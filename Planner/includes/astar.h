@@ -143,7 +143,7 @@ Node :: ~Node ()
 	parent = next = prev = NULL;
 	};
 class SearchSpaceNode
-	{
+	{ 
 	public :
 		Point location;
 		SearchSpaceNode * parent, * next;
@@ -599,12 +599,12 @@ bool AstarPlanner::CheckShortestDistance(double x,double y,double neigbhour_dist
 
 	S = this->search_space;
 	while (S!=NULL)
-		{
+	{
 		distance = sqrt(pow(S->location.x - x,2)+pow(S->location.y - y,2));
 		if (distance < shortest_distance)
 			shortest_distance = distance;
 		S = S->next;
-		}
+	}
 	if( shortest_distance > neigbhour_distance )
 		return 1;
 	else
@@ -613,65 +613,65 @@ bool AstarPlanner::CheckShortestDistance(double x,double y,double neigbhour_dist
 void AstarPlanner::ExpandObstacles() // Nifty way of doing an obstacle expansion, not finalized, ----->>>>> @ TO DO @ <<<<<------
 	{
 	if(this->Map->mapdata == NULL )
-		{
+	{
 		this->AddText(g_strdup_printf("\n	--->>> You have to read the Map before Expanding the Obstacles <<<---	"));
 		return;
-		}
+	}
 	int thickness;
 	int m,n,x,y,radius;
 	thickness = int(this->obstacle_radius/this->pixel_size);
 	radius =2; // This covers vertical, horizontal and diagonal cells
 	for(int i=0;i<this->map_width - 1;i++)
 		for(int j=0;j<this->map_height - 1 ;j++)
+		{
+			for(x = (i - radius) ; x <= (i + radius) ; x ++)
 			{
-		for(x = (i - radius) ; x <= (i + radius) ; x ++)
+				if (x < 0) x = 0;
+				if (x >= this->map_width)  break;
+				y = (int)(- sqrt(radius*radius - (x - i)*(x - i)) + j);
+				if (y < 0) y = 0;
+				if (y >= this->map_height) y = this->map_height - 1;
+				if (this->Map->mapdata[i][j] && !this->Map->mapdata[x][y])
 				{
-						if (x < 0) x = 0;
-						if (x >= this->map_width)  break;
-						y = (int)(- sqrt(radius*radius - (x - i)*(x - i)) + j);
-						if (y < 0) y = 0;
-						if (y >= this->map_height) y = this->map_height - 1;
-						if (this->Map->mapdata[i][j] && !this->Map->mapdata[x][y])
-							{
-							for (int r = 1; r <(int)(thickness);r++)
-								for( m = (int)(i - r); m <= (int)(i + r);m++)
-									{
-										if (m < 0) m = 0;
-										if (m >= this->map_width)  break;
-										n = (int)(- sqrt(r*r - (m - i)*(m - i)) + j);
-										if (n < 0) n = 0;
-										if (n >= this->map_height) n = this->map_height - 1;
-										this->Map->DrawPixel(0xff,0xff,0xff,m,n);
-										n = (int)(+ sqrt(r*r - (m - i)*(m - i)) + j);
-										if (n < 0) n = 0;
-										if (n >= this->map_height) n = this->map_height - 1;
-										this->Map->DrawPixel(0xff,0xff,0xff,m,n);
-									}
-							break;
-							}
-						y = (int)(+ sqrt(radius*radius - (x - i)*(x - i)) + j);
-						if (y < 0) y = 0;
-						if (y >= this->map_height) y = this->map_height - 1;
-						if (this->Map->mapdata[i][j] && !this->Map->mapdata[x][y])
-							{
-							for (int r = 1; r <(int)(thickness);r++)
-								for( m = (int)(i - r); m <= (int)(i + r);m++)
-									{
-										if (m < 0) m = 0;
-										if (m >= this->map_width)  break;
-										n = (int)(- sqrt(r*r - (m - i)*(m - i)) + j);
-										if (n < 0) n = 0;
-										if (n >= this->map_height) n = this->map_height - 1;
-										this->Map->DrawPixel(0xff,0xff,0xff,m,n);
-										n = (int)(+ sqrt(r*r - (m - i)*(m - i)) + j);
-										if (n < 0) n = 0;
-										if (n >= this->map_height) n = this->map_height - 1;
-										this->Map->DrawPixel(0xff,0xff,0xff,m,n);
-									}
-							break;
-							}
+				for (int r = 1; r <(int)(thickness);r++)
+					for( m = (int)(i - r); m <= (int)(i + r);m++)
+					{
+						if (m < 0) m = 0;
+						if (m >= this->map_width)  break;
+						n = (int)(- sqrt(r*r - (m - i)*(m - i)) + j);
+						if (n < 0) n = 0;
+						if (n >= this->map_height) n = this->map_height - 1;
+						this->Map->DrawPixel(0xff,0xff,0xff,m,n);
+						n = (int)(+ sqrt(r*r - (m - i)*(m - i)) + j);
+						if (n < 0) n = 0;
+						if (n >= this->map_height) n = this->map_height - 1;
+						this->Map->DrawPixel(0xff,0xff,0xff,m,n);
+					}
+				break;
+				}
+				y = (int)(+ sqrt(radius*radius - (x - i)*(x - i)) + j);
+				if (y < 0) y = 0;
+				if (y >= this->map_height) y = this->map_height - 1;
+				if (this->Map->mapdata[i][j] && !this->Map->mapdata[x][y])
+				{
+				for (int r = 1; r <(int)(thickness);r++)
+					for( m = (int)(i - r); m <= (int)(i + r);m++)
+					{
+						if (m < 0) m = 0;
+						if (m >= this->map_width)  break;
+						n = (int)(- sqrt(r*r - (m - i)*(m - i)) + j);
+						if (n < 0) n = 0;
+						if (n >= this->map_height) n = this->map_height - 1;
+						this->Map->DrawPixel(0xff,0xff,0xff,m,n);
+						n = (int)(+ sqrt(r*r - (m - i)*(m - i)) + j);
+						if (n < 0) n = 0;
+						if (n >= this->map_height) n = this->map_height - 1;
+						this->Map->DrawPixel(0xff,0xff,0xff,m,n);
+					}
+				break;
 				}
 			}
+		}
 	cout<<"\n	--->>> OBSTACLES EXPANDED SUCCESSFULLY <<<---	";
 	this->Map->ReadMap(); // we changed the pixel buffer, so reading the image again will regenerate the free space / MapData ;)
 	this->Map->SavePixelBufferToFile(); // saving the newly generated space, default file is mapname_FreeSpace.jpeg
