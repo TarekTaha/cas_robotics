@@ -673,7 +673,7 @@ void AstarPlanner::ExpandObstacles() // Nifty way of doing an obstacle expansion
 			}
 		}
 	cout<<"\n	--->>> OBSTACLES EXPANDED SUCCESSFULLY <<<---	";
-	this->Map->ReadMap(); // we changed the pixel buffer, so reading the image again will regenerate the free space / MapData ;)
+	this->Map->ReadMap(); 				// we changed the pixel buffer, so reading the image again will regenerate the free space / MapData ;)
 	this->Map->SavePixelBufferToFile(); // saving the newly generated space, default file is mapname_FreeSpace.jpeg
 	};
 void AstarPlanner::SaveSearchSpace()
@@ -1460,10 +1460,17 @@ void PathFollower::Connect(int platform)
 {
 	this->platform = platform;
 	if(platform == WHEELCHAIR)
+	{
 		robot = new PlayerClient("192.168.0.101", 6665);
+		WCp   = new WheelChairProxy(robot,0,'a');
+		if(WCp->GetAccess() == 'e')
+		{
+			AddText("\n	--->>> Error getting wheelchair device atracking_distanceccess! <<<---");
+			return;
+		}		
+	}
 	else 
 		robot = new PlayerClient("127.0.0.1", 6665);
-	WCp 		= new WheelChairProxy(robot,0,'a');
 	pp  		= new PositionProxy(robot,0,'a');
 	laser 		= new LaserProxy(robot,0,'r');
 	localizer 	= new LocalizeProxy(robot,0,'r');
@@ -1482,11 +1489,6 @@ void PathFollower::Connect(int platform)
     	AddText("\n	--->>> Error getting position device access! <<<---");
     	return;
   	}
-	if(WCp->GetAccess() == 'e')
-	{
-		AddText("\n	--->>> Error getting wheelchair device atracking_distanceccess! <<<---");
-		return;
-	}		
 	AddText(robot->conn.banner);
 	ResetWheelchair();
 }
