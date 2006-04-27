@@ -565,7 +565,7 @@ void AstarPlanner::AddCostToNodes(double r)
 		nearest_obstacle = 0;
 		for(radius = (int)number_of_pixels ; radius >0 ; radius --)
 			{
-				for( i= (int)(point.x - radius) ; i < (int)(point.x + radius); i+=5)
+				for( i= (int)(point.x - radius) ; i < (int)(point.x + radius); i+=(int)(radius/4))
 					{
 						if (i < 0) i = 0;
 						if (i >= this->map_width)  break;
@@ -584,7 +584,8 @@ void AstarPlanner::AddCostToNodes(double r)
 			//cout<<"\n R="<<radius;
 			//fflush(stdout);
 			}
-		S->obstacle_cost =  (r - nearest_obstacle*this->pixel_size)/r; // this is a normalized cost, it will make more sense later on 
+		// this is a normalized cost, it will make more sense later on 
+		S->obstacle_cost =  (r - nearest_obstacle*this->pixel_size)/r; 
 		//cout<<"\n Obstacle Cost ="<<S->obstacle_cost;
 		//getchar();
 		S = S->next;
@@ -1081,14 +1082,10 @@ double AstarPlanner::Calculate_h(Node *n) //define the h function as the Euclide
 	}
 	obstacle_penalty = n->nearest_obstacle;
 	if(n->direction == BACKWARD) 
-		reverse_penalty = 3;
+		reverse_penalty = delta_d;
 	else
 		reverse_penalty = 0;
-	// this has a maximium value of 1 because it's normalized 
-	// Now the trick is to wisely distribute the weights of the costs
-	// My priority is to have a path that is smooth and goes in the middle of the free space
-	// That's why i will make the obstacle cost propotional to the angle cost
-	// 0.555 is the AXLE Length , we don't care which direction we are turning, it's a turn anyways
+	// 0.555 is the AXLE Length 
 	return ( h + 0.555 * angle_cost + obstacle_penalty*delta_d + reverse_penalty );
 };
 // define the goalNode function
@@ -1517,11 +1514,13 @@ void PathFollower::Localize()
 	/***********************Finding Out where we are from the Localizer with initial estimation ************************/
 	while(!position_found) //wait until we have 90% accurate assumption / hypothesis
 	{
-		if(robot->Read()) 
-			exit(1);
-		printf("%d hypotheses\n", localizer->hypoth_count); // Assumed number of Hypothesis
+		// Block Until we get new data
+		robot->Read();
+		// Assumed number of Hypothesis
+		printf("%d hypotheses\n", localizer->hypoth_count); 
     	printf("%d (weight %f): [ %f %f %f ]\n",0,localizer->hypoths[0].weight,localizer->hypoths[0].mean[0],localizer->hypoths[0].mean[1], localizer->hypoths[0].mean[2]);
-		if(localizer->hypoths[0].weight>=0.9) // Since the hypothesis are sorted, we assume the first one to be the one with the most weight
+		// Since the hypothesis are sorted, we assume the first one to be the one with the most weight
+		if(localizer->hypoths[0].weight>=0.9) 
 		{
 			position_found=1; // Accurate Hypothesis found, so update current location and move next
 			old_amcl.x = EstimatedPos.x=amcl_location.x= localizer->hypoths[0].mean[0];
@@ -1529,8 +1528,8 @@ void PathFollower::Localize()
 			estimate_theta=localizer->hypoths[0].mean[2];
 			localizer->SetPose(pose,pose_var);
 		}
-	usleep(100000);
 	}
+	// Give me some time to setup
 	usleep(10000000);
 }
 void PathFollower::RenderGui(Point amcl,double angle)
@@ -1595,7 +1594,7 @@ void PathFollower::FollowPath(Node *path)
 		AddText("\n --->>> No PATH TO FOLLOW <<<---");
 		return ;
 	}
-	if(robot && pp && WCp && laser && localizer)
+	if(robot && pp && laser && localizer)
 		Localize();
 	else
 	{
@@ -1614,71 +1613,93 @@ void PathFollower::FollowPath(Node *path)
 	{
 		g_timer_start(timer2);
 		g_timer_start(delta_timer);
-		if(robot->Read()) 
-			exit(1);
+		robot->Read();
 		last = path;
 		ni = first->location; SegmentStart.x = ni.x; SegmentStart.y = ni.y;
-		AddText(g_strdup_printf("\n	--->>>NEW Line SEGMENT Starts at x[%.3f]y[%.3f] <<<---",SegmentStart.x,SegmentStart.y));
+		AddText(g_strdup_printf("\n	--->>>NEW Line SEG Starts x[%.3f]y[%.3f]",SegmentStart.x,SegmentStart.y));
 		fflush(stdout);
 		ni = last->location;  SegmentEnd.x = ni.x;  SegmentEnd.y = ni.y;	
-		AddText(g_strdup_printf("\n	--->>>NEW Line SEGMENT Ends at   x[%.3f]y[%.3f] <<<---",SegmentEnd.x,SegmentEnd.y));
+		AddText(g_strdup_printf(" Ends at   x[%.3f]y[%.3f] <<<---",SegmentEnd.x,SegmentEnd.y));
 		direction = -1;
 		angle = atan2(SegmentEnd.y - SegmentStart.y,SegmentEnd.x - SegmentStart.x);
-		AddText(g_strdup_printf("\n	--->>> Angle is:=%.3f <<<---",RTOD(angle)));
+		AddText(g_strdup_printf("\n	--->>> Orientation(Planned) to follow :=%.3f <<<---",RTOD(angle)));
 		segment_navigated = FALSE;
 		while (!segment_navigated && !stop) // Loop for each path segment
 		{
-			RenderGui(EstimatedPos,estimate_theta);
-			//if(robot.Peek(0))
-			if(robot->Read()) 
-					exit(1);
-			if (velocity!= pp->Speed())
-					velocity = pp->Speed();
 			obstacle_avoidance_force = 0;
+			RenderGui(EstimatedPos,estimate_theta);
+			
+			// Estimate the location based on the Last AMCL location and the vehichle model
 			delta_t=g_timer_elapsed(delta_timer, NULL );
 			estimate_theta += pp->SideSpeed()*delta_t;
 			EstimatedPos.x += velocity*cos(estimate_theta)*delta_t;
 			EstimatedPos.y += velocity*sin(estimate_theta)*delta_t;
-			AddText(g_strdup_printf("\n->Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",pp->Speed(),EstimatedPos.x,EstimatedPos.y,RTOD(estimate_theta),delta_t));
-			for(int i=0;i<localizer->hypoth_count;i++)
+			// Check if new data arrived
+			//if(robot->Peek(0))
+			if(!robot->Read())
 			{
-				if(localizer->hypoths[i].weight>=0.8)
+				//if(!robot->Read()) // 				No errors occured while reading
 				{
-					amcl_location.x= localizer->hypoths[i].mean[0];
-					amcl_location.y= localizer->hypoths[i].mean[1];
-					theta = localizer->hypoths[i].mean[2];
-					if(old_amcl.x !=amcl_location.x || old_amcl.y !=amcl_location.y )
+					if (velocity!= pp->Speed()) //	Velocity Changed?
+						velocity = pp->Speed();
+					cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
+					for(int i=0;i<localizer->hypoth_count;i++)
 					{
-						last_time = g_timer_elapsed(timer2, NULL );// Recording the last time Data changed
-						g_timer_start(timer2); // resetting the timer
-						old_amcl.x=EstimatedPos.x = amcl_location.x;
-						old_amcl.y=EstimatedPos.y = amcl_location.y;
-						estimate_theta= theta;
+						// Do we have an accurate Hypothesis?
+						if(localizer->hypoths[i].weight>=0.8)
+						{
+							amcl_location.x = localizer->hypoths[i].mean[0];
+							amcl_location.y = localizer->hypoths[i].mean[1];
+							theta = localizer->hypoths[i].mean[2];
+							// Is it a new hypothesis (not the same as the last)?
+							if(old_amcl.x !=amcl_location.x || old_amcl.y !=amcl_location.y )
+							{
+								// Recording the last time Data changed
+								last_time = g_timer_elapsed(timer2, NULL );
+								// resetting the timer
+								g_timer_start(timer2); 
+								// Override the Estimated Location with the AMCL hypothesis
+								old_amcl.x = EstimatedPos.x = amcl_location.x;
+								old_amcl.y = EstimatedPos.y = amcl_location.y;
+								estimate_theta = theta;
+							}
+						}
 					}
 				}
 			}
-			tracking_point.x= EstimatedPos.x + tracking_distance*cos(estimate_theta) - 0*sin(estimate_theta);
-			tracking_point.y= EstimatedPos.y + tracking_distance*sin(estimate_theta) + 0*cos(estimate_theta); 
+			// Determine the Tracking Point 
+			AddText(g_strdup_printf("\n->Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",pp->Speed(),EstimatedPos.x,EstimatedPos.y,RTOD(estimate_theta),delta_t));
+			tracking_point.x = EstimatedPos.x + tracking_distance*cos(estimate_theta) - 0*sin(estimate_theta);
+			tracking_point.y = EstimatedPos.y + tracking_distance*sin(estimate_theta) + 0*cos(estimate_theta); 
+			// Distance to the path Segment
 			distance = sqrt(pow(SegmentEnd.x-tracking_point.x,2)+pow(SegmentEnd.y-tracking_point.y,2));
 			displacement = DistToLineSegment(SegmentStart,SegmentEnd,tracking_point);
-			if (path->next)
+			// Did we reach the last segment ???
+			if (path->next) // NO we didnt
 			{
 				Point n;
 				n.x = path->next->location.x;
 				n.y = path->next->location.y;
 				distance_to_next = DistToLineSegment(SegmentEnd,n,tracking_point);
 			}
-			else // This is the last segment
+			else // YES this is the last segment
 			{
 				distance_to_next = 100;
 				if (distance <= 0.3)
 					segment_navigated = TRUE;
 			}
-			if (displacement > distance_to_next) // we are closer to the next segment
+			// we are closer to the next segment
+			if (displacement > distance_to_next) 
 				segment_navigated = TRUE;
 			AddText(g_strdup_printf("\n->First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x,SegmentStart.y ,SegmentEnd.x,SegmentEnd.y ,RTOD(angle),RTOD(estimate_theta)));
 			AddText(g_strdup_printf("\n->Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next));
+			// Get the control Action to be applied
 			cntrl = Controller(estimate_theta,angle,displacement,path->direction);
+			// Angular Velocity Thrusholded
+			if(cntrl.angular_velocity >   0.2)
+				cntrl.angular_velocity =  0.2;
+			if(cntrl.angular_velocity <  -0.2)
+				cntrl.angular_velocity = -0.2;			
 			if(log)
 				fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.x,EstimatedPos.y,amcl_location.x, amcl_location.y, displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x,SegmentStart.y,SegmentEnd.x,SegmentEnd.y,g_timer_elapsed(delta_timer, NULL ),last_time);
 			if(platform == WHEELCHAIR)
