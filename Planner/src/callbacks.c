@@ -373,8 +373,8 @@ on_drawingarea1_configure_event        (GtkWidget       *widget,
 		MapFilename = "maps/casareaicp.png"; pixel_size = 0.05;
 		//MapFilename = "maps/cas.png"; pixel_size = 0.064;		
   		cout<<"\n Defaults Initialized";
-		node_connection_distance = 0.5; // radius of circle inside which the nodes should be connected
-		reg_grid_distance = 0.2;	// Distance between nodes generated as a regular grid space
+		node_connection_distance = 0.8; // radius of circle inside which the nodes should be connected
+		reg_grid_distance = 0.5;	// Distance between nodes generated as a regular grid space
 		obstacle_radius = 0.2;		// obstacle expansion Radius
 		bridge_length = 1.5;		// length of the bridge segment to be tested
 		bridge_gap = 0.1;

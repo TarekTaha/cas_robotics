@@ -104,10 +104,10 @@ GdkPixbuf * MapFile::ReadMap()
 	        	occ = color_avg / 255.0; //White is 0xFF 0xFF 0xFF = 255 Black = 0x00 0x00 0x00 = 0
 	  		else
 	    		occ = (255 - color_avg) / 255.0;
-	  		if(occ > 0.2) // was 0.95
-			this->mapdata[x][y]= 1; // occupied
+	  		if(occ > 0.9)
+				this->mapdata[x][y]= 1; // occupied
 	  		else 
-			this->mapdata[x][y]= 0; // free
+				this->mapdata[x][y]= 0; // free
 		}
   }
   	printf("\n	--->>> IMAGE READ of Height=%d Width=%d Resolution=%.3f <<<---",this->size_y, this->size_x, this->pixel_size);
