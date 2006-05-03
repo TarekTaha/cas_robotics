@@ -427,8 +427,8 @@ on_drawingarea1_expose_event           (GtkWidget       *widget,
 {  
   if (pixbuf)
 	{
-  	printf("\n--->> Expose Event X=%d and Y =%d Height =%d Width=%d",event->area.x,event->area.y,event->area.height,event->area.width);
-	fflush(stdout);
+//  	printf("\n--->> Expose Event X=%d and Y =%d Height =%d Width=%d",event->area.x,event->area.y,event->area.height,event->area.width);
+//		fflush(stdout);
  	gtk_widget_set_size_request(widget,w,h);
   	gdk_draw_pixbuf(widget->window, NULL, pixbuf, 
                     event->area.x, event->area.y,
