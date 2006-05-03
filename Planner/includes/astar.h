@@ -106,14 +106,14 @@ class Robot
 		~Robot();	
 	};
 void Robot::SetCheckPoints(int number_of_points,Point * a) 
-	{
+{
 	//this->check_points = new Point[number_of_points];
 	for(int i = 0; i < number_of_points; i++)
-		{
+	{
 		check_points.push_back(a[i]);
 		//cout << "\n New Robot i="<<i<<" X=" <<this->check_points[i].x<<" Y="<<this->check_points[i].y;
-		}
-	};
+	}
+};
 Robot::Robot() 
 	{
 	};
@@ -382,28 +382,29 @@ void AstarPlanner::FreePath()
 		path = p;
 		}
 	};
-void AstarPlanner::DetermineCheckPoints() // This Determines the locations of the points to be checked in the Vehicle Coordinates, should be rotated at each node
-	{
+// This Determines the locations of the points to be checked in the Vehicle Coordinates, should be rotated at each node
+void AstarPlanner::DetermineCheckPoints() 
+{
 	//Point edges[4]={{32.5,93},{-32.5,93},{-32.5,-22},{32.5,-22}}; this is the exact dimentions
 	int point_index=0,points_per_height,points_per_width;
 	double i,j;
-	double l = 1.2 , w = 0.7;   // length and width of the wheelchair, can be modefied at any time.
+	double l = 1.2 , w = 0.65;   // length and width of the wheelchair, can be modefied at any time.
 	double startx,starty;       // The edges of the robot in -ve quadrant
 	Point center_of_rotation;   // center of rotation in respect to the center of Area
 	center_of_rotation.x =-0.3; // it's 30 cm on the x-axis
 	center_of_rotation.y = 0;   // it's on the mid of the Wheels Axes so i assume that y = 0;
 	startx = -l/2 - center_of_rotation.x; // am determining here the location of the edges in the robot coordinate system
 	starty = -w/2 - center_of_rotation.y; // 
+	// These Points are used for drawing the Robot rectangle
 	local_edge_points[0].x = startx; 		local_edge_points[0].y = starty;
 	local_edge_points[1].x = startx;		local_edge_points[1].y = w + starty;
 	local_edge_points[2].x = l + startx;	local_edge_points[2].y = w + starty;
 	local_edge_points[3].x = l + startx; 	local_edge_points[3].y = starty;
-	// These Points are used for drawing the Robot rectangle
 	for (int i=0 ;i < 4; i++)
 		cout<<"\nEdge->"<< i<<" X="<<local_edge_points[i].x<<" Y="<<local_edge_points[i].y;
 	// Create a Matrix of the points to check for collision detection
-	points_per_height = (int)(ceil((l) / (2.0*this->obstacle_radius)));
-	points_per_width  = (int)(ceil((w) / (2.0*this->obstacle_radius)));
+	points_per_height = (int)(ceil(l/(double)(2*this->obstacle_radius)));
+	points_per_width  = (int)(ceil(w/(double)(2*this->obstacle_radius)));
 	this->number_of_point_to_check = points_per_height*points_per_width;
 	cout<<"\nPer H ="<<points_per_height<<" Per W="<<points_per_width<<" Total ="<<this->number_of_point_to_check;
 	cout<<"\n Obstacle Radius="<<this->obstacle_radius; fflush(stdout);
@@ -421,31 +422,31 @@ void AstarPlanner::DetermineCheckPoints() // This Determines the locations of th
 			this->points_to_check[point_index].y = j;
 			point_index++;
 			//cout<<"\n I="<<i<<" J="<<j;
-			if ( (j+2*this->obstacle_radius) >= (w + starty) ) 
-				j += (w + starty - j)/2;
+			/* Determining the next center it should be 2*r away from the previous
+			 * and it's circle should not exceed the boundaries
+			 */
+			if ( (j+2*this->obstacle_radius + this->obstacle_radius) >= (w + starty) ) 
+				j = (w + starty - this->obstacle_radius);// Allow overlap
 			else 
 				j += (2*this->obstacle_radius);
 		}
-		double m = i + 2*this->obstacle_radius,n=(l + startx);
-		//cout<<"\n	m ="<<m<<" n="<<n;
-		if (  m >= n  ) 
+		// Same as Above
+		if ((i+2*this->obstacle_radius + this->obstacle_radius) >= (l + startx)) 
 		{
-			i += (l + startx - i)/2;
-			//cout<<"\n It happened i="<<i;
-			//fflush(stdout);
+			// Alow overlap in this case, this is the last center
+			i = (l + startx - this->obstacle_radius); 
 		}
 		else 
 			i += (2*this->obstacle_radius);
 	}
-	cout<<"\n	Last index is="<<point_index;
 	this->wheelchair = new Robot();
 	this->wheelchair->SetCheckPoints(this->number_of_point_to_check,this->points_to_check);
 	for (int k=0;k<this->number_of_point_to_check;k++)
 	{
-		cout << "\nRobot Edge '"<<k<<"'---> X="<<this->wheelchair->check_points[k].x<<" Y="<<this->wheelchair->check_points[k].y;
+		cout << "\nPoint to check "<<k<<"'---> X="<<this->wheelchair->check_points[k].x<<" Y="<<this->wheelchair->check_points[k].y;
 		fflush(stdout);
 	}
-	};
+};
 AstarPlanner :: AstarPlanner(Point start, Point point,double initial_angle,double final_an,double pixel_size,double radius,GtkWidget *w,const char * MapFilename)
 	{
 	this->ConvertPixel(&start);
@@ -501,19 +502,19 @@ void AstarPlanner::ShowConnections()
 	temp = this->search_space;
 	int m=0,n=0;
 	while (temp != NULL)
-		{
+	{
 		for (unsigned int i=0; i < temp->children.size();i++)
-			{
+		{
 			loc1 = temp->location;
 			ConvertToPixel(&loc1);
 			loc2 = temp->children[i]->location;
 			ConvertToPixel(&loc2);
 			gdk_draw_line(view->window,(GdkGC*)(view)->style->white_gc,(int)loc1.x,(int)loc1.y,(int)loc2.x,(int)loc2.y);
 			m++;
-			}
+		}
 		temp = temp->next;
 		n++;
-		}
+	}
 	cout<<"\n---->>> TOTAL NUMBER OF CONNECTIONS ="<<m<<"\n---->>> Total Nodes in search Space ="<<n;
 	fflush(stdout);
 	this->MAXNODES = m;
@@ -565,7 +566,7 @@ void AstarPlanner::AddCostToNodes(double r)
 		nearest_obstacle = 0;
 		for(radius = (int)number_of_pixels ; radius >0 ; radius --)
 			{
-				for( i= (int)(point.x - radius) ; i < (int)(point.x + radius); i+=(int)(radius/4))
+				for( i= (int)(point.x - radius) ; i < (int)(point.x + radius); i+=1)
 					{
 						if (i < 0) i = 0;
 						if (i >= this->map_width)  break;
@@ -829,11 +830,11 @@ void AstarPlanner :: PrintNodeList()
 		pixel =  p->location;
 		cout <<"\nStep [" << step++ <<"] x["<< pixel.x<<"]y["<<pixel.y<<"]"<<" Direction="<<p->direction; 
 		cout <<"\tG cost="<<p->g_value<<"\tH cost="<<p->h_value<<"\tFcost="<<p->f_value;
-		cout<<"\tStored Angle = "<<RTOD(p->angle);
+		cout<<"\tStored Angle = "<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(p->angle);
 		if (p->next !=NULL)
 		{
-			cout<<"\tNext Angle = "<<RTOD(atan2(p->next->location.y - p->location.y, p->next->location.x - p->location.x));
-			cout<<"\tAngle Diff ="<<RTOD(anglediff(p->angle,atan2(p->next->location.y - p->location.y, p->next->location.x - p->location.x)));
+			cout<<"\tNext Angle = "<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(atan2(p->next->location.y - p->location.y, p->next->location.x - p->location.x));
+			cout<<"\tAngle Diff ="<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(anglediff(p->angle,atan2(p->next->location.y - p->location.y, p->next->location.x - p->location.x)));
 		}
 		for (int i=0;i<this->number_of_point_to_check;i++)
 		{
@@ -1081,15 +1082,14 @@ double AstarPlanner::Calculate_h(Node *n) //define the h function as the Euclide
 		delta_d = sqrt(pow(n->location.x - n->parent->location.x,2) + pow(n->location.y - n->parent->location.y,2) );
 	}
 	obstacle_penalty = n->nearest_obstacle;
-	if(n->direction == BACKWARD) 
+	if(n->direction == BACKWARD)
 		reverse_penalty = delta_d;
 	else
 		reverse_penalty = 0;
 	// 0.555 is the AXLE Length 
-	return ( h + 0.555 * angle_cost + obstacle_penalty*delta_d + reverse_penalty );
+	return ( h*(1 + reverse_penalty ) + 0.555 * angle_cost + obstacle_penalty*delta_d);
 };
 // define the goalNode function
-
 bool AstarPlanner :: GoalReached (Node *n) 
 {
 	double angle_diff, delta_d;
@@ -1109,29 +1109,30 @@ bool AstarPlanner :: GoalReached (Node *n)
 	return 0;
 };
 void AstarPlanner::Translate(Point  P, double theta) // Rotates and Translates the check points according to the vehicle position and orientation
-	{
+{
 	for(int i=0;i<this->number_of_point_to_check;i++)
-		{
+	{
 		this->points_to_check[i].x = (this->wheelchair->check_points[i].x*cos(theta) - this->wheelchair->check_points[i].y*sin(theta) + P.x);
 		this->points_to_check[i].y = (this->wheelchair->check_points[i].x*sin(theta) + this->wheelchair->check_points[i].y*cos(theta) + P.y);
 		//cout<<" After Conversion X="<<this->points_to_check[i].x<<" Y="<<this->points_to_check[i].y;
-		}
-	};
-void AstarPlanner::Translate_edges(Point  P, double theta) // Rotates and Translates the check points according to the vehicle position and orientation
-	{
+	}
+};
+// Rotates and Translates the check points according to the vehicle position and orientation
+void AstarPlanner::Translate_edges(Point  P, double theta) 
+{
 	for(int i=0;i<4;i++)
-		{
+	{
 		this->translated_edge_points[i].x = (this->local_edge_points[i].x*cos(theta) - this->local_edge_points[i].y*sin(theta) + P.x);
 		this->translated_edge_points[i].y = (this->local_edge_points[i].x*sin(theta) + this->local_edge_points[i].y*cos(theta) + P.y);
 		//cout<<" \nAfter Conversion X="<<this->translated_edge_points[i].x<<" Y="<<this->translated_edge_points[i].y;
-		}
-	};
+	}
+};
 // Test for whether a point is in an obstacle or not
 int AstarPlanner :: Obstacle(Point P, double angle) 
 {
-	Point s;
 	int m,n;
-	Translate(P,angle); // Rotates and Translates the check points according to the vehicle position and orientation
+	// Rotates and Translates the check points according to the vehicle position and orientation
+	Translate(P,angle); 
 	for (int i=0;i<this->number_of_point_to_check;i++)
 	{
 		this->ConvertToPixel(&this->points_to_check[i]);
@@ -1142,7 +1143,7 @@ int AstarPlanner :: Obstacle(Point P, double angle)
 		if (m <= 0 || n <= 0 || m >=this->map_width || n >=this->map_height)
 			return 1;
 		if (this->Map->mapdata[m][n]) return 1;
-	};	
+	}
 	return 0;
 };
 void AstarPlanner::draw_tree()
@@ -1210,11 +1211,11 @@ void AstarPlanner::draw_path()
 		p = p->next;
 	} 
 };
-Node *AstarPlanner :: MakeChildrenNodes(Node *parent) 
+Node *AstarPlanner :: MakeChildrenNodes(Node *parent)
 {
-	Point P; // grand parents  and parent node information
+	Point P; 
 	Node  *p, *q;
-	double angle,angle_difference,discrete_angle,parent_angle,child_angle,angle_resolution = DTOR(20);
+	double start_angle,end_angle,angle,angle_difference,discrete_angle,robot_angle,child_angle,angle_resolution = DTOR(10);
 	bool collides = FALSE;
 	int direction;
 	P.x = parent->location.x;
@@ -1224,6 +1225,7 @@ Node *AstarPlanner :: MakeChildrenNodes(Node *parent)
 	if(!this->search_space)
 		return NULL;
 	temp = this->search_space;
+	// Locate the Cell in the Search Space, necessary to determine the neighbours
 	while(temp!=NULL)
 	{
 		if (temp->location.x == P.x && temp->location.y == P.y)
@@ -1237,37 +1239,63 @@ Node *AstarPlanner :: MakeChildrenNodes(Node *parent)
 		return NULL;
 	}
 	q = NULL;
-	for (unsigned int i=0;i<temp->children.size();i++) // Check Each neighbour
+	// Check Each neighbour
+	for (unsigned int i=0;i<temp->children.size();i++) 
 	{
+		// What will be our orientation when we go to this child node ?
 		angle = atan2(temp->children[i]->location.y - P.y,temp->children[i]->location.x - P.x); // Angle in Radians
-		angle_difference = anglediff(angle,parent->angle);	
-		if (angle_difference > DTOR(90)) // Change direction of Motion
+		// How much it differs from our current orientations ?
+		angle_difference = anglediff(angle,parent->angle);
+		// Are we gonna turn too much ? if yes then why not go backwards ?
+		if (angle_difference > DTOR(90))
 		{
 			//cout<<"\n Angle difference ="<<RTOD(angle_difference)<<" parent angle="<<RTOD(parent->angle)<<" destination angle="<<RTOD(angle);
 			direction = parent->direction * -1;
-			//angle += M_PI;
-			//if (angle > 2*M_PI ) angle-=2*M_PI;
 		}
 		else
 		{
 			direction = parent->direction;
 		}
-		collides =FALSE;
-		parent_angle = parent->angle; if(parent_angle < 0 ) parent_angle += 2*M_PI;
-		(direction == FORWARD)?(child_angle = angle):(child_angle = angle + M_PI);
+		collides = FALSE;
+		/* Discreatize the turning space and check for collison
+		 * 1- Angle stored in the node is the direction of the PATH
+		 * 2- If we were moving Forward then the Robot direction is the same as the Path
+		 * 3- If we were moving BackWard then the Robot direction is Path + M_PI
+		 * 4- Determine what will the Robot orientation will be at this step
+		 * 5- Check for collision detection with a certain resolution
+		 */
+
+		if (parent->direction == FORWARD)
+			robot_angle = parent->angle;
+		else
+			robot_angle = parent->angle + M_PI;
+		if (direction == FORWARD)
+			child_angle = angle;
+		else
+			child_angle = angle + M_PI;
+		if(robot_angle  < 0 ) robot_angle  += 2*M_PI;
 		if(child_angle  < 0 ) child_angle  += 2*M_PI;
-		discrete_angle =  parent_angle;
-		double start_angle,end_angle;
-		start_angle  = (parent_angle > child_angle)?parent_angle:child_angle;
-		end_angle	 = (parent_angle < child_angle)?parent_angle:child_angle;
+		// Start from the largest angle and go down
+		if (robot_angle > child_angle)
+		{
+			start_angle  = robot_angle;
+			end_angle    = child_angle;
+		}
+		else
+		{
+			start_angle  = child_angle;
+			end_angle    = robot_angle;
+		}
     	discrete_angle =  start_angle;
 		//cout<<"\n Start is"<<RTOD(start_angle)<<" End angle="<<RTOD(end_angle);
 		for (int s=0 ; s <= ceil(angle_difference/angle_resolution); s++)
 		{
-			if(Abs(start_angle - end_angle) > DTOR(180))
+			if(Abs(start_angle - end_angle) >= DTOR(180))
 			{
 				discrete_angle += angle_resolution;
-				if ( ((discrete_angle>360)?discrete_angle-=360:discrete_angle) > end_angle)
+				if (discrete_angle > 2*M_PI)
+					discrete_angle-= 2*M_PI;
+				if(discrete_angle > end_angle)
 					discrete_angle = end_angle;							
 			}
 			else
@@ -1277,11 +1305,18 @@ Node *AstarPlanner :: MakeChildrenNodes(Node *parent)
 					discrete_angle = end_angle;
 			}
 			if (Obstacle(temp->children[i]->location,discrete_angle))
-				{
-				collides= TRUE;
-				break;
-				}
+			{
+				collides= true;
+				continue;
+			}
 		}
+//		if (Obstacle(temp->children[i]->location,angle))
+//		{
+//			collides= true;
+//			continue;
+//		}
+//		else
+//			collides = false;
 		if (!collides) // if after discretization the child still doens't collide then add it
 		{
 			p = new Node;
@@ -1634,6 +1669,7 @@ void PathFollower::FollowPath(Node *path)
 			estimate_theta += pp->SideSpeed()*delta_t;
 			EstimatedPos.x += velocity*cos(estimate_theta)*delta_t;
 			EstimatedPos.y += velocity*sin(estimate_theta)*delta_t;
+			//cout<<"\nVelocity is:"<<velocity<<" Side Speed is:"<<pp->SideSpeed();
 			// Check if new data arrived
 			//if(robot->Peek(0))
 			if(!robot->Read())
@@ -1642,7 +1678,7 @@ void PathFollower::FollowPath(Node *path)
 				{
 					if (velocity!= pp->Speed()) //	Velocity Changed?
 						velocity = pp->Speed();
-					cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
+					//cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
 					for(int i=0;i<localizer->hypoth_count;i++)
 					{
 						// Do we have an accurate Hypothesis?

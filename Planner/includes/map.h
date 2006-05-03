@@ -46,7 +46,7 @@ MapFile::MapFile(char const *MapFilename, double pixel_size)
 {
   	this->MapFilename = MapFilename;
   	this->pixel_size = pixel_size;
-  	this->negate = TRUE;
+  	this->negate = true;
   	this->mapdata = NULL;
   	this->size_x = this->size_y = 0;
 	this->mapdata=NULL;
