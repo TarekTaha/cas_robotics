@@ -368,9 +368,10 @@ on_drawingarea1_configure_event        (GtkWidget       *widget,
 /***************************************************************************** Initialization ****************************************************/
  	if (!initialized)
 	{
-		//MapFilename = "maps/casarea.jpeg"; pixel_size = 0.047;
+		MapFilename = "maps/casarea.jpeg"; pixel_size = 0.047;
 		//MapFilename = "maps/casareaicp.jpeg"; pixel_size = 0.05;
-		MapFilename = "maps/casareaicp.png"; pixel_size = 0.05;
+		//MapFilename = "maps/casareaicp.png"; pixel_size = 0.05;
+		//MapFilename = "maps/lab.png"; pixel_size = 0.05;
 		//MapFilename = "maps/cas.png"; pixel_size = 0.064;		
   		cout<<"\n Defaults Initialized";
 		node_connection_distance = 0.8; // radius of circle inside which the nodes should be connected
