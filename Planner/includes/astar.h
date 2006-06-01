@@ -100,6 +100,7 @@ class Robot
 	{
 	public :
 		//Point * check_points;
+		double length,width;
 		vector<Point> check_points;
 		void SetCheckPoints(int,Point *);
 		Robot();
