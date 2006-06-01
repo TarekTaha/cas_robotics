@@ -1101,7 +1101,7 @@ bool AstarPlanner :: GoalReached (Node *n)
 	{
 		angle_diff =	anglediff(this->final_angle,n->angle + M_PI);
 	}
-	if ( delta_d <= 0.3  && angle_diff <= DTOR(30))
+	if ( delta_d <= 0.7  && angle_diff <= DTOR(30))
 	{
 		cout<<" \n Desired Final Orientation ="<<RTOD(this->final_angle)<<" Current="<<RTOD(n->angle);
 		cout<<"\n Reached Destination with Diff Orientation="<< RTOD(angle_diff);
