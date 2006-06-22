@@ -715,13 +715,15 @@ void MapViewer::keyPressEvent(QKeyEvent *e)
     update(); 
 }
 
-void MapViewer::focusInEvent(QFocusEvent *fe){
+void MapViewer::focusInEvent(QFocusEvent *fe)
+{
     makeCurrent(); 
     glClearColor(0.7f,0.7f,0.7f,1.0f);   
     updateGL();
 }
 
-void MapViewer::focusOutEvent(QFocusEvent *fe){
+void MapViewer::focusOutEvent(QFocusEvent *fe)
+{
     makeCurrent();  
     //glClearColor(0.3f,0.3f,0.3f,1.0f);  
     updateGL(); 

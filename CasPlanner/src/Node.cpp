@@ -9,7 +9,6 @@ Node :: Node ()
 	};
 Node :: ~Node ()
 	{
-	//cout << "\n Node Freed ";
 		parent = next = prev = NULL;
 	};
 bool Node ::operator == (Node a)

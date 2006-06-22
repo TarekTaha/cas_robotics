@@ -1,10 +1,16 @@
-HEADERS +=  gui/mainwindow.h\
+HEADERS +=  gui/CommManager.h\
+			gui/comms.h\
+			gui/configfile.h\
+			gui/interfaceprovider.h\
+			gui/mainwindow.h\
+			gui/mapviewer.h\			
+			gui/navigationtab.h\
+			gui/playerinterface.h\
+			gui/robotcomm.h\
+			gui/sensortab.h\
 			gui/statusbar.h\
 			gui/tabcontainer.h\
 			gui/ogrenderer.h\
-			gui/sensortab.h\
-			gui/navigationtab.h\
-			gui/mapviewer.h\
 			includes/C2DMatrix.h\
 			includes/common.h\
 			includes/defs.h\
@@ -26,14 +32,18 @@ HEADERS +=  gui/mainwindow.h\
 			includes/WallIntersectionTests.h\
 			includes/wheelchairproxy.h
 
-SOURCES +=  gui/main.cpp\
-		    gui/mainwindow.cpp\
-		    gui/statusbar.cpp\
-		    gui/tabcontainer.cpp\
-		    gui/ogrenderer.cpp\
-		    gui/sensortab.cpp\
-		    gui/navigationtab.cpp\
-		    gui/mapviewer.cpp\
+SOURCES +=  gui/CommManager.cpp\
+			gui/configfile.cc\
+			gui/main.cpp\
+			gui/mainwindow.cpp\
+			gui/mapviewer.cpp\			
+			gui/navigationtab.cpp\
+			gui/playerinterface.cpp\
+			gui/robotcomm.cpp\
+			gui/sensortab.cpp\
+			gui/statusbar.cpp\
+			gui/tabcontainer.cpp\
+			gui/ogrenderer.cpp\
 		    src/ForceField.cpp\
 		    src/LList.cpp\
 		    src/Map.cpp\
@@ -44,7 +54,7 @@ SOURCES +=  gui/main.cpp\
 		    src/Robot.cpp\
 		    src/SearchSpaceNode.cpp\
 		    src/Vector2d.cpp
-RESOURCES = gui/icons.qrc
+RESOURCES = resources/icons.qrc
 QT += opengl
 QMAKE_CFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse 
 QMAKE_CXXFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse

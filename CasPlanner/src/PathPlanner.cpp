@@ -3,7 +3,8 @@
 #include<Point.h>
 namespace CasPlanner
 {
-int NodeEquality(Node *a, Node *b) // Test for node equality
+// Test for node equality
+int NodeEquality(Node *a, Node *b) 
 {
 	if (a->location.x == b->location.x && a->location.y == b->location.y)
 		return 1;
@@ -13,14 +14,14 @@ PathPlanner :: PathPlanner()
 	{
 	};
 void PathPlanner::FreePath()
-	{
+{
 	while(path != NULL) 
-		{
+	{
 		p = path->next;
 		delete path;
 		path = p;
-		}
-	};
+	}
+};
 // This Determines the locations of the points to be checked in the Vehicle Coordinates, should be rotated at each node
 void PathPlanner::DetermineCheckPoints() 
 {
@@ -487,11 +488,11 @@ void PathPlanner :: PrintNodeList()
 		}
 		for (int i=0;i<this->number_of_point_to_check;i++)
 		{
-			if(p->wheelchair.check_points.size() == 0)
-			{
-				cout<<"\n FOR some FUCKING REASON AM EMPTY :| !!!!!"; //SHOULD NEVER HAPPEN :@
-				break;
-			}
+//			if(p->wheelchair.check_points.size() == 0)
+//			{
+//				cout<<"\n FOR some FUCKING REASON AM EMPTY :| !!!!!"; //SHOULD NEVER HAPPEN :@
+//				break;
+//			}
 		}
 		fflush(stdout);
 		p = p->next;
@@ -528,7 +529,7 @@ void PathPlanner::FindRoot() // find the nearest node to the start
 	root->angle=this->initial_angle;
 	root->direction = FORWARD;
 	Translate(root->location,this->initial_angle);
-	root->wheelchair.SetCheckPoints(this->number_of_point_to_check,this->points_to_check);
+	//root->wheelchair.SetCheckPoints(this->number_of_point_to_check,this->points_to_check);
 	cout<<"\n---->>>Root is Set to be X="<<root->location.x<<" Y="<<root->location.y;
 	fflush(stdout);
 	};
@@ -976,7 +977,7 @@ Node *PathPlanner :: MakeChildrenNodes(Node *parent)
 			p->nearest_obstacle = temp->children[i]->obstacle_cost;
 			p->parent = parent;
 			p->angle= angle;
-			p->wheelchair.SetCheckPoints(this->number_of_point_to_check,this->points_to_check);
+			//p->wheelchair.SetCheckPoints(this->number_of_point_to_check,this->points_to_check);
 			p->next = q;
 			q = p;
 	    	//cout<<"\n NEW CHILD ADDED";

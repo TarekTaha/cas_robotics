@@ -17,7 +17,7 @@ class LList
 			bool 	Remove(Node *);
 			void 	Print();
 			void	Free();
-			Node   *Find(Node *);
+			Node *  Find(Node *);
 			void   	Next();
 			void    Prev();
 			Node *  GetHead();
