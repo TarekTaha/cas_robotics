@@ -2,11 +2,11 @@
 
 TabContainer::TabContainer(QWidget *parent)
     : QTabWidget(parent),
-      senCon(parent),
-      navCon(parent)
+      navCon(parent),
+      sensorGui(comManager,parent)
 {
     addTab(&navCon, "Navigation Panel"); 
-    addTab(&senCon, "Sensors Viewer"); 
+    //addTab(&sensorGui, "Interactivity Pannel");     
     setTabIcon(1, QIcon(":warning.png")); 
     updateGeometry();
 }
@@ -16,6 +16,11 @@ TabContainer::TabContainer(QWidget *parent)
 //    mapEd.setMapManager(mapManager);  
 //    snapView.setMapManager(mapManager); 
 //}
+
+void TabContainer::setCommManager(CommManager *comManager)
+{
+//	sensorGui.setRobotComms(comManager);
+}
 
 TabContainer::~TabContainer()
 {

@@ -17,23 +17,31 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef TABCONTAINER_H
-#define TABCONTAINER_H
-#include <QTabWidget>
-#include "sensorsgui.h"
-#include "navigationtab.h"
-class TabContainer : public QTabWidget
-{
-Q_OBJECT
+
+#ifndef SPEEDRENDER_H
+#define SPEEDRENDER_H
+#include "glrender.h"
+#include "interfaceprovider.h"
+
+class SpeedRender: public GLRender {
     public:
-	TabContainer(QWidget *parent = 0);
-	//void setMapManager(QTMapDataInterface *mapManager); 
-	void setCommManager(CommManager *commManager); 
-	~TabContainer();
+        SpeedRender(QGLWidget *w);
+        void setSpeedProvider(SpeedProvider *sp);
+        void setMaxSpeed(double speed);
+        void setMaxTurnRate(double turnRate); 
+        void render();
+    public slots:
+        void updateData(); 
     private:
-    CommManager *comManager;
-	NavContainer navCon;
-	SensorsGui sensorGui;
+        SpeedProvider *sp; 
+        double speed; 
+        double maxSpeed; 
+        double turnRate; 
+        double maxTurnRate; 
+    
+    
 };
 
-#endif
+#endif 
+
+

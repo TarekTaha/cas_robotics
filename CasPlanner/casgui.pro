@@ -1,16 +1,20 @@
 HEADERS +=  gui/CommManager.h\
 			gui/comms.h\
 			gui/configfile.h\
+			gui/glrender.h\
 			gui/interfaceprovider.h\
+			gui/laserrender.h\
 			gui/mainwindow.h\
 			gui/mapviewer.h\			
 			gui/navigationtab.h\
+			gui/ogrenderer.h\
 			gui/playerinterface.h\
 			gui/robotcomm.h\
-			gui/sensortab.h\
+			gui/sensors.h\
+			gui/sensorsgui.h\
+			gui/speedrender.h\
 			gui/statusbar.h\
 			gui/tabcontainer.h\
-			gui/ogrenderer.h\
 			includes/C2DMatrix.h\
 			includes/common.h\
 			includes/defs.h\
@@ -34,16 +38,19 @@ HEADERS +=  gui/CommManager.h\
 
 SOURCES +=  gui/CommManager.cpp\
 			gui/configfile.cc\
+			gui/laserrender.cpp\
 			gui/main.cpp\
 			gui/mainwindow.cpp\
 			gui/mapviewer.cpp\			
 			gui/navigationtab.cpp\
+			gui/ogrenderer.cpp\			
 			gui/playerinterface.cpp\
 			gui/robotcomm.cpp\
-			gui/sensortab.cpp\
+			gui/sensors.cpp\
+			gui/sensorsgui.cpp\
+			gui/speedrender.cpp\
 			gui/statusbar.cpp\
 			gui/tabcontainer.cpp\
-			gui/ogrenderer.cpp\
 		    src/ForceField.cpp\
 		    src/LList.cpp\
 		    src/Map.cpp\
