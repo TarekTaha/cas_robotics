@@ -33,7 +33,7 @@ Q_OBJECT
     private:
     CommManager *comManager;
 	NavContainer navCon;
-	SensorsGui sensorGui;
+	SensorsGui sensorsGui;
 };
 
 #endif

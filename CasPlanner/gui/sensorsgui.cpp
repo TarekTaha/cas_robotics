@@ -262,7 +262,7 @@ void SensorsGui::updateData()
 //    updateGeometry();
 //    setFocusPolicy(Qt::StrongFocus);
 //}
-SensorsGui::SensorsGui(CommsMgr *commsMgr, QWidget *parent): 
+SensorsGui::SensorsGui(CommManager *commsMgr, QWidget *parent): 
     Sensors(commsMgr, parent),
 	   robotView((QTabWidget*) parent),
        speed(0.15), 

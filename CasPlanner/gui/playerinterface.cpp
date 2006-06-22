@@ -115,12 +115,14 @@ void PlayerInterface::run ()
     {
 		ptz = new PtzProxy(pc, ptzId, 'a'); 
     }
+    qWarning("Connecting to player server");    
     while(pc->Read())
     {
-		qWarning("Warning! Could not read from player driver -- sleeping for 1 seconds");
+    	qWarning(".");    
 		sleep(1);  
 		retryCount++; 
     }
+    qWarning(" -> Connection Established <-");    
     // Hack around player
     for(int i=0; i < 5; i++)
     {
@@ -132,12 +134,11 @@ void PlayerInterface::run ()
 			retryCount++; 
     	}
     }
-    
     while(true)
     {
         while(pc->Read())
         {
-            qWarning("Warning! Could not read from player driver - sleeping for 1 seconds."); 
+            qWarning("Can not read from Player Server - Retrying"); 
 	    	sleep(1); 
 	    	retryCount++; 
         }
@@ -163,7 +164,7 @@ void PlayerInterface::run ()
 	            drive->SetSpeed(0,0); 
 	            drive->SetMotorState(0);
 	        }  
-	        qDebug("... Robot Stopped");	   
+	        qDebug("... Robot Stopped");
 	    }
     	emit newData();
     }

@@ -38,12 +38,12 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     robotcomm = new RobotComm(configFiles);
     robotcomm->start();
     statusLogger->addStatusMsg(0,1,"Just a msg ..."); 
-    //connect(commsmgr, SIGNAL(statusMsg(int,int,QString)), statusLogger, SLOT(addStatusMsg(int,int,QString))); 
+    connect(robotcomm, SIGNAL(statusMsg(int,int,QString)), statusLogger, SLOT(addStatusMsg(int,int,QString))); 
     //Comms is now set up, connect map view to map manager. 
     qDebug("Initializing Tabs"); 
     //tabcontainer.setMapManager(&mapManager); 
     //To:Do
-    //connect(emergStop, SIGNAL(pressed()), commsmgr, SLOT(emergencyStop())); 
+    connect(emergStop, SIGNAL(pressed()), robotcomm, SLOT(emergencyStop())); 
     //cf = new CfgReader(configFiles, &robotsView, commsmgr);
     statusLogger->addStatusMsg(0,1,"Stating comms ... done"); 
     QTimer *timer = new QTimer(this);

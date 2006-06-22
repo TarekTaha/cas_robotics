@@ -12,8 +12,8 @@ public:
 	MainWindow(QStringList strings, QWidget *parent=0); 
 	~MainWindow(); 
     public slots:
-	void logData();
-	void loadRobot(); 
+		void logData();
+		void loadRobot(); 
 private: 
     TabContainer tabcontainer;
     RobotComm * robotcomm;
