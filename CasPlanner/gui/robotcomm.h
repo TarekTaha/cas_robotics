@@ -18,26 +18,26 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef CFGREADER_H
-#define CFGREADER_H
-
-#include <player/configfile.h>
-//#include "robotsview.h"
-//#include "commsmgr.h"
-#include <QStringList> 
-
-class CfgReader: public QObject 
+#ifndef ROBOTCOMM_H
+#define ROBOTCOMM_H
+#include "CommManager.h"
+#include "configfile.h"
+class RobotComm: public CommManager 
 {
-
 Q_OBJECT
+    public:         
+	RobotComm();
+	RobotComm(QStringList configFiles);
+	~RobotComm(); 
+	int readRobotConfig(ConfigFile *cf, int sectionid);
+	int start(); 
+	void setPtz(double pan, double tilt);
+   signals:
+        void vFound();
 
-public: 
-    CfgReader(QStringList, RobotsView *rv, CommsMgr *cm);
-    void readRobot(QString fileName); 
-    ~CfgReader(); 
-private:
-   //RobotsView *rv; 
-   //CommsMgr *cm;    
+    private:
+		bool laserEnabled,ptzEnabled;
+		int  LaserId,ptzId;
 };
 
 #endif 

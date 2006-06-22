@@ -18,47 +18,65 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "cfgreader.h"
+#ifndef INTERFACEPROVIDER_H
+#define INTERFACEPROVIDER_H
 
-CfgReader::CfgReader(QStringList configFiles, RobotsView *in_rv, CommsMgr *in_cm):
-    rv(in_rv),    
-    cm(in_cm)
-    {
-    rv->setCommsMgr(cm); 
-    for(int h=0; h < configFiles.size(); h++){
-	ConfigFile *cf = new ConfigFile();
-	int numSections; 
-	cf->Load(configFiles[h].toLocal8Bit());
-	numSections = cf->GetSectionCount(); 
-	for(int i=0; i < numSections; i++){
-	    QString sectionName = cf->GetSectionType(i);
-	    if(sectionName == "gui"){
-		rv->createNewTab(cf, i);  
-	    }
-	    if(sectionName == "comms"){
-		cm->createNewComms(cf, i); 
-	    }
-	}
-    }
-}
+#include <QImage>
+#include <QVector> 
+#include <QPointF>
+#include <math.h>
+#include <QMetaType>
 
-void CfgReader::readRobot(QString fileName){
-    ConfigFile *cf = new ConfigFile();
-    int numSections; 
-    cf->Load(fileName.toLocal8Bit());
-    numSections = cf->GetSectionCount(); 
-    for(int i=0; i < numSections; i++){
-	QString sectionName = cf->GetSectionType(i);
-	if(sectionName == "gui"){
-	    rv->createNewTab(cf, i);  
-	}
-	if(sectionName == "comms"){
-	    cm->createNewComms(cf, i); 
-	}
-    }
-}
+// Interfaces for providers. These are for "Design by contract" type things.
 
-CfgReader::~CfgReader(){
-    
-}
+#define R2D(x) ((x*180.0/M_PI))
+#define D2R(x) ((x*M_PI/180.0))
+
+enum CameraId { CAMERA_OMNI0, CAMERA_OMNI1, CAMERA_WIDE0, CAMERA_WIDE1, CAMERA_ZOOM0, CAMERA_ZOOM1, CAMERA_THERMAL0, CAMERA_THERMAL1, CAMERA_AUX0, CAMERA_AUX1, CAMERA_AUX2, CAMERA_AUX3, CAMERA_COUNT}; 
+
+Q_DECLARE_METATYPE(CameraId);
+
+class SimpleImage 
+{
+    public: 
+        int width; 
+        int height; 
+        QByteArray rawData;
+        
+        SimpleImage(int in_width, int in_height, QByteArray in_data)
+        {
+            width = in_width; 
+            height = in_height; 
+            rawData = in_data; 
+        }
+        SimpleImage(): width(0), height(0), rawData()
+        {
+            
+        }
+ 
+};
+class ImgProvider 
+{
+    public:
+        virtual SimpleImage provideImg(CameraId camId)=0; 
+        virtual ~ImgProvider(){};
+};
+
+class LaserProvider 
+{
+    public:
+        virtual QVector<QPointF> getLaserScan(int id)=0; 
+        virtual ~LaserProvider(){}; 
+};
+
+class SpeedProvider 
+{
+    public:
+        virtual void provideSpeed(double &speed, double &turnRate)=0;
+        virtual ~SpeedProvider(){};
+}; 
+
+#endif
+
+
 

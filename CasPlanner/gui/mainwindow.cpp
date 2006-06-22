@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-//#include "cfgreader.h"
 #include <QPushButton>
 #include<QVBoxLayout>
 #include<QTimer>
@@ -34,8 +33,9 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     statusBar()->addPermanentWidget(loadRobotBtn);
     connect(loadRobotBtn, SIGNAL(clicked()), this, SLOT(loadRobot()));
     statusLogger = new StatusLogger(statusBar()); 
-    setCentralWidget(container);  
-    //commsmgr = new CommsMgr(&mapManager);
+    setCentralWidget(container);
+    // Reads Robot Configurations from the file(s)
+    robotcomm = new RobotComm(configFiles);
     statusLogger->addStatusMsg(0,1,"Just a msg ..."); 
     //connect(commsmgr, SIGNAL(statusMsg(int,int,QString)), statusLogger, SLOT(addStatusMsg(int,int,QString))); 
     //Comms is now set up, connect map view to map manager. 
