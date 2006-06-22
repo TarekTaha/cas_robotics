@@ -3,10 +3,10 @@
 TabContainer::TabContainer(QWidget *parent)
     : QTabWidget(parent),
       navCon(parent),
-      sensorGui(comManager,parent)
+      sensorsGui(comManager,parent)
 {
     addTab(&navCon, "Navigation Panel"); 
-    //addTab(&sensorGui, "Interactivity Pannel");     
+    addTab(&sensorsGui, "Interactivity Pannel");     
     setTabIcon(1, QIcon(":warning.png")); 
     updateGeometry();
 }
