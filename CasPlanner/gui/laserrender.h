@@ -17,23 +17,30 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef TABCONTAINER_H
-#define TABCONTAINER_H
-#include <QTabWidget>
-#include "sensorsgui.h"
-#include "navigationtab.h"
-class TabContainer : public QTabWidget
-{
+
+#ifndef LASERRENDER_H
+#define LASERRENDER_H
+
+#include "glrender.h"
+#include "interfaceprovider.h"
+
+class LaserRender: public GLRender {
 Q_OBJECT
-    public:
-	TabContainer(QWidget *parent = 0);
-	//void setMapManager(QTMapDataInterface *mapManager); 
-	void setCommManager(CommManager *commManager); 
-	~TabContainer();
+    public: 
+        LaserRender(QGLWidget *w);
+        ~LaserRender(); 
+        virtual void setId(int laserId);
+        virtual void setProvider(LaserProvider *provider);  
+        virtual void render(); 
+        virtual void setRange(double range); 
+    public slots:
+        virtual void updateData(); 
     private:
-    CommManager *comManager;
-	NavContainer navCon;
-	SensorsGui sensorGui;
+        double maxRange; 
+        int laserId; 
+        LaserProvider *provider; 
+        QVector<QPointF> laserData; 
 };
 
 #endif
+

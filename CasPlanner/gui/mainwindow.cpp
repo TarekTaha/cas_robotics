@@ -36,6 +36,7 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     setCentralWidget(container);
     // Reads Robot Configurations from the file(s)
     robotcomm = new RobotComm(configFiles);
+    robotcomm->start();
     statusLogger->addStatusMsg(0,1,"Just a msg ..."); 
     //connect(commsmgr, SIGNAL(statusMsg(int,int,QString)), statusLogger, SLOT(addStatusMsg(int,int,QString))); 
     //Comms is now set up, connect map view to map manager. 

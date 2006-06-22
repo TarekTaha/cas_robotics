@@ -17,23 +17,28 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef TABCONTAINER_H
-#define TABCONTAINER_H
-#include <QTabWidget>
-#include "sensorsgui.h"
-#include "navigationtab.h"
-class TabContainer : public QTabWidget
-{
-Q_OBJECT
-    public:
-	TabContainer(QWidget *parent = 0);
-	//void setMapManager(QTMapDataInterface *mapManager); 
-	void setCommManager(CommManager *commManager); 
-	~TabContainer();
-    private:
-    CommManager *comManager;
-	NavContainer navCon;
-	SensorsGui sensorGui;
-};
 
-#endif
+/* Base class for robot guis 
+*/ 
+
+#ifndef SENSORS_H
+#define SENSORS_H
+
+#include <QWidget>
+#include <CommManager.h>
+
+class Sensors: public QWidget 
+{
+    Q_OBJECT
+    public:
+        Sensors(CommManager *commsMgr, QWidget *parent = 0); 
+        virtual int config(ConfigFile *cf, int sectionid)=0;
+    public slots:
+        virtual void updateData()=0; 
+    protected:
+        CommManager *commsMgr; 
+    
+}; 
+
+#endif 
+
