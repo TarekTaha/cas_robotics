@@ -15,10 +15,10 @@ public:
 		void logData();
 		void commStart(); 
 private: 
-    TabContainer tabcontainer;
+    TabContainer * tabcontainer;
     RobotManager * robotManager;
+	StatusLogger * statusLogger; 
 	int logCount; 
-	StatusLogger *statusLogger; 
 };
 #endif
 

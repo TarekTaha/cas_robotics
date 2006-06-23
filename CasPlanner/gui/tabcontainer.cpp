@@ -1,7 +1,8 @@
 #include "tabcontainer.h"
 
-TabContainer::TabContainer(QWidget *parent)
+TabContainer::TabContainer(QWidget *parent,RobotManager *rob)
     : QTabWidget(parent),
+      robotManager(rob),
       navCon(parent),
       sensorsGui(robotManager,parent)
 {
