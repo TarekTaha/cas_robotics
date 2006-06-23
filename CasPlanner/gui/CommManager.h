@@ -21,6 +21,7 @@ class CommManager: public Comms, public ImgProvider, public LaserProvider, publi
             virtual double getSpeed(); 
             virtual double getTurnRate(); 
             virtual void setSpeed(double speed);
+            virtual void setPtz(double pan, double tilt);
             virtual void setTurnRate(double turnRate); 
 		    virtual SimpleImage provideImg(CameraId camId); 
 		    virtual void provideSpeed(double &speed, double &turnRate);
@@ -42,9 +43,9 @@ class CommManager: public Comms, public ImgProvider, public LaserProvider, publi
         protected:
             // Player stuff 
             PlayerInterface *player;
-            bool startConnected,activateControl,laserEnabled;
+            bool startConnected,activateControl,laserEnabled,ptzEnabled;
             QString playerIp; 
-            int playerPort,positionControlId,laserId; 
+            int playerPort,positionControlId,laserId,ptzId; 
 //	    	bool mappingEnabled; 
 //	   		QTMapDataInterface *mapManager; 
 			int tmp;  

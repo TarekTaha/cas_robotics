@@ -26,9 +26,6 @@
 SensorsGLW::SensorsGLW():
     QGLWidget(QGLFormat(QGL::AlphaChannel)),
     comms(0),
-//    omniCam(this), 
-//    wideCam(this),  
-//    irCam(this),  
     laser(this),
     speedMeter(this),
     desiredAspectRatio(1),
@@ -42,9 +39,6 @@ SensorsGLW::SensorsGLW():
     zoomSizeY(0.08), 
     srSizeX(0.54),  
     srSizeY(0.38)
-//    showThermal(true),
-//    irMinimum(100),
-//    irMaximum(255)
 {
 }
 
@@ -70,19 +64,9 @@ void SensorsGLW::setRobotGUI(SensorsGui *gui)
     sensorsGui = gui;
 }
 
-void SensorsGLW::setRobotComms(RobotComm *Comms)
+void SensorsGLW::setRobotComms(RobotManager *Comms)
 {
     comms = Comms;
-//    //camera.setInverted(true);
-//
-//    // irCam.setProvider(comms); 
-//    // irCam.setImgId(2); 
-//    if(irCamEnabled){
-//	irCam.setProvider(comms); 
-//	irCam.setImgId( CAMERA_THERMAL0); 
-//	irCam.setInverted(true); 
-//	irCam.setMinHeat(irMinimum);
-//	irCam.setMaxHeat(irMaximum);
 //	connect(comms, SIGNAL(imgUpdate(unsigned int)), &irCam, SLOT(updateImg( unsigned int )));
     if(laserEnabled)
     {
@@ -90,20 +74,6 @@ void SensorsGLW::setRobotComms(RobotComm *Comms)
         connect(comms, SIGNAL(newData()), &laser, SLOT(updateData()));
         laser.setId(0);
     } 
-//    if(omniCamEnabled)
-//    {
-//        omniCam.setProvider(comms);
-//        omniCam.setImgId(CAMERA_OMNI0); 
-//        connect(comms, SIGNAL(imgUpdate(unsigned int)), &omniCam, SLOT(updateImg(unsigned int)));
-//    }
-//    if(wideCamEnabled)
-//    {
-//        qDebug("Wide enabled");
-//        wideCam.setProvider(comms);
-//        wideCam.setImgId(CAMERA_WIDE0);
-//        connect(comms, SIGNAL(imgUpdate(unsigned int)), &wideCam, SLOT(updateImg(unsigned int)));
-//
-//    }
     speedMeter.setSpeedProvider(sensorsGui); 
     connect(sensorsGui, SIGNAL(newData()), &speedMeter, SLOT(updateData()));
 
@@ -137,14 +107,10 @@ void SensorsGLW::resizeGL(int w, int h)
 }
 
 // check for camera flags
-void SensorsGLW::config(ConfigFile *cf, int sectionid)
+void SensorsGLW::config()
 {
-//    omniCamEnabled = (bool) cf->ReadInt(sectionid, "omniCamEnabled", 1);
-//    //OmniCam is always cam 0
-//    wideCamEnabled = (bool) cf->ReadInt(sectionid, "wideCamEnabled", 1); 
-//    irCamEnabled = (bool) cf->ReadInt(sectionid, "irCamEnabled", 1); 
-    laserEnabled = (bool) cf->ReadInt(sectionid, "laserEnabled", 1); 
-    speedEnabled = (bool) cf->ReadInt(sectionid, "speedEnabled", 1); 
+    laserEnabled = true;//(bool) cf->ReadInt(sectionid, "laserEnabled", 1); 
+    speedEnabled = true;//(bool) cf->ReadInt(sectionid, "speedEnabled", 1); 
     if(speedEnabled)
     {
 		speedMeter.setMaxSpeed(2); 
@@ -161,56 +127,9 @@ void SensorsGLW::paintGL()
     double camPanelRatio = 1.0; 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
-//    if(wideCamEnabled)
-//    {
-//       glPushMatrix();
-//       glTranslatef(0,0.2,0); 
-//       glScalef(camPanelRatio,0.8,1);
-//       glTranslatef(0.5,0.5,0); 
-//       glScalef(-1,1,1);
-//       glRotatef(180,0,0,1); 
-//       glTranslatef(-0.5,-0.5,0); 
-//       //qDebug("Rendering widecam"); 
-//       wideCam.render();   
-//       glPopMatrix(); 
-//     }
-//    if(omniCamEnabled){
-//       //qDebug("Rendering ptzCam"); 
-//       glPushMatrix();
-//       glTranslatef(0,0,0); 
-//       glScalef(camPanelRatio,0.2,1);
-//       omniCam.render(); 
-//       glPopMatrix();
-//     }
-     /*if(mode == CamNormal){
-         glColor4f(0.0f,1.0f,0.0f,1.0f); 
-         glBegin(GL_LINE_LOOP); 
-         glVertex2f(0.4*camPanelRatio,0.4*0.8 + 0.2); 
-         glVertex2f(0.4*camPanelRatio,0.6*0.8 + 0.2);
-         glVertex2f(0.6*camPanelRatio,0.6*0.8 + 0.2);
-         glVertex2f(0.6*camPanelRatio,0.4*0.8 + 0.2); 
-         glEnd();
-     }
-     else{
-         glPushMatrix(); 
-         glTranslatef(0.3*camPanelRatio,0.3*0.8,0); 
-         glScalef(0.5,0.5,1);
-         zoomCam.render();
-         glPopMatrix(); 
-     }*/
-//     if(irCamEnabled && showThermal)
-//     {
-//	 glPushMatrix();
-//	 glTranslatef(0.25,0.38,0); 
-//	 glScalef(0.65,0.65,1);
-//	 glTranslatef(0.5,0.5,0.5);
-//	 glRotatef(180,0,0,1); 
-//	 glTranslatef(-0.5,-0.5,-0.5);  
-//	 irCam.render();
-//	 glPopMatrix(); 
-//     }
-     if(laserEnabled)
+    if(laserEnabled)
      {
+	     qDebug("Rendering Laser");      	
          glPushMatrix(); 
          glTranslatef(camPanelRatio*.7,0.25, 0);
          glScalef(0.2,0.2,1);
@@ -262,8 +181,8 @@ void SensorsGui::updateData()
 //    updateGeometry();
 //    setFocusPolicy(Qt::StrongFocus);
 //}
-SensorsGui::SensorsGui(CommManager *commsMgr, QWidget *parent): 
-    Sensors(commsMgr, parent),
+SensorsGui::SensorsGui(RobotManager *commsMgr, QWidget *parent): 
+       Sensors(commsMgr, parent),
 	   robotView((QTabWidget*) parent),
        speed(0.15), 
 	   turnRatio(5),
@@ -278,8 +197,37 @@ SensorsGui::SensorsGui(CommManager *commsMgr, QWidget *parent):
     setLayout(layout); 
     updateGeometry();
     setFocusPolicy(Qt::StrongFocus);
+    config();
 }
+int SensorsGui::config()
+{
+    QString commsName ="Wheelchair";
+    glw.setRobotGUI(this); 
+    glw.config();
+    // Now retrieve the appropriate comms. 
+  //  comms = qobject_cast<comms *>(commsMgr->getCommsByName(commsName)); 
+    glw.setRobotComms(comms);
 
+    // config buttons
+    configButtons();
+
+    // connnect victim found signal
+   // connect(comms, SIGNAL(victimFound()), this, SLOT(victimFound()));
+
+    // connect confirm and reject btns
+    //connnect(confirmBtn, SIGNAL(clicked()), this, SLOT(confirmVictim()));
+    //connect(rejectBtn, SIGNAL(clicked()), this, SLOT(rejectVictim()));
+
+    // signals for changing modes
+    //connect( teleRadBtn, SIGNAL(clicked()), this, SLOT(switchToTele()));
+    //connect( pausedRadBtn, SIGNAL(clicked()), this, SLOT(switchToPaused()));
+    //connect( autoRadBtn, SIGNAL(clicked()), this, SLOT(switchToAuto()));
+
+    //ptzEnabled = cf->ReadInt(sectionid, "ptzEnabled", 1);
+    comms->start();
+    return 1; 
+
+}
 void SensorsGui::configButtons()
 {
     QHBoxLayout *hLayout = new QHBoxLayout;
@@ -322,15 +270,8 @@ void SensorsGui::mouseMoveEvent(QMouseEvent *me)
 {
     startX = me->x(); 
     startY = me->y(); 
-//  qDebug("deltaX = %d deltaY = %d", deltaX, deltaY);
-//    if(glw.getMode() == CamZoom){
-//        PtzValue desiredPtz(startPtz.pan+deltaX*0.003, startPtz.tilt - deltaY*0.003, startPtz.zoom);
-//        comms->setPtz( desiredPtz);
-//    }
-//    else {
-//        glw.moveDrivePan(-0.002*deltaX);  
-//        glw.updateGL();
-//    }
+    //glw.moveDrivePan(-0.002*deltaX);  
+    glw.updateGL();
     if(ptzEnabled)
     {
 		int deltaX = me->x() - startX; 
@@ -417,22 +358,6 @@ void SensorsGui::keyPressEvent(QKeyEvent *e)
         //comms->setCtrlMode(true);
 		}
                 break;
-	    case 't':
-//		glw.showThermal = !glw.showThermal;
-//		break; 
-//	    case '[':
-//		glw.irMinimum--;
-//		glw.irMaximum--;
-//		glw.irCam.setMinHeat(glw.irMinimum);
-//		glw.irCam.setMaxHeat(glw.irMaximum);  
-//		break;
-//	    case ']':
-//		glw.irMinimum++;
-//		glw.irMaximum++; 
-//		glw.irCam.setMinHeat(glw.irMinimum);
-//		glw.irCam.setMaxHeat(glw.irMaximum);  
-                //emit irThresh(1); 
-		break;
             case 'l':
                 //
                 break;
@@ -518,62 +443,13 @@ SensorsGui::~SensorsGui()
 {
 }
 
-int SensorsGui::config(ConfigFile *cf, int sectionid)
-{
-    QString commsName = cf->ReadString(sectionid, "homer", "homer"); 
-    glw.setRobotGUI(this); 
-    glw.config(cf, sectionid);
-    // Now retrieve the appropriate comms. 
-  //  comms = qobject_cast<comms *>(commsMgr->getCommsByName(commsName)); 
-    glw.setRobotComms(comms);
-
-    // config buttons
-    configButtons();
-
-    // connnect victim found signal
-    connect(comms, SIGNAL(victimFound()), this, SLOT(victimFound()));
-
-    // connect confirm and reject btns
-    //connnect(confirmBtn, SIGNAL(clicked()), this, SLOT(confirmVictim()));
-    //connect(rejectBtn, SIGNAL(clicked()), this, SLOT(rejectVictim()));
-
-    // signals for changing modes
-    connect( teleRadBtn, SIGNAL(clicked()), this, SLOT(switchToTele()));
-    connect( pausedRadBtn, SIGNAL(clicked()), this, SLOT(switchToPaused()));
-    connect( autoRadBtn, SIGNAL(clicked()), this, SLOT(switchToAuto()));
-
-    ptzEnabled = cf->ReadInt(sectionid, "ptzEnabled", 1);
-    comms->start();
-    return 1; 
-
-}
-
-/*
- * changing mode slots
- * modes are defined in autocontroller.h
- * enum AutoControllerMode { AUTO_TELEOP, AUTO_WAYPOINT, AUTO_FULL, AUTO_VICTIMFOUND, AUTO_PAUSED };  
- */
-//void SensorsGui::switchToTele(){
-//    resetTab();
-//    comms->setControlMode(0); // AUTO_TELEOP
-//}
-//
-//void SensorsGui::switchToPaused(){
-//    resetTab();
-//    comms->setControlMode(4); // AUTO_PAUSED
-//}
-//
-//void SensorsGui::switchToAuto(){
-//    resetTab();
-//    comms->setControlMode(2); // AUTO_FULL
-//}
-
 /*
  * set Checked status for radio buttons when modes received
  */
 void SensorsGui::setRadMode(int mode)
 {
-    switch(mode){
+    switch(mode)
+    {
         case 0: // AUTO_TELEOP
             teleRadBtn->setChecked(true);
             break;
@@ -586,77 +462,6 @@ void SensorsGui::setRadMode(int mode)
         default:
 	    qDebug("Mode is incorrect");
     }
-}
-
-/*
-// we either have to do the separation here or in comms,
-// but doing it here will avoid further complication
-void SensorsGui::confirmVictim(){
-    QString text;
-    bool ok;
-    qDebug("HOMER victim found confirmed clicked");
-
-    //comms->setCtrlMode(true);
-    
-    text = QInputDialog::getText(this, "RescueGUI: Victim label", "Enter a label for the victim:",
-    QLineEdit::Normal, QString::null, &ok);
-    if ( ok ) {
-      if(text.isEmpty()){
-	        text = "Unlabelled"; 
-      }
-      orca::CartesianPoint2d centre;
-      orca::Size2d size; 
-      centre.x = (glw.cursorCentreX-glw.srCentreX)/glw.srSizeX+0.5;
-      centre.y = (glw.cursorCentreY-glw.srCentreY)/glw.srSizeY+0.5;
-      size.w = glw.zoomSizeX/glw.srSizeX; 
-      size.l = glw.zoomSizeY/glw.srSizeY; 
-		    
-      comms->requestSnap(orca::SNAPVICTIM, text, centre, size);
-    }
-    
-    int index = robotView->indexOf(this);
-    // set Homer tab title
-    robotView->setTabText(index, "HOMER");
-    
-    // set Victim Signal icon
-    robotView->setTabIcon(index, QIcon("../ui/rescuegui-branchCommsRefactor/blank.xpm"));
-    
-    
-
-}
-*/
-/*
-void SensorsGui::rejectVictim()
-{
-
-    qDebug("HOMER victim found reject clicked");
-
-    int index = robotView->indexOf(this);
-    // set Homer tab title
-    robotView->setTabText(index, "HOMER");
-
-    // set Victim Signal icon
-    robotView->setTabIcon(index, QIcon("../ui/rescuegui-branchCommsRefactor/blank.xpm"));
-    comms->setCtrlMode(false);
-}
-*/
-void SensorsGui::victimFound()
-{
-    // get this tab index
-    int index = robotView->indexOf(this);
-
-    // set Homer tab title
-    robotView->setTabText(index, "HOMER - Victim found");
-
-    // set Victim Signal icon
-    robotView->setTabIcon(index, QIcon("../ui/rescuegui-branchCommsRefactor/vicsignal.xpm"));
-
-    // change check box to AUTO_PAUSED
-    setRadMode(4);
-    // request snap
-    // requestSnap();
-
-    qDebug("HOMER victim found signal received");
 }
 
 void SensorsGui::resetTab()

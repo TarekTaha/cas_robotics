@@ -18,26 +18,29 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef ROBOTCOMM_H
-#define ROBOTCOMM_H
+#ifndef ROBOTMANAGER_H
+#define ROBOTMANAGER_H
 #include "CommManager.h"
 #include "configfile.h"
-class RobotComm: public CommManager 
+class RobotManager: public CommManager //public Planner, public MapManager
 {
 Q_OBJECT
     public:         
-	RobotComm();
-	RobotComm(QStringList configFiles);
-	~RobotComm(); 
-	int readRobotConfig(ConfigFile *cf, int sectionid);
-	int start(); 
-	void setPtz(double pan, double tilt);
+	RobotManager();
+	RobotManager(QStringList configFiles);
+	~RobotManager(); 
+	int readCommManagerConfigs(ConfigFile *cf, int sectionid);
+	int readPlannerConfigs(ConfigFile *cf, int sectionid);
+	int readMapManagerConfigs(ConfigFile *cf, int sectionid);	
+	int start();
+	int startPlanner();
+	int startMapManager();
+	int startComms();
    signals:
         void vFound();
-
     private:
-		bool laserEnabled,ptzEnabled;
-		int  LaserId,ptzId;
+		//bool laserEnabled,ptzEnabled;
+		//int  LaserId,ptzId;
 };
 
 #endif 

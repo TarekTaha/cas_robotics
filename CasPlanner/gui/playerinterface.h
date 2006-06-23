@@ -16,7 +16,7 @@ Q_OBJECT
         PlayerInterface(CommManager *comms, QString playerHost, int playerPort); 
         void stop();
         void run(); 
-        void enableDrive(int driveId);
+        void enableControl(int driveId);
         void enableLaser(int whichLaser, int playerId); 
 		void enablePtz(int ptzId);
         QVector<QPointF> getLaserScan(int laserId);
@@ -36,10 +36,10 @@ Q_OBJECT
         PlayerClient *pc;
         CommManager *comms; 
         
-        bool laserEnabled[MAX_LASERS],ptzEnabled,driveEnabled,tiltEnabled; 
-        int playerLaserId[MAX_LASERS],driveId,tiltId,ptzId; 
+        bool laserEnabled[MAX_LASERS],ptzEnabled,ctrEnabled,tiltEnabled; 
+        int playerLaserId[MAX_LASERS],positionId,tiltId,ptzId; 
         LaserProxy *laser[MAX_LASERS]; 
-        PositionProxy *drive;	
+        PositionProxy *drive;
 		PtzProxy *ptz;
 		double pan;
 		double tilt;

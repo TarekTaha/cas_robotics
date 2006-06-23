@@ -28,10 +28,10 @@ Q_OBJECT
     public:
 	TabContainer(QWidget *parent = 0);
 	//void setMapManager(QTMapDataInterface *mapManager); 
-	void setCommManager(CommManager *commManager); 
+	void setRobotManager(RobotManager *robotManager); 
 	~TabContainer();
     private:
-    CommManager *comManager;
+    RobotManager *robotManager;
 	NavContainer navCon;
 	SensorsGui sensorsGui;
 };

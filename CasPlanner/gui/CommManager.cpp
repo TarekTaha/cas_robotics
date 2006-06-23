@@ -15,27 +15,41 @@ void CommManager::emergencyStop()
 
 void CommManager::emergencyRelease()
 {
-  player->emergencyRelease();
+  	player->emergencyRelease();
 }
 
+void CommManager::setSpeed(double i_speed, double i_turnRate)
+{
+  	player->setSpeed(i_speed, i_turnRate);
+}
+void CommManager::setPtz(double p, double t)
+{
+	player->setPtz(p,t);
+}
 void CommManager::setSpeed(double i_speed)
 {
-  player->setSpeed(i_speed);
+  	player->setSpeed(i_speed);
 }
 
 void CommManager::setTurnRate(double i_turnRate)
 {
-  player->setTurnRate(i_turnRate);
+  	player->setTurnRate(i_turnRate);
 }
 
 double CommManager::getSpeed()
 {
-  return player->getSpeed();
+  	return player->getSpeed();
 }
 
 double CommManager::getTurnRate()
 {
-  return player->getTurnRate();
+  	return player->getTurnRate();
+}
+
+void CommManager::provideSpeed(double &speed, double &turnRate)
+{
+     speed = getSpeed();
+     turnRate = getTurnRate();
 }
 
 SimpleImage CommManager::provideImg(CameraId camId)
@@ -53,43 +67,42 @@ SimpleImage CommManager::provideImg(CameraId camId)
 
 QVector<QPointF> CommManager::getLaserScan(int laserId)
 {
-  return player->getLaserScan(laserId);
+  	return player->getLaserScan(laserId);
 }
 
 
 int CommManager::config( ConfigFile *cf, int sectionid)
 {
-	qDebug("reading %d", sectionid);
-   	name = cf->ReadString(sectionid, "name", "No-Name");
-   	qDebug("Setting name to %s", qPrintable(name)); 
-   	startConnected = (bool) cf->ReadInt(sectionid, "startConnected", 1);
-   	if(startConnected)
-   	{
-	   playerIp = cf->ReadString(sectionid, "playerIp", "127.0.0.1");
-	   playerPort = cf->ReadInt(sectionid, "playerPort", 6665);
-	   player = new PlayerInterface(this, playerIp, playerPort);
-   	}
-  	//Enable Robot Control ?
+    qDebug("\n*********************************************************************"); 	
+   	name =                   cf->ReadString(sectionid, "name", "No-Name");
+   	startConnected =  (bool) cf->ReadInt(sectionid, "startConnected", 1);
   	activateControl = (bool) cf->ReadInt(sectionid, "activateControl", 1);
-  	positionControlId = cf->ReadInt(sectionid, "positionControlId", 0);
-  	if(activateControl)
-  	{
-    	player->enableDrive(positionControlId);
-  	}
-  	//Laser
-  	laserEnabled = cf->ReadInt(sectionid, "laserEnabled", 1);
-  	laserId = cf->ReadInt(sectionid, "laserId", 0);
-  	if(laserEnabled)
-  	{
-    	player->enableLaser(0, laserId);
-  	}
+  	positionControlId =      cf->ReadInt(sectionid, "positionControlId", 0);
+  	laserEnabled =           cf->ReadInt(sectionid, "laserEnabled", 1);
+  	laserId =                cf->ReadInt(sectionid, "laserId", 0);
+	playerIp =               cf->ReadString(sectionid, "playerIp", "127.0.0.1");
+	playerPort =             cf->ReadInt(sectionid, "playerPort", 6665);
+   	qDebug("Robot  name:\t%s", qPrintable(name)); 
+    qDebug("Robot Ip is:\t%s:%d", qPrintable(playerIp),playerPort); 
+  	qDebug("Supported Interfaces:"); 
+    if(startConnected)
+	{
+	   	player = new PlayerInterface(this, playerIp, playerPort);
+	  	//Enable Robot Control ?
+	  	if(activateControl)
+	  	{
+	   	  	qDebug("	- Position/Drive Contrl."); 
+	    	player->enableControl(positionControlId);
+	  	}
+	  	//Laser
+	  	if(laserEnabled)
+	  	{
+	   	  	qDebug("	- Laser."); 
+	    	player->enableLaser(0, laserId);
+	  	}
+	}
+    qDebug("*********************************************************************"); 
   	return 1;
-}
-
-void CommManager::provideSpeed(double &speed, double &turnRate)
-{
-     speed = getSpeed();
-     turnRate = getTurnRate();
 }
 int CommManager::start()
 {
@@ -103,11 +116,7 @@ int CommManager::start()
 
 int CommManager::stop()
 {
-  // Do nothing.
-  return 1;
+  	// Do nothing.
+  	return 1;
 }
 
-void CommManager::setSpeed(double i_speed, double i_turnRate)
-{
-  player->setSpeed(i_speed, i_turnRate);
-}
