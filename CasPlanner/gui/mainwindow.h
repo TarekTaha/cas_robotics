@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 #include <QMainWindow>
-#include "robotcomm.h"
+#include "robotmanager.h"
 #include "statusbar.h"
 #include "tabcontainer.h"
 class MainWindow : public QMainWindow 
@@ -13,11 +13,10 @@ public:
 	~MainWindow(); 
     public slots:
 		void logData();
-		void loadRobot(); 
+		void commStart(); 
 private: 
     TabContainer tabcontainer;
-    RobotComm * robotcomm;
-	//QTMapDataInterface mapManager;
+    RobotManager * robotManager;
 	int logCount; 
 	StatusLogger *statusLogger; 
 };

@@ -9,7 +9,7 @@ HEADERS +=  gui/CommManager.h\
 			gui/navigationtab.h\
 			gui/ogrenderer.h\
 			gui/playerinterface.h\
-			gui/robotcomm.h\
+			gui/robotmanager.h\
 			gui/sensors.h\
 			gui/sensorsgui.h\
 			gui/speedrender.h\
@@ -45,7 +45,7 @@ SOURCES +=  gui/CommManager.cpp\
 			gui/navigationtab.cpp\
 			gui/ogrenderer.cpp\			
 			gui/playerinterface.cpp\
-			gui/robotcomm.cpp\
+			gui/robotmanager.cpp\
 			gui/sensors.cpp\
 			gui/sensorsgui.cpp\
 			gui/speedrender.cpp\

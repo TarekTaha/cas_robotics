@@ -24,7 +24,7 @@
 
 #include "sensors.h"
 #include <QtOpenGL>
-#include <robotcomm.h>
+#include <robotmanager.h>
 #include <QImage>
 #include <QPointer>
 #include "laserrender.h"
@@ -41,12 +41,12 @@ class SensorsGLW: public QGLWidget
         void initializeGL();
         void paintGL();
         void resizeGL(int w, int h);
-        void setRobotComms(RobotComm *);
+        void setRobotComms(RobotManager *);
         void setRobotGUI(SensorsGui *);
         QSize setSizeHint();
-        void config(ConfigFile *cf, int sectionid); 
+//        void config(ConfigFile *cf, int sectionid); 
+        void config(); 
         QSize setMinimumSizeHint(); 
-        //void setMode(CamMode m); 
        	double cursorCentreX;
       	double cursorCentreY; 
         double zoomCentreX;
@@ -58,23 +58,13 @@ class SensorsGLW: public QGLWidget
 	    double srSizeX; 
 	    double srSizeY; 
     private:
-        // CamRender camera;
         double desiredAspectRatio;
-        //OmniRender omniCam; 
-		//CamRender wideCam; 
-        //ThermalRender irCam; 
         LaserRender laser; 
         SpeedRender speedMeter; 
-        //bool omniCamEnabled;
-        //bool wideCamEnabled;
-        //bool irCamEnabled;
         bool laserEnabled;
         bool speedEnabled;
-        RobotComm *comms;
+        RobotManager *comms;
         SensorsGui *sensorsGui; 
-		//bool showThermal; 
-		//int irMinimum;
-		//int irMaximum; 
 		friend class SensorsGui;
 };
 
@@ -83,10 +73,11 @@ class SensorsGui: public Sensors, public SpeedProvider
 {
     Q_OBJECT
     public:
-        SensorsGui(CommManager *commsMgr, QWidget *parent = 0); 
+        SensorsGui(RobotManager *commsMgr, QWidget *parent = 0); 
         //SensorsGui(QWidget *parent = 0);
         ~SensorsGui(); 
-        virtual int config(ConfigFile *cf, int sectionid);
+        //virtual int config(ConfigFile *cf, int sectionid);
+        virtual int config();
 		void setRadMode(int mode);
 		void requestSnap();
   		void resetTab();
@@ -99,11 +90,6 @@ class SensorsGui: public Sensors, public SpeedProvider
         void keyPressEvent(QKeyEvent *ke); 
         void keyReleaseEvent(QKeyEvent *ke);
         void provideSpeed(double &speed, double &turnRate);
-        void victimFound();
-//		void switchToTele();
-//		void switchToPaused();
-//		void switchToAuto();
-
     signals: 
         void newData(); 
     private:
@@ -114,7 +100,7 @@ class SensorsGui: public Sensors, public SpeedProvider
 		QRadioButton *teleRadBtn;
 		QRadioButton *pausedRadBtn;
 		QRadioButton *autoRadBtn;
-        RobotComm *comms; 
+        RobotManager *comms; 
         SensorsGLW glw;
         QWidget buttonWidget;
         double speed; 

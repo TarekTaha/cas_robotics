@@ -3,23 +3,16 @@
 TabContainer::TabContainer(QWidget *parent)
     : QTabWidget(parent),
       navCon(parent),
-      sensorsGui(comManager,parent)
+      sensorsGui(robotManager,parent)
 {
     addTab(&navCon, "Navigation Panel"); 
     addTab(&sensorsGui, "Interactivity Pannel");     
     setTabIcon(1, QIcon(":warning.png")); 
     updateGeometry();
 }
-
-//void TabContainer::setMapManager(QTMapDataInterface *mapManager)
-//{
-//    mapEd.setMapManager(mapManager);  
-//    snapView.setMapManager(mapManager); 
-//}
-
-void TabContainer::setCommManager(CommManager *comManager)
+void TabContainer::setRobotManager(RobotManager *robManager)
 {
-//	sensorGui.setRobotComms(comManager);
+	robotManager = robManager;
 }
 
 TabContainer::~TabContainer()

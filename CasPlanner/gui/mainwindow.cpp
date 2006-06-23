@@ -29,21 +29,22 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     container->setLayout(vLayout);
     statusBar()->showMessage("Welcome to CAS Navigation System ...", 20000); 
     statusBar()->showMessage("Initialization Done.");
-    QPushButton *loadRobotBtn = new QPushButton("EXIT"); 
-    statusBar()->addPermanentWidget(loadRobotBtn);
-    connect(loadRobotBtn, SIGNAL(clicked()), this, SLOT(loadRobot()));
+    QPushButton *commStart = new QPushButton("Connect"); 
+    statusBar()->addPermanentWidget(commStart);
+    connect(commStart, SIGNAL(clicked()), this, SLOT(commStart()));
     statusLogger = new StatusLogger(statusBar()); 
     setCentralWidget(container);
     // Reads Robot Configurations from the file(s)
-    robotcomm = new RobotComm(configFiles);
-    robotcomm->start();
+    robotManager = new RobotManager(configFiles);
+    tabcontainer.setRobotManager(robotManager);
+    //robotManager->start();
     statusLogger->addStatusMsg(0,1,"Just a msg ..."); 
-    connect(robotcomm, SIGNAL(statusMsg(int,int,QString)), statusLogger, SLOT(addStatusMsg(int,int,QString))); 
+    connect(robotManager, SIGNAL(statusMsg(int,int,QString)), statusLogger, SLOT(addStatusMsg(int,int,QString))); 
     //Comms is now set up, connect map view to map manager. 
     qDebug("Initializing Tabs"); 
     //tabcontainer.setMapManager(&mapManager); 
     //To:Do
-    connect(emergStop, SIGNAL(pressed()), robotcomm, SLOT(emergencyStop())); 
+    connect(emergStop, SIGNAL(pressed()), robotManager, SLOT(emergencyStop())); 
     //cf = new CfgReader(configFiles, &robotsView, commsmgr);
     statusLogger->addStatusMsg(0,1,"Stating comms ... done"); 
     QTimer *timer = new QTimer(this);
@@ -58,8 +59,9 @@ void MainWindow::logData()
     //mapManager.writeOut(prefix, true); 
 }
 
-void MainWindow::loadRobot()
+void MainWindow::commStart()
 {
+    robotManager->startComms();
     //QString fileName = QFileDialog::getOpenFileName(this, "Load Robot ... "); 
     //cf->readRobot(fileName); 
 }

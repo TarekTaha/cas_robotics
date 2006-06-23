@@ -5,13 +5,12 @@ PlayerInterface::PlayerInterface(CommManager *in_comms, QString host, int port):
     playerHost(host),
     playerPort(port),
     pc(0), 
-    driveEnabled(false),
-    driveId(0), 
+    ctrEnabled(false),
+    positionId(0), 
     drive(0), 
     ptzEnabled(false),
     emergencyStopped(false)
 {
-    qDebug("Robot Ip is: %s", qPrintable(host)); 
     laserEnabled[0] = false;
     laserEnabled[1] = false;
 }
@@ -83,27 +82,25 @@ QVector<QPointF> PlayerInterface::getLaserScan(int Laser_id)
 
 void PlayerInterface::run ()
 {
-    qDebug("Connecting to Robot %s port %d ... \n", qPrintable(playerHost), playerPort);
+    qDebug("Connecting to %s on %s:%d ... \n",qPrintable(comms->getName()),qPrintable(playerHost), playerPort);
     if(pc)
     {
 		delete pc; 
     }
     pc = new PlayerClient(qPrintable(playerHost),playerPort);
-    qDebug("... connected"); 
-    qDebug("PC is %x", pc); 
-    pc->SetFrequency(10); 
-    qDebug("Frequency set"); 
+    pc->SetFrequency(10);
+    qDebug("	--->>> Frequency set to 10 Hz"); 
     int retryCount=0; 
-    if(driveEnabled)
+    if(ctrEnabled)
     {
-		qDebug("Drive enabled"); 
+		qDebug("	--->>> Motor Control Interface Engaged"); 
 		if(drive)
 		{
 		    delete drive;  
 		}
-	        drive = new PositionProxy(pc,driveId,'a');
+	        drive = new PositionProxy(pc,positionId,'a');
     }
-    qDebug("Drive started."); 
+    qDebug("	--->> Robot now can be Drive by Position Commands"); 
     for(int i=0; i < MAX_LASERS; i++)
     {
         if(laserEnabled[i])
@@ -115,14 +112,15 @@ void PlayerInterface::run ()
     {
 		ptz = new PtzProxy(pc, ptzId, 'a'); 
     }
-    qWarning("Connecting to player server");    
+    qWarning("Testing Player Server for Data Read:");    
     while(pc->Read())
     {
     	qWarning(".");    
 		sleep(1);  
 		retryCount++; 
     }
-    qWarning(" -> Connection Established <-");    
+    qWarning("	--->>> Test Passed, You can read Data from Player Server Now");    
+    qDebug("	--->>> Connection Established"); 
     // Hack around player
     for(int i=0; i < 5; i++)
     {
@@ -145,7 +143,7 @@ void PlayerInterface::run ()
 		qDebug("Emerg stopped: %d", emergencyStopped);
     	if(!emergencyStopped)
     	{
-	        if(driveEnabled)
+	        if(ctrEnabled)
 	        {
 	            drive->Lock();
 	            drive->SetSpeed(speed,turnRate);
@@ -159,7 +157,7 @@ void PlayerInterface::run ()
 	    else 
 	    {
 	        qDebug("Stopping Robot NOW ");
-	        if(driveEnabled)
+	        if(ctrEnabled)
 	        {
 	            drive->SetSpeed(0,0); 
 	            drive->SetMotorState(0);
@@ -190,10 +188,10 @@ void PlayerInterface::setSpeed(double i_speed, double i_turnRate)
     dataLock.unlock(); 
 }
 
-void PlayerInterface::enableDrive(int in_driveId)
+void PlayerInterface::enableControl(int posId)
 {
-    driveEnabled=true;
-    driveId=in_driveId;
+    ctrEnabled = true;
+    positionId = posId;
 }
 
 void PlayerInterface::enablePtz(int in_ptzId)
@@ -204,7 +202,6 @@ void PlayerInterface::enablePtz(int in_ptzId)
 
 void PlayerInterface::enableLaser(int laser_id, int in_playerLaserId)
 {
-    qDebug("Laser enabled"); 
     laserEnabled[laser_id] = true; 
     playerLaserId[laser_id] = in_playerLaserId; 
 }
