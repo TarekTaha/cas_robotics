@@ -24,12 +24,12 @@ SensorsGLW::SensorsGLW():
 
 QSize SensorsGLW::setMinimumSizeHint()
 {
-    return QSize(400*desiredAspectRatio,400);  
+    return QSize(450*desiredAspectRatio,400);  
 }
 
 QSize SensorsGLW::setSizeHint()
 {
-    return QSize(800*desiredAspectRatio,800);  
+    return QSize(900*desiredAspectRatio,800);  
 }
 
 void SensorsGLW::initializeGL()
@@ -37,7 +37,6 @@ void SensorsGLW::initializeGL()
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glFlush();
 }
-
 
 void SensorsGLW::setRobotGUI(SensorsGui *gui)
 {
@@ -54,7 +53,7 @@ void SensorsGLW::setRobotComms(RobotManager *Comms)
         laser.setId(0);
     } 
     speedMeter.setSpeedProvider(sensorsGui); 
-    connect(sensorsGui, SIGNAL(newData()), &speedMeter, SLOT(updateData()));
+    connect(comms, SIGNAL(newData()), &speedMeter, SLOT(updateData()));
 
 }
 
@@ -67,7 +66,7 @@ void SensorsGLW::resizeGL(int w, int h)
     int newHeight = h;
     int xOffset = 0;
     int yOffset = 0;  
-    //qDebug("Resize w = %d h = %d", w, h); 
+    qDebug("Resize w = %d h = %d", w, h); 
     if((float) w/h > desiredAspectRatio)
     {
         newWidth = h*desiredAspectRatio; 
@@ -81,6 +80,7 @@ void SensorsGLW::resizeGL(int w, int h)
     glMatrixMode(GL_PROJECTION); 
     glLoadIdentity(); 
     glOrtho(0, desiredAspectRatio, 0, 1, -200, 200); 
+    //glOrtho(0, desiredAspectRatio, 0, 1, -500, 500); 
     glMatrixMode(GL_MODELVIEW);
     glViewport( xOffset, yOffset, (GLint)newWidth, (GLint)newHeight );
 }
@@ -88,7 +88,7 @@ void SensorsGLW::resizeGL(int w, int h)
 // check for camera flags
 void SensorsGLW::config()
 {
-    laserEnabled = comms->laserEnabled;// true;//(bool) cf->ReadInt(sectionid, "laserEnabled", 1); 
+    laserEnabled = true;//(bool) cf->ReadInt(sectionid, "laserEnabled", 1); 
     speedEnabled = true;//(bool) cf->ReadInt(sectionid, "speedEnabled", 1); 
     if(speedEnabled)
     {
@@ -99,18 +99,16 @@ void SensorsGLW::config()
 
 void SensorsGLW::paintGL()
 {
-    //qDebug("RMV asked to paint image"); 
-    //int displayList = glGenLists(1); 
-    //glNewList(displayList, GL_COMPILE); 
-    //qDebug("Mode is: %d", mode); 
     double camPanelRatio = 1.0; 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
     if(laserEnabled)
      {
          glPushMatrix(); 
-         glTranslatef(camPanelRatio*.7,0.25, 0);
-         glScalef(0.2,0.2,1);
+         //glTranslatef(camPanelRatio*.7,0.25, 0);
+         glTranslatef(0,0,0);
+         //glScalef(0.2,0.2,1);
+         glScalef(1,1,1);
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
          glEnable(GL_POLYGON_SMOOTH); 
          glEnable(GL_BLEND);
@@ -119,7 +117,6 @@ void SensorsGLW::paintGL()
          glDisable(GL_POLYGON_SMOOTH);
          glPopMatrix(); 
      }
-
      if(speedEnabled)
      {
          glPushMatrix();
@@ -295,29 +292,21 @@ void SensorsGui::keyPressEvent(QKeyEvent *e)
 		//comms->requestNewPatch(0); 
 		break;
             case 'v':
-	       text = QInputDialog::getText(this, "RescueGUI: Victim label", "Enter a label for the victim:",
-               QLineEdit::Normal, QString::null, &ok);
-		if ( ok ) {
-		    if(text.isEmpty()){
-    			text = "Unlabelled"; 
-		    }
-//		    orca::CartesianPoint2d centre;
-//		    orca::Size2d size; 
-//		    centre.x = (glw.cursorCentreX-glw.srCentreX)/glw.srSizeX+0.5;
-//		    centre.y = (glw.cursorCentreY-glw.srCentreY)/glw.srSizeY+0.5;
-//		    size.w = glw.zoomSizeX/glw.srSizeX; 
-//		    size.l = glw.zoomSizeY/glw.srSizeY; 
-//		    
-//		    comms->requestSnap(orca::SNAPVICTIM, text, centre, size);
-
-        int index = robotView->indexOf(this);
-        // set Homer tab title
-        robotView->setTabText(index, "HOMER");
-    
-        // set Victim Signal icon
-        robotView->setTabIcon(index, QIcon("../ui/rescuegui-branchCommsRefactor/blank.xpm"));
-        //comms->setCtrlMode(true);
-		}
+	       		text = QInputDialog::getText(this, "RescueGUI: Victim label", "Enter a label for the victim:",
+               	QLineEdit::Normal, QString::null, &ok);
+				if ( ok ) 
+				{
+		    		if(text.isEmpty())
+		    		{
+    					text = "Unlabelled"; 
+		    		}
+			        int index = robotView->indexOf(this);
+			        // set Homer tab title
+			        robotView->setTabText(index, "HOMER");
+					// set Victim Signal icon
+        			//robotView->setTabIcon(index, QIcon("../ui/rescuegui-branchCommsRefactor/blank.xpm"));
+			        //comms->setCtrlMode(true);
+				}
                 break;
             case 'l':
                 //
@@ -370,10 +359,11 @@ void SensorsGui::keyPressEvent(QKeyEvent *e)
 
 void SensorsGui::keyReleaseEvent(QKeyEvent *e)
 {
-    qDebug("Key released: %s autorepeat: %d", qPrintable(e->text()), e->isAutoRepeat()); 
-    if(!e->isAutoRepeat()){
-        /* emit allStop(); */
-        switch(e->text().at(0).toAscii()){
+    if(!e->isAutoRepeat())
+    {
+        // Stop Driving 
+        switch(e->text().at(0).toAscii())
+        {
         case 'w': 
         case 's':
             comms->setSpeed(0); 
@@ -394,10 +384,6 @@ void SensorsGui::wheelEvent( QWheelEvent *we)
         speed -= 0.01; // decrease Homer speed a bit
     else
         speed += 0.01; // increase speed
-    // emit newData(); 
-    //startPtz = comms->getPtz(); 
-    //PtzValue desiredPtz(startPtz.pan, startPtz.tilt, startPtz.zoom+0.001*we->delta()); 
-    //comms->setPtz( desiredPtz); 
 }
 
 SensorsGui::~SensorsGui()
@@ -430,8 +416,8 @@ void SensorsGui::resetTab()
     // get this tab index
     int index = robotView->indexOf(this);
 
-    // set Homer tab title
-    robotView->setTabText(index, "HOMER");
+    // set tab title
+    robotView->setTabText(index, "Cas Planner");
 
     // set Victim Signal icon
     robotView->setTabIcon(index, QIcon("../ui/rescuegui-branchCommsRefactor/blank.xpm"));

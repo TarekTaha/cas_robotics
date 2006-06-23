@@ -23,7 +23,8 @@
 #include "glrender.h"
 #include "interfaceprovider.h"
 
-class SpeedRender: public GLRender {
+class SpeedRender: public GLRender 
+{
     public:
         SpeedRender(QGLWidget *w);
         void setSpeedProvider(SpeedProvider *sp);
