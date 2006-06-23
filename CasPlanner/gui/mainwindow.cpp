@@ -15,7 +15,11 @@ QMainWindow(parent)
 MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     QMainWindow(parent), logCount(0)
 {
+    // Reads Robot Configurations from the file(s)
+    robotManager = new RobotManager(configFiles);
+
     QWidget *container = new QWidget(this); 
+    tabcontainer = new TabContainer(this,robotManager);
     QVBoxLayout *vLayout = new QVBoxLayout;
     QPushButton *emergStop = new QPushButton(" STOP ROBOT ");  
     QPalette palette = emergStop->palette();
@@ -23,7 +27,7 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     emergStop->setPalette(palette); 
     setMinimumSize(QSize(900,700)); 
     QHBoxLayout *layout = new QHBoxLayout; 
-    layout->addWidget(&tabcontainer,1); 
+    layout->addWidget(tabcontainer,1); 
     vLayout->addLayout(layout); 
     vLayout->addWidget(emergStop); 
     container->setLayout(vLayout);
@@ -34,18 +38,11 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     connect(commStart, SIGNAL(clicked()), this, SLOT(commStart()));
     statusLogger = new StatusLogger(statusBar()); 
     setCentralWidget(container);
-    // Reads Robot Configurations from the file(s)
-    robotManager = new RobotManager(configFiles);
-    tabcontainer.setRobotManager(robotManager);
-    //robotManager->start();
-    statusLogger->addStatusMsg(0,1,"Just a msg ..."); 
+    statusLogger->addStatusMsg(0,1,"Testing Logging ..."); 
     connect(robotManager, SIGNAL(statusMsg(int,int,QString)), statusLogger, SLOT(addStatusMsg(int,int,QString))); 
     //Comms is now set up, connect map view to map manager. 
     qDebug("Initializing Tabs"); 
-    //tabcontainer.setMapManager(&mapManager); 
-    //To:Do
     connect(emergStop, SIGNAL(pressed()), robotManager, SLOT(emergencyStop())); 
-    //cf = new CfgReader(configFiles, &robotsView, commsmgr);
     statusLogger->addStatusMsg(0,1,"Stating comms ... done"); 
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(logData()));
@@ -62,8 +59,6 @@ void MainWindow::logData()
 void MainWindow::commStart()
 {
     robotManager->startComms();
-    //QString fileName = QFileDialog::getOpenFileName(this, "Load Robot ... "); 
-    //cf->readRobot(fileName); 
 }
 
 MainWindow::~MainWindow()

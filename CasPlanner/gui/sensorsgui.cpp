@@ -1,23 +1,3 @@
-/***************************************************************************
- *   Copyright (C) 2006 by Waleed Kadous   *
- *   waleed@width   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
-
 #include "sensorsgui.h"
 #include <QLabel>
 #include <QGridLayout>
@@ -67,7 +47,6 @@ void SensorsGLW::setRobotGUI(SensorsGui *gui)
 void SensorsGLW::setRobotComms(RobotManager *Comms)
 {
     comms = Comms;
-//	connect(comms, SIGNAL(imgUpdate(unsigned int)), &irCam, SLOT(updateImg( unsigned int )));
     if(laserEnabled)
     {
         laser.setProvider(comms); 
@@ -109,7 +88,7 @@ void SensorsGLW::resizeGL(int w, int h)
 // check for camera flags
 void SensorsGLW::config()
 {
-    laserEnabled = true;//(bool) cf->ReadInt(sectionid, "laserEnabled", 1); 
+    laserEnabled = comms->laserEnabled;// true;//(bool) cf->ReadInt(sectionid, "laserEnabled", 1); 
     speedEnabled = true;//(bool) cf->ReadInt(sectionid, "speedEnabled", 1); 
     if(speedEnabled)
     {
@@ -129,7 +108,6 @@ void SensorsGLW::paintGL()
     glDisable(GL_DEPTH_TEST);
     if(laserEnabled)
      {
-	     qDebug("Rendering Laser");      	
          glPushMatrix(); 
          glTranslatef(camPanelRatio*.7,0.25, 0);
          glScalef(0.2,0.2,1);
@@ -164,25 +142,9 @@ void SensorsGui::updateData()
 {
     
 }
-//SensorsGui::SensorsGui(QWidget *parent): 
-//    Sensors(commsMgr, parent),
-//	   robotView((QTabWidget*) parent),
-//       speed(0.15), 
-//	   turnRatio(5),
-//	   ptzPan(0),
-//	   ptzTilt(0),
-//	   radPerPixel(0.001),
-//	   msperWheel(0.0005)
-//{
-//    QVBoxLayout *layout = new QVBoxLayout();
-//    layout->addWidget(&glw,4); 
-//    layout->addWidget(&buttonWidget, 1);
-//    setLayout(layout); 
-//    updateGeometry();
-//    setFocusPolicy(Qt::StrongFocus);
-//}
 SensorsGui::SensorsGui(RobotManager *commsMgr, QWidget *parent): 
        Sensors(commsMgr, parent),
+       comms(commsMgr),
 	   robotView((QTabWidget*) parent),
        speed(0.15), 
 	   turnRatio(5),
@@ -205,14 +167,13 @@ int SensorsGui::config()
     glw.setRobotGUI(this); 
     glw.config();
     // Now retrieve the appropriate comms. 
-  //  comms = qobject_cast<comms *>(commsMgr->getCommsByName(commsName)); 
+    //  comms = qobject_cast<comms *>(commsMgr->getCommsByName(commsName)); 
     glw.setRobotComms(comms);
-
     // config buttons
     configButtons();
 
     // connnect victim found signal
-   // connect(comms, SIGNAL(victimFound()), this, SLOT(victimFound()));
+    // connect(comms, SIGNAL(victimFound()), this, SLOT(victimFound()));
 
     // connect confirm and reject btns
     //connnect(confirmBtn, SIGNAL(clicked()), this, SLOT(confirmVictim()));
@@ -231,9 +192,9 @@ int SensorsGui::config()
 void SensorsGui::configButtons()
 {
     QHBoxLayout *hLayout = new QHBoxLayout;
-    teleRadBtn = new QRadioButton("&Teleop");
-    pausedRadBtn = new QRadioButton("&Paused");
-    autoRadBtn = new QRadioButton("Autonomous");
+    teleRadBtn =   new QRadioButton("&OG-MAP");
+    pausedRadBtn = new QRadioButton("&Laser");
+    autoRadBtn =   new QRadioButton("StaticMap");
 
     //confirmBtn = new QPushButton("&Confirm Victim");
     //rejectBtn = new QPushButton("&Reject Victim");

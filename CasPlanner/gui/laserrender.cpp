@@ -31,20 +31,19 @@ LaserRender::LaserRender(QGLWidget *in_w):
 
 LaserRender::~LaserRender(){};
 
-
-void LaserRender::setId(int id){
+void LaserRender::setId(int id)
+{
     qDebug("Laser set to %d", id); 
     laserId = id;  
 }
 
-void LaserRender::setProvider( LaserProvider *i_prov){
-    //qDebug("Provider set to *%d", i_prov); 
+void LaserRender::setProvider( LaserProvider *i_prov)
+{
     provider = i_prov;
 }
 
-void LaserRender::updateData(){
-    //qDebug("Laser data provided %d", (provider->provideLaser(laserId)).size()); 
-       
+void LaserRender::updateData()
+{
       laserData = provider->getLaserScan(laserId);
       w->updateGL(); 
 }
@@ -70,9 +69,10 @@ void LaserRender::render()
     glColor3f(0.0,0.0,1.0); 
     glBegin(GL_TRIANGLE_FAN);
     glVertex2f(0,0);  
-    if(laserData.size() > 0){
-        for(int i=0; i < laserData.size(); i++){
-            //qDebug("Putting point at %g %g", data[i].x(), data[i].y());
+    if(laserData.size() > 0)
+    {
+        for(int i=0; i < laserData.size(); i++)
+        {
             glVertex2f(laserData[i].x(), laserData[i].y());  
         }
     }

@@ -140,7 +140,6 @@ void PlayerInterface::run ()
 	    	sleep(1); 
 	    	retryCount++; 
         }
-		qDebug("Emerg stopped: %d", emergencyStopped);
     	if(!emergencyStopped)
     	{
 	        if(ctrEnabled)
@@ -158,7 +157,7 @@ void PlayerInterface::run ()
 	    {
 	        qDebug("Stopping Robot NOW ");
 	        if(ctrEnabled)
-	        {
+	       {
 	            drive->SetSpeed(0,0); 
 	            drive->SetMotorState(0);
 	        }  
