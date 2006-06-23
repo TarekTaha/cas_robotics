@@ -74,7 +74,6 @@ class SensorsGui: public Sensors, public SpeedProvider
     Q_OBJECT
     public:
         SensorsGui(RobotManager *commsMgr, QWidget *parent = 0); 
-        //SensorsGui(QWidget *parent = 0);
         ~SensorsGui(); 
         //virtual int config(ConfigFile *cf, int sectionid);
         virtual int config();

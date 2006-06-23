@@ -26,26 +26,31 @@ SpeedRender::SpeedRender(QGLWidget *w):
 
 }
 
-void SpeedRender::setSpeedProvider(SpeedProvider *provider){
+void SpeedRender::setSpeedProvider(SpeedProvider *provider)
+{
     //qDebug("Speed provider set"); 
     sp = provider;  
 }
 
-void SpeedRender::updateData(){
+void SpeedRender::updateData()
+{
     //qDebug("Data updated to %f %f %f %f", speed, turnRate, maxSpeed, maxTurnRate);
     sp->provideSpeed(speed, turnRate);
     w->updateGL(); 
 }
 
-void SpeedRender::setMaxSpeed(double speed){
+void SpeedRender::setMaxSpeed(double speed)
+{
     maxSpeed = speed;  
 }
 
-void SpeedRender::setMaxTurnRate(double turnRate){
+void SpeedRender::setMaxTurnRate(double turnRate)
+{
     maxTurnRate = turnRate;  
 }
 
-void SpeedRender::render(){
+void SpeedRender::render()
+{
     
     float speedFraction = speed/maxSpeed;
     float turnFraction = turnRate/maxTurnRate; 

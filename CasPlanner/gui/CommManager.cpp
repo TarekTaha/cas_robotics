@@ -48,21 +48,12 @@ double CommManager::getTurnRate()
 
 void CommManager::provideSpeed(double &speed, double &turnRate)
 {
-     speed = getSpeed();
+     speed    = getSpeed();
      turnRate = getTurnRate();
 }
 
 SimpleImage CommManager::provideImg(CameraId camId)
 {
-//  if(capThreads[camId] != NULL)
-//  {
-//    return capThreads[camId]->getImg();
-//  }
-//  else
-//  {
-//    qWarning("Warning: Camera %d undefined.", camId);
-//    return SimpleImage(0,0,NULL);
-//  }
 }
 
 QVector<QPointF> CommManager::getLaserScan(int laserId)
@@ -116,7 +107,6 @@ int CommManager::start()
 
 int CommManager::stop()
 {
-  	// Do nothing.
   	return 1;
 }
 

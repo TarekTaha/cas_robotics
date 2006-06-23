@@ -24,7 +24,8 @@
 #include "glrender.h"
 #include "interfaceprovider.h"
 
-class LaserRender: public GLRender {
+class LaserRender: public GLRender 
+{
 Q_OBJECT
     public: 
         LaserRender(QGLWidget *w);
