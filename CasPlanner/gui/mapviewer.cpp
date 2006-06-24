@@ -19,8 +19,6 @@
  ***************************************************************************/
 
 #include "mapviewer.h"
-//#include <orcaice/mathdefs.h>
-
 MapViewer::MapViewer(QWidget *parent)
  : QGLWidget(QGLFormat(QGL::AlphaChannel), parent),
  //mapManager(NULL),
@@ -550,7 +548,7 @@ void MapViewer::update()
 
 void MapViewer::resizeGL(int w, int h)
 {
-    qDebug("resizeGL on OGRenderer called");
+    //qDebug("resizeGL on OGRenderer called");
     // glMatrixMode(GL_PROJECTION);    
     // glLoadIdentity();
     screenWidth = w;

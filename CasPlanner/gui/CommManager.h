@@ -23,7 +23,7 @@ class CommManager: public Comms, public ImgProvider, public LaserProvider, publi
             virtual void setSpeed(double speed);
             virtual void setPtz(double pan, double tilt);
             virtual void setTurnRate(double turnRate); 
-		    virtual SimpleImage provideImg(CameraId camId); 
+		    virtual SimpleImage provideImg(); 
 		    virtual void provideSpeed(double &speed, double &turnRate);
 //		    virtual void setMapManager(QTMapDataInterface *in_mapManager)
 //		    {

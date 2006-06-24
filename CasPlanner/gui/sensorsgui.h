@@ -44,7 +44,6 @@ class SensorsGLW: public QGLWidget
         void setRobotComms(RobotManager *);
         void setRobotGUI(SensorsGui *);
         QSize setSizeHint();
-//        void config(ConfigFile *cf, int sectionid); 
         void config(); 
         QSize setMinimumSizeHint(); 
        	double cursorCentreX;
@@ -75,7 +74,6 @@ class SensorsGui: public Sensors, public SpeedProvider
     public:
         SensorsGui(RobotManager *commsMgr, QWidget *parent = 0); 
         ~SensorsGui(); 
-        //virtual int config(ConfigFile *cf, int sectionid);
         virtual int config();
 		void setRadMode(int mode);
 		void requestSnap();
