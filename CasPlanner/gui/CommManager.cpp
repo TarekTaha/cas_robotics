@@ -52,7 +52,7 @@ void CommManager::provideSpeed(double &speed, double &turnRate)
      turnRate = getTurnRate();
 }
 
-SimpleImage CommManager::provideImg(CameraId camId)
+SimpleImage CommManager::provideImg()
 {
 }
 
