@@ -2,7 +2,7 @@
 #define COMMMANAGER_H
 
 class CommManager; 
-class PlayerInterface; 
+class PlayerInterface;
 class Comms;
 #include "comms.h"
 #include "interfaceprovider.h"

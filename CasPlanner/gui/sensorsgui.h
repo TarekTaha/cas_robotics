@@ -30,7 +30,7 @@
 #include "laserrender.h"
 #include "interfaceprovider.h"
 #include "speedrender.h"
-#include "ogrenderer.h"
+#include "ogrender.h"
 class SensorsGui;
 class QMessageBox;
 class SpeedRender;
@@ -63,13 +63,13 @@ class SensorsGLW: public QGLWidget
         OGRenderer  ogRenderer;
         bool laserEnabled,mapEnabled;
         bool speedEnabled;
-        RobotManager *comms;
+        RobotManager *robotManager;
         SensorsGui *sensorsGui; 
 		friend class SensorsGui;
 };
 
 
-class SensorsGui: public Sensors, public SpeedProvider
+class SensorsGui: public Sensors, public SpeedProvider, public MapProvider
 {
     Q_OBJECT
     public:
@@ -88,18 +88,19 @@ class SensorsGui: public Sensors, public SpeedProvider
         void keyPressEvent(QKeyEvent *ke); 
         void keyReleaseEvent(QKeyEvent *ke);
         void provideSpeed(double &speed, double &turnRate);
+        Map  provideMap();
     signals: 
         void newData(); 
     private:
-		QTabWidget *robotView;
+		QTabWidget *tabContainer;
         void configButtons(); 
 		//QPushButton *confirmBtn;
 		//QPushButton *rejectBtn;
 		QRadioButton *teleRadBtn;
 		QRadioButton *pausedRadBtn;
 		QRadioButton *autoRadBtn;
-        RobotManager *comms; 
-        SensorsGLW glw;
+        RobotManager *robotManager; 
+        SensorsGLW sensorsGL;
         QWidget buttonWidget;
         double speed; 
         double turnRatio;

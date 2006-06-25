@@ -33,7 +33,7 @@ class Map
         }
  
 };
-class MapProvider 
+class MapProvider
 {
     public:
         virtual Map provideMap()=0; 
