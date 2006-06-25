@@ -52,8 +52,9 @@ void CommManager::provideSpeed(double &speed, double &turnRate)
      turnRate = getTurnRate();
 }
 
-SimpleImage CommManager::provideImg()
+Map CommManager::provideMap()
 {
+	
 }
 
 QVector<QPointF> CommManager::getLaserScan(int laserId)
@@ -73,9 +74,11 @@ int CommManager::config( ConfigFile *cf, int sectionid)
   	laserId =                cf->ReadInt(sectionid, "laserId", 0);
 	playerIp =               cf->ReadString(sectionid, "playerIp", "127.0.0.1");
 	playerPort =             cf->ReadInt(sectionid, "playerPort", 6665);
+	occMapEnabled =   (bool) cf->ReadInt(sectionid, "occMapEnabled", 1);
+  	mapId =                  cf->ReadInt(sectionid, "mapId", 0);
    	qDebug("Robot  name:\t%s", qPrintable(name)); 
     qDebug("Robot Ip is:\t%s:%d", qPrintable(playerIp),playerPort); 
-  	qDebug("Supported Interfaces:"); 
+  	qDebug("Supported Interfaces:");
     if(startConnected)
 	{
 	   	player = new PlayerInterface(this, playerIp, playerPort);
@@ -90,6 +93,11 @@ int CommManager::config( ConfigFile *cf, int sectionid)
 	  	{
 	   	  	qDebug("	- Laser."); 
 	    	player->enableLaser(0, laserId);
+	  	}
+	  	if(occMapEnabled)
+	  	{
+	   	  	qDebug("	- Occupancy Map."); 
+	    	player->enableMap(mapId);
 	  	}
 	}
     qDebug("*********************************************************************"); 

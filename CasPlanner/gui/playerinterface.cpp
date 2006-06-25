@@ -9,7 +9,8 @@ PlayerInterface::PlayerInterface(CommManager *in_comms, QString host, int port):
     positionId(0), 
     drive(0), 
     ptzEnabled(false),
-    emergencyStopped(false)
+    emergencyStopped(false),
+    mapEnabled(false)
 {
     laserEnabled[0] = false;
     laserEnabled[1] = false;
@@ -59,6 +60,49 @@ double PlayerInterface::getTurnRate()
     return retval; 
 }
 
+void PlayerInterface::stop()
+{
+    // Do nothing.  
+}
+
+void PlayerInterface::setPtz( double in_pan, double in_tilt)
+{
+    pan = in_pan;
+    tilt = in_tilt; 
+}
+
+void PlayerInterface::setSpeed(double i_speed, double i_turnRate)
+{
+    dataLock.lockForWrite();
+    speed = i_speed;
+    turnRate = i_turnRate;
+    dataLock.unlock(); 
+}
+
+void PlayerInterface::enableControl(int posId)
+{
+    ctrEnabled = true;
+    positionId = posId;
+}
+
+void PlayerInterface::enablePtz(int in_ptzId)
+{
+    ptzEnabled=true;
+    ptzId=in_ptzId;
+}
+
+void PlayerInterface::enableMap(int  in_mapId)
+{
+    mapEnabled = true;
+    mapId = in_mapId;
+}
+
+void PlayerInterface::enableLaser(int laser_id, int in_playerLaserId)
+{
+    laserEnabled[laser_id] = true; 
+    playerLaserId[laser_id] = in_playerLaserId; 
+}
+
 QVector<QPointF> PlayerInterface::getLaserScan(int Laser_id)
 {
     //qDebug("Laser data requested"); 
@@ -78,6 +122,34 @@ QVector<QPointF> PlayerInterface::getLaserScan(int Laser_id)
     {
         return QVector<QPointF>(0);
     }
+}
+Map PlayerInterface::provideMap()
+{
+	Map retval;
+    int metadata_offset = (map->height-1)*map->width;
+    uint8_t mapid = (uint8_t) map->cells[metadata_offset];
+    uint8_t robotid = (uint8_t) map->cells[metadata_offset+1];
+    int16_t mapposx, mapposy, mapposphi;
+    uint32_t time_secs, time_usecs;
+    
+    //mapposx = (map->cells[metadata_offset+2] & 0x00ff) << 8;
+    //mapposx |= (map->cells[metadata_offset+3] & 0xff);
+    
+    mapposx = *((int16_t *) (map->cells+metadata_offset+2));
+    mapposy = *((int16_t *) (map->cells+metadata_offset+4));
+    mapposphi = *((int16_t *) (map->cells+metadata_offset+6));
+    time_secs = *((int32_t *) (map->cells+metadata_offset+8));
+    time_usecs = *((int32_t *) (map->cells+metadata_offset+12));
+//    ogmapdata->timeStamp.seconds = time_secs;
+//    ogmapdata->timeStamp.useconds = time_usecs;
+//    ogmapdata->origin.p.x = mapposx;
+//    ogmapdata->origin.p.y = mapposy;
+//    ogmapdata->origin.o = mapposphi;
+	retval.width      = map->width;
+	retval.height     = map->height-1;
+	retval.resolution = map->resolution;
+    memcpy(&retval.rawData, map->cells, map->width*(map->height-1));
+    return retval;
 }
 
 void PlayerInterface::run ()
@@ -107,6 +179,10 @@ void PlayerInterface::run ()
         {
             laser[i] = new LaserProxy(pc,playerLaserId[0], 'r');  
         }
+    }
+    if(mapEnabled)
+    {
+    	map = new MapProxy(pc,mapId,'r');
     }
     if(ptzEnabled)
     {
@@ -152,6 +228,10 @@ void PlayerInterface::run ()
 			{
 		    	ptz->SetCam(pan,tilt, 1);  
 			}
+			if(mapEnabled)
+			{
+				map->GetMap();
+			}
     	}
 	    else 
 	    {
@@ -162,45 +242,9 @@ void PlayerInterface::run ()
 	            drive->SetMotorState(0);
 	        }  
 	        qDebug("... Robot Stopped");
+	        emergencyStopped = false;
 	    }
     	emit newData();
     }
     
-}
-
-void PlayerInterface::stop()
-{
-    // Do nothing.  
-}
-
-void PlayerInterface::setPtz( double in_pan, double in_tilt)
-{
-    pan = in_pan;
-    tilt = in_tilt; 
-}
-
-void PlayerInterface::setSpeed(double i_speed, double i_turnRate)
-{
-    dataLock.lockForWrite();
-    speed = i_speed;
-    turnRate = i_turnRate;
-    dataLock.unlock(); 
-}
-
-void PlayerInterface::enableControl(int posId)
-{
-    ctrEnabled = true;
-    positionId = posId;
-}
-
-void PlayerInterface::enablePtz(int in_ptzId)
-{
-    ptzEnabled=true;
-    ptzId=in_ptzId;
-}
-
-void PlayerInterface::enableLaser(int laser_id, int in_playerLaserId)
-{
-    laserEnabled[laser_id] = true; 
-    playerLaserId[laser_id] = in_playerLaserId; 
 }

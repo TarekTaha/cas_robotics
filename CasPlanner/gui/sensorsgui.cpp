@@ -52,6 +52,11 @@ void SensorsGLW::setRobotComms(RobotManager *Comms)
         connect(comms, SIGNAL(newData()), &laser, SLOT(updateData()));
         laser.setId(0);
     } 
+    if(mapEnabled)
+    {
+        ogRenderer.setProvider(comms);
+        connect(comms, SIGNAL(newData()), &laser, SLOT(updateData()));
+    } 
     speedMeter.setSpeedProvider(sensorsGui); 
     connect(comms, SIGNAL(newData()), &speedMeter, SLOT(updateData()));
 
