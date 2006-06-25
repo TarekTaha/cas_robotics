@@ -54,7 +54,7 @@ void CommManager::provideSpeed(double &speed, double &turnRate)
 
 Map CommManager::provideMap()
 {
-	
+	return player->provideMap();
 }
 
 QVector<QPointF> CommManager::getLaserScan(int laserId)

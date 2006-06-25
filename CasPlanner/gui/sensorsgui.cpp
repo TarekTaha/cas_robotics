@@ -5,9 +5,10 @@
 
 SensorsGLW::SensorsGLW():
     QGLWidget(QGLFormat(QGL::AlphaChannel)),
-    comms(0),
+    robotManager(0),
     laser(this),
     speedMeter(this),
+    ogRenderer(this),
     desiredAspectRatio(1),
     cursorCentreX(0.53),
     cursorCentreY(0.51), 
@@ -45,20 +46,20 @@ void SensorsGLW::setRobotGUI(SensorsGui *gui)
 
 void SensorsGLW::setRobotComms(RobotManager *Comms)
 {
-    comms = Comms;
+    robotManager = Comms;
     if(laserEnabled)
     {
-        laser.setProvider(comms); 
-        connect(comms, SIGNAL(newData()), &laser, SLOT(updateData()));
+        laser.setProvider(robotManager); 
+        connect(robotManager, SIGNAL(newData()), &laser, SLOT(updateData()));
         laser.setId(0);
-    } 
+    }
     if(mapEnabled)
     {
-        ogRenderer.setProvider(comms);
-        connect(comms, SIGNAL(newData()), &laser, SLOT(updateData()));
-    } 
+        ogRenderer.setProvider(robotManager);
+        connect(robotManager, SIGNAL(newData()), &ogRenderer, SLOT(updateData()));
+    }
     speedMeter.setSpeedProvider(sensorsGui); 
-    connect(comms, SIGNAL(newData()), &speedMeter, SLOT(updateData()));
+    connect(robotManager, SIGNAL(newData()), &speedMeter, SLOT(updateData()));
 
 }
 
@@ -94,7 +95,8 @@ void SensorsGLW::resizeGL(int w, int h)
 void SensorsGLW::config()
 {
     laserEnabled = true;//(bool) cf->ReadInt(sectionid, "laserEnabled", 1); 
-    speedEnabled = true;//(bool) cf->ReadInt(sectionid, "speedEnabled", 1); 
+    speedEnabled = true;//(bool) cf->ReadInt(sectionid, "speedEnabled", 1);
+    mapEnabled   = true;//(bool) cf->ReadInt(sectionid, "mapEnabled", 1);
     if(speedEnabled)
     {
 		speedMeter.setMaxSpeed(2); 
@@ -135,6 +137,10 @@ void SensorsGLW::paintGL()
          glDisable(GL_POLYGON_SMOOTH);
          glPopMatrix(); 
      }
+     if(mapEnabled)
+     {
+         ogRenderer.render();
+     }     
      glFlush();
 }
 
@@ -146,8 +152,8 @@ void SensorsGui::updateData()
 }
 SensorsGui::SensorsGui(RobotManager *commsMgr, QWidget *parent): 
        Sensors(commsMgr, parent),
-       comms(commsMgr),
-	   robotView((QTabWidget*) parent),
+       robotManager(commsMgr),
+	   tabContainer((QTabWidget*) parent),
        speed(0.15), 
 	   turnRatio(5),
 	   ptzPan(0),
@@ -156,7 +162,7 @@ SensorsGui::SensorsGui(RobotManager *commsMgr, QWidget *parent):
 	   msperWheel(0.0005)
 {
     QVBoxLayout *layout = new QVBoxLayout();
-    layout->addWidget(&glw,4); 
+    layout->addWidget(&sensorsGL,4); 
     layout->addWidget(&buttonWidget, 1);
     setLayout(layout); 
     updateGeometry();
@@ -166,16 +172,16 @@ SensorsGui::SensorsGui(RobotManager *commsMgr, QWidget *parent):
 int SensorsGui::config()
 {
     QString commsName ="Wheelchair";
-    glw.setRobotGUI(this); 
-    glw.config();
-    // Now retrieve the appropriate comms. 
-    //  comms = qobject_cast<comms *>(commsMgr->getCommsByName(commsName)); 
-    glw.setRobotComms(comms);
+    sensorsGL.setRobotGUI(this); 
+    sensorsGL.config();
+    // Now retrieve the appropriate robotManager. 
+    //  robotManager = qobject_cast<robotManager *>(commsMgr->getCommsByName(commsName)); 
+    sensorsGL.setRobotComms(robotManager);
     // config buttons
     configButtons();
 
     // connnect victim found signal
-    // connect(comms, SIGNAL(victimFound()), this, SLOT(victimFound()));
+    // connect(robotManager, SIGNAL(victimFound()), this, SLOT(victimFound()));
 
     // connect confirm and reject btns
     //connnect(confirmBtn, SIGNAL(clicked()), this, SLOT(confirmVictim()));
@@ -187,7 +193,7 @@ int SensorsGui::config()
     //connect( autoRadBtn, SIGNAL(clicked()), this, SLOT(switchToAuto()));
 
     //ptzEnabled = cf->ReadInt(sectionid, "ptzEnabled", 1);
-    comms->start();
+    robotManager->start();
     return 1; 
 
 }
@@ -233,15 +239,15 @@ void SensorsGui::mouseMoveEvent(QMouseEvent *me)
 {
     startX = me->x(); 
     startY = me->y(); 
-    //glw.moveDrivePan(-0.002*deltaX);  
-    glw.updateGL();
+    //sensorsGL.moveDrivePan(-0.002*deltaX);  
+    sensorsGL.updateGL();
     if(ptzEnabled)
     {
 		int deltaX = me->x() - startX; 
 		int deltaY = me->y() - startY; 
 		ptzPan -= deltaX*radPerPixel; 
 		ptzTilt += deltaY*radPerPixel; 
-		comms->setPtz(ptzPan, ptzTilt);  
+		robotManager->setPtz(ptzPan, ptzTilt);  
 	    //qDebug("Intermediate arm pos: %f %f %f", currentArmPos[0], currentArmPos[1], currentArmPos[2]);
 		startX = me->x(); 
 		startY = me->y(); 
@@ -276,16 +282,16 @@ void SensorsGui::keyPressEvent(QKeyEvent *e)
         switch(e->text().at(0).toAscii())
         {
             case 'w': 
-                comms->setSpeed(speed); 
+                robotManager->setSpeed(speed); 
                 break;
             case 'a':
-                comms->setTurnRate(turnRatio*speed); 
+                robotManager->setTurnRate(turnRatio*speed); 
                 break;
             case 's':
-                comms->setSpeed(-speed);
+                robotManager->setSpeed(-speed);
                 break;
             case 'd':
-                comms->setTurnRate(-turnRatio*speed); 
+                robotManager->setTurnRate(-turnRatio*speed); 
                 break;
             case 'z':
  
@@ -294,7 +300,7 @@ void SensorsGui::keyPressEvent(QKeyEvent *e)
                 break;
 	    case 'n':
 		// Start new patch 
-		//comms->requestNewPatch(0); 
+		//robotManager->requestNewPatch(0); 
 		break;
             case 'v':
 	       		text = QInputDialog::getText(this, "RescueGUI: Victim label", "Enter a label for the victim:",
@@ -305,12 +311,12 @@ void SensorsGui::keyPressEvent(QKeyEvent *e)
 		    		{
     					text = "Unlabelled"; 
 		    		}
-			        int index = robotView->indexOf(this);
+			        int index = tabContainer->indexOf(this);
 			        // set Homer tab title
-			        robotView->setTabText(index, "HOMER");
+			        tabContainer->setTabText(index, "HOMER");
 					// set Victim Signal icon
-        			//robotView->setTabIcon(index, QIcon("../ui/rescuegui-branchCommsRefactor/blank.xpm"));
-			        //comms->setCtrlMode(true);
+        			//tabContainer->setTabIcon(index, QIcon("../ui/rescuegui-branchCommsRefactor/blank.xpm"));
+			        //robotManager->setCtrlMode(true);
 				}
                 break;
             case 'l':
@@ -371,11 +377,11 @@ void SensorsGui::keyReleaseEvent(QKeyEvent *e)
         {
         case 'w': 
         case 's':
-            comms->setSpeed(0); 
+            robotManager->setSpeed(0); 
             break;
         case 'a':
         case 'd':
-            comms->setTurnRate(0); 
+            robotManager->setTurnRate(0); 
             break;
         }
     }
@@ -419,23 +425,23 @@ void SensorsGui::setRadMode(int mode)
 void SensorsGui::resetTab()
 {
     // get this tab index
-    int index = robotView->indexOf(this);
+    int index = tabContainer->indexOf(this);
 
     // set tab title
-    robotView->setTabText(index, "Cas Planner");
+    tabContainer->setTabText(index, "Cas Planner");
 
     // set Victim Signal icon
-    robotView->setTabIcon(index, QIcon("../ui/rescuegui-branchCommsRefactor/blank.xpm"));
+    tabContainer->setTabIcon(index, QIcon("../ui/rescuegui-branchCommsRefactor/blank.xpm"));
 }
 
 void SensorsGui::requestSnap()
 {
 //    orca::CartesianPoint2d centre;
 //    orca::Size2d size; 
-//    centre.x = (glw.cursorCentreX-glw.srCentreX)/glw.srSizeX+0.5;
-//    centre.y = (glw.cursorCentreY-glw.srCentreY)/glw.srSizeY+0.5;
-//    size.w = glw.zoomSizeX/glw.srSizeX; 
-//    size.l = glw.zoomSizeY/glw.srSizeY; 
+//    centre.x = (sensorsGL.cursorCentreX-sensorsGL.srCentreX)/sensorsGL.srSizeX+0.5;
+//    centre.y = (sensorsGL.cursorCentreY-sensorsGL.srCentreY)/sensorsGL.srSizeY+0.5;
+//    size.w = sensorsGL.zoomSizeX/sensorsGL.srSizeX; 
+//    size.l = sensorsGL.zoomSizeY/sensorsGL.srSizeY; 
 //		    
-//    comms->requestSnap(orca::SNAPVICTIM, "Homer Victim Found", centre, size);
+//    robotManager->requestSnap(orca::SNAPVICTIM, "Homer Victim Found", centre, size);
 }

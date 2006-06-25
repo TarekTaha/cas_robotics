@@ -7,7 +7,7 @@ HEADERS +=  gui/CommManager.h\
 			gui/mainwindow.h\
 			gui/mapviewer.h\			
 			gui/navigationtab.h\
-			gui/ogrenderer.h\
+			gui/ogrender.h\
 			gui/playerinterface.h\
 			gui/robotmanager.h\
 			gui/sensors.h\
@@ -43,7 +43,7 @@ SOURCES +=  gui/CommManager.cpp\
 			gui/mainwindow.cpp\
 			gui/mapviewer.cpp\			
 			gui/navigationtab.cpp\
-			gui/ogrenderer.cpp\			
+			gui/ogrender.cpp\			
 			gui/playerinterface.cpp\
 			gui/robotmanager.cpp\
 			gui/sensors.cpp\
