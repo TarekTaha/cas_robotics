@@ -30,7 +30,7 @@
 #include "laserrender.h"
 #include "interfaceprovider.h"
 #include "speedrender.h"
-
+#include "ogrenderer.h"
 class SensorsGui;
 class QMessageBox;
 class SpeedRender;
@@ -59,8 +59,9 @@ class SensorsGLW: public QGLWidget
     private:
         double desiredAspectRatio;
         LaserRender laser; 
-        SpeedRender speedMeter; 
-        bool laserEnabled;
+        SpeedRender speedMeter;
+        OGRenderer  ogRenderer;
+        bool laserEnabled,mapEnabled;
         bool speedEnabled;
         RobotManager *comms;
         SensorsGui *sensorsGui; 

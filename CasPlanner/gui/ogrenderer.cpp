@@ -1,29 +1,8 @@
-/***************************************************************************
- *   Copyright (C) 2006 by Waleed Kadous   *
- *   waleed@width   *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
-
 #include "ogrenderer.h"
 //#include <orcaice/mathdefs.h>
 
 OGRenderer::OGRenderer(QWidget *parent)
  : QGLWidget(QGLFormat(QGL::AlphaChannel), parent),
- //mapManager(NULL),
  zoomFactor(10),
  xOffset(0), 
  yOffset(0), 
@@ -44,17 +23,13 @@ OGRenderer::OGRenderer(QWidget *parent)
     glGenTextures(1, &texId); 
 } 
 
-//void OGRenderer::setMapManager( QTMapDataInterface *in_mapManager){
-//    //qDebug("set map manager");
-//    mapManager = in_mapManager; 
-//    connect(mapManager, SIGNAL(patchChanged()), this, SLOT(update())); 
-//}
-
-QSize OGRenderer::sizeHint(){
+QSize OGRenderer::sizeHint()
+{
     return QSize(640,480);   
 }
 
-QSize OGRenderer::minimumSizeHint(){
+QSize OGRenderer::minimumSizeHint()
+{
     return QSize(320,240);   
 }
 
@@ -96,169 +71,190 @@ void OGRenderer::initializeGL()
 //    } 
 //}
 //
-//void OGRenderer::renderOG(orca::OgMapDataPtr currentMap, bool highlighted)
-//{
-//    int textWidth;
-//    int textHeight; 
-//    float textWFrac; 
-//    float textHFrac; 
-// 
-//#ifdef NOPOTD
-//    // Find the next biggest power of two. 
-//   textWidth = powl(2, ceill(log(currentMap->numCellsX)/log(2)));
-//   textHeight = powl(2, ceill(log(currentMap->numCellsY)/log(2)));
-//   textWFrac = ((float) currentMap->numCellsX)/textWidth; 
-//   textHFrac = ((float) currentMap->numCellsY)/textHeight; 
-//   qDebug("Width and height are %d and %d", textWidth, textHeight); 
-//#else 
-//    textWidth = currentMap->numCellsX;
-//    textHeight = currentMap->numCellsY;
-//    textWFrac = 1; 
-//    textHFrac = 1; 
-//#endif
-//    unsigned char imgData[textWidth*textHeight*4];
-//    int min=255; 
-//    int max=0; 
-//    float mean=0; 
-//
-//    
-//    for(int i=0; i < currentMap->numCellsY; i++)
-//    {
-//	for(int j=0; j < currentMap->numCellsX; j++)
-//	{
-//	    // qDebug("Pixel %d has value %d", k, (unsigned char) currentMap->data[k]);
-//	    unsigned char val = (unsigned char) currentMap->data[i*currentMap->numCellsX+j];
-//	    if(val < min) min=val;
-//	    if(val > max) max=val;
-//	    mean += val;
-//	    if(val > 90){
-//		imgData[(i*textWidth+j)*4] = 0;
-//		imgData[(i*textWidth+j)*4+1] =0; 
-//		imgData[(i*textWidth+j)*4+2] = 255; 
-//		imgData[(i*textWidth+j)*4+3] = 255;
-//	    }
-//	    else if(val < 70){
-//		if(!highlighted){
-//		    imgData[(i*textWidth+j)*4] = 255;
-//		    imgData[(i*textWidth+j)*4+1] =255; 
-//		    imgData[(i*textWidth+j)*4+2] = 255; 
-//		    imgData[(i*textWidth+j)*4+3] = 50;
-//		}
-//		else {
-//		    imgData[(i*textWidth+j)*4] = 255;
-//		    imgData[(i*textWidth+j)*4+1] =255; 
-//		    imgData[(i*textWidth+j)*4+2] = 0; 
-//		    imgData[(i*textWidth+j)*4+3] = 100;
-//		}
-//	    }
-//	    else {
-//		imgData[(i*textWidth+j)*4] = 0;  
-//		imgData[(i*textWidth+j)*4+1] = 0; 
-//		imgData[(i*textWidth+j)*4+2] = 0;  
-//		imgData[(i*textWidth+j)*4+3] = 0;   
-//	    }
-//	}
-//    }
-//    qDebug("Map values %d %d %f" , min, max, mean/(currentMap->numCellsX*currentMap->numCellsY)); 
-//
-//    glBindTexture(GL_TEXTURE_2D, texId); 
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, textWidth, textHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
-//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-//		    GL_LINEAR);
-//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-//		    GL_LINEAR);
-//    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-//    glEnable(GL_TEXTURE_2D);
-//    glPushMatrix();
-//    glScalef(1,-1,1);
-//    glTranslatef(-currentMap->numCellsX*currentMap->metresPerCellX/2.0,-currentMap->numCellsY*currentMap->metresPerCellY/2,0);
-//    glColor4f(0,0,1,0.8);
-//    glShadeModel(GL_FLAT);
-//    glBegin(GL_QUADS);
-//    
-//    glTexCoord2f(0.0,0.0);
-//    glVertex2f(0.0,0.0);
-//    glTexCoord2f(0.0,textHFrac);
-//    glVertex2f(0.0, currentMap->numCellsY*currentMap->metresPerCellY);
-//    glTexCoord2f(textWFrac, textHFrac);
-//    glVertex2f(currentMap->numCellsX*currentMap->metresPerCellX,currentMap->numCellsY*currentMap->metresPerCellY);
-//    glTexCoord2f(textWFrac,0.0);
-//    glVertex2f(currentMap->numCellsX*currentMap->metresPerCellX,0.0);
-//    glEnd();
-//    glDisable(GL_TEXTURE_2D);
-//    
-//    // We now draw a surrounding rectangle so people know where the edge of the OG map is. 
-//    if(showPatchBorders){
-//	glColor4f(0,0,1,0.5); 
-//	glBegin(GL_LINE_LOOP); 
-//	glVertex2f(0,0);
-//	glVertex2f(0.0, currentMap->numCellsY*currentMap->metresPerCellY);
-//	glVertex2f(currentMap->numCellsX*currentMap->metresPerCellX,currentMap->numCellsY*currentMap->metresPerCellY);
-//	glVertex2f(currentMap->numCellsX*currentMap->metresPerCellX,0.0);
-//	glEnd();
-//    } 
-//    glPopMatrix();
-//    
-//}
+void OGRenderer::renderOG(Map *mapData, bool highlighted)
+{
+    int textWidth;
+    int textHeight; 
+    float textWFrac; 
+    float textHFrac; 
+ 
+#ifdef NOPOTD
+    // Find the next biggest power of two. 
+   textWidth = powl(2, ceill(log(mapData->width)/log(2)));
+   textHeight = powl(2, ceill(log(mapData->height)/log(2)));
+   textWFrac = ((float) mapData->width)/textWidth; 
+   textHFrac = ((float) mapData->height)/textHeight; 
+   qDebug("Width and height are %d and %d", textWidth, textHeight); 
+#else 
+    textWidth = mapData->width;
+    textHeight = mapData->height;
+    textWFrac = 1; 
+    textHFrac = 1; 
+#endif
+    unsigned char imgData[textWidth*textHeight*4];
+    int min=255; 
+    int max=0; 
+    float mean=0; 
+
+    
+    for(int i=0; i < mapData->height; i++)
+    {
+		for(int j=0; j < mapData->width; j++)
+		{
+		    // qDebug("Pixel %d has value %d", k, (unsigned char) mapData->data[k]);
+		    unsigned char val = (unsigned char) mapData->rawData[i*mapData->width+j];
+		    if(val < min) min=val;
+		    if(val > max) max=val;
+		    mean += val;
+		    if(val > 90)
+		    {
+				imgData[(i*textWidth+j)*4] = 0;
+				imgData[(i*textWidth+j)*4+1] =0; 
+				imgData[(i*textWidth+j)*4+2] = 255; 
+				imgData[(i*textWidth+j)*4+3] = 255;
+		    }
+		    else if(val < 70)
+		    {
+				if(!highlighted)
+				{
+				    imgData[(i*textWidth+j)*4] = 255;
+				    imgData[(i*textWidth+j)*4+1] =255; 
+				    imgData[(i*textWidth+j)*4+2] = 255; 
+				    imgData[(i*textWidth+j)*4+3] = 50;
+				}
+				else 
+				{
+				    imgData[(i*textWidth+j)*4] = 255;
+				    imgData[(i*textWidth+j)*4+1] =255; 
+				    imgData[(i*textWidth+j)*4+2] = 0; 
+				    imgData[(i*textWidth+j)*4+3] = 100;
+				}
+		    }
+		    else 
+		    {
+				imgData[(i*textWidth+j)*4] = 0;  
+				imgData[(i*textWidth+j)*4+1] = 0; 
+				imgData[(i*textWidth+j)*4+2] = 0;  
+				imgData[(i*textWidth+j)*4+3] = 0;   
+		    }
+		}
+    }
+    qDebug("Map values %d %d %f" , min, max, mean/(mapData->width*mapData->height)); 
+
+    glBindTexture(GL_TEXTURE_2D, texId); 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, textWidth, textHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glEnable(GL_TEXTURE_2D);
+    glPushMatrix();
+    glScalef(1,-1,1);
+    glTranslatef(-mapData->width*mapData->resolution/2.0,-mapData->height*mapData->resolution/2,0);
+    glColor4f(0,0,1,0.8);
+    glShadeModel(GL_FLAT);
+    glBegin(GL_QUADS);
+    
+    glTexCoord2f(0.0,0.0);
+    glVertex2f(0.0,0.0);
+    glTexCoord2f(0.0,textHFrac);
+    glVertex2f(0.0, mapData->height*mapData->width);
+    glTexCoord2f(textWFrac, textHFrac);
+    glVertex2f(mapData->resolution*mapData->width,mapData->height*mapData->resolution);
+    glTexCoord2f(textWFrac,0.0);
+    glVertex2f(mapData->width*mapData->resolution,0.0);
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
+    
+    // We now draw a surrounding rectangle so people know where the edge of the OG map is. 
+    if(showPatchBorders)
+    {
+		glColor4f(0,0,1,0.5); 
+		glBegin(GL_LINE_LOOP); 
+		glVertex2f(0,0);
+		glVertex2f(0.0, mapData->height*mapData->resolution);
+		glVertex2f(mapData->width*mapData->resolution,mapData->height*mapData->resolution);
+		glVertex2f(mapData->width*mapData->resolution,0.0);
+		glEnd();
+    } 
+    glPopMatrix();
+    
+}
 
 void OGRenderer::setShowOGs(int state)
 {
-    if(state==0){
-	showOGs = false;  
+    if(state==0)
+    {
+		showOGs = false;  
     }
-    else {
-	showOGs = true; 
+    else 
+    {
+		showOGs = true; 
     }
     update(); 
 }
 
-void OGRenderer::setShowSnaps(int state){
-    if(state==0){
-	showSnaps = false;  
+void OGRenderer::setShowSnaps(int state)
+{
+    if(state==0)
+    {
+		showSnaps = false;  
     }
-    else {
-	showSnaps = true; 
+    else 
+    {
+		showSnaps = true; 
     }
     update();
 }
-void OGRenderer::setShowGrids(int state){
-    if(state==0){
-	showGrids = false;  
+void OGRenderer::setShowGrids(int state)
+{
+    if(state==0)
+    {
+		showGrids = false;  
     }
-    else {
-	showGrids = true; 
+    else 
+    {
+		showGrids = true; 
     }
     update();
 }
 
-void OGRenderer::setShowRobots(int state){
-    if(state==0){
-	showRobots = false;  
+void OGRenderer::setShowRobots(int state)
+{
+    if(state==0)
+    {
+		showRobots = false;  
     }
-    else {
-	showRobots = true; 
+    else 
+    {
+		showRobots = true; 
     }
     update();
 }	
 	
-void OGRenderer::setShowPointclouds(int state){
-    if(state==0){
-	showPointclouds = false;  
+void OGRenderer::setShowPointclouds(int state)
+{
+    if(state==0)
+    {
+		showPointclouds = false;  
     }
-    else {
-	showPointclouds = true; 
+    else 
+    {
+		showPointclouds = true; 
     }
     update(); 
 }
 
-void OGRenderer::setShowPatchBorders(int state){
-    if(state==0){
-	showPatchBorders = false;  
+void OGRenderer::setShowPatchBorders(int state)
+{
+    if(state==0)
+    {
+		showPatchBorders = false;  
     }
-    else {
-	showPatchBorders = true; 
+    else 
+    {
+		showPatchBorders = true; 
     }
     update(); 
 }
@@ -465,16 +461,16 @@ void OGRenderer::update()
 //	// Each patch is draw relative to the parent, so, though it is counterintiutive,
 //	// this is an unmatch translate and rotated.  
 //	glMultMatrixf(xfrm);
-//	orca::OgMapDataPtr currentMap = mapManager->getOccugrid(robotIds[i], patchIds[j]);
-//	if(!currentMap){
+//	orca::OgMapDataPtr mapData = mapManager->getOccugrid(robotIds[i], patchIds[j]);
+//	if(!mapData){
 //	    qDebug("Current map was null!!"); 
 //	}
 //	MapObject *patchMO = mapManager->getMOPatch(robotIds[i], patchIds[j]); 
 //	if(showOGs && patchMO->getVisibility() == 1){
-//	    renderOG(currentMap);
+//	    renderOG(mapData);
 //	}
 //	else if(showOGs && patchMO->getVisibility() == 2) {
-//	    renderOG(currentMap, true); 
+//	    renderOG(mapData, true); 
 //	}
 //	foo = glGetError();
 //	if(foo != GL_NO_ERROR){
@@ -591,14 +587,18 @@ void OGRenderer::paintGL()
  
     glTranslatef(xOffset, yOffset, zOffset);
 
-    if(showGrids){
-	for(int i=-(int) zoomFactor*3; i < (int) zoomFactor*3; i++){
+    if(showGrids)
+    {
+	for(int i=-(int) zoomFactor*3; i < (int) zoomFactor*3; i++)
+	{
 	    glBegin(GL_LINES);
-	    if(i==0){
-		glColor4f(0,0,0,0.5);  
+	    if(i==0)
+	    {
+			glColor4f(0,0,0,0.5);  
 	    }
-	    else {
-		glColor4f(0.5,0.5,0.5,0.5); 
+	    else 
+	    {
+			glColor4f(0.5,0.5,0.5,0.5); 
 	    }
 	    glVertex3f(-zoomFactor*3, i, 0); 
 	    glVertex3f(zoomFactor*3, i, 0); 
@@ -624,102 +624,122 @@ void OGRenderer::paintGL()
 void OGRenderer::keyPressEvent(QKeyEvent *e)
 {
     qDebug("Key Pressed"); 
-    if(e->key() == Qt::Key_W){
-	if(e->modifiers() && Qt::ShiftModifier){
-	    emit moveMOUp(); 
-	}
-	else {
-	    yOffset += 0.1*zoomFactor;
-	} 
+    if(e->key() == Qt::Key_W)
+    {
+		if(e->modifiers() && Qt::ShiftModifier)
+		{
+		    emit moveMOUp(); 
+		}
+		else 
+		{
+		    yOffset += 0.1*zoomFactor;
+		} 
     }
-    else if(e->key() == Qt::Key_S){
-	if(e->modifiers() && Qt::ShiftModifier){
-	    emit moveMODown(); 
-	}
-	else {
-	    yOffset -= 0.1*zoomFactor;
-	} 
+    else if(e->key() == Qt::Key_S)
+    {
+		if(e->modifiers() && Qt::ShiftModifier)
+		{
+		    emit moveMODown(); 
+		}
+		else 
+		{
+		    yOffset -= 0.1*zoomFactor;
+		} 
     }
-    else if(e->key() == Qt::Key_A){
-	if(e->modifiers() && Qt::ShiftModifier){
-	    emit moveMOLeft(); 
-	}
-	else {
-	    xOffset -= 0.1*zoomFactor; 
-	} 
-
+    else if(e->key() == Qt::Key_A)
+    {
+		if(e->modifiers() && Qt::ShiftModifier)
+		{
+		    emit moveMOLeft(); 
+		}
+		else 
+		{
+		    xOffset -= 0.1*zoomFactor; 
+		} 
     }
-    else if(e->key() == Qt::Key_D){
-	if(e->modifiers() && Qt::ShiftModifier){
-	    emit moveMORight(); 
-	}
-	else {
-	    xOffset += 0.1*zoomFactor; 
-	} 
-
+    else if(e->key() == Qt::Key_D)
+    {
+		if(e->modifiers() && Qt::ShiftModifier)
+		{
+		    emit moveMORight(); 
+		}
+		else 
+		{
+		    xOffset += 0.1*zoomFactor; 
+		} 
     }
-    else if(e->key() == Qt::Key_BracketLeft){
-	zoomFactor *= 1.1; 
+    else if(e->key() == Qt::Key_BracketLeft)
+    {
+		zoomFactor *= 1.1; 
     }
-    else if(e->key() == Qt::Key_BracketRight){
-	zoomFactor /= 1.1; 
+    else if(e->key() == Qt::Key_BracketRight)
+    {
+		zoomFactor /= 1.1; 
     }
-    else if(e->key() == Qt::Key_Left){
-	if(e->modifiers() && Qt::ShiftModifier){
-	    emit yawMOPos(); 
-	}
-	else {
-	    yaw += 5;
-	} 
-	 
-	
+    else if(e->key() == Qt::Key_Left)
+    {
+		if(e->modifiers() && Qt::ShiftModifier)
+		{
+		    emit yawMOPos(); 
+		}
+		else 
+		{
+		    yaw += 5;
+		} 
     }
-    else if(e->key() == Qt::Key_Right){
-	if(e->modifiers() && Qt::ShiftModifier){
-	    emit yawMONeg(); 
-	}
-	else {
-	    yaw -= 5;
-	} 
-	 
-	
+    else if(e->key() == Qt::Key_Right)
+    {
+		if(e->modifiers() && Qt::ShiftModifier)
+		{
+		    emit yawMONeg(); 
+		}
+		else 
+		{
+		    yaw -= 5;
+		} 
     }
-    else if(e->key() == Qt::Key_Up){
-	pitch += 5; 
-	if(pitch > 90) pitch = 90; 
+    else if(e->key() == Qt::Key_Up)
+    {
+		pitch += 5; 
+		if(pitch > 90) pitch = 90; 
     }
-    else if(e->key() == Qt::Key_Down){
-	pitch -= 5; 
-	if(pitch < -90) pitch = -90; 
+    else if(e->key() == Qt::Key_Down)
+    {
+		pitch -= 5; 
+		if(pitch < -90) pitch = -90; 
     }
-    else if(e->key() == Qt::Key_R){
-	zoomFactor=10;
-	xOffset= yOffset=zOffset=yaw=pitch=0;
+    else if(e->key() == Qt::Key_R)
+    {
+		zoomFactor=10;
+		xOffset= yOffset=zOffset=yaw=pitch=0;
     }
-    else if(e->text() == "="){
-	fudgeFactor *=1.25;
-	qDebug("Fudge factor set to %f", fudgeFactor); 
+    else if(e->text() == "=")
+    {
+		fudgeFactor *=1.25;
+		qDebug("Fudge factor set to %f", fudgeFactor); 
     }
-    else if(e->text()=="-"){
-	fudgeFactor /=1.25;
-	qDebug("Fudge factor set to %f", fudgeFactor); 	
+    else if(e->text()=="-")
+    {
+		fudgeFactor /=1.25;
+		qDebug("Fudge factor set to %f", fudgeFactor); 	
     }
-    else if(e->text() == "0"){
-	fudgeFactor=3;
-	qDebug("Fudge factor set to %f", fudgeFactor); 	
-    }
-    
-    
+    else if(e->text() == "0")
+    {
+		fudgeFactor=3;
+		qDebug("Fudge factor set to %f", fudgeFactor); 	
+    }    
     update(); 
 }
 
-void OGRenderer::focusInEvent(QFocusEvent *fe){
+void OGRenderer::focusInEvent(QFocusEvent *fe)
+{
     makeCurrent(); 
     glClearColor(0.7f,0.7f,0.7f,1.0f);   
     updateGL();
 }
 
-void OGRenderer::focusOutEvent(QFocusEvent *fe){
+void OGRenderer::focusOutEvent(QFocusEvent *fe)
+{
     makeCurrent();  
     //glClearColor(0.3f,0.3f,0.3f,1.0f);  
     updateGL(); 

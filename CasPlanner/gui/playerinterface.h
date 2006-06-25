@@ -12,14 +12,16 @@ class PlayerInterface: public QThread
 Q_OBJECT    
     public:
         static const int MAX_LASERS = 2;
-        static const int MAX_MOTORS = 3; 
-        PlayerInterface(CommManager *comms, QString playerHost, int playerPort); 
+        static const int MAX_MOTORS = 3;
+        PlayerInterface(CommManager *comms, QString playerHost, int playerPort);
         void stop();
-        void run(); 
+        void run();
         void enableControl(int driveId);
         void enableLaser(int whichLaser, int playerId); 
 		void enablePtz(int ptzId);
+		void enableMap(int mapId);
         QVector<QPointF> getLaserScan(int laserId);
+	    Map provideMap(); 
 		void setPtz(double pan, double tilt);
         double getSpeed(); 
         double getTurnRate(); 
@@ -36,18 +38,19 @@ Q_OBJECT
         PlayerClient *pc;
         CommManager *comms; 
         
-        bool laserEnabled[MAX_LASERS],ptzEnabled,ctrEnabled,tiltEnabled; 
-        int playerLaserId[MAX_LASERS],positionId,tiltId,ptzId; 
+        bool laserEnabled[MAX_LASERS],ptzEnabled,ctrEnabled,mapEnabled; 
+        int playerLaserId[MAX_LASERS],positionId,ptzId,mapId; 
         LaserProxy *laser[MAX_LASERS]; 
         PositionProxy *drive;
+        MapProxy *map;
 		PtzProxy *ptz;
 		double pan;
 		double tilt;
        
         double speed; 
         double turnRate; 
-        
-        //Emerg 
+    
+        //Emergency Stop
         bool emergencyStopped; 
         QReadWriteLock dataLock;       
 };

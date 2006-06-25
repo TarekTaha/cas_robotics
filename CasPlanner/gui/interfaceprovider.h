@@ -12,30 +12,32 @@
 #define R2D(x) ((x*180.0/M_PI))
 #define D2R(x) ((x*M_PI/180.0))
 
-class SimpleImage 
+class Map 
 {
     public: 
         int width; 
-        int height; 
+        int height;
+        double resolution;
         QByteArray rawData;
         
-        SimpleImage(int in_width, int in_height, QByteArray in_data)
+        Map(int width, int height, double resolution, QByteArray data)
         {
-            width = in_width; 
-            height = in_height; 
-            rawData = in_data; 
+            this->width   = width; 
+            this->height  = height; 
+            this->rawData = data; 
+            this->resolution = resolution;
         }
-        SimpleImage(): width(0), height(0), rawData()
+        Map(): width(0), height(0), resolution(0), rawData()
         {
             
         }
  
 };
-class ImgProvider 
+class MapProvider 
 {
     public:
-        virtual SimpleImage provideImg()=0; 
-        virtual ~ImgProvider(){};
+        virtual Map provideMap()=0; 
+        virtual ~MapProvider(){};
 };
 
 class LaserProvider 
