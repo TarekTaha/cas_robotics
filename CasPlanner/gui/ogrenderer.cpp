@@ -1,5 +1,4 @@
 #include "ogrenderer.h"
-//#include <orcaice/mathdefs.h>
 
 OGRenderer::OGRenderer(QWidget *parent)
  : QGLWidget(QGLFormat(QGL::AlphaChannel), parent),

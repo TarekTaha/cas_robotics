@@ -3,11 +3,9 @@
 #include<QVBoxLayout>
 #include<QTimer>
 #include <unistd.h>
-// No configuration file given, so do the defualt configs
 MainWindow::MainWindow(QWidget *parent):
 QMainWindow(parent)
 {
-    //missionView.setMapManager(&mapManager); 
     statusLogger = new StatusLogger(statusBar()); 
     //setCentralWidget(&missionView); 
 }

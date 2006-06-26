@@ -1,10 +1,8 @@
-
 #ifndef MAPVIEWER_H
 #define MAPVIEWER_H
 
 #include <QtOpenGL>
 #include <GL/glut.h>
-//#include "../../mapping/MapManager/QTMapDataInterface.h"
 
 class MapViewer : public QGLWidget
 {
@@ -17,7 +15,6 @@ Q_OBJECT
         void resizeGL(int w, int h);
         QSize sizeHint();
         QSize minimumSizeHint();
-//	void setMapManager(QTMapDataInterface *mapManager);
 	void keyPressEvent(QKeyEvent *e);
 	void focusInEvent(QFocusEvent *fe); 
 	void focusOutEvent(QFocusEvent *fe); 
