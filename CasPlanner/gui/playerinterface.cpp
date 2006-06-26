@@ -148,7 +148,12 @@ Map PlayerInterface::provideMap()
 	retval.width      = map->width;
 	retval.height     = map->height-1;
 	retval.resolution = map->resolution;
-    memcpy(&retval.rawData, map->cells, map->width*(map->height-1));
+//	for(int i=0 ;i<map->width*(map->height-1);i++)
+//	{
+//		if((uint8_t)map->cells[i]>100)
+//	    	qDebug("Pixel value is:%u",(uint8_t)map->cells[i]);
+//	}
+    retval.rawData = QByteArray((const char *) map->cells, map->width*(map->height-1));  
     return retval;
 }
 
@@ -160,7 +165,7 @@ void PlayerInterface::run ()
 		delete pc; 
     }
     pc = new PlayerClient(qPrintable(playerHost),playerPort);
-    pc->SetFrequency(10);
+    pc->SetFrequency(2);
     qDebug("	--->>> Frequency set to 10 Hz"); 
     /* TODO: Proper check for the successfullness of the proxy creation
      */
@@ -198,16 +203,15 @@ void PlayerInterface::run ()
     }
     qDebug("	--->>> Test Passed, You can read Data from Player Server Now");    
     qDebug("	--->>> Connection Established"); 
-    // Hack around player
-    for(int i=0; i < 5; i++)
-    {
-    	usleep(500000); 
-    	while(pc->Read())
-    	{
-			qWarning("Warning! Could not read from player driver -- sleeping for 1 seconds."); 
-			sleep(10);
-    	}
-    }
+//    for(int i=0; i < 5; i++)
+//    {
+//    	usleep(500000); 
+//    	while(pc->Read())
+//    	{
+//			qWarning("Warning! Could not read from player driver -- sleeping for 1 seconds."); 
+//			sleep(10);
+//    	}
+//    }
     while(true)
     {
         while(pc->Read())
@@ -230,7 +234,7 @@ void PlayerInterface::run ()
 			if(mapEnabled)
 			{
 				map->GetMap();
-			    qDebug("Map width %d, height%d resolution %f",map->width,map->height,map->resolution);
+			    //qDebug("Map width %d, height %d resolution %f",map->width,map->height,map->resolution);
 			}
     	}
 	    else 

@@ -105,6 +105,7 @@ void OGRenderer::renderOG(Map *mapData, bool highlighted)
 		    if(val < min) min=val;
 		    if(val > max) max=val;
 		    mean += val;
+		    printf("\nVAL:",val);
 		    if(val > 90)
 		    {
 				imgData[(i*textWidth+j)*4] = 0;

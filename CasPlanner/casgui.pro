@@ -63,12 +63,12 @@ SOURCES +=  gui/CommManager.cpp\
 		    src/Vector2d.cpp
 RESOURCES = resources/icons.qrc
 QT += opengl
-QMAKE_CFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse 
-QMAKE_CXXFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
-QMAKE_LFLAGS_RELEASE += -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
-QMAKE_CFLAGS_DEBUG +=-pg
-QMAKE_CXXFLAGS_DEBUG +=-pg
-QMAKE_LFLAGS_DEBUG+=-pg
+#QMAKE_CFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse 
+#QMAKE_CXXFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
+#QMAKE_LFLAGS_RELEASE += -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
+#QMAKE_CFLAGS_DEBUG +=-pg
+#QMAKE_CXXFLAGS_DEBUG +=-pg
+#QMAKE_LFLAGS_DEBUG+=-pg
 LIBS += -L/usr/local/lib $$system(pkg-config --cflags --libs gtk+-2.0 gthread-2.0 player) -lGL -lGLU -lglut -ljpeg 
 INCLUDEPATH += includes gui /usr/include/gtk-2.0
 INCLUDEPATH += /usr/lib/gtk-2.0/include

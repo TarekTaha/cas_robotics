@@ -56,7 +56,6 @@ class SensorsGui: public Sensors, public SpeedProvider, public MapProvider
         SensorsGui(RobotManager *commsMgr, QWidget *parent = 0); 
         ~SensorsGui(); 
         virtual int config();
-		void setRadMode(int mode);
 		void requestSnap();
   		void resetTab();
     public slots:
@@ -68,6 +67,7 @@ class SensorsGui: public Sensors, public SpeedProvider, public MapProvider
         void keyPressEvent(QKeyEvent *ke); 
         void keyReleaseEvent(QKeyEvent *ke);
         void provideSpeed(double &speed, double &turnRate);
+        void setRadMode(int mode);
         Map  provideMap();
     signals: 
         void newData(); 
