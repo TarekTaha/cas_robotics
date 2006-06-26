@@ -162,40 +162,41 @@ void PlayerInterface::run ()
     pc = new PlayerClient(qPrintable(playerHost),playerPort);
     pc->SetFrequency(10);
     qDebug("	--->>> Frequency set to 10 Hz"); 
-    int retryCount=0; 
+    /* TODO: Proper check for the successfullness of the proxy creation
+     */
     if(ctrEnabled)
     {
-		qDebug("	--->>> Motor Control Interface Engaged"); 
 		if(drive)
 		{
 		    delete drive;  
 		}
-	        drive = new PositionProxy(pc,positionId,'a');
+        drive = new PositionProxy(pc,positionId,'a');
+   		qDebug("	--->>> Motor Control Interface Engaged Successfully"); 
     }
-    qDebug("	--->> Robot now can be Drive by Position Commands"); 
     for(int i=0; i < MAX_LASERS; i++)
     {
         if(laserEnabled[i])
         {
             laser[i] = new LaserProxy(pc,playerLaserId[0], 'r');  
         }
+		qDebug("	--->>> Laser interface Interface Added Successfully");         
     }
     if(mapEnabled)
     {
     	map = new MapProxy(pc,mapId,'r');
+		qDebug("	--->>> Map Interface Engaged Successfully");
     }
     if(ptzEnabled)
     {
 		ptz = new PtzProxy(pc, ptzId, 'a'); 
     }
-    qWarning("Testing Player Server for Data Read:");    
+    qDebug("Testing Player Server for Data Read:");    
     while(pc->Read())
     {
     	qWarning(".");    
-		sleep(1);  
-		retryCount++; 
+		sleep(1);
     }
-    qWarning("	--->>> Test Passed, You can read Data from Player Server Now");    
+    qDebug("	--->>> Test Passed, You can read Data from Player Server Now");    
     qDebug("	--->>> Connection Established"); 
     // Hack around player
     for(int i=0; i < 5; i++)
@@ -204,8 +205,7 @@ void PlayerInterface::run ()
     	while(pc->Read())
     	{
 			qWarning("Warning! Could not read from player driver -- sleeping for 1 seconds."); 
-			sleep(10);  
-			retryCount++; 
+			sleep(10);
     	}
     }
     while(true)
@@ -214,7 +214,6 @@ void PlayerInterface::run ()
         {
             qWarning("Can not read from Player Server - Retrying"); 
 	    	sleep(1); 
-	    	retryCount++; 
         }
     	if(!emergencyStopped)
     	{
@@ -231,6 +230,7 @@ void PlayerInterface::run ()
 			if(mapEnabled)
 			{
 				map->GetMap();
+			    qDebug("Map width %d, height%d resolution %f",map->width,map->height,map->resolution);
 			}
     	}
 	    else 
@@ -240,8 +240,9 @@ void PlayerInterface::run ()
 	       {
 	            drive->SetSpeed(0,0); 
 	            drive->SetMotorState(0);
-	        }  
+	        } 
 	        qDebug("... Robot Stopped");
+	        // temporary fix, needs more thinking once i finalize things
 	        emergencyStopped = false;
 	    }
     	emit newData();

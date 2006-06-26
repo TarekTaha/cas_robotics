@@ -25,11 +25,6 @@ NavContainer::NavContainer(QWidget *parent)
     connect(&mapViewer, SIGNAL(yawMONeg()), &(navControlPanel.yaSB), SLOT(stepDown()));
 }
 
-//void MapEdit::setMapManager( QTMapDataInterface *mapManager){
-//    mapViewer.setMapManager(mapManager); 
-//    navControlPanel.setMapManager(mapManager);
-//}
-
 NavContainer::~NavContainer()
 {
 }

@@ -433,7 +433,10 @@ void SensorsGui::resetTab()
     // set Victim Signal icon
     tabContainer->setTabIcon(index, QIcon("../ui/rescuegui-branchCommsRefactor/blank.xpm"));
 }
-
+Map SensorsGui::provideMap()
+{
+	return robotManager->provideMap();
+}
 void SensorsGui::requestSnap()
 {
 //    orca::CartesianPoint2d centre;

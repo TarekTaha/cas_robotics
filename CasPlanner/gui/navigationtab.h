@@ -9,16 +9,12 @@
 #include <QTreeWidget>
 #include <QPushButton>
 #include <QHash>
-/**
-	@author Waleed Kadous <waleed@cse.unsw.edu.au>
-*/
 
 class NavControlPanel: public QWidget 
 {
 Q_OBJECT
     public:  
 	NavControlPanel(QWidget *parent = 0);
-	//void setMapManager(QTMapDataInterface *mapManager);
     public slots:
 	void updateMap(); 
 	void handleSelection(); 
