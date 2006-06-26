@@ -7,13 +7,13 @@ class TabContainer : public QTabWidget
 {
 Q_OBJECT
     public:
-	TabContainer(QWidget *parent=0,RobotManager *rob=0);
-	void setRobotManager(RobotManager *robotManager); 
-	~TabContainer();
+		TabContainer(QWidget *parent=0,RobotManager *rob=0);
+		void setRobotManager(RobotManager *robotManager); 
+		~TabContainer();
     private:
-    RobotManager *robotManager;
-	NavContainer navCon;
-	SensorsGui sensorsGui;
+	    RobotManager *robotManager;
+		NavContainer navCon;
+		SensorsGui sensorsGui;
 };
 
 #endif

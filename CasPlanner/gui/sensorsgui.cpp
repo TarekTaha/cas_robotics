@@ -94,8 +94,8 @@ void SensorsGLW::resizeGL(int w, int h)
 // check for camera flags
 void SensorsGLW::config()
 {
-    laserEnabled = true;//(bool) cf->ReadInt(sectionid, "laserEnabled", 1); 
-    speedEnabled = true;//(bool) cf->ReadInt(sectionid, "speedEnabled", 1);
+    laserEnabled = false;//(bool) cf->ReadInt(sectionid, "laserEnabled", 1); 
+    speedEnabled = false;//(bool) cf->ReadInt(sectionid, "speedEnabled", 1);
     mapEnabled   = true;//(bool) cf->ReadInt(sectionid, "mapEnabled", 1);
     if(speedEnabled)
     {
@@ -139,7 +139,7 @@ void SensorsGLW::paintGL()
      }
      if(mapEnabled)
      {
-         ogRenderer.render();
+	     ogRenderer.render();
      }     
      glFlush();
 }
@@ -174,25 +174,12 @@ int SensorsGui::config()
     QString commsName ="Wheelchair";
     sensorsGL.setRobotGUI(this); 
     sensorsGL.config();
-    // Now retrieve the appropriate robotManager. 
-    //  robotManager = qobject_cast<robotManager *>(commsMgr->getCommsByName(commsName)); 
     sensorsGL.setRobotComms(robotManager);
-    // config buttons
     configButtons();
-
-    // connnect victim found signal
-    // connect(robotManager, SIGNAL(victimFound()), this, SLOT(victimFound()));
-
-    // connect confirm and reject btns
-    //connnect(confirmBtn, SIGNAL(clicked()), this, SLOT(confirmVictim()));
-    //connect(rejectBtn, SIGNAL(clicked()), this, SLOT(rejectVictim()));
-
     // signals for changing modes
-    //connect( teleRadBtn, SIGNAL(clicked()), this, SLOT(switchToTele()));
-    //connect( pausedRadBtn, SIGNAL(clicked()), this, SLOT(switchToPaused()));
-    //connect( autoRadBtn, SIGNAL(clicked()), this, SLOT(switchToAuto()));
-
-    //ptzEnabled = cf->ReadInt(sectionid, "ptzEnabled", 1);
+    connect( teleRadBtn, SIGNAL(clicked()), this, SLOT(setRadMode(0)));
+    connect( pausedRadBtn, SIGNAL(clicked()), this, SLOT(setRadMode(1)));
+    connect( autoRadBtn, SIGNAL(clicked()), this, SLOT(setRadMode(2)));
     robotManager->start();
     return 1; 
 
@@ -204,16 +191,10 @@ void SensorsGui::configButtons()
     pausedRadBtn = new QRadioButton("&Laser");
     autoRadBtn =   new QRadioButton("StaticMap");
 
-    //confirmBtn = new QPushButton("&Confirm Victim");
-    //rejectBtn = new QPushButton("&Reject Victim");
-    //hLayout->addWidget( confirmBtn, 1);
-    //hLayout->addWidget( rejectBtn, 1);
-
     hLayout->addWidget( teleRadBtn, 1 );
     hLayout->addWidget( pausedRadBtn, 1 );
     hLayout->addWidget( autoRadBtn, 1 );
 
-    // start at teleoperation mode
     teleRadBtn->setChecked(true);
     buttonWidget.setLayout(hLayout);
 }
@@ -303,20 +284,16 @@ void SensorsGui::keyPressEvent(QKeyEvent *e)
 		//robotManager->requestNewPatch(0); 
 		break;
             case 'v':
-	       		text = QInputDialog::getText(this, "RescueGUI: Victim label", "Enter a label for the victim:",
+	       		text = QInputDialog::getText(this, "Name Dialog", "Please Enter your name: ",
                	QLineEdit::Normal, QString::null, &ok);
 				if ( ok ) 
 				{
 		    		if(text.isEmpty())
 		    		{
-    					text = "Unlabelled"; 
+    					text = "NoName"; 
 		    		}
 			        int index = tabContainer->indexOf(this);
-			        // set Homer tab title
-			        tabContainer->setTabText(index, "HOMER");
-					// set Victim Signal icon
-        			//tabContainer->setTabIcon(index, QIcon("../ui/rescuegui-branchCommsRefactor/blank.xpm"));
-			        //robotManager->setCtrlMode(true);
+			        tabContainer->setTabText(index, "CAS PLANNER");
 				}
                 break;
             case 'l':
@@ -372,7 +349,7 @@ void SensorsGui::keyReleaseEvent(QKeyEvent *e)
 {
     if(!e->isAutoRepeat())
     {
-        // Stop Driving 
+        // Stop 
         switch(e->text().at(0).toAscii())
         {
         case 'w': 
@@ -400,22 +377,34 @@ void SensorsGui::wheelEvent( QWheelEvent *we)
 SensorsGui::~SensorsGui()
 {
 }
-
 /*
  * set Checked status for radio buttons when modes received
  */
 void SensorsGui::setRadMode(int mode)
 {
+	qDebug("Radio Button Clicked");
     switch(mode)
     {
         case 0: // AUTO_TELEOP
+        	sensorsGL.mapEnabled   = true;
+        	sensorsGL.laserEnabled = false;
+        	sensorsGL.speedEnabled = false;
             teleRadBtn->setChecked(true);
+            qDebug("OG MAP enabled");
             break;
-        case 4: // AUTO_PAUSED
+        case 1: // AUTO_PAUSED
+            sensorsGL.mapEnabled   = false;
+        	sensorsGL.laserEnabled = true;
+        	sensorsGL.speedEnabled = false;
             pausedRadBtn->setChecked(true);
+            qDebug("Laser Enabled");
             break;
         case 2: // AUTO_FULL
+           	sensorsGL.mapEnabled   = false;
+        	sensorsGL.laserEnabled = false;
+        	sensorsGL.speedEnabled = true;
             autoRadBtn->setChecked(true);
+            qDebug("Speed Enabled");            
             break;
         default:
 	    qDebug("Mode is incorrect");
@@ -439,12 +428,5 @@ Map SensorsGui::provideMap()
 }
 void SensorsGui::requestSnap()
 {
-//    orca::CartesianPoint2d centre;
-//    orca::Size2d size; 
-//    centre.x = (sensorsGL.cursorCentreX-sensorsGL.srCentreX)/sensorsGL.srSizeX+0.5;
-//    centre.y = (sensorsGL.cursorCentreY-sensorsGL.srCentreY)/sensorsGL.srSizeY+0.5;
-//    size.w = sensorsGL.zoomSizeX/sensorsGL.srSizeX; 
-//    size.l = sensorsGL.zoomSizeY/sensorsGL.srSizeY; 
-//		    
-//    robotManager->requestSnap(orca::SNAPVICTIM, "Homer Victim Found", centre, size);
+
 }

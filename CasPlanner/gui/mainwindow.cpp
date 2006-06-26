@@ -17,7 +17,8 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     robotManager = new RobotManager(configFiles);
 
     QWidget *container = new QWidget(this); 
-    tabcontainer = new TabContainer(this,robotManager);
+    tabcontainer = new TabContainer(parent,robotManager);
+    
     QVBoxLayout *vLayout = new QVBoxLayout;
     QPushButton *emergStop = new QPushButton(" STOP ROBOT ");  
     QPalette palette = emergStop->palette();
