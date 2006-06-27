@@ -19,7 +19,6 @@ Q_OBJECT
 		void updateMap(); 
 		void handleSelection(); 
 		void updateSelectedObject(double);
-		void updateSelectedObject(int); 
 		void load(); 
 		void save();
 		void captureMap(); 
