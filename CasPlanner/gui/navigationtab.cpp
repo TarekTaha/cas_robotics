@@ -171,27 +171,22 @@ void NavControlPanel::updateSelectedObject(double)
 //    QTreeWidgetItem *item = selectedObject.currentItem();
 //    if(item != NULL && wiToMo.contains(item))
 //    {
-//	MapObject *mo = wiToMo[item]; 
-//	mo->setVisibility(obstExpRadSB.value()); 
-//	Vector6DOF newPose;
-//	newPose.setX(bridgeTestResSB.value());
-//	newPose.setY(bridgeSegLenSB.value());
-//	newPose.setZ(regGridResSB.value());
-//	newPose.setPitchDeg(obstPenRadSB.value());
-//	newPose.setRollDeg(nodeConRadSB.value());
-//	newPose.setYawDeg(yaSB.value());
-//	mo->setOrigin(newPose); 
-//	emit propsChanged();
+		//	MapObject *mo = wiToMo[item]; 
+		//	mo->setVisibility(obstExpRadSB.value()); 
+		//	Vector6DOF newPose;
+		//	newPose.setX(bridgeTestResSB.value());
+		//	newPose.setY(bridgeSegLenSB.value());
+		//	newPose.setZ(regGridResSB.value());
+		//	newPose.setPitchDeg(obstPenRadSB.value());
+		//	newPose.setRollDeg(nodeConRadSB.value());
+		//	newPose.setYawDeg(yaSB.value());
+		//	mo->setOrigin(newPose); 
+		//	emit propsChanged();
 //    }
 //  else 
 //	{
 //		qDebug("Item unselected!!!"); 
 //  }
-}
-
-void NavControlPanel::updateSelectedObject(int value)
-{
-    updateSelectedObject((double) value); 
 }
 
 //void navControlPanel::setActionValues(MapObject *mo)
