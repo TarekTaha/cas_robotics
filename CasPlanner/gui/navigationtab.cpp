@@ -10,147 +10,159 @@ NavContainer::NavContainer(QWidget *parent)
     vLayout->addWidget(&mapViewer,4); 
     vLayout->addWidget(&navControlPanel,1); 
     setLayout(vLayout); 
-    connect(&navControlPanel.showGrids, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowGrids( int ))); 
-    connect(&navControlPanel.showOGs, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowOGs( int ))); 
-    connect(&navControlPanel.showRobots, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowRobots( int ))); 
-    connect(&navControlPanel.showLabels, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowSnaps( int ))); 
-    connect(&navControlPanel.showPointclouds, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowPointclouds( int )));
-    connect(&navControlPanel.showPatchBorders, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowPatchBorders( int )));
-    connect(&navControlPanel, SIGNAL(propsChanged()), &mapViewer, SLOT(update()));  
-    connect(&mapViewer, SIGNAL(moveMOLeft()), &(navControlPanel.xSB), SLOT(stepDown())); 
-    connect(&mapViewer, SIGNAL(moveMORight()), &(navControlPanel.xSB), SLOT(stepUp())); 
-    connect(&mapViewer, SIGNAL(moveMOUp()), &(navControlPanel.ySB), SLOT(stepUp())); 
-    connect(&mapViewer, SIGNAL(moveMODown()), &(navControlPanel.ySB), SLOT(stepDown())); 
-    connect(&mapViewer, SIGNAL(yawMOPos()), &(navControlPanel.yaSB), SLOT(stepUp())); 
-    connect(&mapViewer, SIGNAL(yawMONeg()), &(navControlPanel.yaSB), SLOT(stepDown()));
+//    connect(&navControlPanel.showGrids, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowGrids( int ))); 
+//    connect(&navControlPanel.showOGs, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowOGs( int ))); 
+//    connect(&navControlPanel.showRobots, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowRobots( int ))); 
+//    connect(&navControlPanel.showLabels, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowSnaps( int ))); 
+//    connect(&navControlPanel.showPointclouds, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowPointclouds( int )));
+//    connect(&navControlPanel.showPatchBorders, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowPatchBorders( int )));
+//    connect(&navControlPanel, SIGNAL(propsChanged()), &mapViewer, SLOT(update()));  
+//    connect(&mapViewer, SIGNAL(moveMOLeft()), &(navControlPanel.xSB), SLOT(stepDown())); 
+//    connect(&mapViewer, SIGNAL(moveMORight()), &(navControlPanel.xSB), SLOT(stepUp())); 
+//    connect(&mapViewer, SIGNAL(moveMOUp()), &(navControlPanel.ySB), SLOT(stepUp())); 
+//    connect(&mapViewer, SIGNAL(moveMODown()), &(navControlPanel.ySB), SLOT(stepDown())); 
+//    connect(&mapViewer, SIGNAL(yawMOPos()), &(navControlPanel.yaSB), SLOT(stepUp())); 
+//    connect(&mapViewer, SIGNAL(yawMONeg()), &(navControlPanel.yaSB), SLOT(stepDown()));
 }
 
 NavContainer::~NavContainer()
 {
 }
 
-NavControlPanel::NavControlPanel( QWidget *parent):
+NavControlPanel::NavControlPanel(QWidget *parent):
 	QWidget(parent),
-	showHideGB("Show/Hide"),
-	showGrids("Grids"),
-	showOGs("Occ grids"), 
-	showRobots("Robots"), 
-	showLabels("Victims and LMs"),
-	showPointclouds("Pointclouds"), 
-	showPatchBorders("Patch Borders"), 
-	selectedObject(), 
-	transformGB("Properties"),
-	visSB(),
-	xSB(), 
-	ySB(), 
-	zSB(), 
-	rSB(),
-	pSB(),
-	yaSB(),
-	setToRootBtn("Set to Root"), 
+	planningGB("Planning"),
+	bridgeTest("Bridge Test"),
+	connectNodes("Connect Nodes"), 
+	regGrid("Generate Reg Grid"), 
+	obstPenalty("Obstacle Penalty"),
+	expandObst("Expand Obstacles"), 
+	showTree("Show Tree"), 
+	parametersGB("Planning Parameters"),
+	obstExpRadSB(),
+	bridgeTestResSB(), 
+	bridgeSegLenSB(), 
+	regGridResSB(), 
+	nodeConRadSB(),
+	obstPenRadSB(),
+	obstavoidGB("Obstacle Avoidace"),
+	noavoidRadBtn("No avoidance"),
+	forceFieldRadBtn("Force Field"),
+	configSpaceRadBtn("Local Config Space"),
+	controlRadBtn("Sensor Based"),
 	actionGB("Action"),
-	captureMapBtn("Capture Map ..."), 
-	loadBtn("Load ..."),
-	saveAsBtn("Save as ..."), 
-	exportBtn("Export HTML")
-{
-    selectedObject.setColumnCount(1); 
-    selectedObject.setHeaderLabels(QStringList("Select")); 
+	captureBtn("Save Map"), 
+	pathPlanBtn("Path Plan"),
+	generateSpaceBtn("Generate Space"), 
+	pathFollowBtn("Path Follow"),
+	loadMapBtn("Load Map")
+{  
     QHBoxLayout *hlayout = new QHBoxLayout;
-    hlayout->addWidget(&showHideGB,1);
-    hlayout->addWidget(&selectedObject,1);
-    hlayout->addWidget(&transformGB,1);
+    hlayout->addWidget(&planningGB,1);
+    hlayout->addWidget(&parametersGB,1);
+    hlayout->addWidget(&obstavoidGB,1);    
     hlayout->addWidget(&actionGB,1); 
     this->setLayout(hlayout);
+    
     QVBoxLayout *showLayout = new QVBoxLayout; 
-    showLayout->addWidget(&showGrids);
-    showGrids.setCheckState(Qt::Checked); 
-    showLayout->addWidget(&showOGs);
-    showOGs.setCheckState(Qt::Checked); 
-    showLayout->addWidget(&showPointclouds);
-    showPointclouds.setCheckState(Qt::Checked); 
-    showLayout->addWidget(&showRobots);
-    showRobots.setCheckState(Qt::Checked); 
-    showLayout->addWidget(&showLabels);
-    showLabels.setCheckState(Qt::Checked);
-    showLayout->addWidget(&showPatchBorders);
-    showPatchBorders.setCheckState(Qt::Checked);
-    showHideGB.setLayout(showLayout); 
+    showLayout->addWidget(&bridgeTest);
+    bridgeTest.setCheckState(Qt::Checked); 
+    showLayout->addWidget(&connectNodes);
+    connectNodes.setCheckState(Qt::Checked); 
+    showLayout->addWidget(&expandObst);
+    expandObst.setCheckState(Qt::Checked); 
+    showLayout->addWidget(&regGrid);
+    regGrid.setCheckState(Qt::Checked); 
+    showLayout->addWidget(&obstPenalty);
+    obstPenalty.setCheckState(Qt::Checked);
+    showLayout->addWidget(&showTree);
+    showTree.setCheckState(Qt::Checked);
+    planningGB.setLayout(showLayout); 
+    
     QGridLayout *xfrmLayout = new QGridLayout;
-    xfrmLayout->addWidget(new QLabel("Visible"),0,0);
-    xfrmLayout->addWidget(&visSB,0,1); 
-    xfrmLayout->addWidget(new QLabel("x"),1,0); 
-    xfrmLayout->addWidget(&xSB,1,1);
-    xfrmLayout->addWidget(new QLabel("y"),2,0); 
-    xfrmLayout->addWidget(&ySB,2,1);
-    xfrmLayout->addWidget(new QLabel("z"),3,0); 
-    xfrmLayout->addWidget(&zSB,3,1);
-    xfrmLayout->addWidget(new QLabel("roll"),4,0); 
-    xfrmLayout->addWidget(&rSB,4,1);
-    xfrmLayout->addWidget(new QLabel("pitch"),5,0); 
-    xfrmLayout->addWidget(&pSB,5,1);
-    xfrmLayout->addWidget(new QLabel("yaw"),6,0); 
-    xfrmLayout->addWidget(&yaSB,6,1); 
-    xfrmLayout->addWidget(&setToRootBtn,7,0,1,2);  
-    transformGB.setLayout(xfrmLayout);
-    visSB.setMinimum(0); 
-    visSB.setMaximum(Qt::Checked);
-    xSB.setMinimum(-25.0); 
-    xSB.setMaximum(25.0);
-    xSB.setSingleStep(0.1); 
-    ySB.setMinimum(-25.0); 
-    ySB.setMaximum(25.0);
-    ySB.setSingleStep(0.1);  
-    zSB.setMinimum(-25.0); 
-    zSB.setMaximum(25.0);
-    zSB.setSingleStep(0.1);  
-    rSB.setMinimum(-90); 
-    rSB.setMaximum(90);
-    rSB.setSingleStep(1);
-    rSB.setDecimals(0);   
-    pSB.setMinimum(-90); 
-    pSB.setMaximum(90);
-    pSB.setSingleStep(1);
-    pSB.setDecimals(0); 
-    yaSB.setMinimum(-180); 
-    yaSB.setMaximum(180);
-    yaSB.setSingleStep(1);
-    yaSB.setDecimals(0); 
+    xfrmLayout->addWidget(new QLabel("Obstacle Expansion"),0,0);
+    xfrmLayout->addWidget(&obstExpRadSB,0,1); 
+    xfrmLayout->addWidget(new QLabel("Bridge Test Res"),1,0); 
+    xfrmLayout->addWidget(&bridgeTestResSB,1,1);
+    xfrmLayout->addWidget(new QLabel("Bridge Length"),2,0); 
+    xfrmLayout->addWidget(&bridgeSegLenSB,2,1);
+    xfrmLayout->addWidget(new QLabel("Reg Grid Res"),3,0); 
+    xfrmLayout->addWidget(&regGridResSB,3,1);
+    xfrmLayout->addWidget(new QLabel("Connection Radius"),4,0); 
+    xfrmLayout->addWidget(&nodeConRadSB,4,1);
+    xfrmLayout->addWidget(new QLabel("Obstacle Penalty"),5,0); 
+    xfrmLayout->addWidget(&obstPenRadSB,5,1);
+    parametersGB.setLayout(xfrmLayout);
+
+    obstExpRadSB.setMinimum(0); 
+    obstExpRadSB.setMaximum(1);
+	obstExpRadSB.setSingleStep(0.05);
+	
+    bridgeTestResSB.setMinimum(0.05); 
+    bridgeTestResSB.setMaximum(1);
+    bridgeTestResSB.setSingleStep(0.05); 
+    
+    bridgeSegLenSB.setMinimum(0.5); 
+    bridgeSegLenSB.setMaximum(5);
+    bridgeSegLenSB.setSingleStep(0.1);  
+
+    regGridResSB.setMinimum(0.1); 
+    regGridResSB.setMaximum(5);
+    regGridResSB.setSingleStep(0.1);  
+
+    nodeConRadSB.setMinimum(0.1); 
+    nodeConRadSB.setMaximum(2);
+    nodeConRadSB.setSingleStep(0.05);
+    //nodeConRadSB.setDecimals(0);   
+
+    obstPenRadSB.setMinimum(1); 
+    obstPenRadSB.setMaximum(5);
+    obstPenRadSB.setSingleStep(0.1);
+    //obstPenRadSB.setDecimals(0); 
+
+    QVBoxLayout *showL = new QVBoxLayout; 
+    showL->addWidget(&noavoidRadBtn);
+    showL->addWidget(&forceFieldRadBtn);
+    showL->addWidget(&configSpaceRadBtn);
+    showL->addWidget(&controlRadBtn);
+    configSpaceRadBtn.setChecked(true);
+    obstavoidGB.setLayout(showL); 
+        
     QVBoxLayout *actionLayout = new QVBoxLayout; 
-    actionLayout->addWidget(&captureMapBtn); 
-    actionLayout->addWidget(&loadBtn);
-    actionLayout->addWidget(&saveAsBtn); 
-    actionLayout->addWidget(&exportBtn); 
+    actionLayout->addWidget(&captureBtn); 
+    actionLayout->addWidget(&loadMapBtn);     
+    actionLayout->addWidget(&pathPlanBtn);
+    actionLayout->addWidget(&generateSpaceBtn); 
+    actionLayout->addWidget(&pathFollowBtn); 
     actionGB.setLayout(actionLayout); 
-    connect(&selectedObject, SIGNAL(itemSelectionChanged()), this, SLOT(handleSelection()));
-    connect(&xSB, SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
-    connect(&ySB, SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
-    connect(&zSB, SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
-    connect(&rSB, SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
-    connect(&pSB, SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
-    connect(&yaSB, SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
-    connect(&visSB, SIGNAL(valueChanged(int)), this, SLOT(updateSelectedObject(int)));
-    connect(&captureMapBtn, SIGNAL(clicked()), this, SLOT(captureMap())); 
-    connect(&loadBtn, SIGNAL(clicked()), this, SLOT(load())); 
-    connect(&saveAsBtn, SIGNAL(clicked()), this, SLOT(save())); 
-    connect(&exportBtn, SIGNAL(clicked()), this, SLOT(exportHtml())); 
-    connect(&setToRootBtn, SIGNAL(clicked()), this, SLOT(setToRoot())); 
+
+    connect(&bridgeTestResSB, SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&bridgeSegLenSB,  SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&regGridResSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&nodeConRadSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&obstPenRadSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&obstExpRadSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&captureBtn,      SIGNAL(clicked()), this, SLOT(captureMap())); 
+//    connect(&loadMapBtn, SIGNAL(clicked()), this, SLOT(captureMap())); 
+    connect(&pathPlanBtn, SIGNAL(clicked()), this, SLOT(load())); 
+    connect(&generateSpaceBtn, SIGNAL(clicked()), this, SLOT(save())); 
+    connect(&pathFollowBtn, SIGNAL(clicked()), this, SLOT(exportHtml())); 
 }
 
-void NavControlPanel::handleSelection(){
+void NavControlPanel::handleSelection()
+{
     qDebug("Item selected ..."); 
-    QTreeWidgetItem *item = selectedObject.currentItem();
+    //QTreeWidgetItem *item = selectedObject.currentItem();
     //MapObject *mo = wiToMo[item]; 
     //setActionValues(mo); 
 }
 
 void NavControlPanel::setToRoot(){
-    xSB.setValue(0);
-    ySB.setValue(0); 
-    zSB.setValue(0); 
-    rSB.setValue(0); 
-    pSB.setValue(0);
-    yaSB.setValue(0);  
+    bridgeTestResSB.setValue(0);
+    bridgeSegLenSB.setValue(0); 
+    regGridResSB.setValue(0); 
+    nodeConRadSB.setValue(0); 
+    obstPenRadSB.setValue(0);
 }
 
 void NavControlPanel::updateSelectedObject(double)
@@ -160,13 +172,13 @@ void NavControlPanel::updateSelectedObject(double)
 //    if(item != NULL && wiToMo.contains(item))
 //    {
 //	MapObject *mo = wiToMo[item]; 
-//	mo->setVisibility(visSB.value()); 
+//	mo->setVisibility(obstExpRadSB.value()); 
 //	Vector6DOF newPose;
-//	newPose.setX(xSB.value());
-//	newPose.setY(ySB.value());
-//	newPose.setZ(zSB.value());
-//	newPose.setPitchDeg(pSB.value());
-//	newPose.setRollDeg(rSB.value());
+//	newPose.setX(bridgeTestResSB.value());
+//	newPose.setY(bridgeSegLenSB.value());
+//	newPose.setZ(regGridResSB.value());
+//	newPose.setPitchDeg(obstPenRadSB.value());
+//	newPose.setRollDeg(nodeConRadSB.value());
 //	newPose.setYawDeg(yaSB.value());
 //	mo->setOrigin(newPose); 
 //	emit propsChanged();
@@ -186,12 +198,12 @@ void NavControlPanel::updateSelectedObject(int value)
 //{
 //    int visibility = mo->getVisibility();
 //    Vector6DOF pose = mo->getOrigin();
-//    visSB.setValue(visibility); 
-//    xSB.setValue(pose.getX());
-//    ySB.setValue(pose.getY()); 
-//    zSB.setValue(pose.getZ()); 
-//    rSB.setValue(pose.getRollDeg()); 
-//    pSB.setValue(pose.getPitchDeg());
+//    obstExpRadSB.setValue(visibility); 
+//    bridgeTestResSB.setValue(pose.getX());
+//    bridgeSegLenSB.setValue(pose.getY()); 
+//    regGridResSB.setValue(pose.getZ()); 
+//    nodeConRadSB.setValue(pose.getRollDeg()); 
+//    obstPenRadSB.setValue(pose.getPitchDeg());
 //    yaSB.setValue(pose.getYawDeg());  
 //}
 
@@ -219,15 +231,16 @@ void NavControlPanel::save()
 void NavControlPanel::captureMap()
 {
     bool ok;
-    QString comment = QInputDialog::getText(this, "RescueGUI: Capture Comment", "Enter a comment for this map:", QLineEdit::Normal,
-	    QString::null, &ok);
+    QString comment = QInputDialog::getText(this, "CAS Planner: Save Map", "Enter name for this map:", QLineEdit::Normal,
+    QString::null, &ok);
     emit propsChanged();
     sleep(1);   
     emit propsChanged();
     sleep(1);
-    if(ok){
-	QImage capturedMap = ((NavContainer *) parent())->mapViewer.captureMap();
-	//mapManager->addMapSnapshot(capturedMap, comment); 
+    if(ok)
+    {
+		QImage capturedMap = ((NavContainer *) parent())->mapViewer.captureMap();
+		//mapManager->addMapSnapshot(capturedMap, comment); 
     }
 }
 

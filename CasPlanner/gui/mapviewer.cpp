@@ -21,7 +21,7 @@ MapViewer::MapViewer(QWidget *parent)
     setFocusPolicy(Qt::StrongFocus);
     makeCurrent(); 
     glGenTextures(1, &texId); 
-} 
+}
 
 QSize MapViewer::sizeHint()
 {

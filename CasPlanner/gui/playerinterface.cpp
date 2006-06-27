@@ -165,7 +165,7 @@ void PlayerInterface::run ()
 		delete pc; 
     }
     pc = new PlayerClient(qPrintable(playerHost),playerPort);
-    pc->SetFrequency(2);
+    pc->SetFrequency(10);
     qDebug("	--->>> Frequency set to 10 Hz"); 
     /* TODO: Proper check for the successfullness of the proxy creation
      */
@@ -203,15 +203,7 @@ void PlayerInterface::run ()
     }
     qDebug("	--->>> Test Passed, You can read Data from Player Server Now");    
     qDebug("	--->>> Connection Established"); 
-//    for(int i=0; i < 5; i++)
-//    {
-//    	usleep(500000); 
-//    	while(pc->Read())
-//    	{
-//			qWarning("Warning! Could not read from player driver -- sleeping for 1 seconds."); 
-//			sleep(10);
-//    	}
-//    }
+	int	mapCounter=0;
     while(true)
     {
         while(pc->Read())
@@ -233,7 +225,8 @@ void PlayerInterface::run ()
 			}
 			if(mapEnabled)
 			{
-				map->GetMap();
+				if(((mapCounter++)%10)==0)
+					map->GetMap();
 			    //qDebug("Map width %d, height %d resolution %f",map->width,map->height,map->resolution);
 			}
     	}

@@ -58,6 +58,7 @@ class SensorsGui: public Sensors, public SpeedProvider, public MapProvider
         virtual int config();
 		void requestSnap();
   		void resetTab();
+        void setRadMode(int mode);
     public slots:
         void updateData();
         void mousePressEvent(QMouseEvent *me); 
@@ -67,16 +68,18 @@ class SensorsGui: public Sensors, public SpeedProvider, public MapProvider
         void keyPressEvent(QKeyEvent *ke); 
         void keyReleaseEvent(QKeyEvent *ke);
         void provideSpeed(double &speed, double &turnRate);
-        void setRadMode(int mode);
+        void renderLaser();
+        void renderOG();
+        void renderStatic();
         Map  provideMap();
     signals: 
         void newData(); 
     private:
 		QTabWidget *tabContainer;
         void configButtons(); 
-		QRadioButton *teleRadBtn;
-		QRadioButton *pausedRadBtn;
-		QRadioButton *autoRadBtn;
+		QRadioButton *OGRadBtn;
+		QRadioButton *laserRadBtn;
+		QRadioButton *staticRadBtn;
         RobotManager *robotManager; 
         SensorsGLW sensorsGL;
         QWidget buttonWidget;

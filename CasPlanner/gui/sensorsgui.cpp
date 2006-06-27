@@ -9,7 +9,7 @@ SensorsGLW::SensorsGLW():
     laser(this),
     speedMeter(this),
     ogRenderer(this),
-    desiredAspectRatio(1),
+    desiredAspectRatio(1.6),
     cursorCentreX(0.53),
     cursorCentreY(0.51), 
     zoomCentreX(0.53), 
@@ -67,7 +67,7 @@ void SensorsGLW::resizeGL(int w, int h)
 {
     // glMatrixMode(GL_PROJECTION);    
     // glLoadIdentity();
-    //width divided by height. 
+    // width divided by height. 
     int newWidth = w;
     int newHeight = h;
     int xOffset = 0;
@@ -75,18 +75,18 @@ void SensorsGLW::resizeGL(int w, int h)
     qDebug("Resize w = %d h = %d", w, h); 
     if((float) w/h > desiredAspectRatio)
     {
-        newWidth = h*desiredAspectRatio; 
+        newWidth = (int)h*desiredAspectRatio; 
         xOffset = (w-newWidth)/2; 
     }
     else if((float) w/h < desiredAspectRatio)
     {
-        newHeight=w/desiredAspectRatio; 
+        newHeight= (int)w/desiredAspectRatio; 
         yOffset = (h-newHeight)/2; 
     }
     glMatrixMode(GL_PROJECTION); 
     glLoadIdentity(); 
     glOrtho(0, desiredAspectRatio, 0, 1, -200, 200); 
-    //glOrtho(0, desiredAspectRatio, 0, 1, -500, 500); 
+    //glOrtho(-1, 1, -1, 1, 0, 0); 
     glMatrixMode(GL_MODELVIEW);
     glViewport( xOffset, yOffset, (GLint)newWidth, (GLint)newHeight );
 }
@@ -94,8 +94,8 @@ void SensorsGLW::resizeGL(int w, int h)
 // check for camera flags
 void SensorsGLW::config()
 {
-    laserEnabled = false;//(bool) cf->ReadInt(sectionid, "laserEnabled", 1); 
-    speedEnabled = false;//(bool) cf->ReadInt(sectionid, "speedEnabled", 1);
+    laserEnabled = true;//(bool) cf->ReadInt(sectionid, "laserEnabled", 1); 
+    speedEnabled = true;//(bool) cf->ReadInt(sectionid, "speedEnabled", 1);
     mapEnabled   = true;//(bool) cf->ReadInt(sectionid, "mapEnabled", 1);
     if(speedEnabled)
     {
@@ -113,9 +113,9 @@ void SensorsGLW::paintGL()
      {
          glPushMatrix(); 
          //glTranslatef(camPanelRatio*.7,0.25, 0);
-         glTranslatef(0,0,0);
+         glTranslatef(0.5,0.5,0);
          //glScalef(0.2,0.2,1);
-         glScalef(1,1,1);
+         //glScalef(1,1,1);
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
          glEnable(GL_POLYGON_SMOOTH); 
          glEnable(GL_BLEND);
@@ -177,9 +177,9 @@ int SensorsGui::config()
     sensorsGL.setRobotComms(robotManager);
     configButtons();
     // signals for changing modes
-    connect( teleRadBtn, SIGNAL(clicked()), this, SLOT(setRadMode(0)));
-    connect( pausedRadBtn, SIGNAL(clicked()), this, SLOT(setRadMode(1)));
-    connect( autoRadBtn, SIGNAL(clicked()), this, SLOT(setRadMode(2)));
+    connect( OGRadBtn, SIGNAL(clicked()), this, SLOT(renderOG()));
+    connect( laserRadBtn, SIGNAL(clicked()), this, SLOT(renderLaser()));
+    connect( staticRadBtn, SIGNAL(clicked()), this, SLOT(renderStatic()));
     robotManager->start();
     return 1; 
 
@@ -187,15 +187,15 @@ int SensorsGui::config()
 void SensorsGui::configButtons()
 {
     QHBoxLayout *hLayout = new QHBoxLayout;
-    teleRadBtn =   new QRadioButton("&OG-MAP");
-    pausedRadBtn = new QRadioButton("&Laser");
-    autoRadBtn =   new QRadioButton("StaticMap");
+    OGRadBtn =   new QRadioButton("&OG-MAP");
+    laserRadBtn = new QRadioButton("&Laser");
+    staticRadBtn =   new QRadioButton("StaticMap");
 
-    hLayout->addWidget( teleRadBtn, 1 );
-    hLayout->addWidget( pausedRadBtn, 1 );
-    hLayout->addWidget( autoRadBtn, 1 );
+    hLayout->addWidget( OGRadBtn, 1 );
+    hLayout->addWidget( laserRadBtn, 1 );
+    hLayout->addWidget( staticRadBtn, 1 );
 
-    teleRadBtn->setChecked(true);
+    OGRadBtn->setChecked(true);
     buttonWidget.setLayout(hLayout);
 }
 
@@ -377,9 +377,24 @@ void SensorsGui::wheelEvent( QWheelEvent *we)
 SensorsGui::~SensorsGui()
 {
 }
-/*
- * set Checked status for radio buttons when modes received
- */
+
+void SensorsGui::renderOG()
+{
+    //resetTab();
+	setRadMode(0);
+}
+
+void SensorsGui::renderLaser()
+{
+    //resetTab();
+	setRadMode(1);
+}
+void SensorsGui::renderStatic()
+{
+    //resetTab();
+	setRadMode(2);
+}
+
 void SensorsGui::setRadMode(int mode)
 {
 	qDebug("Radio Button Clicked");
@@ -389,21 +404,21 @@ void SensorsGui::setRadMode(int mode)
         	sensorsGL.mapEnabled   = true;
         	sensorsGL.laserEnabled = false;
         	sensorsGL.speedEnabled = false;
-            teleRadBtn->setChecked(true);
+            OGRadBtn->setChecked(true);
             qDebug("OG MAP enabled");
             break;
         case 1: // AUTO_PAUSED
             sensorsGL.mapEnabled   = false;
         	sensorsGL.laserEnabled = true;
         	sensorsGL.speedEnabled = false;
-            pausedRadBtn->setChecked(true);
+            laserRadBtn->setChecked(true);
             qDebug("Laser Enabled");
             break;
         case 2: // AUTO_FULL
            	sensorsGL.mapEnabled   = false;
         	sensorsGL.laserEnabled = false;
         	sensorsGL.speedEnabled = true;
-            autoRadBtn->setChecked(true);
+            staticRadBtn->setChecked(true);
             qDebug("Speed Enabled");            
             break;
         default:
