@@ -143,12 +143,11 @@ NavControlPanel::NavControlPanel(QWidget *parent):
     connect(&obstPenRadSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
     connect(&obstExpRadSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
     connect(&captureBtn,      SIGNAL(clicked()), this, SLOT(captureMap())); 
-//    connect(&loadMapBtn, SIGNAL(clicked()), this, SLOT(captureMap())); 
+    //connect(&loadMapBtn, SIGNAL(clicked()), this, SLOT(loadMap())); 
     connect(&pathPlanBtn, SIGNAL(clicked()), this, SLOT(load())); 
     connect(&generateSpaceBtn, SIGNAL(clicked()), this, SLOT(save())); 
     connect(&pathFollowBtn, SIGNAL(clicked()), this, SLOT(exportHtml())); 
 }
-
 void NavControlPanel::handleSelection()
 {
     qDebug("Item selected ..."); 

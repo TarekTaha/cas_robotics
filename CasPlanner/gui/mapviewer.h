@@ -16,18 +16,19 @@ Q_OBJECT
         QSize sizeHint();
         QSize minimumSizeHint();
 		void keyPressEvent(QKeyEvent *e);
-		void focusInEvent(QFocusEvent *fe); 
-		void focusOutEvent(QFocusEvent *fe); 
-		QImage captureMap(); 
+		void focusInEvent(QFocusEvent *fe);
+		void focusOutEvent(QFocusEvent *fe);
+		GLuint makeObject();
+		QImage captureMap();
 
     public slots:
-		void update(); 
-		void setShowOGs(int state); 
-		void setShowSnaps(int state); 
-		void setShowGrids(int state); 
-		void setShowRobots(int state); 
-		void setShowPointclouds(int state); 
-		void setShowPatchBorders(int state); 
+		void update();
+		void setShowOGs         (int state);
+		void setShowSnaps       (int state);
+		void setShowGrids       (int state);
+		void setShowRobots      (int state);
+		void setShowPointclouds (int state);
+		void setShowPatchBorders(int state);
 		
     signals:
 		void moveMOLeft(); 
@@ -50,7 +51,6 @@ Q_OBJECT
 	float yaw, pitch; 
 	float aspectRatio; 
 	float fudgeFactor; 
-	int displayList; 
 	bool showOGs;
 	bool showSnaps;
 	bool showLabels; 
@@ -58,8 +58,11 @@ Q_OBJECT
 	bool showRobots; 
 	bool showPointclouds; 
 	bool showPatchBorders; 
+	GLuint sharedObject;
+    QColor clearColor;
 	QHash<QString, int> snapDLs;
 	QGLPixelBuffer *pbuffer;
+	QPixmap pixmap;
 	friend class MapControlPanel; 
 	GLuint texId; 
 };
