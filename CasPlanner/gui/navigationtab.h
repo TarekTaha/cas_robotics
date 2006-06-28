@@ -61,10 +61,12 @@ Q_OBJECT
 		QPushButton pathFollowBtn;
 		QPushButton loadMapBtn;	
 		
-		friend class NavContainer; 
-		static const int RobotNodeType = QTreeWidgetItem::UserType+1; 
-		static const int PatchNodeType = QTreeWidgetItem::UserType+2;
-		static const int SnapNodeType = QTreeWidgetItem::UserType+3;
+		friend class NavContainer;
+		static unsigned *image, *null;
+        static int width, height, components;
+		//static const int RobotNodeType = QTreeWidgetItem::UserType+1; 
+		//static const int PatchNodeType = QTreeWidgetItem::UserType+2;
+		//static const int SnapNodeType = QTreeWidgetItem::UserType+3;
 	
 };
 
