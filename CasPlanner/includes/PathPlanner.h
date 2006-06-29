@@ -1,61 +1,57 @@
 #ifndef PATHPLANNER_H_
 #define PATHPLANNER_H_
 #include <defs.h>
+#include <QPointF>
+#include <QList>
+#include <QImage>
 #include <Robot.h>
 #include <Point.h>
 #include <LList.h>
 #include <Map.h>
+#include <Node.h>
 #include <SearchSpaceNode.h>
 #include <math.h>
 #include <player/driver.h>
 #define FORWARD 1
 #define BACKWARD -1
-#include <gdk-pixbuf/gdk-pixbuf.h>
-#include <gtk/gtkmain.h>
-#include<gtk/gtk.h>
-#include<glib/gprintf.h>
+
 namespace CasPlanner
 {
 typedef struct _tree
 	{
-		Point location;
-		vector <Point> children;
+		QPointF location;
+		vector <QPointF> children;
 	}Tree;
-class PathPlanner 
+class PathPlanner , public Robot
 	{
 	public :
-		Robot * wheelchair; // Location of the wheelchair's points to check in the wheelchair coordinate system
+		// Location of the wheelchair's points to check in the wheelchair coordinate system
+		//Robot * wheelchair; 
 		int number_of_point_to_check,map_height,map_width,MAXNODES;
 		double pixel_size,initial_angle,obstacle_radius,node_gap,bridge_length,final_angle;
-		bool simulate;
-		Point start, end, * points_to_check,local_edge_points[4],translated_edge_points[4];
+		QPointF start, end, * points_to_check,local_edge_points[4],translated_edge_points[4];
 		const char * MapFilename;
-		GtkWidget * widget;
-		GdkPixbuf * pixbuf;
 		MapInfo mapinfo;	
 		Node * test,*root,*path, *p;
 		SearchSpaceNode * search_space,* temp;
 		Node *current, *childList, *curChild, *q;
-		LList *openList,*closedList;
+		//LList *openList,*closedList;
+		QList <Node> openList,closedList;
 		//list <Node> openList,closedList;
-		Map * map;
+		QImage map;
 		//PathFollower follower;
 		vector <Tree> tree;
 	public :
-		double Calculate_g   (Node *); // Distance from Start
-		double Calculate_h   (Node *); // Herustic Distance to Goal
 		double anglediff(double alfa, double beta);
-		bool   GoalReached   (Node *); 
 		Node  *MakeChildrenNodes(Node *parent) ;
 		void   FreeNode      (Node *);
 		void   PrintNodeList ();
-		int    StartSearch   (Point start, Point end,double initial_angle,double final_angle);
-		void   Translate(Point  , double);
-		void   Translate_edges(Point  , double);
-		int    check_line (Point start,Point end);
-		int    Obstacle   (Point p, double angle);
-		void   ConvertPixel   (Point *p);
-		void   ConvertToPixel (Point *p);
+		void   Translate(QPointF  , double);
+		void   Translate_edges(QPointF  , double);
+		int    check_line (QPointF start,QPointF end);
+		int    Obstacle   (QPointF p, double angle);
+		void   ConvertPixel   (QPointF *p);
+		void   ConvertToPixel (QPointF *p);
 		void   ReadMap(); // Reads the map file and sets the attributes
 		void   ExpandObstacles();
 		void   AddCostToNodes(double distance);
@@ -66,14 +62,14 @@ class PathPlanner
 		void   ShowConnections();
 		void   SaveSearchSpace();
 		void   DetermineCheckPoints();
-		void   AddText ( char const * text);
 		void   FindRoot();
 		void   draw_path();
 		void   draw_tree();
 		void   Print();
 		void   FreePath();
 		void   PathFollow(Node *,double kd, double kt,double ko,double tracking_distance);
-		PathPlanner(Point start,Point end,double initial_angle,double final_angle,double pixel_size,double radius,GtkWidget*,const char * MapFilename); 
+		PathPlanner(double r_l ,double r_w , double r_m ,double pixel_res,double bridge_len,
+					double bridge_res,double reg_grid,double obst_exp,double conn_rad,double obst_pen);
 		PathPlanner();
 		~PathPlanner();
 	};

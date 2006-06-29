@@ -63,11 +63,11 @@ int RobotManager::readCommManagerConfigs(ConfigFile *cf, int sectionid)
 //    return 1;
 //}
 //
-//int RobotManager::readPlannerConfigs(ConfigFile *cf, int sectionid)
-//{
-//    Planner::config( cf, sectionid);
-//    return 1;
-//}
+int RobotManager::readPlannerConfigs(ConfigFile *cf, int sectionid)
+{
+    PlanningManager::config( cf, sectionid);
+    return 1;
+}
 
 int RobotManager::start()
 {
@@ -88,9 +88,9 @@ int RobotManager::startComms()
 
 int RobotManager::startPlanner()
 {
-//    qDebug("-> Starting Planner."); 
-//    Planner::start();
-//    qDebug("<- Planner Started.");
+	qDebug("-> Starting Planner."); 
+    PlanningManager::start();
+    qDebug("<- Planner Started.");
     return 1;
 }
 

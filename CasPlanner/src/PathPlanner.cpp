@@ -1,6 +1,4 @@
 #include "PathPlanner.h"
-#include<Node.h>
-#include<Point.h>
 namespace CasPlanner
 {
 // Test for node equality
@@ -11,8 +9,8 @@ int NodeEquality(Node *a, Node *b)
 	return 0;
 }
 PathPlanner :: PathPlanner()
-	{
-	};
+{
+};
 void PathPlanner::FreePath()
 {
 	while(path != NULL) 
@@ -22,15 +20,17 @@ void PathPlanner::FreePath()
 		path = p;
 	}
 };
-// This Determines the locations of the points to be checked in the Vehicle Coordinates, should be rotated at each node
+
+/* This Determines the locations of the points to be checked in the Vehicle Coordinates,
+ * should be rotated at each node */
 void PathPlanner::DetermineCheckPoints() 
 {
-	//Point edges[4]={{32.5,93},{-32.5,93},{-32.5,-22},{32.5,-22}}; this is the exact dimentions
+	//QPointF edges[4]={{32.5,93},{-32.5,93},{-32.5,-22},{32.5,-22}}; this is the exact dimentions
 	int point_index=0,points_per_height,points_per_width;
 	double i,j;
 	double l = 1.2 , w = 0.65;   // length and width of the wheelchair, can be modefied at any time.
 	double startx,starty;       // The edges of the robot in -ve quadrant
-	Point center_of_rotation;   // center of rotation in respect to the center of Area
+	QPointF center_of_rotation;   // center of rotation in respect to the center of Area
 	center_of_rotation.x =-0.3; // it's 30 cm on the x-axis
 	center_of_rotation.y = 0;   // it's on the mid of the Wheels Axes so i assume that y = 0;
 	startx = -l/2 - center_of_rotation.x; // am determining here the location of the edges in the robot coordinate system
@@ -50,7 +50,7 @@ void PathPlanner::DetermineCheckPoints()
 	cout<<"\n Obstacle Radius="<<this->obstacle_radius; fflush(stdout);
 
 	// The location of the current edges at each NODE
-	this->points_to_check = new Point[this->number_of_point_to_check];
+	this->points_to_check = new QPointF[this->number_of_point_to_check];
 	i =(startx + this->obstacle_radius);
 	for(int r =0; r < points_per_height ; r++ )
 	{
@@ -87,29 +87,31 @@ void PathPlanner::DetermineCheckPoints()
 		fflush(stdout);
 	}
 };
-PathPlanner :: PathPlanner(Point start, Point point,double initial_angle,double final_an,double pixel_size,double radius,GtkWidget *w,const char * MapFilename)
-	{
-	this->ConvertPixel(&start);
-	this->ConvertPixel(&end);
-	this->start.x = start.x;
-	this->start.y = start.y;
-	this->end.x = end.x;
-	this->end.y = end.y;
-	this->MapFilename = MapFilename;
-	this->initial_angle= initial_angle;
-	this->final_angle = final_an;
-	this->pixel_size = pixel_size;
+PathPlanner(double r_l ,double r_w , double r_m ,double pixel_res,double bridge_len,
+			double bridge_res,double reg_grid,double obst_exp,double conn_rad,double obst_pen):
+			Robot(r_l,r_w,r_m),
+			pixel_size(pixel_res),
+			obstacle_radius(obst_exp),
+			
+			
+{
+//	this->ConvertPixel(&start);
+//	this->ConvertPixel(&end);
+//	this->start.setX(start.x());
+//	this->start.setY(start.y());
+//	this->end.setX(end.x());
+//	this->end.setY(end.y());
+//	this->initial_angle= initial_angle;
+//	this->final_angle = final_an;
+	this->pixel_size = pixel_res;
 	this->obstacle_radius = radius;
 	path=p=root=test=NULL;
 	this->search_space=this->temp = NULL;
-	this->widget = w;
-	this->simulate = FALSE;
-	this->DetermineCheckPoints();// Determine the Points that should be checked for obstacle avoidance on the wheelchair
-	this->openList   = new LList;
-	this->closedList = new LList;
-	};
+	// Determine the Points that should be checked for obstacle avoidance on the wheelchair
+	this->DetermineCheckPoints();
+};
 PathPlanner :: ~PathPlanner()
-	{
+{
 	delete wheelchair;
 	delete [] points_to_check;
 	delete map;
@@ -122,21 +124,11 @@ PathPlanner :: ~PathPlanner()
 		};
 	this->FreePath();
 	this->AddText("\n	--->>> Allocated Memory FREED <<<---");
-	};
-void PathPlanner::AddText ( char const * text)
-	{
-	GtkWidget * view;
-	GtkTextBuffer *text_buffer;
-	GtkTextIter     startv, endv;
-	//view = lookup_widget (GTK_WIDGET(widget),"textview1");
-  	text_buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
-	gtk_text_buffer_insert_at_cursor(text_buffer,text,-1);
-    gtk_text_buffer_get_bounds(text_buffer, &startv, &endv);
-    gtk_text_view_scroll_to_iter(GTK_TEXT_VIEW(view), &endv, 0.0, FALSE, 0.0,0.0);
-	}
+};
+
 void PathPlanner::ShowConnections()
-	{
-	Point loc1,loc2;
+{
+	QPointF loc1,loc2;
 	GtkWidget * view;
 	//view = lookup_widget (GTK_WIDGET(widget),"drawingarea1");
 	temp = this->search_space;
@@ -158,7 +150,7 @@ void PathPlanner::ShowConnections()
 	cout<<"\n---->>> TOTAL NUMBER OF CONNECTIONS ="<<m<<"\n---->>> Total Nodes in search Space ="<<n;
 	fflush(stdout);
 	this->MAXNODES = m;
-	}
+}
 void PathPlanner::ConnectNodes(double allowed_distance)
 	{
 	SearchSpaceNode * S;
@@ -188,7 +180,7 @@ void PathPlanner::ConnectNodes(double allowed_distance)
 void PathPlanner::AddCostToNodes(double r)
 	{
 	SearchSpaceNode * S;
-	Point  point;
+	QPointF  point;
 	double number_of_pixels,radius,nearest_obstacle;
 	int i,j;
 	//int n=0;
@@ -235,7 +227,7 @@ void PathPlanner::AddCostToNodes(double r)
 	cout<<"\n	--->>> NODES CONNECTED <<<---	";
 	};
 bool PathPlanner::CheckShortestDistance(double x,double y,double neigbhour_distance)
-	{
+{
 	SearchSpaceNode * S;
 	double distance,shortest_distance = 10000000;
 
@@ -251,9 +243,9 @@ bool PathPlanner::CheckShortestDistance(double x,double y,double neigbhour_dista
 		return 1;
 	else
 		return 0;
-	};
+};
 void PathPlanner::ExpandObstacles() // Nifty way of doing an obstacle expansion, not finalized, ----->>>>> @ TO DO @ <<<<<------
-	{
+{
 	if(this->map->mapdata == NULL )
 	{
 		this->AddText(g_strdup_printf("\n	--->>> You have to read the map before Expanding the Obstacles <<<---	"));
@@ -317,10 +309,10 @@ void PathPlanner::ExpandObstacles() // Nifty way of doing an obstacle expansion,
 	cout<<"\n	--->>> OBSTACLES EXPANDED SUCCESSFULLY <<<---	";
 	this->map->ReadMap(); 				// we changed the pixel buffer, so reading the image again will regenerate the free space / MapData ;)
 	this->map->SavePixelBufferToFile(); // saving the newly generated space, default file is mapname_FreeSpace.jpeg
-	};
+};
 void PathPlanner::SaveSearchSpace()
-	{
-	Point p;
+{
+	QPointF p;
 	temp = this->search_space;
 	while (temp != NULL)
 		{
@@ -330,12 +322,12 @@ void PathPlanner::SaveSearchSpace()
 		temp =temp->next;
 		}
 	this->map->SavePixelBufferToFile(); // Saving the newly generated Pixel Buffer into the file
-	}
+}
 void PathPlanner::GenerateRegularGrid(double distance)
-	{
+{
 	if(this->map->mapdata == NULL )
 		return;
-	Point p;
+	QPointF p;
 	for(int i=0; i<this->map_width; i++)
 		{
 		for(int j=0;j<this->map_height;j++)
@@ -372,11 +364,11 @@ void PathPlanner::GenerateRegularGrid(double distance)
 		}
 	cout<<"\n	--->>> REGULAR GRID GENERATED SUCCESSFULLY <<<---	";
 	this->SaveSearchSpace();
-	};
+};
 void PathPlanner::BridgeTest(double length, double neigbhour_distance)
-	{
+{
 	int radius,pixels_per_bridge;
-	Point p;
+	QPointF p;
 	double x,y,x2,y2;
 	pixels_per_bridge = (int) (length/this->pixel_size);
 	radius = (int) (length/(this->pixel_size*2.0));
@@ -437,23 +429,23 @@ void PathPlanner::BridgeTest(double length, double neigbhour_distance)
 		}
 	cout<< "\n	--->>> BRIDGE TEST FINISHED SUCCESSFULLY <<<---";
 	this->SaveSearchSpace();
-	};
+};
 
 void PathPlanner :: ReadMap()
-	{
+{
 	map = new Map(this->MapFilename,pixel_size);
 	this->pixbuf = map->ReadMap();
 	this->mapinfo = map->GetMapInfo();
 	this->map_width=mapinfo.width;
 	this->map_height=mapinfo.height;
 	this->MAXNODES=map_height*map_width;
-	};
-void PathPlanner :: ConvertPixel(Point  *p) // transfers from pixel coordinate to the main coordinate system
+};
+void PathPlanner :: ConvertPixel(QPointF  *p) // transfers from pixel coordinate to the main coordinate system
 {
 	p->x= p->x*this->pixel_size - this->pixel_size*this->map_width/2;
 	p->y=-p->y*this->pixel_size + this->pixel_size*this->map_height/2;
 };
-void PathPlanner ::ConvertToPixel (Point *p)
+void PathPlanner ::ConvertToPixel (QPointF *p)
 {
 	p->x=( p->x + this->pixel_size*this->map_width/2)/this->pixel_size;
 	p->y=(-p->y + this->pixel_size*this->map_height/2)/this->pixel_size;
@@ -471,7 +463,7 @@ double PathPlanner::anglediff(double alfa, double beta)
 void PathPlanner :: PrintNodeList()
 {
 	int step=1;
-	Point  pixel;
+	QPointF  pixel;
 	if(!(p = this->path))
 		return ;
 	cout <<"\n  --------------------   START OF LIST ---------------------- \n";
@@ -499,8 +491,9 @@ void PathPlanner :: PrintNodeList()
 	}
 	cout <<"\n\n  --------------------   END OF LIST ---------------------- \n";
 }
+
 void PathPlanner::FindRoot() // find the nearest node to the start
-	{
+{
 	if(!this->search_space)
 		return;
 	double distance,shortest_distance = 100000;
@@ -532,233 +525,9 @@ void PathPlanner::FindRoot() // find the nearest node to the start
 	//root->wheelchair.SetCheckPoints(this->number_of_point_to_check,this->points_to_check);
 	cout<<"\n---->>>Root is Set to be X="<<root->location.x<<" Y="<<root->location.y;
 	fflush(stdout);
-	};
-int PathPlanner :: StartSearch(Point start_search, Point end_search,double initial_angle, double final_angle)
-{
-	int      ID = 1;
-  	int      NodesExpanded = 0;
-	this->initial_angle = initial_angle;
-	this->final_angle   = final_angle;
-	if(this->tree.size() > 0)		this->tree.clear();
-	//cout <<"\n	--->>> 1- Initial angle="<<RTOD(this->initial_angle)<<" Final Angle="<<RTOD(this->final_angle);
-	fflush(stdout);
-	if (!this->map) // Make sure that we have a map to search
-	{
-		this->map->ReadMap();
-		cout <<"\nRead the map File First !!!"<<endl;
-		fflush(stdout);
-		this->AddText("\nRead the map File First !!!");
-		return -1;
-	}
-	if (!this->search_space)
-	{
-		cout <<"\n	--->>> Generate Search Space First !!!"<<endl;
-		fflush(stdout);
-		this->AddText("\n	--->>> Generate Search Space First !!!");
-		return -1;
-	}
-	this->ConvertPixel(&start_search);
-	this->ConvertPixel(&end_search);
-	this->start.x = start_search.x;
-	this->start.y = start_search.y;
-	this->end.x   = end_search.x;
-	this->end.y   = end_search.y;
-	cout <<"\n	--->>> Search Started <<<---"; fflush(stdout);
-	FindRoot();
-	cout <<"\n---->>>Target is Set to be X="<<end.x<<" Y="<<end.y<<" <<<---"; fflush(stdout);
-  	openList->Add(root);				// Add the root to OpenList
-	cout <<"\n	--->>> Root Added <<<---"; fflush(stdout);
-//  while openList is not empty 
-	while (openList->Start != NULL) 
-	{
-		current = openList->GetHead(); 	// Get the node with the cheapest cost, first node
-		openList->Next();				// Move to the next Node
-    	NodesExpanded++;
-    	if (GoalReached(current))                     // We reached the target location, so build the path and return it.
-		{
-			// build the complete path to return
-      		current->next = NULL;
-      		path = current;
-      		p = current->parent;
-    		cout<<"\n	--->>> Goal state reached with :"<<ID<<" nodes created and :"<<NodesExpanded<<" nodes expanded <<<---\n";
-			fflush(stdout);
-			cout<<"\n	--->>> General Clean UP <<<---";
-			fflush(stdout);
-//			int m=0;
-      		p = current;
-//   			while (p != NULL) 
-//			{
-//				//cout<<"\n	--->>> Step["<<++m<<"] X="<<p->location.x<<" Y="<<p->location.y;
-//				//cout<<"\n	--->>> Angle is="<<RTOD(p->angle);
-//				fflush(stdout);
-//				p = p->parent;
-//			}
-      		// Going up to the Root
-      		p = current->parent;
-   			while (p != NULL)
-			{
-//				cout<<"\n Am Still HERE Step["<<++m<<"] X="<<p->location.x<<" Y="<<p->location.y;
-//				fflush(stdout);
-				// remove the parent node from the closed list (where it has to be)
-				if(p->prev != NULL)
-					(p->prev)->next = p->next;
-				if(p->next != NULL)
-					(p->next)->prev = p->prev;
-				// check if we're removing the top of the list
-				if(p == closedList->Start)
-		  			closedList->Next();
-				// set it up in the path
-				p->next = path;				
-				path = p;
-				p = p->parent;
-			}
-        	// now delete all nodes on OPEN and Closed Lists
-			cout<<"\n	--->>> Freeing open list <<<---";   fflush(stdout);
-			openList->Free();
-			cout<<"\n	--->>> DONE  <<<---";	fflush(stdout);
-			cout<<"\n	--->>> Freeing closed list <<<---";	fflush(stdout);
-			closedList->Free();
-			cout<<"\n	--->>> DONE  <<<---";	fflush(stdout);
-      		return 1; 	// Path Found Successfully
-    	}
-    	
-    	// Create List of Children for the current NODE
-		if(!(childList = MakeChildrenNodes(current))) // No more Children => Search Ended Unsuccessfully at this path Branch
-		{
-			cout<<"\n	--->>> Search Ended On this Branch / We Reached a DEAD END <<<---";
-			fflush(stdout);
-		}
-		// insert the children into the OPEN list according to their f values
-    	while (childList != NULL)                     
-		{
-  		    curChild  = childList;
-  			childList = childList->next;
-		    // set up the rest of the child node details
-  			curChild->parent = current;
-  			curChild->depth = current->depth + 1;
-  			curChild->id = ID++;
-  			curChild->next = NULL;
-  			curChild->prev = NULL;
-  			curChild->g_value = Calculate_g(curChild);
-      		curChild->h_value = Calculate_h(curChild);
-  			curChild->f_value = curChild->g_value + curChild->h_value;
-			Node * p;
-			// check if the child is already in the open list
-			if( (p = openList->Find(curChild)))
-			{
-  				if (p->f_value <= curChild->f_value && (p->direction == curChild->direction))       
-				{
-	        		FreeNode(curChild);
-  					curChild = NULL;
-				}
-				// the child is a shorter path to this point, delete p from  the closed list
-				else 
-  				if (p->f_value > curChild->f_value && (p->direction == curChild->direction))
-				{
-					openList->Remove(p);
-				 	//cout<<"\n	--->>> Opened list -- Node is deleted, current child X="<<curChild->location.x<<" Y="<<curChild->location.y<<" has shorter path<<<---";
-					fflush(stdout);
+};
 
-				}					
-			}
-			// test whether the child is in the closed list (already been there)			
-			if (curChild)
-			if((p = closedList->Find(curChild)))
-			{
-  				if (p->f_value <= curChild->f_value && p->direction == curChild->direction)       
-				{
-	        		FreeNode(curChild);
-  					curChild = NULL;
-				}
-				// the child is a shorter path to this point, delete p from  the closed list
-				else 
-				{
-					/* This is the tricky part, it rarely happens, but in my case it happenes all the time :s
-					 * Anyways, we are here cause we found a better path to a node that we already visited, we will have to
-					 * Update the cost of that node and ALL ITS DESCENDENTS because their cost is parent dependent ;)
-					 * Another Solution is simply to comment everything and do nothing, doing this, the child will be added to the
-					 * Open List and it will be investigated further later on.
-					 */
-					//closedList->Remove(p);
-				 	//cout<<"\n	--->>> Closed list -- Node is deleted, current child X="<<curChild->location.x<<" Y="<<curChild->location.y<<" has shorter path<<<---";
-					fflush(stdout);
-
-				}					
-			}
-			// ADD the child to the OPEN List
-			if (curChild)
-			{
-				openList->Add(curChild);
-			}	 		
-    	}
-		// put the current node onto the closed list, ==>> already visited List
-		closedList->Add(current);
-		// Test to see if we have expanded too many nodes without a solution
-    	if (current->id > this->MAXNODES*2)     	
-		{
-	    	cout<<"\n	--->>>	Expanded more than the maximum allowable nodes of MAXNODE="<<this->MAXNODES<<" Terminating ...";
-			fflush(stdout);
-			//Delete Nodes in Open and Closed Lists
-			closedList->Free();
-			openList->Free();
-			return 0; // Expanded more than the maximium nodes state
-    	}
- 	}					       // end of OPEN loop
-  	// if we got here, then there is no path to the goal
-  	// delete all nodes on CLOSED since OPEN is now empty
-	closedList->Free();
-  	cout<<"\n	--->>>No Path Found<<<---";
-  	return -1; // No Path Found
-};
-double PathPlanner:: Calculate_g(Node *n) // define the g function as parent plus 1 step
-{
-	double cost;
-	if(n == NULL || n->parent==NULL)
-		return 0.0;
-	cost = n->parent->g_value + sqrt(pow(n->location.x - n->parent->location.x,2) + pow(n->location.y - n->parent->location.y,2) );
-	return cost;
-};
-double PathPlanner::Calculate_h(Node *n) //define the h function as the Euclidean distance to the goal + turning penalty
-{
-	double h=0,angle_cost=0,obstacle_penalty=0,reverse_penalty=0,delta_d=0;
-	if(n == NULL)
-		return(0);
-	// Using the Euclidean distance
-	h = sqrt(pow(this->end.x - n->location.x,2) + pow(this->end.y - n->location.y,2));
-	//h = 0;
-	if (n->parent != NULL) // Adding the Angle cost, we have to uniform the angle representation to the +ve rep or we well get a non sense result
-	{
-		angle_cost = anglediff(n->angle,n->parent->angle); // in radians
-		delta_d = sqrt(pow(n->location.x - n->parent->location.x,2) + pow(n->location.y - n->parent->location.y,2) );
-	}
-	obstacle_penalty = n->nearest_obstacle;
-	if(n->direction == BACKWARD)
-		reverse_penalty = delta_d;
-	else
-		reverse_penalty = 0;
-	// 0.555 is the AXLE Length 
-	return ( h*(1 + reverse_penalty ) + 0.555 * angle_cost + obstacle_penalty*delta_d);
-};
-// define the goalNode function
-bool PathPlanner :: GoalReached (Node *n) 
-{
-	double angle_diff, delta_d;
-	delta_d = sqrt(pow(n->location.x - this->end.x,2)+pow(n->location.y - this->end.y,2));
-	if (n->direction == FORWARD)
-		angle_diff =	anglediff(this->final_angle,n->angle);
-	else
-	{
-		angle_diff =	anglediff(this->final_angle,n->angle + M_PI);
-	}
-	if ( delta_d <= 0.7  && angle_diff <= DTOR(30))
-	{
-		cout<<" \n Desired Final Orientation ="<<RTOD(this->final_angle)<<" Current="<<RTOD(n->angle);
-		cout<<"\n Reached Destination with Diff Orientation="<< RTOD(angle_diff);
-		return 1;
-	}
-	return 0;
-};
-void PathPlanner::Translate(Point  P, double theta) // Rotates and Translates the check points according to the vehicle position and orientation
+void PathPlanner::Translate(QPointF  P, double theta) // Rotates and Translates the check points according to the vehicle position and orientation
 {
 	for(int i=0;i<this->number_of_point_to_check;i++)
 	{
@@ -768,7 +537,7 @@ void PathPlanner::Translate(Point  P, double theta) // Rotates and Translates th
 	}
 };
 // Rotates and Translates the check points according to the vehicle position and orientation
-void PathPlanner::Translate_edges(Point  P, double theta) 
+void PathPlanner::Translate_edges(QPointF  P, double theta) 
 {
 	for(int i=0;i<4;i++)
 	{
@@ -778,7 +547,7 @@ void PathPlanner::Translate_edges(Point  P, double theta)
 	}
 };
 // Test for whether a point is in an obstacle or not
-int PathPlanner :: Obstacle(Point P, double angle) 
+int PathPlanner :: Obstacle(QPointF P, double angle) 
 {
 	int m,n;
 	// Rotates and Translates the check points according to the vehicle position and orientation
@@ -800,7 +569,7 @@ void PathPlanner::draw_tree()
 {
 	GtkWidget * temp;
 	//temp = lookup_widget (GTK_WIDGET(widget),"drawingarea1");
-	Point l_start,l_end;
+	QPointF l_start,l_end;
 	for (unsigned int i =0; i<tree.size();i++)
 		{
 			l_start = tree[i].location;
@@ -826,7 +595,7 @@ void PathPlanner::draw_path()
 	double angle;
 	GtkWidget * temp;
 	//temp = lookup_widget (GTK_WIDGET(widget),"drawingarea1");
-	Point l_start,l_end,E,S;
+	QPointF l_start,l_end,E,S;
   	Node *p;
   	p = this->path;
 	while(p != NULL && p->next!=NULL)
@@ -863,7 +632,7 @@ void PathPlanner::draw_path()
 };
 Node *PathPlanner :: MakeChildrenNodes(Node *parent)
 {
-	Point P; 
+	QPointF P; 
 	Node  *p, *q;
 	double start_angle,end_angle,angle,angle_difference,discrete_angle,robot_angle,child_angle,angle_resolution = DTOR(10);
 	bool collides = FALSE;

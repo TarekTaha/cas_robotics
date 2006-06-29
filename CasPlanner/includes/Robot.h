@@ -1,7 +1,8 @@
 #ifndef ROBOT_H_
 #define ROBOT_H_
-#include<Point.h>
-#include<vector>
+#include <QPointF>
+#include <QString>
+#include <vector>
 using std::vector;
 namespace CasPlanner
 {
@@ -9,10 +10,12 @@ namespace CasPlanner
 class Robot
 	{
 	public :
-		//Point * check_points;
 		double length,width;
-		vector<Point> check_points;
-		void SetCheckPoints(int,Point *);
+		// Motion model
+		QString model;
+		vector<QPointF> check_points;
+		void SetCheckPoints(vector<QPointF>);
+		Robot (double l, double w,QString model )
 		Robot();
 		~Robot();	
 	};

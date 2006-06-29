@@ -1,8 +1,9 @@
 #ifndef ROBOTMANAGER_H
 #define ROBOTMANAGER_H
 #include "CommManager.h"
+#include "planningmanager.h"
 #include "configfile.h"
-class RobotManager: public CommManager //public Planner, public MapManager
+class RobotManager: public CommManager, public PlanningManager //public Planner, public MapManager
 {
 Q_OBJECT
     public:         
