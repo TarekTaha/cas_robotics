@@ -5,7 +5,8 @@ HEADERS +=  gui/CommManager.h\
 			gui/interfaceprovider.h\
 			gui/laserrender.h\
 			gui/mainwindow.h\
-			gui/mapviewer.h\			
+			gui/mapviewer.h\	
+			gui/MapPainter.h\		
 			gui/navigationtab.h\
 			gui/ogrender.h\
 			gui/playerinterface.h\
@@ -42,6 +43,7 @@ SOURCES +=  gui/CommManager.cpp\
 			gui/main.cpp\
 			gui/mainwindow.cpp\
 			gui/mapviewer.cpp\			
+			gui/MapPainter.cpp\
 			gui/navigationtab.cpp\
 			gui/ogrender.cpp\			
 			gui/playerinterface.cpp\

@@ -42,7 +42,7 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     //Comms is now set up, connect map view to map manager. 
     qDebug("Initializing Tabs"); 
     connect(emergStop, SIGNAL(pressed()), robotManager, SLOT(emergencyStop())); 
-    statusLogger->addStatusMsg(0,1,"Stating comms ... done"); 
+    statusLogger->addStatusMsg(0,1,"GUI started successfully ... "); 
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(logData()));
     timer->start(60000);
