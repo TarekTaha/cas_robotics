@@ -17,7 +17,6 @@ MapViewer::MapViewer(QWidget *parent)
  showPointclouds(true), 
  showPatchBorders(true)
 {
-	//pixmap = QPixmap("resources/casareaicp.png");
   	clearColor = Qt::black;
     setFocusPolicy(Qt::StrongFocus);
     makeCurrent(); 
@@ -27,11 +26,10 @@ MapViewer::MapViewer(QWidget *parent)
 
 GLuint MapViewer::makeObject()
 {
-    //glOrtho(-aspectRatio, aspectRatio, -1, 1, -1000, 1000); 
     static const double coords[4][3] = 
-    //{{ +aspectRatio, -aspectRatio, -1 }, { -aspectRatio, -aspectRatio, -1 }, 
-    //{ -aspectRatio, +aspectRatio, -1 }, { +aspectRatio, +aspectRatio, -1 } };
-   {{ +1, -1, -1 }, { -1, -1, -1 }, { -1, +1, -1 }, { +1, +1, -1 } };
+   //{{ +aspectRatio, -1, -1 }, { -aspectRatio, -1, -1 }, 
+   //{ -aspectRatio, +1, -1 }, { +aspectRatio, +1, -1 } };
+	{{ +1, -1, 0}, { -1, -1, 0 }, { -1, +1, 1 }, { +1, +1, 0} };
 
     GLuint texture;
     texture = bindTexture(QPixmap(QString("/home/BlackCoder/workspace/CasPlanner/resources/casareaicp.png")),GL_TEXTURE_2D);
@@ -62,7 +60,8 @@ QSize MapViewer::minimumSizeHint()
 
 void MapViewer::initializeGL()
 {
-	
+    glClearColor(0.70f, 0.7f, 0.7f, 1.0f);
+    //aspectRatio = 1;
 	if (!sharedObject)
     	sharedObject = makeObject();
 
@@ -70,34 +69,36 @@ void MapViewer::initializeGL()
     glEnable(GL_CULL_FACE);
     glEnable(GL_TEXTURE_2D);
     
-    //glClearColor(0.70f, 0.7f, 0.7f, 1.0f);
-    // Some stupid crap for QT
-    //renderText(0,0,0,""); 
+    renderText(0,0,0,""); 
+    glFlush();
 }
 
 void MapViewer::resizeGL(int w, int h)
 {
 	int side = qMin(w, h);
-//    glViewport((w - side) / 2, (h - side) / 2, side, side);
-//    glMatrixMode(GL_PROJECTION);
-//    glLoadIdentity();
-//    glOrtho(-0.5, +0.5, +0.5, -0.5, 4.0, 15.0);
-//    glMatrixMode(GL_MODELVIEW);
-    //qDebug("resizeGL on OGRenderer called");
+//	glViewport((w - side) / 2, (h - side) / 2, side, side);
+//  glMatrixMode(GL_PROJECTION);
+//  glLoadIdentity();
+//  glOrtho(-0.5, +0.5, +0.5, -0.5, 4.0, 15.0);
+//  glMatrixMode(GL_MODELVIEW);
+//    qDebug("resizeGL on OGRenderer called");
     screenWidth = w;
     screenHeight = h;
-    aspectRatio = ((float) w)/((float) h); 
+    aspectRatio = ((float) w)/((float) h);
+
+    glViewport(0,0,w,h); 
     glMatrixMode(GL_PROJECTION); 
     glLoadIdentity(); 
     //qDebug("Aspect ratio set to %f", aspectRatio); 
-    glOrtho(-aspectRatio, aspectRatio, -1, 1, -1000, 1000); 
-    //glOrtho(-0.5, +0.5, +0.5, -0.5, 4.0, 15.0);
+    glOrtho(-aspectRatio, aspectRatio, -1, 1, -5, 5); 
+    //glOrtho(-w/2,w/2, -h/2, h/2, -5, 15); 
+    //glOrtho(0, 10, 0, 10, 4.0, 15.0);
+    //glOrtho(0, w, h, 0, -1, 1);
     //gluPerspective(60, aspectRatio, 1,1000); 
     glMatrixMode(GL_MODELVIEW); 
     glLoadIdentity();
     //glTranslatef(0,0,-2);
-    glViewport((w - side) / 2, (h - side) / 2, side, side);
-    //glViewport(0,0,w,h); 
+    //glViewport((w - side) / 2, (h - side) / 2, side, side);
     updateGL();
 }
 void MapViewer::update()
@@ -272,63 +273,65 @@ void MapViewer::update()
 void MapViewer::paintGL()
 {
 	qDebug("paintGL on OGRenderer called");
-//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
-//    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//    glEnable(GL_BLEND);
-//    glDisable(GL_DEPTH_TEST);
-//    glEnable(GL_POINT_SMOOTH); 
-//    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST); 
-//    glEnable(GL_LINE_SMOOTH); 
-//    glEnable(GL_POLYGON_SMOOTH);
-//    glMatrixMode(GL_MODELVIEW);
-//    glPushMatrix();
-//    glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
-//    glColor4f(0,0,0,1); 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+    glEnable(GL_NORMALIZE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_POINT_SMOOTH); 
+    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST); 
+    glEnable(GL_LINE_SMOOTH); 
+    glEnable(GL_POLYGON_SMOOTH);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
+    glColor4f(0,0,0,1); 
+    //Underline the Grid Size:
 //    glBegin(GL_LINES); 
-//    glVertex2f(zoomFactor*aspectRatio*0.90-1, -0.9*zoomFactor);
-//    glVertex2f(zoomFactor*aspectRatio*0.90, -0.9*zoomFactor); 
+//	    glVertex2f(zoomFactor*aspectRatio*0.90-1, -0.9*zoomFactor);
+//    	glVertex2f(zoomFactor*aspectRatio*0.90, -0.9*zoomFactor); 
 //    glEnd(); 
-//    renderText(zoomFactor*aspectRatio*0.90-1, -0.9*zoomFactor, 0, "scale: 1 m");
-//    glRotatef(pitch,1,0,0); 
-//    glRotatef(yaw,0,0,1); 
-// 
-//    glTranslatef(xOffset, yOffset, zOffset);
-//
-//    if(showGrids){
-//	for(int i=-(int) zoomFactor*3; i < (int) zoomFactor*3; i++){
-//	    glBegin(GL_LINES);
-//	    if(i==0){
-//		glColor4f(0,0,0,0.5);  
-//	    }
-//	    else {
-//		glColor4f(0.5,0.5,0.5,0.5); 
-//	    }
-//	    glVertex3f(-zoomFactor*3, i, 0); 
-//	    glVertex3f(zoomFactor*3, i, 0); 
-//	    glVertex3f(i,-zoomFactor*3, 0); 
-//	    glVertex3f(i, zoomFactor*3, 0); 
-//	    glEnd(); 
-//	}
-//    }
-//    //Ok, now let's draw dem maps.
-//    glColor4f(0,0,0,1.0);
-//    glPushMatrix();  
-//    glPopMatrix(); 
-//    
-//    glDisable(GL_BLEND);
-//    glEnable(GL_DEPTH_TEST);
-//    glDisable(GL_POINT_SMOOTH); 
-//    glDisable(GL_LINE_SMOOTH); 
-//    glDisable(GL_POLYGON_SMOOTH);
-//    glPopMatrix();
+    renderText(zoomFactor*aspectRatio*0.90-3, -0.9*zoomFactor, 0, "Grid Size: 1 m");
+    glRotatef(pitch,1,0,0); 
+    glRotatef(yaw,0,0,1); 
+ 
+    glTranslatef(xOffset, yOffset, zOffset);
+
+    if(showGrids)
+    {
+		for(int i=-(int) zoomFactor*3; i < (int) zoomFactor*3; i++)
+		{
+		    glBegin(GL_LINES);
+		    if(i==0)
+		    {
+				glColor4f(0,0,0,0.5);  
+		    }
+		    else 
+		    {
+				glColor4f(0.5,0.5,0.5,0.5); 
+		    }
+		    glVertex3f(-zoomFactor*3, i, 0); 
+		    glVertex3f(zoomFactor*3, i, 0); 
+		    glVertex3f(i,-zoomFactor*3, 0); 
+		    glVertex3f(i, zoomFactor*3, 0); 
+		    glEnd(); 
+		}
+    }
+    //Ok, now let's draw dem maps.
+    glColor4f(0,0,0,1.0);
+    glPushMatrix();  
+    glPopMatrix(); 
     
-    qglClearColor(clearColor);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();
-    glTranslated(0.0, 0.0, -10.0);
-    glRotated(90.0 / 16.0, 1.0, 0.0, 0.0);
-    glRotated(25.0 / 16.0, 0.0, 1.0, 0.0);
-    glRotated(45.0 / 16.0, 0.0, 0.0, 1.0);
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_POINT_SMOOTH); 
+    glDisable(GL_LINE_SMOOTH); 
+    glDisable(GL_POLYGON_SMOOTH);
+    glPopMatrix();
+//    glTranslated(0.0, 0.0, -10.0);
+//    //glRotated(90.0 / 16.0, 1.0, 0.0, 0.0);
+//    //glRotated(25.0 / 16.0, 0.0, 1.0, 0.0);
+//    //glRotated(45.0 / 16.0, 0.0, 0.0, 1.0);
     glCallList(sharedObject);    
 
 }
@@ -346,7 +349,8 @@ void MapViewer::setShowOGs(int state)
     update(); 
 }
 
-void MapViewer::setShowSnaps(int state){
+void MapViewer::setShowSnaps(int state)
+{
     if(state==0){
 	showSnaps = false;  
     }
@@ -355,7 +359,8 @@ void MapViewer::setShowSnaps(int state){
     }
     update();
 }
-void MapViewer::setShowGrids(int state){
+void MapViewer::setShowGrids(int state)
+{
     if(state==0){
 	showGrids = false;  
     }
@@ -365,7 +370,8 @@ void MapViewer::setShowGrids(int state){
     update();
 }
 
-void MapViewer::setShowRobots(int state){
+void MapViewer::setShowRobots(int state)
+{
     if(state==0){
 	showRobots = false;  
     }
@@ -375,22 +381,28 @@ void MapViewer::setShowRobots(int state){
     update();
 }	
 	
-void MapViewer::setShowPointclouds(int state){
-    if(state==0){
-	showPointclouds = false;  
+void MapViewer::setShowPointclouds(int state)
+{
+    if(state==0)
+    {
+		showPointclouds = false;  
     }
-    else {
-	showPointclouds = true; 
+    else 
+    {
+		showPointclouds = true; 
     }
     update(); 
 }
 
-void MapViewer::setShowPatchBorders(int state){
-    if(state==0){
-	showPatchBorders = false;  
+void MapViewer::setShowPatchBorders(int state)
+{
+    if(state==0)
+    {
+		showPatchBorders = false;  
     }
-    else {
-	showPatchBorders = true; 
+    else 
+    {
+		showPatchBorders = true; 
     }
     update(); 
 }
@@ -642,7 +654,16 @@ void MapViewer::setShowPatchBorders(int state){
 //    glPopMatrix();
 //    
 //}
+void MapViewer::mousePressEvent(QMouseEvent *me)
+{
+	double x = me->x();
+	double y = me->y();
+    qDebug("Mouse pressed x: %f y: %f",x,y); 
+}
 
+void MapViewer::mouseReleaseEvent(QMouseEvent *me)
+{
+}
 void MapViewer::keyPressEvent(QKeyEvent *e)
 {
     qDebug("Key Pressed"); 
@@ -750,7 +771,7 @@ void MapViewer::keyPressEvent(QKeyEvent *e)
 		fudgeFactor=3;
 		qDebug("Fudge factor set to %f", fudgeFactor); 	
     }
-    update(); 
+    updateGL(); 
 }
 
 void MapViewer::focusInEvent(QFocusEvent *fe)

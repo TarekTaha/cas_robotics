@@ -16,6 +16,8 @@ Q_OBJECT
         QSize sizeHint();
         QSize minimumSizeHint();
 		void keyPressEvent(QKeyEvent *e);
+		void mousePressEvent(QMouseEvent *me);
+		void mouseReleaseEvent(QMouseEvent *me);
 		void focusInEvent(QFocusEvent *fe);
 		void focusOutEvent(QFocusEvent *fe);
 		GLuint makeObject();

@@ -3,11 +3,13 @@
 
 NavContainer::NavContainer(QWidget *parent)
  : QWidget(parent),
-   mapViewer(this), 
+   //mapViewer(this), 
+   mapPainter(this),
    navControlPanel(this)
 {
     QVBoxLayout *vLayout = new QVBoxLayout; 
-    vLayout->addWidget(&mapViewer,4); 
+    //vLayout->addWidget(&mapViewer,4); 
+    vLayout->addWidget(&mapPainter,4); 
     vLayout->addWidget(&navControlPanel,1); 
     setLayout(vLayout); 
 //    connect(&navControlPanel.showGrids, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowGrids( int ))); 
@@ -233,7 +235,8 @@ void NavControlPanel::captureMap()
     sleep(1);
     if(ok)
     {
-		QImage capturedMap = ((NavContainer *) parent())->mapViewer.captureMap();
+		//QImage capturedMap = ((NavContainer *) parent())->mapViewer.captureMap();
+		//QImage capturedMap = ((NavContainer *) parent())->mapPainter.captureMap();
 		//mapManager->addMapSnapshot(capturedMap, comment); 
     }
 }

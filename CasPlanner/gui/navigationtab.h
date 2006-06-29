@@ -2,13 +2,14 @@
 #define NAVIGATIONTAB_H
 
 #include <QWidget>
-#include <mapviewer.h>
 #include <QVBoxLayout>
 #include <QCheckBox>
 #include <QDoubleSpinBox>
 #include <QTreeWidget>
 #include <QPushButton>
 #include <QHash>
+#include <mapviewer.h>
+#include <MapPainter.h>
 
 class NavControlPanel: public QWidget 
 {
@@ -64,10 +65,6 @@ Q_OBJECT
 		friend class NavContainer;
 		static unsigned *image, *null;
         static int width, height, components;
-		//static const int RobotNodeType = QTreeWidgetItem::UserType+1; 
-		//static const int PatchNodeType = QTreeWidgetItem::UserType+2;
-		//static const int SnapNodeType = QTreeWidgetItem::UserType+3;
-	
 };
 
 class NavContainer : public QWidget
@@ -78,7 +75,8 @@ Q_OBJECT
 	~NavContainer();
 	//void setMapManager(QTMapDataInterface *mapManager);
     private:
-	MapViewer mapViewer;
+	//MapViewer mapViewer;
+	MapPainter mapPainter;
 	NavControlPanel navControlPanel; 
 	//QTMapDataInterface *mapManager; 
 	friend class NavControlPanel; 
