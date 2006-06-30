@@ -7,15 +7,18 @@ HEADERS +=  gui/CommManager.h\
 			gui/mainwindow.h\
 			gui/mapviewer.h\	
 			gui/MapPainter.h\		
+			gui/MapManager.h\
 			gui/navigationtab.h\
 			gui/ogrender.h\
 			gui/playerinterface.h\
+			gui/planningmanager.h\
 			gui/robotmanager.h\
 			gui/sensors.h\
 			gui/sensorsgui.h\
 			gui/speedrender.h\
 			gui/statusbar.h\
 			gui/tabcontainer.h\
+			includes/Astar.h\
 			includes/C2DMatrix.h\
 			includes/common.h\
 			includes/defs.h\
@@ -23,11 +26,9 @@ HEADERS +=  gui/CommManager.h\
 			includes/geometry.h\
 			includes/InvertedAABBox2D.h\
 			includes/LList.h\
-			includes/Map.h\
 			includes/Node.h\
-			includes/PathFollower.h\
+			#includes/PathFollower.h\
 			includes/PathPlanner.h\
-			includes/Point.h\
 			includes/Robot.h\
 			includes/SearchSpaceNode.h\
 			includes/Transformations.h\
@@ -44,22 +45,23 @@ SOURCES +=  gui/CommManager.cpp\
 			gui/mainwindow.cpp\
 			gui/mapviewer.cpp\			
 			gui/MapPainter.cpp\
+			gui/MapManager.cpp\
 			gui/navigationtab.cpp\
 			gui/ogrender.cpp\			
 			gui/playerinterface.cpp\
+			gui/planningmanager.cpp\
 			gui/robotmanager.cpp\
 			gui/sensors.cpp\
 			gui/sensorsgui.cpp\
 			gui/speedrender.cpp\
 			gui/statusbar.cpp\
 			gui/tabcontainer.cpp\
+			src/Astar.cpp\
 		    src/ForceField.cpp\
 		    src/LList.cpp\
-		    src/Map.cpp\
 		    src/Node.cpp\
-		    src/PathFollower.cpp\
+		    #src/PathFollower.cpp\
 		    src/PathPlanner.cpp\
-		    src/Point.cpp\
 		    src/Robot.cpp\
 		    src/SearchSpaceNode.cpp\
 		    src/Vector2d.cpp

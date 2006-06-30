@@ -41,7 +41,7 @@ RobotManager::RobotManager(QStringList configFiles)
 		    }
 		    if(sectionName == "Planner")
 		    {
-				//readPlannerConfigs(cf, i); 
+				readPlannerConfigs(cf, i); 
 		    }
 		    if(sectionName == "MapManager")
 		    {
