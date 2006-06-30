@@ -48,29 +48,31 @@ PathFollower::~PathFollower()
 	if(log)	
 		fclose(file);
 };
-double PathFollower::Magnitude( Point p1, Point p2 )
+double PathFollower::Magnitude( QPointF p1, QPointF p2 )
 {
-    Point Vector;
-    Vector.x = p2.x - p1.x;
-    Vector.y = p2.y - p1.y;
-    return sqrt( Vector.x * Vector.x + Vector.y * Vector.y);
+    QPointF Vector;
+    Vector = p2 - p1;
+//    Vector.x = p2.x() - p1.x();
+//    Vector.y = p2.y() - p1.y();
+    return sqrt( Vector.x() * Vector.x() + Vector.y() * Vector.y());
 }
-double PathFollower::DistanceToLine( Point LineStart, Point LineEnd, Point P)
+double PathFollower::DistanceToLine( QPointF LineStart, QPointF LineEnd, QPointF P)
 {
 	double LineMag,distance;
 	LineMag = Magnitude(LineStart,LineEnd);
-	distance = (P.x*(LineStart.y - LineEnd.y) + P.y*(LineEnd.x - LineStart.x)+(LineStart.x*LineEnd.y - LineEnd.x*LineStart.y))/LineMag ;
+	distance = (P.x()*(LineStart.y() - LineEnd.y()) + P.y()*(LineEnd.x() - LineStart.x())
+				+(LineStart.x()*LineEnd.y() - LineEnd.x()*LineStart.y()))/LineMag ;
     	return distance;
 };
-double PathFollower::DistToLineSegment(Point LineStart, Point LineEnd, Point p)
+double PathFollower::DistToLineSegment(QPointF LineStart, QPointF LineEnd, QPointF p)
 {
-	Vector2D A(LineStart.x,LineStart.y),B(LineEnd.x,LineEnd.y),P(p.x,p.y);
+	Vector2D A(LineStart.x(),LineStart.y()),B(LineEnd.x(),LineEnd.y()),P(p.x(),p.y());
   	//if the angle between PA and AB is obtuse then the closest vertex must be A
-  	double dotA = (P.x - A.x)*(B.x - A.x) + (P.y - A.y)*(B.y - A.y);
+  	double dotA = (P.x() - A.x())*(B.x() - A.x()) + (P.y() - A.y())*(B.y() - A.y());
   	if (dotA <= 0) 
 		return Vec2DDistance(A, P);
 	//if the angle between PB and AB is obtuse then the closest vertex must be B
-  	double dotB = (P.x - B.x)*(A.x - B.x) + (P.y - B.y)*(A.y - B.y);
+  	double dotB = (P.x() - B.x())*(A.x() - B.x()) + (P.y() - B.y())*(A.y() - B.y());
    	if (dotB <= 0) 
 		return Vec2DDistance(B, P);
    	//calculate the point along AB that is the closest to P
@@ -154,10 +156,10 @@ void PathFollower::Localize()
 		AddText("\n --->>> NO PATH to Localize<<<--- ");
 		return;
 	}
-	pose[0]= path->location.x;
-	pose[1]= path->location.y;
+	pose[0]= path->location.x();
+	pose[1]= path->location.y();
 	pose[2]= path->angle;
-	cout << "\n Default Pose given to the Localizer X="<<path->location.x<<" Y="<<path->location.y<<" Theta="<<path->angle;
+	cout << "\n Default Pose given to the Localizer X="<<path->location.x()<<" Y="<<path->location.y()<<" Theta="<<path->angle;
 	cout << "\n Tracking Distance="<<tracking_distance<<" Kd="<<kd<<" KTheta="<<kt;
 	pose_var[0][0]=0.5;
 	pose_var[0][1]=0.5;

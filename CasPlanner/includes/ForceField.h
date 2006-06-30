@@ -1,8 +1,8 @@
 #ifndef FORCEFIELD_H_
 #define FORCEFIELD_H_
 #include<Robot.h>
-#include<Point.h>
-#include<vector>
+#include<QPointF>
+#include<QVector>
 using std::vector;
 namespace CasPlanner
 {
@@ -12,11 +12,11 @@ public:
 	ForceField();
 	ForceField(Robot * robot);
 	virtual ~ForceField();
-	void GenerateField(Point position,vector<Point> laser_set,Point Goal);
+	void GenerateField(QPointF position,QVector<QPointF> laser_set,QPointF Goal);
 private :
 	double robot_v, robot_w,
 	       cntrl_v, cntrl_w;
-	vector <Point> laser_readings;
+	QVector <QPointF> laser_readings;
 };
 }
 #endif /*FORCEFIELD_H_*/

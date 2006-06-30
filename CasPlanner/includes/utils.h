@@ -16,8 +16,8 @@
 #include <cassert>
 #include <iomanip>
 #include <math.h>
-
-
+#include <QPointF>
+#include <QVector>
 
 //a few useful constants
 const int     MaxInt    = (std::numeric_limits<int>::max)();
@@ -289,8 +289,66 @@ inline void DeleteSTLMap(map& m)
   }
 }
 */
+////////////////////////////////////////////////////////////////////////////////
+//                                 Maths stuff
+////////////////////////////////////////////////////////////////////////////////
+#define FORWARD 1
+#define BACKWARD -1
 
+#define Max(x, y) ((x) > (y) ? (x) : (y))
+/*
+ * Min
+ * Return the minimum of two numbers.
+ */
+#define Min(x, y) ((x) < (y) ? (x) : (y))
+/*
+ * Abs
+ * Return the absolute value of the argument.
+ */
+#define Abs(x) ((x) >= 0 ? (x) : -(x))
+//
+/* This function takes two angles in radians
+ * and returns the smallest angle between them in radians
+ */
+ 
+#ifndef M_PI
+	#define M_PI        3.14159265358979323846
+#endif
 
+// Convert radians to degrees
+#define RTOD(r) ((r) * 180 / M_PI)
 
+// Convert degrees to radians
+#define DTOR(d) ((d) * M_PI / 180)
 
+// Normalize angle to domain -pi, pi
+#define NORMALIZE(z) atan2(sin(z), cos(z))
+
+inline double Dist(QPointF a, QPointF b)
+{
+	return sqrt(pow(a.x() - b.x(),2) + pow(a.y() - b.y(),2));
+}
+
+typedef struct _pose
+{
+	QPointF p;
+	double phi;
+} Pose;
+
+inline double anglediff(double alfa, double beta) 
+{
+	double diff;
+	if( alfa < 0 ) alfa+= 2*M_PI; 	if( alfa > 2*M_PI) alfa-= 2*M_PI;
+	if( beta < 0 ) beta+= 2*M_PI;	if( beta > 2*M_PI) beta-= 2*M_PI;		
+	diff = alfa - beta;
+	if ( diff >  M_PI) diff=( 2*M_PI  - diff);
+	if ( diff < -M_PI) diff=(-2*M_PI - diff);
+	return Abs(diff);
+};
+
+typedef struct _tree
+	{
+		QPointF location;
+		QVector <QPointF> children;
+	}   Tree;
 #endif

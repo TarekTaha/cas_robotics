@@ -17,6 +17,7 @@
 #include<gtk/gtk.h>
 #include<glib/gprintf.h>
 #include<Vector2D.h>
+#include<QPointF>
 namespace CasPlanner
 {
 enum {WHEELCHAIR,STAGE};
@@ -38,7 +39,7 @@ class PathFollower
 				estimate_y,estimate_theta,velocity,delta_t,last_time;;
 		bool	log,position_found,end_reached,segment_navigated;
 		int		platform,direction;
-		Point 	old_amcl,begin,amcl_location,tracking_point,ni,SegmentStart,SegmentEnd,
+		QPointF	old_amcl,begin,amcl_location,tracking_point,ni,SegmentStart,SegmentEnd,
 				EstimatedPos;
 		GtkWidget 		*widget;
 		GTimer *timer2,*delta_timer;
@@ -54,14 +55,14 @@ class PathFollower
 		PathFollower(Node * p,double kd, double kt,double ko,double tracking_distance,GtkWidget *widget,bool log,PathPlanner *Planner,GdkPixbuf *pixbuf);
 		~PathFollower(); 
 		void Connect(int);
-		void RenderGui(Point,double);
+		void RenderGui(QPointF,double);
 		void FollowPath(Node *path);
 		void AddText( char const * text);
 		void ResetWheelchair();
 		void Localize();
-		double Magnitude( Point p1, Point p2 );
-		double DistanceToLine(Point LineStart, Point LineEnd, Point P);
-		double DistToLineSegment(Point LineStart, Point LineEnd, Point p);
+		double Magnitude( QPointF p1, QPointF p2 );
+		double DistanceToLine(QPointF LineStart, QPointF LineEnd, QPointF P);
+		double DistToLineSegment(QPointF LineStart, QPointF LineEnd, QPointF p);
 		ControlAction Controller(double angle_ref,double angle_currnet,double displacement,int direction);
 };
 

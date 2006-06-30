@@ -11,15 +11,15 @@ class StatusLogger : public QObject
 {
 Q_OBJECT
     public:
-	StatusLogger(QStatusBar *status);
-	~StatusLogger();
+		StatusLogger(QStatusBar *status);
+		~StatusLogger();
     public slots:
-	void addStatusMsg(int messageId, int messageType, QString message); 
-	void showLog();
+		void addStatusMsg(int messageId, int messageType, QString message); 
+		void showLog();
     private:
-	QStatusBar *statusBar; 
-	QPushButton *logButton;
-	QTextEdit log; 
+		QStatusBar *statusBar; 
+		QPushButton *logButton;
+		QTextEdit log; 
 };
 
 #endif

@@ -13,7 +13,7 @@ Node :: ~Node ()
 	};
 bool Node ::operator == (Node a)
 	{
-	if (this->location.x == a.location.x && this->location.y == a.location.y)
+	if (this->location.x() == a.location.x() && this->location.y() == a.location.y())
 		return 1;
 	return 0;		
 	}
