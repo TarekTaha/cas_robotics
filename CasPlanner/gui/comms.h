@@ -10,7 +10,8 @@ class Comms: public QObject
     public:
         virtual int config(ConfigFile *cf, int sectionid)=0;
         virtual int start()=0;
-        virtual int stop()=0; 
+        virtual int stop()=0;
+        bool connected;
 		virtual QString getName()
 		{
 		    return name; 
@@ -22,7 +23,9 @@ class Comms: public QObject
         virtual void emergencyStop()=0; 
         virtual void emergencyRelease()=0; 
     protected:
-        QString name;
+		bool startConnected,activateControl,laserEnabled,ptzEnabled,occMapEnabled;
+    	QString name,playerIp; 
+        int playerPort,positionControlId,laserId,ptzId,mapId;
 };
 
 #endif 

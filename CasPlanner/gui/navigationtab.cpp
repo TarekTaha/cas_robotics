@@ -1,9 +1,10 @@
 #include "navigationtab.h"
 #include <QProcess>
 
-NavContainer::NavContainer(QWidget *parent)
+NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
  : QWidget(parent),
    //mapViewer(this), 
+   robotManager(rob),
    mapPainter(this),
    navControlPanel(this)
 {
@@ -25,12 +26,17 @@ NavContainer::NavContainer(QWidget *parent)
 //    connect(&mapViewer, SIGNAL(moveMODown()), &(navControlPanel.ySB), SLOT(stepDown())); 
 //    connect(&mapViewer, SIGNAL(yawMOPos()), &(navControlPanel.yaSB), SLOT(stepUp())); 
 //    connect(&mapViewer, SIGNAL(yawMONeg()), &(navControlPanel.yaSB), SLOT(stepDown()));
+	  connect(&navControlPanel.pathPlanBtn, SIGNAL(pressed()),this, SLOT(Plan()));
 }
 
 NavContainer::~NavContainer()
 {
+	
 }
-
+void NavContainer::Plan()
+{
+	robotManager->planner->FindPath(mapPainter.getImage(),mapPainter.getStart(),mapPainter.getEnd());
+}
 NavControlPanel::NavControlPanel(QWidget *parent):
 	QWidget(parent),
 	planningGB("Planning"),

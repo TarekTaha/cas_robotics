@@ -2,6 +2,13 @@
 
 CommManager::CommManager():Comms()
 {
+//	startConnected = false;
+//	activateControl = false;
+//	laserEnabled = false;
+//	ptzEnabled = false;
+//	occMapEnabled = false;
+//	startConnected = false;
+//	connected = false;
 }
 
 CommManager::~CommManager()
@@ -65,52 +72,60 @@ QVector<QPointF> CommManager::getLaserScan(int laserId)
 
 int CommManager::config( ConfigFile *cf, int sectionid)
 {
-    qDebug("\n*********************************************************************"); 	
    	name =                   cf->ReadString(sectionid, "name", "No-Name");
-   	startConnected =  (bool) cf->ReadInt(sectionid, "startConnected", 1);
-  	activateControl = (bool) cf->ReadInt(sectionid, "activateControl", 1);
-  	positionControlId =      cf->ReadInt(sectionid, "positionControlId", 0);
-  	laserEnabled =           cf->ReadInt(sectionid, "laserEnabled", 1);
-  	laserId =                cf->ReadInt(sectionid, "laserId", 0);
+   	startConnected =  (bool) cf->ReadInt   (sectionid, "startConnected", 1);
+  	activateControl = (bool) cf->ReadInt   (sectionid, "activateControl", 1);
+  	positionControlId =      cf->ReadInt   (sectionid, "positionControlId", 0);
+  	laserEnabled =           cf->ReadInt   (sectionid, "laserEnabled", 1);
+  	laserId =                cf->ReadInt   (sectionid, "laserId", 0);
 	playerIp =               cf->ReadString(sectionid, "playerIp", "127.0.0.1");
-	playerPort =             cf->ReadInt(sectionid, "playerPort", 6665);
-	occMapEnabled =   (bool) cf->ReadInt(sectionid, "occMapEnabled", 1);
-  	mapId =                  cf->ReadInt(sectionid, "mapId", 0);
-   	qDebug("Robot  name:\t%s", qPrintable(name)); 
-    qDebug("Robot Ip is:\t%s:%d", qPrintable(playerIp),playerPort); 
-  	qDebug("Supported Interfaces:");
-    if(startConnected)
+	playerPort =             cf->ReadInt   (sectionid, "playerPort", 6665);
+	occMapEnabled =   (bool) cf->ReadInt   (sectionid, "occMapEnabled", 1);
+  	mapId =                  cf->ReadInt   (sectionid, "mapId", 0);
+  	qDebug("Start Connected is %d",startConnected);
+  	if(startConnected)
 	{
-	   	player = new PlayerInterface(this, playerIp, playerPort);
-	  	//Enable Robot Control ?
-	  	if(activateControl)
-	  	{
-	   	  	qDebug("	- Position/Drive Contrl."); 
-	    	player->enableControl(positionControlId);
-	  	}
-	  	//Laser
-	  	if(laserEnabled)
-	  	{
-	   	  	qDebug("	- Laser."); 
-	    	player->enableLaser(0, laserId);
-	  	}
-	  	if(occMapEnabled)
-	  	{
-	   	  	qDebug("	- Occupancy Map."); 
-	    	player->enableMap(mapId);
-	  	}
+		this->start();
 	}
-    qDebug("*********************************************************************"); 
   	return 1;
 }
 int CommManager::start()
 {
-    if(startConnected)
-    {
-        connect(player, SIGNAL(newData()), this, SIGNAL(newData()));
-        player->start();
-    }
-    return 1; 
+    qDebug("-> Starting Communication Manager."); 
+    qDebug("\n*********************************************************************"); 	
+   	qDebug("Robot  name:\t%s", qPrintable(name)); 
+    qDebug("Robot Ip is:\t%s:%d", qPrintable(playerIp),playerPort); 
+  	qDebug("Supported Interfaces:");
+  	if (!player)
+ 	{
+	   	player = new PlayerInterface(this, playerIp, playerPort);
+   		connect(player, SIGNAL(newData()), this, SIGNAL(newData()));
+ 	}
+  	//Enable Robot Control ?
+  	if(activateControl)
+  	{
+   	  	qDebug("	- Position/Drive Contrl."); 
+    	player->enableControl(positionControlId);
+  	}
+  	//Laser
+  	if(laserEnabled)
+  	{
+   	  	qDebug("	- Laser."); 
+    	player->enableLaser(0, laserId);
+  	}
+  	if(occMapEnabled)
+  	{
+   	  	qDebug("	- Occupancy Map."); 
+    	player->enableMap(mapId);
+  	}
+  	if(player)
+  	{
+    	player->start();	  	
+    	connected = true;
+  	}
+    qDebug("*********************************************************************"); 
+    qDebug("-> Communication Manager Started."); 
+    return 1;
 }
 
 int CommManager::stop()

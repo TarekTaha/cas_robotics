@@ -1,8 +1,8 @@
 #include "sensors.h"
 
-Sensors::Sensors(CommManager *commsMgr, QWidget *parent): 
+Sensors::Sensors(QWidget *parent,RobotManager *rob): 
     QWidget(parent),
-    commsMgr(commsMgr)
+    robotManager(rob)
 {
 
 }

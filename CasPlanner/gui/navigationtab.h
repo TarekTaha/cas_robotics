@@ -8,8 +8,9 @@
 #include <QTreeWidget>
 #include <QPushButton>
 #include <QHash>
-#include <mapviewer.h>
-#include <MapPainter.h>
+#include "mapviewer.h"
+#include "MapPainter.h"
+#include "robotmanager.h"
 
 class NavControlPanel: public QWidget 
 {
@@ -71,14 +72,15 @@ class NavContainer : public QWidget
 {
 Q_OBJECT
     public:
-	NavContainer(QWidget *parent = 0);
-	~NavContainer();
-	//void setMapManager(QTMapDataInterface *mapManager);
+		NavContainer(QWidget *parent = 0,RobotManager *robotManager=0);
+		~NavContainer();
+	public slots:
+		void Plan();
     private:
-	//MapViewer mapViewer;
-	MapPainter mapPainter;
-	NavControlPanel navControlPanel; 
-	//QTMapDataInterface *mapManager; 
+    	RobotManager * robotManager;
+		//MapViewer mapViewer;
+		MapPainter mapPainter;
+		NavControlPanel navControlPanel; 
 	friend class NavControlPanel; 
 };
 
