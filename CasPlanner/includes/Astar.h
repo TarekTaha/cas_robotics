@@ -28,7 +28,7 @@ public:
 	int map_height,map_width,MAXNODES;
 	double	pixel_size;
 	QVector <QBitArray> map;
-	SearchSpaceNode * search_space,* temp;
+	SearchSpaceNode * search_space;
 	Pose start,end;
 	Node *root, *current, *childList, *curChild, *q, * test,*path, *p;
 	LList *openList,*closedList;

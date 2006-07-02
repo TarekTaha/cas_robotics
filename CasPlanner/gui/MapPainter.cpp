@@ -1,30 +1,70 @@
 #include "MapPainter.h"
 
-MapPainter::MapPainter(QWidget *parent): QWidget(parent)
+MapPainter::MapPainter(QWidget *parent): 
+	QWidget(parent),
+	start_initialized(false),
+	end_initialized(false),
+	step(1)
 {
+	
 	if(!image.load("/home/BlackCoder/workspace/CasPlanner/resources/casareaicp.png", 0))
 	{
 		qWarning("Error Loading Image");
 		exit(1);
 	}
-	color = qRgb(255, 255, 255);
-	image.setColor(0, color);
-	
+	image.setColor(0, Qt::white);
+}
+
+Pose MapPainter::getStart()
+{
+	return this->start;	
+}
+
+Pose MapPainter::getEnd()
+{
+	return this->end;
+}
+
+QImage MapPainter::getImage()
+{
+	return this->image;
 }
 
 void MapPainter::paintEvent(QPaintEvent *ev)
 {
-	qDebug("Paint");
+	//qDebug("Paint");
 	QPainter paint(this);
 	paint.drawImage(0, 0, image, 0, 0,image.width(), image.height());
+	paint.setBrush(Qt::cyan);
+	paint.setPen(Qt::white);
+	switch (step)
+	{
+		case 2:
+			paint.drawLine(start.p,mouse_pos);
+			break;
+		case 4:
+			paint.drawLine(end.p,mouse_pos);
+			break;
+	}
+	if(start_initialized)
+	{
+		paint.drawArc(start.p.x()-5,start.p.y()-5,10,10,0,5760);
+		paint.drawPie(start.p.x()-5,start.p.y()-5,10,10,(RTOD(start.phi)-10)*16,(RTOD(start.phi)+10)*16);
+	}
+	if(end_initialized)
+	{
+		paint.drawArc(end.p.x()-5,end.p.y()-5,10,10,0,5760);
+		paint.drawPie(end.p.x()-5,end.p.y()-5,10,10,(RTOD(end.phi)-10)*16,(RTOD(end.phi)+10)*16);		
+	}
 }
 
 void MapPainter::mouseMoveEvent ( QMouseEvent * me )
 {
-	double x = me->x();
-	double y = me->y();
-	image.setPixel(x,y,color);
-	update(x-10,y-10,20,20);
+	mouse_pos.setX(me->x());
+	mouse_pos.setY(me->y());
+	//image.setPixel(mouse_pos.x(),mouse_pos.y(),color);
+	//update(mouse_pos.x()-25,mouse_pos.y()-25,50,50);
+	update();
     //qDebug("Mouse Moving x: %f y: %f",x,y); 	
 }
 
@@ -32,9 +72,39 @@ void MapPainter::mousePressEvent ( QMouseEvent * me )
 {
 	double x = me->x();
 	double y = me->y();
-	image.setPixel(x,y,0);
-	update(x-10,y-10,20,20);
-    //qDebug("Mouse pressed x: %f y: %f",x,y); 
+	setMouseTracking(true);
+	switch (step)
+	{
+		case 1:
+			start.p.setX(x);
+			start.p.setY(y);	
+			step++;
+			break;
+		case 2:
+			// Delta swapped becuase of image coordinate		
+			start.phi = atan2(start.p.y()-y,x-start.p.x());
+			qDebug("Start Angle =%f",RTOD(start.phi));
+			start_initialized = true;
+			step++;
+			break;
+		case 3:
+			end.p.setX(x);
+			end.p.setY(y);	
+			step++;
+			break;
+		case 4:
+			// Delta swapped becuase of image coordinate
+			end.phi = atan2(end.p.y()-y,x-end.p.x());
+			qDebug("End Angle =%f",RTOD(end.phi));		
+			end_initialized = true;
+			step++;
+			break;
+		default:
+			step = 1;
+			setMouseTracking(false);
+			start_initialized = false;
+			end_initialized   = false;
+	}
 }
 
 MapPainter::~MapPainter()

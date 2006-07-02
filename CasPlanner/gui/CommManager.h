@@ -35,10 +35,6 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
         protected:
             // Player stuff 
             PlayerInterface *player;
-            bool startConnected,activateControl,laserEnabled,ptzEnabled,occMapEnabled;
-            QString playerIp; 
-            int playerPort,positionControlId,laserId,ptzId,mapId;
-			int tmp;  
 };
 #endif
 

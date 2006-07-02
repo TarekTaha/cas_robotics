@@ -53,52 +53,48 @@ RobotManager::RobotManager(QStringList configFiles)
 	        
 int RobotManager::readCommManagerConfigs(ConfigFile *cf, int sectionid)
 {
-    CommManager::config( cf, sectionid);
+	commManager = new CommManager;
+	commManager->config( cf, sectionid);
     return 1;
 }
 
-//int RobotManager::readMapManagerConfigs(ConfigFile *cf, int sectionid)
-//{
-//    MapManager::config( cf, sectionid);
-//    return 1;
-//}
-//
+int RobotManager::readNavigatorConfigs(ConfigFile *cf, int sectionid)
+{
+//	navigator = new Navigator;
+//	navigator->config( cf, sectionid);
+	return 1;
+}
+
 int RobotManager::readPlannerConfigs(ConfigFile *cf, int sectionid)
 {
-    PlanningManager::config( cf, sectionid);
+	planner = new PlanningManager;
+	planner->config( cf, sectionid);
     return 1;
 }
 
 int RobotManager::start()
 {
-	startPlanner();
-	startMapManager();
 	startComms();
-    //connect(cammap, SIGNAL(vFound()), this, SIGNAL(vFound()));
+	startPlanner();
+	startNavigator();
     return 1;
 }
 
 int RobotManager::startComms()
 {
-    qDebug("-> Starting Communication Manager."); 
-    CommManager::start();
-    qDebug("<- Communication Manager Started.");
+    commManager->start();
 	return 1;
 }
 
 int RobotManager::startPlanner()
 {
-	qDebug("-> Starting Planner."); 
-    PlanningManager::start();
-    qDebug("<- Planner Started.");
+    planner->start();
     return 1;
 }
 
-int RobotManager::startMapManager()
+int RobotManager::startNavigator()
 {
-//    qDebug("-> Starting Map Manager."); 
-//    MapManager::start();
-//    qDebug("<- Map Manager Started.");
+//  navigator->start();
     return 1;
 }
 

@@ -1,7 +1,7 @@
 #include "playerinterface.h"
 
-PlayerInterface::PlayerInterface(CommManager *in_comms, QString host, int port):
-    comms(in_comms),
+PlayerInterface::PlayerInterface(CommManager *com, QString host, int port):
+    comms(com),
     playerHost(host),
     playerPort(port),
     pc(0), 

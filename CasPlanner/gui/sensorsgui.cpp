@@ -44,22 +44,25 @@ void SensorsGLW::setRobotGUI(SensorsGui *gui)
     sensorsGui = gui;
 }
 
-void SensorsGLW::setRobotComms(RobotManager *Comms)
+void SensorsGLW::setRobotComms(RobotManager *rob)
 {
-    robotManager = Comms;
-    if(laserEnabled)
+    robotManager = rob;
+    if(robotManager->commManager->connected)
     {
-        laser.setProvider(robotManager); 
-        connect(robotManager, SIGNAL(newData()), &laser, SLOT(updateData()));
-        laser.setId(0);
+	    if(laserEnabled)
+	    {
+	        laser.setProvider(robotManager->commManager); 
+	        connect(robotManager->commManager, SIGNAL(newData()), &laser, SLOT(updateData()));
+	        laser.setId(0);
+	    }
+	    if(mapEnabled)
+	    {
+	        ogRenderer.setProvider(robotManager->commManager);
+	        connect(robotManager->commManager, SIGNAL(newData()), &ogRenderer, SLOT(updateData()));
+	    }
+	    speedMeter.setSpeedProvider(sensorsGui); 
+	    connect(robotManager->commManager, SIGNAL(newData()), &speedMeter, SLOT(updateData()));
     }
-    if(mapEnabled)
-    {
-        ogRenderer.setProvider(robotManager);
-        connect(robotManager, SIGNAL(newData()), &ogRenderer, SLOT(updateData()));
-    }
-    speedMeter.setSpeedProvider(sensorsGui); 
-    connect(robotManager, SIGNAL(newData()), &speedMeter, SLOT(updateData()));
 
 }
 
@@ -144,15 +147,8 @@ void SensorsGLW::paintGL()
      glFlush();
 }
 
-
-
-void SensorsGui::updateData()
-{
-    
-}
-SensorsGui::SensorsGui(RobotManager *commsMgr, QWidget *parent): 
-       Sensors(commsMgr, parent),
-       robotManager(commsMgr),
+SensorsGui::SensorsGui(QWidget *parent,RobotManager *rob): 
+       Sensors(parent,rob),
 	   tabContainer((QTabWidget*) parent),
        speed(0.15), 
 	   turnRatio(5),
@@ -169,6 +165,12 @@ SensorsGui::SensorsGui(RobotManager *commsMgr, QWidget *parent):
     setFocusPolicy(Qt::StrongFocus);
     config();
 }
+
+void SensorsGui::updateData()
+{
+    
+}
+
 int SensorsGui::config()
 {
     QString commsName ="Wheelchair";
@@ -180,10 +182,11 @@ int SensorsGui::config()
     connect( OGRadBtn, SIGNAL(clicked()), this, SLOT(renderOG()));
     connect( laserRadBtn, SIGNAL(clicked()), this, SLOT(renderLaser()));
     connect( staticRadBtn, SIGNAL(clicked()), this, SLOT(renderStatic()));
-    robotManager->start();
+    // robotManager->commManager->start();
     return 1; 
 
 }
+
 void SensorsGui::configButtons()
 {
     QHBoxLayout *hLayout = new QHBoxLayout;
@@ -224,11 +227,11 @@ void SensorsGui::mouseMoveEvent(QMouseEvent *me)
     sensorsGL.updateGL();
     if(ptzEnabled)
     {
-		int deltaX = me->x() - startX; 
-		int deltaY = me->y() - startY; 
+		int deltaX = int(me->x() - startX); 
+		int deltaY = int(me->y() - startY); 
 		ptzPan -= deltaX*radPerPixel; 
 		ptzTilt += deltaY*radPerPixel; 
-		robotManager->setPtz(ptzPan, ptzTilt);  
+		robotManager->commManager->setPtz(ptzPan, ptzTilt);  
 	    //qDebug("Intermediate arm pos: %f %f %f", currentArmPos[0], currentArmPos[1], currentArmPos[2]);
 		startX = me->x(); 
 		startY = me->y(); 
@@ -238,7 +241,6 @@ void SensorsGui::mouseMoveEvent(QMouseEvent *me)
 
 void SensorsGui::keyPressEvent(QKeyEvent *e)
 {
-    int index;
     QString text;
     bool ok;
 
@@ -263,16 +265,16 @@ void SensorsGui::keyPressEvent(QKeyEvent *e)
         switch(e->text().at(0).toAscii())
         {
             case 'w': 
-                robotManager->setSpeed(speed); 
+                robotManager->commManager->setSpeed(speed); 
                 break;
             case 'a':
-                robotManager->setTurnRate(turnRatio*speed); 
+                robotManager->commManager->setTurnRate(turnRatio*speed); 
                 break;
             case 's':
-                robotManager->setSpeed(-speed);
+                robotManager->commManager->setSpeed(-speed);
                 break;
             case 'd':
-                robotManager->setTurnRate(-turnRatio*speed); 
+                robotManager->commManager->setTurnRate(-turnRatio*speed); 
                 break;
             case 'z':
  
@@ -281,7 +283,7 @@ void SensorsGui::keyPressEvent(QKeyEvent *e)
                 break;
 	    case 'n':
 		// Start new patch 
-		//robotManager->requestNewPatch(0); 
+		//robotManager->commManager->requestNewPatch(0); 
 		break;
             case 'v':
 	       		text = QInputDialog::getText(this, "Name Dialog", "Please Enter your name: ",
@@ -354,11 +356,11 @@ void SensorsGui::keyReleaseEvent(QKeyEvent *e)
         {
         case 'w': 
         case 's':
-            robotManager->setSpeed(0); 
+            robotManager->commManager->setSpeed(0); 
             break;
         case 'a':
         case 'd':
-            robotManager->setTurnRate(0); 
+            robotManager->commManager->setTurnRate(0); 
             break;
         }
     }
@@ -439,7 +441,7 @@ void SensorsGui::resetTab()
 }
 Map SensorsGui::provideMap()
 {
-	return robotManager->provideMap();
+	return robotManager->commManager->provideMap();
 }
 void SensorsGui::requestSnap()
 {

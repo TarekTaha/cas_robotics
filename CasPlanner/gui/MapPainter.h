@@ -5,15 +5,21 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QColor>
-
+#include "utils.h"
 class MapPainter : public QWidget
 {
 public:
-	MapPainter(QWidget *parent=0) ;
+	MapPainter(QWidget *parent=0);
 	virtual ~MapPainter();
+	Pose   getStart();
+	Pose   getEnd();
+	QImage getImage();
 protected:
 	QImage image;
-	QRgb color;
+	int step;
+	QPoint mouse_pos;
+	bool start_initialized,end_initialized;
+	Pose start,end;
 	void paintEvent(QPaintEvent *);
 	void mousePressEvent ( QMouseEvent * event );
 	void mouseMoveEvent ( QMouseEvent * event );

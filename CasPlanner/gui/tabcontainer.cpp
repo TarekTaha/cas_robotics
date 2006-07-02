@@ -3,12 +3,12 @@
 TabContainer::TabContainer(QWidget *parent,RobotManager *rob)
     : QTabWidget(parent),
       robotManager(rob),
-      navCon(parent),
-      sensorsGui(robotManager,parent)
+      navCon(parent,rob),
+      sensorsGui(parent,rob)
 {
     addTab(&navCon, "Navigation Panel"); 
-    addTab(&sensorsGui, "Interactivity Pannel");     
-    setTabIcon(1, QIcon(":warning.png")); 
+    addTab(&sensorsGui, "Sensors Pannel");     
+    //setTabIcon(1, QIcon(":warning.png")); 
     updateGeometry();
 }
 void TabContainer::setRobotManager(RobotManager *robManager)

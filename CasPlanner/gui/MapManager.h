@@ -16,13 +16,14 @@
  * 2- A Laser scan.
  * 3- Occupancy Grid Map.
  */
-class MapManager //: public QObject 
+class MapManager : public QObject 
 {
-public:
-	MapManager();
-	virtual ~MapManager();
-	QVector <QBitArray> provideLaserOG(QVector<QPointF> laser_scan);
-	QVector <QBitArray> provideMapOG(QImage image);
+	//Q_OBJECT
+	public:
+		MapManager();
+		virtual ~MapManager();
+		QVector <QBitArray> provideLaserOG(QVector<QPointF> laser_scan);
+		QVector <QBitArray> provideMapOG(QImage image);
 };
 
 #endif /*MAPMANAGER_H_*/

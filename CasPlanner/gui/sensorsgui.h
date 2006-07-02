@@ -41,8 +41,7 @@ class SensorsGLW: public QGLWidget
         LaserRender laser; 
         SpeedRender speedMeter;
         OGRenderer  ogRenderer;
-        bool laserEnabled,mapEnabled;
-        bool speedEnabled;
+        bool laserEnabled,mapEnabled,speedEnabled;
         RobotManager *robotManager;
         SensorsGui *sensorsGui; 
 		friend class SensorsGui;
@@ -53,7 +52,7 @@ class SensorsGui: public Sensors, public SpeedProvider, public MapProvider
 {
     Q_OBJECT
     public:
-        SensorsGui(RobotManager *commsMgr, QWidget *parent = 0); 
+        SensorsGui(QWidget *parent = 0,RobotManager *commsMgr=0); 
         ~SensorsGui(); 
         virtual int config();
 		void requestSnap();
@@ -80,7 +79,7 @@ class SensorsGui: public Sensors, public SpeedProvider, public MapProvider
 		QRadioButton *OGRadBtn;
 		QRadioButton *laserRadBtn;
 		QRadioButton *staticRadBtn;
-        RobotManager *robotManager; 
+        //RobotManager *robotManager; 
         SensorsGLW sensorsGL;
         QWidget buttonWidget;
         double speed; 

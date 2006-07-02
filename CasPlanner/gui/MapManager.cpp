@@ -21,8 +21,9 @@ QVector <QBitArray> MapManager::provideMapOG(QImage image)
 	{
 		QBitArray pixel(image.height());
 		QRgb color;
-		for(int j=0;i<image.height();j++)
+		for(int j=0;j<image.height();j++)
 		{
+			//qDebug("i:%d j:%d",i,j);
 			color = image.pixel(i,j);
 			// White color is occupied and black is free
 			if ( double(qRed(color) + qGreen(color) + qBlue(color))/3*255.0 > 0.8)
