@@ -6,6 +6,7 @@
 #include <QPointF>
 #include <math.h>
 #include <QMetaType>
+#include "utils.h"
 
 // Interfaces for providers. These are for "Design by contract" type things.
 
@@ -54,6 +55,13 @@ class SpeedProvider
         virtual void provideSpeed(double &speed, double &turnRate)=0;
         virtual ~SpeedProvider(){};
 }; 
+
+class LocationProvider
+{
+	public:
+		virtual void provideLocation(Pose &location)=0;
+		virtual ~LocationProvider(){};
+};
 
 #endif
 

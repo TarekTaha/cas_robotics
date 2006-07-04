@@ -23,9 +23,9 @@ class Comms: public QObject
         virtual void emergencyStop()=0; 
         virtual void emergencyRelease()=0; 
     protected:
-		bool startConnected,activateControl,laserEnabled,ptzEnabled,occMapEnabled;
+		bool startConnected,activateControl,laserEnabled,ptzEnabled,occMapEnabled,localizerEnabled;
     	QString name,playerIp; 
-        int playerPort,positionControlId,laserId,ptzId,mapId;
+        int playerPort,positionControlId,laserId,ptzId,mapId,localizerId;
 };
 
 #endif 

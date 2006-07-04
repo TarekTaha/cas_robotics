@@ -80,7 +80,7 @@ class SensorsGui: public Sensors, public SpeedProvider, public MapProvider
 		QRadioButton *laserRadBtn;
 		QRadioButton *staticRadBtn;
         //RobotManager *robotManager; 
-        SensorsGLW sensorsGL;
+        SensorsGLW sensorsGL, sGL2,sGL3;
         QWidget buttonWidget;
         double speed; 
         double turnRatio;

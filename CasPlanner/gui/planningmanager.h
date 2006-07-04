@@ -19,19 +19,30 @@ class PlanningManager : public MapManager
             virtual int config(ConfigFile *cf, int sectionid);
             virtual int start(); 
             virtual int stop();
-            //Node * FindPath(QImage map,Pose start,Pose end);
+           	PathPlanner * pathPlanner;
         public slots: 
-	        Node * FindPath(QImage map,Pose start,Pose end);
-            //virtual void setSpeed(double speed, double turnRate); 
-            //virtual void emergencyStop();
-            //virtual void emergencyRelease();
+	        Node * FindPath(Pose start,Pose end);
+	        void GenerateSpace();
+	        void SetMap(QImage mpa);
+	        void setBridgeTest(int);
+	        void setConnNodes(int);
+	        void setRegGrid(int);
+	        void setObstPen(int);
+	        void setExpObst(int);
+	        void setShowTree(int);
+	        void setBridgeTestValue(double);
+	        void setConnNodesValue(double);
+	        void setRegGridValue(double);
+	        void setObstPenValue(double);
+	        void setExpObstValue(double);
+			void setBridgeResValue(double val);
         signals:
 		    //void dataUpdated();
 		    //void statusMsg(int,int, QString); 
         protected:
-        	PathPlanner * pathPlanner;
             double pixel_res,bridge_len,bridge_res,reg_grid,obst_exp,conn_rad,obst_pen,
-            	   robot_length, robot_width; 
+            	   robot_length, robot_width;
+            bool bridgeTestEnabled,connNodesEnabled,regGridEnabled,obstPenEnabled,expObstEnabled,showTreeEnabled;
             QPointF rotation_center;
             QString robot_model;
 };

@@ -16,20 +16,19 @@ class NavControlPanel: public QWidget
 {
 Q_OBJECT
     public:  
-		NavControlPanel(QWidget *parent = 0);
+		NavControlPanel(QWidget *parent = 0,RobotManager *rob=0);
 	public slots:
 		void updateMap(); 
 		void handleSelection(); 
 		void updateSelectedObject(double);
-		void load(); 
 		void save();
 		void captureMap(); 
 		void exportHtml(); 
 		void setToRoot(); 
     signals:
-		void propsChanged(); 
+		void propsChanged();
     private: 
-		
+		RobotManager * robotManager;
 		// Planning Steps
 		QGroupBox planningGB;
 		QCheckBox bridgeTest;
@@ -76,6 +75,8 @@ Q_OBJECT
 		~NavContainer();
 	public slots:
 		void Plan();
+		void LoadMap(); 
+		void GenerateSpace();
     private:
     	RobotManager * robotManager;
 		//MapViewer mapViewer;

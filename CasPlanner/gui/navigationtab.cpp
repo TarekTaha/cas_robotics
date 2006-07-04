@@ -6,27 +6,24 @@ NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
    //mapViewer(this), 
    robotManager(rob),
    mapPainter(this),
-   navControlPanel(this)
+   navControlPanel(this,rob)
 {
     QVBoxLayout *vLayout = new QVBoxLayout; 
     //vLayout->addWidget(&mapViewer,4); 
     vLayout->addWidget(&mapPainter,4); 
     vLayout->addWidget(&navControlPanel,1); 
     setLayout(vLayout); 
-//    connect(&navControlPanel.showGrids, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowGrids( int ))); 
-//    connect(&navControlPanel.showOGs, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowOGs( int ))); 
-//    connect(&navControlPanel.showRobots, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowRobots( int ))); 
-//    connect(&navControlPanel.showLabels, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowSnaps( int ))); 
-//    connect(&navControlPanel.showPointclouds, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowPointclouds( int )));
-//    connect(&navControlPanel.showPatchBorders, SIGNAL(stateChanged(int)),&mapViewer,SLOT(setShowPatchBorders( int )));
-//    connect(&navControlPanel, SIGNAL(propsChanged()), &mapViewer, SLOT(update()));  
-//    connect(&mapViewer, SIGNAL(moveMOLeft()), &(navControlPanel.xSB), SLOT(stepDown())); 
-//    connect(&mapViewer, SIGNAL(moveMORight()), &(navControlPanel.xSB), SLOT(stepUp())); 
-//    connect(&mapViewer, SIGNAL(moveMOUp()), &(navControlPanel.ySB), SLOT(stepUp())); 
-//    connect(&mapViewer, SIGNAL(moveMODown()), &(navControlPanel.ySB), SLOT(stepDown())); 
-//    connect(&mapViewer, SIGNAL(yawMOPos()), &(navControlPanel.yaSB), SLOT(stepUp())); 
-//    connect(&mapViewer, SIGNAL(yawMONeg()), &(navControlPanel.yaSB), SLOT(stepDown()));
-	  connect(&navControlPanel.pathPlanBtn, SIGNAL(pressed()),this, SLOT(Plan()));
+  
+    connect(&navControlPanel.bridgeTest, SIGNAL(stateChanged(int)),robotManager->planner,SLOT(setBridgeTest( int ))); 
+    connect(&navControlPanel.connectNodes, SIGNAL(stateChanged(int)),robotManager->planner,SLOT(setConnNodes( int ))); 
+    connect(&navControlPanel.regGrid, SIGNAL(stateChanged(int)),robotManager->planner,SLOT(setRegGrid( int ))); 
+    connect(&navControlPanel.obstPenalty, SIGNAL(stateChanged(int)),robotManager->planner,SLOT(setObstPen( int ))); 
+    connect(&navControlPanel.expandObst, SIGNAL(stateChanged(int)),robotManager->planner,SLOT(setExpObst( int )));
+    connect(&navControlPanel.showTree, SIGNAL(stateChanged(int)),robotManager->planner,SLOT(setShowTree( int )));
+
+	connect(&navControlPanel.pathPlanBtn, SIGNAL(pressed()),this, SLOT(Plan()));
+	connect(&navControlPanel.generateSpaceBtn, SIGNAL(pressed()),this, SLOT(GenerateSpace()));
+	connect(&navControlPanel.loadMapBtn, SIGNAL(pressed()),this, SLOT(LoadMap()));	  
 }
 
 NavContainer::~NavContainer()
@@ -35,9 +32,22 @@ NavContainer::~NavContainer()
 }
 void NavContainer::Plan()
 {
-	robotManager->planner->FindPath(mapPainter.getImage(),mapPainter.getStart(),mapPainter.getEnd());
+	robotManager->planner->SetMap(mapPainter.getImage());
+	robotManager->planner->FindPath(mapPainter.getStart(),mapPainter.getEnd());
+	mapPainter.drawPath(robotManager->planner->pathPlanner);
 }
-NavControlPanel::NavControlPanel(QWidget *parent):
+void NavContainer::GenerateSpace()
+{
+	robotManager->planner->SetMap(mapPainter.getImage());
+	robotManager->planner->GenerateSpace();
+	mapPainter.drawPath(robotManager->planner->pathPlanner);
+}
+void NavContainer::LoadMap()
+{
+	robotManager->planner->SetMap(mapPainter.getImage());
+	mapPainter.drawPath(robotManager->planner->pathPlanner);	
+}
+NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
 	QWidget(parent),
 	planningGB("Planning"),
 	bridgeTest("Bridge Test"),
@@ -63,7 +73,8 @@ NavControlPanel::NavControlPanel(QWidget *parent):
 	pathPlanBtn("Path Plan"),
 	generateSpaceBtn("Generate Space"), 
 	pathFollowBtn("Path Follow"),
-	loadMapBtn("Load Map")
+	loadMapBtn("Load Map"),
+	robotManager(rob)
 {  
     QHBoxLayout *hlayout = new QHBoxLayout;
     hlayout->addWidget(&planningGB,1);
@@ -102,30 +113,38 @@ NavControlPanel::NavControlPanel(QWidget *parent):
     xfrmLayout->addWidget(&obstPenRadSB,5,1);
     parametersGB.setLayout(xfrmLayout);
 
+	//Loading Default values from config file
+
     obstExpRadSB.setMinimum(0); 
     obstExpRadSB.setMaximum(1);
 	obstExpRadSB.setSingleStep(0.05);
+	obstExpRadSB.setValue(robotManager->planner->pathPlanner->obstacle_radius);
 	
     bridgeTestResSB.setMinimum(0.05); 
     bridgeTestResSB.setMaximum(1);
     bridgeTestResSB.setSingleStep(0.05); 
-    
+	bridgeTestResSB.setValue(robotManager->planner->pathPlanner->bridge_res);
+	    
     bridgeSegLenSB.setMinimum(0.5); 
     bridgeSegLenSB.setMaximum(5);
     bridgeSegLenSB.setSingleStep(0.1);  
-
+	bridgeSegLenSB.setValue(robotManager->planner->pathPlanner->bridge_length);
+	
     regGridResSB.setMinimum(0.1); 
     regGridResSB.setMaximum(5);
     regGridResSB.setSingleStep(0.1);  
-
+	regGridResSB.setValue(robotManager->planner->pathPlanner->reg_grid);
+	
     nodeConRadSB.setMinimum(0.1); 
     nodeConRadSB.setMaximum(2);
     nodeConRadSB.setSingleStep(0.05);
     //nodeConRadSB.setDecimals(0);   
-
+	nodeConRadSB.setValue(robotManager->planner->pathPlanner->conn_radius);
+	
     obstPenRadSB.setMinimum(1); 
     obstPenRadSB.setMaximum(5);
     obstPenRadSB.setSingleStep(0.1);
+   	obstPenRadSB.setValue(robotManager->planner->pathPlanner->obst_dist);
     //obstPenRadSB.setDecimals(0); 
 
     QVBoxLayout *showL = new QVBoxLayout; 
@@ -150,11 +169,10 @@ NavControlPanel::NavControlPanel(QWidget *parent):
     connect(&nodeConRadSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
     connect(&obstPenRadSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
     connect(&obstExpRadSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
-    connect(&captureBtn,      SIGNAL(clicked()), this, SLOT(captureMap())); 
-    //connect(&loadMapBtn, SIGNAL(clicked()), this, SLOT(loadMap())); 
-    connect(&pathPlanBtn, SIGNAL(clicked()), this, SLOT(load())); 
-    connect(&generateSpaceBtn, SIGNAL(clicked()), this, SLOT(save())); 
-    connect(&pathFollowBtn, SIGNAL(clicked()), this, SLOT(exportHtml())); 
+//    connect(&captureBtn,      SIGNAL(clicked()), this, SLOT(captureMap())); 
+//    connect(&pathPlanBtn, SIGNAL(clicked()), this, SLOT(load())); 
+//    connect(&generateSpaceBtn, SIGNAL(clicked()), this, SLOT(save())); 
+//    connect(&pathFollowBtn, SIGNAL(clicked()), this, SLOT(exportHtml())); 
 }
 void NavControlPanel::handleSelection()
 {
@@ -164,7 +182,8 @@ void NavControlPanel::handleSelection()
     //setActionValues(mo); 
 }
 
-void NavControlPanel::setToRoot(){
+void NavControlPanel::setToRoot()
+{
     bridgeTestResSB.setValue(0);
     bridgeSegLenSB.setValue(0); 
     regGridResSB.setValue(0); 
@@ -174,26 +193,16 @@ void NavControlPanel::setToRoot(){
 
 void NavControlPanel::updateSelectedObject(double)
 {
-//    qDebug("Updating selected item"); 
-//    QTreeWidgetItem *item = selectedObject.currentItem();
-//    if(item != NULL && wiToMo.contains(item))
-//    {
-		//	MapObject *mo = wiToMo[item]; 
-		//	mo->setVisibility(obstExpRadSB.value()); 
-		//	Vector6DOF newPose;
-		//	newPose.setX(bridgeTestResSB.value());
-		//	newPose.setY(bridgeSegLenSB.value());
-		//	newPose.setZ(regGridResSB.value());
-		//	newPose.setPitchDeg(obstPenRadSB.value());
-		//	newPose.setRollDeg(nodeConRadSB.value());
-		//	newPose.setYawDeg(yaSB.value());
-		//	mo->setOrigin(newPose); 
-		//	emit propsChanged();
-//    }
-//  else 
-//	{
-//		qDebug("Item unselected!!!"); 
-//  }
+	if(robotManager->planner->pathPlanner==NULL)
+	{
+		robotManager->startPlanner();
+	}
+	robotManager->planner->setBridgeTestValue(bridgeSegLenSB.value());
+	robotManager->planner->setConnNodesValue(nodeConRadSB.value());
+	robotManager->planner->setRegGridValue(regGridResSB.value());
+	robotManager->planner->setObstPenValue(obstPenRadSB.value());
+	robotManager->planner->setExpObstValue(obstExpRadSB.value());
+	robotManager->planner->setBridgeResValue(bridgeTestResSB.value());
 }
 
 //void navControlPanel::setActionValues(MapObject *mo)
@@ -217,12 +226,12 @@ void NavControlPanel::updateSelectedObject(double)
 //    connect(mapManager, SIGNAL(patchChanged()), this, SLOT(updateMap())); 
 //}
 
-void NavControlPanel::load()
-{
-//fprintf(stdout, "Load button pressed, about to call load on mapmanager %x\n", mapManager); 
-//    QString dir = QFileDialog::getExistingDirectory(this, "Load log"); 
-//    mapManager->readIn(dir); 
-}
+//void NavControlPanel::load()
+//{
+////fprintf(stdout, "Load button pressed, about to call load on mapmanager %x\n", mapManager); 
+////    QString dir = QFileDialog::getExistingDirectory(this, "Load log"); 
+////    mapManager->readIn(dir); 
+//}
 
 void NavControlPanel::save()
 {

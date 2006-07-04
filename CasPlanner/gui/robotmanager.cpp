@@ -1,6 +1,8 @@
 #include <robotmanager.h>
 
-RobotManager::RobotManager()
+RobotManager::RobotManager():
+commManager(NULL),
+planner(NULL)
 {
 	// Empty Constructor
 }
@@ -31,9 +33,9 @@ RobotManager::RobotManager(QStringList configFiles)
 				//If we want to add more tabs or GUI options
 				// For future use
 		    }
-		    if(sectionName == "Control")
+		    if(sectionName == "Navigator")
 		    {
-				//Initialize Control Parameters
+				readNavigatorConfigs(cf,i);
 		    }
 		    if(sectionName == "Robot")
 		    {
@@ -60,8 +62,9 @@ int RobotManager::readCommManagerConfigs(ConfigFile *cf, int sectionid)
 
 int RobotManager::readNavigatorConfigs(ConfigFile *cf, int sectionid)
 {
-//	navigator = new Navigator;
-//	navigator->config( cf, sectionid);
+	navigator = new Navigator;
+	navigator->config( cf, sectionid);
+	startNavigator();
 	return 1;
 }
 
@@ -69,6 +72,7 @@ int RobotManager::readPlannerConfigs(ConfigFile *cf, int sectionid)
 {
 	planner = new PlanningManager;
 	planner->config( cf, sectionid);
+	startPlanner();
     return 1;
 }
 
@@ -94,7 +98,7 @@ int RobotManager::startPlanner()
 
 int RobotManager::startNavigator()
 {
-//  navigator->start();
+    navigator->start();
     return 1;
 }
 

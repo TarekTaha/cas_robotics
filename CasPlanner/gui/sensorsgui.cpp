@@ -116,9 +116,9 @@ void SensorsGLW::paintGL()
      {
          glPushMatrix(); 
          //glTranslatef(camPanelRatio*.7,0.25, 0);
-         glTranslatef(0.5,0.5,0);
-         //glScalef(0.2,0.2,1);
-         //glScalef(1,1,1);
+         //glTranslatef(0.5,0.5,0);
+         glScalef(0.2,0.2,1);
+         glScalef(1,1,1);
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
          glEnable(GL_POLYGON_SMOOTH); 
          glEnable(GL_BLEND);
@@ -157,9 +157,18 @@ SensorsGui::SensorsGui(QWidget *parent,RobotManager *rob):
 	   radPerPixel(0.001),
 	   msperWheel(0.0005)
 {
+    QHBoxLayout *layout3 = new QHBoxLayout; 
+    QVBoxLayout *layout1 = new QVBoxLayout(),*layout2 = new QVBoxLayout(),*layout4 = new QVBoxLayout();
+    layout1->addWidget(&sensorsGL,1);
+    layout2->addWidget(&sGL2,1);
+    layout2->addWidget(&sGL3,1);
+    layout3->addLayout(layout1);
+    layout3->addLayout(layout2);
+    
     QVBoxLayout *layout = new QVBoxLayout();
-    layout->addWidget(&sensorsGL,4); 
-    layout->addWidget(&buttonWidget, 1);
+    //layout4->addWidget(&buttonWidget, 1);
+    layout->addLayout(layout3);
+    layout->addLayout(layout4);
     setLayout(layout); 
     updateGeometry();
     setFocusPolicy(Qt::StrongFocus);
@@ -177,7 +186,7 @@ int SensorsGui::config()
     sensorsGL.setRobotGUI(this); 
     sensorsGL.config();
     sensorsGL.setRobotComms(robotManager);
-    configButtons();
+    //configButtons();
     // signals for changing modes
     connect( OGRadBtn, SIGNAL(clicked()), this, SLOT(renderOG()));
     connect( laserRadBtn, SIGNAL(clicked()), this, SLOT(renderLaser()));

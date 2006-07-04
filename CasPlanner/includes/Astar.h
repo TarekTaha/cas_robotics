@@ -25,6 +25,8 @@ private:
 	Node  *MakeChildrenNodes(Node *parent) ;
 	bool   goalReached(Node *n);
 public:
+	Astar(double r_l ,double r_w ,double o_r,double p_s, QString r_m , QPointF r_c);
+	Astar();
 	int map_height,map_width,MAXNODES;
 	double	pixel_size;
 	QVector <QBitArray> map;
@@ -39,8 +41,6 @@ public:
 	int    Obstacle   (QPointF p, double angle);
 	bool   GoalReached (Node *n);
 	Node*  Search(Pose start,Pose end);
-	Astar(double r_l ,double r_w ,double o_r,double p_s, QString r_m , QPointF r_c);
-	Astar();
 	virtual ~Astar();
 };
 

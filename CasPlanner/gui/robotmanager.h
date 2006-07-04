@@ -4,6 +4,7 @@
 #include <QObject>
 #include "CommManager.h"
 #include "planningmanager.h"
+#include "Navigator.h"
 #include "configfile.h"
 
 class RobotManager : public QObject //: public CommManager, public PlanningManager ,public Navigator
@@ -22,7 +23,7 @@ class RobotManager : public QObject //: public CommManager, public PlanningManag
 		int startComms();
 		CommManager * commManager;
 		PlanningManager *planner;
-		//Navigator * navigator;
+		Navigator * navigator;
 		
    signals:
         void vFound();
