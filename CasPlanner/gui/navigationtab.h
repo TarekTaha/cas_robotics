@@ -77,6 +77,7 @@ Q_OBJECT
 		void Plan();
 		void LoadMap(); 
 		void GenerateSpace();
+		void Follow();
     private:
     	RobotManager * robotManager;
 		//MapViewer mapViewer;

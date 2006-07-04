@@ -21,11 +21,17 @@ NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
     connect(&navControlPanel.expandObst, SIGNAL(stateChanged(int)),robotManager->planner,SLOT(setExpObst( int )));
     connect(&navControlPanel.showTree, SIGNAL(stateChanged(int)),robotManager->planner,SLOT(setShowTree( int )));
 
-	connect(&navControlPanel.pathPlanBtn, SIGNAL(pressed()),this, SLOT(Plan()));
+	//connect(&navControlPanel.pathPlanBtn, SIGNAL(pressed()),this, SLOT(Plan()));
+	connect(&navControlPanel.pathPlanBtn, SIGNAL(pressed()),this, SLOT(Follow()));
 	connect(&navControlPanel.generateSpaceBtn, SIGNAL(pressed()),this, SLOT(GenerateSpace()));
 	connect(&navControlPanel.loadMapBtn, SIGNAL(pressed()),this, SLOT(LoadMap()));	  
 }
-
+void NavContainer::Follow()
+{
+	robotManager->navigator->setCommManager(robotManager->commManager);
+	//robotManager->navigator->FollowPath();
+	robotManager->navigator->start();
+}
 NavContainer::~NavContainer()
 {
 	
@@ -45,7 +51,7 @@ void NavContainer::GenerateSpace()
 void NavContainer::LoadMap()
 {
 	robotManager->planner->SetMap(mapPainter.getImage());
-	mapPainter.drawPath(robotManager->planner->pathPlanner);	
+	mapPainter.drawPath(robotManager->planner->pathPlanner);
 }
 NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
 	QWidget(parent),

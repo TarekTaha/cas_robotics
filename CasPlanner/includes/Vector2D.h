@@ -8,12 +8,12 @@
 //
 //  Author: Mat Buckland (fup@ai-junkie.com)
 //
+//  More Function added by: Tarek Taha (tataha@eng.uts.edu.au)
 //------------------------------------------------------------------------
 #include <math.h>
 #include <iosfwd>
 #include <limits>
 #include "utils.h"
-
 
 struct Vector2D
 {
@@ -426,6 +426,37 @@ inline bool isSecondInFOVOfFirst(Vector2D posFirst,
   return facingFirst.Dot(toTarget) >= cos(fov/2.0);
 }
 
+inline double Magnitude( QPointF p1, QPointF p2 )
+{
+    QPointF Vector;
+    Vector = p2 - p1;
+    return sqrt( Vector.x() * Vector.x() + Vector.y() * Vector.y());
+}
 
+inline double DistanceToLine( QPointF LineStart, QPointF LineEnd, QPointF P)
+{
+	double LineMag,distance;
+	LineMag = Magnitude(LineStart,LineEnd);
+	distance = (P.x()*(LineStart.y() - LineEnd.y()) + P.y()*(LineEnd.x() - LineStart.x())
+				+(LineStart.x()*LineEnd.y() - LineEnd.x()*LineStart.y()))/LineMag ;
+    return distance;
+}
 
+inline double DistToLineSegment(QPointF LineStart, QPointF LineEnd, QPointF p)
+{
+	Vector2D A(LineStart.x(),LineStart.y()),B(LineEnd.x(),LineEnd.y()),P(p.x(),p.y());
+  	//if the angle between PA and AB is obtuse then the closest vertex must be A
+  	double dotA = (P.x - A.x)*(B.x - A.x) + (P.y - A.y)*(B.y - A.y);
+  	if (dotA <= 0) 
+		return Vec2DDistance(A, P);
+	//if the angle between PB and AB is obtuse then the closest vertex must be B
+  	double dotB = (P.x - B.x)*(A.x - B.x) + (P.y - B.y)*(A.y - B.y);
+   	if (dotB <= 0) 
+		return Vec2DDistance(B, P);
+   	//calculate the point along AB that is the closest to P
+  	//Vector2D Point = A + ((B - A) * dotA)/(dotA + dotB);
+	//calculate the distance P-Point
+  	//return Vec2DDistance(P,Point);
+	return DistanceToLine(LineStart,LineEnd, p); 
+}
 #endif

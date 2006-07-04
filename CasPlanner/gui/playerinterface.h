@@ -28,6 +28,8 @@ Q_OBJECT
 		void setPtz(double pan, double tilt);
         double getSpeed(); 
         double getTurnRate();
+        double getClosestObst();
+        bool getLocalized();
         Pose getLocation(); 
         void setSpeed(double speed);
         void setTurnRate(double turnRate); 
@@ -43,7 +45,7 @@ Q_OBJECT
         PlayerClient *pc;
         CommManager *comms; 
         
-        bool laserEnabled[MAX_LASERS],ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled; 
+        bool laserEnabled[MAX_LASERS],ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized; 
         int playerLaserId[MAX_LASERS],positionId,ptzId,mapId,localizerId;
         LaserProxy *laser[MAX_LASERS]; 
         PositionProxy *drive;
@@ -53,8 +55,7 @@ Q_OBJECT
 		Pose location;
 		double pan,tilt,pose[3], pose_var[3][3];
        
-        double speed; 
-        double turnRate; 
+        double speed,turnRate,getspeed,getturnrate;
     
         //Emergency Stop
         bool emergencyStopped; 

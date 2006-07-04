@@ -11,7 +11,7 @@ class Comms: public QObject
         virtual int config(ConfigFile *cf, int sectionid)=0;
         virtual int start()=0;
         virtual int stop()=0;
-        bool connected;
+        bool connected,localized;
 		virtual QString getName()
 		{
 		    return name; 
