@@ -19,7 +19,8 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
             virtual int stop();
             virtual QVector<QPointF> getLaserScan(int laserId);
             virtual double getSpeed(); 
-            virtual double getTurnRate(); 
+            virtual double getTurnRate();
+            virtual double getClosestObst(); 
             virtual Pose   getLocation();
             virtual void   setSpeed(double speed);
             virtual void   setPtz(double pan, double tilt);
@@ -27,6 +28,7 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
 		    virtual Map    provideMap(); 
 		    virtual void   provideSpeed(double &speed, double &turnRate);
 		    virtual void   provideLocation(Pose & location);
+		    virtual bool   getLocalized();
         public slots: 
             virtual void setSpeed(double speed, double turnRate); 
             virtual void setLocation(Pose location);

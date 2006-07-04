@@ -1,6 +1,7 @@
 HEADERS +=  gui/CommManager.h\
 			gui/comms.h\
 			gui/configfile.h\
+			gui/Controller.h\
 			gui/glrender.h\
 			gui/interfaceprovider.h\
 			gui/laserrender.h\
@@ -9,6 +10,7 @@ HEADERS +=  gui/CommManager.h\
 			gui/MapPainter.h\		
 			gui/MapManager.h\
 			gui/navigationtab.h\
+			gui/Navigator.h\
 			gui/ogrender.h\
 			gui/playerinterface.h\
 			gui/planningmanager.h\
@@ -40,6 +42,7 @@ HEADERS +=  gui/CommManager.h\
 
 SOURCES +=  gui/CommManager.cpp\
 			gui/configfile.cc\
+			gui/Controller.cpp\
 			gui/laserrender.cpp\
 			gui/main.cpp\
 			gui/mainwindow.cpp\
@@ -47,6 +50,7 @@ SOURCES +=  gui/CommManager.cpp\
 			gui/MapPainter.cpp\
 			gui/MapManager.cpp\
 			gui/navigationtab.cpp\
+			gui/Navigator.cpp\
 			gui/ogrender.cpp\			
 			gui/playerinterface.cpp\
 			gui/planningmanager.cpp\

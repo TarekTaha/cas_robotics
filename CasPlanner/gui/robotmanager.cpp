@@ -2,7 +2,8 @@
 
 RobotManager::RobotManager():
 commManager(NULL),
-planner(NULL)
+planner(NULL),
+navigator(NULL)
 {
 	// Empty Constructor
 }
@@ -64,7 +65,7 @@ int RobotManager::readNavigatorConfigs(ConfigFile *cf, int sectionid)
 {
 	navigator = new Navigator;
 	navigator->config( cf, sectionid);
-	startNavigator();
+	//startNavigator();
 	return 1;
 }
 
@@ -98,7 +99,7 @@ int RobotManager::startPlanner()
 
 int RobotManager::startNavigator()
 {
-    navigator->start();
+    //navigator->start();
     return 1;
 }
 

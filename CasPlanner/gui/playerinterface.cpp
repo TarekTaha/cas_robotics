@@ -7,12 +7,12 @@ PlayerInterface::PlayerInterface(CommManager *com, QString host, int port):
     pc(0), 
     ctrEnabled(false),
     positionId(0), 
-    drive(0),
-    localizer(0),
     localizerEnabled(false),
     ptzEnabled(false),
     emergencyStopped(false),
-    mapEnabled(false)
+    mapEnabled(false),
+    localizer(0),
+    drive(0)
 {
     laserEnabled[0] = false;
     laserEnabled[1] = false;
@@ -49,7 +49,7 @@ void PlayerInterface::setTurnRate(double i_turnRate)
 double PlayerInterface::getSpeed()
 {
     dataLock.lockForRead();
-    double retval = speed; 
+    double retval = getspeed; 
     dataLock.unlock(); 
     return retval; 
 }
@@ -57,17 +57,33 @@ double PlayerInterface::getSpeed()
 double PlayerInterface::getTurnRate()
 {
     dataLock.lockForRead();
-    double retval = turnRate; 
+    double retval = getturnrate; 
     dataLock.unlock(); 
     return retval; 
 }
+
+bool PlayerInterface::getLocalized()
+{
+    dataLock.lockForRead();
+    double retval = localized; 
+    dataLock.unlock(); 
+    return retval; 	
+}
+
 Pose PlayerInterface::getLocation()
 {
     dataLock.lockForRead();
     Pose retval; 
-    retval.p.setX(localizer->hypoths[0].mean[0]);
-    retval.p.setY(localizer->hypoths[0].mean[1]);
-    retval.phi = localizer->hypoths[0].mean[2];
+    if(localizer)
+    {
+	    retval.p.setX(localizer->hypoths[0].mean[0]);
+	    retval.p.setY(localizer->hypoths[0].mean[1]);
+	    retval.phi = localizer->hypoths[0].mean[2];
+	    if(localizer->hypoths[0].weight>=0.9)
+	    	localized = true;
+	    else
+	    	localized = false;
+    }
     dataLock.unlock(); 
     return retval; 	
 }
@@ -106,10 +122,13 @@ void PlayerInterface::setLocation(Pose location)
 	pose_var[2][0]=0.5;
 	pose_var[2][1]=0.5;
 	pose_var[2][2]=DTOR(10);
-	localizer->SetPose(pose,pose_var);	
-	this->location.p.setX(location.p.x());
-	this->location.p.setY(location.p.y());
-	this->location.phi = location.phi;
+	if(localizer)
+	{
+		localizer->SetPose(pose,pose_var);	
+		this->location.p.setX(location.p.x());
+		this->location.p.setY(location.p.y());
+		this->location.phi = location.phi;
+	}
 }
 void PlayerInterface::enableControl(int posId)
 {
@@ -137,7 +156,30 @@ void PlayerInterface::enableLaser(int laser_id, int in_playerLaserId)
 void PlayerInterface::enableLocalizer(int localizerId)
 {
 	this->localizerId= localizerId;
+	localizerEnabled = true;
 }
+
+double PlayerInterface::getClosestObst()
+{
+	double dist,min_dist = 1000;
+	for(int Laser_id = 0; Laser_id < MAX_LASERS; Laser_id++)
+	{
+		if(laserEnabled[Laser_id])
+	    {
+	    	//TODO: ADD the appropriate pose translation
+			laser[Laser_id]->Lock();
+		    for(int i=0; i< laser[Laser_id]->scan_count; i++)
+		    {
+		    	dist = Dist(QPointF(0,0),QPointF(laser[Laser_id]->point[i][0], laser[Laser_id]->point[i][1]));
+		    	if(dist < min_dist)
+		    		min_dist = dist;
+			}
+			laser[Laser_id]->Unlock();
+		}
+	}
+	return min_dist;
+}
+
 QVector<QPointF> PlayerInterface::getLaserScan(int Laser_id)
 {
     //qDebug("Laser data requested"); 
@@ -153,7 +195,7 @@ QVector<QPointF> PlayerInterface::getLaserScan(int Laser_id)
 		//qDebug("Returning ... %d", retval.size());
         return retval;
     }
-    else 
+    else
     {
         return QVector<QPointF>(0);
     }
@@ -194,14 +236,16 @@ Map PlayerInterface::provideMap()
 
 void PlayerInterface::run ()
 {
-    qDebug("Connecting to %s on %s:%d ... \n",qPrintable(comms->getName()),qPrintable(playerHost), playerPort);
+    qDebug("/********************************************************************/"); 	
+    qDebug("Connecting to Robot Server::");
+    qDebug("\t Connecting to %s on %s:%d ... \n",qPrintable(comms->getName()),qPrintable(playerHost), playerPort);
     if(pc)
     {
 		delete pc; 
     }
     pc = new PlayerClient(qPrintable(playerHost),playerPort);
     pc->SetFrequency(10);
-    qDebug("	--->>> Frequency set to 10 Hz"); 
+    qDebug("\t\t - Frequency Set to 10 Hz"); 
     /* TODO: Proper check for the successfullness of the proxy creation
      */
     if(ctrEnabled)
@@ -211,43 +255,46 @@ void PlayerInterface::run ()
 		    delete drive;  
 		}
         drive = new PositionProxy(pc,positionId,'a');
-   		qDebug("	--->>> Motor Control Interface Engaged Successfully"); 
+   		qDebug("\t\t - Motor Control Interface Engaged Successfully"); 
     }
     for(int i=0; i < MAX_LASERS; i++)
     {
         if(laserEnabled[i])
         {
-            laser[i] = new LaserProxy(pc,playerLaserId[0], 'r');  
+            laser[i] = new LaserProxy(pc,playerLaserId[0], 'r'); 
+       		qDebug("\t\t - Laser interface:%d Interface Added Successfully",i);  
         }
-		qDebug("	--->>> Laser interface Interface Added Successfully");         
     }
     if(mapEnabled)
     {
     	map = new MapProxy(pc,mapId,'r');
-		qDebug("	--->>> Map Interface Engaged Successfully");
+		qDebug("\t\t - Map Interface Engaged Successfully");
     }
     if(ptzEnabled)
     {
 		ptz = new PtzProxy(pc, ptzId, 'a'); 
+		qDebug("\t\t - Pan Tilt unit initialized Successfully");
     }
     if(localizerEnabled)
     {
     	localizer 	= new LocalizeProxy(pc,0,'r');
+    	qDebug("\t\t - Localizer Started Successfully");
     }
-    qDebug("Testing Player Server for Data Read:");    
+    qDebug("\t Testing Player Server for Data Read:");    
     while(pc->Read())
     {
     	qWarning(".");    
 		sleep(1);
     }
-    qDebug("	--->>> Test Passed, You can read Data from Player Server Now");    
-    qDebug("	--->>> Connection Established"); 
+    qDebug("\t\t - Test Passed, You can read Data from Player Server Now");    
+    qDebug("\t\t - Connection Established"); 
+    qDebug("/********************************************************************/"); 	
 	int	mapCounter=0;
     while(true)
     {
         while(pc->Read())
         {
-            qWarning("Can not read from Player Server - Retrying"); 
+            qWarning("	--->>> Can not read from Player Server - Retrying <<<---"); 
 	    	sleep(1); 
         }
     	if(!emergencyStopped)
@@ -256,6 +303,8 @@ void PlayerInterface::run ()
 	        {
 	            drive->Lock();
 	            drive->SetSpeed(speed,turnRate);
+	            getspeed = drive->Speed();
+	            getturnrate = drive->TurnRate();
 	            drive->Unlock();             
 	        }
 			if(ptzEnabled)
@@ -271,13 +320,13 @@ void PlayerInterface::run ()
     	}
 	    else 
 	    {
-	        qDebug("Stopping Robot NOW ");
+	        qDebug("	--->>> Stopping Robot NOW <<<---");
 	        if(ctrEnabled)
 	       {
 	            drive->SetSpeed(0,0); 
 	            drive->SetMotorState(0);
 	        } 
-	        qDebug("... Robot Stopped");
+	        qDebug("	--->>> Robot Stopped <<<---");
 	        // temporary fix, needs more thinking once i finalize things
 	        emergencyStopped = false;
 	    }

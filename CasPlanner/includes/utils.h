@@ -8,6 +8,7 @@
 //
 //  Author: Mat Buckland (fup@ai-junkie.com)
 //
+//  More Function added by: Tarek Taha (tataha@eng.uts.edu.au)
 //------------------------------------------------------------------------
 #include <sstream>
 #include <string>
@@ -351,4 +352,5 @@ typedef struct _tree
 		QPointF location;
 		QVector <QPointF> children;
 	}   Tree;
+	
 #endif

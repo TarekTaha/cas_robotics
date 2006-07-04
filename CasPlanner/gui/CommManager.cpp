@@ -61,9 +61,18 @@ double CommManager::getTurnRate()
   	return player->getTurnRate();
 }
 
+double CommManager::getClosestObst()
+{
+	return player->getClosestObst();
+}
+
 Pose CommManager::getLocation()
 {
   	return player->getLocation();
+}
+bool CommManager::getLocalized()
+{
+	return player->getLocalized();
 }
 
 void CommManager::provideSpeed(double &speed, double &turnRate)
