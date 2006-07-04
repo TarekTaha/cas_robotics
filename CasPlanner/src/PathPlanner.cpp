@@ -11,15 +11,6 @@ int NodeEquality(Node *a, Node *b)
 PathPlanner :: PathPlanner()
 {
 };
-void PathPlanner::FreePath()
-{
-	while(path != NULL) 
-	{
-		p = path->next;
-		delete path;
-		path = p;
-	}
-};
 PathPlanner::PathPlanner(double r_l ,double r_w , QString r_m , QPointF r_c,double pixel_res,double bridge_len,
 			double bridge_r,double reg_g,double obst_exp,double conn_rad,double obst_pen):
 			Astar(r_l,r_w,obst_exp,pixel_res,r_m,r_c),
@@ -36,17 +27,59 @@ PathPlanner::PathPlanner(double r_l ,double r_w , QString r_m , QPointF r_c,doub
 
 PathPlanner :: ~PathPlanner()
 {
+	FreeSearchSpace();
+	cout<<"\n	--->>> Allocated Memory FREED <<<---";
+};
+void PathPlanner::FreePath()
+{
+	while(path != NULL) 
+	{
+		p = path->next;
+		delete path;
+		path = p;
+	}
+};
+void PathPlanner:: FreeSearchSpace()
+{
 	SearchSpaceNode *temp;
-	path=p=root=test=NULL;
+	p=root=test=NULL;
 	while (search_space != NULL)
 	{
 		temp = search_space;
 		search_space = search_space->next;
 		delete temp;
 	};
-	this->FreePath();
-	cout<<"\n	--->>> Allocated Memory FREED <<<---";
-};
+	FreePath();	
+}
+void   PathPlanner ::setExpRad(double a)
+{
+	obstacle_radius = a;
+}
+
+void   PathPlanner ::setBridgeLen(double a)
+{
+	bridge_length = a;
+}
+
+void   PathPlanner ::setBridgeRes(double a)
+{
+	bridge_res = a;
+}
+
+void   PathPlanner ::setRegGrid(double a)
+{
+	reg_grid = a;
+}
+
+void   PathPlanner ::setConRad(double a)
+{
+	conn_radius = a;
+}
+
+void   PathPlanner ::setObstDist(double a)
+{
+	obst_dist = a;
+}
 
 void PathPlanner::ExpandObstacles() // Nifty way of doing an obstacle expansion, not finalized, ----->>>>> @ TO DO @ <<<<<------
 {
@@ -59,6 +92,18 @@ void PathPlanner::ExpandObstacles() // Nifty way of doing an obstacle expansion,
 	int m,n,x,y,radius;
 	thickness = int(this->obstacle_radius/this->pixel_size);
 	radius =2; // This covers vertical, horizontal and diagonal cells
+
+	QVector <QBitArray> temp_map;
+	for(int i=0;i<this->map_width;i++)
+	{
+		QBitArray pixel(map_height);
+		for(int j=0;j<this->map_height;j++)
+		{
+			pixel[j]= map[i][j];
+		}	
+		temp_map.push_back(pixel);
+	}
+		
 	for(int i=0;i<this->map_width - 1;i++)
 		for(int j=0;j<this->map_height - 1 ;j++)
 		{
@@ -69,7 +114,7 @@ void PathPlanner::ExpandObstacles() // Nifty way of doing an obstacle expansion,
 				y = (int)(- sqrt(radius*radius - (x - i)*(x - i)) + j);
 				if (y < 0) y = 0;
 				if (y >= this->map_height) y = this->map_height - 1;
-				if (this->map[i][j] && !this->map[x][y])
+				if (temp_map[i][j] && !temp_map[x][y])
 				{
 				for (int r = 1; r <(int)(thickness);r++)
 					for( m = (int)(i - r); m <= (int)(i + r);m++)
@@ -90,7 +135,7 @@ void PathPlanner::ExpandObstacles() // Nifty way of doing an obstacle expansion,
 				y = (int)(+ sqrt(radius*radius - (x - i)*(x - i)) + j);
 				if (y < 0) y = 0;
 				if (y >= this->map_height) y = this->map_height - 1;
-				if (this->map[i][j] && !this->map[x][y])
+				if (temp_map[i][j] && !temp_map[x][y])
 				{
 				for (int r = 1; r <(int)(thickness);r++)
 					for( m = (int)(i - r); m <= (int)(i + r);m++)
@@ -111,7 +156,7 @@ void PathPlanner::ExpandObstacles() // Nifty way of doing an obstacle expansion,
 			}
 		}
 	qDebug("	--->>> OBSTACLES EXPANDED SUCCESSFULLY <<<---	");
-	ShowConnections();
+	//ShowConnections();
 };
 
 void PathPlanner::GenerateRegularGrid()
@@ -144,22 +189,22 @@ void PathPlanner::GenerateRegularGrid()
 					p.setX(i);
 					p.setY(j);
 					this->ConvertPixel(&p);
-						if (CheckShortestDistance(p.x(),p.y(),reg_grid))
-						{
-							temp = new SearchSpaceNode;
-							temp->location.setX(p.x());
-							temp->location.setY(p.y());
-							temp->parent = NULL; 
-							temp->next   = search_space;
-							search_space = temp;
-						}
+					if (CheckShortestDistance(p.x(),p.y(),reg_grid))
+					{
+						temp = new SearchSpaceNode;
+						temp->location.setX(p.x());
+						temp->location.setY(p.y());
+						temp->parent = NULL; 
+						temp->next   = search_space;
+						search_space = temp;
+					}
 				}
 			}
 		}
 	}
 	qDebug("	--->>> REGULAR GRID GENERATED SUCCESSFULLY <<<---	");
 	SaveSearchSpace();
-	ShowConnections();
+	//ShowConnections();
 };
 
 void PathPlanner::BridgeTest()
@@ -227,7 +272,7 @@ void PathPlanner::BridgeTest()
 		}
 	qDebug("	--->>> BRIDGE TEST FINISHED SUCCESSFULLY <<<---");
 	SaveSearchSpace();
-	ShowConnections();
+	//ShowConnections();
 };
 
 void PathPlanner :: PrintNodeList()
@@ -305,7 +350,7 @@ void PathPlanner::AddCostToNodes()
 		S = S->next;
 	}
 	qDebug("	--->>> Penalty Added <<<---	");
-	ShowConnections();
+	//ShowConnections();
 };
 
 void PathPlanner::ConnectNodes()
@@ -326,7 +371,10 @@ void PathPlanner::ConnectNodes()
 			{
 				angle = atan2(S->location.y() - temp->location.y() ,S->location.x() - temp->location.x());
 				if(!Obstacle(temp->location,angle))
+				{
 					temp->children.push_back(S);
+					//qDebug("Child ADDED");
+				}
 			}
 			S = S->next;
 		}
@@ -396,73 +444,6 @@ void PathPlanner :: SetMap(QVector <QBitArray> map)
 	this->map_width  = map.size();
 	this->MAXNODES=map_height*map_width;
 	map_initialized = true;
-};
-
-void PathPlanner::draw_tree()
-{
-	//GtkWidget * temp;
-	//temp = lookup_widget (GTK_WIDGET(widget),"drawingarea1");
-	QPointF l_start,l_end;
-	for (unsigned int i =0; i<tree.size();i++)
-		{
-			l_start = tree[i].location;
-			ConvertToPixel(&l_start);
-			//cout<<"\n Main X="<<tree[i].location.x<<" Y="<<tree[i].location.y;
-			for(int j=0;j<tree[i].children.size();j++)
-			{
-				l_end = tree[i].children[j];
-				ConvertToPixel(&l_end);
-				//gdk_draw_line (temp->window,(GdkGC*)(temp)->style->white_gc,(int)l_start.x,(int)l_start.y,
-				//(int)l_end.x,(int)l_end.y);
-				//cout<<"\n	--->>>Child X="<<tree[i].children[j].x<<" Y="<<tree[i].children[j].y;
-			}
-		}
-}
-
-void PathPlanner::draw_path()
-{
-	if (!this->path)
-	{
-		cout<<"\n->NO Path Generated Yet, plan a Path First";
-		return;
-	}
-	double angle;
-	//GtkWidget * temp;
-	//temp = lookup_widget (GTK_WIDGET(widget),"drawingarea1");
-	QPointF l_start,l_end,E,S;
-  	Node *p;
-  	p = this->path;
-	while(p != NULL && p->next!=NULL)
-	{
-		S =  p->location;
-  		//temp = lookup_widget (widget,"drawingarea1");
-		if (p->direction == FORWARD)
-			angle = p->angle;
-		else
-			angle = p->angle + M_PI;
-		//Translate_edges(S,angle);
-		for (int i=0 ;i < 4; i++)
-		{
-			this->ConvertToPixel(&translated_edge_points[i]);
-			//cout<<"\nEdge "<< i+1<<" X="<<translated_edge_points[i].x<<" Y="<<translated_edge_points[i].y;
-		}
-				//cout<<"\n";
-// 		gdk_draw_line (temp->window,(GdkGC*)(temp)->style->white_gc,(int)translated_edge_points[0].x,(int)translated_edge_points[0].y,
-//		(int)translated_edge_points[1].x,(int)translated_edge_points[1].y);
-//  		gdk_draw_line (temp->window,(GdkGC*)(temp)->style->white_gc,(int)translated_edge_points[1].x,(int)translated_edge_points[1].y,
-//		(int)translated_edge_points[2].x,(int)translated_edge_points[2].y);
-//  		gdk_draw_line (temp->window,(GdkGC*)(temp)->style->white_gc,(int)translated_edge_points[2].x,(int)translated_edge_points[2].y,
-//		(int)translated_edge_points[3].x,(int)translated_edge_points[3].y);
-//  		gdk_draw_line (temp->window,(GdkGC*)(temp)->style->white_gc,(int)translated_edge_points[3].x,(int)translated_edge_points[3].y,
-//		(int)translated_edge_points[0].x,(int)translated_edge_points[0].y);
-		if (p->next)
-		{
-			l_start = p->location; l_end = p->next->location;
-			ConvertToPixel(&l_start); ConvertToPixel(&l_end);
-  			//gdk_draw_line (temp->window,(GdkGC*)(temp)->style->white_gc,(int)l_start.x,(int)l_start.y,(int)l_end.x,(int)l_end.y);
-		}
-		p = p->next;
-	} 
 };
 
 }

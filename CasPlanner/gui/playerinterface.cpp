@@ -7,7 +7,9 @@ PlayerInterface::PlayerInterface(CommManager *com, QString host, int port):
     pc(0), 
     ctrEnabled(false),
     positionId(0), 
-    drive(0), 
+    drive(0),
+    localizer(0),
+    localizerEnabled(false),
     ptzEnabled(false),
     emergencyStopped(false),
     mapEnabled(false)
@@ -59,7 +61,16 @@ double PlayerInterface::getTurnRate()
     dataLock.unlock(); 
     return retval; 
 }
-
+Pose PlayerInterface::getLocation()
+{
+    dataLock.lockForRead();
+    Pose retval; 
+    retval.p.setX(localizer->hypoths[0].mean[0]);
+    retval.p.setY(localizer->hypoths[0].mean[1]);
+    retval.phi = localizer->hypoths[0].mean[2];
+    dataLock.unlock(); 
+    return retval; 	
+}
 void PlayerInterface::stop()
 {
     // Do nothing.  
@@ -78,7 +89,28 @@ void PlayerInterface::setSpeed(double i_speed, double i_turnRate)
     turnRate = i_turnRate;
     dataLock.unlock(); 
 }
-
+void PlayerInterface::setLocation(Pose location)
+{
+	pose[0]= location.p.x();
+	pose[1]= location.p.y();
+	pose[2]= location.phi;
+	//cout << "\n Default Pose given to the Localizer X="<<path->location.x()<<" Y="<<path->location.y()<<" Theta="<<path->angle;
+	//cout << "\n Tracking Distance="<<tracking_distance<<" Kd="<<kd<<" KTheta="<<kt;
+	//Set Covariance Matrix
+	pose_var[0][0]=0.5;
+	pose_var[0][1]=0.5;
+	pose_var[0][2]=0.5;
+	pose_var[1][0]=0.5;
+	pose_var[1][1]=0.5;
+	pose_var[1][2]=0.5;
+	pose_var[2][0]=0.5;
+	pose_var[2][1]=0.5;
+	pose_var[2][2]=DTOR(10);
+	localizer->SetPose(pose,pose_var);	
+	this->location.p.setX(location.p.x());
+	this->location.p.setY(location.p.y());
+	this->location.phi = location.phi;
+}
 void PlayerInterface::enableControl(int posId)
 {
     ctrEnabled = true;
@@ -102,7 +134,10 @@ void PlayerInterface::enableLaser(int laser_id, int in_playerLaserId)
     laserEnabled[laser_id] = true; 
     playerLaserId[laser_id] = in_playerLaserId; 
 }
-
+void PlayerInterface::enableLocalizer(int localizerId)
+{
+	this->localizerId= localizerId;
+}
 QVector<QPointF> PlayerInterface::getLaserScan(int Laser_id)
 {
     //qDebug("Laser data requested"); 
@@ -194,6 +229,10 @@ void PlayerInterface::run ()
     if(ptzEnabled)
     {
 		ptz = new PtzProxy(pc, ptzId, 'a'); 
+    }
+    if(localizerEnabled)
+    {
+    	localizer 	= new LocalizeProxy(pc,0,'r');
     }
     qDebug("Testing Player Server for Data Read:");    
     while(pc->Read())

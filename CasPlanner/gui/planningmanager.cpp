@@ -1,25 +1,123 @@
 #include "planningmanager.h"
 
-PlanningManager::PlanningManager()
+PlanningManager::PlanningManager():
+connNodesEnabled(true),
+regGridEnabled(true),
+bridgeTestEnabled(true),
+obstPenEnabled(true),
+expObstEnabled(true),
+showTreeEnabled(true)
 {
 }
 
 PlanningManager::~PlanningManager()
 {
 }
-Node * PlanningManager::FindPath(QImage map,Pose start,Pose end)
+void PlanningManager:: setBridgeTest(int bt)
+{
+	//qDebug("BridgeTest is set to %d",bt);
+	if(!bt)
+		bridgeTestEnabled = false;
+	else
+		bridgeTestEnabled = true;
+}
+
+void PlanningManager:: setConnNodes(int bt)
+{
+	//qDebug("setConnNodes is set to %d",bt);
+	if(!bt)
+		connNodesEnabled = false;
+	else
+		connNodesEnabled = true;	
+}
+void PlanningManager:: setRegGrid(int bt)
+{
+	//qDebug("setRegGrid is set to %d",bt);
+	if(!bt)
+		regGridEnabled = false;
+	else
+		regGridEnabled = true;
+}
+void PlanningManager:: setObstPen(int bt)
+{
+	//qDebug("setObstPen is set to %d",bt);
+	if(!bt)
+		obstPenEnabled = false;
+	else
+		obstPenEnabled = true;
+}
+void PlanningManager:: setExpObst(int bt)
+{
+	//qDebug("setExpObst is set to %d",bt);
+	if(!bt)
+		expObstEnabled = false;
+	else
+		expObstEnabled = true;
+}
+void PlanningManager:: setShowTree(int bt)
+{
+	//qDebug("setShowTree is set to %d",bt);
+	if(!bt)
+		showTreeEnabled = false;
+	else
+		showTreeEnabled = true;
+}
+void PlanningManager::setBridgeTestValue(double val)
+{
+	pathPlanner->setBridgeLen(val);
+}
+void PlanningManager::setConnNodesValue(double val )
+{
+	pathPlanner->setConRad(val);
+}
+void PlanningManager::setRegGridValue(double val)
+{
+	pathPlanner->setRegGrid(val);
+}
+void PlanningManager::setObstPenValue(double val)
+{
+	pathPlanner->setObstDist(val);
+}
+void PlanningManager::setExpObstValue(double val)
+{
+	pathPlanner->setExpRad(val);
+}
+void PlanningManager::setBridgeResValue(double val)
+{
+	pathPlanner->setBridgeRes(val);
+}
+void PlanningManager::SetMap(QImage map)
+{
+	if(!this->pathPlanner)
+		this->start();	
+	pathPlanner->SetMap(provideMapOG(map));	
+}
+void PlanningManager::GenerateSpace()
+{
+	if(!this->pathPlanner)
+		this->start();
+	if(expObstEnabled)
+		pathPlanner->ExpandObstacles();
+	if(regGridEnabled)
+		pathPlanner->GenerateRegularGrid();
+	if(bridgeTestEnabled)
+		pathPlanner->BridgeTest();
+	if(obstPenEnabled)
+		pathPlanner->AddCostToNodes();
+	if(connNodesEnabled)
+		pathPlanner->ConnectNodes();	
+	pathPlanner->ShowConnections();
+}
+Node * PlanningManager::FindPath(Pose start,Pose end)
 {
 	Node * retval;
 	if(!this->pathPlanner)
-		this->start();
-	qDebug("Image height=%d width=%d",map.height(),map.width());
-	pathPlanner->SetMap(provideMapOG(map));
-	pathPlanner->ExpandObstacles();
-	pathPlanner->GenerateRegularGrid();
-	pathPlanner->BridgeTest();
-	pathPlanner->AddCostToNodes();
-	pathPlanner->ConnectNodes();
-	pathPlanner->ShowConnections();
+		this->start();	
+	if(pathPlanner->search_space)
+	{
+		pathPlanner->FreeSearchSpace();
+	}
+	GenerateSpace();
 	retval = pathPlanner->Search(start,end);
 	if(retval)
 	{
@@ -50,7 +148,7 @@ int PlanningManager::config( ConfigFile *cf, int sectionid)
 int PlanningManager::start()
 {
 	qDebug("-> Starting Planner."); 
-    qDebug("\n*********************************************************************");	
+    qDebug("*********************************************************************");	
    	qDebug("Planning Parameters:"); 
     qDebug("\t\t Pixel Resolution = %f",pixel_res); 
     qDebug("\t\t Bridge Test Lenght = %f",bridge_len); 
