@@ -197,7 +197,7 @@ Node *  Astar::Search(Pose start,Pose end)
   			curChild->parent = current;
   			curChild->depth = current->depth + 1;
   			curChild->id = ID++;
-  			qDebug("ID is:%d",ID);
+  			//qDebug("ID is:%d",ID);
   			curChild->next = NULL;
   			curChild->prev = NULL;
   			curChild->g_value = gCost(curChild);

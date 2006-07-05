@@ -26,18 +26,14 @@ HEADERS +=  gui/CommManager.h\
 			includes/defs.h\
 			includes/ForceField.h\
 			includes/geometry.h\
-			includes/InvertedAABBox2D.h\
 			includes/LList.h\
 			includes/Node.h\
-			#includes/PathFollower.h\
 			includes/PathPlanner.h\
 			includes/Robot.h\
 			includes/SearchSpaceNode.h\
 			includes/Transformations.h\
 			includes/utils.h\
 			includes/Vector2D.h\
-			includes/Wall2D.h\
-			includes/WallIntersectionTests.h\
 			includes/wheelchairproxy.h
 
 SOURCES +=  gui/CommManager.cpp\
@@ -64,7 +60,6 @@ SOURCES +=  gui/CommManager.cpp\
 		    src/ForceField.cpp\
 		    src/LList.cpp\
 		    src/Node.cpp\
-		    #src/PathFollower.cpp\
 		    src/PathPlanner.cpp\
 		    src/Robot.cpp\
 		    src/SearchSpaceNode.cpp\
