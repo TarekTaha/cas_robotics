@@ -45,7 +45,7 @@ int Navigator::config( ConfigFile *cf, int sectionid)
    	obst_avoid  =   cf->ReadString(sectionid, "obst_avoid", "non");
  	k_dist      =   cf->ReadFloat (sectionid, "k_dist", 1.8);
   	k_theta     =   cf->ReadFloat (sectionid, "k_theta", 2.5);
-  	safety_dist =   cf->ReadFloat (sectionid, "safety_dist", 0.1);
+  	safety_dist =   cf->ReadFloat (sectionid, "safety_dist", 0.2);
   	tracking_dist =   cf->ReadFloat (sectionid, "tracking_dist", 0);
     qDebug("-> Starting Robot Navigator."); 
     qDebug("*********************************************************************"); 	
@@ -80,6 +80,10 @@ void Navigator::run()
 	ControlAction cntrl;
 	QTime timer2,delta_timer;
 	Pose loc;
+	if(!local_planner)
+	{
+		setupLocalPlanner();
+	}
 	if(!global_path)
 	{
 		qDebug("\n --->>> No PATH TO FOLLOW <<<---");
@@ -188,6 +192,44 @@ void Navigator::run()
 				segment_navigated = TRUE;
 			qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
 			qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
+			/* If we are too close to obstacles then let the local planner takes control
+			 * steps :
+			 * 1- Takes a local laser Scan from the server.
+			 * 2- Build a local occupancy grid based on the laser scan.
+			 * 3- Give the generated map to the local planner.
+			 * 4- Plan a path from the current location to a point
+			 *    on the global path that is X distance away
+			 * 5- Follow that path
+			 */
+			QTime local_planning_time;
+			while(commManager->getClosestObst() < safety_dist)
+			{
+				local_planning_time.restart();
+			 	local_planner->SetMap(commManager->getLaserScan(0));
+			 	Node * temp;
+			 	temp = global_path;
+			 	double traversable_dist =0,target_angle=0;
+			 	while(traversable_dist <5)
+			 	{
+			 		if(temp->next)
+			 		{
+			 			traversable_dist += Dist(temp->location,temp->next->location);
+						target_angle = ATAN2(temp->next->location,temp->location);
+			 		}
+			 		else
+			 			break;
+			 		temp= temp->next;
+			 	}
+			 	Pose target;
+			 	target.p.setX(temp->location.x());
+			 	target.p.setY(temp->location.y());			 	
+			 	target.phi = target_angle;
+			 	local_path = local_planner->FindPath(EstimatedPos,target);
+			 	if (local_path)
+			 	{
+			 		qDebug("Local Path found in %dms",local_planning_time.elapsed());
+			 	}
+			}
 			/* Get the control Action to be applied, in this case it's a
 			 * simple linear control. It's accurate enough for traversing 
 			 * the generated paths.

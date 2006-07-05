@@ -25,6 +25,7 @@ class PlanningManager : public MapManager
 	        Node * FindPath(Pose start,Pose end);
 	        void GenerateSpace();
 	        void SetMap(QImage mpa);
+	        void SetMap(QVector<QPointF> laser_scan);
 	        void setBridgeTest(int);
 	        void setConnNodes(int);
 	        void setRegGrid(int);
