@@ -27,9 +27,17 @@ PathPlanner::PathPlanner(double r_l ,double r_w , QString r_m , QPointF r_c,doub
 
 PathPlanner :: ~PathPlanner()
 {
-	FreeSearchSpace();
+	FreeResources();
 	cout<<"\n	--->>> Allocated Memory FREED <<<---";
 };
+
+void PathPlanner::FreeResources()
+{
+	FreeSearchSpace();
+	FreePath();
+	p=root=test=NULL;
+}
+
 void PathPlanner::FreePath()
 {
 	while(path != NULL) 
@@ -39,18 +47,7 @@ void PathPlanner::FreePath()
 		path = p;
 	}
 };
-void PathPlanner:: FreeSearchSpace()
-{
-	SearchSpaceNode *temp;
-	p=root=test=NULL;
-	while (search_space != NULL)
-	{
-		temp = search_space;
-		search_space = search_space->next;
-		delete temp;
-	};
-	FreePath();	
-}
+
 void   PathPlanner ::setExpRad(double a)
 {
 	obstacle_radius = a;

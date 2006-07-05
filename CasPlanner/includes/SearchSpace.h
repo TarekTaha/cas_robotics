@@ -9,6 +9,7 @@ class SearchSpace
 {
 public:
 	SearchSpaceNode *search_space;
+	void FreeSearchSpace();
 	SearchSpace();
 	virtual ~SearchSpace();
 };

@@ -6,7 +6,6 @@ namespace CasPlanner
 Astar::Astar(double r_l ,double r_w ,double o_r,double p_s,QString r_m , QPointF r_c) :
 	Robot(r_l ,r_w ,o_r, r_m ,r_c),
 	pixel_size(p_s),
-	search_space(NULL),
 	root(NULL),
 	test(NULL),
 	path(NULL),
