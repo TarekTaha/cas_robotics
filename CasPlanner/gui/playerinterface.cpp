@@ -1,18 +1,19 @@
 #include "playerinterface.h"
 
 PlayerInterface::PlayerInterface(CommManager *com, QString host, int port):
-    comms(com),
     playerHost(host),
-    playerPort(port),
+    playerPort(port),   
     pc(0), 
-    ctrEnabled(false),
-    positionId(0), 
-    localizerEnabled(false),
+    comms(com),
     ptzEnabled(false),
-    emergencyStopped(false),
+    ctrEnabled(false),
     mapEnabled(false),
-    localizer(0),
-    drive(0)
+    localizerEnabled(false),
+    localized(false),
+    emergencyStopped(false),
+    positionId(0), 
+    drive(0),
+    localizer(0)
 {
     laserEnabled[0] = false;
     laserEnabled[1] = false;
@@ -204,8 +205,8 @@ Map PlayerInterface::provideMap()
 {
 	Map retval;
     int metadata_offset = (map->height-1)*map->width;
-    uint8_t mapid = (uint8_t) map->cells[metadata_offset];
-    uint8_t robotid = (uint8_t) map->cells[metadata_offset+1];
+    //uint8_t mapid = (uint8_t) map->cells[metadata_offset];
+    //uint8_t robotid = (uint8_t) map->cells[metadata_offset+1];
     int16_t mapposx, mapposy, mapposphi;
     uint32_t time_secs, time_usecs;
     
@@ -238,7 +239,7 @@ void PlayerInterface::run ()
 {
     qDebug("/********************************************************************/"); 	
     qDebug("Connecting to Robot Server::");
-    qDebug("\t Connecting to %s on %s:%d ... \n",qPrintable(comms->getName()),qPrintable(playerHost), playerPort);
+    qDebug("\t Connecting to %s on %s:%d ...",qPrintable(comms->getName()),qPrintable(playerHost), playerPort);
     if(pc)
     {
 		delete pc; 

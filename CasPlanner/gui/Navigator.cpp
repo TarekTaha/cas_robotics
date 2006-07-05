@@ -99,6 +99,13 @@ void Navigator::run()
 		qDebug("\t - Your not Connected to the Robot, Connect First");
 		return;		
 	}
+
+	Pose initial_pos;
+	initial_pos.p.setX(global_path->location.x());
+	initial_pos.p.setY(global_path->location.y());	
+	initial_pos.phi=global_path->angle;	
+	commManager->setLocation(initial_pos);
+	sleep(1);
 	while(!commManager->getLocalized())
 	{
 		loc = commManager->getLocation();
@@ -133,6 +140,8 @@ void Navigator::run()
 		{
 			// Estimate the location based on the Last AMCL location and the vehichle model
 			delta_t = delta_timer.elapsed()/1e3;
+			delta_timer.restart();
+			usleep(100000);
 			EstimatedPos.phi += commManager->getTurnRate()*delta_t;
 			EstimatedPos.p.setX(EstimatedPos.p.x() + velocity*cos(EstimatedPos.phi)*delta_t);
 			EstimatedPos.p.setY(EstimatedPos.p.y() + velocity*sin(EstimatedPos.phi)*delta_t);
@@ -161,7 +170,7 @@ void Navigator::run()
 			 * It will not be used most of the time, but it addes accuracy in control for
 			 * long line paths.
 			 */
-			qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",commManager->getSpeed(),EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
+			//qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",commManager->getSpeed(),EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
 			tracking_point.setX(EstimatedPos.p.x() + tracking_dist*cos(EstimatedPos.phi) - 0*sin(EstimatedPos.phi));
 			tracking_point.setY(EstimatedPos.p.y() + tracking_dist*sin(EstimatedPos.phi) + 0*cos(EstimatedPos.phi)); 
 			// Distance to the path Segment
@@ -190,8 +199,8 @@ void Navigator::run()
 			 */
 			if (displacement > distance_to_next) 
 				segment_navigated = TRUE;
-			qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
-			qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
+			//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
+			//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
 			/* If we are too close to obstacles then let the local planner takes control
 			 * steps :
 			 * 1- Takes a local laser Scan from the server.
@@ -234,7 +243,9 @@ void Navigator::run()
 			 * simple linear control. It's accurate enough for traversing 
 			 * the generated paths.
 			 */
-			cntrl = getAction(EstimatedPos.phi,angle,displacement,global_path->direction,velocity);
+			cntrl = getAction(EstimatedPos.phi,angle,displacement,global_path->direction,0.2);
+			qDebug("Control Action Linear:%f Angular:%f",global_path->direction*cntrl.linear_velocity,
+			cntrl.angular_velocity);
 			/* Angular Velocity Thrusholded, just trying not to
 			 * exceed the accepted limits. Or setting up a safe 
 			 * turn speed.
@@ -251,7 +262,6 @@ void Navigator::run()
 //				WCp->SetSpeed(global_path->direction*cntrl.linear_velocity,cntrl.angular_velocity);
 //			else
 //				pp->SetSpeed(global_path->direction*cntrl.linear_velocity,cntrl.angular_velocity);
-//			g_timer_start(delta_timer);
 		}
 		qDebug("--->>>Finished Navigating this section, Moving to NEXT --->>>");
 		first = last;

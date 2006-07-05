@@ -5,11 +5,11 @@ namespace CasPlanner
 
 Astar::Astar(double r_l ,double r_w ,double o_r,double p_s,QString r_m , QPointF r_c) :
 	Robot(r_l ,r_w ,o_r, r_m ,r_c),
-	search_space(NULL),
 	pixel_size(p_s),
-	path(NULL),
+	search_space(NULL),
 	root(NULL),
 	test(NULL),
+	path(NULL),
 	p(NULL)
 {
 	openList   = new LList;
@@ -38,7 +38,7 @@ int Astar :: Obstacle(QPointF P, double theta)
 	int m,n;
 	QPointF det_point;
 	// Rotates and Translates the check points according to the vehicle position and orientation
-	for (int i=0;i<this->check_points.size();i++)
+	for (unsigned int i=0;i<this->check_points.size();i++)
 	{
 		det_point.setX((check_points[i].x()*cos(theta) - check_points[i].y()*sin(theta) + P.x()));
 		det_point.setY((check_points[i].x()*sin(theta) + check_points[i].y()*cos(theta) + P.y()));
@@ -130,7 +130,7 @@ Node *  Astar::Search(Pose start,Pose end)
 //  while openList is not empty 
 	while (openList->Start != NULL) 
 	{
-		current = openList->GetHead(); 	// Get the node with the cheapest cost, first node
+		current = openList->GetHead(); 	// Get the node with the cheapest cost (first node)
 		openList->Next();				// Move to the next Node
     	NodesExpanded++;
     	// We reached the target location, so build the path and return it.
@@ -197,6 +197,7 @@ Node *  Astar::Search(Pose start,Pose end)
   			curChild->parent = current;
   			curChild->depth = current->depth + 1;
   			curChild->id = ID++;
+  			qDebug("ID is:%d",ID);
   			curChild->next = NULL;
   			curChild->prev = NULL;
   			curChild->g_value = gCost(curChild);
@@ -254,10 +255,9 @@ Node *  Astar::Search(Pose start,Pose end)
 		// put the current node onto the closed list, ==>> already visited List
 		closedList->Add(current);
 		// Test to see if we have expanded too many nodes without a solution
-    	if (current->id > this->MAXNODES*2)     	
+    	if (current->id > this->MAXNODES)     	
 		{
-	    	cout<<"\n	--->>>	Expanded more than the maximum allowable nodes of MAXNODE="<<this->MAXNODES<<" Terminating ...";
-			fflush(stdout);
+	    	qDebug("--->>>	Expanded %d Nodes which is more than the maximum allowed MAXNODE=%d , Search Terminated",current->id,MAXNODES);
 			//Delete Nodes in Open and Closed Lists
 			closedList->Free();
 			openList->Free();
