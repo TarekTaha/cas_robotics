@@ -114,12 +114,21 @@ void PlanningManager::setBridgeResValue(double val)
 {
 	pathPlanner->setBridgeRes(val);
 }
+
 void PlanningManager::SetMap(QImage map)
 {
 	if(!this->pathPlanner)
 		this->start();	
 	pathPlanner->SetMap(provideMapOG(map));	
 }
+
+void PlanningManager::SetMap(QVector<QPointF> laser_scan)
+{
+	if(!this->pathPlanner)
+		this->start();	
+	pathPlanner->SetMap(provideLaserOG(laser_scan));	
+}
+
 void PlanningManager::GenerateSpace()
 {
 	if(!this->pathPlanner)

@@ -347,6 +347,11 @@ inline double anglediff(double alfa, double beta)
 	return Abs(diff);
 };
 
+inline double ATAN2(QPointF a,QPointF b)
+{
+	return atan2(a.y() - b.y(), a.x() - b.x());
+}
+
 typedef struct _tree
 	{
 		QPointF location;
