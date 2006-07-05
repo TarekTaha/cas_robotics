@@ -1,9 +1,37 @@
 #include "planningmanager.h"
 
+/* Constructor, parameters are provided directly rather than
+ * read from the configuration file
+ */
+PlanningManager::PlanningManager(  double robot_length,
+									  double robot_width,
+									  QString robot_model,
+									  QPointF rotation_center,
+									  double pixel_res,
+									  double bridge_len,
+									  double bridge_res,
+									  double reg_grid,
+									  double obst_exp,
+									  double conn_rad,
+									  double obst_pen)
+{
+	this->robot_length = robot_length;
+	this->robot_width  = robot_width;
+	this->robot_model = robot_model;
+	this->rotation_center = rotation_center;
+	this->pixel_res  = pixel_res;
+	this->bridge_len = bridge_len;
+	this->bridge_res = bridge_res;
+	this->reg_grid = reg_grid;
+	this->obst_exp = obst_exp;
+	this->conn_rad = conn_rad;
+	this->obst_pen = obst_pen;
+}	
+
 PlanningManager::PlanningManager():
+bridgeTestEnabled(true),
 connNodesEnabled(true),
 regGridEnabled(true),
-bridgeTestEnabled(true),
 obstPenEnabled(true),
 expObstEnabled(true),
 showTreeEnabled(true)
@@ -129,6 +157,7 @@ Node * PlanningManager::FindPath(Pose start,Pose end)
 	}
 	return retval;
 }
+
 int PlanningManager::config( ConfigFile *cf, int sectionid)
 {
    	pixel_res =  			cf->ReadFloat(sectionid, "pixel_res",0.05);
@@ -145,6 +174,7 @@ int PlanningManager::config( ConfigFile *cf, int sectionid)
 	rotation_center.setY(cf->ReadFloat(sectionid, "rotation_y",0));
   	return 1;
 }
+
 int PlanningManager::start()
 {
 	qDebug("-> Starting Planner."); 

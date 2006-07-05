@@ -11,6 +11,7 @@ MapManager::~MapManager()
 QVector <QBitArray> MapManager::provideLaserOG(QVector<QPointF> laser_scan)
 {
 	QVector <QBitArray> retval;
+	
 	return retval;
 }
 
