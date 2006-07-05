@@ -18,20 +18,26 @@ Astar::Astar()
 {
 
 }
+
 Astar::~Astar()
 {
 }
-void Astar :: ConvertPixel(QPointF  *p) // transfers from pixel coordinate to the main coordinate system
+
+// transfers from pixel coordinate to the main coordinate system
+void Astar :: ConvertPixel(QPointF  *p) 
 {
 	p->setX( p->x()*this->pixel_size - this->pixel_size*this->map_width/2);
 	p->setY(-p->y()*this->pixel_size + this->pixel_size*this->map_height/2);
 };
+
+// transfers from main coordinate to the pixel coordinate system
 void Astar :: ConvertToPixel (QPointF *p)
 {
 	p->setX(( p->x() + this->pixel_size*this->map_width/2)/this->pixel_size);
 	p->setY((-p->y() + this->pixel_size*this->map_height/2)/this->pixel_size);
 }
-// Test for whether a point is in an obstacle or not
+
+// Tests for whether a point is in an obstacle or not
 int Astar :: Obstacle(QPointF P, double theta) 
 {
 	int m,n;
@@ -70,8 +76,8 @@ void Astar::FindRoot()
 		if (distance < shortest_distance) 
 		{
 			shortest_distance = distance;
-			root->location.setX(temp->location.x());
-			root->location.setY(temp->location.y());
+			root->pose.p.setX(temp->location.x());
+			root->pose.p.setY(temp->location.y());
 		}
 		temp = temp->next;
 	}
@@ -83,10 +89,10 @@ void Astar::FindRoot()
 	root->f_value = root->g_value + root->h_value;
 	root->id = 0;
 	root->depth = 0;
-	root->angle= start.phi;
+	root->pose.phi = start.phi;
 	root->direction = FORWARD;
-	//Translate(root->location,start.phi);
-	qDebug("	---->>>Root is Set to be X=%f Y=%f Phi=%f",root->location.x(),root->location.y(),RTOD(root->angle));
+	//Translate(root->pose,start.phi);
+	qDebug("	---->>>Root is Set to be X=%f Y=%f Phi=%f",root->pose.p.x(),root->pose.p.y(),RTOD(root->pose.phi));
 };
 
 Node *  Astar::Search(Pose start,Pose end)
@@ -132,7 +138,7 @@ Node *  Astar::Search(Pose start,Pose end)
 		current = openList->GetHead(); 	// Get the node with the cheapest cost (first node)
 		openList->Next();				// Move to the next Node
     	NodesExpanded++;
-    	// We reached the target location, so build the path and return it.
+    	// We reached the target pose, so build the path and return it.
     	if (GoalReached(current))                     
 		{
 			// build the complete path to return
@@ -147,7 +153,7 @@ Node *  Astar::Search(Pose start,Pose end)
       		p = current;
 //   		while (p != NULL) 
 //			{
-//				//cout<<"\n	--->>> Step["<<++m<<"] X="<<p->location.x<<" Y="<<p->location.y;
+//				//cout<<"\n	--->>> Step["<<++m<<"] X="<<p->pose.x<<" Y="<<p->pose.y;
 //				//cout<<"\n	--->>> Angle is="<<RTOD(p->angle);
 //				fflush(stdout);
 //				p = p->parent;
@@ -156,7 +162,7 @@ Node *  Astar::Search(Pose start,Pose end)
       		p = current->parent;
    			while (p != NULL)
 			{
-//				cout<<"\n Am Still HERE Step["<<++m<<"] X="<<p->location.x<<" Y="<<p->location.y;
+//				cout<<"\n Am Still HERE Step["<<++m<<"] X="<<p->pose.x<<" Y="<<p->pose.y;
 //				fflush(stdout);
 				// remove the parent node from the closed list (where it has to be)
 				if(p->prev != NULL)
@@ -216,7 +222,7 @@ Node *  Astar::Search(Pose start,Pose end)
   				if (p->f_value > curChild->f_value && (p->direction == curChild->direction))
 				{
 					openList->Remove(p);
-				 	//cout<<"\n	--->>> Opened list -- Node is deleted, current child X="<<curChild->location.x<<" Y="<<curChild->location.y<<" has shorter path<<<---";
+				 	//cout<<"\n	--->>> Opened list -- Node is deleted, current child X="<<curChild->pose.x<<" Y="<<curChild->pose.y<<" has shorter path<<<---";
 					fflush(stdout);
 
 				}					
@@ -240,7 +246,7 @@ Node *  Astar::Search(Pose start,Pose end)
 					 * Open List and it will be investigated further later on.
 					 */
 					//closedList->Remove(p);
-				 	//cout<<"\n	--->>> Closed list -- Node is deleted, current child X="<<curChild->location.x<<" Y="<<curChild->location.y<<" has shorter path<<<---";
+				 	//cout<<"\n	--->>> Closed list -- Node is deleted, current child X="<<curChild->pose.x<<" Y="<<curChild->pose.y<<" has shorter path<<<---";
 					fflush(stdout);
 
 				}					
@@ -276,7 +282,7 @@ double Astar:: gCost(Node *n)
 	double cost;
 	if(n == NULL || n->parent==NULL)
 		return 0.0;
-	cost = n->parent->g_value + Dist(n->location,n->parent->location);
+	cost = n->parent->g_value + Dist(n->pose.p,n->parent->pose.p);
 	return cost;
 };
 
@@ -287,12 +293,12 @@ double Astar::hCost(Node *n)
 	if(n == NULL)
 		return(0);
 	// Using the Euclidean distance
-	h = Dist(end.p,n->location);
+	h = Dist(end.p,n->pose.p);
 	//h = 0;
 	if (n->parent != NULL) // Adding the Angle cost, we have to uniform the angle representation to the +ve rep or we well get a non sense result
 	{
-		angle_cost = anglediff(n->angle,n->parent->angle); // in radians
-		delta_d = Dist(n->location,n->parent->location);
+		angle_cost = anglediff(n->pose.phi,n->parent->pose.phi); // in radians
+		delta_d = Dist(n->pose.p,n->parent->pose.p);
 	}
 	obstacle_penalty = n->nearest_obstacle;
 	if(n->direction == BACKWARD)
@@ -306,16 +312,16 @@ double Astar::hCost(Node *n)
 bool Astar :: GoalReached (Node *n) 
 {
 	double angle_diff, delta_d;
-	delta_d = Dist(n->location,end.p);
+	delta_d = Dist(n->pose.p,end.p);
 	if (n->direction == FORWARD)
-		angle_diff =	anglediff(end.phi,n->angle);
+		angle_diff =	anglediff(end.phi,n->pose.phi);
 	else
 	{
-		angle_diff =	anglediff(end.phi,n->angle + M_PI);
+		angle_diff =	anglediff(end.phi,n->pose.phi + M_PI);
 	}
 	if ( delta_d <= 0.7  && angle_diff <= DTOR(30))
 	{
-		cout<<" \n Desired Final Orientation ="<<RTOD(end.phi)<<" Current="<<RTOD(n->angle);
+		cout<<" \n Desired Final Orientation ="<<RTOD(end.phi)<<" Current="<<RTOD(n->pose.phi);
 		cout<<"\n Reached Destination with Diff Orientation="<< RTOD(angle_diff);
 		return 1;
 	}
@@ -329,8 +335,8 @@ Node *Astar :: MakeChildrenNodes(Node *parent)
 	double start_angle,end_angle,angle,angle_difference,discrete_angle,robot_angle,child_angle,angle_resolution = DTOR(10);
 	bool collides = FALSE;
 	int direction;
-	P.setX(parent->location.x());
-	P.setY(parent->location.y());
+	P.setX(parent->pose.p.x());
+	P.setY(parent->pose.p.y());
 	Tree t;
 	t.location = P;
 	if(!search_space)
@@ -339,7 +345,7 @@ Node *Astar :: MakeChildrenNodes(Node *parent)
 	// Locate the Cell in the Search Space, necessary to determine the neighbours
 	while(temp!=NULL)
 	{
-		//qDebug("Node has %d children x=%f y=%f",temp->children.size(),temp->location.x(),temp->location.y());		
+		//qDebug("Node has %d children x=%f y=%f",temp->children.size(),temp->pose.x(),temp->pose.y());		
 		if (temp->location == P)
 			break;
 		temp = temp->next;
@@ -355,9 +361,9 @@ Node *Astar :: MakeChildrenNodes(Node *parent)
 	for (unsigned int i=0;i<temp->children.size();i++) 
 	{
 		// What will be our orientation when we go to this child node ?
-		angle = atan2(temp->children[i]->location.y() - P.y(),temp->children[i]->location.x() - P.x()); // Angle in Radians
+		angle = ATAN2(temp->children[i]->location,P);
 		// How much it differs from our current orientations ?
-		angle_difference = anglediff(angle,parent->angle);
+		angle_difference = anglediff(angle,parent->pose.phi);
 		// Are we gonna turn too much ? if yes then why not go backwards ?
 		if (angle_difference > DTOR(90))
 		{
@@ -378,9 +384,9 @@ Node *Astar :: MakeChildrenNodes(Node *parent)
 		 */
 
 		if (parent->direction == FORWARD)
-			robot_angle = parent->angle;
+			robot_angle = parent->pose.phi;
 		else
-			robot_angle = parent->angle + M_PI;
+			robot_angle = parent->pose.phi + M_PI;
 		if (direction == FORWARD)
 			child_angle = angle;
 		else
@@ -422,7 +428,7 @@ Node *Astar :: MakeChildrenNodes(Node *parent)
 				continue;
 			}
 		}
-//		if (Obstacle(temp->children[i]->location,angle))
+//		if (Obstacle(temp->children[i]->pose,angle))
 //		{
 //			collides= true;
 //			continue;
@@ -432,13 +438,13 @@ Node *Astar :: MakeChildrenNodes(Node *parent)
 		if (!collides) // if after discretization the child still doens't collide then add it
 		{
 			p = new Node;
-			p->location.setX(temp->children[i]->location.x());
-			p->location.setY(temp->children[i]->location.y());
+			p->pose.p.setX(temp->children[i]->location.x());
+			p->pose.p.setY(temp->children[i]->location.y());
 			p->direction  =	direction ;
-			t.children.push_back(p->location);
+			t.children.push_back(p->pose.p);
 			p->nearest_obstacle = temp->children[i]->obstacle_cost;
 			p->parent = parent;
-			p->angle= angle;
+			p->pose.phi = angle;
 			//p->wheelchair.SetCheckPoints(this->number_of_point_to_check,this->points_to_check);
 			p->next = q;
 			q = p;

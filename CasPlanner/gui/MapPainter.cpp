@@ -100,10 +100,10 @@ void MapPainter::paintEvent(QPaintEvent *ev)
 			  	p = planner->path;
 				while(p != NULL && p->next!=NULL)
 				{
-					S =  p->location;
+					S =  p->pose.p;
 					if (p->next)
 					{
-						l_start = p->location; l_end = p->next->location;
+						l_start = p->pose.p; l_end = p->next->pose.p;
 						planner->ConvertToPixel(&l_start); planner->ConvertToPixel(&l_end);
 						paint.drawLine(l_start,l_end);
 					}

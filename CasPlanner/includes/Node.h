@@ -1,7 +1,10 @@
 #ifndef NODE_H_
 #define NODE_H_
+
 #include<QPointF>
-#include<Robot.h>
+#include "Robot.h"
+#include "utils.h"
+
 namespace CasPlanner
 {
 /* This Class Represents the Node Structure in the search Tree,
@@ -13,10 +16,9 @@ class Node
 	{
 	public :
 		int id,depth,direction;
-		double nearest_obstacle,g_value,h_value,f_value,angle;
+		double nearest_obstacle,g_value,h_value,f_value;
 		Node  * parent, * next, * prev;
-		QPointF   location;
-		// Saving the location of the Robot edges on the planned path
+		Pose   pose;
 		Node ();
 		bool operator == (Node);
 		~Node();	

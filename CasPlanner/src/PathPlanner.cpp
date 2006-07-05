@@ -4,7 +4,7 @@ namespace CasPlanner
 // Test for node equality
 int NodeEquality(Node *a, Node *b) 
 {
-	if (a->location.x() == b->location.x() && a->location.y() == b->location.y())
+	if (a->pose.p.x() == b->pose.p.x() && a->pose.p.y() == b->pose.p.y())
 		return 1;
 	return 0;
 }
@@ -281,7 +281,7 @@ void PathPlanner :: PrintNodeList()
 	qDebug("\n  --------------------   START OF LIST ---------------------- \n");
 	while(p !=NULL)
 	{
-		pixel =  p->location;
+		pixel =  p->pose.p;
 		cout <<"\nStep [" << step++ <<"] x["<< pixel.x()<<"]y["<<pixel.y()<<"]"<<" Direction="<<p->direction; 
 		cout <<"\tG cost="<<p->g_value<<"\tH cost="<<p->h_value<<"\tFcost="<<p->f_value;
 		//cout<<"\tStored Angle = "<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(p->angle);

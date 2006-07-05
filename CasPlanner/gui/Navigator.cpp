@@ -101,9 +101,9 @@ void Navigator::run()
 	}
 
 	Pose initial_pos;
-	initial_pos.p.setX(global_path->location.x());
-	initial_pos.p.setY(global_path->location.y());	
-	initial_pos.phi=global_path->angle;	
+	initial_pos.p.setX(global_path->pose.p.x());
+	initial_pos.p.setY(global_path->pose.p.y());	
+	initial_pos.phi=global_path->pose.phi;	
 	commManager->setLocation(initial_pos);
 	sleep(1);
 	while(!commManager->getLocalized())
@@ -114,7 +114,7 @@ void Navigator::run()
 	}
 	/********************** Start from the root and move forward ************************/
 	first 		= global_path;
-	prev_angle	= global_path->angle;
+	prev_angle	= global_path->pose.phi;
 	global_path = global_path->next;
 	/************************************************************************************/
 	timer2.start();
@@ -126,11 +126,11 @@ void Navigator::run()
 		timer2.restart();
 		delta_timer.restart();
 		last = global_path;
-		ni = first->location; 
+		ni = first->pose.p; 
 		SegmentStart.setX(ni.x()); 
 		SegmentStart.setY(ni.y());
 		qDebug("--->>>NEW Line SEG Starts x[%.3f]y[%.3f]",SegmentStart.x(),SegmentStart.y());
-		ni = last->location;  SegmentEnd.setX(ni.x());  SegmentEnd.setY(ni.y());	
+		ni = last->pose.p;  SegmentEnd.setX(ni.x());  SegmentEnd.setY(ni.y());	
 		qDebug("--->>>Ends at   x[%.3f]y[%.3f] <<<---",SegmentEnd.x(),SegmentEnd.y());
 		direction = -1;
 		angle = atan2(SegmentEnd.y() - SegmentStart.y(),SegmentEnd.x() - SegmentStart.x());
@@ -179,7 +179,7 @@ void Navigator::run()
 			// Did we reach the last segment ???
 			if (global_path->next) // NO we didnt
 			{
-				QPointF n(global_path->next->location.x(),global_path->next->location.y());
+				QPointF n(global_path->next->pose.p.x(),global_path->next->pose.p.y());
 				distance_to_next = DistToLineSegment(SegmentEnd,n,tracking_point);
 			}
 			else // YES this is the last segment
@@ -222,16 +222,16 @@ void Navigator::run()
 			 	{
 			 		if(temp->next)
 			 		{
-			 			traversable_dist += Dist(temp->location,temp->next->location);
-						target_angle = ATAN2(temp->next->location,temp->location);
+			 			traversable_dist += Dist(temp->pose.p,temp->next->pose.p);
+						target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
 			 		}
 			 		else
 			 			break;
 			 		temp= temp->next;
 			 	}
 			 	Pose target;
-			 	target.p.setX(temp->location.x());
-			 	target.p.setY(temp->location.y());			 	
+			 	target.p.setX(temp->pose.p.x());
+			 	target.p.setY(temp->pose.p.y());			 	
 			 	target.phi = target_angle;
 			 	local_path = local_planner->FindPath(EstimatedPos,target);
 			 	if (local_path)

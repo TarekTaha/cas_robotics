@@ -122,7 +122,7 @@ void LList::Print()
 		p = Start;
 		while(p)
 		{
-			cout<<"\n Node["<<++i<<"] X="<<p->location.x()<<" Y="<<p->location.y();
+			cout<<"\n Node["<<++i<<"] X="<<p->pose.p.x()<<" Y="<<p->pose.p.y();
 			p = p->next;
 		}
 	};
