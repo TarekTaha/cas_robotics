@@ -30,6 +30,7 @@ HEADERS +=  gui/CommManager.h\
 			includes/Node.h\
 			includes/PathPlanner.h\
 			includes/Robot.h\
+			includes/SearchSpace.h\
 			includes/SearchSpaceNode.h\
 			includes/Transformations.h\
 			includes/utils.h\
@@ -62,6 +63,7 @@ SOURCES +=  gui/CommManager.cpp\
 		    src/Node.cpp\
 		    src/PathPlanner.cpp\
 		    src/Robot.cpp\
+		    src/SearchSpace.cpp\
 		    src/SearchSpaceNode.cpp\
 		    src/Vector2d.cpp
 RESOURCES = resources/icons.qrc
