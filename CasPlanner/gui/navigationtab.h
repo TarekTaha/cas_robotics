@@ -11,6 +11,7 @@
 #include "mapviewer.h"
 #include "MapPainter.h"
 #include "robotmanager.h"
+#include "Node.h"
 
 class NavControlPanel: public QWidget 
 {
@@ -79,6 +80,7 @@ Q_OBJECT
 		void GenerateSpace();
 		void Follow();
     private:
+       	Node * path;
     	RobotManager * robotManager;
 		//MapViewer mapViewer;
 		MapPainter mapPainter;

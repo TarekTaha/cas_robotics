@@ -11,8 +11,7 @@ StatusLogger::StatusLogger(QStatusBar *in_statusBar)
 
 void StatusLogger::showLog()
 {
-    //Doesn't do anything at the mo. 
-    qDebug("This should pop up da window."); 
+    qDebug("Displaying Log Window"); 
     log.show(); 
 }
 StatusLogger::~StatusLogger()

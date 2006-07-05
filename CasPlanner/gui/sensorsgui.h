@@ -1,7 +1,6 @@
 #ifndef SENSORSGUI_H
 #define SENSORSGUI_H
 
-
 #include "sensors.h"
 #include <QtOpenGL>
 #include <robotmanager.h>
@@ -11,9 +10,11 @@
 #include "laserrender.h"
 #include "speedrender.h"
 #include "ogrender.h"
+
 class SensorsGui;
 class QMessageBox;
 class SpeedRender;
+
 class SensorsGLW: public QGLWidget 
 {
     public: 

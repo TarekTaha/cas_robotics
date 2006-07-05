@@ -4,6 +4,7 @@
 NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
  : QWidget(parent),
    //mapViewer(this), 
+   path(0),
    robotManager(rob),
    mapPainter(this),
    navControlPanel(this,rob)
@@ -21,15 +22,15 @@ NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
     connect(&navControlPanel.expandObst, SIGNAL(stateChanged(int)),robotManager->planner,SLOT(setExpObst( int )));
     connect(&navControlPanel.showTree, SIGNAL(stateChanged(int)),robotManager->planner,SLOT(setShowTree( int )));
 
-	//connect(&navControlPanel.pathPlanBtn, SIGNAL(pressed()),this, SLOT(Plan()));
-	connect(&navControlPanel.pathPlanBtn, SIGNAL(pressed()),this, SLOT(Follow()));
+	connect(&navControlPanel.pathPlanBtn, SIGNAL(pressed()),this, SLOT(Plan()));
 	connect(&navControlPanel.generateSpaceBtn, SIGNAL(pressed()),this, SLOT(GenerateSpace()));
-	connect(&navControlPanel.loadMapBtn, SIGNAL(pressed()),this, SLOT(LoadMap()));	  
+	connect(&navControlPanel.loadMapBtn, SIGNAL(pressed()),this, SLOT(LoadMap()));	
+	connect(&navControlPanel.pathFollowBtn, SIGNAL(pressed()),this, SLOT(Follow()));	
 }
 void NavContainer::Follow()
 {
+	robotManager->navigator->setPath(path);
 	robotManager->navigator->setCommManager(robotManager->commManager);
-	//robotManager->navigator->FollowPath();
 	robotManager->navigator->start();
 }
 NavContainer::~NavContainer()
@@ -39,7 +40,7 @@ NavContainer::~NavContainer()
 void NavContainer::Plan()
 {
 	robotManager->planner->SetMap(mapPainter.getImage());
-	robotManager->planner->FindPath(mapPainter.getStart(),mapPainter.getEnd());
+	path = robotManager->planner->FindPath(mapPainter.getStart(),mapPainter.getEnd());
 	mapPainter.drawPath(robotManager->planner->pathPlanner);
 }
 void NavContainer::GenerateSpace()
@@ -55,6 +56,7 @@ void NavContainer::LoadMap()
 }
 NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
 	QWidget(parent),
+	robotManager(rob),
 	planningGB("Planning"),
 	bridgeTest("Bridge Test"),
 	connectNodes("Connect Nodes"), 
@@ -79,8 +81,7 @@ NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
 	pathPlanBtn("Path Plan"),
 	generateSpaceBtn("Generate Space"), 
 	pathFollowBtn("Path Follow"),
-	loadMapBtn("Load Map"),
-	robotManager(rob)
+	loadMapBtn("Load Map")
 {  
     QHBoxLayout *hlayout = new QHBoxLayout;
     hlayout->addWidget(&planningGB,1);

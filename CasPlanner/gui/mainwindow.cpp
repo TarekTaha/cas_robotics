@@ -7,7 +7,6 @@ MainWindow::MainWindow(QWidget *parent):
 QMainWindow(parent)
 {
     statusLogger = new StatusLogger(statusBar()); 
-    //setCentralWidget(&missionView); 
 }
 
 MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
@@ -35,19 +34,14 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     layout2->addWidget(connRobot);
     vLayout->addLayout(layout); 
     vLayout->addLayout(layout2);     
-    //vLayout->addWidget(emergStop); 
-    //vLayout->addWidget(connRobot); 
     container->setLayout(vLayout);
     
     statusBar()->showMessage("Welcome to CAS Navigation System ...", 20000); 
     statusBar()->showMessage("Initialization Done.");
     
-    //QPushButton *commStart = new QPushButton("Connect"); 
-    //statusBar()->addPermanentWidget(commStart);
-    //connect(commStart, SIGNAL(clicked()), this, SLOT(commStart()));
     statusLogger = new StatusLogger(statusBar()); 
     setCentralWidget(container);
-    statusLogger->addStatusMsg(0,1,"Testing Logging ..."); 
+    statusLogger->addStatusMsg(0,1,"Start of Loggs ..."); 
 
     //Comms is now set up, connect map view to map manager. 
     qDebug("Initializing Tabs"); 
@@ -55,16 +49,15 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     connect(emergStop, SIGNAL(pressed()), robotManager->commManager, SLOT(emergencyStop()));
     connect(connRobot, SIGNAL(pressed()), this, SLOT(commStart()));
     statusLogger->addStatusMsg(0,1,"GUI started successfully ... "); 
+
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(logData()));
     timer->start(60000);
 }
 void MainWindow::logData()
 {
-    //logCount++; 
-    qDebug("!!!!! Logging!!!!!!!"); 
-    QString prefix = QString("log_%1_").arg(logCount); 
-    //mapManager.writeOut(prefix, true); 
+    qDebug("Am not sure , but i might be Logging :)"); 
+    return;
 }
 
 void MainWindow::commStart()

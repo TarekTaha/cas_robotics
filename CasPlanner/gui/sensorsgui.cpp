@@ -97,9 +97,9 @@ void SensorsGLW::resizeGL(int w, int h)
 // check for camera flags
 void SensorsGLW::config()
 {
-    laserEnabled = true;//(bool) cf->ReadInt(sectionid, "laserEnabled", 1); 
-    speedEnabled = true;//(bool) cf->ReadInt(sectionid, "speedEnabled", 1);
-    mapEnabled   = true;//(bool) cf->ReadInt(sectionid, "mapEnabled", 1);
+    //laserEnabled = true;//(bool) cf->ReadInt(sectionid, "laserEnabled", 1); 
+    //speedEnabled = true;//(bool) cf->ReadInt(sectionid, "speedEnabled", 1);
+    //mapEnabled   = true;//(bool) cf->ReadInt(sectionid, "mapEnabled", 1);
     if(speedEnabled)
     {
 		speedMeter.setMaxSpeed(2); 
@@ -188,9 +188,9 @@ int SensorsGui::config()
     sensorsGL.setRobotComms(robotManager);
     //configButtons();
     // signals for changing modes
-    connect( OGRadBtn, SIGNAL(clicked()), this, SLOT(renderOG()));
-    connect( laserRadBtn, SIGNAL(clicked()), this, SLOT(renderLaser()));
-    connect( staticRadBtn, SIGNAL(clicked()), this, SLOT(renderStatic()));
+    //connect( OGRadBtn, SIGNAL(clicked()), this, SLOT(renderOG()));
+    //connect( laserRadBtn, SIGNAL(clicked()), this, SLOT(renderLaser()));
+    //connect( staticRadBtn, SIGNAL(clicked()), this, SLOT(renderStatic()));
     // robotManager->commManager->start();
     return 1; 
 
