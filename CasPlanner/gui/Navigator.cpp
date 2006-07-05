@@ -102,7 +102,7 @@ void Navigator::run()
 	while(!commManager->getLocalized())
 	{
 		loc = commManager->getLocation();
-		qDebug("Accurate Estimation Not found yet, best current is: x:%f y:%f phi:%f",loc.p.x(),loc.p.y(),RTOD(loc.phi));
+		qDebug("NO Accurate Estimation yet, best current is: x:%f y:%f phi:%f",loc.p.x(),loc.p.y(),RTOD(loc.phi));
 		usleep(300000);
 	}
 	/********************** Start from the root and move forward ************************/
