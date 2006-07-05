@@ -1,11 +1,43 @@
 #include "Navigator.h"
 
-Navigator::Navigator()
+Navigator::Navigator() :
+robot_length(1.2),
+robot_width(0.65),
+pixel_res(0.05),
+bridge_len(2),
+bridge_res(0.05),
+reg_grid(0.05),
+obst_exp(0.2),
+conn_rad(0.8),
+obst_pen(3),
+robot_model("diff"),
+rotation_center(0,-0.3)
 {
+	
 }
 
 Navigator::~Navigator()
 {
+	
+}
+
+void Navigator::setupLocalPlanner()
+{
+	if(!local_planner)
+	{
+		local_planner = new PlanningManager(
+									  robot_length,
+									  robot_width,
+									  robot_model,
+									  rotation_center,
+									  pixel_res,
+									  bridge_len,
+									  bridge_res,
+									  reg_grid,
+									  obst_exp,
+									  conn_rad,
+									  obst_pen);		
+	}
 }
 
 int Navigator::config( ConfigFile *cf, int sectionid)
@@ -106,7 +138,10 @@ void Navigator::run()
 			//cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
 			// Get current Robot Location
 			amcl_location = commManager->getLocation();
-			// Is it a new hypothesis (not the same as the last)?
+			/* Is it a new hypothesis (not the same as the last)
+			 * so override the estimation based on the robot model
+			 * with the AMCL localizer's estimation
+			 */
 			if(old_amcl.p.x() != amcl_location.p.x() || old_amcl.p.y() !=amcl_location.p.y() )
 			{
 				// Recording the last time Data changed
@@ -118,7 +153,10 @@ void Navigator::run()
 				old_amcl.p.setY(amcl_location.p.y()); EstimatedPos.p.setY(amcl_location.p.y());
 				EstimatedPos.phi = amcl_location.phi;
 			}
-			// Determine the Tracking Point 
+			/* If we chose to follow a virtual point on the path then calculate that point
+			 * It will not be used most of the time, but it addes accuracy in control for
+			 * long line paths.
+			 */
 			qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",commManager->getSpeed(),EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
 			tracking_point.setX(EstimatedPos.p.x() + tracking_dist*cos(EstimatedPos.phi) - 0*sin(EstimatedPos.phi));
 			tracking_point.setY(EstimatedPos.p.y() + tracking_dist*sin(EstimatedPos.phi) + 0*cos(EstimatedPos.phi)); 
@@ -128,25 +166,37 @@ void Navigator::run()
 			// Did we reach the last segment ???
 			if (global_path->next) // NO we didnt
 			{
-				QPointF n;
-				n.setX(global_path->next->location.x());
-				n.setY(global_path->next->location.y());
+				QPointF n(global_path->next->location.x(),global_path->next->location.y());
 				distance_to_next = DistToLineSegment(SegmentEnd,n,tracking_point);
 			}
 			else // YES this is the last segment
 			{
 				distance_to_next = 100;
+				/* trying to come as close as 30 cm to goal
+				 * this might overshoot and we might by pass the goal
+				 * so this distance can be increased.
+				 */
 				if (distance <= 0.3)
 					segment_navigated = TRUE;
 			}
-			// we are closer to the next segment
+			/* If we are closer to next segment then there is no point
+			 * in following the current, just skip and and follow the 
+			 * closest segment. This can be also helpful when we start from
+			 * a location that is not very close to the first segment.
+			 */
 			if (displacement > distance_to_next) 
 				segment_navigated = TRUE;
 			qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
 			qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
-			// Get the control Action to be applied
+			/* Get the control Action to be applied, in this case it's a
+			 * simple linear control. It's accurate enough for traversing 
+			 * the generated paths.
+			 */
 			cntrl = getAction(EstimatedPos.phi,angle,displacement,global_path->direction,velocity);
-			// Angular Velocity Thrusholded
+			/* Angular Velocity Thrusholded, just trying not to
+			 * exceed the accepted limits. Or setting up a safe 
+			 * turn speed.
+			 */
 			if(cntrl.angular_velocity >   0.2)
 				cntrl.angular_velocity =  0.2;
 			if(cntrl.angular_velocity <  -0.2)

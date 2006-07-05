@@ -15,6 +15,7 @@ class PlanningManager : public MapManager
         Q_OBJECT
         public:
             PlanningManager();
+            PlanningManager(double,double,QString,QPointF,double,double,double,double,double,double,double);
             ~PlanningManager();
             virtual int config(ConfigFile *cf, int sectionid);
             virtual int start(); 
