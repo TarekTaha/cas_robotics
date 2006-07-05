@@ -65,11 +65,11 @@ void Robot::SetCheckPoints()
 	}
 };
 Robot::Robot (double l, double w,double o_r,QString model,QPointF r_c):
-	width(w),
 	length(l),
+	width(w),
+	obstacle_radius(o_r),	
 	model(model),
-	center(r_c),
-	obstacle_radius(o_r)
+	center(r_c)
 {
 	SetCheckPoints();
 };

@@ -18,7 +18,7 @@ class PathPlanner : public Astar
 		void   setRegGrid(double);
 		void   setConRad(double);
 		void   setObstDist(double);
-		void   FreeSearchSpace();
+		void   FreeResources();
 		void   PrintNodeList ();
 		void   SetMap(QVector <QBitArray>); // Reads the map file and sets the attributes
 		void   ExpandObstacles();
