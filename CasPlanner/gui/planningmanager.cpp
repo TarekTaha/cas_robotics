@@ -158,7 +158,6 @@ Node * PlanningManager::FindPath(Pose start,Pose end)
 	{
 		GenerateSpace();
 	}
-	GenerateSpace();
 	retval = pathPlanner->Search(start,end);
 	if(retval)
 	{
