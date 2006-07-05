@@ -133,6 +133,10 @@ void PlanningManager::GenerateSpace()
 {
 	if(!this->pathPlanner)
 		this->start();
+	if(pathPlanner->search_space)
+	{
+		pathPlanner->FreeSearchSpace();
+	}		
 	if(expObstEnabled)
 		pathPlanner->ExpandObstacles();
 	if(regGridEnabled)
@@ -150,9 +154,9 @@ Node * PlanningManager::FindPath(Pose start,Pose end)
 	Node * retval;
 	if(!this->pathPlanner)
 		this->start();	
-	if(pathPlanner->search_space)
+	if(!pathPlanner->search_space)
 	{
-		pathPlanner->FreeSearchSpace();
+		GenerateSpace();
 	}
 	GenerateSpace();
 	retval = pathPlanner->Search(start,end);

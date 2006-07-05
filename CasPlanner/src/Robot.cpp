@@ -19,14 +19,14 @@ void Robot::SetCheckPoints()
 	local_edge_points[1].setX(startx);		local_edge_points[1].setY(w + starty);
 	local_edge_points[2].setX(l + startx);	local_edge_points[2].setY(w + starty);
 	local_edge_points[3].setX(l + startx); 	local_edge_points[3].setY(starty);
-	for (int i=0 ;i < 4; i++)
-		cout<<"\nEdge->"<< i<<" X="<<local_edge_points[i].x()<<" Y="<<local_edge_points[i].y();
+//	for (int i=0 ;i < 4; i++)
+//		cout<<"\nEdge->"<< i<<" X="<<local_edge_points[i].x()<<" Y="<<local_edge_points[i].y();
 	// Create a Matrix of the points to check for collision detection
 	points_per_height = (int)(ceil(l/(double)(2*this->obstacle_radius)));
 	points_per_width  = (int)(ceil(w/(double)(2*this->obstacle_radius)));
 	n = points_per_height*points_per_width;
-	cout<<"\nPer H ="<<points_per_height<<" Per W="<<points_per_width<<" Total ="<<n;
-	cout<<"\n Obstacle Radius="<<this->obstacle_radius; fflush(stdout);
+//	cout<<"\nPer H ="<<points_per_height<<" Per W="<<points_per_width<<" Total ="<<n;
+//	cout<<"\n Obstacle Radius="<<this->obstacle_radius; fflush(stdout);
 
 	// The location of the current edges at each NODE
 	i =(startx + this->obstacle_radius);
@@ -60,8 +60,8 @@ void Robot::SetCheckPoints()
 	}
 	for (unsigned int k=0;k<check_points.size();k++)
 	{
-		cout << "\nPoint to check "<<k<<"'---> X="<<check_points[k].x()<<" Y="<<check_points[k].y();
-		fflush(stdout);
+//		cout << "\nPoint to check "<<k<<"'---> X="<<check_points[k].x()<<" Y="<<check_points[k].y();
+//		fflush(stdout);
 	}
 };
 Robot::Robot (double l, double w,double o_r,QString model,QPointF r_c):
@@ -75,9 +75,9 @@ Robot::Robot (double l, double w,double o_r,QString model,QPointF r_c):
 };
 
 Robot::Robot() 
-	{
-	};
+{
+};
 Robot::~Robot() 
-	{
-	};
+{
+};
 }

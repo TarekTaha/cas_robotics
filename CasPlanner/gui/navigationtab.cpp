@@ -124,12 +124,12 @@ NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
 
     obstExpRadSB.setMinimum(0); 
     obstExpRadSB.setMaximum(1);
-	obstExpRadSB.setSingleStep(0.05);
+	obstExpRadSB.setSingleStep(0.01);
 	obstExpRadSB.setValue(robotManager->planner->pathPlanner->obstacle_radius);
 	
-    bridgeTestResSB.setMinimum(0.05); 
+    bridgeTestResSB.setMinimum(0.01); 
     bridgeTestResSB.setMaximum(1);
-    bridgeTestResSB.setSingleStep(0.05); 
+    bridgeTestResSB.setSingleStep(0.01); 
 	bridgeTestResSB.setValue(robotManager->planner->pathPlanner->bridge_res);
 	    
     bridgeSegLenSB.setMinimum(0.5); 
@@ -137,14 +137,14 @@ NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
     bridgeSegLenSB.setSingleStep(0.1);  
 	bridgeSegLenSB.setValue(robotManager->planner->pathPlanner->bridge_length);
 	
-    regGridResSB.setMinimum(0.1); 
+    regGridResSB.setMinimum(0.02); 
     regGridResSB.setMaximum(5);
-    regGridResSB.setSingleStep(0.1);  
+    regGridResSB.setSingleStep(0.01);  
 	regGridResSB.setValue(robotManager->planner->pathPlanner->reg_grid);
 	
-    nodeConRadSB.setMinimum(0.1); 
+    nodeConRadSB.setMinimum(0.03); 
     nodeConRadSB.setMaximum(2);
-    nodeConRadSB.setSingleStep(0.05);
+    nodeConRadSB.setSingleStep(0.01);
     //nodeConRadSB.setDecimals(0);   
 	nodeConRadSB.setValue(robotManager->planner->pathPlanner->conn_radius);
 	
