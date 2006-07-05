@@ -94,7 +94,6 @@ void SensorsGLW::resizeGL(int w, int h)
     glViewport( xOffset, yOffset, (GLint)newWidth, (GLint)newHeight );
 }
 
-// check for camera flags
 void SensorsGLW::config()
 {
     //laserEnabled = true;//(bool) cf->ReadInt(sectionid, "laserEnabled", 1); 
