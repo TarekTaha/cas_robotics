@@ -2,6 +2,7 @@
 #define PATHPLANNER_H_
 
 #include <Astar.h>
+#include "interfaceprovider.h"
 
 namespace CasPlanner
 {
@@ -20,7 +21,7 @@ class PathPlanner : public Astar
 		void   setObstDist(double);
 		void   FreeResources();
 		void   PrintNodeList ();
-		void   SetMap(QVector <QBitArray>); // Reads the map file and sets the attributes
+		void   SetMap(Map); // Reads the map file and sets the attributes
 		void   ExpandObstacles();
 		void   AddCostToNodes();
 		void   BridgeTest();

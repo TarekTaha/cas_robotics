@@ -1,6 +1,7 @@
 #include "PathPlanner.h"
 namespace CasPlanner
 {
+
 // Test for node equality
 int NodeEquality(Node *a, Node *b) 
 {
@@ -8,9 +9,12 @@ int NodeEquality(Node *a, Node *b)
 		return 1;
 	return 0;
 }
+
 PathPlanner :: PathPlanner()
 {
+	
 };
+
 PathPlanner::PathPlanner(double r_l ,double r_w , QString r_m , QPointF r_c,double pixel_res,double bridge_len,
 			double bridge_r,double reg_g,double obst_exp,double conn_rad,double obst_pen):
 			Astar(r_l,r_w,obst_exp,pixel_res,r_m,r_c),
@@ -434,12 +438,31 @@ void PathPlanner::SaveSearchSpace()
 	}
 }
 
-void PathPlanner :: SetMap(QVector <QBitArray> map)
+void PathPlanner :: SetMap(Map map_in)
 {
-	this->map = map;
-	this->map_height = map[0].size();
-	this->map_width  = map.size();
+	qDebug("Setting Map");
+	if (this->map)
+	{
+		for (int i=0; i < this->map_width; i++)
+    		delete  [] this->map[i];
+		delete [] this->map;
+	}
+	
+	this->map_width  = map_in.width;	
+	this->map_height = map_in.height;
 	this->MAXNODES=map_height*map_width;
+	this->map= new bool* [map_width];
+	for(int m=0; m < this->map_width; m++)
+		this->map[m] = new bool [this->map_height];
+	qDebug("Map Data Structure Created: H:%d W:%d",map_height,map_width);
+	for(int i=0; i< map_width; i++)
+	{
+		for(int j=0; j<map_height;j++)
+		{
+			this->map[i][j] = map_in.data[i][j];
+		}
+	}
+	qDebug("Map Set");
 	map_initialized = true;
 };
 

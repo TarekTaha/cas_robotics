@@ -122,7 +122,7 @@ void PlayerInterface::setLocation(Pose location)
 	pose_var[1][2]=0.5;
 	pose_var[2][0]=0.5;
 	pose_var[2][1]=0.5;
-	pose_var[2][2]=DTOR(10);
+	pose_var[2][2]=DTOR(45);
 	if(localizer)
 	{
 		localizer->SetPose(pose,pose_var);	
