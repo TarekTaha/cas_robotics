@@ -8,6 +8,8 @@
 #include <QImage>
 #include <QRgb>
 #include <QBitArray>
+#include "interfaceprovider.h"
+
 /* Changes different Map representations into an occupancy
  * grid represented by a bit array. This OG will be sent to 
  * the path planner for planning. This manager currently supports
@@ -16,14 +18,14 @@
  * 2- A Laser scan.
  * 3- Occupancy Grid Map.
  */
-class MapManager : public QObject 
+class MapManager : public Map, public QObject
 {
 	//Q_OBJECT
 	public:
 		MapManager();
 		virtual ~MapManager();
-		QVector <QBitArray> provideLaserOG(QVector<QPointF> laser_scan);
-		QVector <QBitArray> provideMapOG(QImage image);
+		Map  provideLaserOG(QVector<QPointF> laser_scan);
+		Map  provideMapOG  (QImage image);
 };
 
 #endif /*MAPMANAGER_H_*/

@@ -127,6 +127,7 @@ void PlanningManager::SetMap(QVector<QPointF> laser_scan)
 	if(!this->pathPlanner)
 		this->start();	
 	pathPlanner->SetMap(provideLaserOG(laser_scan));	
+	qDebug("Done too");
 }
 
 void PlanningManager::GenerateSpace()

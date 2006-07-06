@@ -121,6 +121,8 @@ void Navigator::run()
 	delta_timer.start();
 	//Reset Times
 	last_time=0; delta_t=0;	velocity=0;
+	end_reached = false;
+	stop_following = false;
 	while(!end_reached) 
 	{
 		timer2.restart();
@@ -197,7 +199,7 @@ void Navigator::run()
 			 * closest segment. This can be also helpful when we start from
 			 * a location that is not very close to the first segment.
 			 */
-			if (displacement > distance_to_next) 
+			if (displacement > distance_to_next)
 				segment_navigated = TRUE;
 			//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
 			//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
@@ -211,6 +213,7 @@ void Navigator::run()
 			 * 5- Follow that path
 			 */
 			QTime local_planning_time;
+			qDebug("Closest Distance to Obstacles is:%f",commManager->getClosestObst());
 			while(commManager->getClosestObst() < safety_dist)
 			{
 				local_planning_time.restart();
@@ -218,34 +221,30 @@ void Navigator::run()
 			 	Node * temp;
 			 	temp = global_path;
 			 	double traversable_dist =0,target_angle=0;
-			 	while(traversable_dist <5)
-			 	{
-			 		if(temp->next)
-			 		{
-			 			traversable_dist += Dist(temp->pose.p,temp->next->pose.p);
-						target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
-			 		}
-			 		else
-			 			break;
-			 		temp= temp->next;
-			 	}
-			 	Pose target;
-			 	target.p.setX(temp->pose.p.x());
-			 	target.p.setY(temp->pose.p.y());			 	
-			 	target.phi = target_angle;
-			 	local_path = local_planner->FindPath(EstimatedPos,target);
-			 	if (local_path)
-			 	{
-			 		qDebug("Local Path found in %dms",local_planning_time.elapsed());
-			 	}
+//			 	while(traversable_dist <3 && temp->next)
+//			 	{
+//		 			traversable_dist += Dist(temp->pose.p,temp->next->pose.p);
+//		 			//qDebug("Distance is :%f",traversable_dist);
+//					target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
+//			 		temp= temp->next;
+//			 	}
+//			 	Pose target;
+//			 	target.p.setX(temp->pose.p.x());
+//			 	target.p.setY(temp->pose.p.y());			 	
+//			 	target.phi = target_angle;
+//			 	local_path = local_planner->FindPath(EstimatedPos,target);
+//			 	if (local_path)
+//			 	{
+//			 		qDebug("Local Path found in %dms",local_planning_time.elapsed());
+//			 	}
 			}
 			/* Get the control Action to be applied, in this case it's a
 			 * simple linear control. It's accurate enough for traversing 
 			 * the generated paths.
 			 */
 			cntrl = getAction(EstimatedPos.phi,angle,displacement,global_path->direction,0.2);
-			qDebug("Control Action Linear:%f Angular:%f",global_path->direction*cntrl.linear_velocity,
-			cntrl.angular_velocity);
+			//qDebug("Control Action Linear:%f Angular:%f",global_path->direction*cntrl.linear_velocity,
+			//cntrl.angular_velocity);
 			/* Angular Velocity Thrusholded, just trying not to
 			 * exceed the accepted limits. Or setting up a safe 
 			 * turn speed.

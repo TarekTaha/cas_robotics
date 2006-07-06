@@ -4,14 +4,12 @@
 #include <QImage>
 #include <QVector> 
 #include <QPointF>
+#include <QBitArray>
 #include <math.h>
 #include <QMetaType>
 #include "utils.h"
 
-// Interfaces for providers. These are for "Design by contract" type things.
-
-#define R2D(x) ((x*180.0/M_PI))
-#define D2R(x) ((x*M_PI/180.0))
+//"Design by contract"
 
 class Map 
 {
@@ -19,16 +17,23 @@ class Map
         int width; 
         int height;
         double resolution;
-        QByteArray rawData;
-        
-        Map(int width, int height, double resolution, QByteArray data)
+        QByteArray rawData; // for OG-Maps
+        QBitArray * data;   // for Planners
+        Map(int width, int height, double resolution, QBitArray * data)
         {
             this->width   = width; 
             this->height  = height; 
-            this->rawData = data; 
+            this->data = data; 
             this->resolution = resolution;
         }
-        Map(): width(0), height(0), resolution(0), rawData()
+        Map(int width, int height, double resolution,  QByteArray rawData)
+        {
+            this->width   = width; 
+            this->height  = height; 
+            this->rawData = rawData; 
+            this->resolution = resolution;
+        }        
+        Map(): width(0), height(0), resolution(0), rawData(NULL),data(NULL)
         {
             
         }
