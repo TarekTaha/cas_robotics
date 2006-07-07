@@ -26,17 +26,18 @@ void Navigator::setupLocalPlanner()
 	if(!local_planner)
 	{
 		local_planner = new PlanningManager(
-									  robot_length,
-									  robot_width,
-									  robot_model,
-									  rotation_center,
-									  pixel_res,
-									  bridge_len,
-									  bridge_res,
-									  reg_grid,
-									  obst_exp,
-									  conn_rad,
-									  obst_pen);		
+											  robot_length,
+											  robot_width,
+											  robot_model,
+											  rotation_center,
+											  pixel_res,
+											  bridge_len,
+											  bridge_res,
+											  reg_grid,
+											  obst_exp,
+											  conn_rad,
+											  obst_pen
+										   );		
 	}
 }
 
@@ -218,13 +219,13 @@ void Navigator::run()
 			{
 				local_planning_time.restart();
 			 	local_planner->SetMap(commManager->getLaserScan(0));
-			 	Node * temp;
-			 	temp = global_path;
-			 	double traversable_dist =0,target_angle=0;
+//			 	Node * temp;
+//			 	temp = global_path;
+//			 	double traversable_dist =0,target_angle=0;
 //			 	while(traversable_dist <3 && temp->next)
 //			 	{
 //		 			traversable_dist += Dist(temp->pose.p,temp->next->pose.p);
-//		 			//qDebug("Distance is :%f",traversable_dist);
+//		 			qDebug("Distance is :%f",traversable_dist);
 //					target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
 //			 		temp= temp->next;
 //			 	}
@@ -234,9 +235,9 @@ void Navigator::run()
 //			 	target.phi = target_angle;
 //			 	local_path = local_planner->FindPath(EstimatedPos,target);
 //			 	if (local_path)
-//			 	{
-//			 		qDebug("Local Path found in %dms",local_planning_time.elapsed());
-//			 	}
+			 	{
+			 		qDebug("Local Path found in %dms",local_planning_time.elapsed());
+			 	}
 			}
 			/* Get the control Action to be applied, in this case it's a
 			 * simple linear control. It's accurate enough for traversing 

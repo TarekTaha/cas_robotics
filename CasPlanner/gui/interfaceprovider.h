@@ -18,13 +18,16 @@ class Map
         int height;
         double resolution;
         QByteArray rawData; // for OG-Maps
-        QBitArray * data;   // for Planners
-        Map(int width, int height, double resolution, QBitArray * data)
+        bool ** data;       // for Planners
+        Map(int width, int height, double resolution)
         {
             this->width   = width; 
             this->height  = height; 
-            this->data = data; 
             this->resolution = resolution;
+            this->rawData = NULL;
+			this->data = new bool * [width];
+			for(int i=0; i < width; i++)
+				data[i] = new bool [height];              
         }
         Map(int width, int height, double resolution,  QByteArray rawData)
         {
@@ -32,10 +35,25 @@ class Map
             this->height  = height; 
             this->rawData = rawData; 
             this->resolution = resolution;
+			this->data = NULL;         
         }        
         Map(): width(0), height(0), resolution(0), rawData(NULL),data(NULL)
         {
             
+        }
+        ~Map()
+        {
+        	if(data)
+        	{
+				for (int i=0; i < width; i++)
+				{
+					//qDebug("Deleting Row %d",i);
+					//fflush(stdout);
+		    		delete  [] data[i];
+				}
+				delete [] data;
+				//qDebug("Previous Map Data deleted");
+        	}
         }
  
 };

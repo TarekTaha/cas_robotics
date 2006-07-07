@@ -21,7 +21,7 @@ class PathPlanner : public Astar
 		void   setObstDist(double);
 		void   FreeResources();
 		void   PrintNodeList ();
-		void   SetMap(Map); // Reads the map file and sets the attributes
+		void   SetMap(Map *); // Reads the map file and sets the attributes
 		void   ExpandObstacles();
 		void   AddCostToNodes();
 		void   BridgeTest();
