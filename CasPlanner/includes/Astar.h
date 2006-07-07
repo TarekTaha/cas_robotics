@@ -12,6 +12,7 @@
 #include "utils.h"
 #include "Robot.h"
 #include "SearchSpace.h"
+#include "interfaceprovider.h"
 
 namespace CasPlanner
 {
@@ -27,9 +28,9 @@ class Astar: public Robot , public SearchSpace
 	public:
 		Astar(double r_l ,double r_w ,double o_r,double p_s, QString r_m , QPointF r_c);
 		Astar();
-		int map_height,map_width,MAXNODES;
+		int MAXNODES;
 		double	pixel_size;
-		bool ** map;
+		Map    * map;
 		Pose start,end;
 		Node *root, *current, *childList, *curChild, *q, * test,*path, *p;
 		LList *openList,*closedList;

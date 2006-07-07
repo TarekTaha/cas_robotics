@@ -71,10 +71,10 @@ void MapPainter::paintEvent(QPaintEvent *ev)
 		QPointF p;
 		// Draw All the Map
 		paint.setPen(Qt::blue);
-		for(int i=0;i<planner->map_width - 1;i++)
-			for(int j=0;j<planner->map_height - 1 ;j++)
+		for(int i=0;i<planner->map->width - 1;i++)
+			for(int j=0;j<planner->map->height - 1 ;j++)
 			{
-				if(planner->map[i][j]==true)
+				if(planner->map->data[i][j]==true)
 					paint.drawPoint(i,j);
 			}
 		// Draw Search Space

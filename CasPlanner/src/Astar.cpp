@@ -27,15 +27,15 @@ Astar::~Astar()
 // transfers from pixel coordinate to the main coordinate system
 void Astar :: ConvertPixel(QPointF  *p) 
 {
-	p->setX( p->x()*this->pixel_size - this->pixel_size*this->map_width/2);
-	p->setY(-p->y()*this->pixel_size + this->pixel_size*this->map_height/2);
+	p->setX( p->x()*this->pixel_size - this->pixel_size*map->width/2);
+	p->setY(-p->y()*this->pixel_size + this->pixel_size*this->map->height/2);
 };
 
 // transfers from main coordinate to the pixel coordinate system
 void Astar :: ConvertToPixel (QPointF *p)
 {
-	p->setX(( p->x() + this->pixel_size*this->map_width/2)/this->pixel_size);
-	p->setY((-p->y() + this->pixel_size*this->map_height/2)/this->pixel_size);
+	p->setX(( p->x() + this->pixel_size*map->width/2)/this->pixel_size);
+	p->setY((-p->y() + this->pixel_size*this->map->height/2)/this->pixel_size);
 }
 
 // Tests for whether a point is in an obstacle or not
@@ -54,9 +54,9 @@ int Astar :: Obstacle(QPointF P, double theta)
 		n = (int)det_point.y();
 		//cout <<"\nx ="<<m<<" y="<<n;
 		//fflush(stdout);
-		if (m <= 0 || n <= 0 || m >=this->map_width || n >=this->map_height)
+		if (m <= 0 || n <= 0 || m >=map->width || n >=this->map->height)
 			return 1;
-		if (this->map[m][n]) return 1;
+		if (this->map->data[m][n]) return 1;
 	}
 	return 0;
 };

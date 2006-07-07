@@ -94,63 +94,53 @@ void PathPlanner::ExpandObstacles() // Nifty way of doing an obstacle expansion,
 	thickness = int(this->obstacle_radius/this->pixel_size);
 	radius =2; // This covers vertical, horizontal and diagonal cells
 
-	QVector <QBitArray> temp_map;
-	for(int i=0;i<this->map_width;i++)
-	{
-		QBitArray pixel(map_height);
-		for(int j=0;j<this->map_height;j++)
-		{
-			pixel[j]= map[i][j];
-		}	
-		temp_map.push_back(pixel);
-	}
-		
-	for(int i=0;i<this->map_width - 1;i++)
-		for(int j=0;j<this->map_height - 1 ;j++)
+	Map temp_map(map->width,map->height,pixel_size);
+	for(int i=0;i<this->map->width - 1;i++)
+		for(int j=0;j<this->map->height - 1 ;j++)
 		{
 			for(x = (i - radius) ; x <= (i + radius) ; x ++)
 			{
 				if (x < 0) x = 0;
-				if (x >= this->map_width)  break;
+				if (x >= this->map->width)  break;
 				y = (int)(- sqrt(radius*radius - (x - i)*(x - i)) + j);
 				if (y < 0) y = 0;
-				if (y >= this->map_height) y = this->map_height - 1;
-				if (temp_map[i][j] && !temp_map[x][y])
+				if (y >= this->map->height) y = this->map->height - 1;
+				if (temp_map.data[i][j] && !temp_map.data[x][y])
 				{
 				for (int r = 1; r <(int)(thickness);r++)
 					for( m = (int)(i - r); m <= (int)(i + r);m++)
 					{
 						if (m < 0) m = 0;
-						if (m >= this->map_width)  break;
+						if (m >= this->map->width)  break;
 						n = (int)(- sqrt(r*r - (m - i)*(m - i)) + j);
 						if (n < 0) n = 0;
-						if (n >= this->map_height) n = this->map_height - 1;
-						this->map[m][n] = true;
+						if (n >= this->map->height) n = this->map->height - 1;
+						this->map->data[m][n] = true;
 						n = (int)(+ sqrt(r*r - (m - i)*(m - i)) + j);
 						if (n < 0) n = 0;
-						if (n >= this->map_height) n = this->map_height - 1;
-						this->map[m][n] = true;
+						if (n >= this->map->height) n = this->map->height - 1;
+						this->map->data[m][n] = true;
 					}
 				break;
 				}
 				y = (int)(+ sqrt(radius*radius - (x - i)*(x - i)) + j);
 				if (y < 0) y = 0;
-				if (y >= this->map_height) y = this->map_height - 1;
-				if (temp_map[i][j] && !temp_map[x][y])
+				if (y >= this->map->height) y = this->map->height - 1;
+				if (temp_map.data[i][j] && !temp_map.data[x][y])
 				{
 				for (int r = 1; r <(int)(thickness);r++)
 					for( m = (int)(i - r); m <= (int)(i + r);m++)
 					{
 						if (m < 0) m = 0;
-						if (m >= this->map_width)  break;
+						if (m >= this->map->width)  break;
 						n = (int)(- sqrt(r*r - (m - i)*(m - i)) + j);
 						if (n < 0) n = 0;
-						if (n >= this->map_height) n = this->map_height - 1;
-						this->map[m][n] = true;
+						if (n >= this->map->height) n = this->map->height - 1;
+						this->map->data[m][n] = true;
 						n = (int)(+ sqrt(r*r - (m - i)*(m - i)) + j);
 						if (n < 0) n = 0;
-						if (n >= this->map_height) n = this->map_height - 1;
-						this->map[m][n] = true;
+						if (n >= this->map->height) n = this->map->height - 1;
+						this->map->data[m][n] = true;
 					}
 				break;
 				}
@@ -169,11 +159,11 @@ void PathPlanner::GenerateRegularGrid()
 		return;
 	}
 	QPointF p;
-	for(int i=0; i<this->map_width; i++)
+	for(int i=0; i<this->map->width; i++)
 	{
-		for(int j=0;j<this->map_height;j++)
+		for(int j=0;j<this->map->height;j++)
 		{
-			if (!this->map[i][j]) //Free Pixel
+			if (!this->map->data[i][j]) //Free Pixel
 			{
 				if (search_space == NULL ) // Constructing the ROOT NODE
 				{
@@ -216,9 +206,9 @@ void PathPlanner::BridgeTest()
 	double x,y,x2,y2;
 	pixels_per_bridge = (int) (length/this->pixel_size);
 	radius = (int) (length/(this->pixel_size*2.0));
-	for(int i=0; i < this->map_width - pixels_per_bridge; i++)
+	for(int i=0; i < this->map->width - pixels_per_bridge; i++)
 		{
-		for(int j=0;j<this->map_height - pixels_per_bridge ;j++)
+		for(int j=0;j<this->map->height - pixels_per_bridge ;j++)
 			{
 			int ab=0;
 				for( x = (i - radius) ; x < (i + radius) ; x+=(radius/4.0))//x+=(radius))
@@ -226,20 +216,20 @@ void PathPlanner::BridgeTest()
 					// The circle is of Center (i,j) and radius R=radius
 					ab++;
 					if (x < 0) x = 0;
-					if (x > this->map_width) break;						
+					if (x > this->map->width) break;						
 					y = (int)(+ sqrt(radius*radius -  ( x - i)*( x - i)) + j);
 					if (y < 0) y = 0;
-					if (y >= this->map_height) y = this->map_height - 1;
+					if (y >= this->map->height) y = this->map->height - 1;
 
 					x2 = i + (i - x);
 					if (x2 < 0) x2 = 0;
-					if (x2 > this->map_width) break;	
+					if (x2 > this->map->width) break;	
 					y2 = (int)(- sqrt(radius*radius - (x2 - i)*(x2 - i)) + j);
 					if (y2 < 0) y2 = 0;
-					if (y2 >= this->map_height) y2 = this->map_height - 1;
+					if (y2 >= this->map->height) y2 = this->map->height - 1;
 					//cout<<"\n x="<<x<<" y="<<y<<" x2="<<x2<<" y2="<<y2<<" i="<<i<<" j="<<j<<" R="<<radius;
 					//fflush(stdout);
-					if (!this->map[i][j]&&this->map[(int)x][(int)y]&&this->map[(int)x2][(int)y2])
+					if (!this->map->data[i][j]&&this->map->data[(int)x][(int)y]&&this->map->data[(int)x2][(int)y2])
 					{
 						p.setX(i);
 						p.setY(j);
@@ -332,17 +322,17 @@ void PathPlanner::AddCostToNodes()
 				for( i= (int)(point.x() - radius) ; i < (int)(point.x() + radius); i+=1)
 					{
 						if (i < 0) i = 0;
-						if (i >= this->map_width)  break;
+						if (i >= this->map->width)  break;
 						j = (int)(- sqrt(radius*radius - (i - point.x())*(i - point.x())) + point.y());
 						if (j < 0) j = 0;
-						if (j >= this->map_height) j = this->map_height - 1;
-						if(this->map[i][j])
+						if (j >= this->map->height) j = this->map->height - 1;
+						if(this->map->data[i][j])
 								 nearest_obstacle = radius;
 						j = (int)(+ sqrt(radius*radius - (i - point.x())*(i - point.x())) + point.y());
 						if (j < 0) j = 0;
-						if (j >= this->map_height) j = this->map_height - 1;
+						if (j >= this->map->height) j = this->map->height - 1;
 	
-						if(this->map[i][j])
+						if(this->map->data[i][j])
 								 nearest_obstacle = radius;
 					}
 			}
@@ -433,36 +423,24 @@ void PathPlanner::SaveSearchSpace()
 	{
 		p = temp->location;
 		this->ConvertToPixel(&p);
-		this->map[int(p.x())][(int)p.y()]= true ;
+		this->map->data[int(p.x())][(int)p.y()]= true ;
 		temp =temp->next;
 	}
 }
 
-void PathPlanner :: SetMap(Map map_in)
+void PathPlanner :: SetMap(Map * map_in)
 {
-	qDebug("Setting Map");
-	if (this->map)
-	{
-		for (int i=0; i < this->map_width; i++)
-    		delete  [] this->map[i];
-		delete [] this->map;
-	}
-	
-	this->map_width  = map_in.width;	
-	this->map_height = map_in.height;
-	this->MAXNODES=map_height*map_width;
-	this->map= new bool* [map_width];
-	for(int m=0; m < this->map_width; m++)
-		this->map[m] = new bool [this->map_height];
-	qDebug("Map Data Structure Created: H:%d W:%d",map_height,map_width);
-	for(int i=0; i< map_width; i++)
-	{
-		for(int j=0; j<map_height;j++)
-		{
-			this->map[i][j] = map_in.data[i][j];
-		}
-	}
-	qDebug("Map Set");
+//	if(this->map)
+//		delete map;
+	this->map = map_in;
+	MAXNODES = map->height*map->width;
+	qDebug("W_in:%d H_in:%d",map_in->width,map_in->height);
+//	for(int i=0;i< map_in->width;i++)
+//		for(int j=0 ;j< map_in->height ;j++)
+//			{
+//				if(map_in->data[i][j])
+//					qDebug("Occupied Cell");
+//			}
 	map_initialized = true;
 };
 
