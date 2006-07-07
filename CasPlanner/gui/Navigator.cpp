@@ -11,7 +11,8 @@ obst_exp(0.2),
 conn_rad(0.8),
 obst_pen(3),
 robot_model("diff"),
-rotation_center(0,-0.3)
+rotation_center(0,-0.3),
+local_planner(NULL)
 {
 	
 }
@@ -219,22 +220,23 @@ void Navigator::run()
 			{
 				local_planning_time.restart();
 			 	local_planner->SetMap(commManager->getLaserScan(0));
-//			 	Node * temp;
-//			 	temp = global_path;
-//			 	double traversable_dist =0,target_angle=0;
-//			 	while(traversable_dist <3 && temp->next)
-//			 	{
-//		 			traversable_dist += Dist(temp->pose.p,temp->next->pose.p);
-//		 			qDebug("Distance is :%f",traversable_dist);
-//					target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
-//			 		temp= temp->next;
-//			 	}
-//			 	Pose target;
-//			 	target.p.setX(temp->pose.p.x());
-//			 	target.p.setY(temp->pose.p.y());			 	
-//			 	target.phi = target_angle;
-//			 	local_path = local_planner->FindPath(EstimatedPos,target);
-//			 	if (local_path)
+
+			 	Node * temp;
+			 	temp = global_path;
+			 	double traversable_dist =0,target_angle=0;
+			 	while(traversable_dist <3 && temp->next)
+			 	{
+		 			traversable_dist += Dist(temp->pose.p,temp->next->pose.p);
+		 			qDebug("Distance is :%f",traversable_dist);
+					target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
+			 		temp= temp->next;
+			 	}
+			 	Pose target;
+			 	target.p.setX(temp->pose.p.x());
+			 	target.p.setY(temp->pose.p.y());			 	
+			 	target.phi = target_angle;
+			 	local_path = local_planner->FindPath(EstimatedPos,target);
+			 	if (local_path)
 			 	{
 			 		qDebug("Local Path found in %dms",local_planning_time.elapsed());
 			 	}

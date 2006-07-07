@@ -430,17 +430,15 @@ void PathPlanner::SaveSearchSpace()
 
 void PathPlanner :: SetMap(Map * map_in)
 {
-//	if(this->map)
-//		delete map;
+	if(!map_in)	
+		qDebug("Why the hell ur giving me an empty map ???");
+	if(!map_in->data)	
+		qDebug("Why the hell ur giving me an empty map data ???");
+	if(this->map)
+		delete map;
 	this->map = map_in;
 	MAXNODES = map->height*map->width;
-	qDebug("W_in:%d H_in:%d",map_in->width,map_in->height);
-//	for(int i=0;i< map_in->width;i++)
-//		for(int j=0 ;j< map_in->height ;j++)
-//			{
-//				if(map_in->data[i][j])
-//					qDebug("Occupied Cell");
-//			}
+	qDebug("W_in:%d H_in:%d",map->width,map->height);
 	map_initialized = true;
 };
 

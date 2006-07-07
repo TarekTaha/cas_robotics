@@ -21,7 +21,7 @@ Map * MapManager::provideLaserOG(QVector<QPointF> laser_scan)
 			max_range = dist;
 	}
 	height = width = int(2.0*max_range/res);
-	//qDebug("Width:%d Height:%d",width,height);
+	qDebug("Width:%d Height:%d",width,height);
 	// Creating Map with the right size
 	retval = new Map(width,height,res);
 	// Place Laser points in the appropriate grids
@@ -40,6 +40,7 @@ Map * MapManager::provideLaserOG(QVector<QPointF> laser_scan)
 		// Assigning value to occupancy grid
 		retval->data[int(p.x())][int(p.y())] = true;
 	}
+	qDebug("Laser Map Generated");
 	return retval;
 }
 

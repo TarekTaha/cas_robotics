@@ -28,7 +28,7 @@ class Astar: public Robot , public SearchSpace
 	public:
 		Astar(double r_l ,double r_w ,double o_r,double p_s, QString r_m , QPointF r_c);
 		Astar();
-		int MAXNODES;
+		long int MAXNODES;
 		double	pixel_size;
 		Map    * map;
 		Pose start,end;
