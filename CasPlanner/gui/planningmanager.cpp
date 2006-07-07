@@ -26,6 +26,8 @@ PlanningManager::PlanningManager(  double robot_length,
 	this->obst_exp = obst_exp;
 	this->conn_rad = conn_rad;
 	this->obst_pen = obst_pen;
+	this->pathPlanner = NULL;
+	start();
 }	
 
 PlanningManager::PlanningManager():
@@ -34,7 +36,8 @@ connNodesEnabled(true),
 regGridEnabled(true),
 obstPenEnabled(true),
 expObstEnabled(true),
-showTreeEnabled(true)
+showTreeEnabled(true),
+pathPlanner(NULL)
 {
 }
 
@@ -127,7 +130,6 @@ void PlanningManager::SetMap(QVector<QPointF> laser_scan)
 	if(!this->pathPlanner)
 		this->start();
 	pathPlanner->SetMap(provideLaserOG(laser_scan));	
-	qDebug("Done too");
 }
 
 void PlanningManager::GenerateSpace()
