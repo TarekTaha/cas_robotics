@@ -4,23 +4,23 @@
 #include <QObject>
 #include <QString>
 #include <QPointF>
-#include <QThread> 
+
 #include <QReadWriteLock>
 #include <QTime>
-#include "CommManager.h"
+#include "robotmanager.h"
 #include "planningmanager.h"
 #include "Controller.h"
 #include "configfile.h"
 #include "Node.h"
 
-//enum {WHEELCHAIR,STAGE};
+class PlanningManager;
 using namespace CasPlanner;
 
-class Navigator : public Controller, public QThread 
+class Navigator : public Controller
 {
 	Q_OBJECT
 	public:
-		Navigator();
+		Navigator(RobotManager *);
 		~Navigator();	
 		QString obst_avoid;
 		Node * globalPath, *localPath;
@@ -30,11 +30,13 @@ class Navigator : public Controller, public QThread
         void stop();
         void run();
         void setupLocalPlanner();
-        //Node * FindPath(QPointF start, QPointF end);
-       	//PathPlanner * pathPlanner;
-       	CommManager * commManager;
-	public slots:
+        RobotManager *rob;
+       	CommManager  *commManager;
+	public
+	slots:
 		void FollowPath();
+	signals:
+		void drawLocalPath(Pose *);
 	protected:
 		Pose	old_amcl,amcl_location,EstimatedPos;
 		double 	angle,prev_angle,theta,error_orientation,

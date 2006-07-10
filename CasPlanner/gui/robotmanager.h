@@ -2,10 +2,15 @@
 #define ROBOTMANAGER_H
 
 #include <QObject>
+#include "navigationtab.h"
 #include "CommManager.h"
 #include "planningmanager.h"
 #include "Navigator.h"
 #include "configfile.h"
+
+class Navigator;
+class NavContainer;
+class PlanningManager;
 
 class RobotManager : public QObject //: public CommManager, public PlanningManager ,public Navigator
 {
@@ -16,22 +21,19 @@ class RobotManager : public QObject //: public CommManager, public PlanningManag
 		~RobotManager(); 
 		int readCommManagerConfigs(ConfigFile *cf, int sectionid);
 		int readPlannerConfigs(ConfigFile *cf, int sectionid);
-		int readNavigatorConfigs(ConfigFile *cf, int sectionid);	
+		int readNavigatorConfigs(ConfigFile *cf, int sectionid);
+		int setNavContainer(NavContainer*);
 		int start();
 		int startPlanner();
 		int startNavigator();
 		int startComms();
+		NavContainer *navCon;
 		CommManager * commManager;
 		PlanningManager *planner;
+		PathPlanner * local_planner;
 		Navigator * navigator;
-		
-   signals:
-        void vFound();
    public slots:
-//  		virtual void emergencyStop(); 
-    private:
-		//bool laserEnabled,ptzEnabled;
-		//int  LaserId,ptzId;
+  		void rePaint(Pose *);
 };
 
 #endif 

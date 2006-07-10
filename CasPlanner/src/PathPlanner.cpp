@@ -15,9 +15,9 @@ PathPlanner :: PathPlanner()
 	
 };
 
-PathPlanner::PathPlanner(double r_l ,double r_w , QString r_m , QPointF r_c,double pixel_res,double bridge_len,
+PathPlanner::PathPlanner(double r_l ,double r_w , QString r_m , QPointF r_c,double pixel_res,double dG,double bridge_len,
 			double bridge_r,double reg_g,double obst_exp,double conn_rad,double obst_pen):
-			Astar(r_l,r_w,obst_exp,pixel_res,r_m,r_c),
+			Astar(r_l,r_w,obst_exp,pixel_res,dG,r_m,r_c),
 			map_initialized(false),
 			obstacle_radius(obst_exp),
 			bridge_length(bridge_len),

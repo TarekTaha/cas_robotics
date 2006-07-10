@@ -4,11 +4,13 @@
 #include "PathPlanner.h"
 #include "configfile.h"
 #include "MapManager.h"
+#include "robotmanager.h"
 #include "utils.h"
 #include <QObject>
 #include <QString>
 #include <QPointF>
 
+class RobotManager;
 using namespace CasPlanner;
 class PlanningManager : public MapManager
 {
@@ -17,6 +19,7 @@ class PlanningManager : public MapManager
             PlanningManager();
             PlanningManager(double,double,QString,QPointF,double,double,double,double,double,double,double);
             ~PlanningManager();
+            void setRobotManager(RobotManager *);
             virtual int config(ConfigFile *cf, int sectionid);
             virtual int start(); 
             virtual int stop();
@@ -25,7 +28,7 @@ class PlanningManager : public MapManager
 	        Node * FindPath(Pose start,Pose end);
 	        void GenerateSpace();
 	        void SetMap(QImage mpa);
-	        void SetMap(QVector<QPointF> laser_scan);
+	        void SetMap(QVector<QPointF> laser_scan,double local_dist,Pose pose);
 	        void setBridgeTest(int);
 	        void setConnNodes(int);
 	        void setRegGrid(int);
@@ -39,11 +42,12 @@ class PlanningManager : public MapManager
 	        void setExpObstValue(double);
 			void setBridgeResValue(double val);
         signals:
-		    //void dataUpdated();
-		    //void statusMsg(int,int, QString); 
+		    //void statusMsg(int,int, QString);
+		    void rePaint(Map *);
         protected:
-            double pixel_res,bridge_len,bridge_res,reg_grid,obst_exp,conn_rad,obst_pen,
+            double pixel_res,dist_goal,bridge_len,bridge_res,reg_grid,obst_exp,conn_rad,obst_pen,
             	   robot_length, robot_width;
+            RobotManager *robotManager;
             bool bridgeTestEnabled,connNodesEnabled,regGridEnabled,obstPenEnabled,expObstEnabled,showTreeEnabled;
             QPointF rotation_center;
             QString robot_model;

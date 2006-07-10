@@ -32,14 +32,23 @@ QImage MapPainter::getImage()
 	return this->image;
 }
 
-void MapPainter::drawPath(PathPlanner *p)
+void   MapPainter::setPathEnabled(int set)
+{
+	if (set)	
+		drawPathEnabled = true;
+	else
+		drawPathEnabled = false;
+}
+
+void MapPainter::drawPath(PathPlanner *p,Pose pose)
 {
 	this->planner = p;
-	drawPathEnabled = true;
+	this->pose = pose;
+	//drawPathEnabled = true;
 	update();
 }
 
-void MapPainter::paintEvent(QPaintEvent *ev)
+void MapPainter::paintEvent(QPaintEvent *)
 {
 	//qDebug("Paint");
 	QPainter paint(this);
@@ -57,76 +66,80 @@ void MapPainter::paintEvent(QPaintEvent *ev)
 	}
 	if(start_initialized)
 	{
-		paint.drawArc(start.p.x()-5,start.p.y()-5,10,10,0,5760);
-		paint.drawPie(start.p.x()-5,start.p.y()-5,10,10,(RTOD(start.phi)-10)*16,(RTOD(start.phi)+10)*16);
+		paint.drawArc(int(start.p.x()-5),int(start.p.y()-5),10,10,0,5760);
+		paint.drawPie(int(start.p.x()-5),int(start.p.y()-5),10,10,(RTOD(start.phi)-10)*16,(RTOD(start.phi)+10)*16);
 	}
 	if(end_initialized)
 	{
-		paint.drawArc(end.p.x()-5,end.p.y()-5,10,10,0,5760);
-		paint.drawPie(end.p.x()-5,end.p.y()-5,10,10,(RTOD(end.phi)-10)*16,(RTOD(end.phi)+10)*16);		
+		paint.drawArc(int(end.p.x()-5),int(end.p.y()-5),10,10,0,5760);
+		paint.drawPie(int(end.p.x()-5),int(end.p.y()-5),10,10,(RTOD(end.phi)-10)*16,(RTOD(end.phi)+10)*16);		
 	}
 	if(drawPathEnabled)
 	{
 		SearchSpaceNode * temp;
 		QPointF p;
 		// Draw All the Map
+		int count=0;
 		paint.setPen(Qt::blue);
-		for(int i=0;i<planner->map->width - 1;i++)
-			for(int j=0;j<planner->map->height - 1 ;j++)
+		for(int i=0;i<planner->map->width;i++)
+			for(int j=0;j<planner->map->height;j++)
 			{
-				if(planner->map->data[i][j]==true)
+				if(planner->map->data[i][j] == true)
+				{
 					paint.drawPoint(i,j);
-			}
-		// Draw Search Space
-		if(planner->search_space)
-		{
-			paint.setPen(Qt::red);
-			temp = planner->search_space;
-			while(temp!=NULL)
-			{
-				p = temp->location;
-				planner->ConvertToPixel(&p);
-				//qDebug("Pixel X:%f Y:%f",p.x(),p.y());
-				paint.drawPoint(p);
-				temp = temp->next;
-			}		
-		}
-		// Draw Path if it exists
-		if(planner->path)
-		{
-				paint.setPen(Qt::yellow);
-				QPointF l_start,l_end,E,S;
-			  	Node *p;
-			  	p = planner->path;
-				while(p != NULL && p->next!=NULL)
-				{
-					S =  p->pose.p;
-					if (p->next)
-					{
-						l_start = p->pose.p; l_end = p->next->pose.p;
-						planner->ConvertToPixel(&l_start); planner->ConvertToPixel(&l_end);
-						paint.drawLine(l_start,l_end);
-					}
-					p = p->next;
-				} 
-		}
-		if(drawTreeEnabled)
-		{
-			paint.setPen(Qt::white);
-			QPointF l_start,l_end;
-			for (unsigned int i =0; i<planner->tree.size();i++)
-			{
-				l_start = planner->tree[i].location;
-				planner->ConvertToPixel(&l_start);
-				//cout<<"\n Main X="<<tree[i].location.x<<" Y="<<tree[i].location.y;
-				for(int j=0;j<planner->tree[i].children.size();j++)
-				{
-					l_end = planner->tree[i].children[j];
-					planner->ConvertToPixel(&l_end);
-					paint.drawLine(l_start,l_end);
+					//qDebug("Am here %d",++count);
 				}
 			}
-		}		
+		// Draw Search Space
+//		if(planner->search_space)
+//		{
+//			paint.setPen(Qt::red);
+//			temp = planner->search_space;
+//			while(temp!=NULL)
+//			{
+//				p = temp->location;
+//				planner->ConvertToPixel(&p);
+//				//qDebug("Pixel X:%f Y:%f",p.x(),p.y());
+//				paint.drawPoint(p);
+//				temp = temp->next;
+//			}		
+//		}
+//		// Draw Path if it exists
+//		if(planner->path)
+//		{
+//				paint.setPen(Qt::yellow);
+//				QPointF l_start,l_end,E,S;
+//			  	Node *p;
+//			  	p = planner->path;
+//				while(p != NULL && p->next!=NULL)
+//				{
+//					S =  p->pose.p;
+//					if (p->next)
+//					{
+//						l_start = p->pose.p; l_end = p->next->pose.p;
+//						planner->ConvertToPixel(&l_start); planner->ConvertToPixel(&l_end);
+//						paint.drawLine(l_start,l_end);
+//					}
+//					p = p->next;
+//				} 
+//		}
+//		if(drawTreeEnabled)
+//		{
+//			paint.setPen(Qt::white);
+//			QPointF l_start,l_end;
+//			for (unsigned int i =0; i<planner->tree.size();i++)
+//			{
+//				l_start = planner->tree[i].location;
+//				planner->ConvertToPixel(&l_start);
+//				//cout<<"\n Main X="<<tree[i].location.x<<" Y="<<tree[i].location.y;
+//				for(int j=0;j<planner->tree[i].children.size();j++)
+//				{
+//					l_end = planner->tree[i].children[j];
+//					planner->ConvertToPixel(&l_end);
+//					paint.drawLine(l_start,l_end);
+//				}
+//			}
+//		}		
 	}
 }
 
