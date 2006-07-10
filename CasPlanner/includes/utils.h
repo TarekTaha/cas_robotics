@@ -352,6 +352,25 @@ inline double ATAN2(QPointF a,QPointF b)
 	return atan2(a.y() - b.y(), a.x() - b.x());
 }
 
+inline QPointF Trans2Global(QPointF p,Pose pose)
+{
+	// Rotate + Translate
+	QPointF temp; temp.setX(p.x()); temp.setY(p.y());
+	p.setX(temp.x()*cos(pose.phi) - temp.y()*sin(pose.phi) + pose.p.x());
+	p.setY(temp.x()*sin(pose.phi) + temp.y()*cos(pose.phi) + pose.p.y());
+	return p;
+}
+
+inline Pose Trans2Global(Pose p,Pose pose)
+{
+	// Rotate + Translate
+	QPointF temp; temp.setX(p.p.x()); temp.setY(p.p.y());
+	p.p.setX(temp.x()*cos(pose.phi) - temp.y()*sin(pose.phi) + pose.p.x());
+	p.p.setY(temp.x()*sin(pose.phi) + temp.y()*cos(pose.phi) + pose.p.y());
+	p.phi = NORMALIZE(p.phi + pose.phi);
+	return p;
+}
+
 typedef struct _tree
 	{
 		QPointF location;

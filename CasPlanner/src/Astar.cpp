@@ -3,9 +3,10 @@
 namespace CasPlanner
 {
 
-Astar::Astar(double r_l ,double r_w ,double o_r,double p_s,QString r_m , QPointF r_c) :
+Astar::Astar(double r_l ,double r_w ,double o_r,double p_s,double dG, QString r_m , QPointF r_c) :
 	Robot(r_l ,r_w ,o_r, r_m ,r_c),
 	pixel_size(p_s),
+	distGoal(dG),
 	map(NULL),
 	root(NULL),
 	test(NULL),
@@ -263,7 +264,7 @@ Node *  Astar::Search(Pose start,Pose end)
 		// Test to see if we have expanded too many nodes without a solution
     	if (current->id > this->MAXNODES)     	
 		{
-	    	qDebug("--->>>	Expanded %d Nodes which is more than the maximum allowed MAXNODE=%d , Search Terminated",current->id,MAXNODES);
+	    	qDebug("--->>>	Expanded %d Nodes which is more than the maximum allowed MAXNODE=%ld , Search Terminated",current->id,MAXNODES);
 			//Delete Nodes in Open and Closed Lists
 			closedList->Free();
 			openList->Free();
@@ -320,7 +321,7 @@ bool Astar :: GoalReached (Node *n)
 	{
 		angle_diff =	anglediff(end.phi,n->pose.phi + M_PI);
 	}
-	if ( delta_d <= 0.7  && angle_diff <= DTOR(30))
+	if ( delta_d <= distGoal  && angle_diff <= DTOR(30))
 	{
 		cout<<" \n Desired Final Orientation ="<<RTOD(end.phi)<<" Current="<<RTOD(n->pose.phi);
 		cout<<"\n Reached Destination with Diff Orientation="<< RTOD(angle_diff);

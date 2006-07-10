@@ -15,10 +15,13 @@ class MapPainter : public QWidget
 public:
 	MapPainter(QWidget *parent=0);
 	virtual ~MapPainter();
+	void   setPathEnabled(int);
 	Pose   getStart();
 	Pose   getEnd();
+	Pose   pose;
 	QImage getImage();
-	void drawPath(PathPlanner *);
+public slots:
+	void drawPath(PathPlanner *,Pose);
 protected:
 	QImage image;
 	int step;

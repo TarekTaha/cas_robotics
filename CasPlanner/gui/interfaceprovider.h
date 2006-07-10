@@ -27,7 +27,11 @@ class Map
             this->rawData = NULL;
 			this->data = new bool * [width];
 			for(int i=0; i < width; i++)
-				data[i] = new bool [height];              
+			{
+				data[i] = new bool [height];
+				for(int j=0;j < height;j++)
+					data[i][j] = false;
+			}
         }
         Map(int width, int height, double resolution,  QByteArray rawData)
         {

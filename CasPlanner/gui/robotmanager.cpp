@@ -3,6 +3,7 @@
 RobotManager::RobotManager():
 commManager(NULL),
 planner(NULL),
+local_planner(NULL),
 navigator(NULL)
 {
 	// Empty Constructor
@@ -53,7 +54,13 @@ RobotManager::RobotManager(QStringList configFiles)
 		}
     }
 }
-	        
+
+int RobotManager::setNavContainer(NavContainer* con)
+{
+	this->navCon = con;
+	return 1;
+}	
+        
 int RobotManager::readCommManagerConfigs(ConfigFile *cf, int sectionid)
 {
 	commManager = new CommManager;
@@ -63,7 +70,7 @@ int RobotManager::readCommManagerConfigs(ConfigFile *cf, int sectionid)
 
 int RobotManager::readNavigatorConfigs(ConfigFile *cf, int sectionid)
 {
-	navigator = new Navigator;
+	navigator = new Navigator(this);
 	navigator->config( cf, sectionid);
 	//startNavigator();
 	return 1;
@@ -102,4 +109,13 @@ int RobotManager::startNavigator()
     //navigator->start();
     return 1;
 }
+
+void RobotManager::rePaint(Pose *)
+{
+	Pose pose;
+	qDebug("Here");
+	navCon->mapPainter.setPathEnabled(1);
+	navCon->mapPainter.drawPath(local_planner,pose);
+}
+
 

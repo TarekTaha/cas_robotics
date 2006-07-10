@@ -33,7 +33,7 @@ class PathPlanner : public Astar
 		void   DetermineCheckPoints();
 		void   FindRoot();
 		void   FreePath();
-		PathPlanner(double r_l ,double r_w , QString r_m ,QPointF r_c,double pixel_res,double bridge_len,
+		PathPlanner(double r_l ,double r_w , QString r_m ,QPointF r_c,double pixel_res,double dG,double bridge_len,
 					double bridge_res,double reg_grid,double obst_exp,double conn_rad,double obst_pen);
 		PathPlanner();
 		~PathPlanner();

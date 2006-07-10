@@ -3,14 +3,12 @@
 
 NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
  : QWidget(parent),
-   //mapViewer(this), 
-   path(0),
-   robotManager(rob),
    mapPainter(this),
+   path(0),
+   robotManager(rob),   
    navControlPanel(this,rob)
 {
     QVBoxLayout *vLayout = new QVBoxLayout; 
-    //vLayout->addWidget(&mapViewer,4); 
     vLayout->addWidget(&mapPainter,4); 
     vLayout->addWidget(&navControlPanel,1); 
     setLayout(vLayout); 
@@ -25,8 +23,15 @@ NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
 	connect(&navControlPanel.pathPlanBtn, SIGNAL(pressed()),this, SLOT(Plan()));
 	connect(&navControlPanel.generateSpaceBtn, SIGNAL(pressed()),this, SLOT(GenerateSpace()));
 	connect(&navControlPanel.loadMapBtn, SIGNAL(pressed()),this, SLOT(LoadMap()));	
-	connect(&navControlPanel.pathFollowBtn, SIGNAL(pressed()),this, SLOT(Follow()));	
+	connect(&navControlPanel.pathFollowBtn, SIGNAL(pressed()),this, SLOT(Follow()));
+
 }
+
+//void NavContainer::rePaint()
+//{
+//	
+//}
+
 void NavContainer::Follow()
 {
 	robotManager->navigator->setPath(path);
@@ -37,27 +42,38 @@ void NavContainer::Follow()
 	}
 	robotManager->navigator->start();
 }
+
 NavContainer::~NavContainer()
 {
 	
 }
+
 void NavContainer::Plan()
 {
+	Pose p;
+	p.p.setX(0); p.p.setY(0); p.phi = 0;
 	robotManager->planner->SetMap(mapPainter.getImage());
 	path = robotManager->planner->FindPath(mapPainter.getStart(),mapPainter.getEnd());
-	mapPainter.drawPath(robotManager->planner->pathPlanner);
+	mapPainter.drawPath(robotManager->planner->pathPlanner,p);
 }
+
 void NavContainer::GenerateSpace()
 {
+	Pose p;
+	p.p.setX(0); p.p.setY(0); p.phi = 0;
 	robotManager->planner->SetMap(mapPainter.getImage());
 	robotManager->planner->GenerateSpace();
-	mapPainter.drawPath(robotManager->planner->pathPlanner);
+	mapPainter.drawPath(robotManager->planner->pathPlanner,p);
 }
+
 void NavContainer::LoadMap()
 {
+	Pose p;
+	p.p.setX(0); p.p.setY(0); p.phi = 0;
 	robotManager->planner->SetMap(mapPainter.getImage());
-	mapPainter.drawPath(robotManager->planner->pathPlanner);
+	mapPainter.drawPath(robotManager->planner->pathPlanner,p);
 }
+
 NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
 	QWidget(parent),
 	robotManager(rob),
@@ -109,20 +125,20 @@ NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
     showTree.setCheckState(Qt::Checked);
     planningGB.setLayout(showLayout); 
     
-    QGridLayout *xfrmLayout = new QGridLayout;
-    xfrmLayout->addWidget(new QLabel("Obstacle Expansion"),0,0);
-    xfrmLayout->addWidget(&obstExpRadSB,0,1); 
-    xfrmLayout->addWidget(new QLabel("Bridge Test Res"),1,0); 
-    xfrmLayout->addWidget(&bridgeTestResSB,1,1);
-    xfrmLayout->addWidget(new QLabel("Bridge Length"),2,0); 
-    xfrmLayout->addWidget(&bridgeSegLenSB,2,1);
-    xfrmLayout->addWidget(new QLabel("Reg Grid Res"),3,0); 
-    xfrmLayout->addWidget(&regGridResSB,3,1);
-    xfrmLayout->addWidget(new QLabel("Connection Radius"),4,0); 
-    xfrmLayout->addWidget(&nodeConRadSB,4,1);
-    xfrmLayout->addWidget(new QLabel("Obstacle Penalty"),5,0); 
-    xfrmLayout->addWidget(&obstPenRadSB,5,1);
-    parametersGB.setLayout(xfrmLayout);
+    QGridLayout *parLayout = new QGridLayout;
+    parLayout->addWidget(new QLabel("Obstacle Expansion"),0,0);
+    parLayout->addWidget(&obstExpRadSB,0,1); 
+    parLayout->addWidget(new QLabel("Bridge Test Res"),1,0); 
+    parLayout->addWidget(&bridgeTestResSB,1,1);
+    parLayout->addWidget(new QLabel("Bridge Length"),2,0); 
+    parLayout->addWidget(&bridgeSegLenSB,2,1);
+    parLayout->addWidget(new QLabel("Reg Grid Res"),3,0); 
+    parLayout->addWidget(&regGridResSB,3,1);
+    parLayout->addWidget(new QLabel("Connection Radius"),4,0); 
+    parLayout->addWidget(&nodeConRadSB,4,1);
+    parLayout->addWidget(new QLabel("Obstacle Penalty"),5,0); 
+    parLayout->addWidget(&obstPenRadSB,5,1);
+    parametersGB.setLayout(parLayout);
 
 	//Loading Default values from config file
 

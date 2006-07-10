@@ -10,7 +10,7 @@ Q_OBJECT
 		TabContainer(QWidget *parent=0,RobotManager *rob=0);
 		void setRobotManager(RobotManager *robotManager); 
 		~TabContainer();
-    private:
+    public:
 	    RobotManager *robotManager;
 		NavContainer navCon;
 		SensorsGui sensorsGui;

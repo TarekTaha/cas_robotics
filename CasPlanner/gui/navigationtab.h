@@ -13,6 +13,8 @@
 #include "robotmanager.h"
 #include "Node.h"
 
+class RobotManager;
+
 class NavControlPanel: public QWidget 
 {
 Q_OBJECT
@@ -74,16 +76,16 @@ Q_OBJECT
     public:
 		NavContainer(QWidget *parent = 0,RobotManager *robotManager=0);
 		~NavContainer();
+		MapPainter mapPainter;
 	public slots:
 		void Plan();
 		void LoadMap(); 
 		void GenerateSpace();
 		void Follow();
+		//void RenderMap(Map & map);
     private:
        	Node * path;
     	RobotManager * robotManager;
-		//MapViewer mapViewer;
-		MapPainter mapPainter;
 		NavControlPanel navControlPanel; 
 	friend class NavControlPanel; 
 };

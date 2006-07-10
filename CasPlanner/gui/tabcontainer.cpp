@@ -8,7 +8,6 @@ TabContainer::TabContainer(QWidget *parent,RobotManager *rob)
 {
     addTab(&navCon, "Navigation Panel"); 
     addTab(&sensorsGui, "Sensors Pannel");     
-    //setTabIcon(1, QIcon(":warning.png")); 
     updateGeometry();
 }
 void TabContainer::setRobotManager(RobotManager *robManager)

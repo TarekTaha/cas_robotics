@@ -1,7 +1,7 @@
 #ifndef CONTROLLER_H_
 #define CONTROLLER_H_
 
-#include <QObject>
+#include <QThread> 
 #include "Vector2D.h"
 
 typedef struct _control_action
@@ -10,7 +10,7 @@ typedef struct _control_action
 		double angular_velocity;
 	} ControlAction;
 	
-class Controller : public QObject 
+class Controller: public QThread 
 {
 	public:
 		double k_dist,k_theta,safety_dist,tracking_dist;

@@ -1,12 +1,15 @@
 #include "Navigator.h"
 
-Navigator::Navigator() :
+Navigator::Navigator(RobotManager *r) :
+globalPath(NULL),
+localPath(NULL),
+rob(r),
 robot_length(1.2),
 robot_width(0.65),
 pixel_res(0.05),
 bridge_len(2),
 bridge_res(0.05),
-reg_grid(0.05),
+reg_grid(0.2),
 obst_exp(0.2),
 conn_rad(0.8),
 obst_pen(3),
@@ -14,7 +17,7 @@ robot_model("diff"),
 rotation_center(0,-0.3),
 local_planner(NULL)
 {
-	
+	connect(this, SIGNAL(drawLocalPath(Pose *)),rob, SLOT(rePaint(Pose *)));
 }
 
 Navigator::~Navigator()
@@ -38,7 +41,8 @@ void Navigator::setupLocalPlanner()
 											  obst_exp,
 											  conn_rad,
 											  obst_pen
-										   );		
+										   );
+	rob->local_planner = local_planner->pathPlanner;							   
 	}
 }
 
@@ -218,19 +222,27 @@ void Navigator::run()
 			qDebug("Closest Distance to Obstacles is:%f",commManager->getClosestObst());
 			while(commManager->getClosestObst() < safety_dist)
 			{
+				// local Planning Map Distance
+				double local_dist = 8.0;
 				local_planning_time.restart();
-			 	local_planner->SetMap(commManager->getLaserScan(0));
-
+	
+			 	local_planner->SetMap(commManager->getLaserScan(0),local_dist,commManager->getLocation());
+				local_planner->GenerateSpace();
 			 	Node * temp;
 			 	temp = global_path;
 			 	double traversable_dist =0,target_angle=0;
-			 	while(traversable_dist <3 && temp->next)
+			 	while(traversable_dist < 3 && temp->next)
 			 	{
 		 			traversable_dist += Dist(temp->pose.p,temp->next->pose.p);
-		 			qDebug("Distance is :%f",traversable_dist);
 					target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
 			 		temp= temp->next;
 			 	}
+//			 	if (traversable_dist > 1.5)
+//			 	{
+//			 		if(temp->prev)
+//				 		temp = temp->prev;
+//					target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
+//			 	}
 			 	Pose target;
 			 	target.p.setX(temp->pose.p.x());
 			 	target.p.setY(temp->pose.p.y());			 	
@@ -240,6 +252,9 @@ void Navigator::run()
 			 	{
 			 		qDebug("Local Path found in %dms",local_planning_time.elapsed());
 			 	}
+			 	qDebug("Signal Emitted");
+			 	Pose sds;
+			 	emit drawLocalPath(&sds);
 			}
 			/* Get the control Action to be applied, in this case it's a
 			 * simple linear control. It's accurate enough for traversing 

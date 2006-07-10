@@ -8,37 +8,42 @@ MapManager::~MapManager()
 {
 }
 
-Map * MapManager::provideLaserOG(QVector<QPointF> laser_scan)
+Map * MapManager::provideLaserOG(QVector<QPointF> laser_scan, double local_dist,Pose pose)
 {
+	
 	Map *retval;
-	double dist=0,max_range=0,res=0.05;
+	double dist=0,res=0.05;
 	int height,width;
 	// getting right Map dimensions
-	for(int i =0; i<laser_scan.size();i++)
-	{
-		dist = Dist(QPointF(0,0),laser_scan[i]);
-		if (dist >max_range)
-			max_range = dist;
-	}
-	height = width = int(2.0*max_range/res);
+	height = width = int(2.0*local_dist/res);
 	qDebug("Width:%d Height:%d",width,height);
 	// Creating Map with the right size
 	retval = new Map(width,height,res);
 	// Place Laser points in the appropriate grids
 	for(int i =0; i<laser_scan.size();i++)
 	{
+		
 		//Changing to image coordinate
-		QPointF p(laser_scan[i].x(),laser_scan[i].y());
+		QPointF p;
+		p = Trans2Global(laser_scan[i],pose);
+		dist = Dist(pose.p,p);
+		//qDebug("Metric X:%f Y:%f dist=%f",p.x(),p.y(),dist);			
 		p.setX( (( p.x() + res*width /2)/res) );
 		p.setY( ((-p.y() + res*height/2)/res) );
-//		qDebug("Pixel X:%d Y:%d",int(p.x()),int(p.y()));	
+		//qDebug("Pixel X:%d Y:%d",int(p.x()),int(p.y()));	
 		// Some boundary crossing check
 		if(p.x() > (width-1 )) p.setX(width -1);
 		if(p.y() > (height-1)) p.setY(height-1);
 		if(p.x() < 0) p.setX(0);
-		if(p.y() < 0) p.setY(0);
-		// Assigning value to occupancy grid
-		retval->data[int(p.x())][int(p.y())] = true;
+		if(p.y() < 0) p.setY(0);		
+		if (dist <= local_dist)
+		{
+			retval->data[int(p.x())][int(p.y())] = true;
+		}
+		else
+		{
+			retval->data[int(p.x())][int(p.y())] = false;			
+		}
 	}
 	qDebug("Laser Map Generated");
 	return retval;

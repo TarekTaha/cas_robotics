@@ -27,23 +27,39 @@ PlanningManager::PlanningManager(  double robot_length,
 	this->conn_rad = conn_rad;
 	this->obst_pen = obst_pen;
 	this->pathPlanner = NULL;
+	this->robotManager = NULL;
+	this->bridgeTestEnabled = false;
+	this->connNodesEnabled = false;
+	this->regGridEnabled= false;
+	this->obstPenEnabled= false;
+	this->expObstEnabled= true;
+	this->showTreeEnabled= false;
 	start();
-}	
+}
 
 PlanningManager::PlanningManager():
+pathPlanner(NULL),
+robotManager(NULL),
 bridgeTestEnabled(true),
 connNodesEnabled(true),
 regGridEnabled(true),
 obstPenEnabled(true),
 expObstEnabled(true),
-showTreeEnabled(true),
-pathPlanner(NULL)
+showTreeEnabled(true)
 {
+
 }
 
 PlanningManager::~PlanningManager()
 {
+	
 }
+
+void PlanningManager::setRobotManager(RobotManager *rob)
+{
+	this->robotManager = rob;
+}
+
 void PlanningManager:: setBridgeTest(int bt)
 {
 	//qDebug("BridgeTest is set to %d",bt);
@@ -125,11 +141,11 @@ void PlanningManager::SetMap(QImage map)
 	pathPlanner->SetMap(provideMapOG(map));	
 }
 
-void PlanningManager::SetMap(QVector<QPointF> laser_scan)
+void PlanningManager::SetMap(QVector<QPointF> laser_scan,double local_dist,Pose pose)
 {
 	if(!this->pathPlanner)
 		this->start();
-	pathPlanner->SetMap(provideLaserOG(laser_scan));	
+	pathPlanner->SetMap(provideLaserOG(laser_scan,local_dist,pose));	
 }
 
 void PlanningManager::GenerateSpace()
@@ -182,6 +198,7 @@ int PlanningManager::config( ConfigFile *cf, int sectionid)
    	obst_exp = 				cf->ReadFloat(sectionid, "obst_exp",0.2);
    	conn_rad =				cf->ReadFloat(sectionid, "conn_rad",0.8);
    	obst_pen = 				cf->ReadFloat(sectionid, "obst_pen",3);
+   	dist_goal = 			cf->ReadFloat(sectionid, "dist_goal",0.2);   	
    	robot_length = 			cf->ReadFloat(sectionid, "robot_length",1.2);
    	robot_width  = 			cf->ReadFloat(sectionid, "robot_width",0.65);
    	robot_model  = 			cf->ReadString(sectionid, "robot_mode","diff");
@@ -213,6 +230,7 @@ int PlanningManager::start()
 								  robot_model,
 								  rotation_center,
 								  pixel_res,
+								  dist_goal,
 								  bridge_len,
 								  bridge_res,
 								  reg_grid,
