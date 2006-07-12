@@ -352,6 +352,15 @@ inline double ATAN2(QPointF a,QPointF b)
 	return atan2(a.y() - b.y(), a.x() - b.x());
 }
 
+inline QPointF Rotate(QPointF p,double angle)
+{
+	// Rotate 
+	QPointF temp; temp.setX(p.x()); temp.setY(p.y());
+	p.setX(temp.x()*cos(angle) - temp.y()*sin(angle));
+	p.setY(temp.x()*sin(angle) + temp.y()*cos(angle));
+	return p;
+}
+
 inline QPointF Trans2Global(QPointF p,Pose pose)
 {
 	// Rotate + Translate

@@ -22,11 +22,12 @@ public:
 	QImage getImage();
 public slots:
 	void drawPath(PathPlanner *,Pose);
+	void drawPath(PathPlanner *);
 protected:
 	QImage image;
 	int step;
 	QPoint mouse_pos;
-	PathPlanner * planner;
+	PathPlanner * local_planner,* global_planner;
 	bool start_initialized,end_initialized,drawPathEnabled,drawTreeEnabled;
 	Pose start,end;
 	void paintEvent(QPaintEvent *);

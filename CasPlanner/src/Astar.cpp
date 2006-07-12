@@ -3,9 +3,8 @@
 namespace CasPlanner
 {
 
-Astar::Astar(double r_l ,double r_w ,double o_r,double p_s,double dG, QString r_m , QPointF r_c) :
+Astar::Astar(double r_l ,double r_w ,double o_r,double dG, QString r_m , QPointF r_c) :
 	Robot(r_l ,r_w ,o_r, r_m ,r_c),
-	pixel_size(p_s),
 	distGoal(dG),
 	map(NULL),
 	root(NULL),
@@ -16,6 +15,7 @@ Astar::Astar(double r_l ,double r_w ,double o_r,double p_s,double dG, QString r_
 	openList   = new LList;
 	closedList = new LList; 
 }
+
 Astar::Astar()
 {
 
@@ -28,19 +28,19 @@ Astar::~Astar()
 // transfers from pixel coordinate to the main coordinate system
 void Astar :: ConvertPixel(QPointF  *p) 
 {
-	p->setX( p->x()*this->pixel_size - this->pixel_size*map->width/2);
-	p->setY(-p->y()*this->pixel_size + this->pixel_size*this->map->height/2);
+	p->setX( p->x()*map->resolution - map->resolution*map->center.x());
+	p->setY(-p->y()*map->resolution + map->resolution*map->center.y());
 };
 
 // transfers from main coordinate to the pixel coordinate system
 void Astar :: ConvertToPixel (QPointF *p)
 {
-	p->setX(( p->x() + this->pixel_size*map->width/2)/this->pixel_size);
-	p->setY((-p->y() + this->pixel_size*this->map->height/2)/this->pixel_size);
+	p->setX(( p->x() + map->resolution*map->center.x())/map->resolution);
+	p->setY((-p->y() + map->resolution*map->center.y())/map->resolution);
 }
 
 // Tests for whether a point is in an obstacle or not
-int Astar :: Obstacle(QPointF P, double theta) 
+int Astar :: Obstacle(QPointF P, double theta)
 {
 	int m,n;
 	QPointF det_point;
@@ -57,7 +57,8 @@ int Astar :: Obstacle(QPointF P, double theta)
 		//fflush(stdout);
 		if (m <= 0 || n <= 0 || m >=map->width || n >=this->map->height)
 			return 1;
-		if (this->map->data[m][n]) return 1;
+		if (this->map->data[m][n]) 
+			return 1;
 	}
 	return 0;
 };
@@ -128,13 +129,13 @@ Node *  Astar::Search(Pose start,Pose end)
 	this->end.p.setX(end.p.x());
 	this->end.p.setY(end.p.y());
 	this->end.phi = end.phi;
-	qDebug("	--->>> Search Started <<<---"); fflush(stdout);
+	qDebug("	--->>> Search Started <<<---");
 	FindRoot();
 	qDebug("	---->>>Target is Set to be X=%f Y=%f Phi=%f<<<---",end.p.x(),end.p.y(),RTOD(end.phi));
-	fflush(stdout);
   	openList->Add(root);				// Add the root to OpenList
-	qDebug("	--->>> Root Added <<<---"); fflush(stdout);
-//  while openList is not empty 
+	qDebug("	--->>> Root Added <<<---");
+	
+	// while openList is not empty 
 	while (openList->Start != NULL) 
 	{
 		current = openList->GetHead(); 	// Get the node with the cheapest cost (first node)
@@ -148,11 +149,9 @@ Node *  Astar::Search(Pose start,Pose end)
       		path = current;
       		p = current->parent;
     		qDebug("	--->>> Goal state reached with :%d nodes created and :%d nodes expanded <<<---",ID,NodesExpanded);
-			fflush(stdout);
 			qDebug("	--->>> General Clean UP <<<---");
-			fflush(stdout);
-//			int m=0;
       		p = current;
+//			int m=0;
 //   		while (p != NULL) 
 //			{
 //				//cout<<"\n	--->>> Step["<<++m<<"] X="<<p->pose.x<<" Y="<<p->pose.y;
@@ -185,15 +184,14 @@ Node *  Astar::Search(Pose start,Pose end)
 			qDebug("	--->>> DONE  <<<---");				fflush(stdout);
 			qDebug("	--->>> Freeing closed list <<<---");	fflush(stdout);
 			closedList->Free();
-			cout<<"\n	--->>> DONE  <<<---";	fflush(stdout);
+			qDebug("	--->>> DONE  <<<---");
       		return path; 	// Path Found Successfully
     	}
     	
     	// Create List of Children for the current NODE
 		if(!(childList = MakeChildrenNodes(current))) // No more Children => Search Ended Unsuccessfully at this path Branch
 		{
-			cout<<"\n	--->>> Search Ended On this Branch / We Reached a DEAD END <<<---";
-			fflush(stdout);
+			qDebug("	--->>> Search Ended On this Branch / We Reached a DEAD END <<<---");
 		}
 		// insert the children into the OPEN list according to their f values
     	while (childList != NULL)                     
@@ -231,27 +229,29 @@ Node *  Astar::Search(Pose start,Pose end)
 			}
 			// test whether the child is in the closed list (already been there)			
 			if (curChild)
-			if((p = closedList->Find(curChild)))
 			{
-  				if (p->f_value <= curChild->f_value && p->direction == curChild->direction)       
+				if((p = closedList->Find(curChild)))
 				{
-	        		FreeNode(curChild);
-  					curChild = NULL;
+	  				if (p->f_value <= curChild->f_value && p->direction == curChild->direction)       
+					{
+		        		FreeNode(curChild);
+	  					curChild = NULL;
+					}
+					// the child is a shorter path to this point, delete p from  the closed list
+					else 
+					{
+						/* This is the tricky part, it rarely happens, but in my case it happenes all the time :s
+						 * Anyways, we are here cause we found a better path to a node that we already visited, we will have to
+						 * Update the cost of that node and ALL ITS DESCENDENTS because their cost is parent dependent ;)
+						 * Another Solution is simply to comment everything and do nothing, doing this, the child will be added to the
+						 * Open List and it will be investigated further later on.
+						 */
+						//closedList->Remove(p);
+					 	//cout<<"\n	--->>> Closed list -- Node is deleted, current child X="<<curChild->pose.x<<" Y="<<curChild->pose.y<<" has shorter path<<<---";
+						fflush(stdout);
+	
+					}					
 				}
-				// the child is a shorter path to this point, delete p from  the closed list
-				else 
-				{
-					/* This is the tricky part, it rarely happens, but in my case it happenes all the time :s
-					 * Anyways, we are here cause we found a better path to a node that we already visited, we will have to
-					 * Update the cost of that node and ALL ITS DESCENDENTS because their cost is parent dependent ;)
-					 * Another Solution is simply to comment everything and do nothing, doing this, the child will be added to the
-					 * Open List and it will be investigated further later on.
-					 */
-					//closedList->Remove(p);
-				 	//cout<<"\n	--->>> Closed list -- Node is deleted, current child X="<<curChild->pose.x<<" Y="<<curChild->pose.y<<" has shorter path<<<---";
-					fflush(stdout);
-
-				}					
 			}
 			// ADD the child to the OPEN List
 			if (curChild)
@@ -264,17 +264,20 @@ Node *  Astar::Search(Pose start,Pose end)
 		// Test to see if we have expanded too many nodes without a solution
     	if (current->id > this->MAXNODES)     	
 		{
-	    	qDebug("--->>>	Expanded %d Nodes which is more than the maximum allowed MAXNODE=%ld , Search Terminated",current->id,MAXNODES);
+	    	qDebug("	--->>>	Expanded %d Nodes which is more than the maximum allowed MAXNODE=%ld , Search Terminated",current->id,MAXNODES);
 			//Delete Nodes in Open and Closed Lists
 			closedList->Free();
 			openList->Free();
-			return NULL; // Expanded more than the maximium nodes state
+			path = NULL;
+			return path; // Expanded more than the maximium nodes state
     	}
- 	}					       // end of OPEN loop
-  	// if we got here, then there is no path to the goal
-  	// delete all nodes on CLOSED since OPEN is now empty
+ 	}	//...  end of OPEN loop
+ 	
+  	/* if we got here, then there is no path to the goal
+  	 *  delete all nodes on CLOSED since OPEN is now empty
+  	 */
 	closedList->Free();
-  	cout<<"\n	--->>>No Path Found<<<---";
+  	qDebug("	--->>>No Path Found<<<---");
   	return NULL; // No Path Found
 };
 
@@ -321,7 +324,7 @@ bool Astar :: GoalReached (Node *n)
 	{
 		angle_diff =	anglediff(end.phi,n->pose.phi + M_PI);
 	}
-	if ( delta_d <= distGoal  && angle_diff <= DTOR(30))
+	if ( delta_d <= distGoal  && angle_diff <= DTOR(45))
 	{
 		cout<<" \n Desired Final Orientation ="<<RTOD(end.phi)<<" Current="<<RTOD(n->pose.phi);
 		cout<<"\n Reached Destination with Diff Orientation="<< RTOD(angle_diff);

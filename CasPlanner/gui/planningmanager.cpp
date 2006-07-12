@@ -8,12 +8,14 @@ PlanningManager::PlanningManager(  double robot_length,
 									  QString robot_model,
 									  QPointF rotation_center,
 									  double pixel_res,
+									  double dist_goal,
 									  double bridge_len,
 									  double bridge_res,
 									  double reg_grid,
 									  double obst_exp,
 									  double conn_rad,
-									  double obst_pen)
+									  double obst_pen
+									  )
 {
 	this->robot_length = robot_length;
 	this->robot_width  = robot_width;
@@ -26,14 +28,15 @@ PlanningManager::PlanningManager(  double robot_length,
 	this->obst_exp = obst_exp;
 	this->conn_rad = conn_rad;
 	this->obst_pen = obst_pen;
+	this->dist_goal = dist_goal;
 	this->pathPlanner = NULL;
 	this->robotManager = NULL;
+	this->connNodesEnabled  = true;
+	this->regGridEnabled    = true;
+	this->obstPenEnabled    = true;
+	this->expObstEnabled    = true;
 	this->bridgeTestEnabled = false;
-	this->connNodesEnabled = false;
-	this->regGridEnabled= false;
-	this->obstPenEnabled= false;
-	this->expObstEnabled= true;
-	this->showTreeEnabled= false;
+	this->showTreeEnabled   = false;
 	start();
 }
 
@@ -213,6 +216,7 @@ int PlanningManager::start()
     qDebug("*********************************************************************");	
    	qDebug("Planning Parameters:"); 
     qDebug("\t\t Pixel Resolution = %f",pixel_res); 
+    qDebug("\t\t Distance to Goal = %f",dist_goal); 
     qDebug("\t\t Bridge Test Lenght = %f",bridge_len); 
     qDebug("\t\t Bridge Test Res = %f",bridge_res); 
     qDebug("\t\t Reg Grid Res  = %f",reg_grid); 

@@ -7,11 +7,12 @@ rob(r),
 robot_length(1.2),
 robot_width(0.65),
 pixel_res(0.05),
+dist_goal(0.1),
 bridge_len(2),
 bridge_res(0.05),
 reg_grid(0.2),
-obst_exp(0.2),
-conn_rad(0.8),
+obst_exp(0.1),
+conn_rad(0.4),
 obst_pen(3),
 robot_model("diff"),
 rotation_center(0,-0.3),
@@ -35,6 +36,7 @@ void Navigator::setupLocalPlanner()
 											  robot_model,
 											  rotation_center,
 											  pixel_res,
+											  dist_goal,
 											  bridge_len,
 											  bridge_res,
 											  reg_grid,
@@ -51,7 +53,7 @@ int Navigator::config( ConfigFile *cf, int sectionid)
    	obst_avoid  =   cf->ReadString(sectionid, "obst_avoid", "non");
  	k_dist      =   cf->ReadFloat (sectionid, "k_dist", 1.8);
   	k_theta     =   cf->ReadFloat (sectionid, "k_theta", 2.5);
-  	safety_dist =   cf->ReadFloat (sectionid, "safety_dist", 0.2);
+  	safety_dist =   cf->ReadFloat (sectionid, "safety_dist", 0.5);
   	tracking_dist =   cf->ReadFloat (sectionid, "tracking_dist", 0);
     qDebug("-> Starting Robot Navigator."); 
     qDebug("*********************************************************************"); 	
@@ -64,6 +66,23 @@ int Navigator::config( ConfigFile *cf, int sectionid)
     qDebug("*********************************************************************"); 
     qDebug("-> Robot Navigator Started.");   	
  	return 1;
+}
+
+Node * Navigator::FindClosest(QPointF location,Node * all_path)
+{
+	Node * nearest = NULL;
+	double dist,shortest= 100000;
+	while(all_path && all_path->next)
+	{
+		dist = DistToLineSegment(all_path->pose.p,all_path->next->pose.p,location);
+		if(dist < shortest)
+		{
+			shortest = dist;
+			nearest = all_path;
+		}
+		all_path = all_path->next;
+	}
+	return nearest;
 }
 
 void Navigator::setCommManager(CommManager* com)
@@ -109,7 +128,8 @@ void Navigator::run()
 	Pose initial_pos;
 	initial_pos.p.setX(global_path->pose.p.x());
 	initial_pos.p.setY(global_path->pose.p.y());	
-	initial_pos.phi=global_path->pose.phi;	
+	initial_pos.phi = global_path->pose.phi;	
+	//Set our Initial Location Estimation
 	commManager->setLocation(initial_pos);
 	sleep(1);
 	while(!commManager->getLocalized())
@@ -118,185 +138,225 @@ void Navigator::run()
 		qDebug("NO Accurate Estimation yet, best current is: x:%f y:%f phi:%f",loc.p.x(),loc.p.y(),RTOD(loc.phi));
 		usleep(300000);
 	}
-	/********************** Start from the root and move forward ************************/
-	first 		= global_path;
-	prev_angle	= global_path->pose.phi;
-	global_path = global_path->next;
+	/**********************         Start by the Global Path     ************************/
+	path2Follow = global_path;
 	/************************************************************************************/
 	timer2.start();
 	delta_timer.start();
-	//Reset Times
+	// Reset Times
 	last_time=0; delta_t=0;	velocity=0;
 	end_reached = false;
 	stop_following = false;
-	while(!end_reached) 
+	while(!end_reached)
 	{
 		timer2.restart();
 		delta_timer.restart();
-		last = global_path;
-		ni = first->pose.p; 
-		SegmentStart.setX(ni.x()); 
-		SegmentStart.setY(ni.y());
-		qDebug("--->>>NEW Line SEG Starts x[%.3f]y[%.3f]",SegmentStart.x(),SegmentStart.y());
-		ni = last->pose.p;  SegmentEnd.setX(ni.x());  SegmentEnd.setY(ni.y());	
-		qDebug("--->>>Ends at   x[%.3f]y[%.3f] <<<---",SegmentEnd.x(),SegmentEnd.y());
-		direction = -1;
-		angle = atan2(SegmentEnd.y() - SegmentStart.y(),SegmentEnd.x() - SegmentStart.x());
-		qDebug("--->>> Orientation(Planned) to follow :=%.3f <<<---",RTOD(angle));
-		segment_navigated = false;
-		while (!segment_navigated && !stop_following) // Loop for each global_path segment
-		{
-			// Estimate the location based on the Last AMCL location and the vehichle model
-			delta_t = delta_timer.elapsed()/1e3;
-			delta_timer.restart();
-			usleep(100000);
-			EstimatedPos.phi += commManager->getTurnRate()*delta_t;
-			EstimatedPos.p.setX(EstimatedPos.p.x() + velocity*cos(EstimatedPos.phi)*delta_t);
-			EstimatedPos.p.setY(EstimatedPos.p.y() + velocity*sin(EstimatedPos.phi)*delta_t);
-			//cout<<"\nVelocity is:"<<velocity<<" Side Speed is:"<<pp->SideSpeed();
-			if (velocity!= commManager->getSpeed()) //	Velocity Changed?
-				velocity = commManager->getSpeed();
-			//cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
-			// Get current Robot Location
-			amcl_location = commManager->getLocation();
-			/* Is it a new hypothesis (not the same as the last)
-			 * so override the estimation based on the robot model
-			 * with the AMCL localizer's estimation
-			 */
-			if(old_amcl.p.x() != amcl_location.p.x() || old_amcl.p.y() !=amcl_location.p.y() )
-			{
-				// Recording the last time Data changed
-				last_time = timer2.elapsed()/1e3;
-				// resetting the timer
-				timer2.restart(); 
-				// Override the Estimated Location with the AMCL hypothesis
-				old_amcl.p.setX(amcl_location.p.x()); EstimatedPos.p.setX(amcl_location.p.x());
-				old_amcl.p.setY(amcl_location.p.y()); EstimatedPos.p.setY(amcl_location.p.y());
-				EstimatedPos.phi = amcl_location.phi;
-			}
-			/* If we chose to follow a virtual point on the path then calculate that point
-			 * It will not be used most of the time, but it addes accuracy in control for
-			 * long line paths.
-			 */
-			//qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",commManager->getSpeed(),EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
-			tracking_point.setX(EstimatedPos.p.x() + tracking_dist*cos(EstimatedPos.phi) - 0*sin(EstimatedPos.phi));
-			tracking_point.setY(EstimatedPos.p.y() + tracking_dist*sin(EstimatedPos.phi) + 0*cos(EstimatedPos.phi)); 
-			// Distance to the path Segment
-			distance = Dist(SegmentEnd,tracking_point);
-			displacement = DistToLineSegment(SegmentStart,SegmentEnd,tracking_point);
-			// Did we reach the last segment ???
-			if (global_path->next) // NO we didnt
-			{
-				QPointF n(global_path->next->pose.p.x(),global_path->next->pose.p.y());
-				distance_to_next = DistToLineSegment(SegmentEnd,n,tracking_point);
-			}
-			else // YES this is the last segment
-			{
-				distance_to_next = 100;
-				/* trying to come as close as 30 cm to goal
-				 * this might overshoot and we might by pass the goal
-				 * so this distance can be increased.
-				 */
-				if (distance <= 0.3)
-					segment_navigated = TRUE;
-			}
-			/* If we are closer to next segment then there is no point
-			 * in following the current, just skip and and follow the 
-			 * closest segment. This can be also helpful when we start from
-			 * a location that is not very close to the first segment.
-			 */
-			if (displacement > distance_to_next)
-				segment_navigated = TRUE;
-			//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
-			//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
-			/* If we are too close to obstacles then let the local planner takes control
-			 * steps :
-			 * 1- Takes a local laser Scan from the server.
-			 * 2- Build a local occupancy grid based on the laser scan.
-			 * 3- Give the generated map to the local planner.
-			 * 4- Plan a path from the current location to a point
-			 *    on the global path that is X distance away
-			 * 5- Follow that path
-			 */
-			QTime local_planning_time;
-			qDebug("Closest Distance to Obstacles is:%f",commManager->getClosestObst());
-			while(commManager->getClosestObst() < safety_dist)
-			{
-				// local Planning Map Distance
-				double local_dist = 8.0;
-				local_planning_time.restart();
-	
-			 	local_planner->SetMap(commManager->getLaserScan(0),local_dist,commManager->getLocation());
-				local_planner->GenerateSpace();
-			 	Node * temp;
-			 	temp = global_path;
-			 	double traversable_dist =0,target_angle=0;
-			 	while(traversable_dist < 3 && temp->next)
-			 	{
-		 			traversable_dist += Dist(temp->pose.p,temp->next->pose.p);
-					target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
-			 		temp= temp->next;
-			 	}
-//			 	if (traversable_dist > 1.5)
-//			 	{
-//			 		if(temp->prev)
-//				 		temp = temp->prev;
-//					target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
-//			 	}
-			 	Pose target;
-			 	target.p.setX(temp->pose.p.x());
-			 	target.p.setY(temp->pose.p.y());			 	
-			 	target.phi = target_angle;
-			 	local_path = local_planner->FindPath(EstimatedPos,target);
-			 	if (local_path)
-			 	{
-			 		qDebug("Local Path found in %dms",local_planning_time.elapsed());
-			 	}
-			 	qDebug("Signal Emitted");
-			 	Pose sds;
-			 	emit drawLocalPath(&sds);
-			}
-			/* Get the control Action to be applied, in this case it's a
-			 * simple linear control. It's accurate enough for traversing 
-			 * the generated paths.
-			 */
-			cntrl = getAction(EstimatedPos.phi,angle,displacement,global_path->direction,0.2);
-			//qDebug("Control Action Linear:%f Angular:%f",global_path->direction*cntrl.linear_velocity,
-			//cntrl.angular_velocity);
-			/* Angular Velocity Thrusholded, just trying not to
-			 * exceed the accepted limits. Or setting up a safe 
-			 * turn speed.
-			 */
-			if(cntrl.angular_velocity >   0.2)
-				cntrl.angular_velocity =  0.2;
-			if(cntrl.angular_velocity <  -0.2)
-				cntrl.angular_velocity = -0.2;			
-			if(log)
-				fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.elapsed()/1e3,last_time);
-			commManager->setSpeed(global_path->direction*cntrl.linear_velocity);
-			commManager->setTurnRate(cntrl.angular_velocity);				
-//			if(platform == WHEELCHAIR)
-//				WCp->SetSpeed(global_path->direction*cntrl.linear_velocity,cntrl.angular_velocity);
-//			else
-//				pp->SetSpeed(global_path->direction*cntrl.linear_velocity,cntrl.angular_velocity);
-		}
-		qDebug("--->>>Finished Navigating this section, Moving to NEXT --->>>");
-		first = last;
-		if (!global_path->next)
+		first = FindClosest(loc.p,path2Follow);
+		// Is it the last Segment ?
+		if (!first->next)
 		{
 			qDebug("--->>> Destination Reached !!!");
-			end_reached=TRUE;
-			fflush(stdout);
+			end_reached = true;
+			break;
+		}
+		last  = first->next;	ni = first->pose.p;
+		SegmentStart.setX(ni.x());	SegmentStart.setY(ni.y());
+//		qDebug("--->>>NEW Line SEG Starts x[%.3f]y[%.3f]",SegmentStart.x(),SegmentStart.y());
+		ni = last->pose.p;  SegmentEnd.setX(ni.x());  SegmentEnd.setY(ni.y());	
+//		qDebug("--->>>Ends at   x[%.3f]y[%.3f] <<<---",SegmentEnd.x(),SegmentEnd.y());
+		direction = -1;
+		angle = atan2(SegmentEnd.y() - SegmentStart.y(),SegmentEnd.x() - SegmentStart.x());
+//		qDebug("--->>> Orientation(Planned) to follow :=%.3f <<<---",RTOD(angle));
+
+		// Estimate the location based on the Last AMCL location and the vehichle model
+		delta_t = delta_timer.elapsed()/1e3;
+		delta_timer.restart();
+		usleep(100000);
+		EstimatedPos.phi += commManager->getTurnRate()*delta_t;
+		EstimatedPos.p.setX(EstimatedPos.p.x() + velocity*cos(EstimatedPos.phi)*delta_t);
+		EstimatedPos.p.setY(EstimatedPos.p.y() + velocity*sin(EstimatedPos.phi)*delta_t);
+		//cout<<"\nVelocity is:"<<velocity<<" Side Speed is:"<<pp->SideSpeed();
+		if (velocity!= commManager->getSpeed()) //	Velocity Changed?
+			velocity = commManager->getSpeed();
+		//cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
+		// Get current Robot Location
+		amcl_location = commManager->getLocation();
+		/* Is it a new hypothesis (not the same as the last)
+		 * so override the estimation based on the robot model
+		 * with the AMCL localizer's estimation
+		 */
+		if(old_amcl.p.x() != amcl_location.p.x() || old_amcl.p.y() !=amcl_location.p.y() )
+		{
+			// Recording the last time Data changed
+			last_time = timer2.elapsed()/1e3;
+			// resetting the timer
+			timer2.restart(); 
+			// Override the Estimated Location with the AMCL hypothesis
+			old_amcl.p.setX(amcl_location.p.x()); EstimatedPos.p.setX(amcl_location.p.x());
+			old_amcl.p.setY(amcl_location.p.y()); EstimatedPos.p.setY(amcl_location.p.y());
+			EstimatedPos.phi = amcl_location.phi;
+		}
+		/* If we chose to follow a virtual point on the path then calculate that point
+		 * It will not be used most of the time, but it adds accuracy in control for
+		 * long line paths.
+		 */
+		//qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",commManager->getSpeed(),EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
+		tracking_point.setX(EstimatedPos.p.x() + tracking_dist*cos(EstimatedPos.phi) - 0*sin(EstimatedPos.phi));
+		tracking_point.setY(EstimatedPos.p.y() + tracking_dist*sin(EstimatedPos.phi) + 0*cos(EstimatedPos.phi)); 
+		// Distance to the path Segment
+		distance = Dist(SegmentEnd,tracking_point);
+		displacement = DistToLineSegment(SegmentStart,SegmentEnd,tracking_point);
+		// Did we reach the last segment ???
+		if (path2Follow->next) // NO we didnt
+		{
+			QPointF n(path2Follow->next->pose.p.x(),path2Follow->next->pose.p.y());
+			distance_to_next = DistToLineSegment(SegmentEnd,n,tracking_point);
+		}
+		else // YES this is the last segment
+		{
+			distance_to_next = 100;
+			/* trying to come as close as 30 cm to goal
+			 * this might overshoot and we might by pass the goal
+			 * so this distance can be increased.
+			 */
+			if (distance <= 0.3)
+				segment_navigated = TRUE;
+		}
+
+		//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
+		//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
+		/* If we are too close to obstacles then let the local planner takes control
+		 * steps :
+		 * 1- Takes a local laser Scan from the server.
+		 * 2- Build a local occupancy grid based on the laser scan.
+		 * 3- Give the generated map to the local planner.
+		 * 4- Plan a path from the current location to a point
+		 *    on the global path that is X distance away
+		 * 5- Follow that path
+		 */
+		QTime local_planning_time;
+		qDebug("Closest Distance to Obstacles is:%f",commManager->getClosestObst());
+		if(commManager->getClosestObst() < safety_dist)
+		{
+			// local Planning Map Distance
+			double local_dist = 2.0, target_angle;
+		 	Pose start,target,loc, pixel_loc = commManager->getLocation();
+		 	loc = pixel_loc; target.phi = 0;
+		 	
+		 	// Current Locaion in the Global coordinate
+		 	rob->planner->pathPlanner->ConvertToPixel(&pixel_loc.p);
+			qDebug("Location Global Metric X:%f Y:%f",loc.p.x(),loc.p.y());
+			qDebug("Location Global Pixel  X:%f Y:%f",pixel_loc.p.x(),pixel_loc.p.y());
+			
+			local_planning_time.restart();
+		 	local_planner->SetMap(commManager->getLaserScan(0),local_dist,commManager->getLocation());
+			local_planner->GenerateSpace();
+		 	Node * temp;
+		 	temp = global_path;
+		 	if(!temp)
+		 	{
+		 		qDebug("Global Path is empty, Something went wrong, Emergency Stopping ");
+				commManager->setSpeed(0);
+				commManager->setTurnRate(0);
+				sleep(1);
+				exit(1);
+		 	}
+			/* Find the farest way Point on the global path
+			 * that belongs to the local map
+			 */
+			temp = FindClosest(EstimatedPos.p,global_path);
+		 	while(temp->next)
+		 	{
+			 	QPointF boundary_check;
+	 			//traversable_dist += Dist(temp->pose.p,temp->next->pose.p);
+				target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
+	 		
+			 	boundary_check.setX(temp->pose.p.x());
+			 	boundary_check.setY(temp->pose.p.y());
+//				 	qDebug("Target Global Metric X:%f Y:%f",boundary_check.x(),boundary_check.y());
+			 					 				 	
+			 	// Transfer to the global Pixel Coordinate
+			 	rob->planner->pathPlanner->ConvertToPixel(&boundary_check);				 	
+//					qDebug("Target Pixel Global  X:%f Y:%f",boundary_check.x(),boundary_check.y());
+								 	
+			 	// Transfer to the local Pixel Coordinate
+			 	boundary_check.setX(boundary_check.x() - pixel_loc.p.x() + local_planner->pathPlanner->map->center.x());	
+			 	boundary_check.setY(boundary_check.y() - pixel_loc.p.y() + local_planner->pathPlanner->map->center.y());				 	
+//					qDebug("Target Pixel Local   X:%f Y:%f",boundary_check.x(),boundary_check.y());
+
+				// Check Boundaries
+			 	if (boundary_check.x() < 0 || boundary_check.y() < 0 )
+				 	break;
+			 	if (boundary_check.x() > (local_planner->pathPlanner->map->width - 1) || boundary_check.y() > (local_planner->pathPlanner->map->height - 1))
+			 		break;
+			 	// This is a valid target in the local Map
+				target.p.setX(boundary_check.x());	 		
+				target.p.setY(boundary_check.y());	 							
+			 	target.phi = target_angle;	
+//					qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
+		 		temp= temp->next;
+		 	}
+			
+			/* Search Start location is the center of the Robot			
+			 * currently it's the center of the laser, this will have
+			 * to be modified to translate the laser location to the 
+			 * robot's coordinate : TODO
+			 */
+			 
+		 	start.p.setX(local_planner->pathPlanner->map->center.x());
+		 	start.p.setY(local_planner->pathPlanner->map->center.y()); 	
+		 	start.phi = EstimatedPos.phi;
+		 	
+//				qDebug("Start Local Pixel  X:%f Y:%f",start.p.x(),start.p.y());			 	
+//				qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
+
+		 	local_path = local_planner->FindPath(start,target);
+		 	if (local_path)
+		 	{
+		 		Node * temp = local_path;
+		 		while(temp)
+		 		{
+		 			local_planner->pathPlanner->ConvertToPixel(&temp->pose.p);
+					temp->pose.p += pixel_loc.p;
+		 			rob->planner->pathPlanner->ConvertPixel(&temp->pose.p);
+		 			temp = temp->next;
+		 		}
+		 		qDebug("Local Path found");
+		 		path2Follow = local_path;		 	
+		 	}
+		 	else
+		 		path2Follow = global_path;		 	
+	 		qDebug("Local Planning took %dms",local_planning_time.elapsed());	
+		 	emit drawLocalPath(&loc);
 		}
 		else
-			global_path = global_path->next;
+		{
+			path2Follow = global_path;
+		}
+		/* Get the control Action to be applied, in this case it's a
+		 * simple linear control. It's accurate enough for traversing 
+		 * the generated paths.
+		 */
+		cntrl = getAction(EstimatedPos.phi,angle,displacement,path2Follow->direction,0.2);
+		//qDebug("Control Action Linear:%f Angular:%f",path2Follow->direction*cntrl.linear_velocity,
+		//cntrl.angular_velocity);
+		/* Angular Velocity Thrusholded, just trying not to
+		 * exceed the accepted limits. Or setting up a safe 
+		 * turn speed.
+		 */
+		if(cntrl.angular_velocity >   0.2)
+			cntrl.angular_velocity =  0.2;
+		if(cntrl.angular_velocity <  -0.2)
+			cntrl.angular_velocity = -0.2;			
+		if(log)
+			fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.elapsed()/1e3,last_time);
+		commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
+		commManager->setTurnRate(cntrl.angular_velocity);				
+
+		loc = EstimatedPos;
 	}
 	commManager->setSpeed(0);
 	commManager->setTurnRate(0);
-//	if(platform == WHEELCHAIR)
-//		WCp->SetSpeed(0,0); // Stop The motors
-//	else
-//		pp->SetSpeed(0,0);
 	return;
 }
 

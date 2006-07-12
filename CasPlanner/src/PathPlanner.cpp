@@ -17,7 +17,7 @@ PathPlanner :: PathPlanner()
 
 PathPlanner::PathPlanner(double r_l ,double r_w , QString r_m , QPointF r_c,double pixel_res,double dG,double bridge_len,
 			double bridge_r,double reg_g,double obst_exp,double conn_rad,double obst_pen):
-			Astar(r_l,r_w,obst_exp,pixel_res,dG,r_m,r_c),
+			Astar(r_l,r_w,obst_exp,dG,r_m,r_c),
 			map_initialized(false),
 			obstacle_radius(obst_exp),
 			bridge_length(bridge_len),
@@ -82,7 +82,8 @@ void   PathPlanner ::setObstDist(double a)
 	obst_dist = a;
 }
 
-void PathPlanner::ExpandObstacles() // Nifty way of doing an obstacle expansion, not finalized, ----->>>>> @ TO DO @ <<<<<------
+// Nifty way of doing an obstacle expansion, not finalized, ----->>>>> @ TO DO @ <<<<<------
+void PathPlanner::ExpandObstacles() 
 {
 	if(!map_initialized)
 	{
@@ -91,13 +92,20 @@ void PathPlanner::ExpandObstacles() // Nifty way of doing an obstacle expansion,
 	}
 	int thickness;
 	int m,n,x,y,radius;
-	thickness = int(this->obstacle_radius/this->pixel_size);
+	thickness = int(this->obstacle_radius/map->resolution);
 	radius =2; // This covers vertical, horizontal and diagonal cells
 
-	Map temp_map(map->width,map->height,pixel_size);
+	Map temp_map(map->width,map->height,map->resolution,QPointF(map->width/2.0,map->height/2.0));
+	for(int i = 0;i<map->width;i++)
+		for(int j = 0;j<map->height;j++)
+		{
+			temp_map.data[i][j] = map->data[i][j];
+		}
 	for(int i=0;i<this->map->width - 1;i++)
 		for(int j=0;j<this->map->height - 1 ;j++)
 		{
+//			if(map->data[i][j])
+//				qDebug("i:%d j:%d Count:%d",i,j,++count);
 			for(x = (i - radius) ; x <= (i + radius) ; x ++)
 			{
 				if (x < 0) x = 0;
@@ -194,7 +202,7 @@ void PathPlanner::GenerateRegularGrid()
 		}
 	}
 	qDebug("	--->>> REGULAR GRID GENERATED SUCCESSFULLY <<<---	");
-	SaveSearchSpace();
+	//SaveSearchSpace();
 	//ShowConnections();
 };
 
@@ -204,8 +212,8 @@ void PathPlanner::BridgeTest()
 	SearchSpaceNode *temp;
 	QPointF p;
 	double x,y,x2,y2;
-	pixels_per_bridge = (int) (length/this->pixel_size);
-	radius = (int) (length/(this->pixel_size*2.0));
+	pixels_per_bridge = (int) (length/map->resolution);
+	radius = (int) (length/(map->resolution*2.0));
 	for(int i=0; i < this->map->width - pixels_per_bridge; i++)
 		{
 		for(int j=0;j<this->map->height - pixels_per_bridge ;j++)
@@ -262,7 +270,7 @@ void PathPlanner::BridgeTest()
 			}
 		}
 	qDebug("	--->>> BRIDGE TEST FINISHED SUCCESSFULLY <<<---");
-	SaveSearchSpace();
+	//SaveSearchSpace();
 	//ShowConnections();
 };
 
@@ -308,7 +316,7 @@ void PathPlanner::AddCostToNodes()
 	if (!search_space) // Do nothing if Search Space is not Yet Created
 		return;
 	S = search_space;
-	number_of_pixels = obst_dist / this->pixel_size;
+	number_of_pixels = obst_dist / map->resolution;
 	while (S!=NULL)
 	{
 		//cout<<"\n Node= "<<++n;
@@ -337,7 +345,7 @@ void PathPlanner::AddCostToNodes()
 					}
 			}
 		// this is a normalized cost, it will make more sense later on 
-		S->obstacle_cost =  (obst_dist - nearest_obstacle*this->pixel_size)/obst_dist; 
+		S->obstacle_cost =  (obst_dist - nearest_obstacle*map->resolution)/obst_dist; 
 		S = S->next;
 	}
 	qDebug("	--->>> Penalty Added <<<---	");
@@ -412,7 +420,7 @@ void PathPlanner::ShowConnections()
 		n++;
 	}
 	qDebug("\n---->>> TOTAL NUMBER OF CONNECTIONS =%d\n---->>> Total Nodes in search Space =%d",m,n);
-	this->MAXNODES = m*n;
+	this->MAXNODES = 2*m;
 }
 
 void PathPlanner::SaveSearchSpace()
@@ -438,7 +446,7 @@ void PathPlanner :: SetMap(Map * map_in)
 		delete map;
 	this->map = map_in;
 	MAXNODES = map->height*map->width;
-	qDebug("W_in:%d H_in:%d",map->width,map->height);
+	//qDebug("W_in:%d H_in:%d",map->width,map->height);
 	map_initialized = true;
 };
 

@@ -34,12 +34,12 @@ NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
 
 void NavContainer::Follow()
 {
-	robotManager->navigator->setPath(path);
-	robotManager->navigator->setCommManager(robotManager->commManager);
 	if(robotManager->navigator->isRunning())
 	{
 		robotManager->navigator->quit();
 	}
+	robotManager->navigator->setPath(path);
+	robotManager->navigator->setCommManager(robotManager->commManager);
 	robotManager->navigator->start();
 }
 
@@ -50,28 +50,22 @@ NavContainer::~NavContainer()
 
 void NavContainer::Plan()
 {
-	Pose p;
-	p.p.setX(0); p.p.setY(0); p.phi = 0;
 	robotManager->planner->SetMap(mapPainter.getImage());
 	path = robotManager->planner->FindPath(mapPainter.getStart(),mapPainter.getEnd());
-	mapPainter.drawPath(robotManager->planner->pathPlanner,p);
+	mapPainter.drawPath(robotManager->planner->pathPlanner);
 }
 
 void NavContainer::GenerateSpace()
 {
-	Pose p;
-	p.p.setX(0); p.p.setY(0); p.phi = 0;
 	robotManager->planner->SetMap(mapPainter.getImage());
 	robotManager->planner->GenerateSpace();
-	mapPainter.drawPath(robotManager->planner->pathPlanner,p);
+	mapPainter.drawPath(robotManager->planner->pathPlanner);
 }
 
 void NavContainer::LoadMap()
 {
-	Pose p;
-	p.p.setX(0); p.p.setY(0); p.phi = 0;
 	robotManager->planner->SetMap(mapPainter.getImage());
-	mapPainter.drawPath(robotManager->planner->pathPlanner,p);
+	mapPainter.drawPath(robotManager->planner->pathPlanner);
 }
 
 NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
