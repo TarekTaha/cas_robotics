@@ -11,7 +11,6 @@ class PathPlanner : public Astar
 	public :
 		bool map_initialized;
 		double  obstacle_radius,bridge_length,bridge_res,reg_grid,conn_radius,obst_dist;
-		QPointF start, end;
 	public :
 		void   setExpRad(double);
 		void   setBridgeLen(double);

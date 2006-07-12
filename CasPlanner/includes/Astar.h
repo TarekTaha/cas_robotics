@@ -26,10 +26,10 @@ class Astar: public Robot , public SearchSpace
 		Node  *MakeChildrenNodes(Node *parent) ;
 		bool   goalReached(Node *n);
 	public:
-		Astar(double r_l ,double r_w ,double o_r,double p_s,double dG, QString r_m , QPointF r_c);
+		Astar(double r_l ,double r_w ,double o_r,double dG, QString r_m , QPointF r_c);
 		Astar();
 		long int MAXNODES;
-		double	pixel_size,distGoal;
+		double	distGoal;
 		Map    * map;
 		Pose start,end;
 		Node *root, *current, *childList, *curChild, *q, * test,*path, *p;

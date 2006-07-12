@@ -13,7 +13,7 @@ Node :: ~Node ()
 };
 bool Node ::operator == (Node a)
 {
-	return (this->pose.p.x() == a.pose.p.x() && this->pose.p.y() == a.pose.p.y());
+	return ( isEqual(this->pose.p.x(),a.pose.p.x()) && isEqual(this->pose.p.y(),a.pose.p.y()));
 }
 
 }

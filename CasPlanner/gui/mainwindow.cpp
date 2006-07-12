@@ -62,7 +62,7 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
 }
 void MainWindow::logData()
 {
-    qDebug("Am not sure , but i might be Logging :)"); 
+    //qDebug("Am not sure , but i might be Logging :)"); 
     return;
 }
 
