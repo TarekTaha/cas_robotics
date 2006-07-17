@@ -280,7 +280,7 @@ void PathPlanner :: PrintNodeList()
 	QPointF  pixel;
 	if(!(p = this->path))
 		return ;
-	qDebug("\n  --------------------   START OF LIST ---------------------- \n");
+	qDebug("\n  --------------------   START OF LIST ----------------------");
 	while(p !=NULL)
 	{
 		pixel =  p->pose.p;
@@ -292,18 +292,9 @@ void PathPlanner :: PrintNodeList()
 			//cout<<"\tNext Angle = "<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(atan2(p->next->location.y - p->location.y, p->next->location.x - p->location.x));
 			//cout<<"\tAngle Diff ="<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(anglediff(p->angle,atan2(p->next->location.y - p->location.y, p->next->location.x - p->location.x)));
 		}
-		for (unsigned int i=0;i<this->check_points.size();i++)
-		{
-//			if(p->wheelchair.check_points.size() == 0)
-//			{
-//				cout<<"\n FOR some FUCKING REASON AM EMPTY :| !!!!!"; //SHOULD NEVER HAPPEN :@
-//				break;
-//			}
-		}
-		fflush(stdout);
 		p = p->next;
 	}
-	qDebug("\n\n  --------------------   END OF LIST ---------------------- \n");
+	qDebug("\n --------------------   END OF LIST ---------------------- ");
 }
 
 void PathPlanner::AddCostToNodes()

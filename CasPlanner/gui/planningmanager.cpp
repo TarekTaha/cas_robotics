@@ -35,7 +35,7 @@ PlanningManager::PlanningManager(  double robot_length,
 	this->regGridEnabled    = true;
 	this->obstPenEnabled    = true;
 	this->expObstEnabled    = true;
-	this->bridgeTestEnabled = false;
+	this->bridgeTestEnabled = true;
 	this->showTreeEnabled   = false;
 	start();
 }

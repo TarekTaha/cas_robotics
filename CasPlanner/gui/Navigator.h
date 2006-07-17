@@ -25,19 +25,17 @@ class Navigator : public Controller
 		QString obst_avoid;
 		Node * globalPath, *localPath;
 		int config(ConfigFile *cf, int sectionid);
-		void setCommManager(CommManager*);
 		void setPath(Node *path);
 		Node * FindClosest(QPointF location,Node * all_path);	
         void stop();
         void run();
         void setupLocalPlanner();
-        RobotManager *rob;
-       	CommManager  *commManager;
+        RobotManager *robotManager;
 	public
 	slots:
 		void FollowPath();
 	signals:
-		void drawLocalPath(Pose *);
+		void drawLocalPath(PathPlanner *,Pose *,int *);
 	protected:
 		Pose	old_amcl,amcl_location,EstimatedPos;
 		double 	angle,prev_angle,theta,error_orientation,
@@ -51,7 +49,7 @@ class Navigator : public Controller
 		QPointF rotation_center;
 		QPointF	begin,tracking_point,ni,SegmentStart,SegmentEnd;
 		bool	log,position_found,end_reached,segment_navigated,stop_following;
-		int		platform,direction;					
+		int		platform,direction,path2Draw;					
 		Node * local_path,* global_path,*last,*first,*path2Follow;
 		PlanningManager *local_planner;
 		FILE * file;

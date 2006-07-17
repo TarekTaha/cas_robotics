@@ -425,12 +425,48 @@ inline bool isSecondInFOVOfFirst(Vector2D posFirst,
 
   return facingFirst.Dot(toTarget) >= cos(fov/2.0);
 }
-
+//------------------ Distances  / Intersections and Lines----------------------
+//  By: Tarek Taha
+// Informtion gathered from: 
+//				http://astronomy.swin.edu.au/~pbourke/geometry/pointline/
+//-----------------------------------------------------------------------------
 inline double Magnitude( QPointF p1, QPointF p2 )
 {
     QPointF Vector;
     Vector = p2 - p1;
     return sqrt( Vector.x() * Vector.x() + Vector.y() * Vector.y());
+};
+
+/* This Function takes 2 line and returne the interstection Point
+ * of these two lines. It can also be used for 2 line segments.
+ */
+inline int LineInterLine(Line L1,Line L2,QPointF &P)
+{
+	double Ua,Ub;
+	double denominator;
+	denominator = (
+					(L2.end.y() - L2.start.y())*(L1.end.x() - L1.start.x()) 
+					-
+				  	(L2.end.x() - L2.start.x())*(L1.end.y() - L1.start.y())
+				  );
+	Ua = (
+			(L2.end.x() - L2.start.x())*(L1.start.y() - L2.start.y()) -
+			(L2.end.y() - L2.start.y())*(L1.start.x() - L2.start.x())
+		 )
+		 /
+		 denominator;
+	Ub = (
+			(L1.end.x() - L1.start.x())*(L1.start.y() - L2.start.y()) -
+			(L1.end.y() - L1.start.y())*(L1.start.x() - L2.start.x())
+		 )
+		 /
+		 denominator;
+	// Is the intersection point outside any of the segments?
+    if( Ua < 0.0f || Ua > 1.0f  || Ub < 0.0f || Ub > 1.0f)
+    	return 0;
+    P.setX(L1.start.x() + Ua*(L1.end.x() - L1.start.x()));
+    P.setY(L1.start.y() + Ua*(L1.end.y() - L1.start.y()));
+    return 1;
 }
 
 inline double DistanceToLine( QPointF LineStart, QPointF LineEnd, QPointF P)
@@ -458,5 +494,26 @@ inline double DistToLineSegment(QPointF LineStart, QPointF LineEnd, QPointF p)
 	//calculate the distance P-Point
   	//return Vec2DDistance(P,Point);
 	return DistanceToLine(LineStart,LineEnd, p); 
+}
+
+inline double Dist2Seg(Line line, QPointF Point)
+{
+    double LineMag;
+    double U;
+    QPointF Intersection;
+ 
+    LineMag = line.LineMag();
+ 
+    U = ((( Point.x() - line.start.x() ) * ( line.end.x() - line.start.x() )) +
+        ((  Point.y() - line.start.y() ) * ( line.end.y() - line.start.y() )))
+        /( LineMag * LineMag );
+ 
+    if( U < 0.0f || U > 1.0f )
+        return 1000;   // closest point does not fall within the line segment
+ 
+    Intersection.setX(line.start.x() + U * ( line.end.x() - line.start.x() ));
+    Intersection.setY(line.start.y() + U * ( line.end.y() - line.start.y() ));
+
+    return Magnitude( Point, Intersection );
 }
 #endif

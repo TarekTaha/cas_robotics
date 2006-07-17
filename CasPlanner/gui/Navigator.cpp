@@ -3,22 +3,10 @@
 Navigator::Navigator(RobotManager *r) :
 globalPath(NULL),
 localPath(NULL),
-rob(r),
-robot_length(1.2),
-robot_width(0.65),
-pixel_res(0.05),
-dist_goal(0.1),
-bridge_len(2),
-bridge_res(0.05),
-reg_grid(0.2),
-obst_exp(0.1),
-conn_rad(0.4),
-obst_pen(3),
-robot_model("diff"),
-rotation_center(0,-0.3),
+robotManager(r),
 local_planner(NULL)
 {
-	connect(this, SIGNAL(drawLocalPath(Pose *)),rob, SLOT(rePaint(Pose *)));
+	connect(this, SIGNAL(drawLocalPath(PathPlanner *,Pose *,int *)),robotManager, SLOT(rePaint(PathPlanner*,Pose *,int *)));
 }
 
 Navigator::~Navigator()
@@ -44,17 +32,31 @@ void Navigator::setupLocalPlanner()
 											  conn_rad,
 											  obst_pen
 										   );
-	rob->local_planner = local_planner->pathPlanner;							   
+	robotManager->local_planner = local_planner->pathPlanner;							   
 	}
 }
 
 int Navigator::config( ConfigFile *cf, int sectionid)
 {
-   	obst_avoid  =   cf->ReadString(sectionid, "obst_avoid", "non");
- 	k_dist      =   cf->ReadFloat (sectionid, "k_dist", 1.8);
-  	k_theta     =   cf->ReadFloat (sectionid, "k_theta", 2.5);
-  	safety_dist =   cf->ReadFloat (sectionid, "safety_dist", 0.5);
+   	obst_avoid    =   cf->ReadString(sectionid, "obst_avoid", "non");
+ 	k_dist        =   cf->ReadFloat (sectionid, "k_dist", 1.8);
+  	k_theta       =   cf->ReadFloat (sectionid, "k_theta", 2.5);
+  	safety_dist   =   cf->ReadFloat (sectionid, "safety_dist", 0.5);
   	tracking_dist =   cf->ReadFloat (sectionid, "tracking_dist", 0);
+	
+	robot_length = 	  cf->ReadFloat (sectionid, "robot_length", 1.2);
+	robot_width  = 	  cf->ReadFloat (sectionid, "robot_width", 0.65);
+	pixel_res    = 	  cf->ReadFloat (sectionid, "pixel_res", 0.05);
+	dist_goal    = 	  cf->ReadFloat (sectionid, "dist_goal", 0.2);
+	bridge_len   = 	  cf->ReadFloat (sectionid, "bridge_len", 2);
+	bridge_res   = 	  cf->ReadFloat (sectionid, "bridge_res", 0.1);
+	reg_grid     = 	  cf->ReadFloat (sectionid, "reg_grid", 0.3);
+	obst_exp     = 	  cf->ReadFloat (sectionid, "obst_exp", 0.2);
+	conn_rad     = 	  cf->ReadFloat (sectionid, "conn_rad", 0.5);
+	obst_pen     = 	  cf->ReadFloat (sectionid, "obst_pen", 3);
+	robot_model  =    cf->ReadString(sectionid, "robot_mode", "diff");
+	rotation_center.setX(0);
+	rotation_center.setY(-0.3);  	
     qDebug("-> Starting Robot Navigator."); 
     qDebug("*********************************************************************"); 	
   	qDebug("Navigation Parameters:"); 
@@ -74,7 +76,8 @@ Node * Navigator::FindClosest(QPointF location,Node * all_path)
 	double dist,shortest= 100000;
 	while(all_path && all_path->next)
 	{
-		dist = DistToLineSegment(all_path->pose.p,all_path->next->pose.p,location);
+		Line l(all_path->pose.p,all_path->next->pose.p);
+		dist = Dist2Seg(l,location);
 		if(dist < shortest)
 		{
 			shortest = dist;
@@ -83,11 +86,6 @@ Node * Navigator::FindClosest(QPointF location,Node * all_path)
 		all_path = all_path->next;
 	}
 	return nearest;
-}
-
-void Navigator::setCommManager(CommManager* com)
-{
-	this->commManager = com;
 }
 
 void Navigator::setPath(Node *p)
@@ -103,7 +101,7 @@ void Navigator::FollowPath()
 void Navigator::run()
 {
 	ControlAction cntrl;
-	QTime timer2,delta_timer;
+	QTime amcl_timer,delta_timer;
 	Pose loc;
 	if(!local_planner)
 	{
@@ -114,43 +112,44 @@ void Navigator::run()
 		qDebug("\n --->>> No PATH TO FOLLOW <<<---");
 		return ;
 	}
-	if(!commManager)
+	if(!robotManager->commManager)
 	{
 		qDebug("\t - Communication Manager Not Initialized");
 		return;
 	}
-	if(!commManager->connected)
+	if(!robotManager->commManager->connected)
 	{
 		qDebug("\t - Your not Connected to the Robot, Connect First");
 		return;		
 	}
-
+	path2Draw = SHOWGLOBALPATH;
 	Pose initial_pos;
 	initial_pos.p.setX(global_path->pose.p.x());
 	initial_pos.p.setY(global_path->pose.p.y());	
 	initial_pos.phi = global_path->pose.phi;	
 	//Set our Initial Location Estimation
-	commManager->setLocation(initial_pos);
+	robotManager->commManager->setLocation(initial_pos);
 	sleep(1);
-	while(!commManager->getLocalized())
+	while(!robotManager->commManager->getLocalized())
 	{
-		loc = commManager->getLocation();
+		loc = robotManager->commManager->getLocation();
 		qDebug("NO Accurate Estimation yet, best current is: x:%f y:%f phi:%f",loc.p.x(),loc.p.y(),RTOD(loc.phi));
 		usleep(300000);
 	}
 	/**********************         Start by the Global Path     ************************/
 	path2Follow = global_path;
 	/************************************************************************************/
-	timer2.start();
+	amcl_timer.start();
 	delta_timer.start();
 	// Reset Times
 	last_time=0; delta_t=0;	velocity=0;
 	end_reached = false;
-	stop_following = false;
+	double sf = safety_dist;
 	while(!end_reached)
 	{
-		timer2.restart();
+		delta_t = delta_timer.elapsed()/1e3;
 		delta_timer.restart();
+		usleep(10000);
 		first = FindClosest(loc.p,path2Follow);
 		// Is it the last Segment ?
 		if (!first->next)
@@ -169,59 +168,42 @@ void Navigator::run()
 //		qDebug("--->>> Orientation(Planned) to follow :=%.3f <<<---",RTOD(angle));
 
 		// Estimate the location based on the Last AMCL location and the vehichle model
-		delta_t = delta_timer.elapsed()/1e3;
-		delta_timer.restart();
-		usleep(100000);
-		EstimatedPos.phi += commManager->getTurnRate()*delta_t;
+		EstimatedPos.phi += robotManager->commManager->getTurnRate()*delta_t;
 		EstimatedPos.p.setX(EstimatedPos.p.x() + velocity*cos(EstimatedPos.phi)*delta_t);
 		EstimatedPos.p.setY(EstimatedPos.p.y() + velocity*sin(EstimatedPos.phi)*delta_t);
 		//cout<<"\nVelocity is:"<<velocity<<" Side Speed is:"<<pp->SideSpeed();
-		if (velocity!= commManager->getSpeed()) //	Velocity Changed?
-			velocity = commManager->getSpeed();
+		if (velocity!= robotManager->commManager->getSpeed()) //	Velocity Changed?
+			velocity = robotManager->commManager->getSpeed();
 		//cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
+		
 		// Get current Robot Location
-		amcl_location = commManager->getLocation();
+		amcl_location = robotManager->commManager->getLocation();
 		/* Is it a new hypothesis (not the same as the last)
 		 * so override the estimation based on the robot model
 		 * with the AMCL localizer's estimation
 		 */
-		if(old_amcl.p.x() != amcl_location.p.x() || old_amcl.p.y() !=amcl_location.p.y() )
+		if(old_amcl != amcl_location)
 		{
 			// Recording the last time Data changed
-			last_time = timer2.elapsed()/1e3;
+			last_time = amcl_timer.elapsed()/1e3;
 			// resetting the timer
-			timer2.restart(); 
+			amcl_timer.restart(); 
 			// Override the Estimated Location with the AMCL hypothesis
 			old_amcl.p.setX(amcl_location.p.x()); EstimatedPos.p.setX(amcl_location.p.x());
 			old_amcl.p.setY(amcl_location.p.y()); EstimatedPos.p.setY(amcl_location.p.y());
-			EstimatedPos.phi = amcl_location.phi;
+			old_amcl.phi = EstimatedPos.phi = amcl_location.phi;
 		}
 		/* If we chose to follow a virtual point on the path then calculate that point
 		 * It will not be used most of the time, but it adds accuracy in control for
 		 * long line paths.
 		 */
-		//qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",commManager->getSpeed(),EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
+		//qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",robotManager->commManager->getSpeed(),EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
 		tracking_point.setX(EstimatedPos.p.x() + tracking_dist*cos(EstimatedPos.phi) - 0*sin(EstimatedPos.phi));
 		tracking_point.setY(EstimatedPos.p.y() + tracking_dist*sin(EstimatedPos.phi) + 0*cos(EstimatedPos.phi)); 
 		// Distance to the path Segment
 		distance = Dist(SegmentEnd,tracking_point);
-		displacement = DistToLineSegment(SegmentStart,SegmentEnd,tracking_point);
-		// Did we reach the last segment ???
-		if (path2Follow->next) // NO we didnt
-		{
-			QPointF n(path2Follow->next->pose.p.x(),path2Follow->next->pose.p.y());
-			distance_to_next = DistToLineSegment(SegmentEnd,n,tracking_point);
-		}
-		else // YES this is the last segment
-		{
-			distance_to_next = 100;
-			/* trying to come as close as 30 cm to goal
-			 * this might overshoot and we might by pass the goal
-			 * so this distance can be increased.
-			 */
-			if (distance <= 0.3)
-				segment_navigated = TRUE;
-		}
+		Line l(SegmentStart,SegmentEnd);
+		displacement = Dist2Seg(l,tracking_point);
 
 		//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
 		//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
@@ -235,48 +217,53 @@ void Navigator::run()
 		 * 5- Follow that path
 		 */
 		QTime local_planning_time;
-		qDebug("Closest Distance to Obstacles is:%f",commManager->getClosestObst());
-		if(commManager->getClosestObst() < safety_dist)
+		qDebug("Closest Distance to Obstacles is:%f Saftey Dist:%f",robotManager->commManager->getClosestObst(),sf);
+		if(robotManager->commManager->getClosestObst() < sf)
 		{
+			// Stop And Plan
+			robotManager->commManager->setSpeed(0);
+			robotManager->commManager->setTurnRate(0);			
+			
 			// local Planning Map Distance
-			double local_dist = 2.0, target_angle;
-		 	Pose start,target,loc, pixel_loc = commManager->getLocation();
+			double local_dist = 2.5, target_angle;
+		 	Pose start,target,loc, pixel_loc = robotManager->commManager->getLocation();
 		 	loc = pixel_loc; target.phi = 0;
 		 	
 		 	// Current Locaion in the Global coordinate
-		 	rob->planner->pathPlanner->ConvertToPixel(&pixel_loc.p);
-			qDebug("Location Global Metric X:%f Y:%f",loc.p.x(),loc.p.y());
-			qDebug("Location Global Pixel  X:%f Y:%f",pixel_loc.p.x(),pixel_loc.p.y());
+		 	robotManager->planner->pathPlanner->ConvertToPixel(&pixel_loc.p);
+//			qDebug("Location Global Metric X:%f Y:%f",loc.p.x(),loc.p.y());
+//			qDebug("Location Global Pixel  X:%f Y:%f",pixel_loc.p.x(),pixel_loc.p.y());
 			
 			local_planning_time.restart();
-		 	local_planner->SetMap(commManager->getLaserScan(0),local_dist,commManager->getLocation());
+		 	local_planner->SetMap(robotManager->commManager->getLaserScan(0),local_dist,robotManager->commManager->getLocation());
 			local_planner->GenerateSpace();
 		 	Node * temp;
 		 	temp = global_path;
 		 	if(!temp)
 		 	{
 		 		qDebug("Global Path is empty, Something went wrong, Emergency Stopping ");
-				commManager->setSpeed(0);
-				commManager->setTurnRate(0);
+				robotManager->commManager->setSpeed(0);
+				robotManager->commManager->setTurnRate(0);
 				sleep(1);
 				exit(1);
 		 	}
 			/* Find the farest way Point on the global path
 			 * that belongs to the local map
 			 */
+			double traversable_dist = 1.5, dist=0;
 			temp = FindClosest(EstimatedPos.p,global_path);
-		 	while(temp->next)
+		 	while(temp->next && dist < traversable_dist)
 		 	{
 			 	QPointF boundary_check;
 	 			//traversable_dist += Dist(temp->pose.p,temp->next->pose.p);
 				target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
-	 		
+	 			dist+= Dist(temp->pose.p,temp->next->pose.p);
 			 	boundary_check.setX(temp->pose.p.x());
 			 	boundary_check.setY(temp->pose.p.y());
 //				 	qDebug("Target Global Metric X:%f Y:%f",boundary_check.x(),boundary_check.y());
 			 					 				 	
 			 	// Transfer to the global Pixel Coordinate
-			 	rob->planner->pathPlanner->ConvertToPixel(&boundary_check);				 	
+			 	robotManager->planner->pathPlanner->ConvertToPixel(&boundary_check);				 	
 //					qDebug("Target Pixel Global  X:%f Y:%f",boundary_check.x(),boundary_check.y());
 								 	
 			 	// Transfer to the local Pixel Coordinate
@@ -314,24 +301,32 @@ void Navigator::run()
 		 	if (local_path)
 		 	{
 		 		Node * temp = local_path;
+		 		pixel_loc.p -= local_planner->pathPlanner->map->center;
 		 		while(temp)
 		 		{
 		 			local_planner->pathPlanner->ConvertToPixel(&temp->pose.p);
 					temp->pose.p += pixel_loc.p;
-		 			rob->planner->pathPlanner->ConvertPixel(&temp->pose.p);
+		 			robotManager->planner->pathPlanner->ConvertPixel(&temp->pose.p);
 		 			temp = temp->next;
 		 		}
 		 		qDebug("Local Path found");
-		 		path2Follow = local_path;		 	
+		 		path2Follow = local_path;
+		 		sf = robotManager->commManager->getClosestObst() - 0.1;	 	
 		 	}
 		 	else
-		 		path2Follow = global_path;		 	
+		 	{
+		 		sf = safety_dist;
+		 		path2Follow = global_path;
+		 	}
 	 		qDebug("Local Planning took %dms",local_planning_time.elapsed());	
-		 	emit drawLocalPath(&loc);
+	 		path2Draw = SHOWLOCALPATH;
+		 	emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);
 		}
 		else
 		{
 			path2Follow = global_path;
+	 		path2Draw = SHOWGLOBALPATH;
+		 	emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);			
 		}
 		/* Get the control Action to be applied, in this case it's a
 		 * simple linear control. It's accurate enough for traversing 
@@ -350,13 +345,13 @@ void Navigator::run()
 			cntrl.angular_velocity = -0.2;			
 		if(log)
 			fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.elapsed()/1e3,last_time);
-		commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
-		commManager->setTurnRate(cntrl.angular_velocity);				
+		robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
+		robotManager->commManager->setTurnRate(cntrl.angular_velocity);				
 
 		loc = EstimatedPos;
 	}
-	commManager->setSpeed(0);
-	commManager->setTurnRate(0);
+	robotManager->commManager->setSpeed(0);
+	robotManager->commManager->setTurnRate(0);
 	return;
 }
 

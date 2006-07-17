@@ -39,7 +39,6 @@ void NavContainer::Follow()
 		robotManager->navigator->quit();
 	}
 	robotManager->navigator->setPath(path);
-	robotManager->navigator->setCommManager(robotManager->commManager);
 	robotManager->navigator->start();
 }
 
