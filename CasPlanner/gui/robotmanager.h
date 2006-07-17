@@ -33,7 +33,7 @@ class RobotManager : public QObject //: public CommManager, public PlanningManag
 		PathPlanner * local_planner;
 		Navigator * navigator;
    public slots:
-  		void rePaint(Pose *);
+  		void rePaint(PathPlanner*,Pose *,int *);
 };
 
 #endif 

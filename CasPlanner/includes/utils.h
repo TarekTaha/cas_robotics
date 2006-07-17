@@ -329,12 +329,53 @@ inline double Dist(QPointF a, QPointF b)
 {
 	return sqrt(pow(a.x() - b.x(),2) + pow(a.y() - b.y(),2));
 }
-
-typedef struct _pose
+class Line
 {
+	public:
+		QPointF start,end;
+		Line(){};
+		Line(QPointF a,QPointF b): start(a),end(b) {};
+		void SetStart(QPointF a) 
+		{
+			start = a;
+		}
+		void SetEnd(QPointF a) 
+		{
+			end = a;
+		}
+		double LineMag()
+		{
+			QPointF V = end - start;
+			return sqrt(V.x()*V.x() + V.y()*V.y());
+		}
+};
+
+class Pose
+{	
+public : 
 	QPointF p;
-	double phi;
-} Pose;
+	double phi;	
+	Pose(){};
+	Pose(double x ,double y,double theta)
+	{
+		p.setX(x);
+		p.setY(y);
+		phi = theta;
+	}
+	bool operator==(const Pose& pose) const
+  	{
+    	return (isEqual(p.x(), pose.p.x()) && isEqual(p.y(),pose.p.y()) && isEqual(phi,pose.phi));
+  	}
+  	bool operator!=(const Pose& pose) const
+  	{
+    	return (p.x()!=pose.p.x() || p.y()!=pose.p.y() || phi != pose.phi);
+  	}
+};
+//typedef struct _pose
+//{
+//	QPointF p;
+//	double phi;
+//} Pose;
 
 inline double anglediff(double alfa, double beta) 
 {
@@ -385,5 +426,7 @@ typedef struct _tree
 		QPointF location;
 		QVector <QPointF> children;
 	}   Tree;
-	
+
+enum {SHOWLOCALPATH,SHOWGLOBALPATH,SHOWBOTHPATHS};
+
 #endif

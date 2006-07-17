@@ -3,6 +3,7 @@
 MapPainter::MapPainter(QWidget *parent): 
 	QWidget(parent),
 	step(1),
+	path2Draw(SHOWGLOBALPATH),
 	local_planner(NULL),
 	global_planner(NULL),
 	start_initialized(false),
@@ -42,11 +43,12 @@ void   MapPainter::setPathEnabled(int set)
 		drawPathEnabled = false;
 }
 
-void MapPainter::drawPath(PathPlanner *p,Pose pose)
+void MapPainter::drawPath(PathPlanner *p,Pose pose, int *draw)
 {
 	this->local_planner = p;
 	this->pose = pose;
 	drawPathEnabled = true;
+	this->path2Draw = *draw;
 	update();
 }
 
@@ -60,6 +62,7 @@ void MapPainter::drawPath(PathPlanner *p)
 void MapPainter::paintEvent(QPaintEvent *)
 {
 	//qDebug("Paint");
+	QPointF p;
 	QPainter paint(this);
 	paint.drawImage(0, 0, image, 0, 0,image.width(), image.height());
 	paint.setBrush(Qt::cyan);
@@ -73,23 +76,13 @@ void MapPainter::paintEvent(QPaintEvent *)
 			paint.drawLine(end.p,mouse_pos);
 			break;
 	}
-	if(start_initialized)
-	{
-		paint.drawArc(int(start.p.x()-5),int(start.p.y()-5),10,10,0,5760);
-		paint.drawPie(int(start.p.x()-5),int(start.p.y()-5),10,10,(RTOD(start.phi)-10)*16,(RTOD(start.phi)+10)*16);
-	}
-	if(end_initialized)
-	{
-		paint.drawArc(int(end.p.x()-5),int(end.p.y()-5),10,10,0,5760);
-		paint.drawPie(int(end.p.x()-5),int(end.p.y()-5),10,10,(RTOD(end.phi)-10)*16,(RTOD(end.phi)+10)*16);		
-	}
 	if(drawPathEnabled)
 	{
 		SearchSpaceNode * temp;
-		QPointF p,start,end;
-		if(local_planner)
+		if(local_planner && path2Draw == SHOWLOCALPATH)
 		{
 			Pose	relative_p;
+			QPointF start,end;
 			double res = local_planner->map->resolution;
 			
 			start = this->local_planner->start.p; 
@@ -104,7 +97,26 @@ void MapPainter::paintEvent(QPaintEvent *)
 			
 			start.setX(start.x() + relative_p.p.x()); start.setY(start.y() + relative_p.p.y());
 			end.setX    (end.x() + relative_p.p.x());     end.setY(end.y() + relative_p.p.y());		
-	
+
+			// Draw Local Path if it exists
+			paint.setPen(Qt::white);
+			if(local_planner->path)
+			{
+					paint.setPen(Qt::yellow);
+					QPointF E,S;
+				  	Node *p;
+				  	p = local_planner->path;
+					while(p != NULL && p->next!=NULL)
+					{
+						S = p->pose.p;
+						E = p->next->pose.p;
+						global_planner->ConvertToPixel(&S);
+						global_planner->ConvertToPixel(&E);						
+						paint.drawLine(S,E);
+						p = p->next;
+					} 
+			}			
+				
 			// Draw the expanded Local Map
 			paint.setPen(Qt::blue);
 			for(int i=0;i<local_planner->map->width;i++)
@@ -135,30 +147,21 @@ void MapPainter::paintEvent(QPaintEvent *)
 			paint.drawPie(int(start.x()),int(start.y()),5,5,0,5760);
 			paint.setBrush(Qt::red);
 			paint.drawPie(int(end.x()),  int(end.y()),5,5,0,5760);
-			// Draw Local Path if it exists
-			paint.setPen(Qt::white);
-			if(local_planner->path)
-			{
-					paint.setPen(Qt::yellow);
-					QPointF l_start,l_end,E,S;
-				  	Node *p;
-				  	p = local_planner->path;
-					while(p != NULL && p->next!=NULL)
-					{
-						S =  p->pose.p;
-						if (p->next)
-						{
-							l_start = p->pose.p; l_end = p->next->pose.p;
-							local_planner->ConvertToPixel(&l_start); local_planner->ConvertToPixel(&l_end);
-							paint.drawLine(l_start + relative_p.p,l_end + relative_p.p);
-						}
-						p = p->next;
-					} 
-			}			
-		return ;
 		}
-		if(global_planner)
+		if(global_planner && path2Draw == SHOWGLOBALPATH)
 		{
+			// Draw Start and End Locations
+			if(start_initialized)
+			{
+				paint.drawArc(int(start.p.x()-5),int(start.p.y()-5),10,10,0,5760);
+				paint.drawPie(int(start.p.x()-5),int(start.p.y()-5),10,10,(RTOD(start.phi)-10)*16,(RTOD(start.phi)+10)*16);
+			}
+			if(end_initialized)
+			{
+				paint.drawArc(int(end.p.x()-5),int(end.p.y()-5),10,10,0,5760);
+				paint.drawPie(int(end.p.x()-5),int(end.p.y()-5),10,10,(RTOD(end.phi)-10)*16,(RTOD(end.phi)+10)*16);		
+			}
+			
 			// Draw the expanded Global Map
 			paint.setPen(Qt::gray);
 			for(int i=0;i<global_planner->map->width;i++)
