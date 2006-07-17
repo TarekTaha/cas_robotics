@@ -54,9 +54,12 @@ int Navigator::config( ConfigFile *cf, int sectionid)
 	obst_exp     = 	  cf->ReadFloat (sectionid, "obst_exp", 0.2);
 	conn_rad     = 	  cf->ReadFloat (sectionid, "conn_rad", 0.5);
 	obst_pen     = 	  cf->ReadFloat (sectionid, "obst_pen", 3);
+	local_dist   = 	  cf->ReadFloat (sectionid, "local_dist", 2);	
+	traversable_dist= cf->ReadFloat (sectionid, "traversable_dist", 1.2);
 	robot_model  =    cf->ReadString(sectionid, "robot_mode", "diff");
 	rotation_center.setX(0);
-	rotation_center.setY(-0.3);  	
+	rotation_center.setY(-0.3);
+
     qDebug("-> Starting Robot Navigator."); 
     qDebug("*********************************************************************"); 	
   	qDebug("Navigation Parameters:"); 
@@ -67,11 +70,43 @@ int Navigator::config( ConfigFile *cf, int sectionid)
   	qDebug("\t\t Tracking Distance :%f",tracking_dist);
     qDebug("*********************************************************************"); 
     qDebug("-> Robot Navigator Started.");   	
+
  	return 1;
 }
 
+double Navigator::NearestObstacle(QVector<QPointF> laser_scan,Pose pose)
+{
+	QPointF ray_end,temp[4],intersection;
+	Line L1,L2;
+	double dist,shortest_dist=10000;
+	for(int i=0;i<4;i++)
+	{
+		temp[i] = Trans2Global(local_planner->pathPlanner->local_edge_points[i],pose);
+	}
+	for(int i=0;i<laser_scan.size();i++)
+	{
+		for(int j=0;j<4;j++)
+		{
+			ray_end = Trans2Global(laser_scan[i],pose);
+			L1.SetStart(temp[j%4]);      L1.SetEnd(temp[(j+1)%4]);
+			L2.SetStart(pose.p);         L2.SetEnd(ray_end);
+			if(LineInterLine(L1,L2,intersection))
+			{
+				dist = Dist(intersection,ray_end);
+				if(dist < shortest_dist)
+				{
+					shortest_dist = dist;
+					//qDebug("Shortest:%f",shortest_dist);
+				}
+			}
+		}
+	}
+	return shortest_dist;	
+}
 Node * Navigator::FindClosest(QPointF location,Node * all_path)
 {
+//	QTime timer;
+//	timer.restart();
 	Node * nearest = NULL;
 	double dist,shortest= 100000;
 	while(all_path && all_path->next)
@@ -85,6 +120,7 @@ Node * Navigator::FindClosest(QPointF location,Node * all_path)
 		}
 		all_path = all_path->next;
 	}
+//	qDebug("It took:%dms",timer.elapsed());
 	return nearest;
 }
 
@@ -217,15 +253,17 @@ void Navigator::run()
 		 * 5- Follow that path
 		 */
 		QTime local_planning_time;
-		qDebug("Closest Distance to Obstacles is:%f Saftey Dist:%f",robotManager->commManager->getClosestObst(),sf);
-		if(robotManager->commManager->getClosestObst() < sf)
+		double closest_obst =NearestObstacle(robotManager->commManager->getLaserScan(0),robotManager->commManager->getLocation());
+		qDebug("Closest Distance to Obstacles is:%f Saftey Dist:%f",closest_obst,sf);
+//		if(robotManager->commManager->getClosestObst() < sf)
+		if(closest_obst < sf)
 		{
 			// Stop And Plan
-			robotManager->commManager->setSpeed(0);
-			robotManager->commManager->setTurnRate(0);			
+//			robotManager->commManager->setSpeed(0);
+//			robotManager->commManager->setTurnRate(0);			
 			
 			// local Planning Map Distance
-			double local_dist = 2.5, target_angle;
+			double target_angle;
 		 	Pose start,target,loc, pixel_loc = robotManager->commManager->getLocation();
 		 	loc = pixel_loc; target.phi = 0;
 		 	
@@ -250,7 +288,7 @@ void Navigator::run()
 			/* Find the farest way Point on the global path
 			 * that belongs to the local map
 			 */
-			double traversable_dist = 1.5, dist=0;
+			double dist=0;
 			temp = FindClosest(EstimatedPos.p,global_path);
 		 	while(temp->next && dist < traversable_dist)
 		 	{
@@ -311,7 +349,7 @@ void Navigator::run()
 		 		}
 		 		qDebug("Local Path found");
 		 		path2Follow = local_path;
-		 		sf = robotManager->commManager->getClosestObst() - 0.1;	 	
+//		 		sf = robotManager->commManager->getClosestObst() - 0.1;	 	
 		 	}
 		 	else
 		 	{
@@ -326,7 +364,7 @@ void Navigator::run()
 		{
 			path2Follow = global_path;
 	 		path2Draw = SHOWGLOBALPATH;
-		 	emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);			
+		 	//emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);			
 		}
 		/* Get the control Action to be applied, in this case it's a
 		 * simple linear control. It's accurate enough for traversing 

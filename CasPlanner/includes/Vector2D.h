@@ -440,7 +440,7 @@ inline double Magnitude( QPointF p1, QPointF p2 )
 /* This Function takes 2 line and returne the interstection Point
  * of these two lines. It can also be used for 2 line segments.
  */
-inline int LineInterLine(Line L1,Line L2,QPointF &P)
+inline bool LineInterLine(Line L1,Line L2,QPointF &P)
 {
 	double Ua,Ub;
 	double denominator;
@@ -463,10 +463,10 @@ inline int LineInterLine(Line L1,Line L2,QPointF &P)
 		 denominator;
 	// Is the intersection point outside any of the segments?
     if( Ua < 0.0f || Ua > 1.0f  || Ub < 0.0f || Ub > 1.0f)
-    	return 0;
+    	return false;
     P.setX(L1.start.x() + Ua*(L1.end.x() - L1.start.x()));
     P.setY(L1.start.y() + Ua*(L1.end.y() - L1.start.y()));
-    return 1;
+    return true;
 }
 
 inline double DistanceToLine( QPointF LineStart, QPointF LineEnd, QPointF P)
@@ -478,23 +478,23 @@ inline double DistanceToLine( QPointF LineStart, QPointF LineEnd, QPointF P)
     return distance;
 }
 
-inline double DistToLineSegment(QPointF LineStart, QPointF LineEnd, QPointF p)
-{
-	Vector2D A(LineStart.x(),LineStart.y()),B(LineEnd.x(),LineEnd.y()),P(p.x(),p.y());
-  	//if the angle between PA and AB is obtuse then the closest vertex must be A
-  	double dotA = (P.x - A.x)*(B.x - A.x) + (P.y - A.y)*(B.y - A.y);
-  	if (dotA <= 0) 
-		return Vec2DDistance(A, P);
-	//if the angle between PB and AB is obtuse then the closest vertex must be B
-  	double dotB = (P.x - B.x)*(A.x - B.x) + (P.y - B.y)*(A.y - B.y);
-   	if (dotB <= 0) 
-		return Vec2DDistance(B, P);
-   	//calculate the point along AB that is the closest to P
-  	//Vector2D Point = A + ((B - A) * dotA)/(dotA + dotB);
-	//calculate the distance P-Point
-  	//return Vec2DDistance(P,Point);
-	return DistanceToLine(LineStart,LineEnd, p); 
-}
+//inline double DistToLineSegment(QPointF LineStart, QPointF LineEnd, QPointF p)
+//{
+//	Vector2D A(LineStart.x(),LineStart.y()),B(LineEnd.x(),LineEnd.y()),P(p.x(),p.y());
+//  	//if the angle between PA and AB is obtuse then the closest vertex must be A
+//  	double dotA = (P.x - A.x)*(B.x - A.x) + (P.y - A.y)*(B.y - A.y);
+//  	if (dotA <= 0) 
+//		return Vec2DDistance(A, P);
+//	//if the angle between PB and AB is obtuse then the closest vertex must be B
+//  	double dotB = (P.x - B.x)*(A.x - B.x) + (P.y - B.y)*(A.y - B.y);
+//   	if (dotB <= 0) 
+//		return Vec2DDistance(B, P);
+//   	//calculate the point along AB that is the closest to P
+//  	//Vector2D Point = A + ((B - A) * dotA)/(dotA + dotB);
+//	//calculate the distance P-Point
+//  	//return Vec2DDistance(P,Point);
+//	return DistanceToLine(LineStart,LineEnd, p); 
+//}
 
 inline double Dist2Seg(Line line, QPointF Point)
 {
@@ -507,13 +507,15 @@ inline double Dist2Seg(Line line, QPointF Point)
     U = ((( Point.x() - line.start.x() ) * ( line.end.x() - line.start.x() )) +
         ((  Point.y() - line.start.y() ) * ( line.end.y() - line.start.y() )))
         /( LineMag * LineMag );
- 
-    if( U < 0.0f || U > 1.0f )
-        return 1000;   // closest point does not fall within the line segment
- 
+
+	if( U < 0.0f || U > 1.0f) 
+		return Min(Dist(line.start,Point),Dist(line.end,Point));
+//    if( U < 0.0f)
+//        return Dist(line.start,Point);   
+//    if( U > 1.0f)
+//        return Dist(line.end,Point);   
     Intersection.setX(line.start.x() + U * ( line.end.x() - line.start.x() ));
     Intersection.setY(line.start.y() + U * ( line.end.y() - line.start.y() ));
-
     return Magnitude( Point, Intersection );
 }
 #endif

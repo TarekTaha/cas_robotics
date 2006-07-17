@@ -26,6 +26,7 @@ class Navigator : public Controller
 		Node * globalPath, *localPath;
 		int config(ConfigFile *cf, int sectionid);
 		void setPath(Node *path);
+		double NearestObstacle(QVector<QPointF> laser_scan,Pose pose);
 		Node * FindClosest(QPointF location,Node * all_path);	
         void stop();
         void run();
@@ -43,7 +44,7 @@ class Navigator : public Controller
 				minR,minL,minAhead,avoidance_distance_left,
 				avoidance_distance_right,avoidance_distance_ahead,speed,estimate_x,
 				estimate_y,estimate_theta,velocity,delta_t,last_time;
-		double robot_length, robot_width,pixel_res,dist_goal,
+		double robot_length, robot_width,pixel_res,dist_goal,local_dist,traversable_dist,
 			   bridge_len, bridge_res, reg_grid, obst_exp, conn_rad, obst_pen;
 		QString robot_model;
 		QPointF rotation_center;

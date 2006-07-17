@@ -72,7 +72,6 @@ int RobotManager::readNavigatorConfigs(ConfigFile *cf, int sectionid)
 {
 	navigator = new Navigator(this);
 	navigator->config( cf, sectionid);
-	//startNavigator();
 	return 1;
 }
 
