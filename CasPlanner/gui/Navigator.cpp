@@ -47,15 +47,16 @@ int Navigator::config( ConfigFile *cf, int sectionid)
 	robot_length = 	  cf->ReadFloat (sectionid, "robot_length", 1.2);
 	robot_width  = 	  cf->ReadFloat (sectionid, "robot_width", 0.65);
 	pixel_res    = 	  cf->ReadFloat (sectionid, "pixel_res", 0.05);
-	dist_goal    = 	  cf->ReadFloat (sectionid, "dist_goal", 0.2);
+	dist_goal    = 	  cf->ReadFloat (sectionid, "dist_goal", 0.6);
 	bridge_len   = 	  cf->ReadFloat (sectionid, "bridge_len", 2);
 	bridge_res   = 	  cf->ReadFloat (sectionid, "bridge_res", 0.1);
-	reg_grid     = 	  cf->ReadFloat (sectionid, "reg_grid", 0.3);
-	obst_exp     = 	  cf->ReadFloat (sectionid, "obst_exp", 0.2);
-	conn_rad     = 	  cf->ReadFloat (sectionid, "conn_rad", 0.5);
+	reg_grid     = 	  cf->ReadFloat (sectionid, "reg_grid", 0.2);
+	obst_exp     = 	  cf->ReadFloat (sectionid, "obst_exp", 0.1);
+	conn_rad     = 	  cf->ReadFloat (sectionid, "conn_rad", 0.4);
 	obst_pen     = 	  cf->ReadFloat (sectionid, "obst_pen", 3);
 	local_dist   = 	  cf->ReadFloat (sectionid, "local_dist", 2);	
-	traversable_dist= cf->ReadFloat (sectionid, "traversable_dist", 1.2);
+	traversable_dist= cf->ReadFloat (sectionid, "traversable_dist", 2);
+	linear_velocity = cf->ReadFloat (sectionid, "linear_velocity", 0.1);
 	robot_model  =    cf->ReadString(sectionid, "robot_mode", "diff");
 	rotation_center.setX(0);
 	rotation_center.setY(-0.3);
@@ -137,8 +138,9 @@ void Navigator::FollowPath()
 void Navigator::run()
 {
 	ControlAction cntrl;
-	QTime amcl_timer,delta_timer;
+	QTime amcl_timer,delta_timer,redraw_timer;
 	Pose loc;
+	int counter=0;
 	if(!local_planner)
 	{
 		setupLocalPlanner();
@@ -159,6 +161,7 @@ void Navigator::run()
 		return;		
 	}
 	path2Draw = SHOWGLOBALPATH;
+	redraw_timer.restart();
 	Pose initial_pos;
 	initial_pos.p.setX(global_path->pose.p.x());
 	initial_pos.p.setY(global_path->pose.p.y());	
@@ -188,11 +191,25 @@ void Navigator::run()
 		usleep(10000);
 		first = FindClosest(loc.p,path2Follow);
 		// Is it the last Segment ?
-		if (!first->next)
+		if (!first->next->next)
 		{
-			qDebug("--->>> Destination Reached !!!");
-			end_reached = true;
-			break;
+			if(Dist(first->next->pose.p,EstimatedPos.p)<=0.2)
+			{
+				if (local_planner->pathPlanner->path)
+				{
+					qDebug("--->>> Local Path Traversed !!!");					
+					local_planner->pathPlanner->FreePath();
+					path2Follow = global_path;
+					usleep(100000);
+					continue;
+				}
+				else
+				{
+					qDebug("--->>> Destination Reached !!!");
+		 			end_reached = true;
+					break;
+				}
+			}
 		}
 		last  = first->next;	ni = first->pose.p;
 		SegmentStart.setX(ni.x());	SegmentStart.setY(ni.y());
@@ -256,12 +273,8 @@ void Navigator::run()
 		double closest_obst =NearestObstacle(robotManager->commManager->getLaserScan(0),robotManager->commManager->getLocation());
 		qDebug("Closest Distance to Obstacles is:%f Saftey Dist:%f",closest_obst,sf);
 //		if(robotManager->commManager->getClosestObst() < sf)
-		if(closest_obst < sf)
+		if(closest_obst < sf && !local_planner->pathPlanner->path)
 		{
-			// Stop And Plan
-//			robotManager->commManager->setSpeed(0);
-//			robotManager->commManager->setTurnRate(0);			
-			
 			// local Planning Map Distance
 			double target_angle;
 		 	Pose start,target,loc, pixel_loc = robotManager->commManager->getLocation();
@@ -349,7 +362,6 @@ void Navigator::run()
 		 		}
 		 		qDebug("Local Path found");
 		 		path2Follow = local_path;
-//		 		sf = robotManager->commManager->getClosestObst() - 0.1;	 	
 		 	}
 		 	else
 		 	{
@@ -362,15 +374,22 @@ void Navigator::run()
 		}
 		else
 		{
-			path2Follow = global_path;
-	 		path2Draw = SHOWGLOBALPATH;
-		 	//emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);			
+			if(!local_planner->pathPlanner->path)
+			{
+				path2Follow = global_path;
+		 		path2Draw = SHOWGLOBALPATH;
+		 		if (redraw_timer.elapsed()>100)
+		 		{
+				 	emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);		
+				 	redraw_timer.restart();	
+		 		}
+			}
 		}
 		/* Get the control Action to be applied, in this case it's a
 		 * simple linear control. It's accurate enough for traversing 
 		 * the generated paths.
 		 */
-		cntrl = getAction(EstimatedPos.phi,angle,displacement,path2Follow->direction,0.2);
+		cntrl = getAction(EstimatedPos.phi,angle,displacement,path2Follow->direction,linear_velocity);
 		//qDebug("Control Action Linear:%f Angular:%f",path2Follow->direction*cntrl.linear_velocity,
 		//cntrl.angular_velocity);
 		/* Angular Velocity Thrusholded, just trying not to
