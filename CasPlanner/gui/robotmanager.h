@@ -27,6 +27,8 @@ class RobotManager : public QObject //: public CommManager, public PlanningManag
 		int startPlanner();
 		int startNavigator();
 		int startComms();
+		QString mapName;
+		double pixel_res;
 		NavContainer *navCon;
 		CommManager * commManager;
 		PlanningManager *planner;

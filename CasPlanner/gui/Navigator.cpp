@@ -82,15 +82,18 @@ double Navigator::NearestObstacle(QVector<QPointF> laser_scan,Pose pose)
 	double dist,shortest_dist=10000;
 	for(int i=0;i<4;i++)
 	{
-		temp[i] = Trans2Global(local_planner->pathPlanner->local_edge_points[i],pose);
+//		temp[i] = Trans2Global(local_planner->pathPlanner->local_edge_points[i],pose);
+		temp[i] = local_planner->pathPlanner->local_edge_points[i];
 	}
 	for(int i=0;i<laser_scan.size();i++)
 	{
+		//ray_end = Trans2Global(laser_scan[i],pose);
+		ray_end = laser_scan[i];
 		for(int j=0;j<4;j++)
 		{
-			ray_end = Trans2Global(laser_scan[i],pose);
 			L1.SetStart(temp[j%4]);      L1.SetEnd(temp[(j+1)%4]);
-			L2.SetStart(pose.p);         L2.SetEnd(ray_end);
+//			L2.SetStart(pose.p);         L2.SetEnd(ray_end);
+			L2.SetStart(QPointF(0,0));   L2.SetEnd(ray_end);
 			if(LineInterLine(L1,L2,intersection))
 			{
 				dist = Dist(intersection,ray_end);
@@ -140,7 +143,6 @@ void Navigator::run()
 	ControlAction cntrl;
 	QTime amcl_timer,delta_timer,redraw_timer;
 	Pose loc;
-	int counter=0;
 	if(!local_planner)
 	{
 		setupLocalPlanner();
@@ -190,6 +192,11 @@ void Navigator::run()
 		delta_timer.restart();
 		usleep(10000);
 		first = FindClosest(loc.p,path2Follow);
+		if(!first)
+		{
+			qDebug("Path Doesn't contain any segment to follow !!!");
+			break;
+		}
 		// Is it the last Segment ?
 		if (!first->next->next)
 		{
