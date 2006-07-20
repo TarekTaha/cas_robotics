@@ -324,7 +324,7 @@ bool Astar :: GoalReached (Node *n)
 	{
 		angle_diff =	anglediff(end.phi,n->pose.phi + M_PI);
 	}
-	if ( delta_d <= distGoal  && angle_diff <= DTOR(55))
+	if ( delta_d <= distGoal  && angle_diff <= DTOR(30))
 	{
 //		cout<<" \n Desired Final Orientation ="<<RTOD(end.phi)<<" Current="<<RTOD(n->pose.phi);
 //		cout<<"\n Reached Destination with Diff Orientation="<< RTOD(angle_diff);

@@ -7,6 +7,37 @@ Controller::Controller()
 Controller::~Controller()
 {
 }
+//Model2DRigidDiff(string path = ""):Model2DRigid(path) {
+//  double alpha;
+//
+//  StateDim = 3;
+//  InputDim = 2;
+//
+//  MaxSteeringAngle = PI/12.0;
+//  MaxSteeringAngle = PI/2.0;
+//  CarLength = 2.0;
+//
+//   Make the list of Inputs
+//  Inputs.clear();  // Otherwise its parent constructor will make some inputs
+//  for (alpha = -MaxSteeringAngle; alpha <= MaxSteeringAngle; 
+//       alpha += 2.0*MaxSteeringAngle/6.0) {
+//    Inputs.push_back(MSLVector(1.0,alpha)); 
+//    Inputs.push_back(MSLVector(-1.0,alpha)); 
+//  }
+//
+//  READ_OPTIONAL_PARAMETER(Inputs);
+//
+//}
+//
+//
+//Model2DRigidDiff::StateTransitionEquation(const MSLVector &x, const MSLVector &u) {
+//
+//  MSLVector dx(3);
+//  dx[0] = u[0]*cos(x[2]);
+//  dx[1] = u[0]*sin(x[2]);
+//  dx[2] = u[0]*tan(u[1])/CarLength;
+//  return dx;
+//}
 
 ControlAction Controller::getAction(double angle_current,double angle_ref,double displacement,int direction,double speed)
 {

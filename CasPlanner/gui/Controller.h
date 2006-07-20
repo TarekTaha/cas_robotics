@@ -13,7 +13,7 @@ typedef struct _control_action
 class Controller: public QThread 
 {
 	public:
-		double k_dist,k_theta,safety_dist,tracking_dist;
+		double k_dist,k_theta,safety_dist,tracking_dist,linear_velocity;
 		ControlAction getAction(double angle_current,double angle_ref,double displacement,int direction,double speed);
 		Controller();
 		~Controller();
