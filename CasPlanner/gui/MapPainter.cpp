@@ -1,7 +1,8 @@
 #include "MapPainter.h"
 
-MapPainter::MapPainter(QWidget *parent): 
+MapPainter::MapPainter(QWidget *parent,QString name): 
 	QWidget(parent),
+	mapName(name),
 	step(1),
 	path2Draw(SHOWGLOBALPATH),
 	local_planner(NULL),
@@ -12,12 +13,17 @@ MapPainter::MapPainter(QWidget *parent):
 	drawTreeEnabled(false)
 {
 	
-	if(!image.load("/home/BlackCoder/workspace/CasPlanner/resources/casareaicp.png", 0))
+//	if(!image.load("/home/BlackCoder/workspace/CasPlanner/resources/casareaicp.png", 0))
+	if(!image.load(mapName, 0))
 	{
-		qWarning("Error Loading Image");
+		qDebug("Error Loading Image: %s",qPrintable(mapName));
 		exit(1);
 	}
 	image.setColor(0, Qt::white);
+}
+void  MapPainter::SetMapFileName(QString name)
+{
+	this->mapName = name;	
 }
 
 Pose MapPainter::getStart()

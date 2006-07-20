@@ -3,13 +3,15 @@
 
 NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
  : QWidget(parent),
-   mapPainter(this),
    path(0),
    robotManager(rob),   
    navControlPanel(this,rob)
 {
     QVBoxLayout *vLayout = new QVBoxLayout; 
-    vLayout->addWidget(&mapPainter,4); 
+    mapPainter = new MapPainter(this,robotManager->mapName);
+//    mapPainter.SetMapFileName(robotManager->mapName);
+	qDebug(" 1- Image: %s",qPrintable(robotManager->mapName));			  	    
+    vLayout->addWidget(mapPainter,4); 
     vLayout->addWidget(&navControlPanel,1); 
     setLayout(vLayout); 
   
@@ -49,22 +51,22 @@ NavContainer::~NavContainer()
 
 void NavContainer::Plan()
 {
-	robotManager->planner->SetMap(mapPainter.getImage());
-	path = robotManager->planner->FindPath(mapPainter.getStart(),mapPainter.getEnd());
-	mapPainter.drawPath(robotManager->planner->pathPlanner);
+	robotManager->planner->SetMap(mapPainter->getImage());
+	path = robotManager->planner->FindPath(mapPainter->getStart(),mapPainter->getEnd());
+	mapPainter->drawPath(robotManager->planner->pathPlanner);
 }
 
 void NavContainer::GenerateSpace()
 {
-	robotManager->planner->SetMap(mapPainter.getImage());
+	robotManager->planner->SetMap(mapPainter->getImage());
 	robotManager->planner->GenerateSpace();
-	mapPainter.drawPath(robotManager->planner->pathPlanner);
+	mapPainter->drawPath(robotManager->planner->pathPlanner);
 }
 
 void NavContainer::LoadMap()
 {
-	robotManager->planner->SetMap(mapPainter.getImage());
-	mapPainter.drawPath(robotManager->planner->pathPlanner);
+	robotManager->planner->SetMap(mapPainter->getImage());
+	mapPainter->drawPath(robotManager->planner->pathPlanner);
 }
 
 NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
@@ -271,7 +273,7 @@ void NavControlPanel::captureMap()
     if(ok)
     {
 		//QImage capturedMap = ((NavContainer *) parent())->mapViewer.captureMap();
-		//QImage capturedMap = ((NavContainer *) parent())->mapPainter.captureMap();
+		//QImage capturedMap = ((NavContainer *) parent())->mapPainter->captureMap();
 		//mapManager->addMapSnapshot(capturedMap, comment); 
     }
 }

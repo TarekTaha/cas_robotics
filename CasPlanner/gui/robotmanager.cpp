@@ -47,9 +47,11 @@ RobotManager::RobotManager(QStringList configFiles)
 		    {
 				readPlannerConfigs(cf, i); 
 		    }
-		    if(sectionName == "MapManager")
+		    if(sectionName == "Map")
 		    {
-				//readMapManagerConfigs(cf, i); 
+			  	pixel_res =  cf->ReadFloat (i,"pixel_res",0.05);
+			  	mapName   =  cf->ReadString(i,"mapname","resources\\cas.png");
+//				qDebug("Image: %s",qPrintable(mapName));			  	
 		    }
 		}
     }
@@ -112,8 +114,8 @@ int RobotManager::startNavigator()
 void RobotManager::rePaint(PathPlanner *pl,Pose * ps,int *draw)
 {
 	this->local_planner = pl;
-	navCon->mapPainter.setPathEnabled(1);
-	navCon->mapPainter.drawPath(local_planner,*ps,draw);
+	navCon->mapPainter->setPathEnabled(1);
+	navCon->mapPainter->drawPath(local_planner,*ps,draw);
 }
 
 

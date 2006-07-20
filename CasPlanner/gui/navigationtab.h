@@ -76,7 +76,7 @@ Q_OBJECT
     public:
 		NavContainer(QWidget *parent = 0,RobotManager *robotManager=0);
 		~NavContainer();
-		MapPainter mapPainter;
+		MapPainter * mapPainter;
 	public slots:
 		void Plan();
 		void LoadMap(); 
