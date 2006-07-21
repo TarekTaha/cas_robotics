@@ -51,8 +51,8 @@ ControlAction Controller::getAction(double angle_current,double angle_ref,double
 	cntrl.angular_velocity = (-k_dist*speed*displacement - k_theta*speed*orientation_error);
 	if (Abs(orientation_error)>DTOR(15))
 	{
-		cntrl.linear_velocity = 0;
-		//cntrl.angular_velocity *=2;
+		cntrl.linear_velocity  = 0;
+		cntrl.angular_velocity *= 4;
 	}
 	else
 		cntrl.linear_velocity = speed;

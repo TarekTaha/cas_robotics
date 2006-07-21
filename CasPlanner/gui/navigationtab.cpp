@@ -10,7 +10,6 @@ NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
     QVBoxLayout *vLayout = new QVBoxLayout; 
     mapPainter = new MapPainter(this,robotManager->mapName);
 //    mapPainter.SetMapFileName(robotManager->mapName);
-	qDebug(" 1- Image: %s",qPrintable(robotManager->mapName));			  	    
     vLayout->addWidget(mapPainter,4); 
     vLayout->addWidget(&navControlPanel,1); 
     setLayout(vLayout); 
@@ -51,7 +50,8 @@ NavContainer::~NavContainer()
 
 void NavContainer::Plan()
 {
-	robotManager->planner->SetMap(mapPainter->getImage());
+	if(!robotManager->planner->pathPlanner->map)
+		robotManager->planner->SetMap(mapPainter->getImage());
 	path = robotManager->planner->FindPath(mapPainter->getStart(),mapPainter->getEnd());
 	mapPainter->drawPath(robotManager->planner->pathPlanner);
 }
