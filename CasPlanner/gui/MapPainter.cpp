@@ -117,20 +117,21 @@ void MapPainter::paintEvent(QPaintEvent *)
 			paint.setPen(Qt::white);
 			if(local_planner->path)
 			{
-					paint.setPen(Qt::yellow);
-					QPointF E,S;
-				  	Node *p;
-				  	p = local_planner->path;
-					while(p != NULL && p->next!=NULL)
-					{
-						S = p->pose.p;
-						E = p->next->pose.p;
-						global_planner->ConvertToPixel(&S);
-						global_planner->ConvertToPixel(&E);						
-						paint.drawLine(S,E);
-						p = p->next;
-					}
+				paint.setPen(Qt::yellow);
+				QPointF E,S;
+			  	Node *p;
+			  	p = local_planner->path;
+				while(p != NULL && p->next!=NULL)
+				{
+					S = p->pose.p;
+					E = p->next->pose.p;
+					global_planner->ConvertToPixel(&S);
+					global_planner->ConvertToPixel(&E);						
+					paint.drawLine(S,E);
+					p = p->next;
+				}
 			}
+			
 			// Draw Local Search Space
 			paint.setPen(Qt::green);
 			if(local_planner->search_space)
@@ -147,6 +148,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 					temp = temp->next;
 				}
 			}
+			
 			// Draw the expanded Local Map
 			paint.setPen(Qt::blue);
 			for(int i=0;i<local_planner->map->width;i++)
@@ -174,6 +176,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 						paint.drawPoint(i,j);
 					}
 				}
+			
 			// Draw Global Search Space
 			paint.setPen(Qt::red);
 			if(global_planner->search_space)
@@ -190,6 +193,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 					temp = temp->next;
 				}
 			}
+			
 			// Draw Global Path if it exists
 			paint.setPen(Qt::yellow);
 			if(global_planner->path)
@@ -209,6 +213,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 						p = p->next;
 					}
 			}
+			
 			// Draw Tree if requested
 			paint.setPen(Qt::white);
 			if(drawTreeEnabled)

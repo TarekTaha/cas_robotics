@@ -8,7 +8,7 @@ class Comms: public QObject
 {
     Q_OBJECT 
     public:
-        virtual int config(ConfigFile *cf, int sectionid)=0;
+        virtual int readConfigs(ConfigFile *cf)=0;
         virtual int start()=0;
         virtual int stop()=0;
         bool connected,localized;

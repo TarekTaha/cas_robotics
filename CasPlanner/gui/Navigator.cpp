@@ -36,30 +36,42 @@ void Navigator::setupLocalPlanner()
 	}
 }
 
-int Navigator::config( ConfigFile *cf, int sectionid)
+int Navigator::readConfigs( ConfigFile *cf)
 {
-   	obst_avoid    =   cf->ReadString(sectionid, "obst_avoid", "non");
- 	k_dist        =   cf->ReadFloat (sectionid, "k_dist", 1.8);
-  	k_theta       =   cf->ReadFloat (sectionid, "k_theta", 2.5);
-  	safety_dist   =   cf->ReadFloat (sectionid, "safety_dist", 0.5);
-  	tracking_dist =   cf->ReadFloat (sectionid, "tracking_dist", 0);
-	
-	robot_length = 	  cf->ReadFloat (sectionid, "robot_length", 1.2);
-	robot_width  = 	  cf->ReadFloat (sectionid, "robot_width", 0.65);
-	pixel_res    = 	  cf->ReadFloat (sectionid, "pixel_res", 0.05);
-	dist_goal    = 	  cf->ReadFloat (sectionid, "dist_goal", 0.6);
-	bridge_len   = 	  cf->ReadFloat (sectionid, "bridge_len", 2);
-	bridge_res   = 	  cf->ReadFloat (sectionid, "bridge_res", 0.1);
-	reg_grid     = 	  cf->ReadFloat (sectionid, "reg_grid", 0.2);
-	obst_exp     = 	  cf->ReadFloat (sectionid, "obst_exp", 0.1);
-	conn_rad     = 	  cf->ReadFloat (sectionid, "conn_rad", 0.6);
-	obst_pen     = 	  cf->ReadFloat (sectionid, "obst_pen", 3);
-	local_dist   = 	  cf->ReadFloat (sectionid, "local_dist", 2);	
-	traversable_dist= cf->ReadFloat (sectionid, "traversable_dist", 2);
-	linear_velocity = cf->ReadFloat (sectionid, "linear_velocity", 0.1);
-	robot_model  =    cf->ReadString(sectionid, "robot_mode", "diff");
-	rotation_center.setX(0);
-	rotation_center.setY(-0.3);
+	int numSec; 
+	numSec = cf->GetSectionCount(); 
+	for(int i=0; i < numSec; i++)
+	{
+	    QString sectionName = cf->GetSectionType(i);
+	    if(sectionName == "Navigator")
+	    {
+		   	obst_avoid    =   cf->ReadString(i, "obst_avoid", "non");
+		 	k_dist        =   cf->ReadFloat (i, "k_dist", 1.8);
+		  	k_theta       =   cf->ReadFloat (i, "k_theta", 2.5);
+		  	safety_dist   =   cf->ReadFloat (i, "safety_dist", 0.5);
+		  	tracking_dist =   cf->ReadFloat (i, "tracking_dist", 0);
+			
+			pixel_res    = 	  cf->ReadFloat (i, "pixel_res", 0.05);
+			dist_goal    = 	  cf->ReadFloat (i, "dist_goal", 0.6);
+			bridge_len   = 	  cf->ReadFloat (i, "bridge_len", 2);
+			bridge_res   = 	  cf->ReadFloat (i, "bridge_res", 0.1);
+			reg_grid     = 	  cf->ReadFloat (i, "reg_grid", 0.2);
+			obst_exp     = 	  cf->ReadFloat (i, "obst_exp", 0.1);
+			conn_rad     = 	  cf->ReadFloat (i, "conn_rad", 0.6);
+			obst_pen     = 	  cf->ReadFloat (i, "obst_pen", 3);
+			local_dist   = 	  cf->ReadFloat (i, "local_dist", 2);	
+			traversable_dist= cf->ReadFloat (i, "traversable_dist", 2);
+			linear_velocity = cf->ReadFloat (i, "linear_velocity", 0.1);
+			robot_model  =    cf->ReadString(i, "robot_mode", "diff");
+	    }
+	    if(sectionName == "Robot")
+	    {
+			robot_length = 	  cf->ReadFloat (i, "robot_length", 1.2);
+			robot_width  = 	  cf->ReadFloat (i, "robot_width", 0.65);
+			rotation_center.setX(0);
+			rotation_center.setY(-0.3);
+	    }
+	}
 
     qDebug("-> Starting Robot Navigator."); 
     qDebug("*********************************************************************"); 	

@@ -14,7 +14,7 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
         public:
             CommManager();
             ~CommManager(); 
-            virtual int config(ConfigFile *cf, int sectionid);
+            virtual int readConfigs(ConfigFile *cf);
             virtual int start(); 
             virtual int stop();
             virtual QVector<QPointF> getLaserScan(int laserId);

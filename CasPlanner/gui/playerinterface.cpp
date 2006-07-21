@@ -60,7 +60,7 @@ double PlayerInterface::getTurnRate()
     dataLock.lockForRead();
     double retval = getturnrate; 
     dataLock.unlock(); 
-    return retval; 
+    return retval;
 }
 
 bool PlayerInterface::getLocalized()
@@ -88,6 +88,7 @@ Pose PlayerInterface::getLocation()
     dataLock.unlock(); 
     return retval; 	
 }
+
 void PlayerInterface::stop()
 {
     // Do nothing.  
@@ -106,6 +107,7 @@ void PlayerInterface::setSpeed(double i_speed, double i_turnRate)
     turnRate = i_turnRate;
     dataLock.unlock(); 
 }
+
 void PlayerInterface::setLocation(Pose location)
 {
 	pose[0]= location.p.x();
@@ -131,6 +133,7 @@ void PlayerInterface::setLocation(Pose location)
 		this->location.phi = location.phi;
 	}
 }
+
 void PlayerInterface::enableControl(int posId)
 {
     ctrEnabled = true;
@@ -201,6 +204,7 @@ QVector<QPointF> PlayerInterface::getLaserScan(int Laser_id)
         return QVector<QPointF>(0);
     }
 }
+
 Map PlayerInterface::provideMap()
 {
 	Map retval;
@@ -253,7 +257,7 @@ void PlayerInterface::run ()
     {
 		if(drive)
 		{
-		    delete drive;  
+		    delete drive;
 		}
         drive = new PositionProxy(pc,positionId,'a');
    		qDebug("\t\t - Motor Control Interface Engaged Successfully"); 
@@ -295,8 +299,8 @@ void PlayerInterface::run ()
     {
         while(pc->Read())
         {
-            qWarning("	--->>> Can not read from Player Server - Retrying <<<---"); 
-	    	sleep(1); 
+            qWarning("	--->>> Can not read from Player Server - Retrying <<<---");
+	    	sleep(1);
         }
     	if(!emergencyStopped)
     	{
@@ -310,7 +314,7 @@ void PlayerInterface::run ()
 	        }
 			if(ptzEnabled)
 			{
-		    	ptz->SetCam(pan,tilt, 1);  
+		    	ptz->SetCam(pan,tilt, 1);
 			}
 			if(mapEnabled)
 			{
@@ -319,19 +323,18 @@ void PlayerInterface::run ()
 			    //qDebug("Map width %d, height %d resolution %f",map->width,map->height,map->resolution);
 			}
     	}
-	    else 
+	    else
 	    {
 	        qDebug("	--->>> Stopping Robot NOW <<<---");
-	        if(ctrEnabled)
-	       {
-	            drive->SetSpeed(0,0); 
+			if(ctrEnabled)
+	       	{
+	        	drive->SetSpeed(0,0);
 	            drive->SetMotorState(0);
-	        } 
+	        }
 	        qDebug("	--->>> Robot Stopped <<<---");
 	        // temporary fix, needs more thinking once i finalize things
 	        emergencyStopped = false;
 	    }
     	emit newData();
     }
-    
 }

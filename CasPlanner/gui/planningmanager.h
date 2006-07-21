@@ -20,7 +20,7 @@ class PlanningManager : public MapManager
             PlanningManager(double,double,QString,QPointF,double,double,double,double,double,double,double,double);
             ~PlanningManager();
             void setRobotManager(RobotManager *);
-            virtual int config(ConfigFile *cf, int sectionid);
+            virtual int readConfigs(ConfigFile *cf);
             virtual int start(); 
             virtual int stop();
            	PathPlanner * pathPlanner;

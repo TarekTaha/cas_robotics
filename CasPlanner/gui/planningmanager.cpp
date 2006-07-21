@@ -192,21 +192,36 @@ Node * PlanningManager::FindPath(Pose start,Pose end)
 	return retval;
 }
 
-int PlanningManager::config( ConfigFile *cf, int sectionid)
+int PlanningManager::readConfigs( ConfigFile *cf)
 {
-   	pixel_res =  			cf->ReadFloat(sectionid, "pixel_res",0.05);
-   	bridge_len =			cf->ReadFloat(sectionid, "bridge_len",2);
-   	bridge_res = 			cf->ReadFloat(sectionid, "bridge_res",0.5);
-   	reg_grid =				cf->ReadFloat(sectionid, "reg_grid",0.5);
-   	obst_exp = 				cf->ReadFloat(sectionid, "obst_exp",0.2);
-   	conn_rad =				cf->ReadFloat(sectionid, "conn_rad",0.8);
-   	obst_pen = 				cf->ReadFloat(sectionid, "obst_pen",3);
-   	dist_goal = 			cf->ReadFloat(sectionid, "dist_goal",0.2);   	
-   	robot_length = 			cf->ReadFloat(sectionid, "robot_length",1.2);
-   	robot_width  = 			cf->ReadFloat(sectionid, "robot_width",0.65);
-   	robot_model  = 			cf->ReadString(sectionid, "robot_mode","diff");
-	rotation_center.setX(cf->ReadFloat(sectionid, "rotation_x",-0.3));
-	rotation_center.setY(cf->ReadFloat(sectionid, "rotation_y",0));
+	int numSec; 
+	numSec = cf->GetSectionCount(); 
+	for(int i=0; i < numSec; i++)
+	{
+	    QString sectionName = cf->GetSectionType(i);
+	    if(sectionName == "Planner")
+	    {
+		   	bridge_len =			cf->ReadFloat(i, "bridge_len",2);
+		   	bridge_res = 			cf->ReadFloat(i, "bridge_res",0.5);
+		   	reg_grid =				cf->ReadFloat(i, "reg_grid",0.5);
+		   	obst_exp = 				cf->ReadFloat(i, "obst_exp",0.2);
+		   	conn_rad =				cf->ReadFloat(i, "conn_rad",0.8);
+		   	obst_pen = 				cf->ReadFloat(i, "obst_pen",3);
+		   	dist_goal = 			cf->ReadFloat(i, "dist_goal",0.2);   	
+		   	robot_length = 			cf->ReadFloat(i, "robot_length",1.2);
+		   	robot_width  = 			cf->ReadFloat(i, "robot_width",0.65);
+		   	robot_model  = 			cf->ReadString(i, "robot_mode","diff");
+	    }
+	    if(sectionName == "Robot")
+	    {
+			rotation_center.setX(cf->ReadFloat(i, "rotation_x",-0.3));
+			rotation_center.setY(cf->ReadFloat(i, "rotation_y",0));
+	    }
+	    if(sectionName == "Map")
+	    {
+		   	pixel_res =  			cf->ReadFloat(i, "pixel_res",0.05);	    	
+	    }	    
+	}
   	return 1;
 }
 
