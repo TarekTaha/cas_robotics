@@ -37,21 +37,21 @@ RobotManager::RobotManager(QStringList configFiles)
 		    }
 		    if(sectionName == "Navigator")
 		    {
-				readNavigatorConfigs(cf,i);
+				readNavigatorConfigs(cf);
 		    }
 		    if(sectionName == "Robot")
 		    {
-				readCommManagerConfigs(cf, i); 
+				readCommManagerConfigs(cf); 
 		    }
 		    if(sectionName == "Planner")
 		    {
-				readPlannerConfigs(cf, i); 
+				readPlannerConfigs(cf); 
 		    }
 		    if(sectionName == "Map")
 		    {
-			  	pixel_res =  cf->ReadFloat (i,"pixel_res",0.05);
-			  	mapName   =  cf->ReadString(i,"mapname","resources\\cas.png");
-		    }
+				mapName = cf->ReadString(i, "mapname", "resources//casareaicp.png");
+			   	qDebug("\t\t MAP  name:\t%s", qPrintable(mapName)); 				
+		    }		    
 		}
     }
 }
@@ -62,25 +62,24 @@ int RobotManager::setNavContainer(NavContainer* con)
 	return 1;
 }	
         
-int RobotManager::readCommManagerConfigs(ConfigFile *cf, int sectionid)
+int RobotManager::readCommManagerConfigs(ConfigFile *cf)
 {
 	commManager = new CommManager;
-	commManager->config( cf, sectionid);
+	commManager->readConfigs(cf);
     return 1;
 }
 
-int RobotManager::readNavigatorConfigs(ConfigFile *cf, int sectionid)
+int RobotManager::readNavigatorConfigs(ConfigFile *cf)
 {
 	navigator = new Navigator(this);
-	navigator->config( cf, sectionid);
+	navigator->readConfigs(cf);
 	return 1;
 }
 
-int RobotManager::readPlannerConfigs(ConfigFile *cf, int sectionid)
+int RobotManager::readPlannerConfigs(ConfigFile *cf)
 {
 	planner = new PlanningManager;
-	planner->config( cf, sectionid);
-	startPlanner();
+	planner->readConfigs(cf);
     return 1;
 }
 
@@ -106,7 +105,7 @@ int RobotManager::startPlanner()
 
 int RobotManager::startNavigator()
 {
-    //navigator->start();
+    navigator->start();
     return 1;
 }
 

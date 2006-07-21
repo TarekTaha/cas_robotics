@@ -96,27 +96,40 @@ QVector<QPointF> CommManager::getLaserScan(int laserId)
   	return player->getLaserScan(laserId);
 }
 
-int CommManager::config( ConfigFile *cf, int sectionid)
+int CommManager::readConfigs( ConfigFile *cf)
 {
-   	name =                   cf->ReadString(sectionid, "name", "No-Name");
-   	startConnected =  (bool) cf->ReadInt   (sectionid, "startConnected", 1);
-  	activateControl = (bool) cf->ReadInt   (sectionid, "activateControl", 1);
-  	positionControlId =      cf->ReadInt   (sectionid, "positionControlId", 0);
-  	laserEnabled =           cf->ReadInt   (sectionid, "laserEnabled", 1);
-  	laserId =                cf->ReadInt   (sectionid, "laserId", 0);
-	playerIp =               cf->ReadString(sectionid, "playerIp", "127.0.0.1");
-	playerPort =             cf->ReadInt   (sectionid, "playerPort", 6665);
-	occMapEnabled =   (bool) cf->ReadInt   (sectionid, "occMapEnabled", 1);
-    localizerEnabled =(bool) cf->ReadInt   (sectionid, "localizerEnabled", 1);
-  	mapId =                  cf->ReadInt   (sectionid, "mapId", 0);
-  	localizerId =            cf->ReadInt   (sectionid, "localizerId", 0);  	
-  	qDebug("Start Connected is %d",startConnected);
-  	if(startConnected)
+	int numSec; 
+	numSec = cf->GetSectionCount(); 
+	for(int i=0; i < numSec; i++)
 	{
-		this->start();
-	}
+	    QString sectionName = cf->GetSectionType(i);
+	    if(sectionName == "Robot")
+	    {
+		   	name =                   cf->ReadString(i, "name", "No-Name");
+		   	startConnected =  (bool) cf->ReadInt   (i, "startConnected", 1);
+		  	activateControl = (bool) cf->ReadInt   (i, "activateControl", 1);
+		  	positionControlId =      cf->ReadInt   (i, "positionControlId", 0);
+		  	laserEnabled =           cf->ReadInt   (i, "laserEnabled", 1);
+		  	laserId =                cf->ReadInt   (i, "laserId", 0);
+			playerIp =               cf->ReadString(i, "playerIp", "127.0.0.1");
+			playerPort =             cf->ReadInt   (i, "playerPort", 6665);
+			occMapEnabled =   (bool) cf->ReadInt   (i, "occMapEnabled", 1);
+		    localizerEnabled =(bool) cf->ReadInt   (i, "localizerEnabled", 1);
+		  	mapId =                  cf->ReadInt   (i, "mapId", 0);
+		  	localizerId =            cf->ReadInt   (i, "localizerId", 0);  	
+		  	qDebug("Start Connected is %d",startConnected);
+		  	if(startConnected)
+			{
+				this->start();
+			}
+	    }
+	    if(sectionName == "Planner")
+	    {
+	    }
+	}	
   	return 1;
 }
+
 int CommManager::start()
 {
     qDebug("-> Starting Communication Manager."); 

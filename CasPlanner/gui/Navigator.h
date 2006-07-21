@@ -24,7 +24,7 @@ class Navigator : public Controller
 		~Navigator();	
 		QString obst_avoid;
 		Node * globalPath, *localPath;
-		int config(ConfigFile *cf, int sectionid);
+		int readConfigs(ConfigFile *cf);
 		void setPath(Node *path);
 		double NearestObstacle(QVector<QPointF> laser_scan,Pose pose);
 		Node * FindClosest(QPointF location,Node * all_path);	

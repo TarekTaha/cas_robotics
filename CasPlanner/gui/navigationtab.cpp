@@ -9,7 +9,6 @@ NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
 {
     QVBoxLayout *vLayout = new QVBoxLayout; 
     mapPainter = new MapPainter(this,robotManager->mapName);
-//    mapPainter.SetMapFileName(robotManager->mapName);
     vLayout->addWidget(mapPainter,4); 
     vLayout->addWidget(&navControlPanel,1); 
     setLayout(vLayout); 

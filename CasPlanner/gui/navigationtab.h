@@ -12,6 +12,7 @@
 #include "MapPainter.h"
 #include "robotmanager.h"
 #include "Node.h"
+#include "configfile.h"
 
 class RobotManager;
 

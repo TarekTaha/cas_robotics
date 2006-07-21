@@ -83,7 +83,7 @@ void   PathPlanner ::setObstDist(double a)
 }
 
 // Nifty way of doing an obstacle expansion, not finalized, ----->>>>> @ TO DO @ <<<<<------
-void PathPlanner::ExpandObstacles() 
+void PathPlanner::ExpandObstacles()
 {
 	if(!map_initialized)
 	{
@@ -104,8 +104,6 @@ void PathPlanner::ExpandObstacles()
 	for(int i=0;i<this->map->width - 1;i++)
 		for(int j=0;j<this->map->height - 1 ;j++)
 		{
-//			if(map->data[i][j])
-//				qDebug("i:%d j:%d Count:%d",i,j,++count);
 			for(x = (i - radius) ; x <= (i + radius) ; x ++)
 			{
 				if (x < 0) x = 0;
@@ -399,7 +397,7 @@ void PathPlanner::ShowConnections()
 	int m=0,n=0;
 	while (temp != NULL)
 	{
-		for (unsigned int i=0; i < temp->children.size();i++)
+		for(unsigned int i=0; i < temp->children.size();i++)
 		{
 			loc1 = temp->location;
 			ConvertToPixel(&loc1);
@@ -429,9 +427,9 @@ void PathPlanner::SaveSearchSpace()
 
 void PathPlanner :: SetMap(Map * map_in)
 {
-	if(!map_in)	
+	if(!map_in)
 		qDebug("Why the hell ur giving me an empty map ???");
-	if(!map_in->data)	
+	if(!map_in->data)
 		qDebug("Why the hell ur giving me an empty map data ???");
 	if(this->map)
 		delete map;
