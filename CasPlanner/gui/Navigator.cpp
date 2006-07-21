@@ -52,7 +52,7 @@ int Navigator::config( ConfigFile *cf, int sectionid)
 	bridge_res   = 	  cf->ReadFloat (sectionid, "bridge_res", 0.1);
 	reg_grid     = 	  cf->ReadFloat (sectionid, "reg_grid", 0.2);
 	obst_exp     = 	  cf->ReadFloat (sectionid, "obst_exp", 0.1);
-	conn_rad     = 	  cf->ReadFloat (sectionid, "conn_rad", 0.4);
+	conn_rad     = 	  cf->ReadFloat (sectionid, "conn_rad", 0.6);
 	obst_pen     = 	  cf->ReadFloat (sectionid, "obst_pen", 3);
 	local_dist   = 	  cf->ReadFloat (sectionid, "local_dist", 2);	
 	traversable_dist= cf->ReadFloat (sectionid, "traversable_dist", 2);
@@ -137,7 +137,10 @@ void Navigator::FollowPath()
 {
 	return;
 }
-
+void Navigator::StopNavigating()
+{
+	this->stop_navigating = true;
+}
 void Navigator::run()
 {
 	ControlAction cntrl;
@@ -185,8 +188,9 @@ void Navigator::run()
 	// Reset Times
 	last_time=0; delta_t=0;	velocity=0;
 	end_reached = false;
+	stop_navigating = false;
 	double sf = safety_dist;
-	while(!end_reached)
+	while(!end_reached && !stop_navigating)
 	{
 		delta_t = delta_timer.elapsed()/1e3;
 		delta_timer.restart();
@@ -282,6 +286,10 @@ void Navigator::run()
 //		if(robotManager->commManager->getClosestObst() < sf)
 		if(closest_obst < sf && !local_planner->pathPlanner->path)
 		{
+			//Stop the Robot before planning
+			robotManager->commManager->setSpeed(0);
+			robotManager->commManager->setTurnRate(0);
+			
 			// local Planning Map Distance
 			double target_angle;
 		 	Pose start,target,loc, pixel_loc = robotManager->commManager->getLocation();
@@ -416,6 +424,7 @@ void Navigator::run()
 	}
 	robotManager->commManager->setSpeed(0);
 	robotManager->commManager->setTurnRate(0);
+	local_planner->pathPlanner->FreeResources();
 	return;
 }
 

@@ -12,8 +12,6 @@ MapPainter::MapPainter(QWidget *parent,QString name):
 	drawPathEnabled(false),
 	drawTreeEnabled(false)
 {
-	
-//	if(!image.load("/home/BlackCoder/workspace/CasPlanner/resources/casareaicp.png", 0))
 	if(!image.load(mapName, 0))
 	{
 		qDebug("Error Loading Image: %s",qPrintable(mapName));
@@ -85,17 +83,28 @@ void MapPainter::paintEvent(QPaintEvent *)
 	if(drawPathEnabled)
 	{
 		SearchSpaceNode * temp;
+		// Draw Start and End Locations
+		if(start_initialized)
+		{
+			paint.drawArc(int(start.p.x()-5),int(start.p.y()-5),10,10,0,5760);
+			paint.drawPie(int(start.p.x()-5),int(start.p.y()-5),10,10,(RTOD(start.phi)-10)*16,(RTOD(start.phi)+10)*16);
+		}
+		if(end_initialized)
+		{
+			paint.drawArc(int(end.p.x()-5),int(end.p.y()-5),10,10,0,5760);
+			paint.drawPie(int(end.p.x()-5),int(end.p.y()-5),10,10,(RTOD(end.phi)-10)*16,(RTOD(end.phi)+10)*16);		
+		}
 		if(local_planner && path2Draw == SHOWLOCALPATH)
 		{
 			Pose	relative_p;
 			QPointF start,end;
 			double res = local_planner->map->resolution;
 			
-			start = this->local_planner->start.p; 
+			start = this->local_planner->start.p;
 			local_planner->ConvertToPixel(&start);
-			end   = this->local_planner->end.p;   
+			end   = this->local_planner->end.p;
 			local_planner->ConvertToPixel(&end);
-	
+
 //			qDebug("Start X:%f Y:%f End X:%f Y:%f",start.x(),start.y(),end.x(),end.y());
 			relative_p.p.setX( (( pose.p.x() + res*image.width() /2)/res) - local_planner->map->center.x() );
 			relative_p.p.setY( ((-pose.p.y() + res*image.height()/2)/res) - local_planner->map->center.y() );		
@@ -120,19 +129,8 @@ void MapPainter::paintEvent(QPaintEvent *)
 						global_planner->ConvertToPixel(&E);						
 						paint.drawLine(S,E);
 						p = p->next;
-					} 
-			}			
-				
-			// Draw the expanded Local Map
-			paint.setPen(Qt::blue);
-			for(int i=0;i<local_planner->map->width;i++)
-				for(int j=0;j<local_planner->map->height;j++)
-				{
-					if(local_planner->map->data[i][j] == true)
-					{
-						paint.drawPoint(int(i + relative_p.p.x()),int(j + relative_p.p.y()));
 					}
-				}
+			}
 			// Draw Local Search Space
 			paint.setPen(Qt::green);
 			if(local_planner->search_space)
@@ -147,27 +145,25 @@ void MapPainter::paintEvent(QPaintEvent *)
 					//qDebug("Pixel X:%f Y:%f",p.x(),p.y());
 					paint.drawPoint(p);
 					temp = temp->next;
-				}		
+				}
 			}
-			paint.setBrush(Qt::green);				
+			// Draw the expanded Local Map
+			paint.setPen(Qt::blue);
+			for(int i=0;i<local_planner->map->width;i++)
+				for(int j=0;j<local_planner->map->height;j++)
+				{
+					if(local_planner->map->data[i][j] == true)
+					{
+						paint.drawPoint(int(i + relative_p.p.x()),int(j + relative_p.p.y()));
+					}
+				}
+			paint.setBrush(Qt::green);
 			paint.drawPie(int(start.x()),int(start.y()),5,5,0,5760);
 			paint.setBrush(Qt::red);
 			paint.drawPie(int(end.x()),  int(end.y()),5,5,0,5760);
 		}
 		if(global_planner && path2Draw == SHOWGLOBALPATH)
 		{
-			// Draw Start and End Locations
-			if(start_initialized)
-			{
-				paint.drawArc(int(start.p.x()-5),int(start.p.y()-5),10,10,0,5760);
-				paint.drawPie(int(start.p.x()-5),int(start.p.y()-5),10,10,(RTOD(start.phi)-10)*16,(RTOD(start.phi)+10)*16);
-			}
-			if(end_initialized)
-			{
-				paint.drawArc(int(end.p.x()-5),int(end.p.y()-5),10,10,0,5760);
-				paint.drawPie(int(end.p.x()-5),int(end.p.y()-5),10,10,(RTOD(end.phi)-10)*16,(RTOD(end.phi)+10)*16);		
-			}
-			
 			// Draw the expanded Global Map
 			paint.setPen(Qt::gray);
 			for(int i=0;i<global_planner->map->width;i++)
@@ -177,7 +173,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 					{
 						paint.drawPoint(i,j);
 					}
-				}		
+				}
 			// Draw Global Search Space
 			paint.setPen(Qt::red);
 			if(global_planner->search_space)
@@ -211,8 +207,8 @@ void MapPainter::paintEvent(QPaintEvent *)
 							paint.drawLine(l_start,l_end);
 						}
 						p = p->next;
-					} 
-			}		
+					}
+			}
 			// Draw Tree if requested
 			paint.setPen(Qt::white);
 			if(drawTreeEnabled)
@@ -230,7 +226,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 						paint.drawLine(l_start,l_end);
 					}
 				}
-			}		
+			}
 		}
 	}
 }

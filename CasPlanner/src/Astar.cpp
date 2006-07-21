@@ -39,7 +39,7 @@ void Astar :: ConvertToPixel (QPointF *p)
 	p->setY((-p->y() + map->resolution*map->center.y())/map->resolution);
 }
 
-// Tests for whether a point is in an obstacle or not
+// Tests for whether a node is in an obstacle or not
 int Astar :: Obstacle(QPointF P, double theta)
 {
 	int m,n;
@@ -53,11 +53,9 @@ int Astar :: Obstacle(QPointF P, double theta)
 		this->ConvertToPixel(&det_point);
 		m = (int)det_point.x();
 		n = (int)det_point.y();
-		//cout <<"\nx ="<<m<<" y="<<n;
-		//fflush(stdout);
 		if (m <= 0 || n <= 0 || m >=map->width || n >=this->map->height)
 			return 1;
-		if (this->map->data[m][n]) 
+		if (this->map->data[m][n])
 			return 1;
 	}
 	return 0;

@@ -35,6 +35,7 @@ class Navigator : public Controller
 	public
 	slots:
 		void FollowPath();
+		void StopNavigating();
 	signals:
 		void drawLocalPath(PathPlanner *,Pose *,int *);
 	protected:
@@ -49,7 +50,7 @@ class Navigator : public Controller
 		QString robot_model;
 		QPointF rotation_center;
 		QPointF	begin,tracking_point,ni,SegmentStart,SegmentEnd;
-		bool	log,position_found,end_reached,segment_navigated,stop_following;
+		bool	log,position_found,end_reached,segment_navigated,stop_navigating;
 		int		platform,direction,path2Draw;					
 		Node * local_path,* global_path,*last,*first,*path2Follow;
 		PlanningManager *local_planner;

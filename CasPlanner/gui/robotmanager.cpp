@@ -51,7 +51,6 @@ RobotManager::RobotManager(QStringList configFiles)
 		    {
 			  	pixel_res =  cf->ReadFloat (i,"pixel_res",0.05);
 			  	mapName   =  cf->ReadString(i,"mapname","resources\\cas.png");
-//				qDebug("Image: %s",qPrintable(mapName));			  	
 		    }
 		}
     }
