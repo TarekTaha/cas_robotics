@@ -1,6 +1,7 @@
 #ifndef COMMMANAGER_H
 #define COMMMANAGER_H
-
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
 class CommManager; 
 class PlayerInterface;
 class Comms;

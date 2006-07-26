@@ -140,7 +140,7 @@ int CommManager::start()
   	qDebug("\t\t Supported Interfaces:");
   	if (!player)
  	{
-	   	player = new PlayerInterface(this, playerIp, playerPort);
+	   	player = new PlayerInterface(playerIp, playerPort);
    		connect(player, SIGNAL(newData()), this, SIGNAL(newData()));
  	}
   	//Enable Robot Control ?

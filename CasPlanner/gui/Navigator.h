@@ -1,6 +1,9 @@
 #ifndef NAVIGATOR_H_
 #define NAVIGATOR_H_
 
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
 #include <QObject>
 #include <QString>
 #include <QPointF>

@@ -1,6 +1,9 @@
 #ifndef PLANNINGMANAGER_H_
 #define PLANNINGMANAGER_H_
 
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
 #include "PathPlanner.h"
 #include "configfile.h"
 #include "MapManager.h"

@@ -1,5 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#include <boost/signal.hpp>
+#include <boost/bind.hpp>
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
 #include <QMainWindow>
 #include "robotmanager.h"
 #include "statusbar.h"

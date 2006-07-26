@@ -1,20 +1,26 @@
 #ifndef PLAYERINTERFACE_H
 #define PLAYERINTERFACE_H
+
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
 #include <QThread> 
-#include <playerclient.h>
 #include <QReadWriteLock>
 #include <QTime>
-#include "playerinterface.h"
-#include "CommManager.h"
-#include "utils.h"
 
+//#include <playerclient.h>
+#include "playerinterface.h"
+#include "utils.h"
+#include "map.h"
+
+using namespace PlayerCc;
 class PlayerInterface: public QThread 
 {
 Q_OBJECT    
     public:
         static const int MAX_LASERS = 2;
         static const int MAX_MOTORS = 3;
-        PlayerInterface(CommManager *comms, QString playerHost, int playerPort);
+        PlayerInterface(QString playerHost, int playerPort);
         void stop();
         void run();
         void enableControl(int driveId);
@@ -43,17 +49,16 @@ Q_OBJECT
         QString playerHost; 
         int playerPort; 
         PlayerClient *pc;
-        CommManager *comms; 
-        
+     
         bool laserEnabled[MAX_LASERS],ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized,emergencyStopped; 
         int playerLaserId[MAX_LASERS],positionId,ptzId,mapId,localizerId;
         LaserProxy *laser[MAX_LASERS]; 
-        PositionProxy *drive;
+        Position2dProxy *drive;
         MapProxy *map;
 		PtzProxy *ptz;
 		LocalizeProxy *localizer;
 		Pose location;
-		double pan,tilt,pose[3], pose_var[3][3];
+		double pan,tilt,pose[3], pose_covar[3];
        
         double speed,turnRate,getspeed,getturnrate;
     

@@ -23,7 +23,7 @@ RobotManager::RobotManager(QStringList configFiles)
 {
     for(int j=0; j < configFiles.size(); j++)
     {
-		ConfigFile *cf = new ConfigFile();
+		ConfigFile *cf = new ConfigFile("localhost",6665);
 		int numSections; 
 		cf->Load(configFiles[j].toLocal8Bit());
 		numSections = cf->GetSectionCount(); 
@@ -80,6 +80,7 @@ int RobotManager::readPlannerConfigs(ConfigFile *cf)
 {
 	planner = new PlanningManager;
 	planner->readConfigs(cf);
+	planner->start();
     return 1;
 }
 
