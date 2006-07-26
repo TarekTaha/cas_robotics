@@ -53,6 +53,7 @@ Map *MapManager::provideMapOG(QImage image)
 {
 	Map * retval;
 	double res = 0.05;	
+	bool negate=false;
 	QPointF center(image.width()/2.0,image.height()/2.0);
 	retval = new Map(image.width(),image.height(),res,center);
 	for(int i=0;i<image.width();i++)
@@ -61,11 +62,22 @@ Map *MapManager::provideMapOG(QImage image)
 		for(int j=0;j<image.height();j++)
 		{
 			color = image.pixel(i,j);
+			if(negate)
+			{
 			// White color is occupied and black is free
 			if ( double(qRed(color) + qGreen(color) + qBlue(color))/3*255.0 > 0.8)
 				retval->data[i][j]= true;
 			else 
 				retval->data[i][j]= false;
+			}
+			else
+			{
+			// White color is occupied and black is free
+			if ( double(qRed(color) + qGreen(color) + qBlue(color))/3*255.0 < 0.2)
+				retval->data[i][j]= true;
+			else 
+				retval->data[i][j]= false;				
+			}
 		}
 	}
 	return retval;

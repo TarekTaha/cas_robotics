@@ -1,6 +1,9 @@
 #ifndef ROBOTMANAGER_H
 #define ROBOTMANAGER_H
 
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
 #include <QObject>
 #include "navigationtab.h"
 #include "CommManager.h"

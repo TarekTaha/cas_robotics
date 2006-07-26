@@ -12,7 +12,7 @@ NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
     vLayout->addWidget(mapPainter,4); 
     vLayout->addWidget(&navControlPanel,1); 
     setLayout(vLayout); 
-  
+
     connect(&navControlPanel.bridgeTest, SIGNAL(stateChanged(int)),robotManager->planner,SLOT(setBridgeTest( int ))); 
     connect(&navControlPanel.connectNodes, SIGNAL(stateChanged(int)),robotManager->planner,SLOT(setConnNodes( int ))); 
     connect(&navControlPanel.regGrid, SIGNAL(stateChanged(int)),robotManager->planner,SLOT(setRegGrid( int ))); 
@@ -135,12 +135,11 @@ NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
     parametersGB.setLayout(parLayout);
 
 	//Loading Default values from config file
-
     obstExpRadSB.setMinimum(0); 
     obstExpRadSB.setMaximum(1);
 	obstExpRadSB.setSingleStep(0.01);
 	obstExpRadSB.setValue(robotManager->planner->pathPlanner->obstacle_radius);
-	
+
     bridgeTestResSB.setMinimum(0.01); 
     bridgeTestResSB.setMaximum(1);
     bridgeTestResSB.setSingleStep(0.01); 

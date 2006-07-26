@@ -1,6 +1,9 @@
 #ifndef NAVIGATIONTAB_H
 #define NAVIGATIONTAB_H
 
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QCheckBox>
@@ -20,7 +23,7 @@ class NavControlPanel: public QWidget
 {
 Q_OBJECT
     public:  
-		NavControlPanel(QWidget *parent = 0,RobotManager *rob=0);
+		NavControlPanel(QWidget *parent ,RobotManager *rob);
 	public slots:
 		void updateMap(); 
 		void handleSelection(); 
@@ -75,7 +78,7 @@ class NavContainer : public QWidget
 {
 Q_OBJECT
     public:
-		NavContainer(QWidget *parent = 0,RobotManager *robotManager=0);
+		NavContainer(QWidget *parent ,RobotManager *robotManager);
 		~NavContainer();
 		MapPainter * mapPainter;
 	public slots:

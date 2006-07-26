@@ -14,11 +14,9 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
 {
     // Reads Robot Configurations from the file(s)
     robotManager = new RobotManager(configFiles);
-
     QWidget *container = new QWidget(this); 
     tabcontainer = new TabContainer(parent,robotManager);
-    robotManager->setNavContainer(&tabcontainer->navCon);
-    
+    robotManager->setNavContainer(tabcontainer->navCon);
     QVBoxLayout *vLayout = new QVBoxLayout;
     QPushButton *emergStop = new QPushButton(" STOP ROBOT ");  
     QPushButton *connRobot = new QPushButton(" Connect to Robot ");
@@ -31,7 +29,6 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     palette.setColor(QPalette::Button, Qt::yellow);
     logButton->setPalette(palette);    
     setMinimumSize(QSize(900,700)); 
-    
     QHBoxLayout *layout = new QHBoxLayout, *layout2 = new QHBoxLayout; 
     layout->addWidget(tabcontainer,1); 
     layout2->addWidget(logButton);
@@ -43,7 +40,7 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     
     statusBar()->showMessage("Welcome to CAS Navigation System ...", 20000); 
     statusBar()->showMessage("Initialization Done.");
-    
+
     statusLogger = new StatusLogger(statusBar()); 
     setCentralWidget(container);
     statusLogger->addStatusMsg(0,1,"Start of Loggs ..."); 

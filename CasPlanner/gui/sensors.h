@@ -1,6 +1,9 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
 #include <QWidget>
 #include "robotmanager.h"
 class Sensors: public QWidget 

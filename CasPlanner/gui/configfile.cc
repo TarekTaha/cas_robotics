@@ -21,30 +21,36 @@
  */
 
 /*
- * $Id: configfile.cc,v 1.24 2005/03/02 00:34:10 gerkey Exp $
+ * $Id: configfile.cc,v 1.13.2.1 2006/06/09 01:17:52 gerkey Exp $
  */
 
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
-#include <limits.h> // for PATH_MAX
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
 #include <locale.h>
-#include <libgen.h>
 
-#include "player.h"
-//#include "replace.h"
-#include "player/error.h"
-#include "configfile.h"
+#include <replace.h>
 
-extern int global_playerport;
+#include <libplayercore/player.h>
+#include <libplayercore/playercommon.h>
+#include <libplayercore/error.h>
+#include <libplayercore/configfile.h>
+#include <libplayercore/interface_util.h>
+#include <libplayercore/driver.h>
+#include <libplayercore/drivertable.h>
+#include <libplayercore/devicetable.h>
+#include <libplayercore/globals.h>
+#include <libplayercore/plugins.h>
+#include <libplayercore/addr_util.h>
+
+//extern int global_playerport;
 
 #define COLOR_DATABASE "/usr/X11R6/lib/X11/rgb.txt"
-
 
 ///////////////////////////////////////////////////////////////////////////
 // the isblank() macro is not standard - it's a GNU extension
@@ -53,13 +59,12 @@ extern int global_playerport;
   #define isblank(a) (a == ' ' || a == '\t')
 #endif
 
-
 ///////////////////////////////////////////////////////////////////////////
 // Useful macros for dumping parser errors
 #define TOKEN_ERR(z, l) \
-  fprintf(stderr, "%s:%d error: " z, this->filename, l)
+  fprintf(stderr, "%s:%d error: " z "\n", this->filename, l)
 #define PARSE_ERR(z, l) \
-  fprintf(stderr, "%s:%d error: " z, this->filename, l)
+  fprintf(stderr, "%s:%d error: " z "\n", this->filename, l)
 
 #define CONFIG_WARN1(z, line, a) \
   fprintf(stderr, "%s:%d warning: " z "\n", this->filename, line, a)
@@ -74,7 +79,27 @@ extern int global_playerport;
 
 ///////////////////////////////////////////////////////////////////////////
 // Default constructor
-ConfigFile::ConfigFile() 
+ConfigFile::ConfigFile(uint32_t _default_host, uint32_t _default_robot) 
+{
+  this->default_host = _default_host;
+  this->default_robot = _default_robot;
+  this->InitFields();
+}
+
+/// Alternate constructor, to specify the host as a string
+ConfigFile::ConfigFile(const char* _default_host, uint32_t _default_robot)
+{
+  if(hostname_to_packedaddr(&this->default_host, _default_host) < 0)
+  {
+    PLAYER_WARN1("name lookup failed on \"%s\"", _default_host);
+    this->default_host = 0;
+  }
+  this->default_robot = _default_robot;
+  this->InitFields();
+}
+
+void
+ConfigFile::InitFields()
 {
   this->filename = NULL;
 
@@ -130,7 +155,8 @@ bool ConfigFile::Load(const char *filename)
   FILE *file = fopen(this->filename, "r");
   if (!file)
   {
-//    PLAYER_ERROR2("unable to open world file %s : %s",this->filename, strerror(errno));
+    PLAYER_ERROR2("unable to open world file %s : %s",
+               this->filename, strerror(errno));
     //fclose(file);
     return false;
   }
@@ -156,7 +182,7 @@ bool ConfigFile::Load(const char *filename)
   // Dump contents and exit if this file is meant for debugging only.
   if (ReadInt(0, "test", 0) != 0)
   {
-   // PLAYER_ERROR("this is a test file; quitting");
+    PLAYER_ERROR("this is a test file; quitting");
     DumpTokens();
     DumpMacros();
     DumpSections();
@@ -202,7 +228,8 @@ bool ConfigFile::Save(const char *filename)
   FILE *file = fopen(filename, "w+");
   if (!file)
   {
-    //PLAYER_ERROR2("unable to open world file %s : %s", filename, strerror(errno));
+    PLAYER_ERROR2("unable to open world file %s : %s",
+               filename, strerror(errno));
     return false;
   }
 
@@ -416,6 +443,12 @@ bool ConfigFile::LoadTokenWord(FILE *file, int *line, int include)
         if (!LoadTokenInclude(file, line, include))
           return false;
       }
+      else if(strcmp(token, "true") == 0 || strcmp(token, "false") == 0 || 
+              strcmp(token, "yes") == 0  || strcmp(token, "no") == 0) 
+      {
+        ungetc(ch, file);
+        AddToken(TokenBool, token, include);
+      }
       else
       {
         ungetc(ch, file);
@@ -514,10 +547,14 @@ bool ConfigFile::LoadTokenInclude(FILE *file, int *line, int include)
   FILE *infile = fopen(fullpath, "r");
   if (!infile)
   {
-   // PLAYER_ERROR2("unable to open include file %s : %s",fullpath, strerror(errno));
+    PLAYER_ERROR2("unable to open include file %s : %s",
+               fullpath, strerror(errno));
     free(fullpath);
     return false;
   }
+
+  // Add an EOL to stop parsing of the include statement
+  AddToken(TokenEOL, "\n", include);
 
   // Read tokens from the file
   if (!LoadTokens(infile, include + 1))
@@ -932,6 +969,7 @@ bool ConfigFile::ParseTokenWord(int section, int *index, int *line)
       case TokenNum:
       case TokenString:
       case TokenOpenTuple:
+      case TokenBool:
         return ParseTokenField(section, index, line);
       default:
         PARSE_ERR("syntax error 2", *line);
@@ -1064,6 +1102,11 @@ bool ConfigFile::ParseTokenField(int section, int *index, int *line)
         field = AddField(section, GetTokenValue(name), *line);
         if (!ParseTokenTuple(section, field, &i, line))
           return false;
+        *index = i;
+        return true;
+      case TokenBool:
+        field = AddField(section, GetTokenValue(name), *line);
+        AddFieldValue(field, 0, i);
         *index = i;
         return true;
       case TokenSpace:
@@ -1360,6 +1403,7 @@ void ConfigFile::AddFieldValue(int field, int index, int value_token)
 
   // Set the relevant value
   pfield->values[index] = value_token;
+  pfield->useds[index] = false;
 }
 
 
@@ -1482,6 +1526,41 @@ void ConfigFile::WriteInt(int section, const char *name, int value)
   WriteString(section, name, default_str);
 }
 
+///////////////////////////////////////////////////////////////////////////
+// Read a boolean
+bool ConfigFile::ReadBool(int section, const char* name, bool value)
+{
+  int field = GetField(section, name);
+  if(field < 0) return value;
+  const char* s = GetFieldValue(field, 0);
+  if( strcmp(s, "yes") == 0 || strcmp(s, "true") == 0 || strcmp(s, "1") == 0)
+    return true;
+  else if( strcmp(s, "no") == 0 || strcmp(s, "false") == 0 || strcmp(s, "0") == 0)
+    return false;
+  else
+  {
+    printf("player: Warning: error in config file section %d field %s: Invalid boolean value.", section, name);
+    return value;
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Write a boolean
+void ConfigFile::WriteBool(int section, const char *name, bool value)
+{
+  char str[4];
+  snprintf(str, sizeof(str), "%s", value ? "yes" : "no");
+  WriteString(section, name, str);
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Write a boolean compatibly
+void ConfigFile::WriteBool_Compat(int section, const char *name, bool value)
+{
+  char str[2];
+  snprintf(str, sizeof(str), "%s", value ? "1" : "0");
+  WriteString(section, name, str);
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // Read a float
@@ -1565,12 +1644,12 @@ const char *ConfigFile::ReadFilename(int section, const char *name, const char *
     // we need to make a copy of the filename.
     // There's no bounds-checking, but what the heck.
     char *tmp = strdup(this->filename);
-    char *fullpath = (char*) malloc(PATH_MAX);
-    memset(fullpath, 0, PATH_MAX);
+    char *fullpath = (char*) malloc(MAX_FILENAME_SIZE);
+    memset(fullpath, 0, MAX_FILENAME_SIZE);
     strcat( fullpath, dirname(tmp));
     strcat( fullpath, "/" ); 
     strcat( fullpath, filename );
-    assert(strlen(fullpath) + 1 < PATH_MAX);
+    assert(strlen(fullpath) + 1 < MAX_FILENAME_SIZE);
 
     SetFieldValue(field, 0, fullpath);
     
@@ -1584,13 +1663,13 @@ const char *ConfigFile::ReadFilename(int section, const char *name, const char *
     // we need to make a copy of the filename.
     // There's no bounds-checking, but what the heck.
     char *tmp = strdup(this->filename);
-    char *fullpath = (char*) malloc(PATH_MAX);
-    getcwd(fullpath, PATH_MAX);
+    char *fullpath = (char*) malloc(MAX_FILENAME_SIZE);
+    getcwd(fullpath, MAX_FILENAME_SIZE);
     strcat( fullpath, "/" ); 
     strcat( fullpath, dirname(tmp));
     strcat( fullpath, "/" ); 
     strcat( fullpath, filename );
-    assert(strlen(fullpath) + 1 < PATH_MAX);
+    assert(strlen(fullpath) + 1 < MAX_FILENAME_SIZE);
 
     SetFieldValue(field, 0, fullpath);
     
@@ -1624,7 +1703,10 @@ const char *ConfigFile::ReadTupleString(int section, const char *name,
   int field = GetField(section, name);
   if (field < 0)
     return value;
-  return GetFieldValue(field, index);
+  const char* svalue = GetFieldValue(field, index);
+  if(!svalue)
+    return value;
+  return svalue;
 }
 
 
@@ -1650,8 +1732,10 @@ int ConfigFile::ReadTupleInt(int section, const char *name,
   int field = GetField(section, name);
   if (field < 0)
     return value;
-  return atoi(GetFieldValue(field, index));
-  
+  const char* svalue = GetFieldValue(field, index);
+  if(!svalue)
+    return value;
+  return atoi(svalue);
 }
 
 
@@ -1674,8 +1758,10 @@ double ConfigFile::ReadTupleFloat(int section, const char *name,
   int field = GetField(section, name);
   if (field < 0)
     return value;
-  return atof(GetFieldValue(field, index));
-  
+  const char* svalue = GetFieldValue(field, index);
+  if(!svalue)
+    return value;
+  return atof(svalue);
 }
 
 
@@ -1698,7 +1784,10 @@ double ConfigFile::ReadTupleLength(int section, const char *name,
   int field = GetField(section, name);
   if (field < 0)
     return value;
-  return atof(GetFieldValue(field, index)) * this->unit_length;
+  const char* svalue = GetFieldValue(field, index);
+  if(!svalue)
+    return value;
+  return atof(svalue) * this->unit_length;
 }
 
 
@@ -1721,7 +1810,10 @@ double ConfigFile::ReadTupleAngle(int section, const char *name,
   int field = GetField(section, name);
   if (field < 0)
     return value;
-  return atof(GetFieldValue(field, index)) * this->unit_angle;
+  const char* svalue = GetFieldValue(field, index);
+  if(!svalue)
+    return value;
+  return atof(svalue) * this->unit_angle;
 }
 
 
@@ -1767,7 +1859,8 @@ uint32_t ConfigFile::LookupColor(const char *name)
   file = fopen(filename, "r");
   if (!file)
   {
-    //PLAYER_ERROR2("unable to open color database %s : %s", filename, strerror(errno));
+    PLAYER_ERROR2("unable to open color database %s : %s",
+                  filename, strerror(errno));
     fclose(file);
     return 0xFFFFFF;
   }
@@ -1801,14 +1894,241 @@ uint32_t ConfigFile::LookupColor(const char *name)
       return ((r << 16) | (g << 8) | b);
     }
   }
-  // PLAYER_WARN1("unable to find color [%s]; using default (red)", name);
+  PLAYER_WARN1("unable to find color [%s]; using default (red)", name);
   fclose(file);
   return 0xFF0000;
 }
 
 
+///////////////////////////////////////////////////////////////////////////
+// Read a device id.
+int ConfigFile::ReadDeviceAddr(player_devaddr_t *addr, int section,
+                               const char *name, int interf_code, int index,
+                               const char *key)
+{
+  int prop;
+  int i, j, count;
+  char str[128];
+  char *tokens[5];
+  int token_count;
+  unsigned int robot, host;
+  int ind;
+  const char *s, *k;
+  player_interface_t interf;
 
+  // Get the field index
+  if ((prop = GetField(section, name)) < 0)
+  {
+    CONFIG_ERR1("missing field [%s]", this->fields[prop].line, name);
+    return -1;
+  }
 
+  // Find the number of values in the field
+  count = GetFieldValueCount(prop);
+  
+  // Consider all the values, looking for a match
+  for (i = 0; i < count; i++)
+  {
+    assert(sizeof(str) > strlen(GetFieldValue(prop, i, false)));
+    strcpy(str, GetFieldValue(prop, i, false));
 
+    memset(tokens, 0, sizeof(tokens));
+    token_count = 5;
+
+    // Split the string inplace using ':' as the delimiter.
+    // Note that we do this backwards (leading fields are optional).
+    // The expected syntax is key:host:robot:interface:index.
+    for (j = strlen(str) - 1; j >= 0 && token_count > 0; j--)
+    {
+      if (str[j] == ':')
+      {
+        tokens[--token_count] = str + j + 1;
+        str[j] = 0;
+      }
+    }
+    if (token_count > 0)
+      tokens[--token_count] = str;
+
+    // We require at least an interface:index pair
+    if(!(tokens[3] && tokens[4]))
+    {
+      CONFIG_ERR1("missing interface or index in field [%s]", this->fields[prop].line, name);
+      return -1;
+    }
+
+    // Extract the fields from the tokens (with default values)
+    k = tokens[0];
+    if(tokens[1] && strlen(tokens[1]))
+    {
+      // Try to be smart about reading the host part of the address.
+      for(j=0;j<(int)strlen(tokens[1]);j++)
+      {
+        if(!isdigit(tokens[1][j]))
+          break;
+      }
+      // Are all the characters digits?
+      if(j == (int)strlen(tokens[1]))
+      {
+        // Yes; assume it's a 32-bit packed address
+        host = atoi(tokens[1]);
+      }
+      else
+      {
+        // No; assume it's a string containing a hostname or IP address
+        if(hostname_to_packedaddr(&host, tokens[1]) < 0)
+        {
+          PLAYER_ERROR1("name lookup failed for host \"%s\"", tokens[1]);
+          return -1;
+        }
+      }
+    }
+    else
+    {
+      host = this->default_host;
+    }
+    if(tokens[2] && strlen(tokens[2]))
+      robot = atoi(tokens[2]);
+    else
+      robot = this->default_robot;
+    s = tokens[3];
+    ind = atoi(tokens[4]);
+
+    // Find the interface
+    if (::lookup_interface(s, &interf) != 0)
+    {
+      CONFIG_ERR1("unknown interface: [%s]", this->fields[prop].line, s);
+      return -1;
+    }
+
+    // Match the interface
+    if (interf_code > 0 && interf.interf != interf_code)
+      continue;
+
+    // Match the tuple index (< 0 matches all indices)
+    if (index >= 0 && i != index)
+      continue;
+
+    // If we are expecting a key, but there is non in the file, this
+    // is no match.
+    if (key && k == NULL)
+      continue;
+    
+    // If the key is expected and present in the file, it must match
+    if (key && k && strcmp(key, k) != 0)
+      continue;
+
+    // Read the field again, just to mark it as read
+    GetFieldValue(prop, i, true);
+
+    addr->host = host;
+    addr->robot = robot;
+    addr->interf = interf.interf;
+    addr->index = ind;
+    return 0;
+ 
+  }
+
+  return -1;
+}
+
+// Parse all driver blocks
+bool 
+ConfigFile::ParseAllDrivers()
+{
+  for(int i = 1; i < this->GetSectionCount(); i++)
+  {
+    // Check for new-style device block
+    if(strcmp(this->GetSectionType(i), "driver") == 0)
+    {
+      if(!this->ParseDriver(i))
+        return false;
+    }
+  }
+  return(true);
+}
+
+// Parse a driver block, and update the deviceTable accordingly
+bool 
+ConfigFile::ParseDriver(int section)
+{
+  const char *pluginname;  
+  const char *drivername;
+  DriverEntry *entry;
+  Driver *driver;
+  Device *device;
+  int count;
+
+  entry = NULL;
+  driver = NULL;
+  
+  // Load any required plugins
+  pluginname = this->ReadString(section, "plugin", NULL);
+  if (pluginname != NULL)
+  {
+    if(!LoadPlugin(pluginname,this->filename))
+    {
+      PLAYER_ERROR1("failed to load plugin: %s", pluginname);
+      return (false);
+    }
+  }
+
+  // Get the driver name
+  drivername = this->ReadString(section, "name", NULL);
+  if (drivername == NULL)
+  {
+    PLAYER_ERROR1("No driver name specified in section %d", section);
+    return (false);
+  }
+  
+  // Look for the driver
+  entry = driverTable->GetDriverEntry(drivername);
+  if (entry == NULL)
+  {
+    PLAYER_ERROR1("Couldn't find driver \"%s\"", drivername);
+    return (false);
+  }
+
+  // Create a new-style driver
+  if (entry->initfunc == NULL)
+  {
+    PLAYER_ERROR1("Driver has no initialization function \"%s\"", drivername);
+    return (false);
+  }
+
+  // Create a driver; the driver will add entries into the device
+  // table
+  driver = (*(entry->initfunc)) (this, section);
+  if (driver == NULL || driver->GetError() != 0)
+  {
+    PLAYER_ERROR1("Initialization failed for driver \"%s\"", drivername);
+    return (false);
+  }
+
+  // Fill out the driver name in the device table and count the number
+  // of devices for this driver
+  count = 0;
+  for (device = deviceTable->GetFirstDevice(); device != NULL;
+       device = deviceTable->GetNextDevice(device))
+  {
+    if (device->driver == driver)
+    {
+      strncpy(device->drivername, drivername, sizeof(device->drivername));
+      count++;
+    }
+  }
+
+  // We must have at least one interface per driver
+  if (count == 0)
+  {
+    PLAYER_ERROR1("Driver has no (usable) interfaces \"%s\"", drivername);
+    return false;
+  }
+  
+  // Should this device be "always on"?  
+  if (driver)
+    driver->alwayson = this->ReadInt(section, "alwayson", driver->alwayson);
+
+  return true;
+}
 
 

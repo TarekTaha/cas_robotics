@@ -1,10 +1,9 @@
 #include "playerinterface.h"
 
-PlayerInterface::PlayerInterface(CommManager *com, QString host, int port):
+PlayerInterface::PlayerInterface(QString host, int port):
     playerHost(host),
     playerPort(port),   
     pc(0), 
-    comms(com),
     ptzEnabled(false),
     ctrEnabled(false),
     mapEnabled(false),
@@ -75,12 +74,22 @@ Pose PlayerInterface::getLocation()
 {
     dataLock.lockForRead();
     Pose retval; 
+//    if(localizer)
+//    {
+//	    retval.p.setX(localizer->hypoths[0].mean[0]);
+//	    retval.p.setY(localizer->hypoths[0].mean[1]);
+//	    retval.phi = localizer->hypoths[0].mean[2];
+//	    if(localizer->hypoths[0].weight>=0.9)
+//	    	localized = true;
+//	    else
+//	    	localized = false;
+//    }
     if(localizer)
     {
-	    retval.p.setX(localizer->hypoths[0].mean[0]);
-	    retval.p.setY(localizer->hypoths[0].mean[1]);
-	    retval.phi = localizer->hypoths[0].mean[2];
-	    if(localizer->hypoths[0].weight>=0.9)
+	    retval.p.setX(localizer->GetHypoth(0).mean.px);
+	    retval.p.setY(localizer->GetHypoth(0).mean.py);
+	    retval.phi = localizer->GetHypoth(0).mean.pa;
+	    if(localizer->GetHypoth(0).alpha>=0.9)
 	    	localized = true;
 	    else
 	    	localized = false;
@@ -116,18 +125,12 @@ void PlayerInterface::setLocation(Pose location)
 	//cout << "\n Default Pose given to the Localizer X="<<path->location.x()<<" Y="<<path->location.y()<<" Theta="<<path->angle;
 	//cout << "\n Tracking Distance="<<tracking_distance<<" Kd="<<kd<<" KTheta="<<kt;
 	//Set Covariance Matrix
-	pose_var[0][0]=0.5;
-	pose_var[0][1]=0.5;
-	pose_var[0][2]=0.5;
-	pose_var[1][0]=0.5;
-	pose_var[1][1]=0.5;
-	pose_var[1][2]=0.5;
-	pose_var[2][0]=0.5;
-	pose_var[2][1]=0.5;
-	pose_var[2][2]=DTOR(45);
+	pose_covar[0]=0.5;
+	pose_covar[1]=0.5;
+	pose_covar[2]=DTOR(45);
 	if(localizer)
 	{
-		localizer->SetPose(pose,pose_var);	
+		localizer->SetPose(pose,pose_covar);	
 		this->location.p.setX(location.p.x());
 		this->location.p.setY(location.p.y());
 		this->location.phi = location.phi;
@@ -171,14 +174,12 @@ double PlayerInterface::getClosestObst()
 		if(laserEnabled[Laser_id])
 	    {
 	    	//TODO: ADD the appropriate pose translation
-			laser[Laser_id]->Lock();
-		    for(int i=0; i< laser[Laser_id]->scan_count; i++)
+		    for(uint i=0; i< laser[Laser_id]->GetCount(); i++)
 		    {
-		    	dist = Dist(QPointF(0,0),QPointF(laser[Laser_id]->point[i][0], laser[Laser_id]->point[i][1]));
+		    	dist = Dist(QPointF(0,0),QPointF(laser[Laser_id]->GetPoint(i).px, laser[Laser_id]->GetPoint(i).py));
 		    	if(dist < min_dist)
 		    		min_dist = dist;
 			}
-			laser[Laser_id]->Unlock();
 		}
 	}
 	return min_dist;
@@ -189,13 +190,11 @@ QVector<QPointF> PlayerInterface::getLaserScan(int Laser_id)
     //qDebug("Laser data requested"); 
     if(laserEnabled[Laser_id])
     {
-        laser[Laser_id]->Lock(); 
-        QVector<QPointF> retval(laser[Laser_id]->scan_count);
-        for(int i=0; i< laser[Laser_id]->scan_count; i++)
+        QVector<QPointF> retval(laser[Laser_id]->GetCount());
+        for(uint i=0; i< laser[Laser_id]->GetCount(); i++)
         {
-	    	retval[i] = QPointF(laser[Laser_id]->point[i][0], laser[Laser_id]->point[i][1]);    
+	    	retval[i] = QPointF(laser[Laser_id]->GetPoint(i).px, laser[Laser_id]->GetPoint(i).py);    
 		}
-    	laser[Laser_id]->Unlock(); 
 		//qDebug("Returning ... %d", retval.size());
         return retval;
     }
@@ -208,34 +207,36 @@ QVector<QPointF> PlayerInterface::getLaserScan(int Laser_id)
 Map PlayerInterface::provideMap()
 {
 	Map retval;
-    int metadata_offset = (map->height-1)*map->width;
+    int metadata_offset = (map->GetHeight()-1)*map->GetWidth();
     //uint8_t mapid = (uint8_t) map->cells[metadata_offset];
     //uint8_t robotid = (uint8_t) map->cells[metadata_offset+1];
     int16_t mapposx, mapposy, mapposphi;
     uint32_t time_secs, time_usecs;
-    
+    int8_t * mapdata;
+    assert(mapdata = (int8_t*)malloc(sizeof(int8_t) *map->GetHeight()* map->GetWidth()));
+    map->GetMap(mapdata);
     //mapposx = (map->cells[metadata_offset+2] & 0x00ff) << 8;
     //mapposx |= (map->cells[metadata_offset+3] & 0xff);
-    
-    mapposx = *((int16_t *) (map->cells+metadata_offset+2));
-    mapposy = *((int16_t *) (map->cells+metadata_offset+4));
-    mapposphi = *((int16_t *) (map->cells+metadata_offset+6));
-    time_secs = *((int32_t *) (map->cells+metadata_offset+8));
-    time_usecs = *((int32_t *) (map->cells+metadata_offset+12));
+    mapposx =   *((int16_t *) (mapdata+metadata_offset+2));
+    mapposy =   *((int16_t *) (mapdata+metadata_offset+4));
+    mapposphi = *((int16_t *) (mapdata+metadata_offset+6));
+    time_secs = *((int32_t *) (mapdata+metadata_offset+8));
+    time_usecs =*((int32_t *) (mapdata+metadata_offset+12));
 //    ogmapdata->timeStamp.seconds = time_secs;
 //    ogmapdata->timeStamp.useconds = time_usecs;
 //    ogmapdata->origin.p.x = mapposx;
 //    ogmapdata->origin.p.y = mapposy;
 //    ogmapdata->origin.o = mapposphi;
-	retval.width      = map->width;
-	retval.height     = map->height-1;
-	retval.resolution = map->resolution;
+	retval.width      = map->GetWidth();
+	retval.height     = map->GetHeight()-1;
+	retval.resolution = map->GetResolution();
 //	for(int i=0 ;i<map->width*(map->height-1);i++)
 //	{
 //		if((uint8_t)map->cells[i]>100)
 //	    	qDebug("Pixel value is:%u",(uint8_t)map->cells[i]);
 //	}
-    retval.rawData = QByteArray((const char *) map->cells, map->width*(map->height-1));  
+    retval.rawData = QByteArray((const char *) mapdata, map->GetWidth()*(map->GetHeight()-1));
+    free(mapdata);
     return retval;
 }
 
@@ -243,74 +244,71 @@ void PlayerInterface::run ()
 {
     qDebug("/********************************************************************/"); 	
     qDebug("Connecting to Robot Server::");
-    qDebug("\t Connecting to %s on %s:%d ...",qPrintable(comms->getName()),qPrintable(playerHost), playerPort);
+    qDebug("\t Connecting to %s:%d ...",qPrintable(playerHost), playerPort);
     if(pc)
     {
 		delete pc; 
     }
-    pc = new PlayerClient(qPrintable(playerHost),playerPort);
-    pc->SetFrequency(10);
-    qDebug("\t\t - Frequency Set to 10 Hz"); 
-    /* TODO: Proper check for the successfullness of the proxy creation
-     */
-    if(ctrEnabled)
+    try
     {
-		if(drive)
-		{
-		    delete drive;
-		}
-        drive = new PositionProxy(pc,positionId,'a');
-   		qDebug("\t\t - Motor Control Interface Engaged Successfully"); 
+	    pc = new PlayerClient(qPrintable(playerHost),playerPort);
+	    /* TODO: Proper check for the successfullness of the proxy creation
+	     */
+	    if(ctrEnabled)
+	    {
+			if(drive)
+			{
+			    delete drive;
+			}
+	        drive = new Position2dProxy(pc,positionId);
+	   		qDebug("\t\t - Motor Control Interface Engaged Successfully"); 
+	    }
+	    for(int i=0; i < MAX_LASERS; i++)
+	    {
+	        if(laserEnabled[i])
+	        {
+	            laser[i] = new LaserProxy(pc,playerLaserId[0]); 
+	       		qDebug("\t\t - Laser interface:%d Interface Added Successfully",i);  
+	        }
+	    }
+	    if(mapEnabled)
+	    {
+	    	map = new MapProxy(pc,mapId);
+			qDebug("\t\t - Map Interface Engaged Successfully");
+	    }
+	    if(ptzEnabled)
+	    {
+			ptz = new PtzProxy(pc, ptzId); 
+			qDebug("\t\t - Pan Tilt unit initialized Successfully");
+	    }
+	    if(localizerEnabled)
+	    {
+	    	localizer 	= new LocalizeProxy(pc,0);
+	    	qDebug("\t\t - Localizer Started Successfully");
+	    }
     }
-    for(int i=0; i < MAX_LASERS; i++)
-    {
-        if(laserEnabled[i])
-        {
-            laser[i] = new LaserProxy(pc,playerLaserId[0], 'r'); 
-       		qDebug("\t\t - Laser interface:%d Interface Added Successfully",i);  
-        }
-    }
-    if(mapEnabled)
-    {
-    	map = new MapProxy(pc,mapId,'r');
-		qDebug("\t\t - Map Interface Engaged Successfully");
-    }
-    if(ptzEnabled)
-    {
-		ptz = new PtzProxy(pc, ptzId, 'a'); 
-		qDebug("\t\t - Pan Tilt unit initialized Successfully");
-    }
-    if(localizerEnabled)
-    {
-    	localizer 	= new LocalizeProxy(pc,0,'r');
-    	qDebug("\t\t - Localizer Started Successfully");
-    }
+   catch (PlayerCc::PlayerError e)
+  	{
+    	std::cerr << e << std::endl;
+    	return;
+  	}
     qDebug("\t Testing Player Server for Data Read:");    
-    while(pc->Read())
-    {
-    	qWarning(".");    
-		sleep(1);
-    }
     qDebug("\t\t - Test Passed, You can read Data from Player Server Now");    
     qDebug("\t\t - Connection Established"); 
     qDebug("/********************************************************************/"); 	
 	int	mapCounter=0;
     while(true)
     {
-        while(pc->Read())
-        {
-            qWarning("	--->>> Can not read from Player Server - Retrying <<<---");
-	    	sleep(1);
-        }
+    	// Read Only if new Data is Available
+		//pc->ReadIfWaiting();
+		pc->Read();
     	if(!emergencyStopped)
     	{
 	        if(ctrEnabled)
 	        {
-	            drive->Lock();
 	            drive->SetSpeed(speed,turnRate);
-	            getspeed = drive->Speed();
-	            getturnrate = drive->TurnRate();
-	            drive->Unlock();             
+	            getspeed = drive->GetXSpeed();
+	            getturnrate = drive->GetYSpeed();
 	        }
 			if(ptzEnabled)
 			{
@@ -318,8 +316,8 @@ void PlayerInterface::run ()
 			}
 			if(mapEnabled)
 			{
-				if(((mapCounter++)%10)==0)
-					map->GetMap();
+//				if(((mapCounter++)%10)==0)
+//					map->GetMap();
 			    //qDebug("Map width %d, height %d resolution %f",map->width,map->height,map->resolution);
 			}
     	}
@@ -329,7 +327,6 @@ void PlayerInterface::run ()
 			if(ctrEnabled)
 	       	{
 	        	drive->SetSpeed(0,0);
-	            drive->SetMotorState(0);
 	        }
 	        qDebug("	--->>> Robot Stopped <<<---");
 	        // temporary fix, needs more thinking once i finalize things
