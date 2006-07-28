@@ -15,6 +15,7 @@ player(0)
 
 CommManager::~CommManager()
 {
+	
 }
 
 void CommManager::emergencyStop()

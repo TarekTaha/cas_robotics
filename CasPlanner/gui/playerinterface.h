@@ -52,14 +52,14 @@ Q_OBJECT
      
         bool laserEnabled[MAX_LASERS],ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized,emergencyStopped; 
         int playerLaserId[MAX_LASERS],positionId,ptzId,mapId,localizerId;
-        LaserProxy *laser[MAX_LASERS]; 
+        LaserProxy *laser[MAX_LASERS];
         Position2dProxy *drive;
         MapProxy *map;
 		PtzProxy *ptz;
 		LocalizeProxy *localizer;
 		Pose location;
 		double pan,tilt,pose[3], pose_covar[3];
-       
+        QVector<QPointF> laserScanData[MAX_LASERS];
         double speed,turnRate,getspeed,getturnrate;
     
         QReadWriteLock dataLock;       

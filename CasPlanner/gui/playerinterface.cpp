@@ -32,20 +32,6 @@ void PlayerInterface::emergencyRelease()
     dataLock.unlock();
 }
 
-void PlayerInterface::setSpeed(double i_speed)
-{
-    dataLock.lockForWrite();
-    speed = i_speed; 
-    dataLock.unlock();
-}
-
-void PlayerInterface::setTurnRate(double i_turnRate)
-{
-    dataLock.lockForWrite();
-    turnRate = i_turnRate;
-    dataLock.unlock();
-}
-
 double PlayerInterface::getSpeed()
 {
     dataLock.lockForRead();
@@ -73,7 +59,7 @@ bool PlayerInterface::getLocalized()
 Pose PlayerInterface::getLocation()
 {
     dataLock.lockForRead();
-    Pose retval; 
+    Pose retval = location; 
 //    if(localizer)
 //    {
 //	    retval.p.setX(localizer->hypoths[0].mean[0]);
@@ -84,16 +70,6 @@ Pose PlayerInterface::getLocation()
 //	    else
 //	    	localized = false;
 //    }
-    if(localizer)
-    {
-	    retval.p.setX(localizer->GetHypoth(0).mean.px);
-	    retval.p.setY(localizer->GetHypoth(0).mean.py);
-	    retval.phi = localizer->GetHypoth(0).mean.pa;
-	    if(localizer->GetHypoth(0).alpha>=0.9)
-	    	localized = true;
-	    else
-	    	localized = false;
-    }
     dataLock.unlock(); 
     return retval; 	
 }
@@ -117,11 +93,25 @@ void PlayerInterface::setSpeed(double i_speed, double i_turnRate)
     dataLock.unlock(); 
 }
 
-void PlayerInterface::setLocation(Pose location)
+void PlayerInterface::setSpeed(double i_speed)
 {
-	pose[0]= location.p.x();
-	pose[1]= location.p.y();
-	pose[2]= location.phi;
+    dataLock.lockForWrite();
+    speed = i_speed; 
+    dataLock.unlock();
+}
+
+void PlayerInterface::setTurnRate(double i_turnRate)
+{
+    dataLock.lockForWrite();
+    turnRate = i_turnRate;
+    dataLock.unlock();
+}
+
+void PlayerInterface::setLocation(Pose loc)
+{
+	pose[0]= loc.p.x();
+	pose[1]= loc.p.y();
+	pose[2]= loc.phi;
 	//cout << "\n Default Pose given to the Localizer X="<<path->location.x()<<" Y="<<path->location.y()<<" Theta="<<path->angle;
 	//cout << "\n Tracking Distance="<<tracking_distance<<" Kd="<<kd<<" KTheta="<<kt;
 	//Set Covariance Matrix
@@ -131,9 +121,9 @@ void PlayerInterface::setLocation(Pose location)
 	if(localizer)
 	{
 		localizer->SetPose(pose,pose_covar);	
-		this->location.p.setX(location.p.x());
-		this->location.p.setY(location.p.y());
-		this->location.phi = location.phi;
+		this->location.p.setX(loc.p.x());
+		this->location.p.setY(loc.p.y());
+		this->location.phi = loc.phi;
 	}
 }
 
@@ -187,17 +177,14 @@ double PlayerInterface::getClosestObst()
 
 QVector<QPointF> PlayerInterface::getLaserScan(int Laser_id)
 {
-    //qDebug("Laser data requested"); 
+	QVector<QPointF> retval;
     if(laserEnabled[Laser_id])
     {
-        QVector<QPointF> retval(laser[Laser_id]->GetCount());
-        for(uint i=0; i< laser[Laser_id]->GetCount(); i++)
-        {
-	    	retval[i] = QPointF(laser[Laser_id]->GetPoint(i).px, laser[Laser_id]->GetPoint(i).py);    
-		}
-		//qDebug("Returning ... %d", retval.size());
-        return retval;
-    }
+	    dataLock.lockForWrite();
+	    retval = laserScanData[Laser_id];
+	    dataLock.unlock();
+	    return retval;
+	}
     else
     {
         return QVector<QPointF>(0);
@@ -295,15 +282,32 @@ void PlayerInterface::run ()
     qDebug("\t Testing Player Server for Data Read:");    
     qDebug("\t\t - Test Passed, You can read Data from Player Server Now");    
     qDebug("\t\t - Connection Established"); 
-    qDebug("/********************************************************************/"); 	
-	int	mapCounter=0;
+    qDebug("/********************************************************************/");
+//    long int cnt=0;
     while(true)
     {
     	// Read Only if new Data is Available
 		//pc->ReadIfWaiting();
 		pc->Read();
+//		qDebug("\t\t PLAYER THREAD LOOP START %d",++cnt);		
     	if(!emergencyStopped)
     	{
+		    for(int laser_id=0; laser_id < MAX_LASERS; laser_id++)
+		    {
+			    if(laserEnabled[laser_id])
+			    {
+			    	if (laserScanData[laser_id].size())
+			    		laserScanData[laser_id].clear();
+			        for(uint i=0; i< laser[laser_id]->GetCount(); i++)
+			        {
+				    	laserScanData[laser_id].push_back(QPointF(laser[laser_id]->GetPoint(i).px, laser[laser_id]->GetPoint(i).py));    
+					}
+			    }
+			    else
+			    {
+			        //return QVector<QPointF>(0);
+			    }   
+		    }    		
 	        if(ctrEnabled)
 	        {
 	            drive->SetSpeed(speed,turnRate);
@@ -316,10 +320,19 @@ void PlayerInterface::run ()
 			}
 			if(mapEnabled)
 			{
-//				if(((mapCounter++)%10)==0)
-//					map->GetMap();
+//				map->GetMap();
 			    //qDebug("Map width %d, height %d resolution %f",map->width,map->height,map->resolution);
 			}
+		    if(localizer)
+		    {
+			    location.p.setX(localizer->GetHypoth(0).mean.px);
+			    location.p.setY(localizer->GetHypoth(0).mean.py);
+			    location.phi =  localizer->GetHypoth(0).mean.pa;
+			    if(localizer->GetHypoth(0).alpha>=0.9)
+			    	localized = true;
+			    else
+			    	localized = false;
+		    }			
     	}
 	    else
 	    {

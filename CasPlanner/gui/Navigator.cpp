@@ -153,10 +153,14 @@ void Navigator::StopNavigating()
 {
 	this->stop_navigating = true;
 }
+/*!
+ * This is the Navigation's Thread main, where the control and the path following takes place.
+ */
 void Navigator::run()
 {
 	ControlAction cntrl;
 	QTime amcl_timer,delta_timer,redraw_timer;
+	double closest_obst=10;
 	Pose loc;
 	if(!local_planner)
 	{
@@ -206,6 +210,7 @@ void Navigator::run()
 	{
 		delta_t = delta_timer.elapsed()/1e3;
 		delta_timer.restart();
+//		qDebug("HERE 1 in Loop, time took %f!!!",delta_t);
 		usleep(10000);
 		first = FindClosest(loc.p,path2Follow);
 		if(!first)
@@ -280,7 +285,6 @@ void Navigator::run()
 		distance = Dist(SegmentEnd,tracking_point);
 		Line l(SegmentStart,SegmentEnd);
 		displacement = Dist2Seg(l,tracking_point);
-
 		//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
 		//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
 		/* If we are too close to obstacles then let the local planner takes control
@@ -362,7 +366,7 @@ void Navigator::run()
 		 		temp= temp->next;
 		 	}
 			
-			/* Search Start location is the center of the Robot			
+			/*! Search Start location is the center of the Robot			
 			 * currently it's the center of the laser, this will have
 			 * to be modified to translate the laser location to the 
 			 * robot's coordinate : TODO
@@ -412,14 +416,14 @@ void Navigator::run()
 		 		}
 			}
 		}
-		/* Get the control Action to be applied, in this case it's a
+		/*! Get the control Action to be applied, in this case it's a
 		 * simple linear control. It's accurate enough for traversing 
 		 * the generated paths.
 		 */
 		cntrl = getAction(EstimatedPos.phi,angle,displacement,path2Follow->direction,linear_velocity);
 		//qDebug("Control Action Linear:%f Angular:%f",path2Follow->direction*cntrl.linear_velocity,
 		//cntrl.angular_velocity);
-		/* Angular Velocity Thrusholded, just trying not to
+		/*! Angular Velocity Thrusholded, just trying not to
 		 * exceed the accepted limits. Or setting up a safe 
 		 * turn speed.
 		 */
@@ -429,6 +433,7 @@ void Navigator::run()
 			cntrl.angular_velocity = -0.2;			
 		if(log)
 			fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.elapsed()/1e3,last_time);
+
 		robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
 		robotManager->commManager->setTurnRate(cntrl.angular_velocity);				
 
