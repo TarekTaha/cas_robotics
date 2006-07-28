@@ -52,7 +52,7 @@ ControlAction Controller::getAction(double angle_current,double angle_ref,double
 	if (Abs(orientation_error)>DTOR(15))
 	{
 		cntrl.linear_velocity  = 0;
-		cntrl.angular_velocity *= 4;
+//		cntrl.angular_velocity *= 4;
 	}
 	else
 		cntrl.linear_velocity = speed;

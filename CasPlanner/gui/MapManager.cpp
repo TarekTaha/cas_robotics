@@ -62,21 +62,21 @@ Map *MapManager::provideMapOG(QImage image)
 		for(int j=0;j<image.height();j++)
 		{
 			color = image.pixel(i,j);
-			if(negate)
+			if(!negate)
 			{
-			// White color is occupied and black is free
-			if ( double(qRed(color) + qGreen(color) + qBlue(color))/3*255.0 > 0.8)
-				retval->data[i][j]= true;
-			else 
+			// White color(255) is Free and Black(0) is Occupied
+			if ( double(qRed(color) + qGreen(color) + qBlue(color))/3*255.0 > 0.9)
 				retval->data[i][j]= false;
+			else 
+				retval->data[i][j]= true;
 			}
 			else
 			{
-			// White color is occupied and black is free
-			if ( double(qRed(color) + qGreen(color) + qBlue(color))/3*255.0 < 0.2)
-				retval->data[i][j]= true;
+			// White color(255) is Occupied and Black(0) is Free
+			if ( double(qRed(color) + qGreen(color) + qBlue(color))/3*255.0 < 0.1)
+				retval->data[i][j]= false;
 			else 
-				retval->data[i][j]= false;				
+				retval->data[i][j]= true;				
 			}
 		}
 	}
