@@ -34,7 +34,6 @@ Q_OBJECT
 		void setPtz(double pan, double tilt);
         double getSpeed(); 
         double getTurnRate();
-        double getClosestObst();
         bool getLocalized();
         Pose getLocation(); 
         void setSpeed(double speed);

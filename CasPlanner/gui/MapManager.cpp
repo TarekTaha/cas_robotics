@@ -8,11 +8,10 @@ MapManager::~MapManager()
 {
 }
 
-Map * MapManager::provideLaserOG(QVector<QPointF> laser_scan, double local_dist,Pose pose)
+Map * MapManager::provideLaserOG(QVector<QPointF> laser_scan, double local_dist,Pose pose,double res)
 {
-	
 	Map *retval;
-	double dist=0,res=0.05;
+	double dist=0;
 	int height,width;
 	// getting right Map dimensions
 	height = int(2.0*local_dist/res);
@@ -49,10 +48,9 @@ Map * MapManager::provideLaserOG(QVector<QPointF> laser_scan, double local_dist,
 	return retval;
 }
 
-Map *MapManager::provideMapOG(QImage image)
+Map *MapManager::provideMapOG(QImage image,double res)
 {
 	Map * retval;
-	double res = 0.05;	
 	bool negate=false;
 	QPointF center(image.width()/2.0,image.height()/2.0);
 	retval = new Map(image.width(),image.height(),res,center);
@@ -62,18 +60,19 @@ Map *MapManager::provideMapOG(QImage image)
 		for(int j=0;j<image.height();j++)
 		{
 			color = image.pixel(i,j);
+			double color_ratio = (qRed(color) + qGreen(color) + qBlue(color))/(3.0*255.0);
 			if(!negate)
 			{
-			// White color(255) is Free and Black(0) is Occupied
-			if ( double(qRed(color) + qGreen(color) + qBlue(color))/3*255.0 > 0.9)
-				retval->data[i][j]= false;
-			else 
-				retval->data[i][j]= true;
+				// White color(255) is Free and Black(0) is Occupied
+				if (  color_ratio > 0.9)
+					retval->data[i][j]= false;
+				else
+					retval->data[i][j]= true;
 			}
 			else
 			{
 			// White color(255) is Occupied and Black(0) is Free
-			if ( double(qRed(color) + qGreen(color) + qBlue(color))/3*255.0 < 0.1)
+			if ( color_ratio < 0.1)
 				retval->data[i][j]= false;
 			else 
 				retval->data[i][j]= true;				

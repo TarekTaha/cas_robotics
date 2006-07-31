@@ -141,14 +141,14 @@ void PlanningManager::SetMap(QImage map)
 {
 	if(!this->pathPlanner)
 		this->start();	
-	pathPlanner->SetMap(provideMapOG(map));	
+	pathPlanner->SetMap(provideMapOG(map,pixel_res));	
 }
 
 void PlanningManager::SetMap(QVector<QPointF> laser_scan,double local_dist,Pose pose)
 {
 	if(!this->pathPlanner)
 		this->start();
-	pathPlanner->SetMap(provideLaserOG(laser_scan,local_dist,pose));	
+	pathPlanner->SetMap(provideLaserOG(laser_scan,local_dist,pose,pixel_res));	
 }
 
 void PlanningManager::GenerateSpace()
