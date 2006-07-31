@@ -104,7 +104,6 @@ double Navigator::NearestObstacle(QVector<QPointF> laser_scan,Pose pose)
 		for(int j=0;j<4;j++)
 		{
 			L1.SetStart(temp[j%4]);      L1.SetEnd(temp[(j+1)%4]);
-//			L2.SetStart(pose.p);         L2.SetEnd(ray_end);
 			L2.SetStart(QPointF(0,0));   L2.SetEnd(ray_end);
 			if(LineInterLine(L1,L2,intersection))
 			{

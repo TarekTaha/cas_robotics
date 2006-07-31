@@ -32,48 +32,6 @@ void PlayerInterface::emergencyRelease()
     dataLock.unlock();
 }
 
-double PlayerInterface::getSpeed()
-{
-    dataLock.lockForRead();
-    double retval = getspeed; 
-    dataLock.unlock(); 
-    return retval; 
-}
-
-double PlayerInterface::getTurnRate()
-{
-    dataLock.lockForRead();
-    double retval = getturnrate; 
-    dataLock.unlock(); 
-    return retval;
-}
-
-bool PlayerInterface::getLocalized()
-{
-    dataLock.lockForRead();
-    double retval = localized; 
-    dataLock.unlock(); 
-    return retval; 	
-}
-
-Pose PlayerInterface::getLocation()
-{
-    dataLock.lockForRead();
-    Pose retval = location; 
-//    if(localizer)
-//    {
-//	    retval.p.setX(localizer->hypoths[0].mean[0]);
-//	    retval.p.setY(localizer->hypoths[0].mean[1]);
-//	    retval.phi = localizer->hypoths[0].mean[2];
-//	    if(localizer->hypoths[0].weight>=0.9)
-//	    	localized = true;
-//	    else
-//	    	localized = false;
-//    }
-    dataLock.unlock(); 
-    return retval; 	
-}
-
 void PlayerInterface::stop()
 {
     // Do nothing.  
@@ -156,23 +114,36 @@ void PlayerInterface::enableLocalizer(int localizerId)
 	localizerEnabled = true;
 }
 
-double PlayerInterface::getClosestObst()
+double PlayerInterface::getSpeed()
 {
-	double dist,min_dist = 1000;
-	for(int Laser_id = 0; Laser_id < MAX_LASERS; Laser_id++)
-	{
-		if(laserEnabled[Laser_id])
-	    {
-	    	//TODO: ADD the appropriate pose translation
-		    for(uint i=0; i< laser[Laser_id]->GetCount(); i++)
-		    {
-		    	dist = Dist(QPointF(0,0),QPointF(laser[Laser_id]->GetPoint(i).px, laser[Laser_id]->GetPoint(i).py));
-		    	if(dist < min_dist)
-		    		min_dist = dist;
-			}
-		}
-	}
-	return min_dist;
+    dataLock.lockForRead();
+    double retval = getspeed; 
+    dataLock.unlock(); 
+    return retval; 
+}
+
+double PlayerInterface::getTurnRate()
+{
+    dataLock.lockForRead();
+    double retval = getturnrate; 
+    dataLock.unlock(); 
+    return retval;
+}
+
+bool PlayerInterface::getLocalized()
+{
+    dataLock.lockForRead();
+    double retval = localized; 
+    dataLock.unlock(); 
+    return retval; 	
+}
+
+Pose PlayerInterface::getLocation()
+{
+    dataLock.lockForRead();
+    Pose retval = location; 
+    dataLock.unlock(); 
+    return retval; 	
 }
 
 QVector<QPointF> PlayerInterface::getLaserScan(int Laser_id)
