@@ -54,8 +54,8 @@
 #include "defs.h"
 //#define UNLOCK 	pthread_mutex_unlock(&sslock);
 //#define LOCK    pthread_mutex_lock(&sslock);
-#define UNLOCK 	
-#define LOCK    
+#define UNLOCK 	this->Unlock()
+#define LOCK    this->Lock()
 
 /** @addtogroup drivers Drivers */
 /** @{ */
