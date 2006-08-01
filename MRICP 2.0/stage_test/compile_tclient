@@ -1,0 +1,2 @@
+g++ `sdl-config --cflags --libs` testingclient.cc -o testingclient /usr/local/lib/libplayerclient.a
+
