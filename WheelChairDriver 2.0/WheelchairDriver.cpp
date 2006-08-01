@@ -159,16 +159,9 @@ driver
 Tarek Taha
 */
 /** @} */
-  /////////////////////////////////////////////////////////////
- ///               WheelChair Interface Class              ///
-/////////////////////////////////////////////////////////////
-//char Left_Encoder_Port[MAX_FILENAME_SIZE];
-//char Right_Encoder_Port[MAX_FILENAME_SIZE];
-//int first_ltics,first_rtics,last_ltics, last_rtics;
-//EncoderClass * LeftEncoder;
-//EncoderClass * RightEncoder;
+
 class WheelchairDriver : public Driver
- {
+{
 	public:
 	    // Must implement the following methods.
 	    virtual int Setup();
@@ -177,14 +170,16 @@ class WheelchairDriver : public Driver
 	                               player_msghdr * hdr, 
 	                               void * data);
 				int WheelChair_Unit_Reset(void);
+   		virtual int Subscribe(player_devaddr_t id);
+    	virtual int Unsubscribe(player_devaddr_t id);
 		WheelchairDriver(ConfigFile* cf, int section); 
     private:	
     	virtual void Main();
    		void CheckConfig(); 	//checks for configuration requests
-		void CheckCommands();   //checks for commands
+		int HandleCommands(player_msghdr *hdr,void * data);
 	 	void RefreshData();     //refreshs and sends data    
 		int  ComputeTickDiff(int from, int to); 
-		int  HandleConfig(void *client, unsigned char *buffer, size_t len); //handles forwarded configuration requests 
+		int  HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr,void * data);
 		void UpdateOdom(int ltics, int rtics);  // Updates the Odometry 
 		int  GetReading(char Channel);          // Gets reading from wheelchair control unit
 		int  WCControl(int WCcmd, bool param);  // Enables communication with the control unit through serial port
@@ -192,17 +187,11 @@ class WheelchairDriver : public Driver
 	// Position interface
 	private: 	
 	  	player_devaddr_t position_addr;
+	  	// Odometric position (meters,meters,radians)
   	    player_position2d_data_t posdata;
-//	 	player_position_data_t posdata;
-//		player_position_cmd_t command;
-//		player_position_geom_t geom;
-	// Pluggin interface (wheelchair) represented by the Void OPAQUE interface
-	private:	
 		player_devaddr_t opaque_addr;
 		player_opaque_data_t w_data;
 		player_wheelchair_data_t * wheelchair_data;
-	  	player_wheelchair_speed_cmd_t wheelchair_cmd;
-	// Variables
 	public :        
 		FILE *file;
 		int x,y;
@@ -212,9 +201,8 @@ class WheelchairDriver : public Driver
 		char Right_Encoder_Port[MAX_FILENAME_SIZE];
 		int mode,power; // Holds the status of the power and the control mode
 		int joyx,joyy;  // Holds the value of the X and Y josystick coordinates
-		int Rate;
+		int Rate, opaque_subscriptions, position_subscriptions;
 		unsigned char MoveMode;
-		double px, py, pa;  // Odometric position (meters,meters,radians)
 		int first_ltics,first_rtics,last_ltics, last_rtics;
 		double vint,vdem,vset,vact,vdiff,kvp,kvi,kvd,vact_last,vdem_last; // Liner Velocity Control Parameters.
 		double wint,wdem,wset,wact,wdiff,kwp,kwi,kwd,wact_last,wdem_last; // Angular Velocity Control Parameters.
@@ -383,12 +371,10 @@ int WheelchairDriver::Setup()
 	last_rtics=0;
 	gettimeofday(&lasttime,NULL);
 	gettimeofday(&last_position_update,NULL);
-	this->px=0;
-	this->py=0;
-	this->pa=0;
-	x=y=0;
-  	oldxspeed=0;
-  	oldyaw=0;
+	this->posdata.pos.px = this->posdata.pos.py = this->posdata.pos.pa=0;
+	opaque_subscriptions = position_subscriptions = 0;
+	x = y = 0;
+  	oldxspeed = oldyaw=0;
 	vint=vdem=vset=vact=vdiff=vact_last=vdem_last=0; // Liner   Velocity Control Parameters Reset
 	wint=wdem=wset=wact=wdiff=wact_last=wdem_last=0; // Angular Velocity Control Parameters Reset
 	kvp=0.5; kvi=2; kvd=0.02;
@@ -434,340 +420,335 @@ int WheelchairDriver::Shutdown()
 	return(0);
 }
 
+int WheelchairDriver::Subscribe(player_devaddr_t addr)
+{
+	int retval;
+  	// do the subscription
+ 	if((retval = Driver::Subscribe(addr)) == 0)
+  	{
+    	// also increment the appropriate subscription counter
+    	if(Device::MatchDeviceAddress(addr, this->position_addr))
+      		this->position_subscriptions++;
+    	else 
+    	if(Device::MatchDeviceAddress(addr, this->opaque_addr))
+      		this->opaque_subscriptions++;
+  	}
+  	return(retval);
+}
+
+int WheelchairDriver::Unsubscribe(player_devaddr_t addr)
+{
+	int retval;
+
+  	// do the unsubscription
+  	if((retval = Driver::Unsubscribe(addr)) == 0)
+  	{
+	    // also decrement the appropriate subscription counter
+	    if(Device::MatchDeviceAddress(addr, this->position_addr))
+	    {
+	    	this->position_subscriptions--;
+	      	assert(this->position_subscriptions >= 0);
+	    }
+	    else if(Device::MatchDeviceAddress(addr, this->opaque_addr))
+	    {
+	      	this->opaque_subscriptions--;
+	      	assert(this->opaque_subscriptions >= 0);
+	    }
+  	}
+
+  return(retval);
+};
+
 // this function will be run in a separate thread
 void WheelchairDriver::Main()
 {
-	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED,NULL); // Synchronously cancelable thread.
+	struct timespec sleeptime;
+ 	int last_pos_subscrcount=0,last_opaque_subscrcount=0;
+ 	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED,NULL); // Synchronously cancelable thread.
 	while(1) 
 	{
-		pthread_testcancel();  // Thread cancellation point.
-		usleep(100000);        // repeat frequency (default to 100 Hz)
-		CheckConfig();         // Check for Config Requests
-		CheckCommands();       // Check for Commands
+	    // Sleep for 1ms (will actually take longer than this).
+		sleeptime.tv_sec = 0;
+	    sleeptime.tv_nsec = 1000000L;
+	    nanosleep(&sleeptime, NULL);		
+	    // Thread cancellation point.
+		pthread_testcancel();  
+		
+		// we want to enable the motors if the first client just subscribed to the position device, 
+		// and we want to stop and disable the motors if the last client unsubscribed.
+	    this->Lock();
+	    if((!last_opaque_subscrcount && this->opaque_subscriptions) || (!last_pos_subscrcount && this->position_subscriptions))
+	    	WCControl(POWER,ON);
+	    else if((last_opaque_subscrcount && !(this->opaque_subscriptions)) || (last_pos_subscrcount && !(this->position_subscriptions)))
+	      	WCControl(POWER,OFF);
+	    last_opaque_subscrcount = this->opaque_subscriptions;
+	    last_pos_subscrcount = this->position_subscriptions;
+	    this->Unlock();		
+	    
+	    this->ProcessMessages();		
+		//usleep(100000);        // repeat frequency (default to 100 Hz)
+		//CheckConfig();         // Check for Config Requests
+		//CheckCommands();       // Check for Commands
 		RefreshData();         // Update posdata
 	}
 	pthread_exit(NULL);
 }
-void WheelchairDriver::CheckConfig()
-{
-  void *client;
-  unsigned char buffer[PLAYER_MAX_REQREP_SIZE];
-  size_t buffer_len;
-  if((buffer_len=this->GetConfig(this->opaque_addr, &client, &buffer, sizeof(buffer), NULL)) > 0)
-  {
-    if(debug)
-	printf("\n	--> Recieved request\n");
-    if (HandleConfig(client,  buffer, buffer_len) < 0)
-		fprintf(stderr, "WheelChair: error handling config request\n");
-   fflush(stdout);
-  }
 
-  if ((buffer_len=this->GetConfig(this->position_addr, &client, &buffer, sizeof(buffer), NULL)) > 0)
-  {
-	//if(debug)
-	printf("\n	--> Recieved Position request\n");
-	switch (buffer[0])
-	{
-	case PLAYER_POSITION_GET_GEOM_REQ:  // Return the robot geometry.
-			
-			if(buffer_len != 1) 
-			{
-				PLAYER_WARN("Get robot geom config is wrong size; ignoring");
-				if(this->PutReply(this->position_addr, client, PLAYER_MSGTYPE_RESP_NACK, NULL))
-					PLAYER_ERROR("failed to PutReply");
-				break;
-			}
-			else
-			{
- 			geom.subtype = PLAYER_POSITION_GET_GEOM_REQ;
-			geom.pose[0] = htons((short) (+300));//(PoseX));
-			geom.pose[1] = htons((short) (0));   //(PoseY));
-			geom.pose[2] = htons((short) (0));   //(PoseTheta));
-			geom.size[0] = htons((short) (1150));
-			geom.size[1] = htons((short) (650));
-			printf("\n GET Odom request Recieved");
-			if (this->PutReply(this->position_addr, client, PLAYER_MSGTYPE_RESP_ACK, &this->geom, sizeof(this->geom), NULL)!=0)
-				PLAYER_ERROR("failed to PutReply");
-			}
-			break;
-	case PLAYER_POSITION_SET_ODOM_REQ:  // Sets the robot geometry.
-			
-			if(buffer_len != sizeof(player_position_set_odom_req_t)) 
-			{
-				PLAYER_WARN("Set robot Odom config is wrong size; ignoring");
-				if(this->PutReply(this->position_addr, client, PLAYER_MSGTYPE_RESP_NACK, NULL))
-					PLAYER_ERROR("failed to PutReply");
-				break;
-			}
-			else
-			{
- 			player_position_set_odom_req_t set_odom_req;
-          		set_odom_req = *((player_position_set_odom_req_t*)buffer);
-		        this->px = ((int)ntohl(set_odom_req.x))/1 ;//- this->sippacket->xpos;
-			this->py = ((int)ntohl(set_odom_req.y))/1 ;//- this->sippacket->ypos;
-			this->px/=1000;
-			this->py/=1000;
-          		this->pa = DTOR(((int)ntohl(set_odom_req.theta)));// - this->sippacket->angle;			
-			printf("\n Set Odom request Recieved X=%.3f y=%.3f theta=%.3f",this->px,this->py,this->pa);
-			if (this->PutReply(this->position_addr, client, PLAYER_MSGTYPE_RESP_ACK, NULL,0, NULL)!=0)
-				PLAYER_ERROR("failed to PutReply");
-			}
-			break;
-	case PLAYER_POSITION_RESET_ODOM_REQ:  // Resets the robot geometry.
-			
-			if(buffer_len != sizeof(player_position_resetodom_config_t)) 
-			{
-				PLAYER_WARN("Get robot geom config is wrong size; ignoring");
-				if(this->PutReply(this->position_addr, client, PLAYER_MSGTYPE_RESP_NACK, NULL))
-					PLAYER_ERROR("failed to PutReply");
-				break;
-			}
-			else
-			{
- 			player_position_set_odom_req_t set_odom_req;
-          		set_odom_req = *((player_position_set_odom_req_t*)buffer);
-		        this->px = 0;
-			this->py = 0;
-          		this->pa = 0;
-			last_ltics=0;
-			last_rtics=0;
-			if (this->PutReply(this->position_addr, client, PLAYER_MSGTYPE_RESP_ACK, NULL,0, NULL)!=0)
-				PLAYER_ERROR("failed to PutReply");
-			}
-			break;
-	case PLAYER_POSITION_MOTOR_POWER_REQ:
-        /* motor state change request 
-         *   1 = enable motors
-         *   0 = disable motors (default)
-         */
-		        if(buffer_len != sizeof(player_position_power_config_t))
-        		{
-          		PLAYER_WARN("Arg to motor state change request wrong size; ignoring");
-          		this->PutReply(this->position_addr, client, PLAYER_MSGTYPE_RESP_NACK, NULL);
-        		}
-        		else
-        		{
-        		player_position_power_config_t power_config;
-			unsigned int retbyte;
-        		power_config = *((player_position_power_config_t*)buffer);
-			if (power_config.value==0)
-				{
-				LOCK;
-				Control_Unit_Serial->Write("O0000\r", 6);
-				Control_Unit_Serial->ReadByte(&retbyte);
-				Control_Unit_Serial->ReadByte(&retbyte);
-				UNLOCK;
-				}
-			else
-				{
-				LOCK;
-				Control_Unit_Serial->Write("O0000\r", 6);
-				Control_Unit_Serial->ReadByte(&retbyte);
-				Control_Unit_Serial->ReadByte(&retbyte);
-				Control_Unit_Serial->Write("L0800\r", 6);
-				Control_Unit_Serial->ReadByte(&retbyte);
-				Control_Unit_Serial->ReadByte(&retbyte);
-				Control_Unit_Serial->Write("L1800\r", 6);
-				Control_Unit_Serial->ReadByte(&retbyte);
-				Control_Unit_Serial->ReadByte(&retbyte);
-				UNLOCK;
-				}
-			if (this->PutReply(this->position_addr, client, PLAYER_MSGTYPE_RESP_ACK, NULL,0, NULL)!=0)
-				PLAYER_ERROR("failed to PutReply");
-        		}
-        		break;
-	default:
-		PLAYER_WARN1("\nreceived unknown config type %d", buffer[0]);
-    		this->PutReply(this->position_addr,client, PLAYER_MSGTYPE_RESP_NACK, NULL, 0, NULL);  
-	}
-  }
-  return;
- }
- 
- void WheelchairDriver::CheckCommands()
+// MessageHandler
+int WheelchairDriver::ProcessMessage(MessageQueue * resp_queue, player_msghdr * hdr, void * data)
 {
-  size_t buffer_len;
-  double vdem_new,wdem_new;
-if ((buffer_len = this->GetCommand(this->opaque_addr,&this->wheelchair_cmd, sizeof(this->wheelchair_cmd), NULL))>0)
+  // Look for configuration requests
+  if(hdr->type == PLAYER_MSGTYPE_REQ)
+    return(this->HandleConfigs(resp_queue,hdr,data));
+  else if(hdr->type == PLAYER_MSGTYPE_CMD)
+    return(this->HandleCommands(hdr,data));
+  else
+    return(-1);	
+};
+
+int WheelchairDriver::HandleCommands(player_msghdr *hdr,void * data)
+{
+	int retval = -1;
+  	double vdem_new,wdem_new;
+  	if(Message::MatchMessage(hdr,
+                           PLAYER_MSGTYPE_CMD,
+                           PLAYER_POSITION2D_CMD_VEL,
+                           this->position_addr))
   	{
-	if (buffer_len!=sizeof(this->wheelchair_cmd))
-		return;
-  	this->wheelchair_cmd.xspeed = ntohl(this->wheelchair_cmd.xspeed);// In mm/sec
-	this->wheelchair_cmd.yspeed = ntohl(this->wheelchair_cmd.yspeed);// in deg/sec
-	this->wheelchair_cmd.yawspeed = ntohl(this->wheelchair_cmd.yawspeed); // Not currently used , should be zero
-	vdem_new = this->wheelchair_cmd.xspeed/1e3;
-	wdem_new = this->wheelchair_cmd.yspeed/1e3;
-	if (vdem_new != vdem_last || wdem_new != wdem_last)
+	    // get and send the latest motor command
+	    player_position2d_cmd_vel_t position_cmd;
+	    position_cmd = *(player_position2d_cmd_vel_t*)data;
+        vdem_new = (int)rint(position_cmd.vel.px);
+  		wdem_new = (int)rint(position_cmd.vel.pa);
+		if (vdem_new != vdem_last || wdem_new != wdem_last)
 		{
-		// Very Dirty Patch here, this has to be modified later on
-		if (vdem_new != vdem_last)
-			vint=vdiff=vact_last=0; // Liner   Velocity Control Parameters Reset
-		if (wdem_new != wdem_last && wdem_last == 0)
-			wint=wdiff=wact_last=0; // Angular Velocity Control Parameters Reset
-		vdem=vdem_new;
-		wdem=wdem_new;
-		if(this->debug)
-			printf("\nOPAQUE Interface Command Recieved ==> Xspeed=:%.3f Yaw=:%.3f",vdem,wdem);
-		fflush(stdout);
+			// Very Dirty Patch here, this has to be modified later on
+			if (vdem_new != vdem_last)
+				vint=vdiff=vact_last=0; // Liner   Velocity Control Parameters Reset
+			if (wdem_new != wdem_last && wdem_last == 0)
+				wint=wdiff=wact_last=0; // Angular Velocity Control Parameters Reset
+			vdem=vdem_new;
+			wdem=wdem_new;
+			if(this->debug)
+				printf("\Position Interface Command Recieved ==> Xspeed=:%.3f Yaw=:%.3f",vdem,wdem);
+			fflush(stdout);
 		}
-	}
-/*
-if((buffer_len = this->GetCommand(this->position_addr, &this->command, sizeof(this->command), NULL)) > 0 )
-	{
-	if (buffer_len!=sizeof(this->command))
-		return;
-	this->command.xspeed = ntohl(this->command.xspeed);
-	this->command.yspeed = ntohl(this->command.yspeed);
-	this->command.yawspeed = ntohl(this->command.yawspeed);
-	vdem_new = this->command.xspeed/1e3;
-	wdem_new = this->command.yawspeed/1e3;
-	if (vdem_new != vdem_last || wdem_new != wdem_last)
-		{
-		// Very Dirty Patch here, this has to be modified later on
-		if (vdem_new != vdem_last)
-			vint=vdiff=vact_last=0; // Liner   Velocity Control Parameters Reset
-		if (wdem_new != wdem_last && wdem_last == 0)
-			wint=wdiff=wact_last=0; // Angular Velocity Control Parameters Reset
-		vdem=vdem_new;
-		wdem=wdem_new;
-//		if(this->debug)
-			printf("\nPosition Interface Command Recieved ==> Xspeed=:%.3f Yaw=:%.3f",vdem,wdem);
-		fflush(stdout);
-		}
-	}*/
-  return;
+	    retval = 0;
+  	}
+  	return retval;
 }
 
-int WheelchairDriver::HandleConfig(void *client, unsigned char *buffer, size_t len) 
+int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr,void * data)
 {
-    player_wheelchair_config_t* config;
-
-    switch(buffer[0]) {
-     	case PLAYER_WHEELCHAIR_GET_JOYX_REQ:
-			printf("Get JOYX Request");
-			if(len != sizeof(player_wheelchair_config_t)) 
-			{
-				PLAYER_WARN("Request is of wrong size; ignoring");
-				this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_NACK, NULL);
+	// Handle Position REQ
+	// I didn't like the stupid MessageMatch Method
+	// check for position config requests
+	if(
+	   (hdr->type == (uint8_t)PLAYER_MSGTYPE_REQ) && (hdr->addr.host   == position_addr.host)   &&
+	   (hdr->addr.robot  == position_addr.robot) &&  (hdr->addr.interf == position_addr.interf) &&
+       (hdr->addr.index  == position_addr.index)
+       )
+    {     
+		switch (hdr->subtype)
+		{
+			case PLAYER_POSITION2D_REQ_GET_GEOM:  
+				/* Return the robot geometry. */
+			    if(hdr->size != 0)
+			    {
+			      PLAYER_WARN("Arg get robot geom is wrong size; ignoring");
+			      return(-1);
+			    }
+			    player_position2d_geom_t geom;
+			    /*! Center of Rotation Pose relative to the center of Area
+			     */
+			    geom.pose.px = 0.3;
+			    geom.pose.py = 0.0;
+			    geom.pose.pa = 0.0;
+			    geom.size.sl = 1.2;
+			    geom.size.sw = 0.65;
+			    this->Publish(this->position_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK,PLAYER_POSITION2D_REQ_GET_GEOM,
+			    			  (void*)&geom, sizeof(geom), NULL);
+			    return(0);
 				break;
-			}
-			config = (player_wheelchair_config_t*)buffer;// in case i needed to get a value later
-			this->joyx = GetReading('A');
-			this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_ACK, NULL);
-			break;
-     	case PLAYER_WHEELCHAIR_GET_JOYY_REQ:
-			printf("Get JOYY Request");
-			if(len != sizeof(player_wheelchair_config_t)) 
-			{
-				PLAYER_WARN("Request is of wrong size; ignoring");
-				this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_NACK, NULL);
+			case PLAYER_POSITION2D_REQ_SET_ODOM:  // Sets the robot geometry.
+			    if(hdr->size != sizeof(player_position2d_set_odom_req_t))
+			    {
+			      PLAYER_WARN("Arg to odometry set requests wrong size; ignoring");
+			      return(-1);
+			    }
+		    	player_position2d_set_odom_req_t * set_odom_req;
+		    	set_odom_req = (player_position2d_set_odom_req_t*) data;
+			    this->posdata.pos.px = (int)rint(set_odom_req->pose.px);
+				this->posdata.pos.py = (int)rint(set_odom_req->pose.py);
+		  		this->posdata.pos.pa = (int)rint(set_odom_req->pose.pa);
+				printf("\n Set Odom request Recieved X=%.3f y=%.3f theta=%.3f",this->posdata.pos.px,this->posdata.pos.py,this->posdata.pos.pa);
+			    this->Publish(this->position_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_POSITION2D_REQ_SET_ODOM);
+			    return(0);
 				break;
-			}
-			config = (player_wheelchair_config_t*)buffer;// in case i needed to get a value later
-			this->joyy = GetReading('B');
-			this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_ACK, NULL);
-			break;
-
-	case PLAYER_WHEELCHAIR_GET_MODE_REQ:
-			printf("Set Mode Request");
-			if(len != sizeof(player_wheelchair_config_t)) 
-			{
-				PLAYER_WARN("Request is of wrong size; ignoring");
-				this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_NACK, NULL);
+			case PLAYER_POSITION2D_REQ_RESET_ODOM:
+		    	/* reset position to 0,0,0: no args */
+			    if(hdr->size != 0)
+			    {
+			      PLAYER_WARN("Arg to reset position request is wrong size; ignoring");
+			      return(-1);
+			    }
+		        this->posdata.pos.px = 0;
+				this->posdata.pos.py = 0;
+		   		this->posdata.pos.pa = 0;
+				last_ltics = last_rtics=0;
+			    this->Publish(this->position_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_POSITION2D_REQ_RESET_ODOM);
+			    return(0);
 				break;
-			}
-			config = (player_wheelchair_config_t*)buffer;// in case i needed to get a value later
-			int mm;
-			if( (mm = WCControl(GETMODE,0))!=-1 )
-				this->mode = mm ;
-			this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_ACK, NULL);
-			break;
-    	case PLAYER_WHEELCHAIR_SET_MODE_REQ:
-			printf("Set Mode Request");
-			if(len != sizeof(player_wheelchair_config_t)) 
-			{
-				PLAYER_WARN("Request is of wrong size; ignoring");
-				this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_NACK, NULL);
-				break;
-			}
-			config = (player_wheelchair_config_t*)buffer;
-			if (WCControl(SETMODE, (bool)config->value)!=-1)
-				this->mode = (bool)config->value;
-			this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_ACK, NULL);
-			break;
-    	case PLAYER_WHEELCHAIR_SOUND_HORN_REQ:
-			printf("Sound Horn Request");
-			if(len != sizeof(player_wheelchair_config_t)) 
-			{
-				PLAYER_WARN("Request is of wrong size; ignoring");
-				this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_NACK, NULL);
-				break;
-			}
-			config = (player_wheelchair_config_t*)buffer;
-			WCControl(HORN, config->value);
-			this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_ACK, NULL);
-			break;
-    	case PLAYER_WHEELCHAIR_INC_GEAR_REQ:
-			printf("Increment Gear Request");
-			if(len != sizeof(player_wheelchair_config_t)) 
-			{
-				PLAYER_WARN("Request is of wrong size; ignoring");
-				this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_NACK, NULL);
-				break;
-			}
-			config = (player_wheelchair_config_t*)buffer;
-			for(int i=0;i<config->value;i++)
+			case PLAYER_POSITION2D_REQ_MOTOR_POWER:
+			    /* motor state change request
+			     *   1 = enable motors
+			     *   0 = disable motors (default)
+			     */
+			    if(hdr->size != sizeof(player_position2d_power_config_t))
+			    {
+			      PLAYER_WARN("Arg to motor state change request wrong size; ignoring");
+			      return(-1);
+			    }
+			    player_position2d_power_config_t* power_config;
+			    power_config = (player_position2d_power_config_t*)data;
+				unsigned int retbyte;
+				if (power_config->state == 0)
 				{
-					WCControl(GEAR,INCREMENT);
-					usleep(LATCHDELAY);
+					LOCK;
+					Control_Unit_Serial->Write("O0000\r", 6);
+					Control_Unit_Serial->ReadByte(&retbyte);
+					Control_Unit_Serial->ReadByte(&retbyte);
+					UNLOCK;
 				}
-			this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_ACK, NULL);
-			break;
-    	case PLAYER_WHEELCHAIR_DEC_GEAR_REQ:
-			printf("Decrement Gear Request");
-			if(len != sizeof(player_wheelchair_config_t)) 
-			{
-				PLAYER_WARN("Request is of wrong size; ignoring");
-				this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_NACK, NULL);
-				break;
-			}
-			config = (player_wheelchair_config_t*)buffer;
-			for(int i=0;i<config->value;i++)
+				else
 				{
-					WCControl(GEAR,DECREMENT);
-					usleep(LATCHDELAY);
+					LOCK;
+					Control_Unit_Serial->Write("O0000\r", 6);
+					Control_Unit_Serial->ReadByte(&retbyte);
+					Control_Unit_Serial->ReadByte(&retbyte);
+					Control_Unit_Serial->Write("L0800\r", 6);
+					Control_Unit_Serial->ReadByte(&retbyte);
+					Control_Unit_Serial->ReadByte(&retbyte);
+					Control_Unit_Serial->Write("L1800\r", 6);
+					Control_Unit_Serial->ReadByte(&retbyte);
+					Control_Unit_Serial->ReadByte(&retbyte);
+					UNLOCK;
 				}
-			this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_ACK, NULL);
-			break;
-     	case PLAYER_WHEELCHAIR_GET_POWER_REQ:
-			printf("Get Power Request");
-			if(len != sizeof(player_wheelchair_config_t)) 
-			{
-				PLAYER_WARN("Request is of wrong size; ignoring");
-				this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_NACK, NULL);
-				break;
-			}
-			config = (player_wheelchair_config_t*)buffer; // in case i needed to get a value later
-			this->power = ((GetReading('A') + GetReading('E')) > 1500)?ON:OFF;
-			this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_ACK, NULL);
-			break;
-    	case PLAYER_WHEELCHAIR_SET_POWER_REQ:
-			printf("Set Power Request");
-			if(len != sizeof(player_wheelchair_config_t)) 
-			{
-				PLAYER_WARN("Request is of wrong size; ignoring");
-				this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_NACK, NULL);
-				break;
-			}
-			config = (player_wheelchair_config_t*)buffer;
-			WCControl(POWER, config->value);
-			this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_ACK, NULL);
-			break;
-		default:
-			PLAYER_WARN1("\nreceived unknown config type %d", buffer[0]);
-    			this->PutReply(this->opaque_addr,client, PLAYER_MSGTYPE_RESP_NACK, NULL, 0, NULL);
-			
-	}
+				this->Publish(this->position_addr, resp_queue, PLAYER_MSGTYPE_RESP_ACK, PLAYER_POSITION2D_REQ_MOTOR_POWER);
+		    	return(0);
+		        break;
+			default:
+				return -1;
+		}
+    }
+	// check for opaque config requests
+	if(
+	   (hdr->type == (uint8_t)PLAYER_MSGTYPE_REQ) && (hdr->addr.host   == opaque_addr.host)    &&
+	   (hdr->addr.robot  == opaque_addr.robot)    && (hdr->addr.interf == opaque_addr.interf) &&
+       (hdr->addr.index  == opaque_addr.index) && (hdr->subtype == (uint8_t)PLAYER_OPAQUE_REQ)
+       )
+    {
+    	player_wheelchair_config_t * config;
+    	config = (player_wheelchair_config_t*) data;    	
+	    switch(hdr->subtype)
+	    {
+	     	case PLAYER_WHEELCHAIR_GET_JOYX_REQ:
+				printf("Get JOYX Request");
+				if(hdr->size != sizeof(player_wheelchair_config_t)) 
+				{
+					PLAYER_WARN("Request is of wrong size; ignoring");
+				    return(-1);
+					break;
+				}
+				this->joyx = GetReading('A');
+				return 0;
+	     	case PLAYER_WHEELCHAIR_GET_JOYY_REQ:
+				printf("Get JOYY Request");
+				if(hdr->size != sizeof(player_wheelchair_config_t)) 
+				{
+					PLAYER_WARN("Request is of wrong size; ignoring");
+				    return(-1);
+				}
+				this->joyy = GetReading('B');
+				return 0;	
+			case PLAYER_WHEELCHAIR_GET_MODE_REQ:
+				printf("Set Mode Request");
+				if(hdr->size != sizeof(player_wheelchair_config_t)) 
+				{
+					PLAYER_WARN("Request is of wrong size; ignoring");
+				    return(-1);
+				}
+				int mm;
+				if( (mm = WCControl(GETMODE,0))!=-1 )
+					this->mode = mm ;
+				return 0;
+	    	case PLAYER_WHEELCHAIR_SET_MODE_REQ:
+				printf("Set Mode Request");
+				if(hdr->size != sizeof(player_wheelchair_config_t)) 
+				{
+					PLAYER_WARN("Request is of wrong size; ignoring");
+				    return(-1);
+				}				
+				if (WCControl(SETMODE, (bool)config->value)!=-1)
+					this->mode = (bool)config->value;
+				return 0;
+	    	case PLAYER_WHEELCHAIR_SOUND_HORN_REQ:
+				printf("Sound Horn Request");
+				if(hdr->size != sizeof(player_wheelchair_config_t)) 
+				{
+					PLAYER_WARN("Request is of wrong size; ignoring");
+				    return(-1);
+				}
+				WCControl(HORN, config->value);
+				return 0;
+	    	case PLAYER_WHEELCHAIR_INC_GEAR_REQ:
+				printf("Increment Gear Request");
+				if(hdr->size != sizeof(player_wheelchair_config_t)) 
+				{
+					PLAYER_WARN("Request is of wrong size; ignoring");
+				    return(-1);
+				}
+				for(int i=0;i<config->value;i++)
+					{
+						WCControl(GEAR,INCREMENT);
+						usleep(LATCHDELAY);
+					}
+				return 0;
+	    	case PLAYER_WHEELCHAIR_DEC_GEAR_REQ:
+				printf("Decrement Gear Request");
+				if(hdr->size != sizeof(player_wheelchair_config_t)) 
+				{
+					PLAYER_WARN("Request is of wrong size; ignoring");
+				    return(-1);
+				}
+				for(int i=0;i<config->value;i++)
+					{
+						WCControl(GEAR,DECREMENT);
+						usleep(LATCHDELAY);
+					}
+				return 0;
+	     	case PLAYER_WHEELCHAIR_GET_POWER_REQ:
+				printf("Get Power Request");
+				if(hdr->size != sizeof(player_wheelchair_config_t)) 
+				{
+					PLAYER_WARN("Request is of wrong size; ignoring");
+				    return(-1);
+				}
+				this->power = ((GetReading('A') + GetReading('E')) > 1500)?ON:OFF;
+				return 0;
+			case PLAYER_WHEELCHAIR_SET_POWER_REQ:
+				printf("Set Power Request");
+				if(hdr->size != sizeof(player_wheelchair_config_t)) 
+				{
+					PLAYER_WARN("Request is of wrong size; ignoring");
+				    return(-1);
+				}
+				WCControl(POWER, config->value);
+				return 0;
+			default:
+				return -1;				
+		}
+    }
 	return 0;
 }
 
@@ -1020,30 +1001,7 @@ int WheelchairDriver::GetReading(char Channel)
 	else
 		return -1;
 };
-void WheelchairDriver::RefreshData()
-{
-  	// Write position data//
-	struct timeval now;
-	double time_since_last_update;
-	gettimeofday(&now,NULL);
-	time_since_last_update = (now.tv_sec + now.tv_usec/1e6) - (last_position_update.tv_sec + last_position_update.tv_usec/1e6);
-  	
-  	wheelchair_data.joyx  = HTOPL(this->joyx);
-  	wheelchair_data.joyy  = HTOPL(this->joyy);
-  	wheelchair_data.mode  = HTOPS(this->mode);
-  	wheelchair_data.power = HTOPS(this->power);
-  	uint size = sizeof(w_data) - sizeof(w_data.data) + w_data.data_count;
-    Publish(this->opaque_addr, NULL,PLAYER_MSGTYPE_DATA, PLAYER_OPAQUE_DATA_STATE,reinterpret_cast<void*>(&w_data), size, NULL);  	
 
-	posdata.pos.px = this->px; 
-	posdata.pos.py = this->py; 
-	posdata.pos.pa = this->pa;
-	posdata.vel.px = this->vact;
-	posdata.vel.py = this->wact;
-    Publish(this->position_addr, NULL,PLAYER_MSGTYPE_DATA, PLAYER_POSITION2D_DATA_STATE,(void*)&posdata, sizeof(posdata), NULL);
-
-	last_position_update = now;
-}
 void WheelchairDriver::UpdateOdom(int ltics, int rtics) 
 {
 	double delta_left, delta_right, theta, mid_d,sum,diff,circular_r,left_speed,right_speed,rotational_speed;
@@ -1080,29 +1038,53 @@ void WheelchairDriver::UpdateOdom(int ltics, int rtics)
  	mid_d = sum / 2.0;                                       //  Distance travelled by mid point
 	if ( diff==0 )//If we are moving straight, a specail case is needed cause our formula will crash since denomenator will be 0
 	{
-		px += (delta_left  * cos(pa)); // in meters
-		py += (delta_right * sin(pa)); // in meters
-		pa += (theta);   // no need for this in case of straight line -> delta_theta=0 but just for illustration i kept it
+		posdata.pos.px += (delta_left  * cos(posdata.pos.pa)); // in meters
+		posdata.pos.py += (delta_right * sin(posdata.pos.pa)); // in meters
+		posdata.pos.pa += (theta);   // no need for this in case of straight line -> delta_theta=0 but just for illustration i kept it
 	}
 	else // we are moving in an arc
 	{
 	circular_r = mid_d / theta ;                      // Circular Radius of Trajectory of robot's center	
-	px +=  circular_r * (sin(theta + pa) - sin(pa) ); // in meters
-	py -=  circular_r * (cos(theta + pa) - cos(pa) ); // in meters
-	pa +=  theta;
+	posdata.pos.px +=  circular_r * (sin(theta + posdata.pos.pa) - sin(posdata.pos.pa) ); // in meters
+	posdata.pos.py -=  circular_r * (cos(theta + posdata.pos.pa) - cos(posdata.pos.pa) ); // in meters
+	posdata.pos.pa +=  theta;
 	}
-	pa = NORMALIZE(pa); // Normalize the angle to be between -pi and +pi Normalize(z)= atan2(sin(z),cos(z))
+	posdata.pos.pa = NORMALIZE(posdata.pos.pa); // Normalize the angle to be between -pi and +pi Normalize(z)= atan2(sin(z),cos(z))
 	if( debug)
 	{
 		printf("\nDelta L=%5.4lf Delta R=%5.4lf Sum=%5.4lf Diff=%5.4lf Theta=%5.4lf Mid=%5.4lf Cir_r=%5.4lf", delta_left, delta_right, sum,diff,theta,mid_d,circular_r);
 		printf("\nLastL=%d LastR=%d LTicks= %d RTicks= %d LSpeed= %5.2lf m/sec RSpeed= %5.2lf m/sec diff=%lf",last_ltics,last_rtics,ltics,rtics,left_speed,right_speed,timediff);
-		printf("\nWHEELCHAIR: pose: %5.2lf,%5.2lf,%5.2lf", px,py,RTOD(pa));
+		printf("\nWHEELCHAIR: pose: %5.2lf,%5.2lf,%5.2lf", posdata.pos.px,posdata.pos.py,RTOD(posdata.pos.pa));
 	}
 	if(log)
 		fprintf(file,"%d %d %.5f %.5f %.5f %.5f ",ltics,rtics,left_speed,right_speed,rotational_speed,timediff);
 	last_ltics = ltics;
 	last_rtics = rtics;
 };
+
+void WheelchairDriver::RefreshData()
+{
+  	// Write position data//
+	struct timeval now;
+	double time_since_last_update;
+	gettimeofday(&now,NULL);
+	time_since_last_update = (now.tv_sec + now.tv_usec/1e6) - (last_position_update.tv_sec + last_position_update.tv_usec/1e6);
+  	
+  	wheelchair_data->joyx  = this->joyx;
+  	wheelchair_data->joyy  = this->joyy;
+  	wheelchair_data->mode  = this->mode;
+  	wheelchair_data->power = this->power;
+  	uint size = sizeof(w_data) - sizeof(w_data.data) + w_data.data_count;
+    Publish(this->opaque_addr, NULL,PLAYER_MSGTYPE_DATA, PLAYER_OPAQUE_DATA_STATE,reinterpret_cast<void*>(&w_data), size, NULL);  	
+
+	posdata.vel.px = this->vact;
+	posdata.vel.py = this->wact;
+  	// put odometry data
+    Publish(this->position_addr, NULL,PLAYER_MSGTYPE_DATA, PLAYER_POSITION2D_DATA_STATE,(void*)&posdata, sizeof(posdata), NULL);
+
+	last_position_update = now;
+}
+
 void WheelchairDriver::UpdateMotors(double xspeed, double yawspeed) 
 {
 	double yawval, xval;
