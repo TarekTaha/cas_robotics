@@ -7,7 +7,7 @@
 <toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.1009490785" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.875404340" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1545431724" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
-<option id="gnu.cpp.compiler.option.other.other.617177763" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 `pkg-config --cflags playercore`" valueType="string"/>
+<option id="gnu.cpp.compiler.option.other.other.617177763" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 `pkg-config --cflags playerc++ playercore`" valueType="string"/>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.490663631" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1654467841" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
