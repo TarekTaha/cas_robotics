@@ -530,7 +530,7 @@ int WheelchairDriver::HandleCommands(player_msghdr *hdr,void * data)
 			vdem=vdem_new;
 			wdem=wdem_new;
 			if(this->debug)
-				printf("\Position Interface Command Recieved ==> Xspeed=:%.3f Yaw=:%.3f",vdem,wdem);
+				printf("\nPosition Interface Command Recieved ==> Xspeed=:%.3f Yaw=:%.3f",vdem,wdem);
 			fflush(stdout);
 		}
 	    retval = 0;
