@@ -46,27 +46,20 @@
 #include <math.h>
 #include <fstream>
 #include <iostream>
-using namespace std;
 #include <signal.h>
 #include <netinet/in.h>
 // Player includes
-#include <player/drivertable.h>
-#include <player/driver.h>
-#include <player.h>
+#include <libplayercore/playercore.h>
+
 #include <assert.h>
-#include "devicetable.h"
-#include "error.h"
-#include "playertime.h"
 #include "icp.h"
 #include "map.h"
 #include "lasermodel.h"
 #include "Timer.h"
+
+using namespace std;
 using namespace Geom2D;
-/*  Host to network and Network to Host Castings    */
-#define HTOPS(x)  htonl(static_cast<int16_t>(rint(x)))
-#define HTOPL(x)  htonl(static_cast<int32_t>(rint(x))) 
-#define PTOHL(x)  ntohl(static_cast<int32_t>(rint(x))) 
-#define PTOHS(x)  ntohl(static_cast<int16_t>(rint(x))) 
+
 #define MAP_IDX(mf, i, j) ((mf->map_size) * (j) + (i))// compute linear index for given map coords
 #define MAP_VALID(mf, i, j) ((i >= 0) && (i < mf->map_size*2/mf->map_resolution) && (j >= 0) && (j < mf->map_size*2/mf->map_resolution))
 #define MAXLASERS 4
