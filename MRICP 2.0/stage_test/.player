@@ -1,0 +1,164 @@
+main.cc:920 error   : error loading plugin: (null)
+main.cc:987 error   : failed to load plugin: MrIcpDriver.so
+configfile.cc:134 error   : unable to open world file stage_, : No such file or directory
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+readlog.cc:505 logfile rewound
+readlog.cc:505 logfile rewound
+readlog.cc:505 logfile rewound
+readlog.cc:505 logfile rewound
+readlog.cc:505 logfile rewound
+readlog.cc:505 logfile rewound
+readlog.cc:505 logfile rewound
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+readlog.cc:505 logfile rewound
+readlog.cc:505 logfile rewound
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+readlog.cc:505 logfile rewound
+readlog.cc:505 logfile rewound
+readlog.cc:505 logfile rewound
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+readlog.cc:505 logfile rewound
+readlog.cc:505 logfile rewound
+readlog.cc:505 logfile rewound
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+readlog.cc:505 logfile rewound
+readlog.cc:505 logfile rewound
+readlog.cc:505 logfile rewound
+readlog.cc:505 logfile rewound
+readlog.cc:505 logfile rewound
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+driver.cc:609 warning : tried to call DataAvailable() on NULL clientmanager!
+src/mricp_driver.cpp:782 error   : PutReply() failed
+src/mricp_driver.cpp:911 error   : PutReply() failed
+src/mricp_driver.cpp:782 error   : PutReply() failed
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49184 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+clientdata.cc:1193 warning : 49167 bytes leftover on write() to client
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+src/mricp_driver.cpp:913 error   : PutReply() failed
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:118 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+configfile.cc:2103 error   : Initialization failed for driver "stage"
+server.cc:150 error   : failed to parse config file stage_mricp.cfg
