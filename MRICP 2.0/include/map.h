@@ -21,8 +21,9 @@
 #define map_HEADER
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
-#include<gtk/gtk.h>
-#include<glib/gprintf.h>
+#include <gtk/gtk.h>
+#include <glib/gprintf.h>
+
 #include <sys/stat.h>
 class MapInfo
 {

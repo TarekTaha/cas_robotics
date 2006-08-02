@@ -248,15 +248,18 @@ class MrIcpDriver : public Driver
  {
 	// Must implement the following methods.
   	public :	
-  			int Setup();
-			int Shutdown();
+	    virtual int Setup();
+	    virtual int Shutdown();
+	    virtual int ProcessMessage(MessageQueue * resp_queue, player_msghdr * hdr, void * data);
 	// Constructor
 	public:  	MrIcpDriver(ConfigFile* cf, int section); 
 	// Main function for device thread.
     private:	
     		virtual void Main();
+			int  HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr,void * data);
+			int  HandleCommands(MessageQueue* resp_queue,player_msghdr * hdr,void * data);
+			int  HandleData(MessageQueue * resp_queue, player_msghdr * hdr, void * data);			
        		void CheckConfig(); 	//checks for configuration requests
- 			void CheckCommands();   //checks for commands
  		 	void RefreshData();     //refreshs and sends data    
  		 	void AddToMap(vector <Point> points_to_add,Pose p); // Add points to Map
  		 	void ResetMap();		// Reset the Map and empty all the point cloud
@@ -267,39 +270,36 @@ class MrIcpDriver : public Driver
  		 	Pose GetOdomReading();
  		 	int  InRange(double angle,int laser_index);
  		 	void BuildMap();
- 		 	void SetupLaser(int);
+ 		 	int SetupLaser(int);
 			void SetupPositionDriver();
 			void GenerateLocalMap(Pose pse);
 			void ConnectPatches();
 			mapgrid_t ComputeRangeProb(double range,bool);
-			void HandleGetMapInfo(void *client, void *request, int len);
-			void HandleGetMapData(void *client, void *request, int len);
+			int ProcessMapInfoReq(MessageQueue* resp_queue,player_msghdr * hdr,void * data);
+			int ProcessMapDataReq(MessageQueue* resp_queue,player_msghdr * hdr,void * data);
  		 	vector<Point>  GetLaserSample();
 	// Position interface / IN
   	private: 	
-  			player_device_id_t     position_in_id;
-  		 	player_position_data_t position_in_data;
-  			player_position_cmd_t  position_in_cmd;
-			player_position_geom_t position_in_geom;
-			Driver 				   *position_driver;
+  			player_devaddr_t          position_in_addr;
+  		 	player_position2d_data_t  position_in_data;
+			player_position2d_geom_t  geom;
+			Device  			     *position_device;
 	// Position interface / OUT
   	private: 	
-  			player_device_id_t     position_out_id;
-  		 	player_position_data_t position_out_data;
-  			player_position_cmd_t  position_out_cmd;
-			player_position_geom_t position_out_geom;
+  			player_devaddr_t         position_out_addr;
+  		 	player_position2d_data_t position_out_data;
 	// Laser interface
   	private: 	
 			// Supports 2 Lasers
-  			player_device_id_t     laser_id[MAXLASERS];
+  			player_devaddr_t       laser_addr[MAXLASERS];
   		 	player_laser_data_t    laser_data;
   			player_laser_config_t  laser_cfg;
-			player_laser_geom_t    laser_geom;
+			player_laser_geom_t    *laser_geom;
 			// Used to communicate with the laser Driver
-			Driver                 *laser_driver[MAXLASERS]; 
+			Device                 *laser_device[MAXLASERS]; 
 	// Map interface
   	private:	
-  			player_device_id_t 	   map_id;
+  			player_devaddr_t 	   map_addr;
   		 	player_map_data_t 	   map_data;
 			player_map_info_t      map_info;
 			Driver                 *map_driver;   // Used to communicate with Map Driver
@@ -321,8 +321,9 @@ class MrIcpDriver : public Driver
 			struct timeval last_time[MAXLASERS],current_time,laser_timestamp,position_timestamp,
 				   loop_start,loop_end,map_timestamp,last_delta,map_current,map_saved;
 			ICP icp;
-			Pose laser_pose[MAXLASERS],pose_1,pose_2,delta_pose,global_pose,global_pose_prev,global_diff,relative_pose;
-			vector<Point> laser_set_1,laser_set_2,local_map,occ_laser_set,map_points;
+			Pose laser_pose[MAXLASERS],pose_1,pose_2,delta_pose,global_pose,global_pose_prev,
+				 global_diff,relative_pose,P;
+			vector<Point> laser_set,laser_set_1,laser_set_2,local_map,occ_laser_set,map_points;
 			MAP *map;
 			Timer delta_t_estimation;
 };
@@ -409,56 +410,34 @@ MrIcpDriver::MrIcpDriver(ConfigFile* cf, int section)  : Driver(cf, section)
 		}
 		range_count[k]/=2;
 	}
-  // Adding position interface
-  // Do we create a position interface?
-  if(cf->ReadDeviceId(&(this->position_out_id), section, "provides", PLAYER_POSITION_CODE, -1, NULL) == 0)
-  {
-  if (this->AddInterface(this->position_out_id , //1- Supports the Position Interface indicated by it's code "PLAYER_POSITION_CODE"
-                                PLAYER_ALL_MODE, //2- Allows Read/Write access from the clients indicated by "PLAYER_ALL_MODE"
-		    	 sizeof(player_position_data_t), //3- Has a data buffer big enough to hold a standard position interface data
-			                                     // packet sizeof(player_position_data_t)
-                  sizeof(player_position_cmd_t), //4- Has a command buffer large enougg to hold the standard position interface 
-			                                     //command packet sizeof(player_position_cmd_t)
-			                                 10, //5- Can queue upto 10 incoming configuration requests and 10 outgoing
-			                                     //configuration replies
-			                                10)!= 0) 
+    // Adding position interface
+    // Do we create a robot position interface?
+    if(cf->ReadDeviceAddr(&(this->position_out_addr), section, "provides", PLAYER_POSITION2D_CODE, -1, NULL) == 0)
     {
-      this->SetError(-1);    
-      return;
-    }
-  }
-  else
-  	{
-  		cout<<"\n --->>> ERROR: position out not specified in the configuration FILE";
-  		exit(-1);
+		if (this->AddInterface(this->position_out_addr))
+	  	{
+	    	this->SetError(-1);    
+	    	return;
+	  	}
+  	  	if(this->debug)
+			cout<<"\n Position out Interface Loaded";
   	}
-  if(this->debug)
-	  cout<<"\n Position out Interface Loaded";
-  fflush(stdout);
-  // Adding MAP interface
-  // Do we create a MAP interface?
-  if(cf->ReadDeviceId(&(this->map_id), section, "provides", PLAYER_MAP_CODE, -1, NULL) == 0)
-  {
-   if (this->AddInterface(this->map_id , //1- Supports the Map Interface indicated by it's code "PLAYER_MAP_CODE"
-                        PLAYER_ALL_MODE, //2- Allows Read/Write access from the clients indicated by "PLAYER_ALL_MODE"
-			  sizeof(player_map_data_t), //3- Has a data buffer big enough to hold a standard MAP interface data
-			                             // packet sizeof(player_map_data_t)
-                                      0, //4- NO commands for map interface
-			                          10,//5- Can queue upto 10 incoming configuration requests and 10 outgoing
-			                             //configuration replies
-			                          10)!= 0) 
-	{
-      	this->SetError(-1);    
-     	return;
-    }
-	if(this->debug)
-		cout<<"\n MAP Interface Loaded";
-  }
-
-  // Adding LASER interfaces
+  	// Adding MAP interface
+  	// Do we create a MAP interface?
+    if(cf->ReadDeviceAddr(&(this->map_addr), section, "provides", PLAYER_MAP_CODE, -1, NULL) == 0)
+    {
+		if (this->AddInterface(this->map_addr))
+	  	{
+	    	this->SetError(-1);    
+	    	return;
+	  	}
+		if(this->debug)
+			cout<<"\n MAP Interface Loaded";	  	
+  	}  
+  	// Adding LASER interfaces
 	for(int i=0; i<this->number_of_lasers;i++)
 	{
-  		if(cf->ReadDeviceId(&(this->laser_id[i]), section, "requires", PLAYER_LASER_CODE,i, NULL) == 0)
+  		if(cf->ReadDeviceAddr(&(this->laser_addr[i]), section, "requires", PLAYER_LASER_CODE,i, NULL) == 0)
   		{
 			SetupLaser(i); // Here we initialize the talk to the laser driver
 			cout<<"\n LASER Interface Loaded Success index:"<<i; fflush(stdout);
@@ -469,28 +448,26 @@ MrIcpDriver::MrIcpDriver(ConfigFile* cf, int section)  : Driver(cf, section)
 		{
 			cout<<"\n Incorrect Number of Lasers Specified, check your config file ...";
 			fflush(stdout);
-			exit(1);
+	    	this->SetError(-1);    
+	    	return;
 		}
 	}
    // Adding position interface
    // Do we create a position interface?
-	if(cf->ReadDeviceId(&(this->position_in_id), section, "requires", PLAYER_POSITION_CODE, -1, NULL) == 0)
-  	{
+	if (cf->ReadDeviceAddr(&this->position_in_addr, section, "requires",PLAYER_POSITION2D_CODE, -1, NULL) == 0)
+	{
 		SetupPositionDriver();
-		position_in_exists = true; 
 		if(this->debug)
 			cout<<"\n Position IN Interface Loaded";
-  	}
+	}   
   	else
   	{
-  		cout<<"\n No position:0 is found, ignoring it ...";
   		if (this->use_odom)
   		  		cout<<"\n Can't use odom when you don't have an underlying position driver !!!";
   		position_in_exists = false;
-  		this->position_driver = NULL;
+  		this->position_device = NULL;
   	}
   	cout<<"\n	--->>>Gate1 ="<<gate1<<" Gate2="<<gate2<<" NIT="<<nit<<" MAXR="<<maxr<<" MINR="<<minr<<endl;
-  	fflush(stdout);
   	return;
 }
 
@@ -541,6 +518,86 @@ int MrIcpDriver::Setup()
   	this->StartThread();
 	return(0);
 };
+void MrIcpDriver::SetupPositionDriver()
+{
+	Pose initial_pose;
+	// Subscribe to the underlyin odometry device
+	if(!(this->position_device = deviceTable->GetDevice(this->position_in_addr)))
+	{
+		PLAYER_ERROR("unable to locate suitable position device");
+	    return ;
+	}
+	if(this->position_device->Subscribe(this->InQueue) != 0)
+	{
+		PLAYER_ERROR("unable to subscribe to position device");
+	    return ;
+	}
+	position_in_exists = true; 
+ 	// Get the odometry geometry
+  	Message* msg;
+  	if(!(msg = this->position_device->Request(this->InQueue,PLAYER_MSGTYPE_REQ,PLAYER_POSITION2D_REQ_GET_GEOM,NULL, 0, NULL,false)) 
+  	  ||(msg->GetHeader()->size != sizeof(player_position2d_geom_t)))
+  	{
+    	PLAYER_ERROR("failed to get geometry of underlying position device");
+    	if(msg)
+      		delete msg;
+    	return;
+  	}
+  	memcpy(&geom,(player_position2d_geom_t *)msg->GetPayload(),sizeof(geom));
+// 	geom = (player_position2d_geom_t *)msg->GetPayload();
+	initial_pose = GetOdomReading();
+	this->px = initial_pose.p.x;
+	this->py = initial_pose.p.y;
+	this->pa = initial_pose.phi;
+};
+
+//Pose MrIcpDriver::GetOdomReading()
+//{
+//	Pose P;
+//	size_t size;
+//	player_position_data_t data;
+//	// Get the odom device data.
+//	size = this->position_device->GetData(this->position_in_addr,(void*) &data,sizeof(data), &this->position_timestamp);
+//	if (size == 0)
+//		return P;
+//	// Get the pose
+//	P.p.x = (double) ((int32_t) ntohl(data.xpos)) / 1000.0;
+//	P.p.y = (double) ((int32_t) ntohl(data.ypos)) / 1000.0;
+//	P.phi = (double) ((int32_t) ntohl(data.yaw)) * M_PI / 180;
+//	if(this->debug)
+//		cout<<"\n	--->>> Odom pose from Position:0 XYTheta=["<<P.p.x<<"]["<<P.p.y<<"]["<<P.phi<<"]";
+//	return P;
+//};
+
+int MrIcpDriver::SetupLaser(int index)
+{
+	// Subscribe to the Laser device
+  	if (!(this->laser_device[index] = deviceTable->GetDevice(this->laser_addr[index])))
+  	{
+    	PLAYER_ERROR("unable to locate suitable laser device");
+    	return -1;
+  	}
+  	if (this->laser_device[index]->Subscribe(this->InQueue) != 0)
+  	{
+    	PLAYER_ERROR("unable to subscribe to laser device");
+    	return -1;
+  	}
+  	// Ask for the laser's geometry
+  	Message* msg;
+  	if((msg = laser_device[index]->Request(this->InQueue,PLAYER_MSGTYPE_REQ,PLAYER_LASER_REQ_GET_GEOM,NULL, 0, NULL,false)))
+  	{
+    	laser_geom = (player_laser_geom_t *)msg->GetPayload();
+	  	// Get the laser pose relative to the robot center of Rotation
+  		laser_pose[index].p.x = laser_geom->pose.px;
+  		laser_pose[index].p.y = laser_geom->pose.py;
+  		laser_pose[index].phi = laser_geom->pose.pa;
+	  	if (this->debug)
+		  	cout<<"\n Laser["<<index<<"] Pose --> X="<<laser_pose[index].p.x<<" Y="<<laser_pose[index].p.y<<" Theta="<<laser_pose[index].phi;
+    	delete msg;
+    	return 0;
+  	}
+  	return -1;
+};
 void MrIcpDriver::ResetMap()
 {
 	char filename[40];
@@ -567,9 +624,11 @@ int MrIcpDriver::Shutdown()
 	cout<<"\n- Shutting Down MRICP Driver - Cleaning up Mess ..\n"; fflush(stdout);
 	for(int i=0;i<number_of_lasers;i++)
 	{
-    	this->laser_driver[i]->Unsubscribe(this->laser_id[i]);
-    	this->laser_driver[i] = NULL;
+    	this->laser_device[i]->Unsubscribe(this->InQueue);
+    	this->laser_device[i] = NULL;
 	}
+	if(position_in_exists)
+		this->position_device->Unsubscribe(this->InQueue);
     //this->map->SavePixelBufferToFile();
     this->map->SavePgm();
     delete this->map;
@@ -611,8 +670,7 @@ void MrIcpDriver::Main()
 		loop_timer.Reset();
 		test.Reset();
 		pthread_testcancel();     // Thread cancellation point.
-		CheckConfig();            // Check for Config Requests
-		CheckCommands();          // Check for Commands
+	    this->ProcessMessages();	
 		BuildMap();		          // Launch the MrICP on two laser scans
 		RefreshData();            // Update Data
 		//time_elapsed = loop_timer.TimeElapsed();
@@ -629,361 +687,393 @@ void MrIcpDriver::Main()
 	}
 	pthread_exit(NULL);
 }
-void MrIcpDriver::CheckConfig()
+/*! Forwards the Messeges  from the messege queue to their
+ *  specific handler
+ */
+int MrIcpDriver::ProcessMessage(MessageQueue * resp_queue, player_msghdr * hdr, void * data)
 {
-	void *client;
-	unsigned char buffer[PLAYER_MAX_REQREP_SIZE];
-	size_t buffer_len;
-  	if ((buffer_len=this->GetConfig(this->position_out_id, &client, &buffer, sizeof(buffer), NULL)) > 0)
+  	// Forward the Messages
+  	switch (hdr->type)
   	{
-			cout<<"\n	--> Recieved Position request\n"; 
-			fflush(stdout);
-		if(debug)
+  		case PLAYER_MSGTYPE_REQ:
+	    	return(this->HandleConfigs(resp_queue,hdr,data));  			
+	    case PLAYER_MSGTYPE_CMD:
+	    	return(this->HandleCommands(resp_queue,hdr,data));	    	
+	    case PLAYER_MSGTYPE_DATA:
+	    	return(this->HandleData(resp_queue,hdr,data));
+	    default:
+	    	return -1;
+  	}
+};
+/*! Gets the Laser and Position Data from the underlying Devices
+ *  If they are provided.
+ */
+int MrIcpDriver::HandleData(MessageQueue * resp_queue, player_msghdr * hdr, void * idata)
+{
+  	struct timeval currtime;
+  	double t1,t2, min_angle, scan_res,r,b,time_diff;
+	Point p;
+	//Clear the previous Laser set used for the occupance grid generation
+	occ_laser_set.clear();
+	laser_set.clear();
+  	if(Message::MatchMessage(hdr, PLAYER_MSGTYPE_DATA,PLAYER_POSITION2D_DATA_STATE, this->position_in_addr))
+  	{
+  		player_position2d_data_t* data = reinterpret_cast<player_position2d_data_t*> (idata);
+  		// Compute new robot pose from Underlying Position Interface.
+  		P.p.x = data->pos.px;
+  		P.p.y = data->pos.py;
+  		P.phi = data->pos.pa;
+		if(this->debug)
+			cout<<"\n	--->>> Odom pose from Position:0 XYTheta=["<<P.p.x<<"]["<<P.p.y<<"]["<<P.phi<<"]";  		
+		return 0;
+  	}
+  	for(int index=0;index<number_of_lasers;index++)
+  	{
+		if(Message::MatchMessage(hdr, PLAYER_MSGTYPE_DATA,PLAYER_LASER_DATA_SCAN, this->laser_addr[index]))
 		{
-			cout<<"\n	--> Recieved Position request\n"; 
-			fflush(stdout);
+			gettimeofday(&currtime,NULL);
+			t1 = ((double) currtime.tv_sec  + (double) currtime.tv_usec/1e6);
+			t2 = ((double) last_time[index].tv_sec + (double) last_time[index].tv_usec/1e6);
+		    time_diff = t1 -t2;
+		  	if (time_diff < 0.1)
+		  	{
+		  		if(this->debug)
+		  			cout<<"\n	--->>> Time Since Last Read is= "<<(t1-t2)<<" msec";
+		    	continue;
+		  	}
+		  	this->last_time[index] = currtime;
+	  		player_laser_data_t* data = reinterpret_cast<player_laser_data_t*> (idata);
+	  		min_angle = data->min_angle;
+	  		scan_res  = data->resolution;
+	  		this->scan_count = data->ranges_count;
+		    if(this->debug)
+		    	cout<<"\n Scan Count="<<this->scan_count;
+		  	for(int i=0;i < scan_count ;i++)
+		  	{
+		    	// convert to mm, then m, according to given range resolution
+			    r = data->ranges[i];
+		    	b = min_angle + (i * scan_res); 		    // compute bearing
+		    	//cout<<"\n Bearing:"<<RTOD(b);
+		    	if(InRange(b,index)!=0)
+		    		continue;
+			    // Transfer from Polar to Cartesian coordinates
+		    	p.x = r * cos(b);
+		    	p.y = r * sin(b);
+		    	p.laser_index = index;
+		    	// Transfer all the laser Reading into the Robot Coordinate System
+		    	p = TransformToGlobal(p,laser_pose[index]);
+				// Filter max ranges for alignment and use all for Occ-grid
+		    	if (this->use_max_range!=0)
+		    	{
+			    	if (r >= this->minr && r <= this->maxr && (i%sparse_scans_rate)==0)
+		  				laser_set.push_back(p);
+		  			occ_laser_set.push_back(p);
+		  		}
+		  		else
+		  		{
+		    		// Use only informative data for the scan allignement and Occ-grid
+			    	if (r >= this->minr && r <= this->maxr)
+			    	{
+			    		// Get samples according to sparse resolution
+			    		if ((i%sparse_scans_rate)==0)
+		  					laser_set.push_back(p);
+		  				// Use All the samples for OG-Map
+		  				occ_laser_set.push_back(p);
+			    	}
+		  		}
+		  	}
+			return 0;
 		}
-		switch (buffer[0])
+  	}
+  	return -1;
+};  
+int MrIcpDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr,void * data)
+{
+	// Handle Position REQ
+	// I didn't like the stupid MessageMatch Method
+	// check for position config requests
+	if(
+	   (hdr->type == (uint8_t)PLAYER_MSGTYPE_REQ) && (hdr->addr.host   == position_out_addr.host)   &&
+	   (hdr->addr.robot  == position_out_addr.robot) &&  (hdr->addr.interf == position_out_addr.interf) &&
+       (hdr->addr.index  == position_out_addr.index)
+       )
+    {
+		switch (hdr->subtype)
 		{
-		case PLAYER_POSITION_GET_GEOM_REQ:  // Return the robot geometry.
-			if(buffer_len != 1) 
-			{
-				PLAYER_WARN("Get robot geom config is wrong size; ignoring");
-				if(this->PutReply(this->position_out_id, client, PLAYER_MSGTYPE_RESP_NACK, NULL))
-					PLAYER_ERROR("failed to PutReply");
-				break;
+		case PLAYER_POSITION2D_REQ_GET_GEOM:  
+			/* Return the robot geometry. */
+		    if(hdr->size != 0)
+		    {
+		      PLAYER_WARN("Arg get robot geom is wrong size; ignoring");
+		      return(-1);
 			}
-			else
-			{
-				uint16_t reptype;
-				uint8_t req;
-			    struct timeval tv;
-		  		// Request geom from the underlying position driver
-		  		if(position_in_exists)
-		  		{
-				   	req = PLAYER_POSITION_GET_GEOM_REQ;
-				   	if (this->position_driver->Request(this->position_in_id,(void*)this, (void*) &req, 1,&tv , &reptype,(void*) &position_in_geom, sizeof(position_in_geom),&tv) < 0)
-			   		{
-				    	PLAYER_ERROR("Unable to get Position geometry from the underlying Position Interface");
-				    	exit(1);
-			   		}
-					position_out_geom.subtype = PLAYER_POSITION_GET_GEOM_REQ;
-					position_out_geom.pose[0] = position_in_geom.pose[0];
-					position_out_geom.pose[1] = position_in_geom.pose[1];
-					position_out_geom.pose[2] = position_in_geom.pose[2];
-					position_out_geom.size[0] = position_in_geom.size[0];
-					position_out_geom.size[1] = position_in_geom.size[1];
-		  		}
-		  		else // Default Value if Position:0 not found
-		  		{
-					position_out_geom.subtype = PLAYER_POSITION_GET_GEOM_REQ;
-					position_out_geom.pose[0] = htons((short) (-110));
-					position_out_geom.pose[1] = htons((short) (0));
-					position_out_geom.pose[2] = htons((short) (0));
-					position_out_geom.size[0] = htons((short) (370));
-					position_out_geom.size[1] = htons((short) (370));
-		  		}
-				if (this->PutReply(this->position_out_id, client, PLAYER_MSGTYPE_RESP_ACK, &this->position_out_geom, sizeof(this->position_out_geom), NULL)!=0)
-					PLAYER_ERROR("failed to PutReply");
+	  		if(position_in_exists)
+	  		{
+		    	this->Publish(this->position_out_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK,PLAYER_POSITION2D_REQ_GET_GEOM,
+			    			  (void*)&geom, sizeof(geom), NULL);
+			    return 0;
+	  		}
+	  		else // Default Value if Position:0 not found
+	  		{
+			    geom.pose.px = 0.3;
+			    geom.pose.py = 0.0;
+			    geom.pose.pa = 0.0;
+		    	geom.size.sl = 1.2;
+		    	geom.size.sw = 0.65;
+		    	this->Publish(this->position_out_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK,PLAYER_POSITION2D_REQ_GET_GEOM,
+			    			  (void*)&geom, sizeof(geom), NULL);
+			    return 0;
+	  		}
+			return -1;
+		case PLAYER_POSITION2D_REQ_SET_ODOM:
+		    if(hdr->size != sizeof(player_position2d_set_odom_req_t))
+		    {
+		      puts("Arg get robot geom is wrong size; ignoring");
+		      return(-1);
 			}
-				break;
-		case PLAYER_POSITION_SET_ODOM_REQ:  // Sets the robot geometry.
-				this->PutReply(this->position_out_id,client, PLAYER_MSGTYPE_RESP_NACK, NULL, 0, NULL);  
-				break;
-		case PLAYER_POSITION_RESET_ODOM_REQ:  // Resets the robot geometry.
-                        PLAYER_WARN("Got robot reset request!! Woohoo"); 	
-			if(buffer_len != sizeof(player_position_resetodom_config_t)) 
-			{
-				PLAYER_WARN("Get robot geom config is wrong size; ignoring");
-				if(this->PutReply(this->position_out_id, client, PLAYER_MSGTYPE_RESP_NACK, NULL))
-					PLAYER_ERROR("failed to PutReply");
-				break;
-			}
-			else
-				ResetMap();
-                                if(this->PutReply(this->position_out_id, client,PLAYER_MSGTYPE_RESP_ACK, NULL)){
-                                  PLAYER_ERROR("Failed to inform client of reset");  
-                                }
-
+	    	player_position2d_set_odom_req_t * set_odom_req;
+	    	set_odom_req = (player_position2d_set_odom_req_t*) data;
+	    	this->Publish(this->position_in_addr, resp_queue,PLAYER_MSGTYPE_REQ,PLAYER_POSITION2D_REQ_SET_ODOM,
+		    			  (void*)set_odom_req, sizeof(set_odom_req), NULL);
 			break;
-		case PLAYER_POSITION_MOTOR_POWER_REQ:
-				this->PutReply(this->position_out_id,client, PLAYER_MSGTYPE_RESP_NACK, NULL, 0, NULL);  
+		case PLAYER_POSITION2D_REQ_RESET_ODOM:
+		    	/* reset position to 0,0,0: no args */
+			    if(hdr->size != 0)
+			    {
+			      PLAYER_WARN("Arg to reset position request is wrong size; ignoring");
+			      return(-1);
+			    }
+				else
+				ResetMap();
+			    this->Publish(this->position_out_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_POSITION2D_REQ_RESET_ODOM);
+			    return(0);
+		case PLAYER_POSITION2D_REQ_MOTOR_POWER:
+			    /* motor state change request
+			     *   1 = enable motors
+			     *   0 = disable motors (default)
+			     */
+			    if(hdr->size != sizeof(player_position2d_power_config_t))
+			    {
+			      PLAYER_WARN("Arg to motor state change request wrong size; ignoring");
+			      return(-1);
+			    }
+		    	this->Publish(this->position_in_addr, resp_queue,PLAYER_MSGTYPE_REQ,PLAYER_POSITION2D_REQ_SET_ODOM,
+		    			  (void*)data, sizeof(data), NULL);
+			    
 	        	break;
 		default:
-				PLAYER_WARN1("\nreceived unknown config type %d", buffer[0]);
-	    		this->PutReply(this->position_out_id,client, PLAYER_MSGTYPE_RESP_NACK, NULL, 0, NULL);  
+				PLAYER_WARN("\nreceived unknown config type ");
+	    		return -1;
 		}
   	}
-  	if ((buffer_len=this->GetConfig(this->map_id, &client, &buffer, sizeof(buffer), NULL)) > 0)
-  	{
-  		switch(buffer[0])
-  		{
-    		case PLAYER_MAP_GET_INFO_REQ:
-      			HandleGetMapInfo(client, buffer, buffer_len);
-      		break;
-		    case PLAYER_MAP_GET_DATA_REQ:
-		      	HandleGetMapData(client, buffer, buffer_len);
-		     	break;
+	// check for MAP config requests
+	if(
+	   (hdr->type == (uint8_t)PLAYER_MSGTYPE_REQ) && (hdr->addr.host   == map_addr.host)   &&
+	   (hdr->addr.robot  == map_addr.robot) &&  (hdr->addr.interf == map_addr.interf) &&
+       (hdr->addr.index  == map_addr.index)
+       )
+    {
+    	switch(hdr->subtype)
+  		{ 
+    		case PLAYER_MAP_REQ_GET_INFO:
+      			return ProcessMapInfoReq(resp_queue,hdr,data);
+		    case PLAYER_MAP_REQ_GET_DATA:
+		      	return ProcessMapDataReq(resp_queue,hdr,data);
 		    default:
-		      	PLAYER_ERROR("got unknown config request; ignoring");
-		      	if(PutReply(client, PLAYER_MSGTYPE_RESP_NACK,NULL) != 0)
-		        	PLAYER_ERROR("PutReply() failed");
-		      	break;
+		    	return -1;
   		}
   	}
-  	return;
+  	return -1;
 }
- void MrIcpDriver::CheckCommands()
+int  MrIcpDriver::HandleCommands(MessageQueue* resp_queue,player_msghdr * hdr,void * data)
 {
-	if( this->GetCommand(this->position_out_id, &this->position_out_cmd, sizeof(this->position_out_cmd), NULL) > 0 )
-	{
+  	if(Message::MatchMessage(hdr,PLAYER_MSGTYPE_CMD,PLAYER_POSITION2D_CMD_VEL,this->position_out_addr))
+  	{
 	 	if (!this->position_in_exists)
 	 	{
 	  		cout<<"\n	--->>>No Input Position Driver Initialized";
 	  		fflush(stdout);	 		
-	  		return;
+	  		return -1;
 	 	}
-	  	this->position_driver->PutCommand(this->position_in_id, (void*) &position_out_cmd,sizeof(position_out_cmd), NULL);
+    	this->Publish(this->position_in_addr, resp_queue,PLAYER_MSGTYPE_CMD,PLAYER_POSITION2D_CMD_VEL,
+		    			  (void*)data, sizeof(data), NULL);
+		return 0;
 	}
-  	return;
+  	return -1;
 }
 // Handle map info request
-void MrIcpDriver::HandleGetMapInfo(void *client, void *request, int len)
+int MrIcpDriver::ProcessMapInfoReq(MessageQueue* resp_queue,player_msghdr * hdr,void * data)
 {
-  	if(len != sizeof(map_info.subtype))
+  	// Is it a request for map meta-data?
+  	if(Message::MatchMessage(hdr, PLAYER_MSGTYPE_REQ, PLAYER_MAP_REQ_GET_INFO, 
+                           this->device_addr) && !this->map->occ_grid)
   	{
-    	PLAYER_ERROR2("config request len is invalid (%d != %d)", len, sizeof(map_info.subtype));
-    	if (PutReply(client, PLAYER_MSGTYPE_RESP_NACK,NULL) != 0)
-      		PLAYER_ERROR("PutReply() failed");
-   	 	return;
-  	}
-  	if(this->map->occ_grid == NULL)
-  	{
-    	PLAYER_ERROR("NULL map data");
-    	if(PutReply(client, PLAYER_MSGTYPE_RESP_NACK,NULL) != 0)
-      		PLAYER_ERROR("PutReply() failed");
-    	return;
-  	}
-
-  	map_info.subtype = ((player_map_info_t*)request)->subtype;
-  	map_info.scale = htonl((uint32_t)rint(1e3/this->map_resolution));
-  	map_info.width =  htonl((uint32_t) (int)ceil(2*map_size/map_resolution));
-  	// Here we add the Meta Data Row
-  	map_info.height = htonl((uint32_t) (int)ceil(2*map_size/map_resolution + 1));
-
-  	if (PutReply(client, PLAYER_MSGTYPE_RESP_ACK, &map_info, sizeof(map_info),NULL) != 0)
-    	PLAYER_ERROR("PutReply() failed");
-  	return;
+    	if(hdr->size != 0)
+    	{
+	      	PLAYER_ERROR2("request is wrong length (%d != %d); ignoring",hdr->size, sizeof(player_laser_config_t));
+	      	return(-1);
+    	}
+	    player_map_info_t info;
+	    info.scale = this->map_resolution;
+	    info.width = ((uint32_t) (int)ceil(2*map_size/map_resolution));
+	    info.height =((uint32_t) (int)ceil(2*map_size/map_resolution + 1));
+	    // Did the user specify an origin?
+    	info.origin.px = -map_size;
+      	info.origin.py = -map_size;
+      	info.origin.pa = 0.0;
+	    this->Publish(this->map_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK,PLAYER_MAP_REQ_GET_INFO,
+	                  (void*)&info, sizeof(info), NULL);
+	    return(0);
+  }
+  return -1;
 }
 
 // Handle map data request
-void MrIcpDriver::HandleGetMapData(void *client, void *request, int len)
+int MrIcpDriver::ProcessMapDataReq(MessageQueue* resp_queue,player_msghdr * hdr,void * data)
 {
-  	int i, j,oi, oj, si, sj,reqlen,last_row = map->size_y -1;
-  	double prob;
-	int16_t temp;
-  	player_map_data_t data;
-  	reqlen = sizeof(data) - sizeof(data.data);
-  	// check if the config request is valid
-  	if(len != reqlen)
+	if(Message::MatchMessage(hdr, PLAYER_MSGTYPE_REQ, 
+                           PLAYER_MAP_REQ_GET_DATA,
+                           this->device_addr))
   	{
-    	PLAYER_ERROR2("config request len is invalid (%d != %d)", len, reqlen);
-	    if(PutReply(client, PLAYER_MSGTYPE_RESP_NACK,NULL) != 0)
-    	  	PLAYER_ERROR("PutReply() failed");
-    	return;
-  	}
+    	player_map_data_t* mapreq = (player_map_data_t*)data;
 
-  	// Construct reply
-  	memcpy(&data, request, len);
+   		// Can't declare a map tile on the stack (it's too big)
+    	/*
+    	size_t mapsize = (sizeof(player_map_data_t) - PLAYER_MAP_MAX_TILE_SIZE + 
+                      (mapreq->width * mapreq->height));
+        */
+	    size_t mapsize = sizeof(player_map_data_t);
+	    player_map_data_t* mapresp = (player_map_data_t*)calloc(1,mapsize);
+	    assert(mapresp);
+    
+	    int i, j;
+	    int oi, oj, si, sj,last_row = map->size_y -1;;
+		int16_t temp;
+	  	double prob;
+	    // Construct reply
+	    oi = mapresp->col = mapreq->col;
+	    oj = mapresp->row = mapreq->row;
+	    si = mapresp->width = mapreq->width;
+	    sj = mapresp->height = mapreq->height;
+  		// Grab the Information from the occupancy data
+	  	for(j = oj; j < (sj+oj); j++)
+	  	{
+	  		// Proccess Last Row with the patch data
+	  		if(j == last_row )
+	  		{
+	  			// Saving Creation Map Time Stamp 
+	 			gettimeofday(&map_timestamp,NULL);
+				// Storing Map ID can be between -127 and 127 (assumed +ve all the time)
+				mapresp->data[0 + (j-oj) * si] = map_number;
+				// Storing Robot ID can be between -127 and 127 (assumed +ve all the time)			
+				mapresp->data[1 + (j-oj) * si] = robot_id;
+				/* Storing Pose X */
+				int8_t* offset = mapresp->data + (j-oj)*si+2; 
+				temp = (int)(global_pose.p.x*1e3);
+				memcpy(offset,&temp, sizeof(temp));
+				offset += sizeof(temp);   
+				// Storing Pose Y 
+				temp = (int)(global_pose.p.y*1e3);
+				memcpy(offset,&temp, sizeof(temp));
+				offset += sizeof(temp);   
+				// Storing Pose Phi 
+				temp = (int)(global_pose.phi*1e3);
+				memcpy(offset,&temp, sizeof(temp));
+				offset += sizeof(temp);   
+				/* Encapsulating Map time stamp
+				 * Timeval consists of two value, tv_sec and tv_usec both of
+				 * long unsigned int unit32_t (4 bytes), representing time since
+				 * the epoch.
+				 */
+				uint32_t time_temp;
+				// Seconds
+				time_temp = map_timestamp.tv_sec;
+				memcpy(offset,&time_temp, sizeof(time_temp));
+				offset += sizeof(time_temp);   
+				// usec
+				time_temp = map_timestamp.tv_usec;
+				memcpy(offset,&time_temp, sizeof(time_temp));
+				offset += sizeof(time_temp);   
+				/* The Rest of the Row is ignored for now, more data will
+				 * be encapsulated later on
+				 */
+	  			continue;
+	  		}
+	    	for(i= oi; i < (si+oi); i++)
+	    	{
+	      		if(((i-oi) * (j-oj)) <= PLAYER_MAP_MAX_TILE_SIZE )
+	      		{
+	        		if(MAP_VALID(this, i, j))
+	        		{
+	       				prob = map->occ_grid[i][j].prob_occ;
+	       				//cout<<"\n prob ="<<prob<<" found occupied"<<found_occ;
+	       				if(this->playerv_debug)
+	       				{
+		        			if(prob > 0.9)
+		        				mapresp->data[(i-oi) + (j-oj) * si] = +1;
+		        			else if(prob < 0.1)
+		        				mapresp->data[(i-oi) + (j-oj) * si] = -1;
+		        			else
+		        				mapresp->data[(i-oi) + (j-oj) * si] =  0;
+	       				}
+	       				else
+	       				{
+	       					uint8_t value = (uint8_t)(double(255)*prob);
+	       					memcpy(mapresp->data + (i-oi) + (j-oj)*si,&value, sizeof(value));
+	       					//if(prob <= 0.5)
+	       					//{
+	       					//	printf("\n Prob =%f",prob);
+	       					//	printf(" Scaled Before Casting=%f",double(255)*prob);
+	       					//	printf(" After Scaled Prob=%u",value);
+	       					//}
+	       				}
+	        		}
+	        		else
+	        		{
+	          			PLAYER_WARN2("requested cell (%d,%d) is offmap", i+oi, j+oj);
+	          			mapresp->data[i + j * si] = 0;
+		        		cout<<"\nData Sent";fflush(stdout);
+	        		}
+	      		}
+	     		else
+	      		{
+	        		PLAYER_WARN("requested tile is too large; truncating");
+	        		cout<<"\nMap Too Large";fflush(stdout);
+	        		if(i == 0)
+	        		{
+	          			mapresp->width = htonl(si-1);
+	          			mapresp->height = htonl(j-1);
+	        		}
+	        		else
+	       			{
+	          			mapresp->width = htonl(i);
+	          			mapresp->height = htonl(j);
+	        		}
+	      		}
+	    	}
+	  }
+    	// recompute size, in case the tile got truncated
+    	//mapsize = (sizeof(player_map_data_t) - PLAYER_MAP_MAX_TILE_SIZE + 
+        //(mapresp->width * mapresp->height));
+       	mapresp->data_count = mapresp->width * mapresp->height;
+    	cout<<"\n	--->>> Columns="<<oi<<" Rows="<<oj<<" width="<<si<<" height="<<sj;
+       	this->Publish(this->device_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK,PLAYER_MAP_REQ_GET_DATA,(void*)mapresp, mapsize, NULL);
+	   	free(mapresp);
+       	return(0);
+	}	
+  	return -1;
+};
 
-  	oi = ntohl(data.col);
-  	oj = ntohl(data.row);
-  	si = ntohl(data.width);
-  	sj = ntohl(data.height);
-  	cout<<"\n	--->>> Columns="<<oi<<" Rows="<<oj<<" width="<<si<<" height="<<sj;
-
-  	// Grab the Information from the occupancy data
-  	for(j = oj; j < (sj+oj); j++)
-  	{
-  		// Proccess Last Row with the patch data
-  		if(j == last_row )
-  		{
-  			// Saving Creation Map Time Stamp 
- 			gettimeofday(&map_timestamp,NULL);
-			// Storing Map ID can be between -127 and 127 (assumed +ve all the time)
-			data.data[0 + (j-oj) * si] = map_number;
-			// Storing Robot ID can be between -127 and 127 (assumed +ve all the time)			
-			data.data[1 + (j-oj) * si] = robot_id;
-			/* Storing Pose X */
-			int8_t* offset = data.data + (j-oj)*si+2; 
-			temp = (int)(global_pose.p.x*1e3);
-			memcpy(offset,&temp, sizeof(temp));
-			offset += sizeof(temp);   
-			// Storing Pose Y 
-			temp = (int)(global_pose.p.y*1e3);
-			memcpy(offset,&temp, sizeof(temp));
-			offset += sizeof(temp);   
-			// Storing Pose Phi 
-			temp = (int)(global_pose.phi*1e3);
-			memcpy(offset,&temp, sizeof(temp));
-			offset += sizeof(temp);   
-			/* Encapsulating Map time stamp
-			 * Timeval consists of two value, tv_sec and tv_usec both of
-			 * long unsigned int unit32_t (4 bytes), representing time since
-			 * the epoch.
-			 */
-			uint32_t time_temp;
-			// Seconds
-			time_temp = map_timestamp.tv_sec;
-			memcpy(offset,&time_temp, sizeof(time_temp));
-			offset += sizeof(time_temp);   
-			// usec
-			time_temp = map_timestamp.tv_usec;
-			memcpy(offset,&time_temp, sizeof(time_temp));
-			offset += sizeof(time_temp);   
-			/* The Rest of the Row is ignored for now, more data will
-			 * be encapsulated later on
-			 */
-  			continue;
-  		}
-    	for(i= oi; i < (si+oi); i++)
-    	{
-      		if(((i-oi) * (j-oj)) <= PLAYER_MAP_MAX_CELLS_PER_TILE)
-      		{
-        		if(MAP_VALID(this, i, j))
-        		{
-       				prob = map->occ_grid[i][j].prob_occ;
-       				//cout<<"\n prob ="<<prob<<" found occupied"<<found_occ;
-       				if(this->playerv_debug)
-       				{
-	        			if(prob > 0.9)
-	        				data.data[(i-oi) + (j-oj) * si] = +1;
-	        			else if(prob < 0.1)
-	        				data.data[(i-oi) + (j-oj) * si] = -1;
-	        			else
-	        				data.data[(i-oi) + (j-oj) * si] =  0;
-       				}
-       				else
-       				{
-       					uint8_t value = (uint8_t)(double(255)*prob);
-       					memcpy(data.data + (i-oi) + (j-oj)*si,&value, sizeof(value));
-       					//if(prob <= 0.5)
-       					//{
-       					//	printf("\n Prob =%f",prob);
-       					//	printf(" Scaled Before Casting=%f",double(255)*prob);
-       					//	printf(" After Scaled Prob=%u",value);
-       					//}
-       				}
-        		}
-        		else
-        		{
-          			PLAYER_WARN2("requested cell (%d,%d) is offmap", i+oi, j+oj);
-          			data.data[i + j * si] = 0;
-	        		cout<<"\nData Sent";fflush(stdout);
-        		}
-      		}
-     		else
-      		{
-        		PLAYER_WARN("requested tile is too large; truncating");
-        		cout<<"\nMap Too Large";fflush(stdout);
-        		if(i == 0)
-        		{
-          			data.width = htonl(si-1);
-          			data.height = htonl(j-1);
-        		}
-        		else
-       			{
-          			data.width = htonl(i);
-          			data.height = htonl(j);
-        		}
-      		}
-    	}
-  }
-  	// Send map info to the client
-  	//if(PutReply(client, PLAYER_MSGTYPE_RESP_ACK, &data,sizeof(data) - sizeof(data.data) + ntohl(data.width) * ntohl(data.height),NULL) != 0)
-	if(PutReply(client, PLAYER_MSGTYPE_RESP_ACK, &data,ntohl(data.width) * ntohl(data.height) +(sizeof(data) - sizeof(data.data)) ,NULL) != 0)
-	    	PLAYER_ERROR("PutReply() failed");
-	//cout<<"\n Size Header: "<<(ntohl(data.width) * ntohl(data.height) +(sizeof(data) - sizeof(data.data)));
-  	return;
-}
 void MrIcpDriver::RefreshData()
 {
   	// Write position data//
-	this->position_out_data.xpos = HTOPL(this->px * 1e3); // changing to mm because of player position interface 
-	this->position_out_data.ypos = HTOPL(this->py * 1e3); // changing to mm because of player position interface 
-	this->position_out_data.yaw =  HTOPL(RTOD(this->pa)); // changing to degrees because of player position interface 
-	this->position_out_data.xspeed = HTOPL(this->speed * 1e3);
- 	this->position_out_data.yawspeed = HTOPL(RTOD(this->turn_rate));
-  	PutData(this->position_out_id,(void*)&(this->position_out_data),sizeof(player_position_data_t), &this->laser_timestamp);
+	this->position_out_data.pos.px = this->px; 
+	this->position_out_data.pos.py = this->py; 
+	this->position_out_data.pos.pa = this->pa; 
+	this->position_out_data.vel.px = this->speed;
+ 	this->position_out_data.vel.py = this->turn_rate;
+    Publish(this->position_out_addr, NULL,PLAYER_MSGTYPE_DATA, PLAYER_POSITION2D_DATA_STATE,(void*)&position_out_data, sizeof(position_out_data), NULL); 
 	return;
-};
-void MrIcpDriver::SetupPositionDriver()
-{
-	Pose initial_pose;
-	// Subscribe to the odometry driver
-	this->position_driver = deviceTable->GetDriver(this->position_in_id);
-	if (!this->position_driver)
-	{
-		PLAYER_ERROR("Couldn't Connect to position driver");
-		return;
-	}
-	if (this->position_driver->Subscribe(this->position_in_id) != 0)
-	{
-		PLAYER_ERROR("Couldn't subscribe to position device");
-		return;
-	}
-	initial_pose = GetOdomReading();
-	this->px = initial_pose.p.x;
-	this->py = initial_pose.p.y;
-	this->pa = initial_pose.phi;
-}
-void MrIcpDriver::SetupLaser(int index)
-{
-	uint8_t req;
-	uint16_t reptype;
-    player_laser_geom_t geom;
-    struct timeval tv;
-	this->laser_driver[index] = deviceTable->GetDriver(this->laser_id[index]);
-	if (!this->laser_driver)
-	{
-		PLAYER_ERROR("Unable to connect to laser Driver");
-		return;
-	}
-	if (this->laser_driver[index]->Subscribe(this->laser_id[index]) != 0)
-	{
-	    PLAYER_ERROR("Unable to subscribe to laser device");
-	    return;
-	}
-	// Get the laser geometry
-   	req = PLAYER_LASER_GET_GEOM;
-   	if (this->laser_driver[index]->Request(this->laser_id[index],(void*)this, (void*) &req, 1,&tv , &reptype,(void*) &geom, sizeof(geom),&tv) < 0)
-   	{
-	    PLAYER_ERROR("Unable to get laser geometry");
-	    return;
-   	}
-  	// Get the laser pose relative to the robot center of Rotation
-  	laser_pose[index].p.x = ((int16_t) ntohs(geom.pose[0])) / 1000.0;
-  	laser_pose[index].p.y = ((int16_t) ntohs(geom.pose[1])) / 1000.0;
-  	laser_pose[index].phi = ((int16_t) ntohs(geom.pose[2])) * M_PI / 180.0;
-  	//if (this->debug)
-	  	cout<<"\n Laser["<<index<<"] Pose --> X="<<laser_pose[index].p.x<<" Y="<<laser_pose[index].p.y<<" Theta="<<laser_pose[index].phi;
-};
-Pose MrIcpDriver::GetOdomReading()
-{
-	Pose P;
-	size_t size;
-	player_position_data_t data;
-	// Get the odom device data.
-	size = this->position_driver->GetData(this->position_in_id,(void*) &data,sizeof(data), &this->position_timestamp);
-	if (size == 0)
-		return P;
-	// Get the pose
-	P.p.x = (double) ((int32_t) ntohl(data.xpos)) / 1000.0;
-	P.p.y = (double) ((int32_t) ntohl(data.ypos)) / 1000.0;
-	P.phi = (double) ((int32_t) ntohl(data.yaw)) * M_PI / 180;
-	if(this->debug)
-		cout<<"\n	--->>> Odom pose from Position:0 XYTheta=["<<P.p.x<<"]["<<P.p.y<<"]["<<P.phi<<"]";
-	return P;
 };
 // Check if the laser beam is in the allowed range
 int MrIcpDriver::InRange(double angle,int laser_index)
@@ -997,81 +1087,6 @@ int MrIcpDriver::InRange(double angle,int laser_index)
 	}
 	return -1; // Beam to be ignored
 };
-// Read Laser Data from all the drivers
-vector <Point>  MrIcpDriver::GetLaserSample()
-{
-	size_t size;
-	player_laser_data_t data;
-  	struct timeval currtime;
-  	double t1,t2, min_angle, scan_res, range_res,r,b,time_diff;
-  	vector<Point> laser_set;
-	Point p;
-	gettimeofday(&currtime,NULL);
-	//Clear the previous Laser set used for the occupance grid generation
-	occ_laser_set.clear();
-  	// Get the laser device data.
-  	for(int index=0;index<number_of_lasers;index++)
-  	{
-	  	size = this->laser_driver[index]->GetData(this->laser_id[index], (void*) &data,sizeof(data), &this->laser_timestamp);
-	  	if (size == 0)
-	  	{
-	  		cout<<"\n	--->>>Error Reading From Laser";
-	  		fflush(stdout);
-		    return laser_set;
-	  	}
-		t1 = ((double) currtime.tv_sec  + (double) currtime.tv_usec/1e6);
-		t2 = ((double) last_time[index].tv_sec + (double) last_time[index].tv_usec/1e6);
-	    time_diff = t1 -t2;
-	  	if (time_diff < 0.1)
-	  	{
-	  		if(this->debug)
-	  			cout<<"\n	--->>> Time Since Last Read is= "<<(t1-t2)<<" msec";
-	    	continue;
-	  	}
-	  	this->last_time[index] = currtime;
-	  	min_angle = DTOR((int16_t)ntohs(data.min_angle)/1e2);
-	  	scan_res  = DTOR((int16_t)ntohs(data.resolution)/1e2);
-	  	range_res = (int16_t) ntohs(data.range_res); 
-	  	this->scan_count = ntohs(data.range_count);
-	    if(this->debug)
-	    	cout<<"\n Scan Count="<<this->scan_count;
-	  	for(int i=0;i < scan_count ;i++)
-	  	{
-	    	// convert to mm, then m, according to given range resolution
-		    r = ntohs(data.ranges[i]) * range_res / 1e3;
-	    	b = min_angle + (i * scan_res); 		    // compute bearing
-	    	//cout<<"\n Bearing:"<<RTOD(b);
-	    	if(InRange(b,index)!=0)
-	    		continue;
-		    // Transfer from Polar to Cartesian coordinates
-	    	p.x = r * cos(b);
-	    	p.y = r * sin(b);
-	    	p.laser_index = index;
-	    	// Transfer all the laser Reading into the Robot Coordinate System
-	    	p = TransformToGlobal(p,laser_pose[index]);
-			// Filter max ranges for alignment and use all for Occ-grid
-	    	if (this->use_max_range!=0)
-	    	{
-		    	if (r >= this->minr && r <= this->maxr && (i%sparse_scans_rate)==0)
-	  				laser_set.push_back(p);
-	  			occ_laser_set.push_back(p);
-	  		}
-	  		else
-	  		{
-	    		// Use only informative data for the scan allignement and Occ-grid
-		    	if (r >= this->minr && r <= this->maxr)
-		    	{
-		    		// Get samples according to sparse resolution
-		    		if ((i%sparse_scans_rate)==0)
-	  					laser_set.push_back(p);
-	  				// Use All the samples for OG-Map
-	  				occ_laser_set.push_back(p);
-		    	}
-	  		}
-	  	}
-  	}
- return laser_set;//success
-}
 Point MrIcpDriver::TransformToGlobal(Point p,Pose pose)
 {
 	// Rotate + Translate
@@ -1295,7 +1310,7 @@ void MrIcpDriver::BuildMap()
 		else
 			return;
 		// Read Pose if postion driver exists
-		if(this->position_driver)	pose_1 = GetOdomReading(); 
+		if(this->position_device)	pose_1 = GetOdomReading(); 
 		global_pose.p.x = global_pose.p.y = global_pose.phi = 0;
 		AddToMap(laser_set_1,global_pose);
 		gettimeofday(&last_delta,NULL);
@@ -1387,7 +1402,7 @@ void MrIcpDriver::BuildMap()
 
 	// Perform the ICP on Next Laser Scan
 	laser_set_1 = laser_set_2;
-	if(this->position_driver)	pose_1 = pose_2;
+	if(this->position_device)	pose_1 = pose_2;
 };
 
 void MrIcpDriver::ConnectPatches()
