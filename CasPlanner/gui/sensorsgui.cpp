@@ -8,8 +8,8 @@ SensorsGLW::SensorsGLW():
     robotManager(0),
     laser(this),
     speedMeter(this),
-    ogRenderer(this),
-    desiredAspectRatio(1.6),
+//    ogRenderer(this),
+    desiredAspectRatio(1.33),
     cursorCentreX(0.53),
     cursorCentreY(0.51), 
     zoomCentreX(0.53), 
@@ -25,12 +25,12 @@ SensorsGLW::SensorsGLW():
 
 QSize SensorsGLW::setMinimumSizeHint()
 {
-    return QSize(450*desiredAspectRatio,400);  
+    return QSize(80*desiredAspectRatio,60);  
 }
 
 QSize SensorsGLW::setSizeHint()
 {
-    return QSize(900*desiredAspectRatio,800);  
+    return QSize(160*desiredAspectRatio,120);  
 }
 
 void SensorsGLW::initializeGL()
@@ -57,8 +57,8 @@ void SensorsGLW::setRobotComms(RobotManager *rob)
 	    }
 	    if(mapEnabled)
 	    {
-	        ogRenderer.setProvider(robotManager->commManager);
-	        connect(robotManager->commManager, SIGNAL(newData()), &ogRenderer, SLOT(updateData()));
+//	        mapViewer.setProvider(robotManager->commManager);
+//	        connect(robotManager->commManager, SIGNAL(newData()), &mapViewer, SLOT(update()));
 	    }
 	    speedMeter.setSpeedProvider(sensorsGui); 
 	    connect(robotManager->commManager, SIGNAL(newData()), &speedMeter, SLOT(updateData()));
@@ -111,13 +111,11 @@ void SensorsGLW::paintGL()
     double camPanelRatio = 1.0; 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDisable(GL_DEPTH_TEST);
-    if(laserEnabled)
+     if(laserEnabled)
      {
          glPushMatrix(); 
-         //glTranslatef(camPanelRatio*.7,0.25, 0);
-         //glTranslatef(0.5,0.5,0);
+         glTranslatef(camPanelRatio*.7,0.25, 0);
          glScalef(0.2,0.2,1);
-         glScalef(1,1,1);
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
          glEnable(GL_POLYGON_SMOOTH); 
          glEnable(GL_BLEND);
@@ -125,7 +123,7 @@ void SensorsGLW::paintGL()
          glDisable(GL_BLEND);
          glDisable(GL_POLYGON_SMOOTH);
          glPopMatrix(); 
-     }
+     }    
      if(speedEnabled)
      {
          glPushMatrix();
@@ -141,7 +139,7 @@ void SensorsGLW::paintGL()
      }
      if(mapEnabled)
      {
-	     ogRenderer.render();
+	   //  mapViewer.render();
      }     
      glFlush();
 }
@@ -156,14 +154,17 @@ SensorsGui::SensorsGui(QWidget *parent,RobotManager *rob):
 	   radPerPixel(0.001),
 	   msperWheel(0.0005)
 {
+    mapViewer = new MapViewer(parent);
+    mapViewer->setProvider(rob->commManager);
+    connect(rob->commManager, SIGNAL(newData()), mapViewer, SLOT(update()));    
+    
     QHBoxLayout *layout3 = new QHBoxLayout; 
     QVBoxLayout *layout1 = new QVBoxLayout(),*layout2 = new QVBoxLayout(),*layout4 = new QVBoxLayout();
-    layout1->addWidget(&sensorsGL,1);
-    layout2->addWidget(&sGL2,1);
-    layout2->addWidget(&sGL3,1);
+    layout1->addWidget(mapViewer,1);
+   // layout2->addWidget(&sGL2,1);
+    //layout2->addWidget(&sensorsGL,1);
     layout3->addLayout(layout1);
-    layout3->addLayout(layout2);
-    
+    //layout3->addLayout(layout2);
     QVBoxLayout *layout = new QVBoxLayout();
     //layout4->addWidget(&buttonWidget, 1);
     layout->addLayout(layout3);
@@ -445,8 +446,9 @@ void SensorsGui::resetTab()
     tabContainer->setTabText(index, "Cas Planner");
 
     // set Victim Signal icon
-    tabContainer->setTabIcon(index, QIcon("../ui/rescuegui-branchCommsRefactor/blank.xpm"));
+    //tabContainer->setTabIcon(index, QIcon("../ui/rescuegui-branchCommsRefactor/blank.xpm"));
 }
+
 Map SensorsGui::provideMap()
 {
 	return robotManager->commManager->provideMap();

@@ -4,13 +4,13 @@ CommManager::CommManager():
 Comms(),
 player(0)
 {
-//	startConnected = false;
-//	activateControl = false;
-//	laserEnabled = false;
-//	ptzEnabled = false;
-//	occMapEnabled = false;
-//	startConnected = false;
-//	connected = false;
+	startConnected = false;
+	activateControl = false;
+	laserEnabled = false;
+	ptzEnabled = false;
+	occMapEnabled = false;
+	startConnected = false;
+	connected = false;
 }
 
 CommManager::~CommManager()
@@ -60,11 +60,6 @@ double CommManager::getSpeed()
 double CommManager::getTurnRate()
 {
   	return player->getTurnRate();
-}
-
-double CommManager::getClosestObst()
-{
-	return player->getClosestObst();
 }
 
 Pose CommManager::getLocation()
@@ -168,6 +163,11 @@ int CommManager::start()
   	}
   	if(player)
   	{
+ 		if(player->isRunning())
+ 		{
+ 			player->quit();
+ 			usleep(100000);
+ 		}
     	player->start();	  	
     	connected = true;
   	}
