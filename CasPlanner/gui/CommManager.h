@@ -21,7 +21,6 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
             virtual QVector<QPointF> getLaserScan(int laserId);
             virtual double getSpeed(); 
             virtual double getTurnRate();
-            virtual double getClosestObst(); 
             virtual Pose   getLocation();
             virtual void   setSpeed(double speed);
             virtual void   setPtz(double pan, double tilt);

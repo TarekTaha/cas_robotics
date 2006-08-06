@@ -51,7 +51,6 @@ int Navigator::readConfigs( ConfigFile *cf)
 		  	safety_dist   =   cf->ReadFloat (i, "safety_dist", 0.5);
 		  	tracking_dist =   cf->ReadFloat (i, "tracking_dist", 0);
 			
-			pixel_res    = 	  cf->ReadFloat (i, "pixel_res", 0.05);
 			dist_goal    = 	  cf->ReadFloat (i, "dist_goal", 0.6);
 			bridge_len   = 	  cf->ReadFloat (i, "bridge_len", 2);
 			bridge_res   = 	  cf->ReadFloat (i, "bridge_res", 0.1);
@@ -64,6 +63,10 @@ int Navigator::readConfigs( ConfigFile *cf)
 			linear_velocity = cf->ReadFloat (i, "linear_velocity", 0.1);
 			robot_model  =    cf->ReadString(i, "robot_mode", "diff");
 	    }
+	    if(sectionName == "Map")
+	    {
+			pixel_res    = 	  cf->ReadFloat (i, "pixel_res", 0.05);	    	
+	    }	    
 	    if(sectionName == "Robot")
 	    {
 			robot_length = 	  cf->ReadFloat (i, "robot_length", 1.2);

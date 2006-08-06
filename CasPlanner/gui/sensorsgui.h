@@ -1,15 +1,19 @@
 #ifndef SENSORSGUI_H
 #define SENSORSGUI_H
 
-#include "sensors.h"
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
 #include <QtOpenGL>
 #include <robotmanager.h>
 #include <QImage>
 #include <QPointer>
+#include "sensors.h"
 #include "interfaceprovider.h"
 #include "laserrender.h"
 #include "speedrender.h"
 #include "ogrender.h"
+#include "mapviewer.h"
 
 class SensorsGui;
 class QMessageBox;
@@ -41,7 +45,7 @@ class SensorsGLW: public QGLWidget
         double desiredAspectRatio;
         LaserRender laser; 
         SpeedRender speedMeter;
-        OGRenderer  ogRenderer;
+//        OGRenderer  ogRenderer;
         bool laserEnabled,mapEnabled,speedEnabled;
         RobotManager *robotManager;
         SensorsGui *sensorsGui; 
@@ -81,7 +85,8 @@ class SensorsGui: public Sensors, public SpeedProvider, public MapProvider
 		QRadioButton *laserRadBtn;
 		QRadioButton *staticRadBtn;
         //RobotManager *robotManager; 
-        SensorsGLW sensorsGL, sGL2,sGL3;
+        SensorsGLW sensorsGL, sGL2;
+        MapViewer *mapViewer;
         QWidget buttonWidget;
         double speed; 
         double turnRatio;

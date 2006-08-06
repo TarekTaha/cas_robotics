@@ -3,6 +3,8 @@
 
 #include <QtOpenGL>
 #include <GL/glut.h>
+#include "interfaceprovider.h"
+//#include "map.h"
 
 class MapViewer : public QGLWidget
 {
@@ -22,7 +24,8 @@ Q_OBJECT
 		void focusOutEvent(QFocusEvent *fe);
 		GLuint makeObject();
 		QImage captureMap();
-
+        virtual void setProvider(MapProvider *provider);
+        void renderMap();
     public slots:
 		void update();
 		void setShowOGs         (int state);
@@ -41,12 +44,7 @@ Q_OBJECT
 		void yawMONeg();
 		
     private:
-	//void renderPointcloud(orca::PointcloudPtr, float in_fudgeFactor=1.0); 
-	//void renderSnap(orca::SnapPtr, float in_fudgeFactor=1.0); 
-	//void renderOG(orca::OgMapDataPtr, bool highlighted=false); 
-	//void renderRobots(QVector<RobotLocation *> robotLocation, bool renderRobot);
-	//QTMapDataInterface *mapManager; 
-	int screenWidth;
+	int screenWidth,count;
     int screenHeight;  
 	float zoomFactor; 
 	float xOffset, yOffset, zOffset; 
@@ -60,11 +58,10 @@ Q_OBJECT
 	bool showRobots; 
 	bool showPointclouds; 
 	bool showPatchBorders; 
-	GLuint sharedObject;
+    MapProvider *provider; 
+    Map mapData; 	
     QColor clearColor;
 	QHash<QString, int> snapDLs;
-	QGLPixelBuffer *pbuffer;
-	QPixmap pixmap;
 	friend class MapControlPanel; 
 	GLuint texId; 
 };
