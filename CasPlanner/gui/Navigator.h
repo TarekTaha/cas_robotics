@@ -10,14 +10,17 @@
 
 #include <QReadWriteLock>
 #include <QTime>
+#include <vector>
 #include "robotmanager.h"
 #include "planningmanager.h"
 #include "Controller.h"
 #include "configfile.h"
 #include "Node.h"
+#include "icp.h"
 
 class PlanningManager;
 using namespace CasPlanner;
+//using namespace Geom2D;
 
 class Navigator : public Controller
 {
@@ -30,7 +33,9 @@ class Navigator : public Controller
 		int readConfigs(ConfigFile *cf);
 		void setPath(Node *path);
 		double NearestObstacle(QVector<QPointF> laser_scan,Pose pose);
-		Node * FindClosest(QPointF location,Node * all_path);	
+		Node * ClosestPathSeg(QPointF location,Node * all_path);	
+		QVector<QPointF> GenerateLocalMap(QVector<QPointF> laser_scan,Pose laser_pose, Pose rob_location);
+		bool MapModified(QVector<QPointF> laser_scan,Pose rob_location);
         void stop();
         void run();
         void setupLocalPlanner();
@@ -56,7 +61,11 @@ class Navigator : public Controller
 		bool	log,position_found,end_reached,segment_navigated,stop_navigating;
 		int		platform,direction,path2Draw;					
 		Node * local_path,* global_path,*last,*first,*path2Follow;
-		PlanningManager *local_planner;
+		PlanningManager *local_planner,*global_planner;
+		Geom2D::ICP icp;
+		std::vector<Geom2D::Point> local_map_icp,laser_scan_icp;
+		Geom2D::Pose	delta_pose;		
+		QVector<QPointF> local_map;
 		FILE * file;
 };
 

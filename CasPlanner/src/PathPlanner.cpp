@@ -424,7 +424,9 @@ void PathPlanner::SaveSearchSpace()
 		temp =temp->next;
 	}
 }
-
+/*! Sets the converted QImage or the Laser Scan Map to 
+ * the Current Planner
+ */ 
 void PathPlanner :: SetMap(Map * map_in)
 {
 	if(!map_in)

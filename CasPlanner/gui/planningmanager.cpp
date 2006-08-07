@@ -1,20 +1,20 @@
 #include "planningmanager.h"
 
-/* Constructor, parameters are provided directly rather than
+/*! Constructor, parameters are provided directly rather than
  * read from the configuration file
  */
-PlanningManager::PlanningManager(  double robot_length,
-									  double robot_width,
-									  QString robot_model,
-									  QPointF rotation_center,
-									  double pixel_res,
-									  double dist_goal,
-									  double bridge_len,
-									  double bridge_res,
-									  double reg_grid,
-									  double obst_exp,
-									  double conn_rad,
-									  double obst_pen
+PlanningManager::PlanningManager(double robot_length,
+								 double robot_width,
+								 QString robot_model,
+								 QPointF rotation_center,
+								 double pixel_res,
+								 double dist_goal,
+								 double bridge_len,
+								 double bridge_res,
+								 double reg_grid,
+								 double obst_exp,
+								 double conn_rad,
+								 double obst_pen
 									  )
 {
 	this->robot_length = robot_length;
@@ -37,6 +37,7 @@ PlanningManager::PlanningManager(  double robot_length,
 	this->expObstEnabled    = true;
 	this->bridgeTestEnabled = true;
 	this->showTreeEnabled   = false;
+	qDebug("Pixel Res in Navigator =%f",this->pixel_res);	
 	start();
 }
 
