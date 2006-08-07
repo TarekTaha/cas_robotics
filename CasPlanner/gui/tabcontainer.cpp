@@ -5,9 +5,9 @@ TabContainer::TabContainer(QWidget *parent,RobotManager *rob)
       robotManager(rob)
 {
     navCon = new NavContainer(parent,rob);
-    sensorsGui = new SensorsGui(parent,rob);
+    //sensorsGui = new SensorsGui(parent,rob);
     addTab(navCon, "Navigation Panel"); 
-    addTab(sensorsGui, "Sensors Pannel");     
+    //addTab(sensorsGui, "Sensors Pannel");     
     updateGeometry();
 }
 void TabContainer::setRobotManager(RobotManager *robManager)

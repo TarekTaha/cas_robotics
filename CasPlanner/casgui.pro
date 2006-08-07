@@ -26,7 +26,10 @@ HEADERS +=  gui/CommManager.h\
 			includes/defs.h\
 			includes/ForceField.h\
 			includes/geometry.h\
+			includes/geometry2D.h\			
+			includes/icp.h\			
 			includes/LList.h\
+			includes/nn.h\			
 			includes/Node.h\
 			includes/PathPlanner.h\
 			includes/Robot.h\
@@ -59,6 +62,9 @@ SOURCES +=  gui/CommManager.cpp\
 			gui/tabcontainer.cpp\
 			src/Astar.cpp\
 		    src/ForceField.cpp\
+		    src/geometry2D.cpp\		    
+		    src/icp.cpp\		    
+		    src/nn.cpp\		    
 		    src/LList.cpp\
 		    src/Node.cpp\
 		    src/PathPlanner.cpp\
