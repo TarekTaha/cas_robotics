@@ -291,7 +291,7 @@ void Navigator::GenerateLocalMap(QVector<QPointF> laser_scan,Pose laser_pose, Po
 	if(grid_start.y() < 0) 
 		grid_start.setY(0);
 
-//    cout<<"\nStart grid: "<<grid_start.x<<" y:"<<grid_start.y<<" pixels:"<<num_pixels; fflush(stdout);
+    cout<<"\nStart grid: "<<grid_start.x()<<" y:"<<grid_start.y()<<" pixels:"<<num_pixels; fflush(stdout);
 	for(int i= (int)(grid_start.x()) ; i< (2*num_pixels + grid_start.x()); i++)
 		for(int j=(int)(grid_start.y());j<(2*num_pixels + grid_start.y()); j++)
 		{
@@ -483,7 +483,7 @@ void Navigator::run()
 		
 		// Get current Robot Location
 		amcl_location = robotManager->commManager->getLocation();
-		/*! Is it a new hypothesis (not the same as the last)
+		/* Is it a new hypothesis (not the same as the last)
 		 * so override the estimation based on the robot model
 		 * with the AMCL localizer's estimation
 		 */
@@ -498,7 +498,7 @@ void Navigator::run()
 			old_amcl.p.setY(amcl_location.p.y()); EstimatedPos.p.setY(amcl_location.p.y());
 			old_amcl.phi = EstimatedPos.phi = amcl_location.phi;
 		}
-		/*! If we chose to follow a virtual point on the path then calculate that point
+		/* If we chose to follow a virtual point on the path then calculate that point
 		 * It will not be used most of the time, but it adds accuracy in control for
 		 * long line paths.
 		 */
@@ -511,7 +511,7 @@ void Navigator::run()
 		displacement = Dist2Seg(l,tracking_point);
 		//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
 		//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
-		/*! If we are too close to obstacles then let the local planner takes control
+		/* If we are too close to obstacles then let the local planner takes control
 		 * steps :
 		 * 1- Takes a local laser Scan from the server.
 		 * 2- Build a local occupancy grid based on the laser scan.
@@ -525,10 +525,10 @@ void Navigator::run()
 //		qDebug("Closest Distance to Obstacles is:%f Saftey Dist:%f",closest_obst,sf);
 //		if(robotManager->commManager->getClosestObst() < sf)
 		icp_time.restart();
-//		if (MapModified(robotManager->commManager->getLaserScan(0),robotManager->commManager->getLocation()))
-//		{
-//			cout<<"\nMap Modified";			
-//		}
+		if (MapModified(robotManager->commManager->getLaserScan(0),robotManager->commManager->getLocation()))
+		{
+			cout<<"\nMap Modified";
+		}
 		qDebug("Icp Check took:%d msec",icp_time.elapsed());					
 		if(closest_obst < sf && !local_planner->pathPlanner->path)
 		{
@@ -545,7 +545,7 @@ void Navigator::run()
 		 	global_planner->pathPlanner->ConvertToPixel(&pixel_loc.p);
 //			qDebug("Location Global Metric X:%f Y:%f",loc.p.x(),loc.p.y());
 //			qDebug("Location Global Pixel  X:%f Y:%f",pixel_loc.p.x(),pixel_loc.p.y());
-			
+
 			local_planning_time.restart();
 		 	local_planner->SetMap(robotManager->commManager->getLaserScan(0),local_dist,robotManager->commManager->getLocation());
 			local_planner->GenerateSpace();
@@ -596,7 +596,7 @@ void Navigator::run()
 		 		temp= temp->next;
 		 	}
 			
-			/*! Search Start location is the center of the Robot			
+			/* Search Start location is the center of the Robot			
 			 * currently it's the center of the laser, this will have
 			 * to be modified to translate the laser location to the 
 			 * robot's coordinate : TODO
@@ -652,14 +652,14 @@ void Navigator::run()
 			 	emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);				
 			}
 		}
-		/*! Get the control Action to be applied, in this case it's a
+		/* Get the control Action to be applied, in this case it's a
 		 * simple linear control. It's accurate enough for traversing 
 		 * the generated paths.
 		 */
 		cntrl = getAction(EstimatedPos.phi,angle,displacement,path2Follow->direction,linear_velocity);
 		//qDebug("Control Action Linear:%f Angular:%f",path2Follow->direction*cntrl.linear_velocity,
 		//cntrl.angular_velocity);
-		/*! Angular Velocity Thrusholded, just trying not to
+		/* Angular Velocity Thrusholded, just trying not to
 		 * exceed the accepted limits. Or setting up a safe 
 		 * turn speed.
 		 */

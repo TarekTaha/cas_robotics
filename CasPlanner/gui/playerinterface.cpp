@@ -73,9 +73,9 @@ void PlayerInterface::setLocation(Pose loc)
 	//cout << "\n Default Pose given to the Localizer X="<<path->location.x()<<" Y="<<path->location.y()<<" Theta="<<path->angle;
 	//cout << "\n Tracking Distance="<<tracking_distance<<" Kd="<<kd<<" KTheta="<<kt;
 	//Set Covariance Matrix
-	pose_covar[0]=0.5;
-	pose_covar[1]=0.5;
-	pose_covar[2]=DTOR(45);
+	pose_covar[0]=1;
+	pose_covar[1]=1;
+	pose_covar[2]=DTOR(60);
 	if(localizer)
 	{
 		localizer->SetPose(pose,pose_covar);	

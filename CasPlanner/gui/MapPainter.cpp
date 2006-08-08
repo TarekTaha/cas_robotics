@@ -10,7 +10,8 @@ MapPainter::MapPainter(QWidget *parent,QString name):
 	start_initialized(false),
 	end_initialized(false),
 	drawPathEnabled(false),
-	drawTreeEnabled(false)
+	drawTreeEnabled(false),
+	trigger(false)
 {
 	if(!image.load(mapName, 0))
 	{
@@ -49,14 +50,17 @@ void   MapPainter::setPathEnabled(int set)
 
 void MapPainter::drawPath(PathPlanner *p,Pose pose, int *draw)
 {
-	if(this->local_planner->path != p->path)
+	this->path2Draw = *draw;
+	this->pose = pose;
+	drawPathEnabled = true;
+	if(!trigger && path2Draw == SHOWLOCALPATH)
 	{
 		this->local_planner = p;
 		this->local_pose = pose;
+		trigger = true;
 	}
-	this->pose = pose;
-	drawPathEnabled = true;
-	this->path2Draw = *draw;
+	if(trigger && path2Draw==SHOWGLOBALPATH)
+		trigger = false;
 	update();
 }
 
