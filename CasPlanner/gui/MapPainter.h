@@ -19,7 +19,7 @@ public:
 	void   setPathEnabled(int);
 	Pose   getStart();
 	Pose   getEnd();
-	Pose   pose;
+	Pose   local_pose,pose;
 	void  SetMapFileName(QString name);
 	QImage getImage();
 public slots:
