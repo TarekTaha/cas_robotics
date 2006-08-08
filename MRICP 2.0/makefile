@@ -9,6 +9,6 @@ clean:
 	-rm -f *.o *.so *.*~
 MrIcpDriver: 
 	echo $(lib)
-	g++ -Wall -fpic -g3 $(CXXFLAGS) `pkg-config --cflags gtk+-2.0 gthread-2.0 player` -c src/*.cpp -Iinclude -I/usr/local/include -I/usr/local/include/player 
+	g++ -Wall -fpic -g3 $(CXXFLAGS) `pkg-config --cflags gtk+-2.0 playercore playerc++` -c src/*.cpp -Iinclude -I/usr/local/include -I/usr/local/include/player 
 	g++ -shared $(CXXFLAGS) -o MrIcpDriver.so *.o
 	rm *.o

@@ -64,9 +64,15 @@ using namespace Geom2D;
 #define MAP_VALID(mf, i, j) ((i >= 0) && (i < mf->map_size*2/mf->map_resolution) && (j >= 0) && (j < mf->map_size*2/mf->map_resolution))
 #define MAXLASERS 4
 #define MAXRANGES 10
-/** @addtogroup drivers Drivers */
+/** @ingroup Components */
 /** @{ */
-/** @defgroup MRICP Driver
+/** @defgroup ComponentNavigator MRICP
+ * @brief Map Reference ICP
+
+This is a Map Reference ICP plugin Driver for real time Map building and 
+Localization using Iterative Closest Point laser scan matching and 
+odom correction. Currently The driver is in stable release stage, more modifications
+might be added later on.
 
 This driver is created to support UTS CAS mobile Platforms. This driver can be quite 
 usefull in a lot of applications where odom correction or matching laser scans is 
@@ -220,7 +226,7 @@ driver
 
 @par Authors
 
-Tarek Taha
+Tarek Taha - Centre of Autonomous Systems - University of Technology Sydney
 */
 /** @} */
   /////////////////////////////////////////////////////////////
@@ -259,7 +265,6 @@ class MrIcpDriver : public Driver
 			int  HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr,void * data);
 			int  HandleCommands(MessageQueue* resp_queue,player_msghdr * hdr,void * data);
 			int  HandleData(MessageQueue * resp_queue, player_msghdr * hdr, void * data);			
-       		void CheckConfig(); 	//checks for configuration requests
  		 	void RefreshData();     //refreshs and sends data    
  		 	void AddToMap(vector <Point> points_to_add,Pose p); // Add points to Map
  		 	void ResetMap();		// Reset the Map and empty all the point cloud
@@ -267,7 +272,6 @@ class MrIcpDriver : public Driver
  		 	Pose  TransformToGlobal(Pose ,Pose p);
 			Point ConvertToPixel(Point p);
 			Point ConvertPixel(Point p);
- 		 	Pose GetOdomReading();
  		 	int  InRange(double angle,int laser_index);
  		 	void BuildMap();
  		 	int SetupLaser(int);
@@ -277,7 +281,6 @@ class MrIcpDriver : public Driver
 			mapgrid_t ComputeRangeProb(double range,bool);
 			int ProcessMapInfoReq(MessageQueue* resp_queue,player_msghdr * hdr,void * data);
 			int ProcessMapDataReq(MessageQueue* resp_queue,player_msghdr * hdr,void * data);
- 		 	vector<Point>  GetLaserSample();
 	// Position interface / IN
   	private: 	
   			player_devaddr_t          position_in_addr;
@@ -435,9 +438,10 @@ MrIcpDriver::MrIcpDriver(ConfigFile* cf, int section)  : Driver(cf, section)
 			cout<<"\n MAP Interface Loaded";	  	
   	}  
   	// Adding LASER interfaces
+	// cout<<"N of Lasers:"<<number_of_lasers;
 	for(int i=0; i<this->number_of_lasers;i++)
 	{
-  		if(cf->ReadDeviceAddr(&(this->laser_addr[i]), section, "requires", PLAYER_LASER_CODE,i, NULL) == 0)
+  		if(cf->ReadDeviceAddr(&this->laser_addr[i], section, "requires", PLAYER_LASER_CODE,-1, NULL) == 0)
   		{
 			SetupLaser(i); // Here we initialize the talk to the laser driver
 			cout<<"\n LASER Interface Loaded Success index:"<<i; fflush(stdout);
@@ -446,7 +450,7 @@ MrIcpDriver::MrIcpDriver(ConfigFile* cf, int section)  : Driver(cf, section)
   		}
   		else
 		{
-			cout<<"\n Incorrect Number of Lasers Specified, check your config file ...";
+			cout<<"\n Error Reading Laser on index:"<<i;
 			fflush(stdout);
 	    	this->SetError(-1);    
 	    	return;
@@ -545,7 +549,7 @@ void MrIcpDriver::SetupPositionDriver()
   	}
   	memcpy(&geom,(player_position2d_geom_t *)msg->GetPayload(),sizeof(geom));
 // 	geom = (player_position2d_geom_t *)msg->GetPayload();
-	initial_pose = GetOdomReading();
+//	initial_pose = GetOdomReading();
 	this->px = initial_pose.p.x;
 	this->py = initial_pose.p.y;
 	this->pa = initial_pose.phi;
@@ -591,7 +595,7 @@ int MrIcpDriver::SetupLaser(int index)
   		laser_pose[index].p.x = laser_geom->pose.px;
   		laser_pose[index].p.y = laser_geom->pose.py;
   		laser_pose[index].phi = laser_geom->pose.pa;
-	  	if (this->debug)
+	  	//if (this->debug)
 		  	cout<<"\n Laser["<<index<<"] Pose --> X="<<laser_pose[index].p.x<<" Y="<<laser_pose[index].p.y<<" Theta="<<laser_pose[index].phi;
     	delete msg;
     	return 0;
@@ -1304,19 +1308,22 @@ void MrIcpDriver::BuildMap()
 		delta_t_estimation.Reset();
 	if (!sample_initialized)
 	{
-		laser_set_1 = GetLaserSample();
+//		laser_set_1 = GetLaserSample();
+		laser_set_1 = laser_set;
 		if (laser_set_1.size() != 0)
 			sample_initialized = TRUE;
 		else
 			return;
 		// Read Pose if postion driver exists
-		if(this->position_device)	pose_1 = GetOdomReading(); 
+//		if(this->position_device)	pose_1 = GetOdomReading(); 
+		if(this->position_device)	pose_1 = P; 
 		global_pose.p.x = global_pose.p.y = global_pose.phi = 0;
 		AddToMap(laser_set_1,global_pose);
 		gettimeofday(&last_delta,NULL);
 		return;
 	}
-	laser_set_2 =  GetLaserSample();
+//	laser_set_2 =  GetLaserSample();
+	laser_set_2 =  laser_set;
 	if (laser_set_2.size() == 0 || laser_set_1.size() == 0)
 		return;
 
@@ -1324,7 +1331,8 @@ void MrIcpDriver::BuildMap()
 	// Read Pose if position driver exists
 	if(this->use_odom)
 	{
-		pose_2 = GetOdomReading(); 
+//		pose_2 = GetOdomReading(); 
+		pose_2 = P; 
 		delta_pose.phi = NORMALIZE(pose_2.phi - pose_1.phi);
 		delta_pose.p.x =  (pose_2.p.x - pose_1.p.x)*cos(pose_1.phi) + (pose_2.p.y - pose_1.p.y)*sin(pose_1.phi) ;
 		delta_pose.p.y = -(pose_2.p.x - pose_1.p.x)*sin(pose_1.phi) + (pose_2.p.y - pose_1.p.y)*cos(pose_1.phi) ;
