@@ -49,7 +49,11 @@ void   MapPainter::setPathEnabled(int set)
 
 void MapPainter::drawPath(PathPlanner *p,Pose pose, int *draw)
 {
-	this->local_planner = p;
+	if(this->local_planner->path != p->path)
+	{
+		this->local_planner = p;
+		this->local_pose = pose;
+	}
 	this->pose = pose;
 	drawPathEnabled = true;
 	this->path2Draw = *draw;
@@ -66,7 +70,7 @@ void MapPainter::drawPath(PathPlanner *p)
 void MapPainter::paintEvent(QPaintEvent *)
 {
 	//qDebug("Paint");
-	QPointF p;
+	QPointF p,curr_loc(pose.p.x(),pose.p.y());
 	QPainter paint(this);
 	paint.drawImage(0, 0, image, 0, 0,image.width(), image.height());
 	paint.setBrush(Qt::cyan);
@@ -83,6 +87,17 @@ void MapPainter::paintEvent(QPaintEvent *)
 	if(drawPathEnabled)
 	{
 		SearchSpaceNode * temp;
+		paint.setBrush(Qt::red);
+		paint.setPen(Qt::white);		
+		// Draw Current Location
+		global_planner->ConvertToPixel(&curr_loc);
+		qDebug("The current Pose is X:%f Y:%f",curr_loc.x(),curr_loc.y());
+
+		paint.drawArc(int(curr_loc.x()-5),int(curr_loc.y()-5),10,10,0,5760);	
+		paint.drawPie(int(curr_loc.x()-5),int(curr_loc.y()-5),10,10,0,5760);
+					
+		paint.setBrush(Qt::cyan);
+		paint.setPen(Qt::white);		
 		// Draw Start and End Locations
 		if(start_initialized)
 		{
@@ -106,9 +121,9 @@ void MapPainter::paintEvent(QPaintEvent *)
 			local_planner->ConvertToPixel(&end);
 
 //			qDebug("Start X:%f Y:%f End X:%f Y:%f",start.x(),start.y(),end.x(),end.y());
-			relative_p.p.setX( (( pose.p.x() + res*image.width() /2)/res) - local_planner->map->center.x() );
-			relative_p.p.setY( ((-pose.p.y() + res*image.height()/2)/res) - local_planner->map->center.y() );		
-			relative_p.phi = pose.phi;
+			relative_p.p.setX( (( local_pose.p.x() + res*image.width() /2)/res) - local_planner->map->center.x() );
+			relative_p.p.setY( ((-local_pose.p.y() + res*image.height()/2)/res) - local_planner->map->center.y() );		
+			relative_p.phi = local_pose.phi;
 			
 			start.setX(start.x() + relative_p.p.x()); start.setY(start.y() + relative_p.p.y());
 			end.setX    (end.x() + relative_p.p.x());     end.setY(end.y() + relative_p.p.y());		
