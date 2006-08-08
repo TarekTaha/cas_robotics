@@ -31,7 +31,7 @@ protected:
 	int step,path2Draw;
 	QPoint mouse_pos;
 	PathPlanner * local_planner,* global_planner;
-	bool start_initialized,end_initialized,drawPathEnabled,drawTreeEnabled;
+	bool start_initialized,end_initialized,drawPathEnabled,drawTreeEnabled,trigger;
 	Pose start,end;
 	void paintEvent(QPaintEvent *);
 	void mousePressEvent ( QMouseEvent * event );
