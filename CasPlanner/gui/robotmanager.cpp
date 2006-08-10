@@ -50,7 +50,7 @@ RobotManager::RobotManager(QStringList configFiles)
 		    if(sectionName == "Map")
 		    {
 				mapName = cf->ReadString(i, "mapname", "resources//casareaicp.png");
-			   	qDebug("\t\t MAP  name:\t%s", qPrintable(mapName)); 				
+//			   	qDebug("\t\t MAP  name:\t%s", qPrintable(mapName)); 				
 		    }		    
 		}
     }

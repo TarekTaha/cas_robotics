@@ -7,11 +7,13 @@ class Map
         int width; 
         int height;
         double resolution;
+        Pose global_pose;
         QByteArray rawData; // for OG-Maps
         bool ** data;       // for Planners
         QPointF center;		// Axis Center of the Map
-        Map(int width, int height, double resolution,QPointF center)
+        Map(int width, int height, double resolution,QPointF center,Pose p)
         {
+        	this->global_pose = p;
             this->width   = width; 
             this->height  = height; 
             this->resolution = resolution;

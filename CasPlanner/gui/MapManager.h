@@ -24,8 +24,8 @@ class MapManager : public Map, public QObject
 	public:
 		MapManager();
 		virtual ~MapManager();
-		Map * provideLaserOG(QVector<QPointF> laser_scan,double local_dist,Pose pose,double pixel_res);
-		Map * provideMapOG  (QImage image,double pixel_res);
+		Map * provideLaserOG(QVector<QPointF> laser_scan,double local_dist,double pixel_res,Pose laser_pose,Pose pose);
+		Map * provideMapOG  (QImage image,double pixel_res,Pose p,bool negate);
 };
 
 #endif /*MAPMANAGER_H_*/

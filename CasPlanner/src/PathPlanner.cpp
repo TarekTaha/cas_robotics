@@ -26,7 +26,7 @@ PathPlanner::PathPlanner(double r_l ,double r_w , QString r_m , QPointF r_c,doub
 			conn_radius(conn_rad),
 			obst_dist(obst_pen)
 {
-	qDebug("Planner Initialized");
+//	qDebug("Planner Initialized");
 };
 
 PathPlanner :: ~PathPlanner()
@@ -95,7 +95,7 @@ void PathPlanner::ExpandObstacles()
 	thickness = int(this->obstacle_radius/map->resolution);
 	radius =2; // This covers vertical, horizontal and diagonal cells
 
-	Map temp_map(map->width,map->height,map->resolution,QPointF(map->width/2.0,map->height/2.0));
+	Map temp_map(map->width,map->height,map->resolution,QPointF(map->width/2.0,map->height/2.0),Pose(0,0,0));
 	for(int i = 0;i<map->width;i++)
 		for(int j = 0;j<map->height;j++)
 		{

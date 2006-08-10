@@ -8,19 +8,26 @@ void Robot::SetCheckPoints()
 {
 	int point_index=0,points_per_height,points_per_width,n;
 	double i,j, l = length , w = width;
+	check_points.clear();
 	// The edges of the robot in -ve quadrant
 	double startx,starty;       
-	QPointF temp;   
+	QPointF temp,edges[4];   
+	edges[0].setX(-l/2);		edges[0].setY(w/2);
+	edges[1].setX(l/2);			edges[1].setY(w/2);
+	edges[2].setX(l/2);			edges[2].setY(-w/2);
+	edges[3].setX(-l/2);		edges[3].setY(-w/2);	
+	Pose pose(-center.x(),-center.y(),0);
+//	cout <<"\nCenter Point X:"<<center.x()<<" Y:"<<center.y();		
 	// am determining here the location of the edges in the robot coordinate system
 	startx = -l/2 - center.x(); 
 	starty = -w/2 - center.y();
 	// These Points are used for drawing the Robot rectangle
-	local_edge_points[0].setX(startx); 		local_edge_points[0].setY(starty);
-	local_edge_points[1].setX(startx);		local_edge_points[1].setY(w + starty);
-	local_edge_points[2].setX(l + startx);	local_edge_points[2].setY(w + starty);
-	local_edge_points[3].setX(l + startx); 	local_edge_points[3].setY(starty);
-//	for (int i=0 ;i < 4; i++)
-//		cout<<"\nEdge->"<< i<<" X="<<local_edge_points[i].x()<<" Y="<<local_edge_points[i].y();
+	for(int s=0;s<4;s++)
+	{
+		local_edge_points[s] = Trans2Global(edges[s],pose)		;
+	}
+//	for (int s=0 ;s < 4; s++)
+//		cout<<"\nEdge->"<< s<<" X="<<local_edge_points[s].x()<<" Y="<<local_edge_points[s].y();
 	// Create a Matrix of the points to check for collision detection
 	points_per_height = (int)(ceil(l/(double)(2*this->obstacle_radius)));
 	points_per_width  = (int)(ceil(w/(double)(2*this->obstacle_radius)));
@@ -60,8 +67,8 @@ void Robot::SetCheckPoints()
 	}
 	for (unsigned int k=0;k<check_points.size();k++)
 	{
-//		cout << "\nPoint to check "<<k<<"'---> X="<<check_points[k].x()<<" Y="<<check_points[k].y();
-//		fflush(stdout);
+		cout << "\nPoint to check "<<k<<"'---> X="<<check_points[k].x()<<" Y="<<check_points[k].y();
+		fflush(stdout);
 	}
 };
 Robot::Robot (double l, double w,double o_r,QString model,QPointF r_c):

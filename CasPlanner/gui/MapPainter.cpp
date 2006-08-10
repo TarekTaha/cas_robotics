@@ -10,8 +10,7 @@ MapPainter::MapPainter(QWidget *parent,QString name):
 	start_initialized(false),
 	end_initialized(false),
 	drawPathEnabled(false),
-	drawTreeEnabled(false),
-	trigger(false)
+	drawTreeEnabled(false)
 {
 	if(!image.load(mapName, 0))
 	{
@@ -53,14 +52,9 @@ void MapPainter::drawPath(PathPlanner *p,Pose pose, int *draw)
 	this->path2Draw = *draw;
 	this->pose = pose;
 	drawPathEnabled = true;
-	if(!trigger && path2Draw == SHOWLOCALPATH)
-	{
-		this->local_planner = p;
-		this->local_pose = pose;
-		trigger = true;
-	}
-	if(trigger && path2Draw==SHOWGLOBALPATH)
-		trigger = false;
+	this->local_planner = p;
+	if(path2Draw == SHOWLOCALPATH)
+		this->local_pose = p->map->global_pose;
 	update();
 }
 
@@ -95,7 +89,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 		paint.setPen(Qt::white);		
 		// Draw Current Location
 		global_planner->ConvertToPixel(&curr_loc);
-		qDebug("The current Pose is X:%f Y:%f",curr_loc.x(),curr_loc.y());
+//		qDebug("The current Pose is X:%f Y:%f",curr_loc.x(),curr_loc.y());
 
 		paint.drawArc(int(curr_loc.x()-5),int(curr_loc.y()-5),10,10,0,5760);	
 		paint.drawPie(int(curr_loc.x()-5),int(curr_loc.y()-5),10,10,0,5760);
@@ -183,7 +177,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 			paint.setBrush(Qt::red);
 			paint.drawPie(int(end.x()),  int(end.y()),5,5,0,5760);
 		}
-		if(global_planner && path2Draw == SHOWGLOBALPATH)
+//		if(global_planner && path2Draw == SHOWGLOBALPATH)
 		{
 			// Draw the expanded Global Map
 			paint.setPen(Qt::gray);
@@ -214,7 +208,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 			}
 			
 			// Draw Global Path if it exists
-			paint.setPen(Qt::yellow);
+			paint.setPen(Qt::black);
 			if(global_planner->path)
 			{
 					QPointF l_start,l_end,E,S;
