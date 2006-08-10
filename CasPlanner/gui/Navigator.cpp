@@ -204,7 +204,6 @@ int Navigator::readConfigs( ConfigFile *cf)
 			local_dist   = 	  cf->ReadFloat (i, "local_dist", 2);	
 			traversable_dist= cf->ReadFloat (i, "traversable_dist", 2);
 			linear_velocity = cf->ReadFloat (i, "linear_velocity", 0.1);
-			robot_model  =    cf->ReadString(i, "robot_mode", "diff");
 	    }
 	    if(sectionName == "Map")
 	    {
@@ -212,10 +211,17 @@ int Navigator::readConfigs( ConfigFile *cf)
 	    }	    
 	    if(sectionName == "Robot")
 	    {
-			robot_length = 	  cf->ReadFloat (i, "robot_length", 1.2);
-			robot_width  = 	  cf->ReadFloat (i, "robot_width", 0.65);
-			rotation_center.setX(0);
-			rotation_center.setY(-0.3);
+		   	robot_length = 			cf->ReadFloat(i, "robot_length",1.2);
+		   	robot_width  = 			cf->ReadFloat(i, "robot_width",0.65);
+		   	robot_model  = 			cf->ReadString(i, "robot_mode","diff");
+			int cnt =	 			cf->GetTupleCount(i,"robot_center");
+			if (cnt != 2)
+			{
+				cout<<"\n ERROR: center should consist of 2 tuples !!!";
+				exit(1);
+			}
+			rotation_center.setX(cf->ReadTupleFloat(i,"robot_center",0 ,0));
+			rotation_center.setY(cf->ReadTupleFloat(i,"robot_center",1 ,0));
 	    }
 	}
 
@@ -233,7 +239,7 @@ int Navigator::readConfigs( ConfigFile *cf)
  	return 1;
 }
 
-double Navigator::NearestObstacle(QVector<QPointF> laser_scan,Pose pose)
+double Navigator::NearestObstacle(QVector<QPointF> laser_scan,Pose laser_pose)
 {
 	QPointF ray_end,temp[4],intersection;
 	Line L1,L2;
@@ -257,7 +263,6 @@ double Navigator::NearestObstacle(QVector<QPointF> laser_scan,Pose pose)
 				if(dist < shortest_dist)
 				{
 					shortest_dist = dist;
-					//qDebug("Shortest:%f",shortest_dist);
 				}
 			}
 		}
@@ -434,7 +439,6 @@ void Navigator::run()
 	{
 		delta_t = delta_timer.elapsed()/1e3;
 		delta_timer.restart();
-//		qDebug("HERE 1 in Loop, time took %f!!!",delta_t);
 		usleep(10000);
 		first = ClosestPathSeg(loc.p,path2Follow);
 		if(!first)
@@ -522,14 +526,14 @@ void Navigator::run()
 		 */
 		QTime local_planning_time,icp_time;
 		closest_obst = NearestObstacle(robotManager->commManager->getLaserScan(0),robotManager->commManager->getLocation());
-//		qDebug("Closest Distance to Obstacles is:%f Saftey Dist:%f",closest_obst,sf);
+		qDebug("Closest Distance to Obstacles is:%f Saftey Dist:%f",closest_obst,sf);
 //		if(robotManager->commManager->getClosestObst() < sf)
 		icp_time.restart();
-		if (MapModified(robotManager->commManager->getLaserScan(0),robotManager->commManager->getLocation()))
-		{
-			cout<<"\nMap Modified";
-		}
-		qDebug("Icp Check took:%d msec",icp_time.elapsed());					
+//		if (MapModified(robotManager->commManager->getLaserScan(0),robotManager->commManager->getLocation()))
+//		{
+//			cout<<"\nMap Modified";
+//		}
+//		qDebug("Icp Check took:%d msec",icp_time.elapsed());					
 		if(closest_obst < sf && !local_planner->pathPlanner->path)
 		{
 			//Stop the Robot before planning
@@ -572,16 +576,16 @@ void Navigator::run()
 	 			dist+= Dist(temp->pose.p,temp->next->pose.p);
 			 	boundary_check.setX(temp->pose.p.x());
 			 	boundary_check.setY(temp->pose.p.y());
-//				 	qDebug("Target Global Metric X:%f Y:%f",boundary_check.x(),boundary_check.y());
+//				qDebug("Target Global Metric X:%f Y:%f",boundary_check.x(),boundary_check.y());
 			 					 				 	
 			 	// Transfer to the global Pixel Coordinate
 			 	global_planner->pathPlanner->ConvertToPixel(&boundary_check);				 	
-//					qDebug("Target Pixel Global  X:%f Y:%f",boundary_check.x(),boundary_check.y());
+//				qDebug("Target Pixel Global  X:%f Y:%f",boundary_check.x(),boundary_check.y());
 								 	
 			 	// Transfer to the local Pixel Coordinate
 			 	boundary_check.setX(boundary_check.x() - pixel_loc.p.x() + local_planner->pathPlanner->map->center.x());	
 			 	boundary_check.setY(boundary_check.y() - pixel_loc.p.y() + local_planner->pathPlanner->map->center.y());				 	
-//					qDebug("Target Pixel Local   X:%f Y:%f",boundary_check.x(),boundary_check.y());
+//				qDebug("Target Pixel Local   X:%f Y:%f",boundary_check.x(),boundary_check.y());
 
 				// Check Boundaries
 			 	if (boundary_check.x() < 0 || boundary_check.y() < 0 )
@@ -592,7 +596,7 @@ void Navigator::run()
 				target.p.setX(boundary_check.x());	 		
 				target.p.setY(boundary_check.y());	 							
 			 	target.phi = target_angle;	
-//					qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
+//				qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
 		 		temp= temp->next;
 		 	}
 			
@@ -606,8 +610,8 @@ void Navigator::run()
 		 	start.p.setY(local_planner->pathPlanner->map->center.y()); 	
 		 	start.phi = EstimatedPos.phi;
 		 	
-//				qDebug("Start Local Pixel  X:%f Y:%f",start.p.x(),start.p.y());			 	
-//				qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
+//			qDebug("Start Local Pixel  X:%f Y:%f",start.p.x(),start.p.y());			 	
+//			qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
 
 		 	local_path = local_planner->FindPath(start,target);
 		 	if (local_path)

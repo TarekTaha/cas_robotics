@@ -142,14 +142,14 @@ void PlanningManager::SetMap(QImage map)
 {
 	if(!this->pathPlanner)
 		this->start();	
-	pathPlanner->SetMap(provideMapOG(map,pixel_res));	
+	pathPlanner->SetMap(provideMapOG(map,pixel_res,Pose(0,0,0),negate));	
 }
 
 void PlanningManager::SetMap(QVector<QPointF> laser_scan,double local_dist,Pose pose)
 {
 	if(!this->pathPlanner)
 		this->start();
-	pathPlanner->SetMap(provideLaserOG(laser_scan,local_dist,pose,pixel_res));	
+	pathPlanner->SetMap(provideLaserOG(laser_scan,local_dist,pixel_res,Pose(0,0,0),pose));
 }
 
 void PlanningManager::GenerateSpace()
@@ -209,18 +209,25 @@ int PlanningManager::readConfigs( ConfigFile *cf)
 		   	conn_rad =				cf->ReadFloat(i, "conn_rad",0.8);
 		   	obst_pen = 				cf->ReadFloat(i, "obst_pen",3);
 		   	dist_goal = 			cf->ReadFloat(i, "dist_goal",0.2);   	
-		   	robot_length = 			cf->ReadFloat(i, "robot_length",1.2);
-		   	robot_width  = 			cf->ReadFloat(i, "robot_width",0.65);
-		   	robot_model  = 			cf->ReadString(i, "robot_mode","diff");
 	    }
 	    if(sectionName == "Robot")
 	    {
-			rotation_center.setX(cf->ReadFloat(i, "rotation_x",-0.3));
-			rotation_center.setY(cf->ReadFloat(i, "rotation_y",0));
+		   	robot_length = 			cf->ReadFloat(i, "robot_length",1.2);
+		   	robot_width  = 			cf->ReadFloat(i, "robot_width",0.65);
+		   	robot_model  = 			cf->ReadString(i, "robot_mode","diff");
+			int cnt =	 			cf->GetTupleCount(i,"robot_center");
+			if (cnt != 2)
+			{
+				cout<<"\n ERROR: center should consist of 2 tuples !!!";
+				exit(1);
+			}
+			rotation_center.setX(cf->ReadTupleFloat(i,"robot_center",0 ,0));
+			rotation_center.setY(cf->ReadTupleFloat(i,"robot_center",1 ,0));
 	    }
 	    if(sectionName == "Map")
 	    {
-		   	pixel_res =  			cf->ReadFloat(i, "pixel_res",0.05);	    	
+		   	pixel_res =  			cf->ReadFloat(i, "pixel_res",0.05);
+		   	negate = 				cf->ReadInt(i, "negate",0);
 	    }	    
 	}
   	return 1;

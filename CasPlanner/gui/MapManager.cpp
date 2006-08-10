@@ -8,7 +8,7 @@ MapManager::~MapManager()
 {
 }
 
-Map * MapManager::provideLaserOG(QVector<QPointF> laser_scan, double local_dist,Pose pose,double res)
+Map * MapManager::provideLaserOG(QVector<QPointF> laser_scan, double local_dist,double res,Pose laser_pose,Pose map_pose)
 {
 	Map *retval;
 	double dist=0;
@@ -17,12 +17,13 @@ Map * MapManager::provideLaserOG(QVector<QPointF> laser_scan, double local_dist,
 	height = int(2.0*local_dist/res);
 	width =  int(2.0*local_dist/res);	
 	// Creating Map with the right size
-	retval = new Map(width,height,res,QPointF(width/2.0,height/2.0));
+	retval = new Map(width,height,res,QPointF(width/2.0,height/2.0),map_pose);
 	for(int i =0; i < laser_scan.size();i++)
 	{
 		// Rotate it now, it will reduce the computation later on
 		QPointF p(laser_scan[i].x(),laser_scan[i].y());
-		p = Rotate(p,pose.phi);
+		p = Rotate(p,map_pose.phi);
+		p = Trans2Global(p,laser_pose);
 		dist = Dist(QPointF(0,0),p);
 //		assert( p.x() > 0 );
 		//qDebug("Metric X:%f Y:%f dist=%f",p.x(),p.y(),dist);		
@@ -48,12 +49,11 @@ Map * MapManager::provideLaserOG(QVector<QPointF> laser_scan, double local_dist,
 	return retval;
 }
 
-Map *MapManager::provideMapOG(QImage image,double res)
+Map *MapManager::provideMapOG(QImage image,double res,Pose map_pose,bool negate)
 {
 	Map * retval;
-	bool negate=false;
 	QPointF center(image.width()/2.0,image.height()/2.0);
-	retval = new Map(image.width(),image.height(),res,center);
+	retval = new Map(image.width(),image.height(),res,center,map_pose);
 	for(int i=0;i<image.width();i++)
 	{
 		QRgb color;

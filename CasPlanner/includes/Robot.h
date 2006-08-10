@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <math.h>
+#include "utils.h"
 using namespace std;
 using std::vector;
 namespace CasPlanner
@@ -24,7 +25,7 @@ class Robot
 		void SetCheckPoints();
 		Robot (double r_l, double r_w,double o_r,QString r_m,QPointF r_c );
 		Robot();
-		~Robot();	
+		~Robot();
 };
 }
 

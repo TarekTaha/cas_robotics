@@ -51,7 +51,7 @@ class PlanningManager : public MapManager
             double pixel_res,dist_goal,bridge_len,bridge_res,reg_grid,obst_exp,conn_rad,obst_pen,
             	   robot_length, robot_width;
             RobotManager *robotManager;
-            bool bridgeTestEnabled,connNodesEnabled,regGridEnabled,obstPenEnabled,expObstEnabled,showTreeEnabled;
+            bool bridgeTestEnabled,connNodesEnabled,regGridEnabled,obstPenEnabled,expObstEnabled,showTreeEnabled,negate;
             QPointF rotation_center;
             QString robot_model;
 };
