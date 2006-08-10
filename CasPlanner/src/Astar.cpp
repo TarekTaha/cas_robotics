@@ -140,7 +140,7 @@ Node *  Astar::Search(Pose start,Pose end)
 		openList->Next();				// Move to the next Node
     	NodesExpanded++;
     	// We reached the target pose, so build the path and return it.
-    	if (GoalReached(current))                     
+    	if (GoalReached(current) && current!= root)                     
 		{
 			// build the complete path to return
       		current->next = NULL;

@@ -177,7 +177,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 			paint.setBrush(Qt::red);
 			paint.drawPie(int(end.x()),  int(end.y()),5,5,0,5760);
 		}
-//		if(global_planner && path2Draw == SHOWGLOBALPATH)
+		if(global_planner && path2Draw == SHOWGLOBALPATH)
 		{
 			// Draw the expanded Global Map
 			paint.setPen(Qt::gray);
@@ -208,7 +208,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 			}
 			
 			// Draw Global Path if it exists
-			paint.setPen(Qt::black);
+			paint.setPen(Qt::yellow);
 			if(global_planner->path)
 			{
 					QPointF l_start,l_end,E,S;
