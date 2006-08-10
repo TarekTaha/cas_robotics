@@ -76,7 +76,7 @@ Pose ICP::align(vector<Point> reference, vector<Point> obs,Pose init, double gat
 		{
 			cout<<"\n Detected Possible misalignment --- Skipping this Laser Set! Gate is:"<<gate;;
 			pse.p.x = -1 ; pse.p.y=-1 ; pse.phi = -1;
-			return pse;
+			break;
 		}
 		if (a.size() > 2)
 			pse = compute_relative_pose(a, b); // new iteration result
