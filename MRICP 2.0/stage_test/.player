@@ -162,3 +162,518 @@ plugins.cc:190 invoking player_driver_init()...
 plugins.cc:208 success
 configfile.cc:2103 error   : Initialization failed for driver "stage"
 server.cc:150 error   : failed to parse config file stage_mricp.cfg
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:118 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+configfile.cc:2103 error   : Initialization failed for driver "stage"
+server.cc:150 error   : failed to parse config file stage_mricp.cfg
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:118 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+configfile.cc:2103 error   : Initialization failed for driver "stage"
+server.cc:150 error   : failed to parse config file stage_mricp.cfg
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:118 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+configfile.cc:2103 error   : Initialization failed for driver "stage"
+server.cc:150 error   : failed to parse config file stage_mricp.cfg
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:118 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/MrIcpDriver.so...
+plugins.cc:123 failed to load /home/BlackCoder/psg/lib/MrIcpDriver.so (error /home/BlackCoder/psg/lib/MrIcpDriver.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:147 trying to load /home/BlackCoder/workspace/MRICP 2.0/stage_test/./MrIcpDriver.so...
+plugins.cc:149 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+configfile.cc:2103 error   : Initialization failed for driver "MrIcpDriver"
+server.cc:150 error   : failed to parse config file stage_mricp.cfg
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:118 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/MrIcpDriver.so...
+plugins.cc:123 failed to load /home/BlackCoder/psg/lib/MrIcpDriver.so (error /home/BlackCoder/psg/lib/MrIcpDriver.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:147 trying to load /home/BlackCoder/workspace/MRICP 2.0/stage_test/./MrIcpDriver.so...
+plugins.cc:149 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+configfile.cc:2103 error   : Initialization failed for driver "MrIcpDriver"
+server.cc:150 error   : failed to parse config file stage_mricp.cfg
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:118 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/MrIcpDriver.so...
+plugins.cc:123 failed to load /home/BlackCoder/psg/lib/MrIcpDriver.so (error /home/BlackCoder/psg/lib/MrIcpDriver.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:147 trying to load /home/BlackCoder/workspace/MRICP 2.0/stage_test/./MrIcpDriver.so...
+plugins.cc:149 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+configfile.cc:2103 error   : Initialization failed for driver "MrIcpDriver"
+server.cc:150 error   : failed to parse config file stage_mricp.cfg
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:118 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/MrIcpDriver.so...
+plugins.cc:123 failed to load /home/BlackCoder/psg/lib/MrIcpDriver.so (error /home/BlackCoder/psg/lib/MrIcpDriver.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:147 trying to load /home/BlackCoder/workspace/MRICP 2.0/stage_test/./MrIcpDriver.so...
+plugins.cc:149 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+configfile.cc:2103 error   : Initialization failed for driver "MrIcpDriver"
+server.cc:150 error   : failed to parse config file stage_mricp.cfg
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:118 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/MrIcpDriver.so...
+plugins.cc:123 failed to load /home/BlackCoder/psg/lib/MrIcpDriver.so (error /home/BlackCoder/psg/lib/MrIcpDriver.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:147 trying to load /home/BlackCoder/workspace/MRICP 2.0/stage_test/./MrIcpDriver.so...
+plugins.cc:149 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+configfile.cc:2103 error   : Initialization failed for driver "MrIcpDriver"
+server.cc:150 error   : failed to parse config file stage_mricp.cfg
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:118 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/MrIcpDriver.so...
+plugins.cc:123 failed to load /home/BlackCoder/psg/lib/MrIcpDriver.so (error /home/BlackCoder/psg/lib/MrIcpDriver.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:147 trying to load /home/BlackCoder/workspace/MRICP 2.0/stage_test/./MrIcpDriver.so...
+plugins.cc:149 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:118 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/MrIcpDriver.so...
+plugins.cc:123 failed to load /home/BlackCoder/psg/lib/MrIcpDriver.so (error /home/BlackCoder/psg/lib/MrIcpDriver.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:147 trying to load /home/BlackCoder/workspace/MRICP 2.0/stage_test/./MrIcpDriver.so...
+plugins.cc:149 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+configfile.cc:2103 error   : Initialization failed for driver "MrIcpDriver"
+server.cc:150 error   : failed to parse config file stage_mricp.cfg
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:118 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/MrIcpDriver.so...
+plugins.cc:123 failed to load /home/BlackCoder/psg/lib/MrIcpDriver.so (error /home/BlackCoder/psg/lib/MrIcpDriver.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:147 trying to load /home/BlackCoder/workspace/MRICP 2.0/stage_test/./MrIcpDriver.so...
+plugins.cc:149 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+configfile.cc:2103 error   : Initialization failed for driver "MrIcpDriver"
+server.cc:150 error   : failed to parse config file stage_mricp.cfg
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:118 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/MrIcpDriver.so...
+plugins.cc:123 failed to load /home/BlackCoder/psg/lib/MrIcpDriver.so (error /home/BlackCoder/psg/lib/MrIcpDriver.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:147 trying to load /home/BlackCoder/workspace/MRICP 2.0/stage_test/./MrIcpDriver.so...
+plugins.cc:149 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+configfile.cc:2103 error   : Initialization failed for driver "MrIcpDriver"
+server.cc:150 error   : failed to parse config file stage_mricp.cfg
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:118 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/MrIcpDriver.so...
+plugins.cc:123 failed to load /home/BlackCoder/psg/lib/MrIcpDriver.so (error /home/BlackCoder/psg/lib/MrIcpDriver.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:147 trying to load /home/BlackCoder/workspace/MRICP 2.0/stage_test/./MrIcpDriver.so...
+plugins.cc:149 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+configfile.cc:2103 error   : Initialization failed for driver "MrIcpDriver"
+server.cc:150 error   : failed to parse config file stage_mricp.cfg
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:118 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/MrIcpDriver.so...
+plugins.cc:123 failed to load /home/BlackCoder/psg/lib/MrIcpDriver.so (error /home/BlackCoder/psg/lib/MrIcpDriver.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:147 trying to load /home/BlackCoder/workspace/MRICP 2.0/stage_test/./MrIcpDriver.so...
+plugins.cc:149 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+configfile.cc:2103 error   : Initialization failed for driver "MrIcpDriver"
+server.cc:150 error   : failed to parse config file stage_mricp.cfg
+readlog.cc:353 error   : must specify a log file to read from
+configfile.cc:2103 error   : Initialization failed for driver "readlog"
+server.cc:150 error   : failed to parse config file log_data.cfg
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/MrIcpDriver.so...
+plugins.cc:123 failed to load /home/BlackCoder/psg/lib/MrIcpDriver.so (error /home/BlackCoder/psg/lib/MrIcpDriver.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:147 trying to load /home/BlackCoder/workspace/MRICP 2.0/stage_test/./MrIcpDriver.so...
+plugins.cc:149 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+driver.cc:345 warning : Unhandled message for driver device=16777343:6665:6:0 type=3 subtype=1 len=0
+
+readlog.cc:1453 error   : unknown laser msg type 19740
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:4
+configfile.cc:2123 error   : Driver has no (usable) interfaces "MrIcpDriver"
+server.cc:150 error   : failed to parse config file log_data.cfg
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/MrIcpDriver.so...
+plugins.cc:123 failed to load /home/BlackCoder/psg/lib/MrIcpDriver.so (error /home/BlackCoder/psg/lib/MrIcpDriver.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:147 trying to load /home/BlackCoder/workspace/MRICP 2.0/stage_test/./MrIcpDriver.so...
+plugins.cc:149 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+driver.cc:345 warning : Unhandled message for driver device=16777343:6665:6:0 type=3 subtype=1 len=0
+
+readlog.cc:1453 error   : unknown laser msg type 19740
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:4
+readlog.cc:1453 error   : unknown laser msg type 19741
+
+readlog.cc:1453 error   : unknown laser msg type 19741
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:7
+readlog.cc:1453 error   : unknown laser msg type 19741
+
+readlog.cc:1453 error   : unknown laser msg type 19741
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:10
+readlog.cc:1453 error   : unknown laser msg type 19741
+
+readlog.cc:1453 error   : unknown laser msg type 19741
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:13
+readlog.cc:1453 error   : unknown laser msg type 19741
+
+readlog.cc:1453 error   : unknown laser msg type 19741
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:16
+readlog.cc:1453 error   : unknown laser msg type 19741
+
+readlog.cc:1453 error   : unknown laser msg type 19741
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:19
+readlog.cc:1453 error   : unknown laser msg type 19742
+
+readlog.cc:1453 error   : unknown laser msg type 19742
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:22
+readlog.cc:1453 error   : unknown laser msg type 19742
+
+readlog.cc:1453 error   : unknown laser msg type 19742
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:25
+readlog.cc:1453 error   : unknown laser msg type 19742
+
+readlog.cc:1453 error   : unknown laser msg type 19742
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:28
+readlog.cc:1453 error   : unknown laser msg type 19742
+
+readlog.cc:1453 error   : unknown laser msg type 19742
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:31
+readlog.cc:1453 error   : unknown laser msg type 19742
+
+readlog.cc:1453 error   : unknown laser msg type 19742
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:34
+readlog.cc:1453 error   : unknown laser msg type 19743
+
+readlog.cc:1453 error   : unknown laser msg type 19743
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:37
+readlog.cc:1453 error   : unknown laser msg type 19743
+
+readlog.cc:1453 error   : unknown laser msg type 19743
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:40
+readlog.cc:1453 error   : unknown laser msg type 19743
+
+readlog.cc:1453 error   : unknown laser msg type 19743
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:43
+readlog.cc:1453 error   : unknown laser msg type 19743
+
+readlog.cc:1453 error   : unknown laser msg type 19743
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:46
+readlog.cc:1453 error   : unknown laser msg type 19743
+
+readlog.cc:1453 error   : unknown laser msg type 19743
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:49
+readlog.cc:1453 error   : unknown laser msg type 19744
+
+readlog.cc:1453 error   : unknown laser msg type 19744
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:52
+readlog.cc:1453 error   : unknown laser msg type 19744
+
+readlog.cc:1453 error   : unknown laser msg type 19744
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:55
+readlog.cc:1453 error   : unknown laser msg type 19744
+
+readlog.cc:1453 error   : unknown laser msg type 19744
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:58
+readlog.cc:1453 error   : unknown laser msg type 19744
+
+readlog.cc:1453 error   : unknown laser msg type 19744
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:61
+readlog.cc:1453 error   : unknown laser msg type 19744
+
+readlog.cc:1453 error   : unknown laser msg type 19744
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:64
+readlog.cc:1453 error   : unknown laser msg type 19745
+
+readlog.cc:1453 error   : unknown laser msg type 19745
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:67
+readlog.cc:1453 error   : unknown laser msg type 19745
+
+readlog.cc:1453 error   : unknown laser msg type 19745
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:70
+readlog.cc:1453 error   : unknown laser msg type 19745
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:72
+readlog.cc:1453 error   : unknown laser msg type 19745
+
+readlog.cc:1453 error   : unknown laser msg type 19745
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:75
+readlog.cc:1453 error   : unknown laser msg type 19745
+
+readlog.cc:1453 error   : unknown laser msg type 19745
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:78
+readlog.cc:1453 error   : unknown laser msg type 19745
+
+readlog.cc:1453 error   : unknown laser msg type 19746
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:81
+readlog.cc:1453 error   : unknown laser msg type 19746
+
+readlog.cc:1453 error   : unknown laser msg type 19746
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:84
+readlog.cc:1453 error   : unknown laser msg type 19746
+
+readlog.cc:1453 error   : unknown laser msg type 19746
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:87
+readlog.cc:1453 error   : unknown laser msg type 19746
+
+readlog.cc:1453 error   : unknown laser msg type 19746
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:90
+readlog.cc:1453 error   : unknown laser msg type 19746
+
+readlog.cc:1453 error   : unknown laser msg type 19746
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:93
+readlog.cc:1453 error   : unknown laser msg type 19746
+
+readlog.cc:1453 error   : unknown laser msg type 19747
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:96
+readlog.cc:1453 error   : unknown laser msg type 19747
+
+readlog.cc:1453 error   : unknown laser msg type 19747
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:99
+readlog.cc:1453 error   : unknown laser msg type 19747
+
+readlog.cc:1453 error   : unknown laser msg type 19747
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:102
+readlog.cc:1453 error   : unknown laser msg type 19747
+
+readlog.cc:1453 error   : unknown laser msg type 19747
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:105
+readlog.cc:1453 error   : unknown laser msg type 19747
+
+readlog.cc:1453 error   : unknown laser msg type 19747
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:108
+readlog.cc:1453 error   : unknown laser msg type 19747
+
+readlog.cc:1453 error   : unknown laser msg type 19747
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:111
+readlog.cc:1453 error   : unknown laser msg type 19748
+
+readlog.cc:1453 error   : unknown laser msg type 19748
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:114
+readlog.cc:1453 error   : unknown laser msg type 19748
+
+readlog.cc:1453 error   : unknown laser msg type 19748
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:117
+readlog.cc:1453 error   : unknown laser msg type 19748
+
+readlog.cc:1453 error   : unknown laser msg type 19748
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:120
+readlog.cc:1453 error   : unknown laser msg type 19748
+
+readlog.cc:1453 error   : unknown laser msg type 19748
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:123
+readlog.cc:1453 error   : unknown laser msg type 19748
+
+readlog.cc:1453 error   : unknown laser msg type 19748
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:126
+readlog.cc:1453 error   : unknown laser msg type 19749
+
+readlog.cc:1453 error   : unknown laser msg type 19749
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:129
+readlog.cc:1453 error   : unknown laser msg type 19749
+
+readlog.cc:1453 error   : unknown laser msg type 19749
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:132
+readlog.cc:1453 error   : unknown laser msg type 19749
+
+readlog.cc:1453 error   : unknown laser msg type 19749
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:135
+readlog.cc:1453 error   : unknown laser msg type 19749
+
+readlog.cc:1453 error   : unknown laser msg type 19749
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:138
+readlog.cc:1453 error   : unknown laser msg type 19749
+
+readlog.cc:1453 error   : unknown laser msg type 19749
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:141
+readlog.cc:1453 error   : unknown laser msg type 19750
+
+readlog.cc:1453 error   : unknown laser msg type 19750
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:144
+readlog.cc:1453 error   : unknown laser msg type 19750
+
+readlog.cc:1453 error   : unknown laser msg type 19750
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:147
+readlog.cc:1453 error   : unknown laser msg type 19750
+
+readlog.cc:1453 error   : unknown laser msg type 19750
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:150
+readlog.cc:1453 error   : unknown laser msg type 19750
+
+readlog.cc:1453 error   : unknown laser msg type 19750
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:153
+readlog.cc:1453 error   : unknown laser msg type 19750
+
+readlog.cc:1453 error   : unknown laser msg type 19750
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:156
+readlog.cc:1453 error   : unknown laser msg type 19751
+
+readlog.cc:1453 error   : unknown laser msg type 19751
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:159
+readlog.cc:1453 error   : unknown laser msg type 19751
+
+readlog.cc:1453 error   : unknown laser msg type 19751
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:162
+readlog.cc:1453 error   : unknown laser msg type 19751
+
+readlog.cc:1453 error   : unknown laser msg type 19751
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:165
+readlog.cc:1453 error   : unknown laser msg type 19751
+
+readlog.cc:1453 error   : unknown laser msg type 19751
+
+readlog.cc:1032 error   : invalid line at /home/BlackCoder/workspace/MRICP 2.0/stage_test/./arena_run3.dat:168
