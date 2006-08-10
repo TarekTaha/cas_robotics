@@ -51,8 +51,9 @@ RobotManager::RobotManager(QStringList configFiles)
 		    {
 				mapName = cf->ReadString(i, "mapname", "resources//casareaicp.png");
 //			   	qDebug("\t\t MAP  name:\t%s", qPrintable(mapName)); 				
-		    }		    
+		    }		
 		}
+		delete cf;    
     }
 }
 

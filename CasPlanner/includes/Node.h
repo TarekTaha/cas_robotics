@@ -21,6 +21,7 @@ class Node
 		Pose   pose;
 		Node ();
 		bool operator == (Node);
+		bool operator != (Node);		
 		~Node();	
 	};
 
