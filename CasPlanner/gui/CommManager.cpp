@@ -15,7 +15,6 @@ player(0)
 
 CommManager::~CommManager()
 {
-	
 }
 
 void CommManager::emergencyStop()
@@ -87,14 +86,14 @@ Map CommManager::provideMap()
 	return player->provideMap();
 }
 
-QVector<QPointF> CommManager::getLaserScan(int laserId)
+QVector<QPointF> CommManager::getLaserScan()
 {
-  	return player->getLaserScan(laserId);
+  	return player->getLaserScan();
 }
 
 int CommManager::readConfigs( ConfigFile *cf)
 {
-	int numSec; 
+	int numSec,cnt;
 	numSec = cf->GetSectionCount(); 
 	for(int i=0; i < numSec; i++)
 	{
@@ -104,15 +103,52 @@ int CommManager::readConfigs( ConfigFile *cf)
 		   	name =                   cf->ReadString(i, "name", "No-Name");
 		   	startConnected =  (bool) cf->ReadInt   (i, "startConnected", 1);
 		  	activateControl = (bool) cf->ReadInt   (i, "activateControl", 1);
-		  	positionControlId =      cf->ReadInt   (i, "positionControlId", 0);
-		  	laserEnabled =           cf->ReadInt   (i, "laserEnabled", 1);
-		  	laserId =                cf->ReadInt   (i, "laserId", 0);
 			playerIp =               cf->ReadString(i, "playerIp", "127.0.0.1");
 			playerPort =             cf->ReadInt   (i, "playerPort", 6665);
-			occMapEnabled =   (bool) cf->ReadInt   (i, "occMapEnabled", 1);
-		    localizerEnabled =(bool) cf->ReadInt   (i, "localizerEnabled", 1);
-		  	mapId =                  cf->ReadInt   (i, "mapId", 0);
-		  	localizerId =            cf->ReadInt   (i, "localizerId", 0);  	
+			cnt = cf->GetTupleCount(i,"lasers");
+			if (cnt)
+			{
+				laserEnabled = true;
+				for(int c=0; c<cnt; c++)
+				{
+					laserIds.push_back(cf->ReadTupleInt(i,"laser_pose",c ,0));							
+				}
+			}
+			else
+				laserEnabled = false;
+			cnt = cf->GetTupleCount(i,"position");				
+			if (cnt)
+			{
+				activateControl = true;
+				for(int c=0; c<cnt; c++)
+				{
+					positionControlId = cf->ReadTupleInt(i,"position",c ,0);							
+				}
+			}
+			else
+				activateControl = false;
+			cnt = cf->GetTupleCount(i,"map");				
+			if (cnt)
+			{
+				occMapEnabled = true;
+				for(int c=0; c<cnt; c++)
+				{
+					mapId = cf->ReadTupleInt(i,"map",c ,0);							
+				}
+			}
+			else
+				occMapEnabled = false;
+			cnt = cf->GetTupleCount(i,"localizer");				
+			if (cnt==1)
+			{
+				localizerEnabled = true;
+				for(int c=0; c<cnt; c++)
+				{
+					localizerId = cf->ReadTupleInt(i,"localizer",c ,0);							
+				}
+			}
+			else
+				localizerEnabled = false;				
 		  	qDebug("Start Connected is %d",startConnected);
 		  	if(startConnected)
 			{
@@ -149,7 +185,7 @@ int CommManager::start()
   	if(laserEnabled)
   	{
    	  	qDebug("\t\t\t	- Laser."); 
-    	player->enableLaser(0, laserId);
+    	player->setLasers(laserIds);
   	}
   	if(occMapEnabled)
   	{

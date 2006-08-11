@@ -63,12 +63,13 @@ Q_OBJECT
 
 		// Command Actions
 		QGroupBox actionGB;
-		QPushButton captureBtn;
+		QPushButton pauseBtn;
 		QPushButton pathPlanBtn;
 		QPushButton generateSpaceBtn;
 		QPushButton pathFollowBtn;
 		QPushButton loadMapBtn;	
 		
+		bool pause;
 		friend class NavContainer;
 		static unsigned *image, *null;
         static int width, height, components;

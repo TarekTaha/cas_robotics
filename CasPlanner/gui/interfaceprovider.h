@@ -21,7 +21,7 @@ class MapProvider
 class LaserProvider 
 {
     public:
-        virtual QVector<QPointF> getLaserScan(int id)=0; 
+        virtual QVector<QPointF> getLaserScan()=0; 
         virtual ~LaserProvider(){}; 
 };
 

@@ -18,7 +18,7 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
             virtual int readConfigs(ConfigFile *cf);
             virtual int start(); 
             virtual int stop();
-            virtual QVector<QPointF> getLaserScan(int laserId);
+            virtual QVector<QPointF> getLaserScan();
             virtual double getSpeed(); 
             virtual double getTurnRate();
             virtual Pose   getLocation();

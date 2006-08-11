@@ -91,11 +91,12 @@ NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
 	configSpaceRadBtn("Local Config Space"),
 	controlRadBtn("Sensor Based"),
 	actionGB("Action"),
-	captureBtn("Save Map"), 
+	pauseBtn("Pause"), 
 	pathPlanBtn("Path Plan"),
 	generateSpaceBtn("Generate Space"), 
 	pathFollowBtn("Path Follow"),
-	loadMapBtn("Load Map")
+	loadMapBtn("Load Map"),
+	pause(true)
 {  
     QHBoxLayout *hlayout = new QHBoxLayout;
     hlayout->addWidget(&planningGB,1);
@@ -176,7 +177,7 @@ NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
     obstavoidGB.setLayout(showL); 
         
     QVBoxLayout *actionLayout = new QVBoxLayout; 
-    actionLayout->addWidget(&captureBtn); 
+    actionLayout->addWidget(&pauseBtn); 
     actionLayout->addWidget(&loadMapBtn);     
     actionLayout->addWidget(&pathPlanBtn);
     actionLayout->addWidget(&generateSpaceBtn); 
@@ -189,7 +190,7 @@ NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
     connect(&nodeConRadSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
     connect(&obstPenRadSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
     connect(&obstExpRadSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
-//    connect(&captureBtn,      SIGNAL(clicked()), this, SLOT(captureMap())); 
+    connect(&pauseBtn,      SIGNAL(clicked()), this, SLOT(captureMap())); 
 //    connect(&pathPlanBtn, SIGNAL(clicked()), this, SLOT(load())); 
 //    connect(&generateSpaceBtn, SIGNAL(clicked()), this, SLOT(save())); 
 //    connect(&pathFollowBtn, SIGNAL(clicked()), this, SLOT(exportHtml())); 
@@ -261,19 +262,31 @@ void NavControlPanel::save()
 
 void NavControlPanel::captureMap()
 {
-    bool ok;
-    QString comment = QInputDialog::getText(this, "CAS Planner: Save Map", "Enter name for this map:", QLineEdit::Normal,
-    QString::null, &ok);
-    emit propsChanged();
-    sleep(1);   
-    emit propsChanged();
-    sleep(1);
-    if(ok)
-    {
-		//QImage capturedMap = ((NavContainer *) parent())->mapViewer.captureMap();
-		//QImage capturedMap = ((NavContainer *) parent())->mapPainter->captureMap();
-		//mapManager->addMapSnapshot(capturedMap, comment); 
-    }
+	if(pause)
+	{
+		robotManager->navigator->setPause(pause);
+		pause = false;
+		pauseBtn.setText("Continue");
+	}
+	else
+	{
+		robotManager->navigator->setPause(pause);		
+		pause = true;
+		pauseBtn.setText("Pause");		
+	}
+//    bool ok;
+//    QString comment = QInputDialog::getText(this, "CAS Planner: Save Map", "Enter name for this map:", QLineEdit::Normal,
+//    QString::null, &ok);
+//    emit propsChanged();
+//    sleep(1);   
+//    emit propsChanged();
+//    sleep(1);
+//    if(ok)
+//    {
+//		//QImage capturedMap = ((NavContainer *) parent())->mapViewer.captureMap();
+//		//QImage capturedMap = ((NavContainer *) parent())->mapPainter->captureMap();
+//		//mapManager->addMapSnapshot(capturedMap, comment); 
+//    }
 }
 
 void NavControlPanel::exportHtml()

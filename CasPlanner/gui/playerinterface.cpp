@@ -14,8 +14,6 @@ PlayerInterface::PlayerInterface(QString host, int port):
     drive(0),
     localizer(0)
 {
-    laserEnabled[0] = false;
-    laserEnabled[1] = false;
 }
 
 void PlayerInterface::emergencyStop()
@@ -103,10 +101,9 @@ void PlayerInterface::enableMap(int  in_mapId)
     mapId = in_mapId;
 }
 
-void PlayerInterface::enableLaser(int laser_id, int in_playerLaserId)
+void PlayerInterface::setLasers(QVector<int> laserIds)
 {
-    laserEnabled[laser_id] = true; 
-    playerLaserId[laser_id] = in_playerLaserId; 
+	this->laserIds = laserIds;
 }
 void PlayerInterface::enableLocalizer(int localizerId)
 {
@@ -146,20 +143,13 @@ Pose PlayerInterface::getLocation()
     return retval; 	
 }
 
-QVector<QPointF> PlayerInterface::getLaserScan(int Laser_id)
+QVector<QPointF> PlayerInterface::getLaserScan()
 {
 	QVector<QPointF> retval;
-    if(laserEnabled[Laser_id])
-    {
-	    dataLock.lockForWrite();
-	    retval = laserScanData[Laser_id];
-	    dataLock.unlock();
-	    return retval;
-	}
-    else
-    {
-        return QVector<QPointF>(0);
-    }
+    dataLock.lockForWrite();
+    retval = laserScanPoints;
+    dataLock.unlock();
+    return retval;
 }
 
 Map PlayerInterface::provideMap()
@@ -221,13 +211,12 @@ void PlayerInterface::run ()
 	        drive = new Position2dProxy(pc,positionId);
 	   		qDebug("\t\t - Motor Control Interface Engaged Successfully"); 
 	    }
-	    for(int i=0; i < MAX_LASERS; i++)
+	    laser.clear();
+	    for(int i=0; i < laserIds.size(); i++)
 	    {
-	        if(laserEnabled[i])
-	        {
-	            laser[i] = new LaserProxy(pc,playerLaserId[0]); 
-	       		qDebug("\t\t - Laser interface:%d Interface Added Successfully",i);  
-	        }
+	    	LaserProxy *lp = new LaserProxy(pc,laserIds[i]);
+            laser.push_back(lp);
+       		qDebug("\t\t - Laser interface:%d Interface Added Successfully",laserIds[i]);  
 	    }
 	    if(mapEnabled)
 	    {
@@ -263,22 +252,15 @@ void PlayerInterface::run ()
 //		qDebug("\t\t PLAYER THREAD LOOP START %d",++cnt);		
     	if(!emergencyStopped)
     	{
-		    for(int laser_id=0; laser_id < MAX_LASERS; laser_id++)
+		    for(int laser_indx=0; laser_indx < laserIds.size(); laser_indx++)
 		    {
-			    if(laserEnabled[laser_id])
-			    {
-			    	if (laserScanData[laser_id].size())
-			    		laserScanData[laser_id].clear();
-			        for(uint i=0; i< laser[laser_id]->GetCount(); i++)
-			        {
-				    	laserScanData[laser_id].push_back(QPointF(laser[laser_id]->GetPoint(i).px, laser[laser_id]->GetPoint(i).py));    
-					}
-			    }
-			    else
-			    {
-			        //return QVector<QPointF>(0);
-			    }   
-		    }    		
+		    	if (laserScanPoints.size())
+		    		laserScanPoints.clear();
+		        for(uint i=0; i< laser[laser_indx]->GetCount(); i++)
+		        {
+			    	laserScanPoints.push_back(QPointF(laser[laser_indx]->GetPoint(i).px, laser[laser_indx]->GetPoint(i).py));    
+				}
+		  	} 
 	        if(ctrEnabled)
 	        {
 	            drive->SetSpeed(speed,turnRate);
