@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QString> 
 #include <QStringList>
+#include <QVector>
 #include "configfile.h"
 class Comms: public QObject 
 {
@@ -23,9 +24,10 @@ class Comms: public QObject
         virtual void emergencyStop()=0; 
         virtual void emergencyRelease()=0; 
     protected:
-		bool startConnected,activateControl,laserEnabled,ptzEnabled,occMapEnabled,localizerEnabled;
+		bool startConnected,activateControl,ptzEnabled,occMapEnabled,localizerEnabled,laserEnabled;
     	QString name,playerIp; 
-        int playerPort,positionControlId,laserId,ptzId,mapId,localizerId;
+    	QVector <int> laserIds;
+        int playerPort,positionControlId,ptzId,mapId,localizerId;
 };
 
 #endif 

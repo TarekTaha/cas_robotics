@@ -8,27 +8,25 @@
 #include <QReadWriteLock>
 #include <QTime>
 
-//#include <playerclient.h>
 #include "playerinterface.h"
 #include "utils.h"
 #include "map.h"
+#define MAX_LASERS 4
 
 using namespace PlayerCc;
 class PlayerInterface: public QThread 
 {
 Q_OBJECT    
     public:
-        static const int MAX_LASERS = 2;
-        static const int MAX_MOTORS = 3;
         PlayerInterface(QString playerHost, int playerPort);
         void stop();
         void run();
         void enableControl(int driveId);
-        void enableLaser(int whichLaser, int playerId); 
+        void setLasers(QVector<int>laserIds); 
 		void enablePtz(int ptzId);
 		void enableMap(int mapId);
 		void enableLocalizer(int localizerId);
-        QVector<QPointF> getLaserScan(int laserId);
+        QVector<QPointF> getLaserScan();
         void provideLocation(Pose location);
 	    Map provideMap(); 
 		void setPtz(double pan, double tilt);
@@ -49,16 +47,17 @@ Q_OBJECT
         int playerPort; 
         PlayerClient *pc;
      
-        bool laserEnabled[MAX_LASERS],ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized,emergencyStopped; 
-        int playerLaserId[MAX_LASERS],positionId,ptzId,mapId,localizerId;
-        LaserProxy *laser[MAX_LASERS];
+        bool ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized,emergencyStopped; 
+        int positionId,ptzId,mapId,localizerId;
+        QVector <int> laserIds;
+        QVector <LaserProxy *> laser;
         Position2dProxy *drive;
         MapProxy *map;
 		PtzProxy *ptz;
 		LocalizeProxy *localizer;
 		Pose location;
 		double pan,tilt,pose[3], pose_covar[3];
-        QVector<QPointF> laserScanData[MAX_LASERS];
+        QVector<QPointF> laserScanPoints;
         double speed,turnRate,getspeed,getturnrate;
     
         QReadWriteLock dataLock;       

@@ -33,6 +33,7 @@ class Navigator : public Controller
 		int readConfigs(ConfigFile *cf);
 		void setPath(Node *path);
 		double NearestObstacle(QVector<QPointF> laser_scan,Pose pose);
+		void  setPause(bool pause);
 		Node * ClosestPathSeg(QPointF location,Node * all_path);	
 		void GenerateLocalMap(QVector<QPointF> laser_scan,Pose laser_pose, Pose rob_location);
 		bool MapModified(QVector<QPointF> laser_scan,Pose rob_location);
@@ -47,7 +48,7 @@ class Navigator : public Controller
 	signals:
 		void drawLocalPath(PathPlanner *,Pose *,int *);
 	protected:
-		Pose	old_amcl,amcl_location,EstimatedPos;
+		Pose	old_amcl,amcl_location,EstimatedPos,laser_pose;
 		double 	angle,prev_angle,theta,error_orientation,
 				displacement,wdem,distance,distance_to_next,
 				minR,minL,minAhead,avoidance_distance_left,
@@ -58,7 +59,7 @@ class Navigator : public Controller
 		QString robot_model;
 		QPointF rotation_center;
 		QPointF	begin,tracking_point,ni,SegmentStart,SegmentEnd;
-		bool	log,position_found,end_reached,segment_navigated,stop_navigating;
+		bool	log,position_found,end_reached,segment_navigated,stop_navigating,pause;
 		int		platform,direction,path2Draw;					
 		Node * local_path,* global_path,*last,*first,*path2Follow;
 		PlanningManager *local_planner,*global_planner;

@@ -204,6 +204,16 @@ int Navigator::readConfigs( ConfigFile *cf)
 			local_dist   = 	  cf->ReadFloat (i, "local_dist", 2);	
 			traversable_dist= cf->ReadFloat (i, "traversable_dist", 2);
 			linear_velocity = cf->ReadFloat (i, "linear_velocity", 0.1);
+			int cnt =	 			cf->GetTupleCount(i,"laser_pose");
+			if (cnt != 3)
+			{
+				cout<<"\n ERROR: Laser Pose should consist of 3 tuples !!!";
+				exit(1);
+			}
+			laser_pose.p.setX(cf->ReadTupleFloat(i,"laser_pose",0 ,0));
+			laser_pose.p.setY(cf->ReadTupleFloat(i,"laser_pose",1 ,0));
+			laser_pose.phi = (cf->ReadTupleFloat(i,"laser_pose",2 ,0));			
+
 	    }
 	    if(sectionName == "Map")
 	    {
@@ -239,24 +249,23 @@ int Navigator::readConfigs( ConfigFile *cf)
  	return 1;
 }
 
-double Navigator::NearestObstacle(QVector<QPointF> laser_scan,Pose laser_pose)
+double Navigator::NearestObstacle(QVector<QPointF> laser_scan,Pose lase_pose)
 {
 	QPointF ray_end,temp[4],intersection;
 	Line L1,L2;
 	double dist,shortest_dist=10000;
 	for(int i=0;i<4;i++)
 	{
-//		temp[i] = Trans2Global(local_planner->pathPlanner->local_edge_points[i],pose);
 		temp[i] = local_planner->pathPlanner->local_edge_points[i];
 	}
 	for(int i=0;i<laser_scan.size();i++)
 	{
-		//ray_end = Trans2Global(laser_scan[i],pose);
-		ray_end = laser_scan[i];
+		ray_end = Trans2Global(laser_scan[i],laser_pose);
+//		ray_end = laser_scan[i];
 		for(int j=0;j<4;j++)
 		{
 			L1.SetStart(temp[j%4]);      L1.SetEnd(temp[(j+1)%4]);
-			L2.SetStart(QPointF(0,0));   L2.SetEnd(ray_end);
+			L2.SetStart(laser_pose.p);   L2.SetEnd(ray_end);
 			if(LineInterLine(L1,L2,intersection))
 			{
 				dist = Dist(intersection,ray_end);
@@ -310,6 +319,11 @@ void Navigator::GenerateLocalMap(QVector<QPointF> laser_scan,Pose laser_pose, Po
 		}
 	return;
 };
+
+void Navigator::setPause(bool pause)
+{
+	this->pause = pause;
+}
 
 bool Navigator::MapModified(QVector<QPointF> laser_scan,Pose rob_location)
 {
@@ -439,6 +453,44 @@ void Navigator::run()
 		delta_t = delta_timer.elapsed()/1e3;
 		delta_timer.restart();
 		usleep(10000);
+		// Get current Robot Location
+		amcl_location = robotManager->commManager->getLocation();
+		/* If this location is new, then use it. Otherwise
+		 * estimate the location based on the last reading.
+		 */
+		if(old_amcl != amcl_location)
+		{
+			// Recording the last time Data changed
+			last_time = amcl_timer.elapsed()/1e3;
+			// resetting the timer
+			amcl_timer.restart(); 
+			// Override the Estimated Location with the AMCL hypothesis
+			old_amcl.p.setX(amcl_location.p.x()); EstimatedPos.p.setX(amcl_location.p.x());
+			old_amcl.p.setY(amcl_location.p.y()); EstimatedPos.p.setY(amcl_location.p.y());
+			old_amcl.phi = EstimatedPos.phi = amcl_location.phi;
+		}
+		else
+		{
+			// Estimate the location based on the Last AMCL location and the vehichle model
+			EstimatedPos.phi += robotManager->commManager->getTurnRate()*delta_t;
+			EstimatedPos.p.setX(EstimatedPos.p.x() + velocity*cos(EstimatedPos.phi)*delta_t);
+			EstimatedPos.p.setY(EstimatedPos.p.y() + velocity*sin(EstimatedPos.phi)*delta_t);
+			//cout<<"\nVelocity is:"<<velocity<<" Side Speed is:"<<pp->SideSpeed();
+			if (velocity!= robotManager->commManager->getSpeed()) //	Velocity Changed?
+				velocity = robotManager->commManager->getSpeed();
+			//cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
+		}
+		/* if we were following a local path and crossed the boundaried of the local
+		 * area without reaching the local destination then go back to the global path
+		 */
+		if (path2Follow == local_path)
+		{
+			if(Dist(EstimatedPos.p,local_planner->pathPlanner->map->global_pose.p)>local_dist)
+			{
+				path2Follow = global_path;
+				path2Draw = SHOWGLOBALPATH;
+			}
+		}
 		first = ClosestPathSeg(loc.p,path2Follow);
 		if(!first)
 		{
@@ -475,36 +527,11 @@ void Navigator::run()
 		angle = atan2(SegmentEnd.y() - SegmentStart.y(),SegmentEnd.x() - SegmentStart.x());
 //		qDebug("--->>> Orientation(Planned) to follow :=%.3f <<<---",RTOD(angle));
 
-		// Estimate the location based on the Last AMCL location and the vehichle model
-		EstimatedPos.phi += robotManager->commManager->getTurnRate()*delta_t;
-		EstimatedPos.p.setX(EstimatedPos.p.x() + velocity*cos(EstimatedPos.phi)*delta_t);
-		EstimatedPos.p.setY(EstimatedPos.p.y() + velocity*sin(EstimatedPos.phi)*delta_t);
-		//cout<<"\nVelocity is:"<<velocity<<" Side Speed is:"<<pp->SideSpeed();
-		if (velocity!= robotManager->commManager->getSpeed()) //	Velocity Changed?
-			velocity = robotManager->commManager->getSpeed();
-		//cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
-		
-		// Get current Robot Location
-		amcl_location = robotManager->commManager->getLocation();
-		/* Is it a new hypothesis (not the same as the last)
-		 * so override the estimation based on the robot model
-		 * with the AMCL localizer's estimation
-		 */
-		if(old_amcl != amcl_location)
-		{
-			// Recording the last time Data changed
-			last_time = amcl_timer.elapsed()/1e3;
-			// resetting the timer
-			amcl_timer.restart(); 
-			// Override the Estimated Location with the AMCL hypothesis
-			old_amcl.p.setX(amcl_location.p.x()); EstimatedPos.p.setX(amcl_location.p.x());
-			old_amcl.p.setY(amcl_location.p.y()); EstimatedPos.p.setY(amcl_location.p.y());
-			old_amcl.phi = EstimatedPos.phi = amcl_location.phi;
-		}
 		/* If we chose to follow a virtual point on the path then calculate that point
 		 * It will not be used most of the time, but it adds accuracy in control for
 		 * long line paths.
 		 */
+		 
 		//qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",robotManager->commManager->getSpeed(),EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
 		tracking_point.setX(EstimatedPos.p.x() + tracking_dist*cos(EstimatedPos.phi) - 0*sin(EstimatedPos.phi));
 		tracking_point.setY(EstimatedPos.p.y() + tracking_dist*sin(EstimatedPos.phi) + 0*cos(EstimatedPos.phi)); 
@@ -524,16 +551,15 @@ void Navigator::run()
 		 * 5- Follow that path
 		 */
 		QTime local_planning_time,icp_time;
-		closest_obst = NearestObstacle(robotManager->commManager->getLaserScan(0),robotManager->commManager->getLocation());
+		closest_obst = NearestObstacle(robotManager->commManager->getLaserScan(),EstimatedPos);
 //		qDebug("Closest Distance to Obstacles is:%f Saftey Dist:%f",closest_obst,sf);
-//		if(robotManager->commManager->getClosestObst() < sf)
-		icp_time.restart();
-		qDebug("Icp Check took:%d msec",icp_time.elapsed());					
 		if(closest_obst < sf)
 		{
+			icp_time.restart();
 			// If we don't already have a local map or the local environment is changed then re-plan
-			if ( !local_planner->pathPlanner->path || MapModified(robotManager->commManager->getLaserScan(0),robotManager->commManager->getLocation()))
+			if ( !local_planner->pathPlanner->path || MapModified(robotManager->commManager->getLaserScan(),EstimatedPos))
 			{
+				qDebug("Icp Check took:%d msec",icp_time.elapsed());					
 				//Stop the Robot before planning
 				robotManager->commManager->setSpeed(0);
 				robotManager->commManager->setTurnRate(0);
@@ -549,7 +575,7 @@ void Navigator::run()
 	//			qDebug("Location Global Pixel  X:%f Y:%f",pixel_loc.p.x(),pixel_loc.p.y());
 	
 				local_planning_time.restart();
-			 	local_planner->SetMap(robotManager->commManager->getLaserScan(0),local_dist,robotManager->commManager->getLocation());
+			 	local_planner->SetMap(robotManager->commManager->getLaserScan(),local_dist,robotManager->commManager->getLocation());
 				local_planner->GenerateSpace();
 			 	Node * temp;
 			 	temp = global_path;
@@ -649,7 +675,7 @@ void Navigator::run()
 				 	redraw_timer.restart();	
 		 		}
 			}
-			else
+			else if (path2Follow != global_path)
 			{
 		 		path2Draw = SHOWLOCALPATH;
 			 	emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);				
@@ -672,9 +698,16 @@ void Navigator::run()
 			cntrl.angular_velocity = -0.2;
 		if(log)
 			fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.elapsed()/1e3,last_time);
-
-		robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
-		robotManager->commManager->setTurnRate(cntrl.angular_velocity);				
+		if(!pause)
+		{
+			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
+			robotManager->commManager->setTurnRate(cntrl.angular_velocity);				
+		}
+		else
+		{
+			robotManager->commManager->setSpeed(0);
+			robotManager->commManager->setTurnRate(0);
+		}
 
 		loc = EstimatedPos;
 	}
