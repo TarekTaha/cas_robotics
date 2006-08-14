@@ -32,6 +32,7 @@ class Navigator : public Controller
 		Node * globalPath, *localPath;
 		int readConfigs(ConfigFile *cf);
 		void setPath(Node *path);
+		void StopNavigating();
 		double NearestObstacle(QVector<QPointF> laser_scan,Pose pose);
 		void  setPause(bool pause);
 		Node * ClosestPathSeg(QPointF location,Node * all_path);	
@@ -44,7 +45,6 @@ class Navigator : public Controller
 	public
 	slots:
 		void FollowPath();
-		void StopNavigating();
 	signals:
 		void drawLocalPath(PathPlanner *,Pose *,int *);
 	protected:

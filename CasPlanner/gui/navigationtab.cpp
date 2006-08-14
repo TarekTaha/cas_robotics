@@ -34,12 +34,28 @@ NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
 
 void NavContainer::Follow()
 {
-	if(robotManager->navigator->isRunning())
+	if(navControlPanel.following)
 	{
-		robotManager->navigator->quit();
+		if(robotManager->navigator->isRunning())
+		{
+			robotManager->navigator->quit();
+		}
+		robotManager->navigator->setPath(path);
+		robotManager->navigator->start();
+		navControlPanel.pathFollowBtn.setText("Stop");
+		navControlPanel.following = false;
 	}
-	robotManager->navigator->setPath(path);
-	robotManager->navigator->start();
+	else
+	{
+		if(robotManager->navigator->isRunning())
+		{
+			robotManager->navigator->StopNavigating();
+			robotManager->navigator->quit();	
+			qDebug("Quitting Thread");
+		}
+		navControlPanel.pathFollowBtn.setText("Follow");
+		navControlPanel.following = true;		
+	}
 }
 
 NavContainer::~NavContainer()
@@ -96,7 +112,8 @@ NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
 	generateSpaceBtn("Generate Space"), 
 	pathFollowBtn("Path Follow"),
 	loadMapBtn("Load Map"),
-	pause(true)
+	pause(true),
+	following(true)
 {  
     QHBoxLayout *hlayout = new QHBoxLayout;
     hlayout->addWidget(&planningGB,1);

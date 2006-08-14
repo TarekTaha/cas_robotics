@@ -69,7 +69,7 @@ Q_OBJECT
 		QPushButton pathFollowBtn;
 		QPushButton loadMapBtn;	
 		
-		bool pause;
+		bool pause,following;
 		friend class NavContainer;
 		static unsigned *image, *null;
         static int width, height, components;
