@@ -50,13 +50,13 @@
 #include <pthread.h>
 #include <math.h>
 #include <signal.h>
-
+#include <iostream>
 #include "defs.h"
 //#define UNLOCK 	pthread_mutex_unlock(&sslock);
 //#define LOCK    pthread_mutex_lock(&sslock);
 #define UNLOCK 	this->Unlock()
 #define LOCK    this->Lock()
-
+using namespace std;
 /** @addtogroup drivers Drivers */
 /** @{ */
 /** @defgroup WheelChair Driver
@@ -170,16 +170,15 @@ class WheelchairDriver : public Driver
 	                               player_msghdr * hdr, 
 	                               void * data);
 				int WheelChair_Unit_Reset(void);
-   		virtual int Subscribe(player_devaddr_t id);
-    	virtual int Unsubscribe(player_devaddr_t id);
+//   		virtual int Subscribe(player_devaddr_t id);
+//    	virtual int Unsubscribe(player_devaddr_t id);
 		WheelchairDriver(ConfigFile* cf, int section); 
     private:	
     	virtual void Main();
-   		void CheckConfig(); 	//checks for configuration requests
-		int HandleCommands(player_msghdr *hdr,void * data);
+		int  HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr,void * data);
+		int  HandleCommands(player_msghdr *hdr,void * data);
 	 	void RefreshData();     //refreshs and sends data    
 		int  ComputeTickDiff(int from, int to); 
-		int  HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr,void * data);
 		void UpdateOdom(int ltics, int rtics);  // Updates the Odometry 
 		int  GetReading(char Channel);          // Gets reading from wheelchair control unit
 		int  WCControl(int WCcmd, bool param);  // Enables communication with the control unit through serial port
@@ -286,6 +285,7 @@ void  WheelchairDriver :: Velocity_Controller(void)
 		if (vdem_last == 0) vset=0;
 		if (wdem_last == 0) wset=0;
 		UpdateMotors(vset,wset);
+		usleep(10000);
 	}
 	pthread_exit(NULL);
 }
@@ -295,7 +295,7 @@ int WheelchairDriver :: WheelChair_Unit_Reset()
 	unsigned int retbyte;
 
 	if (Control_Unit_Serial->SendCommand("O0000") != 0) //Reset output and wait response
-	{	
+	{
 		PLAYER_ERROR("\n	-->Failed to find Wheelchair Interface Unit");
 		return -1;
 	}
@@ -339,7 +339,7 @@ WheelchairDriver::WheelchairDriver(ConfigFile* cf, int section)  : Driver(cf, se
     // Do we create a robot position interface?
     if(cf->ReadDeviceAddr(&(this->position_addr), section, "provides", PLAYER_POSITION2D_CODE, -1, NULL) == 0)
     {
-		if (this->AddInterface(this->opaque_addr))
+		if (this->AddInterface(this->position_addr))
 	  	{
 	    	this->SetError(-1);    
 	    	return;
@@ -420,44 +420,50 @@ int WheelchairDriver::Shutdown()
 	return(0);
 }
 
-int WheelchairDriver::Subscribe(player_devaddr_t addr)
-{
-	int retval;
-  	// do the subscription
- 	if((retval = Driver::Subscribe(addr)) == 0)
-  	{
-    	// also increment the appropriate subscription counter
-    	if(Device::MatchDeviceAddress(addr, this->position_addr))
-      		this->position_subscriptions++;
-    	else 
-    	if(Device::MatchDeviceAddress(addr, this->opaque_addr))
-      		this->opaque_subscriptions++;
-  	}
-  	return(retval);
-}
+//int WheelchairDriver::Subscribe(player_devaddr_t addr)
+//{
+//	int retval;
+//  	// do the subscription
+// 	if((retval = Driver::Subscribe(addr)) == 0)
+//  	{
+//    	// also increment the appropriate subscription counter
+//    	if(Device::MatchDeviceAddress(addr, this->position_addr))
+//    	{
+//  		  	cout<<"\n Subscribing to position Device"; fflush(stdout);
+//      		this->position_subscriptions++;
+//    	}
+//    	else 
+//    	if(Device::MatchDeviceAddress(addr, this->opaque_addr))
+//  		{
+//  		  	cout<<"\n Subscribing to Opaque Device"; fflush(stdout);  			
+//      		this->opaque_subscriptions++;
+//  		}
+//  	}
+//  	return(retval);
+//}
 
-int WheelchairDriver::Unsubscribe(player_devaddr_t addr)
-{
-	int retval;
-
-  	// do the unsubscription
-  	if((retval = Driver::Unsubscribe(addr)) == 0)
-  	{
-	    // also decrement the appropriate subscription counter
-	    if(Device::MatchDeviceAddress(addr, this->position_addr))
-	    {
-	    	this->position_subscriptions--;
-	      	assert(this->position_subscriptions >= 0);
-	    }
-	    else if(Device::MatchDeviceAddress(addr, this->opaque_addr))
-	    {
-	      	this->opaque_subscriptions--;
-	      	assert(this->opaque_subscriptions >= 0);
-	    }
-  	}
-
-  return(retval);
-};
+//int WheelchairDriver::Unsubscribe(player_devaddr_t addr)
+//{
+//	int retval;
+//
+//  	// do the unsubscription
+//  	if((retval = Driver::Unsubscribe(addr)) == 0)
+//  	{
+//	    // also decrement the appropriate subscription counter
+//	    if(Device::MatchDeviceAddress(addr, this->position_addr))
+//	    {
+//	    	this->position_subscriptions--;
+//	      	assert(this->position_subscriptions >= 0);
+//	    }
+//	    else if(Device::MatchDeviceAddress(addr, this->opaque_addr))
+//	    {
+//	      	this->opaque_subscriptions--;
+//	      	assert(this->opaque_subscriptions >= 0);
+//	    }
+//  	}
+//
+//  return(retval);
+//};
 
 // this function will be run in a separate thread
 void WheelchairDriver::Main()
@@ -486,9 +492,7 @@ void WheelchairDriver::Main()
 	    this->Unlock();		
 	    
 	    this->ProcessMessages();		
-		//usleep(100000);        // repeat frequency (default to 100 Hz)
-		//CheckConfig();         // Check for Config Requests
-		//CheckCommands();       // Check for Commands
+		usleep(100000);        // repeat frequency (default to 100 Hz)
 		RefreshData();         // Update posdata
 	}
 	pthread_exit(NULL);
@@ -499,11 +503,17 @@ int WheelchairDriver::ProcessMessage(MessageQueue * resp_queue, player_msghdr * 
 {
   // Look for configuration requests
   if(hdr->type == PLAYER_MSGTYPE_REQ)
+  {
+  	cout<<"\n Wheelchair Driver Got a Req"; fflush(stdout);
     return(this->HandleConfigs(resp_queue,hdr,data));
+  }
   else if(hdr->type == PLAYER_MSGTYPE_CMD)
+  {
+//	cout<<"\n Wheelchair Driver Got a CMD"; fflush(stdout);
     return(this->HandleCommands(hdr,data));
+  }
   else
-    return(-1);	
+    return(-1);
 };
 
 int WheelchairDriver::HandleCommands(player_msghdr *hdr,void * data)
@@ -516,10 +526,11 @@ int WheelchairDriver::HandleCommands(player_msghdr *hdr,void * data)
                            this->position_addr))
   	{
 	    // get and send the latest motor command
+	    cout<<"\n\t\t -Command Is  Velocity"; fflush(stdout);
 	    player_position2d_cmd_vel_t position_cmd;
 	    position_cmd = *(player_position2d_cmd_vel_t*)data;
-        vdem_new = (int)rint(position_cmd.vel.px);
-  		wdem_new = (int)rint(position_cmd.vel.pa);
+        vdem_new = position_cmd.vel.px;
+  		wdem_new = position_cmd.vel.pa;
 		if (vdem_new != vdem_last || wdem_new != wdem_last)
 		{
 			// Very Dirty Patch here, this has to be modified later on
@@ -529,7 +540,7 @@ int WheelchairDriver::HandleCommands(player_msghdr *hdr,void * data)
 				wint=wdiff=wact_last=0; // Angular Velocity Control Parameters Reset
 			vdem=vdem_new;
 			wdem=wdem_new;
-			if(this->debug)
+			//if(this->debug)
 				printf("\nPosition Interface Command Recieved ==> Xspeed=:%.3f Yaw=:%.3f",vdem,wdem);
 			fflush(stdout);
 		}
@@ -548,11 +559,12 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 	   (hdr->addr.robot  == position_addr.robot) &&  (hdr->addr.interf == position_addr.interf) &&
        (hdr->addr.index  == position_addr.index)
        )
-    {     
+    {
 		switch (hdr->subtype)
 		{
 			case PLAYER_POSITION2D_REQ_GET_GEOM:  
 				/* Return the robot geometry. */
+			  	cout<<"\n\t -Got GEOM Req"; fflush(stdout);
 			    if(hdr->size != 0)
 			    {
 			      PLAYER_WARN("Arg get robot geom is wrong size; ignoring");
@@ -570,7 +582,8 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 			    			  (void*)&geom, sizeof(geom), NULL);
 			    return(0);
 				break;
-			case PLAYER_POSITION2D_REQ_SET_ODOM:  // Sets the robot geometry.
+			case PLAYER_POSITION2D_REQ_SET_ODOM: 
+			  	cout<<"\n\t -Got Set Odom Req"; fflush(stdout);
 			    if(hdr->size != sizeof(player_position2d_set_odom_req_t))
 			    {
 			      PLAYER_WARN("Arg to odometry set requests wrong size; ignoring");
@@ -586,6 +599,7 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 			    return(0);
 				break;
 			case PLAYER_POSITION2D_REQ_RESET_ODOM:
+			  	cout<<"\n\t -Got Reset Odom";	fflush(stdout);
 		    	/* reset position to 0,0,0: no args */
 			    if(hdr->size != 0)
 			    {
@@ -598,12 +612,12 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 				last_ltics = last_rtics=0;
 			    this->Publish(this->position_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_POSITION2D_REQ_RESET_ODOM);
 			    return(0);
-				break;
 			case PLAYER_POSITION2D_REQ_MOTOR_POWER:
 			    /* motor state change request
 			     *   1 = enable motors
 			     *   0 = disable motors (default)
 			     */
+			  	cout<<"\n\t -Got Motor Power Req"; fflush(stdout);     
 			    if(hdr->size != sizeof(player_position2d_power_config_t))
 			    {
 			      PLAYER_WARN("Arg to motor state change request wrong size; ignoring");
@@ -618,6 +632,7 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 					Control_Unit_Serial->Write("O0000\r", 6);
 					Control_Unit_Serial->ReadByte(&retbyte);
 					Control_Unit_Serial->ReadByte(&retbyte);
+//					WCControl(POWER,OFF);
 					UNLOCK;
 				}
 				else
@@ -632,12 +647,14 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 					Control_Unit_Serial->Write("L1800\r", 6);
 					Control_Unit_Serial->ReadByte(&retbyte);
 					Control_Unit_Serial->ReadByte(&retbyte);
+//					WCControl(POWER,ON);
 					UNLOCK;
 				}
 				this->Publish(this->position_addr, resp_queue, PLAYER_MSGTYPE_RESP_ACK, PLAYER_POSITION2D_REQ_MOTOR_POWER);
 		    	return(0);
 		        break;
 			default:
+			  	cout<<"\n\t -Get Unknown Req"; fflush(stdout);
 				return -1;
 		}
     }
