@@ -1,3 +1,6 @@
+#ifndef COMMON_H_
+#define COMMON_H_
+
 #define PLAYER_WHEELCHAIR_SOUND_HORN_REQ      ((uint8_t)1)
 #define PLAYER_WHEELCHAIR_SET_MODE_REQ        ((uint8_t)2)
 #define PLAYER_WHEELCHAIR_INC_GEAR_REQ        ((uint8_t)3)
@@ -24,10 +27,23 @@ typedef struct player_wheelchair_data
 } __attribute__ ((packed)) player_wheelchair_data_t;
 /******************* DATA ENDS*******************************/
 
+
+/******************* COMMAND STARTS************************/
+typedef struct player_wheelchair_speed_cmd
+{
+   int32_t xpos, ypos;            // X and Y position 
+   int32_t xspeed,yspeed;         // Linear And Angular Velocity in m/sec and rad /sec
+   int32_t yaw,yawspeed;          // angle and angular velocity in m/sec
+   int32_t state,type;            // state (ON,OFF) and type of command (Position Control or Speed Control)
+} __attribute__ ((packed)) player_wheelchair_speed_cmd_t;
+/******************* COMMAND ENDS************************/
+
+
 /*******************CONFIG   STARTS************************/
 typedef struct player_wheelchair_config
 {
-  uint8_t request;
+//  uint8_t request;
   uint16_t value;
 } __attribute__ ((packed)) player_wheelchair_config_t;
 /*******************CONFIG      ENDS************************/
+#endif
