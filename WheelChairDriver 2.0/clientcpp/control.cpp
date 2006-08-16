@@ -12,7 +12,7 @@
 #define log
 // #define localize
 SDL_Surface *screen;
-  
+class WheelChairProxy;
 int main()
 {
   	using namespace PlayerCc;
@@ -185,7 +185,8 @@ int main()
 		fflush(stdout);   
 	    // WCp.Print();
 	    // pp.Print();
-	    if (changed==1) WCp.SetSpeed((dirFR + frOffset),(dirLR + lrOffset)); 
+	    if (changed==1) 
+	    	pp.SetSpeed((dirFR + frOffset),(dirLR + lrOffset)); 
 		//printf("\n X reading=%lf Y readings=%lf",WCp.JoyX(),WCp.JoyY());
 		if(count==50)
 	    {

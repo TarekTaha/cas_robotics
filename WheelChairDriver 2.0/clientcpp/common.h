@@ -42,7 +42,7 @@ typedef struct player_wheelchair_speed_cmd
 /*******************CONFIG   STARTS************************/
 typedef struct player_wheelchair_config
 {
-//  uint8_t request;
+  uint8_t request;
   uint16_t value;
 } __attribute__ ((packed)) player_wheelchair_config_t;
 /*******************CONFIG      ENDS************************/
