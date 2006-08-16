@@ -23,7 +23,10 @@ class WheelChairProxy : public ClientProxy
     WheelChairProxy(PlayerClient *aPc, uint aIndex=0);
     ~WheelChairProxy();
     /// How long is the data?
-    uint GetCount() const { return GetVar(mDevice->data_count); };
+    uint GetCount() const 
+    { 
+    	return GetVar(mDevice->data_count); 
+    };
     /// Opaque data
     void GetData(uint8_t* aDest) const
     {

@@ -662,15 +662,15 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 	if(
 	   (hdr->type == (uint8_t)PLAYER_MSGTYPE_REQ) && (hdr->addr.host   == opaque_addr.host)    &&
 	   (hdr->addr.robot  == opaque_addr.robot)    && (hdr->addr.interf == opaque_addr.interf) &&
-       (hdr->addr.index  == opaque_addr.index) && (hdr->subtype == (uint8_t)PLAYER_OPAQUE_REQ)
-       )
+       (hdr->addr.index  == opaque_addr.index))//  && (hdr->subtype == (uint8_t)PLAYER_OPAQUE_REQ))
     {
     	player_wheelchair_config_t * config;
     	config = (player_wheelchair_config_t*) data;    	
-	    switch(hdr->subtype)
+	  	cout<<"\n\t - Opaque Interface Req";	fflush(stdout);    	
+	    switch(config->request)
 	    {
 	     	case PLAYER_WHEELCHAIR_GET_JOYX_REQ:
-				printf("Get JOYX Request");
+			  	cout<<"\n\t - Got JOYX Request Req"; fflush(stdout);     				
 				if(hdr->size != sizeof(player_wheelchair_config_t)) 
 				{
 					PLAYER_WARN("Request is of wrong size; ignoring");
@@ -678,18 +678,22 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 					break;
 				}
 				this->joyx = GetReading('A');
+			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
+			    			  (void*)&config, sizeof(config), NULL);			    
 				return 0;
 	     	case PLAYER_WHEELCHAIR_GET_JOYY_REQ:
-				printf("Get JOYY Request");
+			  	cout<<"\n\t - Got JOYY Req"; fflush(stdout);     				
 				if(hdr->size != sizeof(player_wheelchair_config_t)) 
 				{
 					PLAYER_WARN("Request is of wrong size; ignoring");
 				    return(-1);
 				}
 				this->joyy = GetReading('B');
+			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
+			    			  (void*)&config, sizeof(config), NULL);			    
 				return 0;	
 			case PLAYER_WHEELCHAIR_GET_MODE_REQ:
-				printf("Set Mode Request");
+			  	cout<<"\n\t - Got GET Mode Req"; fflush(stdout);     				
 				if(hdr->size != sizeof(player_wheelchair_config_t)) 
 				{
 					PLAYER_WARN("Request is of wrong size; ignoring");
@@ -698,75 +702,92 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 				int mm;
 				if( (mm = WCControl(GETMODE,0))!=-1 )
 					this->mode = mm ;
+			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
+			    			  (void*)&config, sizeof(config), NULL);			    
 				return 0;
 	    	case PLAYER_WHEELCHAIR_SET_MODE_REQ:
-				printf("Set Mode Request");
+			  	cout<<"\n\t - Got Set Mode Req"; fflush(stdout);     				
 				if(hdr->size != sizeof(player_wheelchair_config_t)) 
 				{
-					PLAYER_WARN("Request is of wrong size; ignoring");
+				  	cout<<"\n\t - Request is of wrong size:"<<hdr->size;	fflush(stdout);    						
+//					PLAYER_WARN("Request is of wrong size; ignoring");
 				    return(-1);
 				}				
 				if (WCControl(SETMODE, (bool)config->value)!=-1)
 					this->mode = (bool)config->value;
+			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
+			    			  (void*)&config, sizeof(config), NULL);			    
 				return 0;
 	    	case PLAYER_WHEELCHAIR_SOUND_HORN_REQ:
-				printf("Sound Horn Request");
+			  	cout<<"\n\t - Got Sound Horn Req"; fflush(stdout);     				
 				if(hdr->size != sizeof(player_wheelchair_config_t)) 
 				{
 					PLAYER_WARN("Request is of wrong size; ignoring");
 				    return(-1);
 				}
 				WCControl(HORN, config->value);
+			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
+			    			  (void*)&config, sizeof(config), NULL);			    
 				return 0;
 	    	case PLAYER_WHEELCHAIR_INC_GEAR_REQ:
-				printf("Increment Gear Request");
+			  	cout<<"\n\t - Got Increment Gear Req"; fflush(stdout);     				
 				if(hdr->size != sizeof(player_wheelchair_config_t)) 
 				{
 					PLAYER_WARN("Request is of wrong size; ignoring");
 				    return(-1);
 				}
 				for(int i=0;i<config->value;i++)
-					{
-						WCControl(GEAR,INCREMENT);
-						usleep(LATCHDELAY);
-					}
+				{
+					WCControl(GEAR,INCREMENT);
+					usleep(LATCHDELAY);
+				}
+			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
+			    			  (void*)&config, sizeof(config), NULL);			    
 				return 0;
 	    	case PLAYER_WHEELCHAIR_DEC_GEAR_REQ:
-				printf("Decrement Gear Request");
+			  	cout<<"\n\t - Got Decrement Gear Req"; fflush(stdout);     				
 				if(hdr->size != sizeof(player_wheelchair_config_t)) 
 				{
 					PLAYER_WARN("Request is of wrong size; ignoring");
 				    return(-1);
 				}
 				for(int i=0;i<config->value;i++)
-					{
-						WCControl(GEAR,DECREMENT);
-						usleep(LATCHDELAY);
-					}
+				{
+					WCControl(GEAR,DECREMENT);
+					usleep(LATCHDELAY);
+				}
+			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
+			    			  (void*)&config, sizeof(config), NULL);			    
 				return 0;
 	     	case PLAYER_WHEELCHAIR_GET_POWER_REQ:
-				printf("Get Power Request");
+			  	cout<<"\n\t - Got Get Power Req"; fflush(stdout);     				
 				if(hdr->size != sizeof(player_wheelchair_config_t)) 
 				{
 					PLAYER_WARN("Request is of wrong size; ignoring");
 				    return(-1);
 				}
 				this->power = ((GetReading('A') + GetReading('E')) > 1500)?ON:OFF;
+			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
+			    			  (void*)&config, sizeof(config), NULL);			    
 				return 0;
 			case PLAYER_WHEELCHAIR_SET_POWER_REQ:
-				printf("Set Power Request");
+			  	cout<<"\n\t - Got Set Power Req"; fflush(stdout);     				
 				if(hdr->size != sizeof(player_wheelchair_config_t)) 
 				{
-					PLAYER_WARN("Request is of wrong size; ignoring");
+				  	cout<<"\n\t - Request is of wrong size:"<<hdr->size;	fflush(stdout);    	
+//					PLAYER_WARN("Request is of wrong size; ignoring");
 				    return(-1);
 				}
 				WCControl(POWER, config->value);
+			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
+			    			  (void*)&config, sizeof(config), NULL);			    
 				return 0;
 			default:
+			  	cout<<"\n\t - Got UNKNOWN Req"; fflush(stdout);     							
 				return -1;				
 		}
     }
-	return 0;
+	return -1;
 }
 
 int WheelchairDriver::WCControl(int WCcmd, bool param) 

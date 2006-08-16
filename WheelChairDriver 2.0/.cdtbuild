@@ -8,6 +8,9 @@
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.875404340" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1545431724" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
 <option id="gnu.cpp.compiler.option.other.other.617177763" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 `pkg-config --cflags playerc++ playercore`" valueType="string"/>
+<option id="gnu.cpp.compiler.option.include.paths.597506452" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;/home/BlackCoder/workspace/WheelChairDriver 2.0/clientcpp&quot;"/>
+</option>
 </tool>
 <tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.490663631" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1654467841" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
