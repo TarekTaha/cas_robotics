@@ -22,6 +22,8 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
             virtual double getSpeed(); 
             virtual double getTurnRate();
             virtual Pose   getLocation();
+            virtual Pose   getOdomLocation();
+            virtual void   gotoGoal(Pose);
             virtual void   setSpeed(double speed);
             virtual void   setPtz(double pan, double tilt);
             virtual void   setTurnRate(double turnRate); 

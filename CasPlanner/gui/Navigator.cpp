@@ -391,12 +391,18 @@ void Navigator::FollowPath()
 {
 	return;
 }
+
+void Navigator::StopRobot()
+{
+	this->stop_navigating = true;
+}
+
 void Navigator::StopNavigating()
 {
 	this->stop_navigating = true;
 }
 /*!
- * This is the Navigation's Thread main, where the control and the path following takes place.
+ * This is the Navigation Thread's main, where the control and the path following takes place.
  */
 void Navigator::run()
 {
@@ -454,7 +460,9 @@ void Navigator::run()
 		delta_timer.restart();
 		usleep(10000);
 		// Get current Robot Location
-		amcl_location = robotManager->commManager->getLocation();
+//		amcl_location = robotManager->commManager->getLocation();
+		amcl_location = robotManager->commManager->getOdomLocation();		
+//		cout<<"\n Current Location X:"<<amcl_location.p.x()<<" Y:"<<amcl_location.p.y()<<" Theta:"<<amcl_location.phi;
 		/* If this location is new, then use it. Otherwise
 		 * estimate the location based on the last reading.
 		 */
@@ -480,6 +488,7 @@ void Navigator::run()
 				velocity = robotManager->commManager->getSpeed();
 			//cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
 		}
+//		cout<<"\n Current Location X:"<<EstimatedPos.p.x()<<" Y:"<<EstimatedPos.p.y()<<" Theta:"<<EstimatedPos.phi;
 		/* if we were following a local path and crossed the boundaried of the local
 		 * area without reaching the local destination then go back to the global path
 		 */
@@ -566,7 +575,7 @@ void Navigator::run()
 				
 				// local Planning Map Distance
 				double target_angle;
-			 	Pose start,target,loc, pixel_loc = robotManager->commManager->getLocation();
+			 	Pose start,target,loc, pixel_loc = EstimatedPos;
 			 	loc = pixel_loc; target.phi = 0;
 			 	
 			 	// Current Locaion in the Global coordinate
@@ -575,7 +584,7 @@ void Navigator::run()
 	//			qDebug("Location Global Pixel  X:%f Y:%f",pixel_loc.p.x(),pixel_loc.p.y());
 	
 				local_planning_time.restart();
-			 	local_planner->SetMap(robotManager->commManager->getLaserScan(),local_dist,robotManager->commManager->getLocation());
+			 	local_planner->SetMap(robotManager->commManager->getLaserScan(),local_dist,EstimatedPos);
 				local_planner->GenerateSpace();
 			 	Node * temp;
 			 	temp = global_path;
@@ -701,7 +710,9 @@ void Navigator::run()
 		if(!pause)
 		{
 			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
-			robotManager->commManager->setTurnRate(cntrl.angular_velocity);				
+			robotManager->commManager->setTurnRate(cntrl.angular_velocity);		
+//			Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
+//			robotManager->commManager->gotoGoal(goal);
 		}
 		else
 		{

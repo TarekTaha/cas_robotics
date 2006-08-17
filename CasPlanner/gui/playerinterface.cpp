@@ -10,6 +10,7 @@ PlayerInterface::PlayerInterface(QString host, int port):
     localizerEnabled(false),
     localized(false),
     emergencyStopped(false),
+    velControl(true),
     positionId(0), 
     drive(0),
     localizer(0)
@@ -44,6 +45,7 @@ void PlayerInterface::setPtz( double in_pan, double in_tilt)
 void PlayerInterface::setSpeed(double i_speed, double i_turnRate)
 {
     dataLock.lockForWrite();
+	velControl = true;    
     speed = i_speed;
     turnRate = i_turnRate;
     dataLock.unlock(); 
@@ -52,6 +54,7 @@ void PlayerInterface::setSpeed(double i_speed, double i_turnRate)
 void PlayerInterface::setSpeed(double i_speed)
 {
     dataLock.lockForWrite();
+	velControl = true;        
     speed = i_speed; 
     dataLock.unlock();
 }
@@ -59,8 +62,17 @@ void PlayerInterface::setSpeed(double i_speed)
 void PlayerInterface::setTurnRate(double i_turnRate)
 {
     dataLock.lockForWrite();
+	velControl = true;    
     turnRate = i_turnRate;
     dataLock.unlock();
+}
+
+void PlayerInterface::gotoGoal(Pose goal)
+{
+    dataLock.lockForWrite();	
+	velControl = false;
+	this->goal = goal;	
+    dataLock.unlock();	
 }
 
 void PlayerInterface::setLocation(Pose loc)
@@ -139,6 +151,14 @@ Pose PlayerInterface::getLocation()
 {
     dataLock.lockForRead();
     Pose retval = location; 
+    dataLock.unlock(); 
+    return retval; 	
+}
+
+Pose PlayerInterface::getOdomLocation()
+{
+    dataLock.lockForRead();
+    Pose retval = odom_location; 
     dataLock.unlock(); 
     return retval; 	
 }
@@ -263,9 +283,22 @@ void PlayerInterface::run ()
 		  	} 
 	        if(ctrEnabled)
 	        {
-	            drive->SetSpeed(speed,turnRate);
+	        	player_pose_t ps;
+	        	if(velControl)
+	        	{
+		            drive->SetSpeed(speed,turnRate);
+	        	}
+	        	else
+	        	{
+	        		drive->GoTo(goal.p.x(),goal.p.y(),goal.phi);
+	        	}
 	            getspeed = drive->GetXSpeed();
 	            getturnrate = drive->GetYSpeed();
+	            ps = drive->GetPose();
+	            odom_location.p.setX(drive->GetXPos());
+	            odom_location.p.setY(drive->GetYPos());
+	            odom_location.phi =  drive->GetYaw();
+				//cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<odom_location.phi;	            
 	        }
 			if(ptzEnabled)
 			{

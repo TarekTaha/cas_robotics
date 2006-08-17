@@ -7,6 +7,7 @@
 #include <QThread> 
 #include <QReadWriteLock>
 #include <QTime>
+#include <iostream>
 
 #include "playerinterface.h"
 #include "utils.h"
@@ -14,6 +15,8 @@
 #define MAX_LASERS 4
 
 using namespace PlayerCc;
+using namespace std;
+
 class PlayerInterface: public QThread 
 {
 Q_OBJECT    
@@ -33,7 +36,9 @@ Q_OBJECT
         double getSpeed(); 
         double getTurnRate();
         bool getLocalized();
-        Pose getLocation(); 
+        Pose getLocation();
+        Pose getOdomLocation();
+        void gotoGoal(Pose);
         void setSpeed(double speed);
         void setTurnRate(double turnRate); 
         void setSpeed(double speed, double turnRate); 
@@ -47,7 +52,7 @@ Q_OBJECT
         int playerPort; 
         PlayerClient *pc;
      
-        bool ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized,emergencyStopped; 
+        bool ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized,emergencyStopped,velControl; 
         int positionId,ptzId,mapId,localizerId;
         QVector <int> laserIds;
         QVector <LaserProxy *> laser;
@@ -55,11 +60,10 @@ Q_OBJECT
         MapProxy *map;
 		PtzProxy *ptz;
 		LocalizeProxy *localizer;
-		Pose location;
+		Pose location,goal,odom_location;
 		double pan,tilt,pose[3], pose_covar[3];
         QVector<QPointF> laserScanPoints;
         double speed,turnRate,getspeed,getturnrate;
-    
         QReadWriteLock dataLock;       
 };
 #endif 
