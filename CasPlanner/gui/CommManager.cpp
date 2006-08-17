@@ -32,6 +32,11 @@ void CommManager::setSpeed(double i_speed, double i_turnRate)
   	player->setSpeed(i_speed, i_turnRate);
 }
 
+void CommManager::gotoGoal(Pose goal)
+{
+	player->gotoGoal(goal);
+}
+
 void CommManager::setLocation(Pose location)
 {
 	player->setLocation(location);
@@ -65,6 +70,12 @@ Pose CommManager::getLocation()
 {
   	return player->getLocation();
 }
+
+Pose CommManager::getOdomLocation()
+{
+  	return player->getOdomLocation();
+}
+
 bool CommManager::getLocalized()
 {
 	return player->getLocalized();

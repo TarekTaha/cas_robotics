@@ -45,6 +45,7 @@ class Navigator : public Controller
 	public
 	slots:
 		void FollowPath();
+		void StopRobot();
 	signals:
 		void drawLocalPath(PathPlanner *,Pose *,int *);
 	protected:

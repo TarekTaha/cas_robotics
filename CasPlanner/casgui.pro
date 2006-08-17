@@ -74,6 +74,7 @@ SOURCES +=  gui/CommManager.cpp\
 		    src/Vector2d.cpp
 RESOURCES = resources/icons.qrc
 QT += opengl
+QMAKE_CFLAGS_RELEASE+= -g -O3 -o 
 #QMAKE_CFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse 
 #QMAKE_CXXFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
 #QMAKE_LFLAGS_RELEASE += -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
