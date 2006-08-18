@@ -428,16 +428,9 @@ Node *Astar :: MakeChildrenNodes(Node *parent)
 			if (Obstacle(temp->children[i]->location,discrete_angle))
 			{
 				collides= true;
-				continue;
+				break;
 			}
 		}
-//		if (Obstacle(temp->children[i]->pose,angle))
-//		{
-//			collides= true;
-//			continue;
-//		}
-//		else
-//			collides = false;
 		if (!collides) // if after discretization the child still doens't collide then add it
 		{
 			p = new Node;

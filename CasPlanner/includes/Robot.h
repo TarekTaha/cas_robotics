@@ -14,7 +14,8 @@ namespace CasPlanner
 class Robot
 {
 	public :
-		double length,width,obstacle_radius;
+		double length,width,obstacle_radius,robotMass,robotMI,robotRadius;
+		double TimeStep, SysK, SysC, SysFR, SysP, SysQ, MaxSpeed, MaxAcceT, OmegadotMax, OmegaMax;
 		// Motion model
 		QString model;
 		// Center of Rotation

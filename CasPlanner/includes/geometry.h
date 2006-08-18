@@ -625,7 +625,11 @@ inline bool GetLineSegmentCircleClosestIntersectionPoint(Vector2D A,
 
   return ipFound;
 }
-
+inline double AngleSeg2Seg(Line L1, Line L2)
+{
+	return acos(((L1.end.x() - L1.start.x())*(L2.end.x()-L2.start.x()) + (L1.end.y() - L1.start.y())*(L2.end.y() - L2.start.y()))/
+				L1.LineMag()*L2.LineMag);
+}
 #endif
 
               
