@@ -10,7 +10,7 @@ void Robot::SetCheckPoints()
 	double i,j, l = length , w = width;
 	check_points.clear();
 	// The edges of the robot in -ve quadrant
-	double startx,starty;       
+	double startx,starty,internal_radius;       
 	QPointF temp,edges[4];   
 	edges[0].setX(-l/2);		edges[0].setY(w/2);
 	edges[1].setX(l/2);			edges[1].setY(w/2);
@@ -29,17 +29,18 @@ void Robot::SetCheckPoints()
 //	for (int s=0 ;s < 4; s++)
 //		cout<<"\nEdge->"<< s<<" X="<<local_edge_points[s].x()<<" Y="<<local_edge_points[s].y();
 	// Create a Matrix of the points to check for collision detection
-	points_per_height = (int)(ceil(l/(double)(2*this->obstacle_radius)));
-	points_per_width  = (int)(ceil(w/(double)(2*this->obstacle_radius)));
+	internal_radius = this->obstacle_radius/sqrt(2);
+	points_per_height = (int)(ceil(l/(double)(2*internal_radius)));
+	points_per_width  = (int)(ceil(w/(double)(2*internal_radius)));
 	n = points_per_height*points_per_width;
 //	cout<<"\nPer H ="<<points_per_height<<" Per W="<<points_per_width<<" Total ="<<n;
-//	cout<<"\n Obstacle Radius="<<this->obstacle_radius; fflush(stdout);
+//	cout<<"\n Obstacle Radius="<<internal_radius; fflush(stdout);
 
 	// The location of the current edges at each NODE
-	i =(startx + this->obstacle_radius);
+	i =(startx + internal_radius);
 	for(int r =0; r < points_per_height ; r++ )
 	{
-		j=(starty + this->obstacle_radius);
+		j=(starty + internal_radius);
 		for (int s=0;s < points_per_width;s++)
 		{
 			// Angle zero is when robot heading points to the right (right had rule)
@@ -51,19 +52,19 @@ void Robot::SetCheckPoints()
 			/* Determining the next center it should be 2*r away from the previous
 			 * and it's circle should not exceed the boundaries
 			 */
-			if ( (j+2*this->obstacle_radius + this->obstacle_radius) >= (w + starty) ) 
-				j = (w + starty - this->obstacle_radius);// Allow overlap
+			if ( (j+2*internal_radius + internal_radius) >= (w + starty) ) 
+				j = (w + starty - internal_radius);// Allow overlap
 			else 
-				j += (2*this->obstacle_radius);
+				j += (2*internal_radius);
 		}
 		// Same as Above
-		if ((i+2*this->obstacle_radius + this->obstacle_radius) >= (l + startx)) 
-		{
-			// Alow overlap in this case, this is the last center
-			i = (l + startx - this->obstacle_radius); 
-		}
-		else 
-			i += (2*this->obstacle_radius);
+//		if ((i+2*internal_radius + internal_radius) >= (l + startx)) 
+//		{
+//			// Alow overlap in this case, this is the last center
+//			i = (l + startx - internal_radius); 
+//		}
+//		else 
+			i += (2*internal_radius);
 	}
 	for (unsigned int k=0;k<check_points.size();k++)
 	{
@@ -79,8 +80,20 @@ Robot::Robot (double l, double w,double o_r,QString model,QPointF r_c):
 	center(r_c)
 {
 	SetCheckPoints();
+	FindR();
 };
 
+void FindR()
+{
+	double dist,max_dist=-10;
+ 	for (int i = 0; i < 4; i++)
+ 	{
+ 		dist = Dist(center,local_edge_points[i]);
+ 		if (dist > max_dist)
+ 			max_dist = dist;
+ 	}
+	this->robotRadius= max_dist;
+}	
 Robot::Robot() 
 {
 };

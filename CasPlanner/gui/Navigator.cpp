@@ -379,6 +379,12 @@ Node * Navigator::ClosestPathSeg(QPointF location,Node * all_path)
 		}
 		all_path = all_path->next;
 	}
+	if (shortest <= 0.02)
+	{
+		if(nearest->next)
+			if(nearest->next->next)
+				nearest = nearest->next;
+	}
 	return nearest;
 }
 
@@ -709,10 +715,10 @@ void Navigator::run()
 			fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.elapsed()/1e3,last_time);
 		if(!pause)
 		{
-			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
-			robotManager->commManager->setTurnRate(cntrl.angular_velocity);		
-//			Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
-//			robotManager->commManager->gotoGoal(goal);
+//			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
+//			robotManager->commManager->setTurnRate(cntrl.angular_velocity);		
+			Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
+			robotManager->commManager->gotoGoal(goal);
 		}
 		else
 		{
