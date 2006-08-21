@@ -218,7 +218,7 @@ int Navigator::readConfigs( ConfigFile *cf)
 	    if(sectionName == "Map")
 	    {
 			pixel_res    = 	  cf->ReadFloat (i, "pixel_res", 0.028);
-	    }	    
+	    }
 	    if(sectionName == "Robot")
 	    {
 		   	robot_length = 			cf->ReadFloat(i, "robot_length",1.2);
@@ -232,6 +232,8 @@ int Navigator::readConfigs( ConfigFile *cf)
 			}
 			rotation_center.setX(cf->ReadTupleFloat(i,"robot_center",0 ,0));
 			rotation_center.setY(cf->ReadTupleFloat(i,"robot_center",1 ,0));
+			Robot robot(robot_length, robot_width,obst_exp,"diff",rotation_center);
+			FF = new ForceField(robot);
 	    }
 	}
 
@@ -572,7 +574,7 @@ void Navigator::run()
 		{
 			icp_time.restart();
 			// If we don't already have a local map or the local environment is changed then re-plan
-			if ( !local_planner->pathPlanner->path || MapModified(robotManager->commManager->getLaserScan(),EstimatedPos))
+			if ( !local_planner->pathPlanner->path) //|| MapModified(robotManager->commManager->getLaserScan(),EstimatedPos))
 			{
 				qDebug("Icp Check took:%d msec",icp_time.elapsed());					
 				//Stop the Robot before planning
@@ -715,10 +717,17 @@ void Navigator::run()
 			fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.elapsed()/1e3,last_time);
 		if(!pause)
 		{
+			// Normal Follower
 //			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
 //			robotManager->commManager->setTurnRate(cntrl.angular_velocity);		
+			// Stage goto
 			Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
-			robotManager->commManager->gotoGoal(goal);
+//			robotManager->commManager->gotoGoal(goal);
+			// Force Field
+			velVector action;
+			action = FF->GenerateField(EstimatedPos,robotManager->commManager->getLaserScan(),goal,robotManager->commManager->getSpeed(),robotManager->commManager->getTurnRate());
+			robotManager->commManager->setSpeed(action.speed);			
+			robotManager->commManager->setTurnRate(action.turnRate);		
 		}
 		else
 		{
