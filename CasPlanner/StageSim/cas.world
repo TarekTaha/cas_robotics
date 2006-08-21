@@ -1,0 +1,85 @@
+
+# Desc: Stage demo with lots of models. Works with everything.cfg.
+# CVS: $Id: everything.world,v 1.85 2006/03/29 05:11:00 rtv Exp $
+
+# the size of a pixel in Stage's underlying raytrace model in meters
+resolution     0.02
+
+interval_sim 100  # milliseconds per update step
+interval_real 100 # real-time milliseconds per update step
+
+# defines Pioneer-like robots
+include "wheelchair.inc"
+
+# defines 'map' object used for floorplans
+include "map.inc"
+
+# defines the laser model `sick_laser' configured like a Sick LMS-200
+include "sick.inc"
+# defines the laser model `hokuyo_laser' configured like a Hokuyo Laser
+include "hokuyo.inc"
+
+#size [16 16]
+size [40 20 ]
+
+gui_disable 0
+gui_interval 100
+gui_menu_interval 20
+
+# configure the GUI window
+#window
+#( 
+#  size [ 591.000 638.000 ] 
+#  center [-0.010 -0.040] 
+#  scale 0.028 
+#)
+
+# load an environment bitmap
+#map
+#( 
+#  bitmap "bitmaps/cave.png"
+#  size [16 16]
+#  name "casarea"
+#)
+
+window
+(
+  size [ 500 500 ] 
+  center [0 0] 
+  scale 0.05
+)
+
+map
+(
+  bitmap "bitmaps/casareaicp2.png"
+  map_resolution 0.05
+  size [22.8 20.3]  # casarea
+  name "casarea"
+)
+# an obstacle that i can move around
+model
+(
+  size [ 0.4 0.4 ]
+  pose [-6 0 180]
+  color "red" 
+  gui_nose 1
+  gui_grid 1
+  gui_movemask 1
+  boundary 1
+  obstacle_return 1
+  laser_return 1
+  ranger_return 1
+  fiducial_return 1
+)
+# extend the wheelchair definition from wheelchair.inc
+
+wheelchair
+(
+   name "robot"
+   #pose [-5 0 90]
+   pose [0 0 0]
+   sick_laser
+	(
+		pose [0.030 0.000 0.000 ]
+	)
+)
