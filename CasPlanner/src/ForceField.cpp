@@ -17,7 +17,6 @@ namespace CasPlanner
 	}
 	/* Given a Position and an environment, generate the action to 
 	 * go to the goal Point without colliding with the surrondings
-	 * dsadsada sadsa sa
 	 */
 	void ForceField::NearestObstacle(QVector<QPointF> laser_scan,Pose laser_pose)
 	{
