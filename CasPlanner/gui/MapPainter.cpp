@@ -72,7 +72,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 	QPainter paint(this);
 	paint.drawImage(0, 0, image, 0, 0,image.width(), image.height());
 	paint.setBrush(Qt::cyan);
-	paint.setPen(Qt::white);
+	paint.setPen(Qt::blue);
 	switch (step)
 	{
 		case 2:
@@ -95,7 +95,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 		paint.drawPie(int(curr_loc.x()-5),int(curr_loc.y()-5),10,10,0,5760);
 					
 		paint.setBrush(Qt::cyan);
-		paint.setPen(Qt::white);		
+		paint.setPen(Qt::green);		
 		// Draw Start and End Locations
 		if(start_initialized)
 		{
@@ -130,7 +130,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 			paint.setPen(Qt::white);
 			if(local_planner->path)
 			{
-				paint.setPen(Qt::yellow);
+				paint.setPen(Qt::black);
 				QPointF E,S;
 			  	Node *p;
 			  	p = local_planner->path;
@@ -208,7 +208,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 			}
 			
 			// Draw Global Path if it exists
-			paint.setPen(Qt::yellow);
+			paint.setPen(Qt::black);
 			if(global_planner->path)
 			{
 					QPointF l_start,l_end,E,S;

@@ -56,6 +56,6 @@ ControlAction Controller::getAction(double angle_current,double angle_ref,double
 	}
 	else
 		cntrl.linear_velocity = speed;
-	qDebug("Ori-Err=[%.3f] Dist-Err=[%.3f] Wdem=[%.3f]",RTOD(orientation_error),displacement,cntrl.angular_velocity);
+	//qDebug("Ori-Err=[%.3f] Dist-Err=[%.3f] Wdem=[%.3f]",RTOD(orientation_error),displacement,cntrl.angular_velocity);
 	return cntrl;
 };
