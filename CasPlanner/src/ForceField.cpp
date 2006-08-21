@@ -207,7 +207,6 @@ namespace CasPlanner
 	}
 
 	/*****************************************************************/
-	
 	// use least square method in curve fitting
 	// x[n]  x values of n data
 	// y[n]  y values of n data

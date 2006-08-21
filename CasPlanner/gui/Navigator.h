@@ -35,7 +35,7 @@ class Navigator : public Controller
 		int readConfigs(ConfigFile *cf);
 		void setPath(Node *path);
 		void StopNavigating();
-		double NearestObstacle(QVector<QPointF> laser_scan,Pose pose);
+		double NearestObstacle(QVector<QPointF> laser_scan);
 		void  setPause(bool pause);
 		Node * ClosestPathSeg(QPointF location,Node * all_path);	
 		void GenerateLocalMap(QVector<QPointF> laser_scan,Pose laser_pose, Pose rob_location);

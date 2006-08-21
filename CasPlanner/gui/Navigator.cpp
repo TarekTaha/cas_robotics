@@ -251,7 +251,7 @@ int Navigator::readConfigs( ConfigFile *cf)
  	return 1;
 }
 
-double Navigator::NearestObstacle(QVector<QPointF> laser_scan,Pose lase_pose)
+double Navigator::NearestObstacle(QVector<QPointF> laser_scan)
 {
 	QPointF ray_end,temp[4],intersection;
 	Line L1,L2;
@@ -461,15 +461,20 @@ void Navigator::run()
 	last_time=0; delta_t=0;	velocity=0;
 	end_reached = false;
 	stop_navigating = false;
-	double sf = safety_dist;
+	double sf = safety_dist,speed,turnRate;
+	QVector <QPointF> laser_set;
 	while(!end_reached && !stop_navigating)
 	{
+		laser_set.clear();
 		delta_t = delta_timer.elapsed()/1e3;
 		delta_timer.restart();
 		usleep(10000);
 		// Get current Robot Location
 //		amcl_location = robotManager->commManager->getLocation();
-		amcl_location = robotManager->commManager->getOdomLocation();		
+		amcl_location = robotManager->commManager->getOdomLocation();
+		speed = robotManager->commManager->getSpeed();
+		turnRate = robotManager->commManager->getTurnRate();
+		laser_set = robotManager->commManager->getLaserScan();
 //		cout<<"\n Current Location X:"<<amcl_location.p.x()<<" Y:"<<amcl_location.p.y()<<" Theta:"<<amcl_location.phi;
 		/* If this location is new, then use it. Otherwise
 		 * estimate the location based on the last reading.
@@ -492,8 +497,8 @@ void Navigator::run()
 			EstimatedPos.p.setX(EstimatedPos.p.x() + velocity*cos(EstimatedPos.phi)*delta_t);
 			EstimatedPos.p.setY(EstimatedPos.p.y() + velocity*sin(EstimatedPos.phi)*delta_t);
 			//cout<<"\nVelocity is:"<<velocity<<" Side Speed is:"<<pp->SideSpeed();
-			if (velocity!= robotManager->commManager->getSpeed()) //	Velocity Changed?
-				velocity = robotManager->commManager->getSpeed();
+			if (velocity!= speed) //	Velocity Changed?
+				velocity = speed;
 			//cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
 		}
 //		cout<<"\n Current Location X:"<<EstimatedPos.p.x()<<" Y:"<<EstimatedPos.p.y()<<" Theta:"<<EstimatedPos.phi;
@@ -549,7 +554,7 @@ void Navigator::run()
 		 * long line paths.
 		 */
 		 
-		//qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",robotManager->commManager->getSpeed(),EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
+		//qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",speed,EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
 		tracking_point.setX(EstimatedPos.p.x() + tracking_dist*cos(EstimatedPos.phi) - 0*sin(EstimatedPos.phi));
 		tracking_point.setY(EstimatedPos.p.y() + tracking_dist*sin(EstimatedPos.phi) + 0*cos(EstimatedPos.phi)); 
 		// Distance to the path Segment
@@ -568,13 +573,13 @@ void Navigator::run()
 		 * 5- Follow that path
 		 */
 		QTime local_planning_time,icp_time;
-		closest_obst = NearestObstacle(robotManager->commManager->getLaserScan(),EstimatedPos);
+		closest_obst = NearestObstacle(laser_set);
 //		qDebug("Closest Distance to Obstacles is:%f Saftey Dist:%f",closest_obst,sf);
 		if(closest_obst < sf)
 		{
 			icp_time.restart();
 			// If we don't already have a local map or the local environment is changed then re-plan
-			if ( !local_planner->pathPlanner->path) //|| MapModified(robotManager->commManager->getLaserScan(),EstimatedPos))
+			if ( !local_planner->pathPlanner->path) //|| MapModified(laser_set,EstimatedPos))
 			{
 				qDebug("Icp Check took:%d msec",icp_time.elapsed());					
 				//Stop the Robot before planning
@@ -592,7 +597,7 @@ void Navigator::run()
 	//			qDebug("Location Global Pixel  X:%f Y:%f",pixel_loc.p.x(),pixel_loc.p.y());
 	
 				local_planning_time.restart();
-			 	local_planner->SetMap(robotManager->commManager->getLaserScan(),local_dist,EstimatedPos);
+			 	local_planner->SetMap(laser_set,local_dist,EstimatedPos);
 				local_planner->GenerateSpace();
 			 	Node * temp;
 			 	temp = global_path;
@@ -718,23 +723,25 @@ void Navigator::run()
 		if(!pause)
 		{
 			// Normal Follower
-//			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
-//			robotManager->commManager->setTurnRate(cntrl.angular_velocity);		
+			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
+			robotManager->commManager->setTurnRate(cntrl.angular_velocity);		
 			// Stage goto
 			Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
 //			robotManager->commManager->gotoGoal(goal);
 			// Force Field
-			velVector action;
-			action = FF->GenerateField(EstimatedPos,robotManager->commManager->getLaserScan(),goal,robotManager->commManager->getSpeed(),robotManager->commManager->getTurnRate());
-			robotManager->commManager->setSpeed(action.speed);			
-			robotManager->commManager->setTurnRate(action.turnRate);		
+//			velVector action;
+//			QTime ff_time;
+//			ff_time.restart();
+//			action = FF->GenerateField(EstimatedPos,laser_set,goal,speed,turnRate);
+//			qDebug("FF Speed is:%f TurnRate is:%f  time is:%dms",action.speed,action.turnRate,ff_time.elapsed());
+//			robotManager->commManager->setSpeed(action.speed);			
+//			robotManager->commManager->setTurnRate(action.turnRate);		
 		}
 		else
 		{
 			robotManager->commManager->setSpeed(0);
 			robotManager->commManager->setTurnRate(0);
 		}
-
 		loc = EstimatedPos;
 	}
 	robotManager->commManager->setSpeed(0);
