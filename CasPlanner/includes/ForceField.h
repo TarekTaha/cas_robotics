@@ -1,30 +1,48 @@
 #ifndef FORCEFIELD_H_
 #define FORCEFIELD_H_
-#include<Robot.h>
-#include<QPointF>
-#include<QVector>
-#include<math.h>
-#include "utils.h"
-#include "robot.h"
-using std::vector;
+#include <Robot.h>
+#include <QPointF>
+#include <QVector>
+#include <math.h>
 
+#include "utils.h"
+#include "Robot.h"
+#include "Vector2D.h"
+
+using std::vector;
+typedef struct _interaction
+	{
+		QPointF location;
+		double force;
+		double direction;
+	}   Interaction;
+typedef struct _velVector
+{
+	double speed;
+	double turnRate;
+}   velVector;	
 namespace CasPlanner
 {
 class ForceField : public Robot
 {
 public:
-	ForceField();
+	ForceField(Robot r);
 	virtual ~ForceField();
-	VelVector ForceField::GenerateField(QPointF position,QVector<QPointF> laser_set,QPointF Goal,QPointF location,double speed,double turnrate);
+	velVector GenerateField(Pose pose,QVector<QPointF> laser_set,Pose Goal,double speed,double turnrate);
+	QVector < QVector<QPointF> > DivObst(QVector<QPointF> laser_set);	
+	void LSCurveFitting (QVector<QPointF> obstacle, double a[], int m);
+	void NearestObstacle(QVector<QPointF> laser_scan,Pose laser_pose);
+	void VSFF(QVector<Interaction> obstacle_interaction_set);	
+	double FindNorm(QPointF interaction_point, double Tang);
+	void CrossProduct(double MatrixA[3], double MatrixB[3], double MatrixC[3]);
+	double ForceValue();	
 private :
-	double NearestObstacle(QVector<QPointF> laser_scan,Pose lase_pose);
-	double DotMultiply(POINT, POINT, POINT);
-	const int curvefittingorder = 6;
-	const double Gapdist = 0.5;
-	const int NPOL = 4;
-	const double INF = 1E200;
-	const double EP = 1E-10;
-	double robotSpeed,robotTurnRate;
+	int curvefittingorder;
+	double Gapdist;
+	int NPOL;
+	double INF,EP;
+	double robotSpeed,robotTurnRate,closest_dist;
+	QPointF intersect_point,end_point;
 	Pose robotLocation, goalLocation;
 	QVector <QPointF> laser_readings;
 };

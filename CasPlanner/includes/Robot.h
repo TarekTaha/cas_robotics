@@ -14,7 +14,7 @@ namespace CasPlanner
 class Robot
 {
 	public :
-		double length,width,obstacle_radius,robotMass,robotMI,robotRadius;
+		double length,width,obstacle_radius,robotMass,robotMI,robotRadius,FixedRatio;
 		double TimeStep, SysK, SysC, SysFR, SysP, SysQ, MaxSpeed, MaxAcceT, OmegadotMax, OmegaMax;
 		// Motion model
 		QString model;
@@ -24,6 +24,7 @@ class Robot
 		QPointF local_edge_points[4];
 		vector<QPointF> check_points;
 		void SetCheckPoints();
+		void FindR();
 		Robot (double r_l, double r_w,double o_r,QString r_m,QPointF r_c );
 		Robot();
 		~Robot();

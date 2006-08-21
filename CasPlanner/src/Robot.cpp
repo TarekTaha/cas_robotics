@@ -75,15 +75,26 @@ void Robot::SetCheckPoints()
 Robot::Robot (double l, double w,double o_r,QString model,QPointF r_c):
 	length(l),
 	width(w),
-	obstacle_radius(o_r),	
+	obstacle_radius(o_r),
+	robotMass(50),
+	robotMI(10),
+	FixedRatio(0.2),
+	TimeStep(0.2),
+	SysK(5),
+	SysC(1.25),
+	SysP(10),
+	SysQ(10),
+	MaxSpeed(0.5),
+	MaxAcceT(0.2),
+	OmegadotMax(0.15),
+	OmegaMax(0.2),
 	model(model),
 	center(r_c)
 {
 	SetCheckPoints();
 	FindR();
 };
-
-void FindR()
+void Robot::FindR()
 {
 	double dist,max_dist=-10;
  	for (int i = 0; i < 4; i++)

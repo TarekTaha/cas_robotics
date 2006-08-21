@@ -12,9 +12,11 @@
 #include <QTime>
 #include <vector>
 #include "robotmanager.h"
+#include "Robot.h"
 #include "planningmanager.h"
 #include "Controller.h"
 #include "configfile.h"
+#include "ForceField.h"
 #include "Node.h"
 #include "icp.h"
 
@@ -59,6 +61,7 @@ class Navigator : public Controller
 			   bridge_len, bridge_res, reg_grid, obst_exp, conn_rad, obst_pen;
 		QString robot_model;
 		QPointF rotation_center;
+		ForceField *FF;
 		QPointF	begin,tracking_point,ni,SegmentStart,SegmentEnd;
 		bool	log,position_found,end_reached,segment_navigated,stop_navigating,pause;
 		int		platform,direction,path2Draw;					

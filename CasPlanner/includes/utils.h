@@ -432,78 +432,12 @@ inline double DotMultiply(QPointF p1,QPointF p2,QPointF p0)
 {
 	return ((p1.x()-p0.x())*(p2.x()-p0.x())+(p1.y()-p0.y())*(p2.y()-p0.y()));
 }
-
 /*****************************************************************/
-
-void CrossProduct(double MatrixA[3], double MatrixB[3], double MatrixC[3])
-{
- 	MatrixC[0] = (MatrixA[1] * MatrixB[2]) - (MatrixB[1] * MatrixA[2]);
-	MatrixC[1] = (MatrixA[2] * MatrixB[0]) - (MatrixB[2] * MatrixA[0]);
- 	MatrixC[2] = (MatrixA[0] * MatrixB[1]) - (MatrixB[0] * MatrixA[1]);
-}
-/*****************************************************************/
-double FindNorm(double PointX, double PointY, double Tang, double RobotX, double RobotY)
-{
-	double Direction;
- 	if ((Tang > EP) || (Tang < -EP))
- 	{
-   		double k = -1 / Tang;
-   		double x1 = PointX + 1;
-   		double x2 = PointX - 1;
-   		double y1 = PointY + k;
-   		double y2 = PointY - k;
-   		double Value = RobotY - PointY - Tang * (RobotX - PointX);
-   		double Value1 = y1 - PointY - Tang * (x1 - PointX);
-   		double Value2 = y2 - PointY - Tang * (x2 - PointX);
-   		if ((Value < EP) && (Value > -EP))
-   		{
-     		Direction = FindAngle (RobotX - PointX, RobotY - PointY);
-   		}
-   		else if ((Value * Value1) > 0)
-   		{
-   			Direction = FindAngle (1, k);
-   		}
-   		else if ((Value * Value2) > 0)
-   		{
-     		Direction = FindAngle (-1, -k);
-   		}
-   		else
-   		{
-     		printf ("error!\n");
-   		}
- 	}
- 	else
- 	{
-   		if (RobotY > (PointY + EP))
-   		{
-     		Direction = PI / 2;
-   		}
-   		else if (RobotY < (PointY - EP))
-   		{
-    		 Direction = -PI / 2;
-   		}
-   		else if (RobotX < PointX)
-   		{
-    		Direction = PI;
-   		}
-   		else
-   		{
-     		Direction = 0; //may have some problems
-   		}
-	}
- 	return (Direction);
-};
-
 typedef struct _tree
 	{
 		QPointF location;
 		QVector <QPointF> children;
 	}   Tree;
-typedef struct _velVector
-{
-	double speed;
-	double turnRate;
-}   velVector;
 
 enum {SHOWLOCALPATH,SHOWGLOBALPATH,SHOWBOTHPATHS};
 
