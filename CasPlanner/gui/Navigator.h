@@ -23,7 +23,6 @@
 class PlanningManager;
 using namespace CasPlanner;
 //using namespace Geom2D;
-
 class Navigator : public Controller
 {
 	Q_OBJECT
@@ -50,6 +49,7 @@ class Navigator : public Controller
 		void StopRobot();
 	signals:
 		void drawLocalPath(PathPlanner *,Pose *,int *);
+		void pathTraversed();
 	protected:
 		Pose	old_amcl,amcl_location,EstimatedPos,laser_pose;
 		double 	angle,prev_angle,theta,error_orientation,

@@ -438,7 +438,5 @@ typedef struct _tree
 		QPointF location;
 		QVector <QPointF> children;
 	}   Tree;
-
-enum {SHOWLOCALPATH,SHOWGLOBALPATH,SHOWBOTHPATHS};
-
+enum {LOCALPATH,GLOBALPATH,BOTHPATHS};
 #endif

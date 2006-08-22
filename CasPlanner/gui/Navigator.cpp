@@ -414,6 +414,7 @@ void Navigator::StopNavigating()
  */
 void Navigator::run()
 {
+	connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));	
 	ControlAction cntrl;
 	QTime amcl_timer,delta_timer,redraw_timer;
 	double closest_obst=10;
@@ -437,7 +438,7 @@ void Navigator::run()
 		qDebug("\t - Your not Connected to the Robot, Connect First");
 		return;		
 	}
-	path2Draw = SHOWGLOBALPATH;
+	path2Draw = GLOBALPATH;
 	redraw_timer.restart();
 	Pose initial_pos;
 	initial_pos.p.setX(global_path->pose.p.x());
@@ -501,7 +502,6 @@ void Navigator::run()
 				velocity = speed;
 			//cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
 		}
-//		cout<<"\n Current Location X:"<<EstimatedPos.p.x()<<" Y:"<<EstimatedPos.p.y()<<" Theta:"<<EstimatedPos.phi;
 		/* if we were following a local path and crossed the boundaried of the local
 		 * area without reaching the local destination then go back to the global path
 		 */
@@ -509,8 +509,9 @@ void Navigator::run()
 		{
 			if(Dist(EstimatedPos.p,local_planner->pathPlanner->map->global_pose.p)>local_dist)
 			{
+				local_planner->pathPlanner->FreeResources();
 				path2Follow = global_path;
-				path2Draw = SHOWGLOBALPATH;
+				path2Draw = GLOBALPATH;
 			}
 		}
 		first = ClosestPathSeg(loc.p,path2Follow);
@@ -542,25 +543,23 @@ void Navigator::run()
 		}
 		last  = first->next;	ni = first->pose.p;
 		SegmentStart.setX(ni.x());	SegmentStart.setY(ni.y());
-//		qDebug("--->>>NEW Line SEG Starts x[%.3f]y[%.3f]",SegmentStart.x(),SegmentStart.y());
 		ni = last->pose.p;  SegmentEnd.setX(ni.x());  SegmentEnd.setY(ni.y());	
-//		qDebug("--->>>Ends at   x[%.3f]y[%.3f] <<<---",SegmentEnd.x(),SegmentEnd.y());
 		direction = -1;
 		angle = atan2(SegmentEnd.y() - SegmentStart.y(),SegmentEnd.x() - SegmentStart.x());
-//		qDebug("--->>> Orientation(Planned) to follow :=%.3f <<<---",RTOD(angle));
 
 		/* If we chose to follow a virtual point on the path then calculate that point
 		 * It will not be used most of the time, but it adds accuracy in control for
 		 * long line paths.
 		 */
-		 
 		//qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",speed,EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
 		tracking_point.setX(EstimatedPos.p.x() + tracking_dist*cos(EstimatedPos.phi) - 0*sin(EstimatedPos.phi));
 		tracking_point.setY(EstimatedPos.p.y() + tracking_dist*sin(EstimatedPos.phi) + 0*cos(EstimatedPos.phi)); 
+
 		// Distance to the path Segment
 		distance = Dist(SegmentEnd,tracking_point);
 		Line l(SegmentStart,SegmentEnd);
 		displacement = Dist2Seg(l,tracking_point);
+
 		//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
 		//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
 		/* If we are too close to obstacles then let the local planner takes control
@@ -572,16 +571,17 @@ void Navigator::run()
 		 *    on the global path that is X distance away
 		 * 5- Follow that path
 		 */
+
 		QTime local_planning_time,icp_time;
 		closest_obst = NearestObstacle(laser_set);
 //		qDebug("Closest Distance to Obstacles is:%f Saftey Dist:%f",closest_obst,sf);
-		if(closest_obst < sf)
+		if(closest_obst < safety_dist)
 		{
 			icp_time.restart();
 			// If we don't already have a local map or the local environment is changed then re-plan
 			if ( !local_planner->pathPlanner->path) //|| MapModified(laser_set,EstimatedPos))
 			{
-				qDebug("Icp Check took:%d msec",icp_time.elapsed());					
+				//qDebug("Icp Check took:%d msec",icp_time.elapsed());					
 				//Stop the Robot before planning
 				robotManager->commManager->setSpeed(0);
 				robotManager->commManager->setTurnRate(0);
@@ -593,8 +593,8 @@ void Navigator::run()
 			 	
 			 	// Current Locaion in the Global coordinate
 			 	global_planner->pathPlanner->ConvertToPixel(&pixel_loc.p);
-	//			qDebug("Location Global Metric X:%f Y:%f",loc.p.x(),loc.p.y());
-	//			qDebug("Location Global Pixel  X:%f Y:%f",pixel_loc.p.x(),pixel_loc.p.y());
+//				qDebug("Location Global Metric X:%f Y:%f",loc.p.x(),loc.p.y());
+//				qDebug("Location Global Pixel  X:%f Y:%f",pixel_loc.p.x(),pixel_loc.p.y());
 	
 				local_planning_time.restart();
 			 	local_planner->SetMap(laser_set,local_dist,EstimatedPos);
@@ -622,16 +622,16 @@ void Navigator::run()
 		 			dist+= Dist(temp->pose.p,temp->next->pose.p);
 				 	boundary_check.setX(temp->pose.p.x());
 				 	boundary_check.setY(temp->pose.p.y());
-	//				qDebug("Target Global Metric X:%f Y:%f",boundary_check.x(),boundary_check.y());
+//					qDebug("Target Global Metric X:%f Y:%f",boundary_check.x(),boundary_check.y());
 				 					 				 	
 				 	// Transfer to the global Pixel Coordinate
 				 	global_planner->pathPlanner->ConvertToPixel(&boundary_check);				 	
-	//				qDebug("Target Pixel Global  X:%f Y:%f",boundary_check.x(),boundary_check.y());
+//					qDebug("Target Pixel Global  X:%f Y:%f",boundary_check.x(),boundary_check.y());
 									 	
 				 	// Transfer to the local Pixel Coordinate
 				 	boundary_check.setX(boundary_check.x() - pixel_loc.p.x() + local_planner->pathPlanner->map->center.x());	
 				 	boundary_check.setY(boundary_check.y() - pixel_loc.p.y() + local_planner->pathPlanner->map->center.y());				 	
-	//				qDebug("Target Pixel Local   X:%f Y:%f",boundary_check.x(),boundary_check.y());
+//					qDebug("Target Pixel Local   X:%f Y:%f",boundary_check.x(),boundary_check.y());
 	
 					// Check Boundaries
 				 	if (boundary_check.x() < 0 || boundary_check.y() < 0 )
@@ -642,7 +642,7 @@ void Navigator::run()
 					target.p.setX(boundary_check.x());	 		
 					target.p.setY(boundary_check.y());	 							
 				 	target.phi = target_angle;	
-	//				qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
+//					qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
 			 		temp= temp->next;
 			 	}
 				
@@ -656,8 +656,8 @@ void Navigator::run()
 			 	start.p.setY(local_planner->pathPlanner->map->center.y()); 	
 			 	start.phi = EstimatedPos.phi;
 			 	
-	//			qDebug("Start Local Pixel  X:%f Y:%f",start.p.x(),start.p.y());			 	
-	//			qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
+//				qDebug("Start Local Pixel  X:%f Y:%f",start.p.x(),start.p.y());			 	
+//				qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
 	
 			 	local_path = local_planner->FindPath(start,target);
 			 	if (local_path)
@@ -674,35 +674,21 @@ void Navigator::run()
 			 		}
 			 		qDebug("Local Path found");
 			 		path2Follow = local_path;
+			 		path2Draw = LOCALPATH;
 			 	}
 			 	else
 			 	{
-			 		sf = safety_dist;
 			 		path2Follow = global_path;
+			 		path2Draw = GLOBALPATH;
 			 	}
 		 		qDebug("Local Planning took %dms",local_planning_time.elapsed());	
-		 		path2Draw = SHOWLOCALPATH;
-			 	emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);
 			}
 		}
-		else
-		{
-			if(!local_planner->pathPlanner->path)
-			{
-				path2Follow = global_path;
-		 		path2Draw = SHOWGLOBALPATH;
-		 		if (redraw_timer.elapsed()>100)
-		 		{
-				 	emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);		
-				 	redraw_timer.restart();	
-		 		}
-			}
-			else if (path2Follow != global_path)
-			{
-		 		path2Draw = SHOWLOCALPATH;
-			 	emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);				
-			}
-		}
+ 		if (redraw_timer.elapsed()>100)
+ 		{
+		 	emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);		
+		 	redraw_timer.restart();	
+ 		}
 		/* Get the control Action to be applied, in this case it's a
 		 * simple linear control. It's accurate enough for traversing 
 		 * the generated paths.

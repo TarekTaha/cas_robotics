@@ -87,6 +87,7 @@ Q_OBJECT
 		void LoadMap(); 
 		void GenerateSpace();
 		void Follow();
+		void Finished();
 		//void RenderMap(Map & map);
     private:
        	Node * path;

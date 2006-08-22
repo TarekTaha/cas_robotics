@@ -27,10 +27,10 @@ NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
 
 }
 
-//void NavContainer::rePaint()
-//{
-//	
-//}
+void NavContainer::Finished()
+{
+	navControlPanel.pathFollowBtn.setText("Follow");	
+}
 
 void NavContainer::Follow()
 {
