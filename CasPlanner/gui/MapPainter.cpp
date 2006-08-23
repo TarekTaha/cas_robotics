@@ -17,7 +17,6 @@ MapPainter::MapPainter(QWidget *parent,QString name):
 		qDebug("Error Loading Image: %s",qPrintable(mapName));
 		exit(1);
 	}
-	image.setColor(0, Qt::white);
 }
 void  MapPainter::SetMapFileName(QString name)
 {
