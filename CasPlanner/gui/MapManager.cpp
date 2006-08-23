@@ -54,6 +54,7 @@ Map *MapManager::provideMapOG(QImage image,double res,Pose map_pose,bool negate)
 	Map * retval;
 	QPointF center(image.width()/2.0,image.height()/2.0);
 	retval = new Map(image.width(),image.height(),res,center,map_pose);
+	long int count=0;
 	for(int i=0;i<image.width();i++)
 	{
 		QRgb color;
@@ -67,17 +68,21 @@ Map *MapManager::provideMapOG(QImage image,double res,Pose map_pose,bool negate)
 				if (  color_ratio > 0.9)
 					retval->data[i][j]= false;
 				else
+				{
 					retval->data[i][j]= true;
+					count++;
+				}
 			}
 			else
 			{
-			// White color(255) is Occupied and Black(0) is Free
-			if ( color_ratio < 0.1)
-				retval->data[i][j]= false;
-			else 
-				retval->data[i][j]= true;				
+				// White color(255) is Occupied and Black(0) is Free
+				if ( color_ratio < 0.1)
+					retval->data[i][j]= false;
+				else 
+					retval->data[i][j]= true;				
 			}
 		}
 	}
+	qDebug("Count is:%ld",count);
 	return retval;
 }

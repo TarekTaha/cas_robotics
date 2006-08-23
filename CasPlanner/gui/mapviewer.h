@@ -4,7 +4,8 @@
 #include <QtOpenGL>
 #include <GL/glut.h>
 #include "interfaceprovider.h"
-//#include "map.h"
+#include "MapManager.h"
+#include "map.h"
 
 class MapViewer : public QGLWidget
 {
@@ -58,9 +59,10 @@ Q_OBJECT
 	bool showRobots; 
 	bool showPointclouds; 
 	bool showPatchBorders; 
-    MapProvider *provider; 
-    Map mapData; 	
+    MapManager mapManager; 
+    Map * mapData; 	
     QColor clearColor;
+   	QImage image;
 	QHash<QString, int> snapDLs;
 	friend class MapControlPanel; 
 	GLuint texId; 

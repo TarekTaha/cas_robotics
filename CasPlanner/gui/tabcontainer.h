@@ -7,6 +7,7 @@
 #include <QTabWidget>
 #include "sensorsgui.h"
 #include "navigationtab.h"
+#include "mapviewer.h"
 class TabContainer : public QTabWidget
 {
 Q_OBJECT
@@ -18,6 +19,7 @@ Q_OBJECT
 	    RobotManager *robotManager;
 		NavContainer *navCon;
 		SensorsGui *sensorsGui;
+		MapViewer *mapViewer;
 };
 
 #endif
