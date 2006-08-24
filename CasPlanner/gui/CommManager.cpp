@@ -1,8 +1,9 @@
 #include "CommManager.h"
 
-CommManager::CommManager():
+CommManager::CommManager(Robot *rob):
 Comms(),
-player(0)
+player(0),
+robot(rob)
 {
 	startConnected = false;
 	activateControl = false;
@@ -109,7 +110,7 @@ int CommManager::readConfigs( ConfigFile *cf)
 	for(int i=0; i < numSec; i++)
 	{
 	    QString sectionName = cf->GetSectionType(i);
-	    if(sectionName == "Robot")
+	    if(sectionName == "CommInterfaces")
 	    {
 		   	name =                   cf->ReadString(i, "name", "No-Name");
 		   	startConnected =  (bool) cf->ReadInt   (i, "startConnected", 1);
@@ -175,15 +176,11 @@ int CommManager::readConfigs( ConfigFile *cf)
 
 int CommManager::start()
 {
-    qDebug("-> Starting Communication Manager."); 
+    qDebug("-> Communication Parameters"); 
     qDebug("*********************************************************************"); 	
-    qDebug("Communication Parameters:"); 
-   	qDebug("\t\t Robot  name:\t%s", qPrintable(name)); 
-    qDebug("\t\t Robot Ip is:\t%s:%d", qPrintable(playerIp),playerPort); 
-  	qDebug("\t\t Supported Interfaces:");
   	if (!player)
  	{
-	   	player = new PlayerInterface(playerIp, playerPort);
+	   	player = new PlayerInterface(robot->robotIp,robot->robotPort);
    		connect(player, SIGNAL(newData()), this, SIGNAL(newData()));
  	}
   	//Enable Robot Control ?

@@ -3,10 +3,7 @@
 /*! Constructor, parameters are provided directly rather than
  * read from the configuration file
  */
-PlanningManager::PlanningManager(double robot_length,
-								 double robot_width,
-								 QString robot_model,
-								 QPointF rotation_center,
+PlanningManager::PlanningManager(RobotManager *robMan,
 								 double pixel_res,
 								 double dist_goal,
 								 double bridge_len,
@@ -17,10 +14,6 @@ PlanningManager::PlanningManager(double robot_length,
 								 double obst_pen
 									  )
 {
-	this->robot_length = robot_length;
-	this->robot_width  = robot_width;
-	this->robot_model = robot_model;
-	this->rotation_center = rotation_center;
 	this->pixel_res  = pixel_res;
 	this->bridge_len = bridge_len;
 	this->bridge_res = bridge_res;
@@ -30,20 +23,21 @@ PlanningManager::PlanningManager(double robot_length,
 	this->obst_pen = obst_pen;
 	this->dist_goal = dist_goal;
 	this->pathPlanner = NULL;
-	this->robotManager = NULL;
+	this->robotManager = robMan;
 	this->connNodesEnabled  = true;
 	this->regGridEnabled    = true;
 	this->obstPenEnabled    = true;
 	this->expObstEnabled    = true;
 	this->bridgeTestEnabled = true;
 	this->showTreeEnabled   = false;
+	robotManager->robot->setCheckPoints(obst_exp);	
 	qDebug("Pixel Res in Navigator =%f",this->pixel_res);	
 	start();
 }
 
-PlanningManager::PlanningManager():
+PlanningManager::PlanningManager(RobotManager *robMan):
 pathPlanner(NULL),
-robotManager(NULL),
+robotManager(robMan),
 bridgeTestEnabled(true),
 connNodesEnabled(true),
 regGridEnabled(true),
@@ -210,26 +204,13 @@ int PlanningManager::readConfigs( ConfigFile *cf)
 		   	obst_pen = 				cf->ReadFloat(i, "obst_pen",3);
 		   	dist_goal = 			cf->ReadFloat(i, "dist_goal",0.2);   	
 	    }
-	    if(sectionName == "Robot")
-	    {
-		   	robot_length = 			cf->ReadFloat(i, "robot_length",1.2);
-		   	robot_width  = 			cf->ReadFloat(i, "robot_width",0.65);
-		   	robot_model  = 			cf->ReadString(i, "robot_mode","diff");
-			int cnt =	 			cf->GetTupleCount(i,"robot_center");
-			if (cnt != 2)
-			{
-				cout<<"\n ERROR: center should consist of 2 tuples !!!";
-				exit(1);
-			}
-			rotation_center.setX(cf->ReadTupleFloat(i,"robot_center",0 ,0));
-			rotation_center.setY(cf->ReadTupleFloat(i,"robot_center",1 ,0));
-	    }
 	    if(sectionName == "Map")
 	    {
 		   	pixel_res =  			cf->ReadFloat(i, "pixel_res",0.05);
 		   	negate = 				cf->ReadInt(i, "negate",0);
 	    }	    
 	}
+	robotManager->robot->setCheckPoints(obst_exp);	
   	return 1;
 }
 
@@ -246,24 +227,16 @@ int PlanningManager::start()
     qDebug("\t\t Obstacle Expansion Radius = %f",obst_exp);         
     qDebug("\t\t Connection Radius = %f",conn_rad);         
     qDebug("\t\t Obstacle Penalty = %f",obst_pen);
-    qDebug("\t\t Robot length = %f",robot_length);
-    qDebug("\t\t Robot Width  = %f",robot_width);
-    qDebug("\t\t Robot Model  = %s",qPrintable(robot_model));
-    qDebug("\t\t Robot Center of Rotation x:%f y:%f",rotation_center.x(),rotation_center.y());
     qDebug("*********************************************************************"); 	
 	if (!pathPlanner)
-		pathPlanner = new PathPlanner(robot_length,
-								  robot_width,
-								  robot_model,
-								  rotation_center,
-								  pixel_res,
-								  dist_goal,
-								  bridge_len,
-								  bridge_res,
-								  reg_grid,
-								  obst_exp,
-								  conn_rad,
-								  obst_pen);
+		pathPlanner = new PathPlanner(robotManager->robot,
+									  dist_goal,
+									  bridge_len,
+									  bridge_res,
+									  reg_grid,
+									  obst_exp,
+									  conn_rad,
+									  obst_pen);
 	qDebug("->Planner Started.");
 	return 1;
 }

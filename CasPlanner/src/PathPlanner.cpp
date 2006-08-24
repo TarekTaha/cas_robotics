@@ -15,9 +15,9 @@ PathPlanner :: PathPlanner()
 	
 };
 
-PathPlanner::PathPlanner(double r_l ,double r_w , QString r_m , QPointF r_c,double pixel_res,double dG,double bridge_len,
+PathPlanner::PathPlanner(Robot *rob,double dG,double bridge_len,
 			double bridge_r,double reg_g,double obst_exp,double conn_rad,double obst_pen):
-			Astar(r_l,r_w,obst_exp,dG,r_m,r_c),
+			Astar(rob,dG),
 			map_initialized(false),
 			obstacle_radius(obst_exp),
 			bridge_length(bridge_len),
@@ -210,8 +210,8 @@ void PathPlanner::BridgeTest()
 	SearchSpaceNode *temp;
 	QPointF p;
 	double x,y,x2,y2;
-	pixels_per_bridge = (int) (length/map->resolution);
-	radius = (int) (length/(map->resolution*2.0));
+	pixels_per_bridge = (int) (robot->robotLength/map->resolution);
+	radius = (int) (robot->robotLength/(map->resolution*2.0));
 	for(int i=0; i < this->map->width - pixels_per_bridge; i++)
 		{
 		for(int j=0;j<this->map->height - pixels_per_bridge ;j++)

@@ -162,11 +162,7 @@ void Navigator::setupLocalPlanner()
 {
 	if(!local_planner)
 	{
-		local_planner = new PlanningManager(
-											  robot_length,
-											  robot_width,
-											  robot_model,
-											  rotation_center,
+		local_planner = new PlanningManager(robotManager,
 											  pixel_res,
 											  dist_goal,
 											  bridge_len,
@@ -219,22 +215,7 @@ int Navigator::readConfigs( ConfigFile *cf)
 	    {
 			pixel_res    = 	  cf->ReadFloat (i, "pixel_res", 0.028);
 	    }
-	    if(sectionName == "Robot")
-	    {
-		   	robot_length = 			cf->ReadFloat(i, "robot_length",1.2);
-		   	robot_width  = 			cf->ReadFloat(i, "robot_width",0.65);
-		   	robot_model  = 			cf->ReadString(i, "robot_mode","diff");
-			int cnt =	 			cf->GetTupleCount(i,"robot_center");
-			if (cnt != 2)
-			{
-				cout<<"\n ERROR: center should consist of 2 tuples !!!";
-				exit(1);
-			}
-			rotation_center.setX(cf->ReadTupleFloat(i,"robot_center",0 ,0));
-			rotation_center.setY(cf->ReadTupleFloat(i,"robot_center",1 ,0));
-			Robot robot(robot_length, robot_width,obst_exp,"diff",rotation_center);
-			FF = new ForceField(robot);
-	    }
+		FF = new ForceField(*robotManager->robot,cf);
 	}
 
     qDebug("-> Starting Robot Navigator."); 
@@ -258,7 +239,7 @@ double Navigator::NearestObstacle(QVector<QPointF> laser_scan)
 	double dist,shortest_dist=10000;
 	for(int i=0;i<4;i++)
 	{
-		temp[i] = local_planner->pathPlanner->local_edge_points[i];
+		temp[i] = robotManager->robot->local_edge_points[i];
 	}
 	for(int i=0;i<laser_scan.size();i++)
 	{
@@ -462,7 +443,7 @@ void Navigator::run()
 	last_time=0; delta_t=0;	velocity=0;
 	end_reached = false;
 	stop_navigating = false;
-	double sf = safety_dist,speed,turnRate;
+	double speed,turnRate;
 	QVector <QPointF> laser_set;
 	while(!end_reached && !stop_navigating)
 	{

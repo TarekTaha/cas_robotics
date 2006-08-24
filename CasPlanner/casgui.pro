@@ -15,6 +15,7 @@ HEADERS +=  gui/CommManager.h\
 			gui/playerinterface.h\
 			gui/planningmanager.h\
 			gui/robotmanager.h\
+			gui/robotrender.h\
 			gui/sensors.h\
 			gui/sensorsgui.h\
 			gui/speedrender.h\
@@ -55,6 +56,7 @@ SOURCES +=  gui/CommManager.cpp\
 			gui/playerinterface.cpp\
 			gui/planningmanager.cpp\
 			gui/robotmanager.cpp\
+			gui/robotrender.cpp\
 			gui/sensors.cpp\
 			gui/sensorsgui.cpp\
 			gui/speedrender.cpp\

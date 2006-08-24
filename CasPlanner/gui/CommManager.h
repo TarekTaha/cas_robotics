@@ -8,12 +8,13 @@ class Comms;
 #include "comms.h"
 #include "interfaceprovider.h"
 #include "playerinterface.h"
+#include "Robot.h"
 
 class CommManager: public Comms, public MapProvider, public LaserProvider, public SpeedProvider ,public LocationProvider
 {
         Q_OBJECT
         public:
-            CommManager();
+            CommManager(Robot *);
             ~CommManager(); 
             virtual int readConfigs(ConfigFile *cf);
             virtual int start(); 
@@ -42,6 +43,7 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
         protected:
             // Player stuff 
             PlayerInterface *player;
+            Robot * robot;
 };
 #endif
 
