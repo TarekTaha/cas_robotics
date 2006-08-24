@@ -45,7 +45,7 @@ Q_OBJECT
 		void yawMONeg();
 		
     private:
-	int screenWidth,count;
+	int screenWidth,count,step;
     int screenHeight;  
 	float zoomFactor; 
 	float xOffset, yOffset, zOffset; 
@@ -59,6 +59,8 @@ Q_OBJECT
 	bool showRobots; 
 	bool showPointclouds; 
 	bool showPatchBorders; 
+	bool start_initialized,end_initialized;
+	Pose start,end;
     MapManager mapManager; 
     Map * mapData; 	
     QColor clearColor;

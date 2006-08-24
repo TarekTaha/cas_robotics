@@ -2,33 +2,33 @@
 #define ROBOT_H_
 #include <QPointF>
 #include <QString>
-#include <vector>
+#include <QVector>
 #include <iostream>
 #include <math.h>
 #include "utils.h"
-using namespace std;
-using std::vector;
-namespace CasPlanner
-{
+#include "configfile.h"
 
+using namespace std;
 class Robot
 {
 	public :
-		double length,width,obstacle_radius,robotMass,robotMI,robotRadius,FixedRatio;
-		double TimeStep, SysK, SysC, SysFR, SysP, SysQ, MaxSpeed, MaxAcceT, OmegadotMax, OmegaMax;
-		// Motion model
-		QString model;
+		double robotLength,robotWidth,obstacleRadius,robotMass,robotMI,robotRadius,
+			   robotSpeed,robotTurnRate;
+		int robotPort;
+		//! Motion model
+		QString robotModel,robotName,robotIp;
+		//! Holds the Latest Robot Position
+		Pose location;
 		// Center of Rotation
-		QPointF center;
+		QPointF robotCenter;
 		// For Rendering the Robot Rectangle
-		QPointF local_edge_points[4];
-		vector<QPointF> check_points;
-		void SetCheckPoints();
-		void FindR();
-		Robot (double r_l, double r_w,double o_r,QString r_m,QPointF r_c );
+		QVector<QPointF> local_edge_points, check_points;
+		void setCheckPoints(double o_r);
+		void findR();
+		int  readConfigs(ConfigFile *cf);
+		Robot(ConfigFile *cf);
 		Robot();
 		~Robot();
 };
-}
 
 #endif /*ROBOT_H_*/

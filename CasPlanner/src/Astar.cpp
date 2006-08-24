@@ -3,8 +3,8 @@
 namespace CasPlanner
 {
 
-Astar::Astar(double r_l ,double r_w ,double o_r,double dG, QString r_m , QPointF r_c) :
-	Robot(r_l ,r_w ,o_r, r_m ,r_c),
+Astar::Astar(Robot *rob,double dG):
+	robot(rob),
 	distGoal(dG),
 	map(NULL),
 	root(NULL),
@@ -45,10 +45,10 @@ int Astar :: Obstacle(QPointF P, double theta)
 	int m,n;
 	QPointF det_point;
 	// Rotates and Translates the check points according to the vehicle position and orientation
-	for (unsigned int i=0;i<this->check_points.size();i++)
+	for (int i=0;i<robot->check_points.size();i++)
 	{
-		det_point.setX((check_points[i].x()*cos(theta) - check_points[i].y()*sin(theta) + P.x()));
-		det_point.setY((check_points[i].x()*sin(theta) + check_points[i].y()*cos(theta) + P.y()));
+		det_point.setX((robot->check_points[i].x()*cos(theta) - robot->check_points[i].y()*sin(theta) + P.x()));
+		det_point.setY((robot->check_points[i].x()*sin(theta) + robot->check_points[i].y()*cos(theta) + P.y()));
 		
 		this->ConvertToPixel(&det_point);
 		m = (int)det_point.x();

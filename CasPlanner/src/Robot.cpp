@@ -1,13 +1,53 @@
 #include "Robot.h"
 
-namespace CasPlanner
+Robot::Robot(ConfigFile *cf)
 {
-/* This Determines the locations of the points to be checked in the Vehicle Coordinates,
+	readConfigs(cf);
+	findR();
+};
+int Robot::readConfigs(ConfigFile *cf)
+{
+	int numSec,cnt;
+	numSec = cf->GetSectionCount(); 
+	for(int i=0; i < numSec; i++)
+	{
+	    QString sectionName = cf->GetSectionType(i);
+	    if(sectionName == "Robot")
+	    {
+		   	robotName  =           cf->ReadString(i, "robotName", "No-Name");
+		   	robotModel =           cf->ReadString(i, "robotModel", "Diff");		   	
+			robotIp =              cf->ReadString(i, "robotIp", "127.0.0.1");
+			robotPort =            cf->ReadInt   (i, "robotPort", 6665);
+			robotLength =          cf->ReadFloat (i, "robotLength", 6665);			
+			robotWidth =           cf->ReadFloat (i, "robotWidth", 6665);			
+			robotMass =            cf->ReadFloat (i, "robotMass", 6665);						
+			robotMI =              cf->ReadFloat (i, "robotMI", 6665);									
+			cnt =	 		   	   cf->GetTupleCount(i,"robotCenter");
+			if (cnt != 2)
+			{
+				cout<<"\n ERROR: center should consist of 2 tuples !!!";
+				exit(1);
+			}
+			robotCenter.setX(cf->ReadTupleFloat(i,"robotCenter",0 ,0));
+			robotCenter.setY(cf->ReadTupleFloat(i,"robotCenter",1 ,0));			
+	    }
+	}
+    qDebug("-> Robot Configurations Read."); 
+    qDebug("*********************************************************************"); 	
+   	qDebug("\t\t Robot  name:\t%s", qPrintable(robotName)); 
+    qDebug("\t\t Robot Ip is:\t%s:%d", qPrintable(robotIp),robotPort); 
+    qDebug("*********************************************************************");
+	qDebug("");    	
+  	return 1;
+}
+
+/*! This Determines the locations of the points to be checked in the Vehicle Coordinates,
  * should be rotated at each node */
-void Robot::SetCheckPoints() 
+void Robot::setCheckPoints(double obst_r) 
 {
+	this->obstacleRadius = obst_r;
 	int point_index=0,points_per_height,points_per_width,n;
-	double i,j, l = length , w = width;
+	double i,j, l = robotLength , w = robotWidth;
 	check_points.clear();
 	// The edges of the robot in -ve quadrant
 	double startx,starty,internal_radius;       
@@ -16,20 +56,20 @@ void Robot::SetCheckPoints()
 	edges[1].setX(l/2);			edges[1].setY(w/2);
 	edges[2].setX(l/2);			edges[2].setY(-w/2);
 	edges[3].setX(-l/2);		edges[3].setY(-w/2);	
-	Pose pose(-center.x(),-center.y(),0);
+	Pose pose(-robotCenter.x(),-robotCenter.y(),0);
 //	cout <<"\nCenter Point X:"<<center.x()<<" Y:"<<center.y();		
 	// am determining here the location of the edges in the robot coordinate system
-	startx = -l/2 - center.x(); 
-	starty = -w/2 - center.y();
+	startx = -l/2 - robotCenter.x(); 
+	starty = -w/2 - robotCenter.y();
 	// These Points are used for drawing the Robot rectangle
 	for(int s=0;s<4;s++)
 	{
-		local_edge_points[s] = Trans2Global(edges[s],pose)		;
+		local_edge_points.push_back(Trans2Global(edges[s],pose));
 	}
 //	for (int s=0 ;s < 4; s++)
 //		cout<<"\nEdge->"<< s<<" X="<<local_edge_points[s].x()<<" Y="<<local_edge_points[s].y();
 	// Create a Matrix of the points to check for collision detection
-	internal_radius = this->obstacle_radius/sqrt(2);
+	internal_radius = this->obstacleRadius/sqrt(2);
 	points_per_height = (int)(ceil(l/(double)(2*internal_radius)));
 	points_per_width  = (int)(ceil(w/(double)(2*internal_radius)));
 	n = points_per_height*points_per_width;
@@ -66,40 +106,18 @@ void Robot::SetCheckPoints()
 //		else 
 			i += (2*internal_radius);
 	}
-	for (unsigned int k=0;k<check_points.size();k++)
+	for (int k=0;k<check_points.size();k++)
 	{
 		cout << "\nPoint to check "<<k<<"'---> X="<<check_points[k].x()<<" Y="<<check_points[k].y();
 		fflush(stdout);
 	}
 };
-Robot::Robot (double l, double w,double o_r,QString model,QPointF r_c):
-	length(l),
-	width(w),
-	obstacle_radius(o_r),
-	robotMass(50),
-	robotMI(10),
-	FixedRatio(0.2),
-	TimeStep(0.2),
-	SysK(5),
-	SysC(1.25),
-	SysP(10),
-	SysQ(10),
-	MaxSpeed(0.5),
-	MaxAcceT(0.2),
-	OmegadotMax(0.15),
-	OmegaMax(0.2),
-	model(model),
-	center(r_c)
-{
-	SetCheckPoints();
-	FindR();
-};
-void Robot::FindR()
+void Robot::findR()
 {
 	double dist,max_dist=-10;
  	for (int i = 0; i < 4; i++)
  	{
- 		dist = Dist(center,local_edge_points[i]);
+ 		dist = Dist(robotCenter,local_edge_points[i]);
  		if (dist > max_dist)
  			max_dist = dist;
  	}
@@ -111,4 +129,3 @@ Robot::Robot()
 Robot::~Robot() 
 {
 };
-}

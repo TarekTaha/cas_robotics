@@ -21,12 +21,10 @@ typedef struct _velVector
 	double speed;
 	double turnRate;
 }   velVector;	
-namespace CasPlanner
-{
 class ForceField : public Robot
 {
 public:
-	ForceField(Robot r);
+	ForceField(Robot r,ConfigFile *cf);
 	virtual ~ForceField();
 	velVector GenerateField(Pose pose,QVector<QPointF> laser_set,Pose Goal,double speed,double turnrate);
 	QVector < QVector<QPointF> > DivObst(QVector<QPointF> laser_set);	
@@ -37,14 +35,12 @@ public:
 	void CrossProduct(double MatrixA[3], double MatrixB[3], double MatrixC[3]);
 	double ForceValue();	
 private :
+	double   FixedRatio,TimeStep,SysK,SysC,SysP,SysQ,MaxSpeed,MaxAcceT,OmegadotMax,OmegaMax,
+			 Gapdist,NPOL,INF,EP;
 	int curvefittingorder;
-	double Gapdist;
-	int NPOL;
-	double INF,EP;
 	double robotSpeed,robotTurnRate,closest_dist;
 	QPointF intersect_point,end_point;
 	Pose robotLocation, goalLocation;
 	QVector <QPointF> laser_readings;
 };
-}
 #endif /*FORCEFIELD_H_*/

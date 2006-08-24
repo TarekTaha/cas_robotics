@@ -17,7 +17,7 @@
 namespace CasPlanner
 {
 
-class Astar: public Robot , public SearchSpace
+class Astar: public SearchSpace
 {
 	private:
 		void   FindRoot();
@@ -26,12 +26,13 @@ class Astar: public Robot , public SearchSpace
 		Node  *MakeChildrenNodes(Node *parent) ;
 		bool   goalReached(Node *n);
 	public:
-		Astar(double r_l ,double r_w ,double o_r,double dG, QString r_m , QPointF r_c);
+		Astar(Robot *,double dG);
 		Astar();
 		long int MAXNODES;
 		double	distGoal;
 		Map    * map;
 		Pose start,end;
+		Robot *robot;
 		Node *root, *current, *childList, *curChild, *q, * test,*path, *p;
 		LList *openList,*closedList;
 		vector <Tree> tree;

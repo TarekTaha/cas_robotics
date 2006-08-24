@@ -4,7 +4,8 @@ RobotManager::RobotManager():
 commManager(NULL),
 planner(NULL),
 local_planner(NULL),
-navigator(NULL)
+navigator(NULL),
+robot(NULL)
 {
 	// Empty Constructor
 }
@@ -12,6 +13,9 @@ navigator(NULL)
 RobotManager::~RobotManager()
 {
 	// Empty Destructor
+	delete commManager;
+	delete navigator;
+	delete robot;
 }
 /* Read Configuration File and Initialize corresponding Sections :
  *  1- Initialize communication with the Player Server.
@@ -29,19 +33,32 @@ RobotManager::RobotManager(QStringList configFiles)
 		numSections = cf->GetSectionCount(); 
 		for(int i=0; i < numSections; i++)
 		{
+		    QString sectionName = cf->GetSectionType(i);			
+		    if(sectionName == "Robot")
+		    {
+				readRobotConfigs(cf); 
+		    }			
+		}
+		if(!robot)
+		{
+			qDebug("Robot Section was not Found in the Configuration file, this section is essential!!!"); 							
+			exit(1);
+		}
+		for(int i=0; i < numSections; i++)
+		{
 		    QString sectionName = cf->GetSectionType(i);
 		    if(sectionName == "GUI")
 		    {
 				//If we want to add more tabs or GUI options
 				// For future use
 		    }
+		    if(sectionName == "CommInterfaces")
+		    {
+				readCommManagerConfigs(cf); 
+		    }  
 		    if(sectionName == "Navigator")
 		    {
 				readNavigatorConfigs(cf);
-		    }
-		    if(sectionName == "Robot")
-		    {
-				readCommManagerConfigs(cf); 
 		    }
 		    if(sectionName == "Planner")
 		    {
@@ -50,7 +67,6 @@ RobotManager::RobotManager(QStringList configFiles)
 		    if(sectionName == "Map")
 		    {
 				mapName = cf->ReadString(i, "mapname", "resources//casareaicp2.png");
-//			   	qDebug("\t\t MAP  name:\t%s", qPrintable(mapName)); 				
 		    }		
 		}
 		delete cf;    
@@ -62,10 +78,17 @@ int RobotManager::setNavContainer(NavContainer* con)
 	this->navCon = con;
 	return 1;
 }	
-        
+ 
+int RobotManager::readRobotConfigs(ConfigFile *cf)
+{
+	robot = new Robot();
+	robot->readConfigs(cf);
+    return 1;
+}       
+
 int RobotManager::readCommManagerConfigs(ConfigFile *cf)
 {
-	commManager = new CommManager;
+	commManager = new CommManager(robot);
 	commManager->readConfigs(cf);
     return 1;
 }
@@ -79,7 +102,7 @@ int RobotManager::readNavigatorConfigs(ConfigFile *cf)
 
 int RobotManager::readPlannerConfigs(ConfigFile *cf)
 {
-	planner = new PlanningManager;
+	planner = new PlanningManager(this);
 	planner->readConfigs(cf);
 	planner->start();
     return 1;

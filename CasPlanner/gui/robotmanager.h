@@ -10,6 +10,7 @@
 #include "planningmanager.h"
 #include "Navigator.h"
 #include "configfile.h"
+#include "Robot.h"
 
 class Navigator;
 class NavContainer;
@@ -22,6 +23,7 @@ class RobotManager : public QObject //: public CommManager, public PlanningManag
 		RobotManager();
 		RobotManager(QStringList configFiles);
 		~RobotManager(); 
+		int readRobotConfigs(ConfigFile *cf);		
 		int readCommManagerConfigs(ConfigFile *cf);
 		int readPlannerConfigs(ConfigFile *cf);
 		int readNavigatorConfigs(ConfigFile *cf);
@@ -36,6 +38,7 @@ class RobotManager : public QObject //: public CommManager, public PlanningManag
 		PlanningManager *planner;
 		PathPlanner * local_planner;
 		Navigator * navigator;
+		Robot * robot;
    public slots:
   		void rePaint(PathPlanner*,Pose *,int *);
 };

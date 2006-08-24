@@ -19,8 +19,8 @@ class PlanningManager : public MapManager
 {
         Q_OBJECT
         public:
-            PlanningManager();
-            PlanningManager(double,double,QString,QPointF,double,double,double,double,double,double,double,double);
+            PlanningManager(RobotManager *);
+            PlanningManager(RobotManager *,double,double,double,double,double,double,double,double);
             ~PlanningManager();
             void setRobotManager(RobotManager *);
             virtual int readConfigs(ConfigFile *cf);
@@ -48,8 +48,7 @@ class PlanningManager : public MapManager
 		    //void statusMsg(int,int, QString);
 		    void rePaint(Map *);
         protected:
-            double pixel_res,dist_goal,bridge_len,bridge_res,reg_grid,obst_exp,conn_rad,obst_pen,
-            	   robot_length, robot_width;
+            double pixel_res,dist_goal,bridge_len,bridge_res,reg_grid,obst_exp,conn_rad,obst_pen;
             RobotManager *robotManager;
             bool bridgeTestEnabled,connNodesEnabled,regGridEnabled,obstPenEnabled,expObstEnabled,showTreeEnabled,negate;
             QPointF rotation_center;
