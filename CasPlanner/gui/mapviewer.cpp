@@ -1,8 +1,9 @@
 #include "mapviewer.h"
 
-MapViewer::MapViewer(QWidget *parent)
+MapViewer::MapViewer(QWidget *parent,RobotManager *rob)
  : QGLWidget(QGLFormat(QGL::AlphaChannel), parent),
  step(1),
+ robotManager(rob),
  zoomFactor(10),
  xOffset(0), 
  yOffset(0), 
@@ -69,7 +70,7 @@ void MapViewer::resizeGL(int w, int h)
     updateGL();
 }
 
-void MapViewer::setProvider(MapProvider *provider)
+void MapViewer::setProvider(MapProvider *)
 {
     
 }

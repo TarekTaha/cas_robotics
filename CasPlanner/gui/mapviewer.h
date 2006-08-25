@@ -1,17 +1,23 @@
 #ifndef MAPVIEWER_H
 #define MAPVIEWER_H
 
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
 #include <QtOpenGL>
 #include <GL/glut.h>
 #include "interfaceprovider.h"
 #include "MapManager.h"
+#include "robotmanager.h"
 #include "map.h"
+
+class RobotManager;
 
 class MapViewer : public QGLWidget
 {
 Q_OBJECT
     public:
-        MapViewer(QWidget *parent=0);
+        MapViewer(QWidget *parent=0,RobotManager *rob=0);
 		~MapViewer();
         void initializeGL();
         void paintGL();
@@ -46,6 +52,7 @@ Q_OBJECT
 		
     private:
 	int screenWidth,count,step;
+    RobotManager * robotManager;
     int screenHeight;  
 	float zoomFactor; 
 	float xOffset, yOffset, zOffset; 
