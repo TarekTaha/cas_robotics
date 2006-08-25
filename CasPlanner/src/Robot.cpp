@@ -4,6 +4,7 @@ Robot::Robot(ConfigFile *cf)
 {
 	readConfigs(cf);
 	findR();
+	qDebug("Robot Radius:%f",robotRadius);
 };
 int Robot::readConfigs(ConfigFile *cf)
 {
@@ -32,12 +33,13 @@ int Robot::readConfigs(ConfigFile *cf)
 			robotCenter.setY(cf->ReadTupleFloat(i,"robotCenter",1 ,0));			
 	    }
 	}
+	findR();
     qDebug("-> Robot Configurations Read."); 
     qDebug("*********************************************************************"); 	
    	qDebug("\t\t Robot  name:\t%s", qPrintable(robotName)); 
-    qDebug("\t\t Robot Ip is:\t%s:%d", qPrintable(robotIp),robotPort); 
+    qDebug("\t\t Robot Ip is:\t%s:%d", qPrintable(robotIp),robotPort);
+//   	qDebug("\t\t Robot Radius:%f",robotRadius); 
     qDebug("*********************************************************************");
-	qDebug("");    	
   	return 1;
 }
 
@@ -111,13 +113,15 @@ void Robot::setCheckPoints(double obst_r)
 		cout << "\nPoint to check "<<k<<"'---> X="<<check_points[k].x()<<" Y="<<check_points[k].y();
 		fflush(stdout);
 	}
+	findR();
 };
 void Robot::findR()
 {
 	double dist,max_dist=-10;
  	for (int i = 0; i < 4; i++)
  	{
- 		dist = Dist(robotCenter,local_edge_points[i]);
+// 		dist = Dist(robotCenter,local_edge_points[i]);
+ 		dist = Dist(QPointF(0,0),local_edge_points[i]);
  		if (dist > max_dist)
  			max_dist = dist;
  	}
