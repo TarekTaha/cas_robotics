@@ -689,20 +689,20 @@ void Navigator::run()
 			fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.elapsed()/1e3,last_time);
 		if(!pause)
 		{
+			Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);			
 			// Normal Follower
-			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
-			robotManager->commManager->setTurnRate(cntrl.angular_velocity);		
+//			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
+//			robotManager->commManager->setTurnRate(cntrl.angular_velocity);		
 			// Stage goto
-			Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
 //			robotManager->commManager->gotoGoal(goal);
 			// Force Field
-//			velVector action;
-//			QTime ff_time;
-//			ff_time.restart();
-//			action = FF->GenerateField(EstimatedPos,laser_set,goal,speed,turnRate);
-//			qDebug("FF Speed is:%f TurnRate is:%f  time is:%dms",action.speed,action.turnRate,ff_time.elapsed());
-//			robotManager->commManager->setSpeed(action.speed);			
-//			robotManager->commManager->setTurnRate(action.turnRate);		
+			velVector action;
+			QTime ff_time;
+			ff_time.restart();
+			action = FF->GenerateField(EstimatedPos,laser_set,goal,speed,turnRate);
+			qDebug("FF Speed is:%f TurnRate is:%f  time is:%dms",action.speed,action.turnRate,ff_time.elapsed());
+			robotManager->commManager->setSpeed(action.speed);			
+			robotManager->commManager->setTurnRate(action.turnRate);		
 		}
 		else
 		{
