@@ -235,7 +235,7 @@ int Navigator::readConfigs( ConfigFile *cf)
 double Navigator::NearestObstacle(QVector<QPointF> laser_scan)
 {
 	QPointF ray_end,temp[4],intersection;
-	Line L1,L2;
+	Line L1;
 	double dist,shortest_dist=10000;
 	for(int i=0;i<4;i++)
 	{
@@ -244,18 +244,13 @@ double Navigator::NearestObstacle(QVector<QPointF> laser_scan)
 	for(int i=0;i<laser_scan.size();i++)
 	{
 		ray_end = Trans2Global(laser_scan[i],laser_pose);
-//		ray_end = laser_scan[i];
 		for(int j=0;j<4;j++)
 		{
 			L1.SetStart(temp[j%4]);      L1.SetEnd(temp[(j+1)%4]);
-			L2.SetStart(laser_pose.p);   L2.SetEnd(ray_end);
-			if(LineInterLine(L1,L2,intersection))
+			dist = Dist2Seg(L1,ray_end);
+			if(dist < shortest_dist)
 			{
-				dist = Dist(intersection,ray_end);
-				if(dist < shortest_dist)
-				{
-					shortest_dist = dist;
-				}
+				shortest_dist = dist;
 			}
 		}
 	}
@@ -691,8 +686,8 @@ void Navigator::run()
 		{
 			Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);			
 			// Normal Follower
-//			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
-//			robotManager->commManager->setTurnRate(cntrl.angular_velocity);		
+			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
+			robotManager->commManager->setTurnRate(cntrl.angular_velocity);		
 			// Stage goto
 //			robotManager->commManager->gotoGoal(goal);
 			// Force Field
@@ -700,9 +695,8 @@ void Navigator::run()
 			QTime ff_time;
 			ff_time.restart();
 			action = FF->GenerateField(EstimatedPos,laser_set,goal,speed,turnRate);
-			qDebug("FF Speed is:%f TurnRate is:%f  time is:%dms",action.speed,action.turnRate,ff_time.elapsed());
-			robotManager->commManager->setSpeed(0.1);			
-//			robotManager->commManager->setSpeed(action.speed);						
+			qDebug("FF Speed is:%f TurnRate is:%f  time is:%dms",action.speed,action.turnRate,ff_time.elapsed());	
+			robotManager->commManager->setSpeed(action.speed);						
 			robotManager->commManager->setTurnRate(action.turnRate);		
 		}
 		else
