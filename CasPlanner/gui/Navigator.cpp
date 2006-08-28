@@ -701,7 +701,8 @@ void Navigator::run()
 			ff_time.restart();
 			action = FF->GenerateField(EstimatedPos,laser_set,goal,speed,turnRate);
 			qDebug("FF Speed is:%f TurnRate is:%f  time is:%dms",action.speed,action.turnRate,ff_time.elapsed());
-			robotManager->commManager->setSpeed(action.speed);			
+			robotManager->commManager->setSpeed(0.1);			
+//			robotManager->commManager->setSpeed(action.speed);						
 			robotManager->commManager->setTurnRate(action.turnRate);		
 		}
 		else

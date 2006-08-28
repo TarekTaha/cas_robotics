@@ -9,9 +9,18 @@ EP(1E-10)
 	numSec = cf->GetSectionCount(); 
 	for(int i=0; i < numSec; i++)
 	{
-	    QString sectionName = cf->GetSectionType(i);
+	    QString sectionName = cf->GetSectionType(i),FF;
 	    if(sectionName == "ForceField")
 	    {
+	    	FF		   =   cf->ReadString(i,"FF","VariableSpeedFF");
+	    	if(FF == "VariableSpeedFF")
+	    	{
+	    		FF_algorithm = VariableSpeedFF;
+	    	}
+	    	else
+	    	{
+	    		FF_algorithm = SimpleFF;
+	    	}   	
 		 	FixedRatio =   cf->ReadFloat (i, "FixedRatio", 0.2);
 		  	TimeStep =     cf->ReadFloat (i, "TimeStep", 0.2);
 		  	SysK   =       cf->ReadFloat (i, "SysK", 5);
@@ -130,7 +139,14 @@ velVector ForceField::GenerateField(Pose pose,QVector<QPointF> laser_set,Pose Go
 			obstacle_interaction_set.push_back(max_inter);
 	   	}
 	 }
- 	VSFF(obstacle_interaction_set);
+	if(FF_algorithm == VariableSpeedFF)
+	{
+ 		VSFF(obstacle_interaction_set);
+	}
+	else
+	{
+		SimFF(obstacle_interaction_set);
+	}
  	action.speed= robotSpeed;
  	action.turnRate = robotTurnRate;
  	return action;
@@ -333,118 +349,118 @@ void ForceField::LSCurveFitting (QVector<QPointF> obstacle, double a[], int m)
 }
 
 /*****************************************************************/
-	void ForceField::VSFF(QVector<Interaction> obstacle_interaction_set)
-	{
-	 	double AbsSpeedX = robotSpeed * cos(robotLocation.phi);
-	 	double AbsSpeedY = robotSpeed * sin(robotLocation.phi);
-	 	double TransformMatrix[2][2] = {{cos(robotLocation.phi), sin(robotLocation.phi)},
-	 									{-sin(robotLocation.phi), cos(robotLocation.phi)}}; //robotLocation.phi or -robotLocation.phi?
-	 	//the attactive force
-	 	double FattAmp = SysQ;
-	 	double FattAngleA[2] = {goalLocation.p.x() - (robotLocation.p.x() + robotRadius * cos(robotLocation.phi)), goalLocation.p.y() - (robotLocation.p.y() + robotRadius * sin(robotLocation.phi))};
-	 	double FattAngleR[2];
-	 	MatrixMultipy(TransformMatrix, FattAngleA, FattAngleR);
-	 	double FattAngle = atan2(FattAngleR[1], FattAngleR[0]);
-	 	double FattX = FattAmp * cos(FattAngle);
-	 	double FattY = FattAmp * sin(FattAngle);
-	 	double FattArm[3] = {robotRadius, 0, 0};
-	 	double FattForce[3] = {FattX, FattY, 0};
-	 	double Matt[3];
-	 	CrossProduct (FattArm, FattForce, Matt);
-	 	//printf ("\n");
-	 	qDebug ("OldSpeed=%f, OldDirec=%f, Turnate=%f, RR=%f", robotSpeed,robotLocation.phi,robotTurnRate, robotRadius);  
-	 	qDebug ("X=%f, Y=%f, GoalX=%f, GoalY=%f", robotLocation.p.x(), robotLocation.p.y(), goalLocation.p.x(), goalLocation.p.y());
-	 	qDebug ("FattAngleA_0=%f, FattAngleA_1=%f, FattAngleR_0=%f, FattAngleR_1=%f", FattAngleA[0], FattAngleA[1], FattAngleR[0], FattAngleR[1]);
-	 	qDebug ("FattAmp = %f, FattAngle = %f, FattX = %f, FattY = %f, FattArm[0] = %f, FattArm[1] = %f, Matt[2] = %f\n",FattAmp, FattAngle, FattX, FattY, FattArm[0], FattArm[1], Matt[2]);
-	 	double MrepTotal = 0, FrepXTotal = 0, FrepYTotal = 0;
-	 	for(int i = 0; i<obstacle_interaction_set.size();i++)
-	 	{
-	   		double FrepAmp   = obstacle_interaction_set[i].force;
-	   		double FrepAngle = obstacle_interaction_set[i].direction - robotLocation.phi;
-	   		double FrepX = FrepAmp * cos(FrepAngle);
-	   		double FrepY = FrepAmp * sin(FrepAngle);
-	
-	   		double FrepArmA[2] = {obstacle_interaction_set[i].location.x() - robotLocation.p.x(), obstacle_interaction_set[i].location.y() - robotLocation.p.y()};
-	  	 	double FrepArmR[2];
-	   		MatrixMultipy(TransformMatrix, FrepArmA, FrepArmR);
-	   		double FrepArm[3] = {FrepArmR[0], FrepArmR[1], 0};
-	  		double FrepForce[3] = {FrepX, FrepY, 0};
-	   		double Mrep[3];
-	   		CrossProduct (FrepArm, FrepForce, Mrep);
-	   		//printf ("\n");
-	   		qDebug ("FrepAmp = %f, FrepAngle = %f, FrepX = %f, FrepY = %f, FrepArm[0] = %f, FrepArm[1] = %f, Mrep[2] = %f",FrepAmp, FrepAngle, FrepX, FrepY, FrepArm[0], FrepArm[1], Mrep[2]);
-	   		FrepXTotal = FrepXTotal + FrepX;
-			FrepYTotal = FrepYTotal + FrepY;
-	   		MrepTotal = MrepTotal + Mrep[2];
-	 	}
-	
-	 	double FtotalX = FattX + FrepXTotal;
-	 	double FtotalY = FattY + FrepYTotal;
-	 	double Mtotal = Matt[2] + MrepTotal;
-	 	qDebug ("FtotalX = %f, FtotalY = %f, Mtotal = %f\n", FtotalX, FtotalY, Mtotal);
-	 	double AcceRX = FtotalX / robotMass;
-	 	double AcceRY = FtotalY / robotMass;
-	
-	 	double AcceR = sqrt(AcceRX * AcceRX + AcceRY * AcceRY);
-	 	double AcceRA = atan2 (AcceRY, AcceRX);
-	 	qDebug ("AcceR=%f, AcceRX=%f, AcceRY=%f, AcceRA=%f, MaxAcceT=%f", AcceR, AcceRX, AcceRY, AcceRA, MaxAcceT);
-	 	if (AcceR > MaxAcceT)
-	 	{
-	   		AcceR = MaxAcceT;
-	   		AcceRX = MaxAcceT * cos(AcceRA);
-	   		AcceRY = MaxAcceT * sin(AcceRA);
-	 	}
-	 	else if (AcceR < -MaxAcceT)
-	 	{
-	   		AcceR = -MaxAcceT;
-	   		AcceRX = -MaxAcceT * cos(AcceRA);
-	   		AcceRY = -MaxAcceT * sin(AcceRA);
-	 	}
-	 	qDebug ("AcceRX=%f, AcceRY=%f", AcceRX, AcceRY);
-	 	//double J = 0.5 * robotMass * robotRadius * robotRadius;
-		 double Omegadot = Mtotal / robotMI;
-	 	if (Omegadot > OmegadotMax)
-	 	{
-	   		Omegadot = OmegadotMax;
-	 	}
-	 	else if (Omegadot < -OmegadotMax)
-	 	{
-	  		Omegadot = -OmegadotMax;
-	 	}
-	
-	 	robotTurnRate = robotTurnRate + Omegadot * TimeStep;
-	 	if (robotTurnRate > OmegaMax)
-	 	{
-	  		robotTurnRate = OmegaMax;
-	 	}
-	 	else if (robotTurnRate < -OmegaMax)
-	 	{
-	   		robotTurnRate = -OmegaMax;
-	 	}
-	 	robotLocation.phi = robotLocation.phi + robotTurnRate * TimeStep; //
-	
-	 	double AcceAX = cos(robotLocation.phi) * AcceRX - sin(robotLocation.phi) * AcceRY; //robotLocation.phi or -robotLocation.phi?
-	 	double AcceAY = sin(robotLocation.phi) * AcceRX + cos(robotLocation.phi) * AcceRY;
-	
-	 	double AbsSpeedX1 = AbsSpeedX + AcceAX * TimeStep;
-	 	double AbsSpeedY1 = AbsSpeedY + AcceAY * TimeStep;
-	
-	 	robotSpeed = sqrt(AbsSpeedX1 * AbsSpeedX1 + AbsSpeedY1 * AbsSpeedY1);
-	 	robotLocation.phi = atan2(AbsSpeedY1, AbsSpeedX1);
-	
-	 	if (robotSpeed > MaxSpeed)
-	 	{
-	  		robotSpeed = MaxSpeed;
-	   		AbsSpeedX1 = robotSpeed * cos(robotLocation.phi);
-	   		AbsSpeedY1 = robotSpeed * sin(robotLocation.phi);
-	 	}
-	 	else if (robotSpeed < -MaxSpeed)
-	 	{
-	   		robotSpeed = -MaxSpeed;
-	   		AbsSpeedX1 = -robotSpeed * cos(robotLocation.phi);
-	   		AbsSpeedY1 = -robotSpeed * sin(robotLocation.phi);
-	 	}
-		qDebug ("Omegadot=%f, OmegadotMax=%f, robotTurnRate=%f, OmegaMax=%f, robotSpeed=%f, MaxSpeed=%f", Omegadot, OmegadotMax, robotTurnRate, OmegaMax, robotSpeed, MaxSpeed);	
+void ForceField::VSFF(QVector<Interaction> obstacle_interaction_set)
+{
+ 	double AbsSpeedX = robotSpeed * cos(robotLocation.phi);
+ 	double AbsSpeedY = robotSpeed * sin(robotLocation.phi);
+ 	double TransformMatrix[2][2] = {{cos(robotLocation.phi), sin(robotLocation.phi)},
+ 									{-sin(robotLocation.phi), cos(robotLocation.phi)}}; //robotLocation.phi or -robotLocation.phi?
+ 	//the attactive force
+ 	double FattAmp = SysQ;
+ 	double FattAngleA[2] = {goalLocation.p.x() - (robotLocation.p.x() + robotRadius * cos(robotLocation.phi)), goalLocation.p.y() - (robotLocation.p.y() + robotRadius * sin(robotLocation.phi))};
+ 	double FattAngleR[2];
+ 	MatrixMultipy(TransformMatrix, FattAngleA, FattAngleR);
+ 	double FattAngle = atan2(FattAngleR[1], FattAngleR[0]);
+ 	double FattX = FattAmp * cos(FattAngle);
+ 	double FattY = FattAmp * sin(FattAngle);
+ 	double FattArm[3] = {robotRadius, 0, 0};
+ 	double FattForce[3] = {FattX, FattY, 0};
+ 	double Matt[3];
+ 	CrossProduct (FattArm, FattForce, Matt);
+ 	//printf ("\n");
+ 	qDebug ("OldSpeed=%f, OldDirec=%f, Turnate=%f, RR=%f", robotSpeed,robotLocation.phi,robotTurnRate, robotRadius);  
+ 	qDebug ("X=%f, Y=%f, GoalX=%f, GoalY=%f", robotLocation.p.x(), robotLocation.p.y(), goalLocation.p.x(), goalLocation.p.y());
+ 	qDebug ("FattAngleA_0=%f, FattAngleA_1=%f, FattAngleR_0=%f, FattAngleR_1=%f", FattAngleA[0], FattAngleA[1], FattAngleR[0], FattAngleR[1]);
+ 	qDebug ("FattAmp = %f, FattAngle = %f, FattX = %f, FattY = %f, FattArm[0] = %f, FattArm[1] = %f, Matt[2] = %f\n",FattAmp, FattAngle, FattX, FattY, FattArm[0], FattArm[1], Matt[2]);
+ 	double MrepTotal = 0, FrepXTotal = 0, FrepYTotal = 0;
+ 	for(int i = 0; i<obstacle_interaction_set.size();i++)
+ 	{
+   		double FrepAmp   = obstacle_interaction_set[i].force;
+   		double FrepAngle = obstacle_interaction_set[i].direction - robotLocation.phi;
+   		double FrepX = FrepAmp * cos(FrepAngle);
+   		double FrepY = FrepAmp * sin(FrepAngle);
+
+   		double FrepArmA[2] = {obstacle_interaction_set[i].location.x() - robotLocation.p.x(), obstacle_interaction_set[i].location.y() - robotLocation.p.y()};
+  	 	double FrepArmR[2];
+   		MatrixMultipy(TransformMatrix, FrepArmA, FrepArmR);
+   		double FrepArm[3] = {FrepArmR[0], FrepArmR[1], 0};
+  		double FrepForce[3] = {FrepX, FrepY, 0};
+   		double Mrep[3];
+   		CrossProduct (FrepArm, FrepForce, Mrep);
+   		//printf ("\n");
+   		qDebug ("FrepAmp = %f, FrepAngle = %f, FrepX = %f, FrepY = %f, FrepArm[0] = %f, FrepArm[1] = %f, Mrep[2] = %f",FrepAmp, FrepAngle, FrepX, FrepY, FrepArm[0], FrepArm[1], Mrep[2]);
+   		FrepXTotal = FrepXTotal + FrepX;
+		FrepYTotal = FrepYTotal + FrepY;
+   		MrepTotal = MrepTotal + Mrep[2];
+ 	}
+
+ 	double FtotalX = FattX + FrepXTotal;
+ 	double FtotalY = FattY + FrepYTotal;
+ 	double Mtotal = Matt[2] + MrepTotal;
+ 	qDebug ("FtotalX = %f, FtotalY = %f, Mtotal = %f\n", FtotalX, FtotalY, Mtotal);
+ 	double AcceRX = FtotalX / robotMass;
+ 	double AcceRY = FtotalY / robotMass;
+
+ 	double AcceR = sqrt(AcceRX * AcceRX + AcceRY * AcceRY);
+ 	double AcceRA = atan2 (AcceRY, AcceRX);
+ 	qDebug ("AcceR=%f, AcceRX=%f, AcceRY=%f, AcceRA=%f, MaxAcceT=%f", AcceR, AcceRX, AcceRY, AcceRA, MaxAcceT);
+ 	if (AcceR > MaxAcceT)
+ 	{
+   		AcceR = MaxAcceT;
+   		AcceRX = MaxAcceT * cos(AcceRA);
+   		AcceRY = MaxAcceT * sin(AcceRA);
+ 	}
+ 	else if (AcceR < -MaxAcceT)
+ 	{
+   		AcceR = -MaxAcceT;
+   		AcceRX = -MaxAcceT * cos(AcceRA);
+   		AcceRY = -MaxAcceT * sin(AcceRA);
+ 	}
+ 	qDebug ("AcceRX=%f, AcceRY=%f", AcceRX, AcceRY);
+ 	//double J = 0.5 * robotMass * robotRadius * robotRadius;
+	 double Omegadot = Mtotal / robotMI;
+ 	if (Omegadot > OmegadotMax)
+ 	{
+   		Omegadot = OmegadotMax;
+ 	}
+ 	else if (Omegadot < -OmegadotMax)
+ 	{
+  		Omegadot = -OmegadotMax;
+ 	}
+
+ 	robotTurnRate = robotTurnRate + Omegadot * TimeStep;
+ 	if (robotTurnRate > OmegaMax)
+ 	{
+  		robotTurnRate = OmegaMax;
+ 	}
+ 	else if (robotTurnRate < -OmegaMax)
+ 	{
+   		robotTurnRate = -OmegaMax;
+ 	}
+ 	robotLocation.phi = robotLocation.phi + robotTurnRate * TimeStep; //
+
+ 	double AcceAX = cos(robotLocation.phi) * AcceRX - sin(robotLocation.phi) * AcceRY; //robotLocation.phi or -robotLocation.phi?
+ 	double AcceAY = sin(robotLocation.phi) * AcceRX + cos(robotLocation.phi) * AcceRY;
+
+ 	double AbsSpeedX1 = AbsSpeedX + AcceAX * TimeStep;
+ 	double AbsSpeedY1 = AbsSpeedY + AcceAY * TimeStep;
+
+ 	robotSpeed = sqrt(AbsSpeedX1 * AbsSpeedX1 + AbsSpeedY1 * AbsSpeedY1);
+ 	robotLocation.phi = atan2(AbsSpeedY1, AbsSpeedX1);
+
+ 	if (robotSpeed > MaxSpeed)
+ 	{
+  		robotSpeed = MaxSpeed;
+   		AbsSpeedX1 = robotSpeed * cos(robotLocation.phi);
+   		AbsSpeedY1 = robotSpeed * sin(robotLocation.phi);
+ 	}
+ 	else if (robotSpeed < -MaxSpeed)
+ 	{
+   		robotSpeed = -MaxSpeed;
+   		AbsSpeedX1 = -robotSpeed * cos(robotLocation.phi);
+   		AbsSpeedY1 = -robotSpeed * sin(robotLocation.phi);
+ 	}
+	qDebug ("Omegadot=%f, OmegadotMax=%f, robotTurnRate=%f, OmegaMax=%f, robotSpeed=%f, MaxSpeed=%f", Omegadot, OmegadotMax, robotTurnRate, OmegaMax, robotSpeed, MaxSpeed);	
 
 //	 	RX = RX + (AbsSpeedX + AbsSpeedX1) * Timestep / 2;
 //	 	RY = RY + (AbsSpeedY + AbsSpeedY1) * Timestep / 2;
@@ -461,4 +477,133 @@ void ForceField::LSCurveFitting (QVector<QPointF> obstacle, double a[], int m)
 //	 	RobInfo[7] = goalLocation.p.x();
 //	 	RobInfo[8] = goalLocation.p.y();
 //	 	RobInfo[9] = robotTurnRate;
-	}
+}
+void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set)
+{
+ 	double AbsSpeedX = robotSpeed * cos(robotLocation.phi);
+ 	double AbsSpeedY = robotSpeed * sin(robotLocation.phi);
+ 	double TransformMatrix[2][2] = {{cos(robotLocation.phi), sin(robotLocation.phi)},
+ 									{-sin(robotLocation.phi), cos(robotLocation.phi)}}; //robotLocation.phi or -robotLocation.phi?
+ 	//the attactive force
+ 	double FattAmp = SysQ;
+ 	double FattAngleA[2] = {goalLocation.p.x() - (robotLocation.p.x() + robotRadius * cos(robotLocation.phi)), goalLocation.p.y() - (robotLocation.p.y() + robotRadius * sin(robotLocation.phi))};
+ 	double FattAngleR[2];
+ 	MatrixMultipy(TransformMatrix, FattAngleA, FattAngleR);
+ 	double FattAngle = atan2(FattAngleR[1], FattAngleR[0]);
+ 	double FattX = FattAmp * cos(FattAngle);
+ 	double FattY = FattAmp * sin(FattAngle);
+ 	double FattArm[3] = {robotRadius, 0, 0};
+ 	double FattForce[3] = {FattX, FattY, 0};
+ 	double Matt[3];
+ 	CrossProduct (FattArm, FattForce, Matt);
+ 	//printf ("\n");
+ 	qDebug ("OldSpeed=%f, OldDirec=%f, Turnate=%f, RR=%f", robotSpeed,robotLocation.phi,robotTurnRate, robotRadius);  
+ 	qDebug ("X=%f, Y=%f, GoalX=%f, GoalY=%f", robotLocation.p.x(), robotLocation.p.y(), goalLocation.p.x(), goalLocation.p.y());
+ 	qDebug ("FattAngleA_0=%f, FattAngleA_1=%f, FattAngleR_0=%f, FattAngleR_1=%f", FattAngleA[0], FattAngleA[1], FattAngleR[0], FattAngleR[1]);
+ 	qDebug ("FattAmp = %f, FattAngle = %f, FattX = %f, FattY = %f, FattArm[0] = %f, FattArm[1] = %f, Matt[2] = %f\n",FattAmp, FattAngle, FattX, FattY, FattArm[0], FattArm[1], Matt[2]);
+ 	double MrepTotal = 0, FrepXTotal = 0, FrepYTotal = 0;
+ 	for(int i = 0; i<obstacle_interaction_set.size();i++)
+ 	{
+   		double FrepAmp   = obstacle_interaction_set[i].force;
+   		double FrepAngle = obstacle_interaction_set[i].direction - robotLocation.phi;
+   		double FrepX = FrepAmp * cos(FrepAngle);
+   		double FrepY = FrepAmp * sin(FrepAngle);
+
+   		double FrepArmA[2] = {obstacle_interaction_set[i].location.x() - robotLocation.p.x(), obstacle_interaction_set[i].location.y() - robotLocation.p.y()};
+  	 	double FrepArmR[2];
+   		MatrixMultipy(TransformMatrix, FrepArmA, FrepArmR);
+   		double FrepArm[3] = {FrepArmR[0], FrepArmR[1], 0};
+  		double FrepForce[3] = {FrepX, FrepY, 0};
+   		double Mrep[3];
+   		CrossProduct (FrepArm, FrepForce, Mrep);
+   		//printf ("\n");
+   		qDebug ("FrepAmp = %f, FrepAngle = %f, FrepX = %f, FrepY = %f, FrepArm[0] = %f, FrepArm[1] = %f, Mrep[2] = %f",FrepAmp, FrepAngle, FrepX, FrepY, FrepArm[0], FrepArm[1], Mrep[2]);
+   		FrepXTotal = FrepXTotal + FrepX;
+		FrepYTotal = FrepYTotal + FrepY;
+   		MrepTotal = MrepTotal + Mrep[2];
+ 	}
+
+ 	double FtotalX = FattX + FrepXTotal;
+ 	double FtotalY = FattY + FrepYTotal;
+ 	double Mtotal = Matt[2] + MrepTotal;
+ 	qDebug ("FtotalX = %f, FtotalY = %f, Mtotal = %f\n", FtotalX, FtotalY, Mtotal);
+ 	double AcceRX = FtotalX / robotMass;
+ 	double AcceRY = FtotalY / robotMass;
+
+ 	double AcceR = sqrt(AcceRX * AcceRX + AcceRY * AcceRY);
+ 	double AcceRA = atan2 (AcceRY, AcceRX);
+ 	qDebug ("AcceR=%f, AcceRX=%f, AcceRY=%f, AcceRA=%f, MaxAcceT=%f", AcceR, AcceRX, AcceRY, AcceRA, MaxAcceT);
+ 	if (AcceR > MaxAcceT)
+ 	{
+   		AcceR = MaxAcceT;
+   		AcceRX = MaxAcceT * cos(AcceRA);
+   		AcceRY = MaxAcceT * sin(AcceRA);
+ 	}
+ 	else if (AcceR < -MaxAcceT)
+ 	{
+   		AcceR = -MaxAcceT;
+   		AcceRX = -MaxAcceT * cos(AcceRA);
+   		AcceRY = -MaxAcceT * sin(AcceRA);
+ 	}
+ 	qDebug ("AcceRX=%f, AcceRY=%f", AcceRX, AcceRY);
+ 	//double J = 0.5 * robotMass * robotRadius * robotRadius;
+	 double Omegadot = Mtotal / robotMI;
+ 	if (Omegadot > OmegadotMax)
+ 	{
+   		Omegadot = OmegadotMax;
+ 	}
+ 	else if (Omegadot < -OmegadotMax)
+ 	{
+  		Omegadot = -OmegadotMax;
+ 	}
+
+ 	robotTurnRate = robotTurnRate + Omegadot * TimeStep;
+ 	if (robotTurnRate > OmegaMax)
+ 	{
+  		robotTurnRate = OmegaMax;
+ 	}
+ 	else if (robotTurnRate < -OmegaMax)
+ 	{
+   		robotTurnRate = -OmegaMax;
+ 	}
+ 	robotLocation.phi = robotLocation.phi + robotTurnRate * TimeStep; //
+
+ 	double AcceAX = cos(robotLocation.phi) * AcceRX - sin(robotLocation.phi) * AcceRY; //robotLocation.phi or -robotLocation.phi?
+ 	double AcceAY = sin(robotLocation.phi) * AcceRX + cos(robotLocation.phi) * AcceRY;
+
+ 	double AbsSpeedX1 = AbsSpeedX + AcceAX * TimeStep;
+ 	double AbsSpeedY1 = AbsSpeedY + AcceAY * TimeStep;
+
+ 	robotSpeed = sqrt(AbsSpeedX1 * AbsSpeedX1 + AbsSpeedY1 * AbsSpeedY1);
+ 	robotLocation.phi = atan2(AbsSpeedY1, AbsSpeedX1);
+
+ 	if (robotSpeed > MaxSpeed)
+ 	{
+  		robotSpeed = MaxSpeed;
+   		AbsSpeedX1 = robotSpeed * cos(robotLocation.phi);
+   		AbsSpeedY1 = robotSpeed * sin(robotLocation.phi);
+ 	}
+ 	else if (robotSpeed < -MaxSpeed)
+ 	{
+   		robotSpeed = -MaxSpeed;
+   		AbsSpeedX1 = -robotSpeed * cos(robotLocation.phi);
+   		AbsSpeedY1 = -robotSpeed * sin(robotLocation.phi);
+ 	}
+	qDebug ("Omegadot=%f, OmegadotMax=%f, robotTurnRate=%f, OmegaMax=%f, robotSpeed=%f, MaxSpeed=%f", Omegadot, OmegadotMax, robotTurnRate, OmegaMax, robotSpeed, MaxSpeed);	
+
+//	 	RX = RX + (AbsSpeedX + AbsSpeedX1) * Timestep / 2;
+//	 	RY = RY + (AbsSpeedY + AbsSpeedY1) * Timestep / 2;
+//	
+//	 	RobInfo;
+//	
+//	 	RobInfo[0] = RX;
+//		RobInfo[1] = RY;
+//	 	RobInfo[2] = robotRadius;
+//	 	RobInfo[3] = robotSpeed;
+//	 	RobInfo[4] = robotLocation.phi;
+//	 	RobInfo[5] = robotMass;
+//	 	RobInfo[6] = robotMI;
+//	 	RobInfo[7] = goalLocation.p.x();
+//	 	RobInfo[8] = goalLocation.p.y();
+//	 	RobInfo[9] = robotTurnRate;
+}
