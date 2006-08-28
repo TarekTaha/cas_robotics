@@ -29,16 +29,16 @@ public:
 	velVector GenerateField(Pose pose,QVector<QPointF> laser_set,Pose Goal,double speed,double turnrate);
 	QVector < QVector<QPointF> > DivObst(QVector<QPointF> laser_set);	
 	void LSCurveFitting (QVector<QPointF> obstacle, double a[], int m);
-	void NearestObstacle(QVector<QPointF> laser_scan,Pose laser_pose);
+	double Dist2Robot(QPointF ray_end,Pose laser_pose,double &angle);
 	void VSFF(QVector<Interaction> obstacle_interaction_set);	
 	double FindNorm(QPointF interaction_point, double Tang);
 	void CrossProduct(double MatrixA[3], double MatrixB[3], double MatrixC[3]);
-	double ForceValue();	
+	double ForceValue(QPointF ray_end,Pose laser_pose);
 private :
 	double   FixedRatio,TimeStep,SysK,SysC,SysP,SysQ,MaxSpeed,MaxAcceT,OmegadotMax,OmegaMax,
 			 Gapdist,NPOL,INF,EP;
 	int curvefittingorder;
-	double robotSpeed,robotTurnRate,closest_dist;
+	double robotSpeed,robotTurnRate;
 	QPointF intersect_point,end_point;
 	Pose robotLocation, goalLocation;
 	QVector <QPointF> laser_readings;

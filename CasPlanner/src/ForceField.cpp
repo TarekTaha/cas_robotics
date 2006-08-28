@@ -32,38 +32,55 @@ EP(1E-10)
 ForceField::~ForceField()
 {
 }
-/* Given a Position and an environment, generate the action to 
- * go to the goal Point without colliding with the surrondings
- */
-void ForceField::NearestObstacle(QVector<QPointF> laser_scan,Pose laser_pose)
+double ForceField::Dist2Robot(QPointF ray_end,Pose laser_pose,double &angle)
 {
-	QPointF ray_end,temp[4],intersection;
+	QPointF temp[4],intersection;
+    double LineMag, U;
+    QPointF Intersection;
 	Line L1,L2;
-	double dist,shortest_dist=10000;
-	for(int i=0;i<4;i++)
+	double dist,shortest_dist=1000;
+	for(int i=0;i<local_edge_points.size();i++)
 	{
 		temp[i] = local_edge_points[i];
 	}
-	for(int i=0;i<laser_scan.size();i++)
+	ray_end = Trans2Global(ray_end,laser_pose);
+	for(int j=0;j<4;j++)
 	{
-		ray_end = Trans2Global(laser_scan[i],laser_pose);
-		for(int j=0;j<4;j++)
+		L1.SetStart(temp[j%4]);      L1.SetEnd(temp[(j+1)%4]);
+	    LineMag = L1.LineMag();
+	    U = ((( ray_end.x() - L1.start.x() ) * ( L1.end.x() - L1.start.x() )) +
+	        ((  ray_end.y() - L1.start.y() ) * ( L1.end.y() - L1.start.y() )))
+	        /( LineMag * LineMag );
+		if( U < 0.0f || U > 1.0f) 
 		{
-			L1.SetStart(temp[j%4]);      L1.SetEnd(temp[(j+1)%4]);
-			L2.SetStart(laser_pose.p);   L2.SetEnd(ray_end);
-			if(LineInterLine(L1,L2,intersection))
+			if (Dist(L1.start,ray_end) < Dist(L1.end,ray_end))
 			{
-				dist = Dist(intersection,ray_end);
-				if(dist < shortest_dist)
-				{
-					shortest_dist = dist;
-					this->closest_dist = dist;
-					this->intersect_point = intersection;
-					this->end_point = ray_end;
-				}
+			    Intersection.setX(L1.start.x());
+			    Intersection.setY(L1.start.y());					
+			    dist = Dist(L1.start,ray_end);
 			}
+			else
+			{
+			    Intersection.setX(L1.end.x());
+			    Intersection.setY(L1.end.y());					
+			    dist = Dist(L1.end,ray_end);			
+			}			
+		}
+		else
+		{
+		    Intersection.setX(L1.start.x() + U * ( L1.end.x() - L1.start.x() ));
+		    Intersection.setY(L1.start.y() + U * ( L1.end.y() - L1.start.y() ));
+		    dist = Magnitude( ray_end, Intersection );		
+		}
+		if(dist < shortest_dist)
+		{
+			shortest_dist = dist;
+			this->intersect_point = intersection;
+			this->end_point = ray_end;
 		}
 	}
+	angle = ATAN2(ray_end,Intersection);
+	return dist;
 };
 void ForceField::CrossProduct(double MatrixA[3], double MatrixB[3], double MatrixC[3])
 {
@@ -81,7 +98,6 @@ velVector ForceField::GenerateField(Pose pose,QVector<QPointF> laser_set,Pose Go
  	double coefficient[curvefittingorder];
 	QVector< QVector<QPointF> > obstacles_set = DivObst(laser_set);
 	QVector<Interaction> obstacle_interaction_set;
-	NearestObstacle(laser_set,Pose(0,0,0));
  	for (int i = 0; i <obstacles_set.size() ; i++)
  	{
  		Interaction inter_point, max_inter;
@@ -92,7 +108,7 @@ velVector ForceField::GenerateField(Pose pose,QVector<QPointF> laser_set,Pose Go
  		{
  			inter_point.location.setX(obstacles_set[i][j].x());
  			inter_point.location.setY(obstacles_set[i][j].y());	 			
- 			inter_point.force = ForceValue();
+ 			inter_point.force = ForceValue(inter_point.location,Pose(0,0,0));
  			sum_x += inter_point.location.x();
  			if(inter_point.force > max_inter.force )
  			{
@@ -170,13 +186,14 @@ double ForceField::FindNorm(QPointF interaction_point, double Tang)
 	}
  	return (Direction);
 };	
-double ForceField::ForceValue()
+double ForceField::ForceValue(QPointF ray_end,Pose laser_pose)
 {
-	double angle = ATAN2(end_point,intersect_point);
+	double angle,closest_dist;
+	closest_dist = Dist2Robot(ray_end,laser_pose,angle);
  	double Er = robotSpeed / (MaxSpeed * SysC);
  	double Dmax = SysK * Er * robotRadius / (1 - Er * cos(angle));
  	double Dmin = FixedRatio * Dmax;
- 	double Ratio = this->closest_dist / Dmax;
+ 	double Ratio = closest_dist / Dmax;
 
  	double ForceAmp;
  	if (Ratio >= 1)
