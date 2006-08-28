@@ -27,9 +27,9 @@ public:
 	ForceField(Robot r,ConfigFile *cf);
 	virtual ~ForceField();
 	velVector GenerateField(Pose pose,QVector<QPointF> laser_set,Pose Goal,double speed,double turnrate);
-	QVector < QVector<QPointF> > DivObst(QVector<QPointF> laser_set);	
+	QVector < QVector<QPointF> > DivObst(QVector<QPointF> laser_set,Pose laser_pose);	
 	void    LSCurveFitting (QVector<QPointF> obstacle, double a[], int m);
-	double  Dist2Robot(QPointF ray_end,Pose laser_pose,double &angle);
+	double  Dist2Robot(QPointF ray_end,double &angle);
 	void    VSFF(QVector<Interaction> obstacle_interaction_set);	
 	double  FindNorm(QPointF interaction_point, double Tang);
 	void    CrossProduct(double MatrixA[3], double MatrixB[3], double MatrixC[3]);

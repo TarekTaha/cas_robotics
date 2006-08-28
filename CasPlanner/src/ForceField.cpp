@@ -41,7 +41,7 @@ EP(1E-10)
 ForceField::~ForceField()
 {
 }
-double ForceField::Dist2Robot(QPointF ray_end,Pose laser_pose,double &angle)
+double ForceField::Dist2Robot(QPointF ray_end,double &angle)
 {
 	QPointF temp[4],intersection;
     double LineMag, U;
@@ -51,8 +51,9 @@ double ForceField::Dist2Robot(QPointF ray_end,Pose laser_pose,double &angle)
 	for(int i=0;i<local_edge_points.size();i++)
 	{
 		temp[i] = local_edge_points[i];
+		temp[i] = Trans2Global(temp[i],robotLocation);
 	}
-	ray_end = Trans2Global(ray_end,laser_pose);
+//	ray_end = Trans2Global(ray_end,laser_pose);
 	for(int j=0;j<4;j++)
 	{
 		L1.SetStart(temp[j%4]);      L1.SetEnd(temp[(j+1)%4]);
@@ -105,7 +106,7 @@ velVector ForceField::GenerateField(Pose pose,QVector<QPointF> laser_set,Pose Go
  	this->robotSpeed = speed;
  	this->robotTurnRate = turnrate;	 	
  	double coefficient[curvefittingorder];
-	QVector< QVector<QPointF> > obstacles_set = DivObst(laser_set);
+	QVector< QVector<QPointF> > obstacles_set = DivObst(laser_set,Pose(0,0,0));
 	QVector<Interaction> obstacle_interaction_set;
  	for (int i = 0; i <obstacles_set.size() ; i++)
  	{
@@ -205,7 +206,7 @@ double ForceField::FindNorm(QPointF interaction_point, double Tang)
 double ForceField::ForceValue(QPointF ray_end,Pose laser_pose)
 {
 	double angle,closest_dist;
-	closest_dist = Dist2Robot(ray_end,laser_pose,angle);
+	closest_dist = Dist2Robot(ray_end,angle);
  	double Er = robotSpeed / (MaxSpeed * SysC);
  	double Dmax = SysK * Er * robotRadius / (1 - Er * cos(angle));
  	double Dmin = FixedRatio * Dmax;
@@ -228,7 +229,7 @@ double ForceField::ForceValue(QPointF ray_end,Pose laser_pose)
  	return(ForceAmp);
 	}
 
-QVector < QVector<QPointF> > ForceField::DivObst(QVector<QPointF> laser_set)
+QVector < QVector<QPointF> > ForceField::DivObst(QVector<QPointF> laser_set,Pose laser_pose)
 {
  	double DistBetw;
  	QPointF p1,p2;
@@ -239,7 +240,9 @@ QVector < QVector<QPointF> > ForceField::DivObst(QVector<QPointF> laser_set)
 	for (int i = 0; i < laser_set.size() - 1; i++)
  	{
 		p1.setX(laser_set[i].x())	; p1.setY(laser_set[i].y());
-		p2.setX(laser_set[i+1].x())	; p2.setY(laser_set[i+1].y());			
+		p1 = Trans2Global(p1,laser_pose);p1 = Trans2Global(p1,robotLocation);
+		p2.setX(laser_set[i+1].x())	; p2.setY(laser_set[i+1].y());	
+		p2 = Trans2Global(p1,laser_pose);p2 = Trans2Global(p1,robotLocation);				
    		DistBetw = Dist(p1,p2);
    		if (DistBetw < Gapdist)
    		{

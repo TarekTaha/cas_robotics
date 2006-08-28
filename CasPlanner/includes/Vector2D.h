@@ -510,10 +510,6 @@ inline double Dist2Seg(Line line, QPointF Point)
 
 	if( U < 0.0f || U > 1.0f) 
 		return Min(Dist(line.start,Point),Dist(line.end,Point));
-//    if( U < 0.0f)
-//        return Dist(line.start,Point);   
-//    if( U > 1.0f)
-//        return Dist(line.end,Point);   
     Intersection.setX(line.start.x() + U * ( line.end.x() - line.start.x() ));
     Intersection.setY(line.start.y() + U * ( line.end.y() - line.start.y() ));
     return Magnitude( Point, Intersection );
