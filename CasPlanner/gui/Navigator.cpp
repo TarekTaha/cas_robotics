@@ -388,10 +388,24 @@ void Navigator::StopNavigating()
 /*!
  * This is the Navigation Thread's main, where the control and the path following takes place.
  */
+Pose Navigator::getGoal(Node *global_path,Pose robotLocation,double traversable_dist)
+{
+	Node *temp;
+	Pose retval;
+	temp = ClosestPathSeg(robotLocation.p,global_path);
+ 	while(temp->next && Dist(robotLocation.p,temp->pose.p) < traversable_dist)
+ 	{
+ 		double angle = ATAN2(temp->next->pose.p,temp->pose.p);
+ 		retval.p = temp->pose.p;
+ 		retval.phi = angle;
+ 		temp= temp->next;
+ 	}	
+ 	return retval;
+}
 void Navigator::run()
 {
 	connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));	
-	ControlAction cntrl;
+//	ControlAction cntrl;
 	QTime amcl_timer,delta_timer,redraw_timer;
 	double closest_obst=10;
 	Pose loc;
@@ -683,12 +697,13 @@ void Navigator::run()
 //			cntrl.angular_velocity =  0.2;
 //		if(cntrl.angular_velocity <  -0.2)
 //			cntrl.angular_velocity = -0.2;
-		if(log)
-			fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.elapsed()/1e3,last_time);
+//		if(log)
+//			fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.elapsed()/1e3,last_time);
 		if(!pause)
 		{
-			Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);			
-			// Normal Follower
+//			Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);		
+			Pose goal = getGoal(global_path,EstimatedPos,traversable_dist);
+			// Normal Linear Follower
 //			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
 //			robotManager->commManager->setTurnRate(cntrl.angular_velocity);		
 			// Stage goto
