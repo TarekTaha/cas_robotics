@@ -701,7 +701,7 @@ void Navigator::run()
 //			fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.elapsed()/1e3,last_time);
 		if(!pause)
 		{
-//			Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);		
+//			Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
 			Pose goal = getGoal(global_path,EstimatedPos,traversable_dist);
 			// Normal Linear Follower
 //			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
