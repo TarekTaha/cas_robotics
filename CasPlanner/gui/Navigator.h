@@ -22,7 +22,7 @@
 
 class PlanningManager;
 using namespace CasPlanner;
-//using namespace Geom2D;
+
 class Navigator : public Controller
 {
 	Q_OBJECT
@@ -33,6 +33,7 @@ class Navigator : public Controller
 		Node * globalPath, *localPath;
 		int readConfigs(ConfigFile *cf);
 		void setPath(Node *path);
+		void setObstAvoidAlgo(int);
 		void StopNavigating();
 		double NearestObstacle(QVector<QPointF> laser_scan);
 		void  setPause(bool pause);
@@ -65,7 +66,7 @@ class Navigator : public Controller
 		ForceField *FF;
 		QPointF	begin,tracking_point,ni,SegmentStart,SegmentEnd;
 		bool	log,position_found,end_reached,segment_navigated,stop_navigating,pause;
-		int		platform,direction,path2Draw;					
+		int		platform,direction,path2Draw,obstAvoidAlgo;					
 		Node * local_path,* global_path,*last,*first,*path2Follow;
 		PlanningManager *local_planner,*global_planner;
 		Geom2D::ICP icp;

@@ -38,6 +38,11 @@ void CommManager::gotoGoal(Pose goal)
 	player->gotoGoal(goal);
 }
 
+void CommManager::vfhGoto(Pose goal)
+{
+	player->vfhGoto(goal);
+}
+
 void CommManager::setLocation(Pose location)
 {
 	player->setLocation(location);
@@ -160,7 +165,18 @@ int CommManager::readConfigs( ConfigFile *cf)
 				}
 			}
 			else
-				localizerEnabled = false;				
+				localizerEnabled = false;		
+			cnt = cf->GetTupleCount(i,"vfh");				
+			if (cnt==1)
+			{
+				vfhEnabled = true;
+				for(int c=0; c<cnt; c++)
+				{
+					vfhId = cf->ReadTupleInt(i,"vfh",c,0);							
+				}
+			}
+			else
+				vfhEnabled = false;							
 		  	qDebug("Start Connected is %d",startConnected);
 		  	if(startConnected)
 			{
@@ -205,6 +221,11 @@ int CommManager::start()
   		qDebug("\t\t\t	- AMCL Localizer."); 
   		player->enableLocalizer(localizerId);
   	}
+  	if(vfhEnabled)
+  	{
+  		qDebug("\t\t\t	- VFH Navigator."); 
+  		player->enableVfh(vfhId);
+  	}  	
   	if(player)
   	{
  		if(player->isRunning())
