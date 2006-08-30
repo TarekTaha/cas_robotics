@@ -39,6 +39,7 @@ class Navigator : public Controller
 		Node * ClosestPathSeg(QPointF location,Node * all_path);	
 		void GenerateLocalMap(QVector<QPointF> laser_scan,Pose laser_pose, Pose rob_location);
 		bool MapModified(QVector<QPointF> laser_scan,Pose rob_location);
+		Pose getGoal(Node *global_path,Pose robotLocation,double traversable_dist);
         void stop();
         void run();
         void setupLocalPlanner();
