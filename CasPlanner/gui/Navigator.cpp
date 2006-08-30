@@ -452,6 +452,7 @@ void Navigator::run()
 		speed = robotManager->commManager->getSpeed();
 		turnRate = robotManager->commManager->getTurnRate();
 		laser_set = robotManager->commManager->getLaserScan();
+		qDebug("Turn Rate is:%f",turnRate);
 //		cout<<"\n Current Location X:"<<amcl_location.p.x()<<" Y:"<<amcl_location.p.y()<<" Theta:"<<amcl_location.phi;
 		/* If this location is new, then use it. Otherwise
 		 * estimate the location based on the last reading.
@@ -651,6 +652,7 @@ void Navigator::run()
 			 		qDebug("Local Path found");
 			 		path2Follow = local_path;
 			 		path2Draw = LOCALPATH;
+			 		continue;
 			 	}
 			 	else
 			 	{
@@ -686,8 +688,8 @@ void Navigator::run()
 		{
 			Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);			
 			// Normal Follower
-			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
-			robotManager->commManager->setTurnRate(cntrl.angular_velocity);		
+//			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
+//			robotManager->commManager->setTurnRate(cntrl.angular_velocity);		
 			// Stage goto
 //			robotManager->commManager->gotoGoal(goal);
 			// Force Field
