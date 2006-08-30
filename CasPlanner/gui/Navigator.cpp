@@ -552,116 +552,117 @@ void Navigator::run()
 		QTime local_planning_time,icp_time;
 		closest_obst = NearestObstacle(laser_set);
 //		qDebug("Closest Distance to Obstacles is:%f Saftey Dist:%f",closest_obst,sf);
-		if(closest_obst < safety_dist)
-		{
-			icp_time.restart();
-			// If we don't already have a local map or the local environment is changed then re-plan
-			if ( !local_planner->pathPlanner->path) //|| MapModified(laser_set,EstimatedPos))
-			{
-				//qDebug("Icp Check took:%d msec",icp_time.elapsed());					
-				//Stop the Robot before planning
-				robotManager->commManager->setSpeed(0);
-				robotManager->commManager->setTurnRate(0);
-				
-				// local Planning Map Distance
-				double target_angle;
-			 	Pose start,target,loc, pixel_loc = EstimatedPos;
-			 	loc = pixel_loc; target.phi = 0;
-			 	
-			 	// Current Locaion in the Global coordinate
-			 	global_planner->pathPlanner->ConvertToPixel(&pixel_loc.p);
-//				qDebug("Location Global Metric X:%f Y:%f",loc.p.x(),loc.p.y());
-//				qDebug("Location Global Pixel  X:%f Y:%f",pixel_loc.p.x(),pixel_loc.p.y());
-	
-				local_planning_time.restart();
-			 	local_planner->SetMap(laser_set,local_dist,EstimatedPos);
-				local_planner->GenerateSpace();
-			 	Node * temp;
-			 	temp = global_path;
-			 	if(!temp)
-			 	{
-			 		qDebug("Global Path is empty, Something went wrong, Emergency Stopping ");
-					robotManager->commManager->setSpeed(0);
-					robotManager->commManager->setTurnRate(0);
-					sleep(1);
-					exit(1);
-			 	}
-				/* Find the farest way Point on the global path
-				 * that belongs to the local map
-				 */
-				double dist=0;
-				temp = ClosestPathSeg(EstimatedPos.p,global_path);
-			 	while(temp->next && dist < traversable_dist)
-			 	{
-				 	QPointF boundary_check;
-		 			//traversable_dist += Dist(temp->pose.p,temp->next->pose.p);
-					target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
-		 			dist+= Dist(temp->pose.p,temp->next->pose.p);
-				 	boundary_check.setX(temp->pose.p.x());
-				 	boundary_check.setY(temp->pose.p.y());
-//					qDebug("Target Global Metric X:%f Y:%f",boundary_check.x(),boundary_check.y());
-				 					 				 	
-				 	// Transfer to the global Pixel Coordinate
-				 	global_planner->pathPlanner->ConvertToPixel(&boundary_check);				 	
-//					qDebug("Target Pixel Global  X:%f Y:%f",boundary_check.x(),boundary_check.y());
-									 	
-				 	// Transfer to the local Pixel Coordinate
-				 	boundary_check.setX(boundary_check.x() - pixel_loc.p.x() + local_planner->pathPlanner->map->center.x());	
-				 	boundary_check.setY(boundary_check.y() - pixel_loc.p.y() + local_planner->pathPlanner->map->center.y());				 	
-//					qDebug("Target Pixel Local   X:%f Y:%f",boundary_check.x(),boundary_check.y());
-	
-					// Check Boundaries
-				 	if (boundary_check.x() < 0 || boundary_check.y() < 0 )
-					 	break;
-				 	if (boundary_check.x() > (local_planner->pathPlanner->map->width - 1) || boundary_check.y() > (local_planner->pathPlanner->map->height - 1))
-				 		break;
-				 	// This is a valid target in the local Map
-					target.p.setX(boundary_check.x());	 		
-					target.p.setY(boundary_check.y());	 							
-				 	target.phi = target_angle;	
-//					qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
-			 		temp= temp->next;
-			 	}
-				
-				/* Search Start location is the center of the Robot			
-				 * currently it's the center of the laser, this will have
-				 * to be modified to translate the laser location to the 
-				 * robot's coordinate : TODO
-				 */
-				 
-			 	start.p.setX(local_planner->pathPlanner->map->center.x());
-			 	start.p.setY(local_planner->pathPlanner->map->center.y()); 	
-			 	start.phi = EstimatedPos.phi;
-			 	
-//				qDebug("Start Local Pixel  X:%f Y:%f",start.p.x(),start.p.y());			 	
-//				qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
-	
-			 	local_path = local_planner->FindPath(start,target);
-			 	if (local_path)
-			 	{
-			 		Node * temp = local_path;
-			 		// Changing the Path to the Global Coordinate
-			 		pixel_loc.p -= local_planner->pathPlanner->map->center;
-			 		while(temp)
-			 		{
-			 			local_planner->pathPlanner->ConvertToPixel(&temp->pose.p);
-						temp->pose.p += pixel_loc.p;
-			 			global_planner->pathPlanner->ConvertPixel(&temp->pose.p);
-			 			temp = temp->next;
-			 		}
-			 		qDebug("Local Path found");
-			 		path2Follow = local_path;
-			 		path2Draw = LOCALPATH;
-			 		continue;
-			 	}
-			 	else
-			 	{
-			 		path2Follow = global_path;
-			 		path2Draw = GLOBALPATH;
-			 	}
-		 		qDebug("Local Planning took %dms",local_planning_time.elapsed());	
-			}
-		}
+//		if(closest_obst < safety_dist)
+//		{
+//			icp_time.restart();
+//			// If we don't already have a local map or the local environment is changed then re-plan
+//			if ( !local_planner->pathPlanner->path) //|| MapModified(laser_set,EstimatedPos))
+//			{
+//				//qDebug("Icp Check took:%d msec",icp_time.elapsed());					
+//				//Stop the Robot before planning
+//				robotManager->commManager->setSpeed(0);
+//				robotManager->commManager->setTurnRate(0);
+//				
+//				// local Planning Map Distance
+//				double target_angle;
+//			 	Pose start,target,loc, pixel_loc = EstimatedPos;
+//			 	loc = pixel_loc; target.phi = 0;
+//			 	
+//			 	// Current Locaion in the Global coordinate
+//			 	global_planner->pathPlanner->ConvertToPixel(&pixel_loc.p);
+////				qDebug("Location Global Metric X:%f Y:%f",loc.p.x(),loc.p.y());
+////				qDebug("Location Global Pixel  X:%f Y:%f",pixel_loc.p.x(),pixel_loc.p.y());
+//	
+//				local_planning_time.restart();
+//			 	local_planner->SetMap(laser_set,local_dist,EstimatedPos);
+//				local_planner->GenerateSpace();
+//			 	Node * temp;
+//			 	temp = global_path;
+//			 	if(!temp)
+//			 	{
+//			 		qDebug("Global Path is empty, Something went wrong, Emergency Stopping ");
+//					robotManager->commManager->setSpeed(0);
+//					robotManager->commManager->setTurnRate(0);
+//					sleep(1);
+//					exit(1);
+//			 	}
+//				 //Find the farest way Point on the global path
+//				 //* that belongs to the local map
+//				 
+//				double dist=0;
+//				temp = ClosestPathSeg(EstimatedPos.p,global_path);
+//			 	while(temp->next && dist < traversable_dist)
+//			 	{
+//				 	QPointF boundary_check;
+//		 			//traversable_dist += Dist(temp->pose.p,temp->next->pose.p);
+//					target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
+//		 			dist+= Dist(temp->pose.p,temp->next->pose.p);
+//				 	boundary_check.setX(temp->pose.p.x());
+//				 	boundary_check.setY(temp->pose.p.y());
+////					qDebug("Target Global Metric X:%f Y:%f",boundary_check.x(),boundary_check.y());
+//				 					 				 	
+//				 	// Transfer to the global Pixel Coordinate
+//				 	global_planner->pathPlanner->ConvertToPixel(&boundary_check);				 	
+////					qDebug("Target Pixel Global  X:%f Y:%f",boundary_check.x(),boundary_check.y());
+//									 	
+//				 	// Transfer to the local Pixel Coordinate
+//				 	boundary_check.setX(boundary_check.x() - pixel_loc.p.x() + local_planner->pathPlanner->map->center.x());	
+//				 	boundary_check.setY(boundary_check.y() - pixel_loc.p.y() + local_planner->pathPlanner->map->center.y());				 	
+////					qDebug("Target Pixel Local   X:%f Y:%f",boundary_check.x(),boundary_check.y());
+//	
+//					// Check Boundaries
+//				 	if (boundary_check.x() < 0 || boundary_check.y() < 0 )
+//					 	break;
+//				 	if (boundary_check.x() > (local_planner->pathPlanner->map->width - 1) || boundary_check.y() > (local_planner->pathPlanner->map->height - 1))
+//				 		break;
+//				 	// This is a valid target in the local Map
+//					target.p.setX(boundary_check.x());	 		
+//					target.p.setY(boundary_check.y());	 							
+//				 	target.phi = target_angle;	
+////					qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
+//			 		temp= temp->next;
+//			 	}
+//				
+//				 /*Search Start location is the center of the Robot			
+//				 * currently it's the center of the laser, this will have
+//				 * to be modified to translate the laser location to the 
+//				 * robot's coordinate : TODO
+//				 */
+//				 
+//				 
+//			 	start.p.setX(local_planner->pathPlanner->map->center.x());
+//			 	start.p.setY(local_planner->pathPlanner->map->center.y()); 	
+//			 	start.phi = EstimatedPos.phi;
+//			 	
+////				qDebug("Start Local Pixel  X:%f Y:%f",start.p.x(),start.p.y());			 	
+////				qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
+//	
+//			 	local_path = local_planner->FindPath(start,target);
+//			 	if (local_path)
+//			 	{
+//			 		Node * temp = local_path;
+//			 		// Changing the Path to the Global Coordinate
+//			 		pixel_loc.p -= local_planner->pathPlanner->map->center;
+//			 		while(temp)
+//			 		{
+//			 			local_planner->pathPlanner->ConvertToPixel(&temp->pose.p);
+//						temp->pose.p += pixel_loc.p;
+//			 			global_planner->pathPlanner->ConvertPixel(&temp->pose.p);
+//			 			temp = temp->next;
+//			 		}
+//			 		qDebug("Local Path found");
+//			 		path2Follow = local_path;
+//			 		path2Draw = LOCALPATH;
+//			 		continue;
+//			 	}
+//			 	else
+//			 	{
+//			 		path2Follow = global_path;
+//			 		path2Draw = GLOBALPATH;
+//			 	}
+//		 		qDebug("Local Planning took %dms",local_planning_time.elapsed());	
+//			}
+//		}
  		if (redraw_timer.elapsed()>100)
  		{
 		 	emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);		
@@ -671,17 +672,17 @@ void Navigator::run()
 		 * simple linear control. It's accurate enough for traversing 
 		 * the generated paths.
 		 */
-		cntrl = getAction(EstimatedPos.phi,angle,displacement,path2Follow->direction,linear_velocity);
+		//cntrl = getAction(EstimatedPos.phi,angle,displacement,path2Follow->direction,linear_velocity);
 		//qDebug("Control Action Linear:%f Angular:%f",path2Follow->direction*cntrl.linear_velocity,
 		//cntrl.angular_velocity);
 		/* Angular Velocity Thrusholded, just trying not to
 		 * exceed the accepted limits. Or setting up a safe 
 		 * turn speed.
 		 */
-		if(cntrl.angular_velocity >   0.2)
-			cntrl.angular_velocity =  0.2;
-		if(cntrl.angular_velocity <  -0.2)
-			cntrl.angular_velocity = -0.2;
+//		if(cntrl.angular_velocity >   0.2)
+//			cntrl.angular_velocity =  0.2;
+//		if(cntrl.angular_velocity <  -0.2)
+//			cntrl.angular_velocity = -0.2;
 		if(log)
 			fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.elapsed()/1e3,last_time);
 		if(!pause)
