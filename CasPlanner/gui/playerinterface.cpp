@@ -69,10 +69,18 @@ void PlayerInterface::setTurnRate(double i_turnRate)
 
 void PlayerInterface::gotoGoal(Pose goal)
 {
-    dataLock.lockForWrite();	
+    dataLock.lockForWrite();
 	velControl = false;
-	this->goal = goal;	
-    dataLock.unlock();	
+	this->goal = goal;
+    dataLock.unlock();
+}
+
+void PlayerInterface::vfhGoto(Pose goal)
+{
+    dataLock.lockForWrite();
+	velControl = false;
+	this->vfhGoal = goal;
+    dataLock.unlock();
 }
 
 void PlayerInterface::setLocation(Pose loc)
@@ -105,6 +113,12 @@ void PlayerInterface::enablePtz(int in_ptzId)
 {
     ptzEnabled=true;
     ptzId=in_ptzId;
+}
+
+void PlayerInterface::enableVfh(int in_vfhId)
+{
+	vfhEnabled = true;
+	vfhId = in_vfhId;
 }
 
 void PlayerInterface::enableMap(int  in_mapId)
@@ -253,6 +267,11 @@ void PlayerInterface::run ()
 	    	localizer 	= new LocalizeProxy(pc,0);
 	    	qDebug("\t\t - Localizer Started Successfully");
 	    }
+	    if(vfhEnabled)
+	    {
+	    	vfh 	= new Position2dProxy(pc,vfhId);
+	    	qDebug("\t\t - Vfh Started Successfully");
+	    }	    
     }
    catch (PlayerCc::PlayerError e)
   	{
@@ -290,10 +309,12 @@ void PlayerInterface::run ()
 	        	}
 	        	else
 	        	{
-	        		drive->GoTo(goal.p.x(),goal.p.y(),goal.phi);
+//	        		drive->GoTo(goal.p.x(),goal.p.y(),goal.phi);
+	        		vfh->GoTo(vfhGoal.p.x(),vfhGoal.p.y(),vfhGoal.phi);	        		
 	        	}
 	            getspeed = drive->GetXSpeed();
-	            getturnrate = drive->GetYSpeed();
+//	            getturnrate = drive->GetYSpeed();
+	            getturnrate = drive->GetYaw();	            
 	            ps = drive->GetPose();
 	            odom_location.p.setX(drive->GetXPos());
 	            odom_location.p.setY(drive->GetYPos());

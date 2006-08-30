@@ -303,6 +303,11 @@ void Navigator::setPause(bool pause)
 	this->pause = pause;
 }
 
+void Navigator::setObstAvoidAlgo(int algo)
+{
+	this->obstAvoidAlgo = algo;
+}
+
 bool Navigator::MapModified(QVector<QPointF> laser_scan,Pose rob_location)
 {
 	local_map_icp.clear();
@@ -405,7 +410,7 @@ Pose Navigator::getGoal(Node *global_path,Pose robotLocation,double traversable_
 void Navigator::run()
 {
 	connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));	
-//	ControlAction cntrl;
+	ControlAction cntrl;
 	QTime amcl_timer,delta_timer,redraw_timer;
 	double closest_obst=10;
 	Pose loc;
@@ -466,7 +471,7 @@ void Navigator::run()
 		speed = robotManager->commManager->getSpeed();
 		turnRate = robotManager->commManager->getTurnRate();
 		laser_set = robotManager->commManager->getLaserScan();
-		qDebug("Turn Rate is:%f",turnRate);
+//		qDebug("Turn Rate is:%f",turnRate);
 //		cout<<"\n Current Location X:"<<amcl_location.p.x()<<" Y:"<<amcl_location.p.y()<<" Theta:"<<amcl_location.phi;
 		/* If this location is new, then use it. Otherwise
 		 * estimate the location based on the last reading.
@@ -686,36 +691,49 @@ void Navigator::run()
 		 * simple linear control. It's accurate enough for traversing 
 		 * the generated paths.
 		 */
-		//cntrl = getAction(EstimatedPos.phi,angle,displacement,path2Follow->direction,linear_velocity);
-		//qDebug("Control Action Linear:%f Angular:%f",path2Follow->direction*cntrl.linear_velocity,
-		//cntrl.angular_velocity);
-		/* Angular Velocity Thrusholded, just trying not to
-		 * exceed the accepted limits. Or setting up a safe 
-		 * turn speed.
-		 */
-//		if(cntrl.angular_velocity >   0.2)
-//			cntrl.angular_velocity =  0.2;
-//		if(cntrl.angular_velocity <  -0.2)
-//			cntrl.angular_velocity = -0.2;
-//		if(log)
-//			fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.elapsed()/1e3,last_time);
+//		Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
+		Pose goal = getGoal(global_path,EstimatedPos,traversable_dist);		 
+		QTime ff_time;
 		if(!pause)
 		{
-//			Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
-			Pose goal = getGoal(global_path,EstimatedPos,traversable_dist);
-			// Normal Linear Follower
-//			robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
-//			robotManager->commManager->setTurnRate(cntrl.angular_velocity);		
-			// Stage goto
-//			robotManager->commManager->gotoGoal(goal);
-			// Force Field
-			velVector action;
-			QTime ff_time;
-			ff_time.restart();
-			action = FF->GenerateField(EstimatedPos,laser_set,goal,speed,turnRate);
-			qDebug("FF Speed is:%f TurnRate is:%f  time is:%dms",action.speed,action.turnRate,ff_time.elapsed());	
-			robotManager->commManager->setSpeed(action.speed);						
-			robotManager->commManager->setTurnRate(action.turnRate);		
+			switch(obstAvoidAlgo)		 
+			{
+				case FORCE_FIELD:
+					//Force Field
+					velVector action;
+					ff_time.restart();
+					action = FF->GenerateField(EstimatedPos,laser_set,goal,speed,turnRate);
+					qDebug("FF Speed is:%f TurnRate is:%f  time is:%dms",action.speed,action.turnRate,ff_time.elapsed());	
+					robotManager->commManager->setSpeed(action.speed);						
+					robotManager->commManager->setTurnRate(action.turnRate);		
+					break;		
+				case CONFIG_SPACE:
+					break;
+				case NO_AVOID:
+					// Linear Controller 
+					cntrl = getAction(EstimatedPos.phi,angle,displacement,path2Follow->direction,linear_velocity);
+					qDebug("Control Action Linear:%f Angular:%f",path2Follow->direction*cntrl.linear_velocity,
+					cntrl.angular_velocity);
+					/* Angular Velocity Thrusholded, just trying not to
+					 * exceed the accepted limits. Or setting up a safe 
+					 * turn speed.
+					 */
+					if(cntrl.angular_velocity >   0.2)
+						cntrl.angular_velocity =  0.2;
+					if(cntrl.angular_velocity <  -0.2)
+						cntrl.angular_velocity = -0.2;
+					if(log)
+						fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.elapsed()/1e3,last_time);			
+					//Normal Linear Follower
+					robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
+					robotManager->commManager->setTurnRate(cntrl.angular_velocity);							
+				case VFH:
+					// Vector Field Histogram
+					robotManager->commManager->vfhGoto(goal);	
+					break;		
+				default:
+					qDebug("Unknown Obstacle Avoidance Algorithm used !!!");
+			}	
 		}
 		else
 		{

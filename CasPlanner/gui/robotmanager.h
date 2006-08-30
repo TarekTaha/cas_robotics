@@ -15,7 +15,7 @@
 class Navigator;
 class NavContainer;
 class PlanningManager;
-
+enum{FORCE_FIELD,VFH,CONFIG_SPACE,NO_AVOID};
 class RobotManager : public QObject //: public CommManager, public PlanningManager ,public Navigator
 {
 	Q_OBJECT

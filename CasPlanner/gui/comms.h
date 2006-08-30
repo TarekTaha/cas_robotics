@@ -24,10 +24,11 @@ class Comms: public QObject
         virtual void emergencyStop()=0; 
         virtual void emergencyRelease()=0; 
     protected:
-		bool startConnected,activateControl,ptzEnabled,occMapEnabled,localizerEnabled,laserEnabled;
+		bool startConnected,activateControl,ptzEnabled,occMapEnabled,localizerEnabled,laserEnabled
+			 ,vfhEnabled;
     	QString name,playerIp; 
     	QVector <int> laserIds;
-        int playerPort,positionControlId,ptzId,mapId,localizerId;
+        int playerPort,positionControlId,ptzId,mapId,localizerId,vfhId;
 };
 
 #endif 

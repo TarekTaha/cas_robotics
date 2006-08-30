@@ -28,6 +28,7 @@ Q_OBJECT
 		void updateMap(); 
 		void handleSelection(); 
 		void updateSelectedObject(double);
+		void updateSelectedAvoidanceAlgo(bool);
 		void save();
 		void captureMap(); 
 		void exportHtml(); 
@@ -59,7 +60,7 @@ Q_OBJECT
 		QRadioButton noavoidRadBtn; 
  		QRadioButton forceFieldRadBtn; 
  		QRadioButton configSpaceRadBtn;
- 		QRadioButton controlRadBtn;  		
+ 		QRadioButton vfhRadBtn;  		
 
 		// Command Actions
 		QGroupBox actionGB;

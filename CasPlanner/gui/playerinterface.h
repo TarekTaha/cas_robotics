@@ -27,6 +27,7 @@ Q_OBJECT
         void enableControl(int driveId);
         void setLasers(QVector<int>laserIds); 
 		void enablePtz(int ptzId);
+		void enableVfh(int vfhId);
 		void enableMap(int mapId);
 		void enableLocalizer(int localizerId);
         QVector<QPointF> getLaserScan();
@@ -39,6 +40,7 @@ Q_OBJECT
         Pose getLocation();
         Pose getOdomLocation();
         void gotoGoal(Pose);
+        void vfhGoto(Pose);
         void setSpeed(double speed);
         void setTurnRate(double turnRate); 
         void setSpeed(double speed, double turnRate); 
@@ -52,15 +54,16 @@ Q_OBJECT
         int playerPort; 
         PlayerClient *pc;
      
-        bool ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized,emergencyStopped,velControl; 
-        int positionId,ptzId,mapId,localizerId;
+        bool ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized,emergencyStopped,
+        	 velControl,vfhEnabled; 
+        int positionId,ptzId,mapId,localizerId,vfhId;
         QVector <int> laserIds;
         QVector <LaserProxy *> laser;
-        Position2dProxy *drive;
+        Position2dProxy *drive, *vfh;
         MapProxy *map;
 		PtzProxy *ptz;
 		LocalizeProxy *localizer;
-		Pose location,goal,odom_location;
+		Pose location,goal,odom_location,vfhGoal;
 		double pan,tilt,pose[3], pose_covar[3];
         QVector<QPointF> laserScanPoints;
         double speed,turnRate,getspeed,getturnrate;

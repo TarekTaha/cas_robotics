@@ -102,10 +102,10 @@ NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
 	nodeConRadSB(),
 	obstPenRadSB(),
 	obstavoidGB("Obstacle Avoidace"),
-	noavoidRadBtn("No avoidance"),
+	noavoidRadBtn("No avoidance /Linear Controller"),
 	forceFieldRadBtn("Force Field"),
 	configSpaceRadBtn("Local Config Space"),
-	controlRadBtn("Sensor Based"),
+	vfhRadBtn("VFH"),
 	actionGB("Action"),
 	pauseBtn("Pause"), 
 	pathPlanBtn("Path Plan"),
@@ -189,8 +189,10 @@ NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
     showL->addWidget(&noavoidRadBtn);
     showL->addWidget(&forceFieldRadBtn);
     showL->addWidget(&configSpaceRadBtn);
-    showL->addWidget(&controlRadBtn);
-    configSpaceRadBtn.setChecked(true);
+    showL->addWidget(&vfhRadBtn);
+    
+    forceFieldRadBtn.setChecked(true);
+    updateSelectedAvoidanceAlgo(true);
     obstavoidGB.setLayout(showL); 
         
     QVBoxLayout *actionLayout = new QVBoxLayout; 
@@ -201,16 +203,17 @@ NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
     actionLayout->addWidget(&pathFollowBtn); 
     actionGB.setLayout(actionLayout); 
 
-    connect(&bridgeTestResSB, SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
-    connect(&bridgeSegLenSB,  SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
-    connect(&regGridResSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
-    connect(&nodeConRadSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
-    connect(&obstPenRadSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
-    connect(&obstExpRadSB,    SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
-    connect(&pauseBtn,      SIGNAL(clicked()), this, SLOT(captureMap())); 
-//    connect(&pathPlanBtn, SIGNAL(clicked()), this, SLOT(load())); 
-//    connect(&generateSpaceBtn, SIGNAL(clicked()), this, SLOT(save())); 
-//    connect(&pathFollowBtn, SIGNAL(clicked()), this, SLOT(exportHtml())); 
+    connect(&bridgeTestResSB,  SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&bridgeSegLenSB,   SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&regGridResSB,     SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&nodeConRadSB,     SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&obstPenRadSB,     SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&obstExpRadSB,     SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&pauseBtn,         SIGNAL(clicked()), this,SLOT(captureMap())); 
+    connect(&vfhRadBtn,        SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));
+    connect(&forceFieldRadBtn, SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));    
+    connect(&configSpaceRadBtn,SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));    
+    connect(&noavoidRadBtn,    SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));            
 }
 void NavControlPanel::handleSelection()
 {
@@ -241,6 +244,34 @@ void NavControlPanel::updateSelectedObject(double)
 	robotManager->planner->setObstPenValue(obstPenRadSB.value());
 	robotManager->planner->setExpObstValue(obstExpRadSB.value());
 	robotManager->planner->setBridgeResValue(bridgeTestResSB.value());
+}
+
+void NavControlPanel::updateSelectedAvoidanceAlgo(bool)
+{
+	if(robotManager->navigator==NULL)
+	{
+		robotManager->startNavigator();
+	}
+	if(vfhRadBtn.isChecked())
+	{
+		qDebug("VFH");
+		robotManager->navigator->setObstAvoidAlgo(VFH);
+	}
+	else if(forceFieldRadBtn.isChecked())
+	{
+		qDebug("Force Field");		
+		robotManager->navigator->setObstAvoidAlgo(FORCE_FIELD);	
+	}
+	else if(configSpaceRadBtn.isChecked())
+	{
+		qDebug("Config Space");		
+		robotManager->navigator->setObstAvoidAlgo(CONFIG_SPACE);	
+	}
+	else if(noavoidRadBtn.isChecked())
+	{
+		qDebug("NO Avoidace");		
+		robotManager->navigator->setObstAvoidAlgo(NO_AVOID);	
+	}
 }
 
 //void navControlPanel::setActionValues(MapObject *mo)
