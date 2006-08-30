@@ -477,22 +477,6 @@ void ForceField::VSFF(QVector<Interaction> obstacle_interaction_set)
    		AbsSpeedY1 = -robotSpeed * sin(robotLocation.phi);
  	}
 	qDebug ("Omegadot=%f, OmegadotMax=%f, robotTurnRate=%f, OmegaMax=%f, robotSpeed=%f, MaxSpeed=%f", Omegadot, OmegadotMax, robotTurnRate, OmegaMax, robotSpeed, MaxSpeed);	
-
-//	 	RX = RX + (AbsSpeedX + AbsSpeedX1) * Timestep / 2;
-//	 	RY = RY + (AbsSpeedY + AbsSpeedY1) * Timestep / 2;
-//	
-//	 	RobInfo;
-//	
-//	 	RobInfo[0] = RX;
-//		RobInfo[1] = RY;
-//	 	RobInfo[2] = robotRadius;
-//	 	RobInfo[3] = robotSpeed;
-//	 	RobInfo[4] = robotLocation.phi;
-//	 	RobInfo[5] = robotMass;
-//	 	RobInfo[6] = robotMI;
-//	 	RobInfo[7] = goalLocation.p.x();
-//	 	RobInfo[8] = goalLocation.p.y();
-//	 	RobInfo[9] = robotTurnRate;
 }
 void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set)
 {
