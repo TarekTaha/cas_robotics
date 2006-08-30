@@ -90,7 +90,7 @@ double ForceField::Dist2Robot(QPointF ray_end,double &angle)
 		}
 	}
 	angle = ATAN2(ray_end,Intersection);
-	return dist;
+	return shortest_dist;
 };
 void ForceField::CrossProduct(double MatrixA[3], double MatrixB[3], double MatrixC[3])
 {
@@ -127,9 +127,10 @@ velVector ForceField::GenerateField(Pose pose,QVector<QPointF> laser_set,Pose Go
  				inter_point.direction = 0;
  			}
  		}
- 		average_x = sum_x/(j+1);
+ 		average_x = sum_x/(j+1);		
 	   	if (!IsZero(max_inter.force))
 	   	{
+	   		qDebug("MAX INTER FORCE:%f",max_inter.force); 	   		
      		LSCurveFitting(obstacles_set[i],coefficient,curvefittingorder);
      		double DiffInterPoint = coefficient[1], Xoffset = max_inter.location.x() - average_x;
      		for (int diffo = 2; diffo < curvefittingorder; diffo++)
@@ -143,6 +144,7 @@ velVector ForceField::GenerateField(Pose pose,QVector<QPointF> laser_set,Pose Go
 	 }
 	if(FF_algorithm == VariableSpeedFF)
 	{
+		//qDebug("Obstacle Interaction Set Before VSFF=%d",obstacle_interaction_set.size());
  		VSFF(obstacle_interaction_set);
 	}
 	else
@@ -190,13 +192,21 @@ double ForceField::FindNorm(QPointF interaction_point, double Tang)
 
 double ForceField::ForceValue(QPointF ray_end,Pose laser_pose)
 {
+ 	double MinSpeed = 0.05;
+ 	if ((robotSpeed < MinSpeed) && (robotSpeed >= 0))
+ 	{
+ 		robotSpeed = MinSpeed;
+ 	}
+ 	if ((robotSpeed > - MinSpeed) && (robotSpeed < 0))
+ 	{
+ 		robotSpeed = - MinSpeed;
+ 	}
 	double angle,closest_dist;
 	closest_dist = Dist2Robot(ray_end,angle);
- 	double Er = robotSpeed / (MaxSpeed * SysC);
+ 	double Er = fabs(robotSpeed) / (MaxSpeed * SysC);
  	double Dmax = SysK * Er * robotRadius / (1 - Er * cos(angle));
  	double Dmin = FixedRatio * Dmax;
  	double Ratio = closest_dist / Dmax;
-
  	double ForceAmp;
  	if (Ratio >= 1)
  	{
@@ -211,8 +221,9 @@ double ForceField::ForceValue(QPointF ray_end,Pose laser_pose)
    		ForceAmp = SysP * 10;
  	}
  	//printf ("ForceAmp=%f\n",ForceAmp);
+	qDebug("Er:%f Angle:%f Dmax:%f Dmin:%f Ratio:%f ClosestDist:%f ForceAmp:%f",Er,angle,Dmax,Dmin,Ratio,closest_dist,ForceAmp); 	
  	return(ForceAmp);
-	}
+}
 
 QVector < QVector<QPointF> > ForceField::DivObst(QVector<QPointF> laser_set,Pose laser_pose)
 {
