@@ -59,7 +59,7 @@ map
 # an obstacle that i can move around
 model
 (
-  size [ 0.4 0.4 ]
+  size [ 0.8 0.8 ]
   pose [-6 0 180]
   color "red" 
   gui_nose 1

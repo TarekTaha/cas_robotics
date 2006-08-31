@@ -410,6 +410,7 @@ Pose Navigator::getGoal(Node *global_path,Pose robotLocation,double traversable_
 void Navigator::run()
 {
 	connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));	
+	connect(this, SIGNAL(glRender()),robotManager->mapViewer, SLOT(update()));		
 	ControlAction cntrl;
 	QTime amcl_timer,delta_timer,redraw_timer;
 	double closest_obst=10;
@@ -466,8 +467,9 @@ void Navigator::run()
 		delta_timer.restart();
 		usleep(10000);
 		// Get current Robot Location
-//		amcl_location = robotManager->commManager->getLocation();
-		amcl_location = robotManager->commManager->getOdomLocation();
+		amcl_location = robotManager->commManager->getLocation();
+//		amcl_location = robotManager->commManager->getOdomLocation();
+		robotManager->robot->setPose(amcl_location);
 		speed = robotManager->commManager->getSpeed();
 		turnRate = robotManager->commManager->getTurnRate();
 		laser_set = robotManager->commManager->getLaserScan();
@@ -532,6 +534,7 @@ void Navigator::run()
 				else
 				{
 					qDebug("--->>> Destination Reached !!!");
+					emit pathTraversed();
 		 			end_reached = true;
 					break;
 				}
@@ -685,6 +688,7 @@ void Navigator::run()
  		if (redraw_timer.elapsed()>100)
  		{
 		 	emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);		
+		 	emit glRender();
 		 	redraw_timer.restart();	
  		}
 		/* Get the control Action to be applied, in this case it's a

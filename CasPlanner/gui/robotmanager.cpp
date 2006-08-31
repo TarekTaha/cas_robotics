@@ -78,7 +78,12 @@ int RobotManager::setNavContainer(NavContainer* con)
 	this->navCon = con;
 	return 1;
 }	
- 
+int RobotManager::setMapViewer(MapViewer* mapV)
+{
+	this->mapViewer = mapV;
+	return 1;
+}	
+
 int RobotManager::readRobotConfigs(ConfigFile *cf)
 {
 	robot = new Robot();

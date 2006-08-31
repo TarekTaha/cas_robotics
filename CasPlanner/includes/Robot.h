@@ -18,12 +18,13 @@ class Robot
 		//! Motion model
 		QString robotModel,robotName,robotIp;
 		//! Holds the Latest Robot Position
-		Pose location;
+		Pose robotLocation;
 		// Center of Rotation
 		QPointF robotCenter;
 		// For Rendering the Robot Rectangle
 		QVector<QPointF> local_edge_points, check_points;
 		void setCheckPoints(double o_r);
+		void setPose(Pose location);
 		void findR();
 		int  readConfigs(ConfigFile *cf);
 		Robot(ConfigFile *cf);

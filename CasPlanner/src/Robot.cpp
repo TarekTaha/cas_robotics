@@ -127,6 +127,12 @@ void Robot::findR()
  	}
 	this->robotRadius= max_dist;
 }	
+
+void Robot::setPose(Pose location)
+{
+	this->robotLocation = location;
+}
+
 Robot::Robot() 
 {
 };
