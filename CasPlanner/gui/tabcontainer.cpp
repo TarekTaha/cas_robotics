@@ -5,11 +5,12 @@ TabContainer::TabContainer(QWidget *parent,RobotManager *rob)
       robotManager(rob)
 {
     navCon = 	new NavContainer(parent,rob);
-    mapViewer = new MapViewer(parent,rob);
+    //mapViewer = new MapViewer(parent,rob);
     //sensorsGui = new SensorsGui(parent,rob);
     addTab(navCon, "Navigation Panel"); 
-    addTab(mapViewer, "OpenGl Map Viewer"); 
-    //addTab(sensorsGui, "Sensors Pannel");     
+    //addTab(mapViewer, "OpenGl Map Viewer"); 
+    //addTab(sensorsGui, "Sensors Pannel");  
+    qDebug("HERE"); fflush(stdout);
     updateGeometry();
 }
 void TabContainer::setRobotManager(RobotManager *robManager)

@@ -51,7 +51,8 @@ window
 
 map
 (
-  bitmap "bitmaps/casareaicp2.png"
+  #bitmap "bitmaps/casareaicp2.png"
+  bitmap "bitmaps/casareaicpA.png"
   map_resolution 0.05
   size [22.8 20.3]  # casarea
   name "casarea"

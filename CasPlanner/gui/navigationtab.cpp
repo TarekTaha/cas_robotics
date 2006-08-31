@@ -7,9 +7,19 @@ NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
    robotManager(rob),   
    navControlPanel(this,rob)
 {
-    QVBoxLayout *vLayout = new QVBoxLayout; 
-    mapPainter = new MapPainter(this,robotManager->mapName);
-    vLayout->addWidget(mapPainter,4); 
+   	qDebug("Map Name is %s", qPrintable(robotManager->mapName)); fflush(stdout);
+//    QVBoxLayout *vLayout = new QVBoxLayout;
+    QHBoxLayout *vLayout = new QHBoxLayout;
+    if(robotManager->renderingMethod == PAINTER_2D)
+	{
+		mapPainter = new MapPainter(this,robotManager->mapName);
+ 	    vLayout->addWidget(mapPainter,4);
+	}
+	else
+	{
+   	 	mapViewer = new MapViewer(this,robotManager,robotManager->mapName);		
+	    vLayout->addWidget(mapViewer,4); 
+	}
     vLayout->addWidget(&navControlPanel,1); 
     setLayout(vLayout); 
 
@@ -66,16 +76,42 @@ NavContainer::~NavContainer()
 void NavContainer::Plan()
 {
 	if(!robotManager->planner->pathPlanner->map)
-		robotManager->planner->SetMap(mapPainter->getImage());
-	path = robotManager->planner->FindPath(mapPainter->getStart(),mapPainter->getEnd());
-	mapPainter->drawPath(robotManager->planner->pathPlanner);
+	{
+	    if(robotManager->renderingMethod == PAINTER_2D)
+		{
+			robotManager->planner->SetMap(mapPainter->getImage());					
+		}
+		else
+		{
+			robotManager->planner->SetMap(mapViewer->getImage());							
+		}
+	}
+    if(robotManager->renderingMethod == PAINTER_2D)
+	{
+		path = robotManager->planner->FindPath(mapPainter->getStart(),mapPainter->getEnd());
+		mapPainter->drawPath(robotManager->planner->pathPlanner);
+	}
+	else
+	{
+			path = robotManager->planner->FindPath(mapViewer->getStart(),mapViewer->getEnd());						
+//			mapPainter->drawPath(robotManager->planner->pathPlanner);				
+	}	
 }
 
 void NavContainer::GenerateSpace()
 {
-	robotManager->planner->SetMap(mapPainter->getImage());
-	robotManager->planner->GenerateSpace();
-	mapPainter->drawPath(robotManager->planner->pathPlanner);
+    if(robotManager->renderingMethod == PAINTER_2D)
+	{			
+		robotManager->planner->SetMap(mapPainter->getImage());
+		robotManager->planner->GenerateSpace();
+		mapPainter->drawPath(robotManager->planner->pathPlanner);
+	}
+	else
+	{
+		robotManager->planner->SetMap(mapViewer->getImage());
+		robotManager->planner->GenerateSpace();
+//		mapPainter->drawPath(robotManager->planner->pathPlanner);		
+	}
 }
 
 void NavContainer::LoadMap()
@@ -115,7 +151,7 @@ NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
 	pause(true),
 	following(true)
 {  
-    QHBoxLayout *hlayout = new QHBoxLayout;
+    QVBoxLayout *hlayout = new QVBoxLayout;
     hlayout->addWidget(&planningGB,1);
     hlayout->addWidget(&parametersGB,1);
     hlayout->addWidget(&obstavoidGB,1);    
@@ -214,13 +250,6 @@ NavControlPanel::NavControlPanel(QWidget *parent,RobotManager *rob):
     connect(&forceFieldRadBtn, SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));    
     connect(&configSpaceRadBtn,SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));    
     connect(&noavoidRadBtn,    SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));            
-}
-void NavControlPanel::handleSelection()
-{
-    qDebug("Item selected ..."); 
-    //QTreeWidgetItem *item = selectedObject.currentItem();
-    //MapObject *mo = wiToMo[item]; 
-    //setActionValues(mo); 
 }
 
 void NavControlPanel::setToRoot()

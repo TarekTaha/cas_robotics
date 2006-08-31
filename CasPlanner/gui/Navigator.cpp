@@ -410,7 +410,7 @@ Pose Navigator::getGoal(Node *global_path,Pose robotLocation,double traversable_
 void Navigator::run()
 {
 	connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));	
-	connect(this, SIGNAL(glRender()),robotManager->mapViewer, SLOT(update()));		
+//	connect(this, SIGNAL(glRender()),robotManager->mapViewer, SLOT(update()));		
 	ControlAction cntrl;
 	QTime amcl_timer,delta_timer,redraw_timer;
 	double closest_obst=10;
@@ -473,7 +473,7 @@ void Navigator::run()
 		speed = robotManager->commManager->getSpeed();
 		turnRate = robotManager->commManager->getTurnRate();
 		laser_set = robotManager->commManager->getLaserScan();
-		qDebug("Navigator Turn Rate is:%f Orientation:%f",turnRate,amcl_location.phi);
+//		qDebug("Navigator Turn Rate is:%f Orientation:%f",turnRate,amcl_location.phi);
 //		cout<<"\n Current Location X:"<<amcl_location.p.x()<<" Y:"<<amcl_location.p.y()<<" Theta:"<<amcl_location.phi;
 		/* If this location is new, then use it. Otherwise
 		 * estimate the location based on the last reading.

@@ -19,7 +19,7 @@ class MapViewer : public QGLWidget
 {
 Q_OBJECT
     public:
-        MapViewer(QWidget *parent=0,RobotManager *rob=0);
+        MapViewer(QWidget *parent=0,RobotManager *rob=0,QString map="");
 		~MapViewer();
         void initializeGL();
         void paintGL();
@@ -28,9 +28,16 @@ Q_OBJECT
         QSize minimumSizeHint();
 		void keyPressEvent(QKeyEvent *e);
 		void mousePressEvent(QMouseEvent *me);
+		void mouseDoubleClickEvent(QMouseEvent *me);
+		void getOGLPos(double x, double y);
 		void mouseReleaseEvent(QMouseEvent *me);
 		void focusInEvent(QFocusEvent *fe);
 		void focusOutEvent(QFocusEvent *fe);
+		QImage getImage();
+		void  SetMapFileName(QString name);
+		Pose getStart();
+		Pose getEnd();
+		void setMapName(QString name);
 		void renderRobot();
 		void renderLaser();	
 		GLuint makeObject();
@@ -73,11 +80,13 @@ Q_OBJECT
 		bool showPatchBorders; 
 		bool start_initialized,end_initialized;
 		Pose start,end;
+		QString mapName;
 //		RobotRender * robotRender;
 	    MapManager mapManager; 
 	    Map * mapData; 	
 	    QColor clearColor;
 	   	QImage image;
+	   	QPointF mouseDouble;
 		QHash<QString, int> snapDLs;
 		friend class MapControlPanel; 
 		GLuint texId; 

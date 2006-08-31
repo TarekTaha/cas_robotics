@@ -1,6 +1,6 @@
 #include "mapviewer.h"
 
-MapViewer::MapViewer(QWidget *parent,RobotManager *rob)
+MapViewer::MapViewer(QWidget *parent,RobotManager *rob,QString map_name)
  : QGLWidget(QGLFormat(QGL::AlphaChannel), parent),
  step(1),
  robotManager(rob),
@@ -17,20 +17,20 @@ MapViewer::MapViewer(QWidget *parent,RobotManager *rob)
  showGrids(true),  
  showRobots(true), 
  showPointclouds(true), 
- showPatchBorders(true)
+ showPatchBorders(true),
+ start_initialized(false),
+ end_initialized(false),
+ mapName(map_name)
 {
-    //robotRender = new RobotRender(this,rob->robot);
   	clearColor = Qt::black;
     setFocusPolicy(Qt::StrongFocus);
-//  makeCurrent(); 
     glGenTextures(1, &texId); 
-    qWarning("Initialized !!!"); fflush(stdout);	
-	if(!image.load("resources//casareaicp.png", 0))
+	if(!image.load(mapName, 0))
 	{
 		qDebug("Error Loading Image");
 		exit(1);
 	}
-	mapData = mapManager.provideMapOG(image,0.05,Pose(0,0,0),true);
+	mapData = mapManager.provideMapOG(image,0.05,Pose(0,0,0),false);
 }
 
 QSize MapViewer::sizeHint()
@@ -41,6 +41,11 @@ QSize MapViewer::sizeHint()
 QSize MapViewer::minimumSizeHint()
 {
     return QSize(320,240);   
+}
+
+void MapViewer::setMapName(QString name)
+{
+	this->mapName = name;
 }
 
 void MapViewer::initializeGL()
@@ -69,6 +74,25 @@ void MapViewer::resizeGL(int w, int h)
     glTranslatef(0,0,-2);
     glViewport(0,0,w,h); 
     updateGL();
+}
+void  MapViewer::SetMapFileName(QString name)
+{
+	this->mapName = name;	
+}
+
+Pose MapViewer::getStart()
+{
+	return this->start;	
+}
+
+Pose MapViewer::getEnd()
+{
+	return this->end;
+}
+
+QImage MapViewer::getImage()
+{
+	return this->image;
 }
 
 void MapViewer::setProvider(MapProvider *)
@@ -232,7 +256,6 @@ void MapViewer::renderMap()
 }
 void MapViewer::paintGL()
 {
-//  qDebug("MAPVIEWER paintGL on mapview called");
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
@@ -253,6 +276,8 @@ void MapViewer::paintGL()
     glRotatef(yaw,0,0,1); 
  
     glTranslatef(xOffset, yOffset, zOffset);
+
+//	getOGLPos(mouseDouble.x(),mouseDouble.x());
 
     if(showGrids)
     {
@@ -302,7 +327,7 @@ void MapViewer::paintGL()
     renderMap();
     renderLaser();
     renderRobot();
-        
+    
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_POINT_SMOOTH); 
@@ -385,50 +410,76 @@ void MapViewer::setShowPatchBorders(int state)
     }
     update(); 
 }
+void MapViewer::mouseDoubleClickEvent(QMouseEvent *me)
+{
+	double x = me->x();
+	double y = me->y();	
+	if(step == 1)
+	{
+		start.p.setX(x);
+		start.p.setY(y);	
+		step++;
+		start_initialized = end_initialized = false;
+	}
+	else if(step==3)
+	{
+		end.p.setX(x);
+		end.p.setY(y);
+		end_initialized = true;
+		step++;
+	}
+    qDebug("Mouse Double click x: %f y: %f",x,y); 
+    mouseDouble.setX(x);
+    mouseDouble.setY(y);    
+}
+
+void MapViewer::getOGLPos(double x, double y)
+{
+	GLint viewport[4];
+	GLdouble modelview[16];
+	GLdouble projection[16];
+	GLfloat winX, winY, winZ;
+	GLdouble posX, posY, posZ;
+
+	glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
+	glGetDoublev( GL_PROJECTION_MATRIX, projection );
+	glGetIntegerv( GL_VIEWPORT, viewport );
+    qDebug("ViewPort x: %d y: %d W:%d H:%d",viewport[0],viewport[1],viewport[2],viewport[3]); 	
+	winX = x;
+	winY = (float)viewport[3] - y;
+	glReadPixels( (int)x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
+
+	gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+    qDebug("Mouse Double click x: %f y: %f z:%f",posX,posY,posZ); 	
+//	return CVector3(posX, posY, posZ);
+}
 
 void MapViewer::mousePressEvent(QMouseEvent *me)
 {
 	double x = me->x();
 	double y = me->y();
-    qDebug("Mouse pressed x: %f y: %f",x,y); 
+    //qDebug("Mouse pressed x: %f y: %f",x,y); 
 	setMouseTracking(true);
-	switch (step)
+	if(step ==2)
 	{
-		case 1:
-			start.p.setX(x);
-			start.p.setY(y);	
-			step++;
-			break;
-		case 2:
-			// Delta swapped becuase of image coordinate		
-			start.phi = atan2(start.p.y()-y,x-start.p.x());
-			qDebug("Start Angle =%f",RTOD(start.phi));
-			start_initialized = true;
-			step++;
-			break;
-		case 3:
-			end.p.setX(x);
-			end.p.setY(y);	
-			step++;
-			break;
-		case 4:
-			// Delta swapped becuase of image coordinate
-			end.phi = atan2(end.p.y()-y,x-end.p.x());
-			qDebug("End Angle =%f",RTOD(end.phi));		
-			end_initialized = true;
-			step++;
-			break;
-		default:
-			step = 1;
-			setMouseTracking(false);
-			start_initialized = false;
-			end_initialized   = false;
-	}    
+		start.phi = atan2(start.p.y()-y,x-start.p.x());
+		qDebug("Start Angle =%f",RTOD(start.phi));				
+		start_initialized = true;	
+		step++;
+	}
+	else if(step == 4)
+	{
+		end.phi = atan2(end.p.y()-y,x-end.p.x());
+		qDebug("End Angle =%f",RTOD(end.phi));		
+		end_initialized = true;
+		step = 1;
+	}
 }
 
 void MapViewer::mouseReleaseEvent(QMouseEvent *)
 {
 }
+
 void MapViewer::keyPressEvent(QKeyEvent *e)
 {
     if(e->key() == Qt::Key_C)

@@ -41,7 +41,8 @@ RobotManager::RobotManager(QStringList configFiles)
 		}
 		if(!robot)
 		{
-			qDebug("Robot Section was not Found in the Configuration file, this section is essential!!!"); 							
+			qDebug("Robot Section was not Found in the Configuration file, this section is essential!!!"); 
+			fflush(stdout)							;
 			exit(1);
 		}
 		for(int i=0; i < numSections; i++)
@@ -49,9 +50,23 @@ RobotManager::RobotManager(QStringList configFiles)
 		    QString sectionName = cf->GetSectionType(i);
 		    if(sectionName == "GUI")
 		    {
-				//If we want to add more tabs or GUI options
-				// For future use
-		    }
+				QString render = cf->ReadString(i, "renderingMethod", "OpenGL");
+				if(render =="OpenGL")
+				{
+					this->renderingMethod = OPENGL;
+					qDebug("OpenGL !!!");					
+				}
+				else if (render =="Painter2D")
+				{
+					this->renderingMethod = PAINTER_2D;
+					qDebug("2D Painter !!!");										
+				}
+				else
+				{
+					qDebug("Unknown Rendering Method !!!");
+					exit(1);
+				}
+			}
 		    if(sectionName == "CommInterfaces")
 		    {
 				readCommManagerConfigs(cf); 
@@ -66,7 +81,7 @@ RobotManager::RobotManager(QStringList configFiles)
 		    }
 		    if(sectionName == "Map")
 		    {
-				mapName = cf->ReadString(i, "mapname", "resources//casareaicp2.png");
+				mapName = cf->ReadString(i, "mapname", "resources//casareaicpA.png");
 		    }		
 		}
 		delete cf;    

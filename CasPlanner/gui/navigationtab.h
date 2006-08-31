@@ -18,6 +18,7 @@
 #include "configfile.h"
 
 class RobotManager;
+class MapViewer;
 
 class NavControlPanel: public QWidget 
 {
@@ -26,7 +27,6 @@ Q_OBJECT
 		NavControlPanel(QWidget *parent ,RobotManager *rob);
 	public slots:
 		void updateMap(); 
-		void handleSelection(); 
 		void updateSelectedObject(double);
 		void updateSelectedAvoidanceAlgo(bool);
 		void save();
@@ -83,6 +83,7 @@ Q_OBJECT
 		NavContainer(QWidget *parent ,RobotManager *robotManager);
 		~NavContainer();
 		MapPainter * mapPainter;
+		MapViewer  * mapViewer;
 	public slots:
 		void Plan();
 		void LoadMap(); 
