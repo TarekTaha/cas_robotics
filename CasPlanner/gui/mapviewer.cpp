@@ -19,6 +19,7 @@ MapViewer::MapViewer(QWidget *parent,RobotManager *rob)
  showPointclouds(true), 
  showPatchBorders(true)
 {
+    //robotRender = new RobotRender(this,rob->robot);
   	clearColor = Qt::black;
     setFocusPolicy(Qt::StrongFocus);
 //  makeCurrent(); 
@@ -74,11 +75,80 @@ void MapViewer::setProvider(MapProvider *)
 {
     
 }
+void MapViewer::renderLaser()
+{
+//	double maxRange = 8.0;
+    QVector<QPointF> laserData = robotManager->commManager->getLaserScan(); 
+    Pose loc = robotManager->robot->robotLocation;	
+    glPushMatrix(); 
+    glTranslatef(loc.p.x(),loc.p.y(),0);
+    glRotated(RTOD(loc.phi),0,0,1);    
+//    glBegin(GL_QUADS); 
+//    	glVertex2f(-maxRange, -maxRange); 
+//	    glVertex2f(-maxRange, maxRange); 
+//	    glVertex2f(maxRange, maxRange); 
+//    	glVertex2f(maxRange, -maxRange); 
+////    	glVertex2f(0, 0); 
+////	    glVertex2f(0, 1); 
+////	    glVertex2f(1, 1); 
+////    	glVertex2f(1, 0); 
+//    glEnd(); 
+    
+    glColor3f(0.623,0.811,1); 
+    
+    glBegin(GL_TRIANGLE_FAN);
+    	glVertex2f(0,0);  
+	    if(laserData.size() > 0)
+    	{
+        	for(int i=0; i < laserData.size(); i++)
+	        {
+    	        glVertex2f(laserData[i].x(), laserData[i].y());  
+        	}
+	    }
+    	glVertex2f(0,0);
+    glEnd(); 
+    glPopMatrix();	
+}
+void MapViewer::renderRobot()
+{
+    Pose loc = robotManager->robot->robotLocation;	
+	if(trail.size()==0 && loc.p!=QPointF(0,0))
+	{
+		trail.push_back(loc.p);		
+	}
+	else if(trail[trail.size()-1]!=loc.p)
+	{
+		trail.push_back(loc.p);
+	}
+	if(trail.size()>1)
+	{
+    	glColor4f(0,0,0,1);
+	    glBegin(GL_LINE_STRIP);
+		    for(int i =0;i<trail.size();i++)
+		    {
+		    	glVertex2f(trail[i].x(),trail[i].y());
+		    }
+	    glEnd();
+	}
+    glPushMatrix();
+    glTranslatef(loc.p.x(),loc.p.y(),0);
+    glRotated(RTOD(loc.phi),0,0,1);
+    glColor4f(0,0,1,0.8);
+    glShadeModel(GL_FLAT);
+    // Surrounding BOX
+	glColor4f(1,1,1,0.5); 
+	glBegin(GL_TRIANGLE_FAN);
+	for(int i=0;i<robotManager->robot->local_edge_points.size();i++)
+	{
+		glVertex2f(robotManager->robot->local_edge_points[i].x(),robotManager->robot->local_edge_points[i].y());
+	}
+	glEnd();
+    glPopMatrix();
+}
 
 void MapViewer::update()
 {
-      //mapData = provider->provideMap();
-      this->updateGL(); 
+      this->updateGL();
 }
 void MapViewer::renderMap()
 {
@@ -230,7 +300,9 @@ void MapViewer::paintGL()
     glColor4f(0,0,0,1.0);
 
     renderMap();
-    
+    renderLaser();
+    renderRobot();
+        
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_POINT_SMOOTH); 
@@ -359,7 +431,18 @@ void MapViewer::mouseReleaseEvent(QMouseEvent *)
 }
 void MapViewer::keyPressEvent(QKeyEvent *e)
 {
-    if(e->key() == Qt::Key_W)
+    if(e->key() == Qt::Key_C)
+    {
+		if(e->modifiers() && Qt::ShiftModifier)
+		{
+		    trail.clear();
+		}
+		else 
+		{
+
+		} 
+    }	
+    else if(e->key() == Qt::Key_W)
     {
 		if(e->modifiers() && Qt::ShiftModifier)
 		{

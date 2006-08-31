@@ -52,6 +52,7 @@ class Navigator : public Controller
 	signals:
 		void drawLocalPath(PathPlanner *,Pose *,int *);
 		void pathTraversed();
+		void glRender();
 	protected:
 		Pose	old_amcl,amcl_location,EstimatedPos,laser_pose;
 		double 	angle,prev_angle,theta,error_orientation,

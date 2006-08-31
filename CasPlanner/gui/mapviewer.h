@@ -9,8 +9,10 @@
 #include "interfaceprovider.h"
 #include "MapManager.h"
 #include "robotmanager.h"
+//#include "robotrender.h"
 #include "map.h"
 
+//class RobotRender;
 class RobotManager;
 
 class MapViewer : public QGLWidget
@@ -29,6 +31,8 @@ Q_OBJECT
 		void mouseReleaseEvent(QMouseEvent *me);
 		void focusInEvent(QFocusEvent *fe);
 		void focusOutEvent(QFocusEvent *fe);
+		void renderRobot();
+		void renderLaser();	
 		GLuint makeObject();
 		QImage captureMap();
         virtual void setProvider(MapProvider *provider);
@@ -51,30 +55,32 @@ Q_OBJECT
 		void yawMONeg();
 		
     private:
-	int screenWidth,count,step;
-    RobotManager * robotManager;
-    int screenHeight;  
-	float zoomFactor; 
-	float xOffset, yOffset, zOffset; 
-	float yaw, pitch; 
-	float aspectRatio; 
-	float fudgeFactor; 
-	bool showOGs;
-	bool showSnaps;
-	bool showLabels; 
-	bool showGrids; 
-	bool showRobots; 
-	bool showPointclouds; 
-	bool showPatchBorders; 
-	bool start_initialized,end_initialized;
-	Pose start,end;
-    MapManager mapManager; 
-    Map * mapData; 	
-    QColor clearColor;
-   	QImage image;
-	QHash<QString, int> snapDLs;
-	friend class MapControlPanel; 
-	GLuint texId; 
+		int screenWidth,count,step;
+		QVector <QPointF> trail;
+	    RobotManager * robotManager;
+	    int screenHeight;  
+		float zoomFactor; 
+		float xOffset, yOffset, zOffset; 
+		float yaw, pitch; 
+		float aspectRatio; 
+		float fudgeFactor; 
+		bool showOGs;
+		bool showSnaps;
+		bool showLabels; 
+		bool showGrids; 
+		bool showRobots; 
+		bool showPointclouds; 
+		bool showPatchBorders; 
+		bool start_initialized,end_initialized;
+		Pose start,end;
+//		RobotRender * robotRender;
+	    MapManager mapManager; 
+	    Map * mapData; 	
+	    QColor clearColor;
+	   	QImage image;
+		QHash<QString, int> snapDLs;
+		friend class MapControlPanel; 
+		GLuint texId; 
 };
 
 

@@ -11,10 +11,13 @@
 #include "Navigator.h"
 #include "configfile.h"
 #include "Robot.h"
+#include "mapviewer.h"
 
 class Navigator;
 class NavContainer;
 class PlanningManager;
+class MapViewer;
+
 enum{FORCE_FIELD,VFH,CONFIG_SPACE,NO_AVOID};
 class RobotManager : public QObject //: public CommManager, public PlanningManager ,public Navigator
 {
@@ -28,12 +31,14 @@ class RobotManager : public QObject //: public CommManager, public PlanningManag
 		int readPlannerConfigs(ConfigFile *cf);
 		int readNavigatorConfigs(ConfigFile *cf);
 		int setNavContainer(NavContainer*);
+		int setMapViewer(MapViewer*);
 		int start();
 		int startPlanner();
 		int startNavigator();
 		int startComms();
 		QString mapName;
 		NavContainer *navCon;
+		MapViewer *mapViewer;
 		CommManager * commManager;
 		PlanningManager *planner;
 		PathPlanner * local_planner;
