@@ -19,6 +19,7 @@ class PlanningManager;
 class MapViewer;
 
 enum{FORCE_FIELD,VFH,CONFIG_SPACE,NO_AVOID};
+enum{OPENGL,PAINTER_2D};
 class RobotManager : public QObject //: public CommManager, public PlanningManager ,public Navigator
 {
 	Q_OBJECT
@@ -36,6 +37,7 @@ class RobotManager : public QObject //: public CommManager, public PlanningManag
 		int startPlanner();
 		int startNavigator();
 		int startComms();
+		int renderingMethod;
 		QString mapName;
 		NavContainer *navCon;
 		MapViewer *mapViewer;

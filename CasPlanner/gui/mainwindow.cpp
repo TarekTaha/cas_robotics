@@ -47,7 +47,7 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     statusLogger->addStatusMsg(0,1,"Start of Loggs ..."); 
 
     //Comms is now set up, connect map view to map manager. 
-    qDebug("Initializing Tabs"); 
+//    qDebug("Initializing Tabs"); 
     connect(robotManager->commManager, SIGNAL(statusMsg(int,int,QString)), statusLogger, SLOT(addStatusMsg(int,int,QString))); 
 //    connect(emergStop, SIGNAL(pressed()), robotManager->commManager, SLOT(emergencyStop()));
     connect(emergStop, SIGNAL(pressed()), robotManager->navigator, SLOT(StopRobot()));

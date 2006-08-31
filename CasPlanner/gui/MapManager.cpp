@@ -83,6 +83,6 @@ Map *MapManager::provideMapOG(QImage image,double res,Pose map_pose,bool negate)
 			}
 		}
 	}
-	qDebug("Count is:%ld",count);
+//	qDebug("Count is:%ld",count);
 	return retval;
 }
