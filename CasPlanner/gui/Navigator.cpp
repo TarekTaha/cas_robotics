@@ -473,7 +473,7 @@ void Navigator::run()
 		speed = robotManager->commManager->getSpeed();
 		turnRate = robotManager->commManager->getTurnRate();
 		laser_set = robotManager->commManager->getLaserScan();
-//		qDebug("Turn Rate is:%f",turnRate);
+		qDebug("Navigator Turn Rate is:%f Orientation:%f",turnRate,amcl_location.phi);
 //		cout<<"\n Current Location X:"<<amcl_location.p.x()<<" Y:"<<amcl_location.p.y()<<" Theta:"<<amcl_location.phi;
 		/* If this location is new, then use it. Otherwise
 		 * estimate the location based on the last reading.
@@ -706,7 +706,8 @@ void Navigator::run()
 					//Force Field
 					velVector action;
 					ff_time.restart();
-					action = FF->GenerateField(EstimatedPos,laser_set,goal,speed,turnRate);
+				 	//qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);
+					action = FF->GenerateField(amcl_location,laser_set,goal,speed,turnRate);
 					qDebug("FF Speed is:%f TurnRate is:%f  time is:%dms",action.speed,action.turnRate,ff_time.elapsed());	
 					robotManager->commManager->setSpeed(action.speed);						
 					robotManager->commManager->setTurnRate(action.turnRate);		

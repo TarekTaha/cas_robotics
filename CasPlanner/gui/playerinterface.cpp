@@ -314,7 +314,7 @@ void PlayerInterface::run ()
 	        	}
 	            getspeed = drive->GetXSpeed();
 //	            getturnrate = drive->GetYSpeed();
-	            getturnrate = drive->GetYaw();	            
+	            getturnrate = drive->GetYawSpeed();	            
 	            ps = drive->GetPose();
 	            odom_location.p.setX(drive->GetXPos());
 	            odom_location.p.setY(drive->GetYPos());
