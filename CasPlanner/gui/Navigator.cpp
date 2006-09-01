@@ -536,7 +536,7 @@ void Navigator::run()
 				else
 				{
 					qDebug("--->>> Destination Reached !!!");
-					emit pathTraversed();
+					//emit pathTraversed();
 		 			end_reached = true;
 					break;
 				}

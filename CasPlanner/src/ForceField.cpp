@@ -553,7 +553,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set)
   	robotTurnRate = anglebetw / TimeStep;
   	
   	qDebug ("robotTurnRate=%f", robotTurnRate);  
-  	double TurnLimit = 0.2;
+  	double TurnLimit = 0.1;
   	if (robotTurnRate > TurnLimit)
   	{
   		robotTurnRate = TurnLimit;
