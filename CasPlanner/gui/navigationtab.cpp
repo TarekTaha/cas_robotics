@@ -7,8 +7,8 @@ NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
    robotManager(rob),   
    navControlPanel(this,rob)
 {
-   	qDebug("Map Name is %s", qPrintable(robotManager->mapName)); fflush(stdout);
-//    QVBoxLayout *vLayout = new QVBoxLayout;
+//	qDebug("Map Name is %s", qPrintable(robotManager->mapName)); fflush(stdout);
+//  QVBoxLayout *vLayout = new QVBoxLayout;
     QHBoxLayout *vLayout = new QHBoxLayout;
     if(robotManager->renderingMethod == PAINTER_2D)
 	{
@@ -93,8 +93,8 @@ void NavContainer::Plan()
 	}
 	else
 	{
-			path = robotManager->planner->FindPath(mapViewer->getStart(),mapViewer->getEnd());						
-//			mapPainter->drawPath(robotManager->planner->pathPlanner);				
+		path = robotManager->planner->FindPath(mapViewer->getStart(),mapViewer->getEnd());						
+//		mapPainter->drawPath(robotManager->planner->pathPlanner);				
 	}	
 }
 
@@ -283,22 +283,22 @@ void NavControlPanel::updateSelectedAvoidanceAlgo(bool)
 	}
 	if(vfhRadBtn.isChecked())
 	{
-		qDebug("VFH");
+//		qDebug("VFH");
 		robotManager->navigator->setObstAvoidAlgo(VFH);
 	}
 	else if(forceFieldRadBtn.isChecked())
 	{
-		qDebug("Force Field");		
+//		qDebug("Force Field");		
 		robotManager->navigator->setObstAvoidAlgo(FORCE_FIELD);	
 	}
 	else if(configSpaceRadBtn.isChecked())
 	{
-		qDebug("Config Space");		
+//		qDebug("Config Space");		
 		robotManager->navigator->setObstAvoidAlgo(CONFIG_SPACE);	
 	}
 	else if(noavoidRadBtn.isChecked())
 	{
-		qDebug("NO Avoidace");		
+//		qDebug("NO Avoidace");		
 		robotManager->navigator->setObstAvoidAlgo(NO_AVOID);	
 	}
 }

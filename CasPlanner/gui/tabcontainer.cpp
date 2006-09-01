@@ -7,10 +7,16 @@ TabContainer::TabContainer(QWidget *parent,RobotManager *rob)
     navCon = 	new NavContainer(parent,rob);
     //mapViewer = new MapViewer(parent,rob);
     //sensorsGui = new SensorsGui(parent,rob);
-    addTab(navCon, "Navigation Panel"); 
+    if(rob->renderingMethod == PAINTER_2D)
+    {
+    	addTab(navCon, "2D Painter Navigation Panel"); 
+    }
+    else
+    {
+    	addTab(navCon, "OpenGL Navigation Panel");     	
+    }
     //addTab(mapViewer, "OpenGl Map Viewer"); 
     //addTab(sensorsGui, "Sensors Pannel");  
-    qDebug("HERE"); fflush(stdout);
     updateGeometry();
 }
 void TabContainer::setRobotManager(RobotManager *robManager)

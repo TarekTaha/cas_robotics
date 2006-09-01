@@ -30,9 +30,11 @@ Q_OBJECT
 		void mousePressEvent(QMouseEvent *me);
 		void mouseDoubleClickEvent(QMouseEvent *me);
 		void getOGLPos(double x, double y);
+		void getOGLPos(QPointF point);	
 		void mouseReleaseEvent(QMouseEvent *me);
 		void focusInEvent(QFocusEvent *fe);
 		void focusOutEvent(QFocusEvent *fe);
+		int  loadImage(QString name);
 		QImage getImage();
 		void  SetMapFileName(QString name);
 		Pose getStart();
@@ -88,6 +90,10 @@ Q_OBJECT
 	   	QImage image;
 	   	QPointF mouseDouble;
 		QHash<QString, int> snapDLs;
+	    GLdouble modelMatrix[16];
+	    double position[3];
+	    int viewport[4];		
+	    GLdouble projMatrix[16];	    
 		friend class MapControlPanel; 
 		GLuint texId; 
 };

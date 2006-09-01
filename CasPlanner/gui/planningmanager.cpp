@@ -175,7 +175,14 @@ Node * PlanningManager::FindPath(Pose start,Pose end)
 	{
 		GenerateSpace();
 	}
-	retval = pathPlanner->Search(start,end);
+	if(robotManager->renderingMethod == PAINTER_2D)
+	{
+		retval = pathPlanner->Search(start,end,PIXEL);
+	}
+	else
+	{
+		retval = pathPlanner->Search(start,end,METRIC);		
+	}
 	if(retval)
 	{
 		pathPlanner->PrintNodeList();

@@ -25,12 +25,21 @@ MapViewer::MapViewer(QWidget *parent,RobotManager *rob,QString map_name)
   	clearColor = Qt::black;
     setFocusPolicy(Qt::StrongFocus);
     glGenTextures(1, &texId); 
-	if(!image.load(mapName, 0))
+	if(!loadImage(mapName))
 	{
 		qDebug("Error Loading Image");
 		exit(1);
 	}
-	mapData = mapManager.provideMapOG(image,0.05,Pose(0,0,0),false);
+}
+
+int MapViewer::loadImage(QString name)
+{
+	if(!image.load(name, 0))
+	{
+		return -1;
+	}
+	mapData = mapManager.provideMapOG(image,0.05,Pose(0,0,0),false);	
+	return 1;
 }
 
 QSize MapViewer::sizeHint()
@@ -52,7 +61,8 @@ void MapViewer::initializeGL()
 {
 	glEnable(GL_TEXTURE_2D);				// Enable Texture Mapping
 	glShadeModel(GL_SMOOTH);				// Enable Smooth Shading
-	glClearColor(0.70f, 0.7f, 0.7f, 1.0f);
+//	glClearColor(0.70f, 0.7f, 0.7f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClearDepth(1.0f);						// Depth Buffer Setup
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE);		// Set The Blending Function For Translucency
@@ -74,6 +84,9 @@ void MapViewer::resizeGL(int w, int h)
     glTranslatef(0,0,-2);
     glViewport(0,0,w,h); 
     updateGL();
+    glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
+    glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
+    glGetIntegerv(GL_VIEWPORT,viewport);    
 }
 void  MapViewer::SetMapFileName(QString name)
 {
@@ -118,7 +131,7 @@ void MapViewer::renderLaser()
 ////    	glVertex2f(1, 0); 
 //    glEnd(); 
     
-    glColor3f(0.623,0.811,1); 
+    glColor3f(0.623,0.811,0.3); 
     
     glBegin(GL_TRIANGLE_FAN);
     	glVertex2f(0,0);  
@@ -159,7 +172,7 @@ void MapViewer::renderRobot()
     glRotated(RTOD(loc.phi),0,0,1);
     glColor4f(0,0,1,0.8);
     glShadeModel(GL_FLAT);
-    // Surrounding BOX
+    // Map Boundaries BOX
 	glColor4f(1,1,1,0.5); 
 	glBegin(GL_TRIANGLE_FAN);
 	for(int i=0;i<robotManager->robot->local_edge_points.size();i++)
@@ -167,6 +180,22 @@ void MapViewer::renderRobot()
 		glVertex2f(robotManager->robot->local_edge_points[i].x(),robotManager->robot->local_edge_points[i].y());
 	}
 	glEnd();
+
+    glBegin(GL_LINE_LOOP);
+		glColor4f(0,0,1,0.5);  
+	    glVertex3f(1.3, 0.15,0); 			
+	    glVertex3f(1.5,0,0); 			    	
+	    glVertex3f(1.3,-0.15,0); 			    				    
+    glEnd();
+    
+    glBegin(GL_LINE_LOOP);
+		glColor4f(0,0,1,0.5);  
+	    glVertex3f(0,0,0); 			
+	    glVertex3f(1.5,0,0); 			    	
+    glEnd();    
+    
+    renderText(1.6,0,0, "Robot Direction");		    	    
+
     glPopMatrix();
 }
 
@@ -199,8 +228,12 @@ void MapViewer::renderMap()
 		    if(mapData->data[i][j] == true)
 			{
 		    	count++;
-				imgData[(j*mapData->width+i)*4] = 0;
-				imgData[(j*mapData->width+i)*4+1] =0; 
+//				imgData[(j*mapData->width+i)*4] = 0;
+//				imgData[(j*mapData->width+i)*4+1] =0; 
+//				imgData[(j*mapData->width+i)*4+2] = 255; 
+//				imgData[(j*mapData->width+i)*4+3] = 255;
+				imgData[(j*mapData->width+i)*4]   = 255;
+				imgData[(j*mapData->width+i)*4+1] = 255; 
 				imgData[(j*mapData->width+i)*4+2] = 255; 
 				imgData[(j*mapData->width+i)*4+3] = 255;
 			}
@@ -231,7 +264,8 @@ void MapViewer::renderMap()
     // Inverse the Y-axis    
     glScalef(1,-1,1);
     glTranslatef(-(mapData->width*mapData->resolution)/2.0,-(mapData->height*mapData->resolution)/2.0,0);
-    glColor4f(0,0,1,0.8);
+//    glColor4f(0,0,1,0.8);
+    glColor4f(1,1,1,0.8);
     glShadeModel(GL_FLAT);
 	// Define Coordinate System
     glBegin(GL_QUADS);
@@ -265,7 +299,12 @@ void MapViewer::paintGL()
     glEnable(GL_LINE_SMOOTH); 
     glEnable(GL_POLYGON_SMOOTH);
     glMatrixMode(GL_MODELVIEW);
-
+    glFlush();
+    
+    glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
+    glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
+    glGetIntegerv(GL_VIEWPORT,viewport); 
+    
     glPushMatrix();
     glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
     glColor4f(0,0,0,1); 
@@ -286,11 +325,12 @@ void MapViewer::paintGL()
 		    glBegin(GL_LINES);
 			    if(i==0)
 			    {
-					glColor4f(0,0,0,0.5);  
+//					glColor4f(0,0,0,0.5);  
+					glColor4f(1,1,1,0.5);  
 			    }
 			    else 
 			    {
-					glColor4f(0.5,0.5,0.5,0.5); 
+					glColor4f(0.5,0.5,0.5,0.5);
 			    }
 			    glVertex3f(-zoomFactor*3, i, 0); 
 			    glVertex3f(zoomFactor*3, i, 0); 
@@ -302,7 +342,8 @@ void MapViewer::paintGL()
 	    int i = int((mapData->width*mapData->resolution)/2.0 + 2);
 	    {
 		    glBegin(GL_LINE_LOOP);
-				glColor4f(0,0,0,0.5);  
+//				glColor4f(0,0,0,0.5);  
+				glColor4f(1,1,1,0.5);  
 			    glVertex3f(i-1,0.5,0); 			    	
 			    glVertex3f(i,0,0); 			    	
 			    glVertex3f(i-1,-0.5,0); 				    
@@ -313,7 +354,8 @@ void MapViewer::paintGL()
 	    int j = int((mapData->height*mapData->resolution)/2.0 + 2);
 	    {
 		    glBegin(GL_LINE_LOOP);
-				glColor4f(0,0,0,0.5);  
+//				glColor4f(0,0,0,0.5);  
+				glColor4f(1,1,1,0.5);  
 			    glVertex3f(-0.5,j-1,0); 			    	
 			    glVertex3f(0,j,0); 				    				    			    
 			    glVertex3f(0.5,j-1,0); 				    
@@ -413,45 +455,64 @@ void MapViewer::setShowPatchBorders(int state)
 void MapViewer::mouseDoubleClickEvent(QMouseEvent *me)
 {
 	double x = me->x();
-	double y = me->y();	
+	double y = me->y();
+    qDebug("Mouse Double click x: %f y: %f",x,y); 
+    mouseDouble.setX(x);
+    mouseDouble.setY(y);    
+    //getOGLPos(mouseDouble);
+    getOGLPos(x,y);		
 	if(step == 1)
 	{
-		start.p.setX(x);
-		start.p.setY(y);	
+		start.p.setX(position[0]);
+		start.p.setY(position[1]);	
 		step++;
 		start_initialized = end_initialized = false;
 	}
 	else if(step==3)
 	{
-		end.p.setX(x);
-		end.p.setY(y);
+		end.p.setX(position[0]);
+		end.p.setY(position[1]);
 		end_initialized = true;
 		step++;
 	}
-    qDebug("Mouse Double click x: %f y: %f",x,y); 
-    mouseDouble.setX(x);
-    mouseDouble.setY(y);    
+
 }
+
+
+void MapViewer::getOGLPos(QPointF point)
+{
+    gluUnProject(
+       point.x(),
+       point.y(),
+       0,
+       modelMatrix,
+       projMatrix,
+       viewport,
+    //the next 3 parameters are the pointers to the final object
+    //coordinates. Notice that these MUST be double's
+    &position[0], //-> pointer to your own position (optional)
+    &position[1], // id
+    &position[2] // id
+  	);
+    qDebug("Translated to x: %f y: %f z:%f",position[0],position[1],position[2]); 	  	
+};
 
 void MapViewer::getOGLPos(double x, double y)
 {
-	GLint viewport[4];
-	GLdouble modelview[16];
-	GLdouble projection[16];
 	GLfloat winX, winY, winZ;
 	GLdouble posX, posY, posZ;
 
-	glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
-	glGetDoublev( GL_PROJECTION_MATRIX, projection );
-	glGetIntegerv( GL_VIEWPORT, viewport );
-    qDebug("ViewPort x: %d y: %d W:%d H:%d",viewport[0],viewport[1],viewport[2],viewport[3]); 	
+//	glGetDoublev( GL_MODELVIEW_MATRIX, modelMatrix );
+//	glGetDoublev( GL_PROJECTION_MATRIX, projMatrix );
+//	glGetIntegerv( GL_VIEWPORT, viewport );
+
 	winX = x;
 	winY = (float)viewport[3] - y;
 	glReadPixels( (int)x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
-
-	gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
-    qDebug("Mouse Double click x: %f y: %f z:%f",posX,posY,posZ); 	
-//	return CVector3(posX, posY, posZ);
+	gluUnProject( winX, winY, winZ, modelMatrix, projMatrix, viewport, &posX, &posY, &posZ);
+    qDebug("Translated to x: %f y: %f z:%f",posX*0.025,posY*0.025,posZ*0.025); 	
+    position[0] = posX*0.025;
+    position[1] = posY*0.025;
 }
 
 void MapViewer::mousePressEvent(QMouseEvent *me)
@@ -603,14 +664,16 @@ void MapViewer::keyPressEvent(QKeyEvent *e)
 void MapViewer::focusInEvent(QFocusEvent *)
 {
     makeCurrent(); 
-    glClearColor(0.7f,0.7f,0.7f,1.0f);   
+//    glClearColor(0.7f,0.7f,0.7f,1.0f);   
+    glClearColor(0.0f,0.0f,0.0f,1.0f);   
     updateGL();
 }
 
 void MapViewer::focusOutEvent(QFocusEvent *)
 {
     makeCurrent();  
-    glClearColor(0.7f,0.7f,0.7f,1.0f);
+//    glClearColor(0.7f,0.7f,0.7f,1.0f);
+    glClearColor(0.0f,0.0f,0.0f,1.0f);       
     updateGL(); 
 }
 
