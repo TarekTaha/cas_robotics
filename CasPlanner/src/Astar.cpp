@@ -4,9 +4,9 @@ namespace CasPlanner
 {
 
 Astar::Astar(Robot *rob,double dG):
-	robot(rob),
 	distGoal(dG),
 	map(NULL),
+	robot(rob),		
 	root(NULL),
 	test(NULL),
 	path(NULL),
@@ -96,7 +96,7 @@ void Astar::FindRoot()
 	qDebug("	---->>>Root is Set to be X=%f Y=%f Phi=%f",root->pose.p.x(),root->pose.p.y(),RTOD(root->pose.phi));
 };
 
-Node *  Astar::Search(Pose start,Pose end)
+Node *  Astar::Search(Pose start,Pose end, int coord)
 {
 	int      ID = 1;
   	int      NodesExpanded = 0;
@@ -118,9 +118,11 @@ Node *  Astar::Search(Pose start,Pose end)
 		qDebug("Read the map and generate SearchSpace before Searching !!!");
 		return NULL;
 	}
-
-	this->ConvertPixel(&start.p);
-	this->ConvertPixel(&end.p);
+	if(coord == PIXEL)
+	{
+		this->ConvertPixel(&start.p);
+		this->ConvertPixel(&end.p);
+	}
 	this->start.p.setX(start.p.x());
 	this->start.p.setY(start.p.y());
 	this->start.phi = start.phi;

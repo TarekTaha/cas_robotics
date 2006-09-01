@@ -3,7 +3,6 @@
 
 #include <Astar.h>
 #include "interfaceprovider.h"
-
 namespace CasPlanner
 {
 class PathPlanner : public Astar

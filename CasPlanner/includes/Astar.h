@@ -14,6 +14,7 @@
 #include "SearchSpace.h"
 #include "interfaceprovider.h"
 
+enum{METRIC,PIXEL};
 namespace CasPlanner
 {
 
@@ -41,7 +42,7 @@ class Astar: public SearchSpace
 		void   ConvertToPixel (QPointF *p);
 		int    Obstacle   (QPointF p, double angle);
 		bool   GoalReached (Node *n);
-		Node*  Search(Pose start,Pose end);
+		Node*  Search(Pose start,Pose end,int);
 		virtual ~Astar();
 };
 

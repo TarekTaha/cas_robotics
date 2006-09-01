@@ -409,8 +409,10 @@ Pose Navigator::getGoal(Node *global_path,Pose robotLocation,double traversable_
 }
 void Navigator::run()
 {
-	connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));	
-//	connect(this, SIGNAL(glRender()),robotManager->mapViewer, SLOT(update()));		
+	if(robotManager->renderingMethod == PAINTER_2D)
+		connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));	
+	if(robotManager->renderingMethod == OPENGL)	
+		connect(this, SIGNAL(glRender()),robotManager->mapViewer, SLOT(update()));		
 	ControlAction cntrl;
 	QTime amcl_timer,delta_timer,redraw_timer;
 	double closest_obst=10;
@@ -662,7 +664,7 @@ void Navigator::run()
 //			 	local_path = local_planner->FindPath(start,target);
 //			 	if (local_path)
 //			 	{
-//			 		Node * temp = local_path;
+//			 		Node * temp = local_path;	
 //			 		// Changing the Path to the Global Coordinate
 //			 		pixel_loc.p -= local_planner->pathPlanner->map->center;
 //			 		while(temp)
@@ -687,8 +689,10 @@ void Navigator::run()
 //		}
  		if (redraw_timer.elapsed()>100)
  		{
-		 	emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);		
-		 	emit glRender();
+			if(robotManager->renderingMethod == PAINTER_2D) 			
+		 		emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);	
+			else if(robotManager->renderingMethod == OPENGL)		 			
+			 	emit glRender();
 		 	redraw_timer.restart();	
  		}
 		/* Get the control Action to be applied, in this case it's a
