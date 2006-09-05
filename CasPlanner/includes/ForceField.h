@@ -37,6 +37,7 @@ public:
 	void    CrossProduct(double MatrixA[3], double MatrixB[3], double MatrixC[3]);
 	void    SimFF(QVector<Interaction> obstacle_interaction_set);
 	double  ForceValue(QPointF ray_end,Pose laser_pose);
+	double  Delta_Angle(double a1, double a2);
 private :
 	double   FixedRatio,TimeStep,SysK,SysC,SysP,SysQ,MaxSpeed,MaxAcceT,OmegadotMax,OmegaMax,
 			 Gapdist,NPOL,INF,EP;
