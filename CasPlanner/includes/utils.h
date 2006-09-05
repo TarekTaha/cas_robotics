@@ -362,6 +362,13 @@ public :
 		p.setY(y);
 		phi = theta;
 	}
+//	Pose & operator=(const Pose &ps)
+//	{
+//		this->p.setX(ps.p.x());
+//		this->p.setY(ps.p.y());
+//		this->phi = ps.phi;
+//		return * this;
+//	}
 	bool operator==(const Pose& pose) const
   	{
     	return (isEqual(p.x(), pose.p.x()) && isEqual(p.y(),pose.p.y()) && isEqual(phi,pose.phi));

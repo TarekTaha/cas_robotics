@@ -90,7 +90,6 @@ Q_OBJECT
 		void GenerateSpace();
 		void Follow();
 		void Finished();
-		//void RenderMap(Map & map);
     private:
        	Node * path;
     	RobotManager * robotManager;

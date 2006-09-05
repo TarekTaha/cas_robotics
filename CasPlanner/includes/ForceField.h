@@ -8,6 +8,8 @@
 #include "utils.h"
 #include "Robot.h"
 #include "Vector2D.h"
+#include "playerinterface.h"
+
 using std::vector;
 typedef struct _interaction
 	{
@@ -26,8 +28,8 @@ class ForceField : public Robot
 public:
 	ForceField(Robot r,ConfigFile *cf);
 	virtual ~ForceField();
-	velVector GenerateField(Pose pose,QVector<QPointF> laser_set,Pose Goal,double speed,double turnrate);
-	QVector < QVector<QPointF> > DivObst(QVector<QPointF> laser_set,Pose laser_pose);	
+	velVector GenerateField(Pose pose,LaserScan laser_set,Pose Goal,double speed,double turnrate);
+	QVector < QVector<QPointF> > DivObst(LaserScan laser_set,Pose laser_pose);	
 	void    LSCurveFitting (QVector<QPointF> obstacle, double a[], int m);
 	double  Dist2Robot(QPointF ray_end,double &angle);
 	void    VSFF(QVector<Interaction> obstacle_interaction_set);	

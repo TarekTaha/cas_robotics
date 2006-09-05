@@ -1,6 +1,9 @@
 #ifndef ASTAR_H_
 #define ASTAR_H_
 
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
 #include <QPointF>
 #include <QBitArray>
 #include <QVector>

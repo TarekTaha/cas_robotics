@@ -32,7 +32,6 @@ class RobotManager : public QObject //: public CommManager, public PlanningManag
 		int readPlannerConfigs(ConfigFile *cf);
 		int readNavigatorConfigs(ConfigFile *cf);
 		int setNavContainer(NavContainer*);
-		int setMapViewer(MapViewer*);
 		int start();
 		int startPlanner();
 		int startNavigator();

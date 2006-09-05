@@ -103,7 +103,7 @@ Map CommManager::provideMap()
 	return player->provideMap();
 }
 
-QVector<QPointF> CommManager::getLaserScan()
+LaserScan CommManager::getLaserScan()
 {
   	return player->getLaserScan();
 }
@@ -128,7 +128,10 @@ int CommManager::readConfigs( ConfigFile *cf)
 				laserEnabled = true;
 				for(int c=0; c<cnt; c++)
 				{
-					laserIds.push_back(cf->ReadTupleInt(i,"laser_pose",c ,0));							
+					Laser ls;
+					int id = cf->ReadTupleInt(i,"lasers",c ,0);							
+					ls.index = id;
+					lasers.push_back(ls);							
 				}
 			}
 			else
@@ -208,8 +211,8 @@ int CommManager::start()
   	//Laser
   	if(laserEnabled)
   	{
-   	  	qDebug("\t\t\t	- Laser."); 
-    	player->setLasers(laserIds);
+   	  	qDebug("\t\t\t	- Laser:%d.",lasers.size()); 
+    	player->setLasers(lasers);
   	}
   	if(occMapEnabled)
   	{

@@ -39,7 +39,14 @@ NavContainer::NavContainer(QWidget *parent,RobotManager *rob)
 
 void NavContainer::Finished()
 {
-	navControlPanel.pathFollowBtn.setText("Follow");	
+	if(robotManager->navigator->isRunning())
+	{
+		robotManager->navigator->StopNavigating();
+		robotManager->navigator->quit();	
+		qDebug("Quitting Thread");
+	}
+	navControlPanel.pathFollowBtn.setText("Follow");
+	navControlPanel.following = true;	
 }
 
 void NavContainer::Follow()

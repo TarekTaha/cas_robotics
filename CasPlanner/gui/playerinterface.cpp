@@ -127,9 +127,10 @@ void PlayerInterface::enableMap(int  in_mapId)
     mapId = in_mapId;
 }
 
-void PlayerInterface::setLasers(QVector<int> laserIds)
+void PlayerInterface::setLasers(QVector<Laser> lasers)
 {
-	this->laserIds = laserIds;
+	this->lasers = lasers;
+//	qDebug("\n I got Lasers%d and now i have %d Lasers",lasers.size(),this->lasers.size());
 }
 void PlayerInterface::enableLocalizer(int localizerId)
 {
@@ -177,11 +178,11 @@ Pose PlayerInterface::getOdomLocation()
     return retval; 	
 }
 
-QVector<QPointF> PlayerInterface::getLaserScan()
+LaserScan PlayerInterface::getLaserScan()
 {
-	QVector<QPointF> retval;
+	LaserScan retval;
     dataLock.lockForWrite();
-    retval = laserScanPoints;
+    retval = laserScan;
     dataLock.unlock();
     return retval;
 }
@@ -245,12 +246,15 @@ void PlayerInterface::run ()
 	        drive = new Position2dProxy(pc,positionId);
 	   		qDebug("\t\t - Motor Control Interface Engaged Successfully"); 
 	    }
-	    laser.clear();
-	    for(int i=0; i < laserIds.size(); i++)
+	    for(int i=0; i < lasers.size(); i++)
 	    {
-	    	LaserProxy *lp = new LaserProxy(pc,laserIds[i]);
-            laser.push_back(lp);
-       		qDebug("\t\t - Laser interface:%d Interface Added Successfully",laserIds[i]);  
+	    	player_pose_t 	lp_pose;
+	    	lasers[i].lp = new LaserProxy(pc,lasers[i].index);
+	    	lp_pose = lasers[i].lp->GetPose();
+	    	lasers[i].pose.p.setX(lp_pose.px);
+	    	lasers[i].pose.p.setY(lp_pose.py);	    	
+	    	lasers[i].pose.phi = lp_pose.pa;
+       		qDebug("\t\t - Laser interface:%d Interface Added Successfully",lasers[i].index);  
 	    }
 	    if(mapEnabled)
 	    {
@@ -289,15 +293,16 @@ void PlayerInterface::run ()
 		//pc->ReadIfWaiting();
 		pc->Read();
 //		qDebug("\t\t PLAYER THREAD LOOP START %d",++cnt);		
+//		qDebug("\t\t Number of lasers %d",lasers.size());		
     	if(!emergencyStopped)
     	{
-		    for(int laser_indx=0; laser_indx < laserIds.size(); laser_indx++)
+		    for(int laser_indx=0; laser_indx < lasers.size(); laser_indx++)
 		    {
-		    	if (laserScanPoints.size())
-		    		laserScanPoints.clear();
-		        for(uint i=0; i< laser[laser_indx]->GetCount(); i++)
+		    	if (laserScan.points.size())
+		    		laserScan.points.clear();
+		        for(uint i=0; i< lasers[laser_indx].lp->GetCount(); i++)
 		        {
-			    	laserScanPoints.push_back(QPointF(laser[laser_indx]->GetPoint(i).px, laser[laser_indx]->GetPoint(i).py));    
+			    	laserScan.points.push_back(QPointF(lasers[laser_indx].lp->GetPoint(i).px, lasers[laser_indx].lp->GetPoint(i).py));    
 				}
 		  	} 
 	        if(ctrEnabled)

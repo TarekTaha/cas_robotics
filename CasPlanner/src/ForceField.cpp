@@ -98,7 +98,7 @@ void ForceField::CrossProduct(double MatrixA[3], double MatrixB[3], double Matri
 	MatrixC[1] = (MatrixA[2] * MatrixB[0]) - (MatrixB[2] * MatrixA[0]);
  	MatrixC[2] = (MatrixA[0] * MatrixB[1]) - (MatrixB[0] * MatrixA[1]);
 };	
-velVector ForceField::GenerateField(Pose pose,QVector<QPointF> laser_set,Pose Goal,double speed,double turnrate)
+velVector ForceField::GenerateField(Pose pose,LaserScan laser_set,Pose Goal,double speed,double turnrate)
 {
 	velVector action;
  	this->robotLocation = pose;
@@ -281,19 +281,19 @@ double ForceField::ForceValue(QPointF ray_end,Pose laser_pose)
  	return(ForceAmp);
 }
 
-QVector < QVector<QPointF> > ForceField::DivObst(QVector<QPointF> laser_set,Pose laser_pose)
+QVector < QVector<QPointF> > ForceField::DivObst(LaserScan laser_set,Pose laser_pose)
 {
  	double DistBetw;
  	QPointF p1,p2;
 	QVector < QVector<QPointF> > obstacles_set;
 	QVector<QPointF> obstacle;
-	p1.setX(laser_set[0].x())	; p1.setY(laser_set[0].y());		
+	p1.setX(laser_set.points[0].x())	; p1.setY(laser_set.points[0].y());		
 	obstacle.push_back(p1);		
-	for (int i = 0; i < laser_set.size() - 1; i++)
+	for (int i = 0; i < laser_set.points.size() - 1; i++)
  	{
-		p1.setX(laser_set[i].x())	; p1.setY(laser_set[i].y());
+		p1.setX(laser_set.points[i].x())	; p1.setY(laser_set.points[i].y());
 		p1 = Trans2Global(p1,laser_pose);p1 = Trans2Global(p1,robotLocation);
-		p2.setX(laser_set[i+1].x())	; p2.setY(laser_set[i+1].y());	
+		p2.setX(laser_set.points[i+1].x())	; p2.setY(laser_set.points[i+1].y());	
 		p2 = Trans2Global(p2,laser_pose);p2 = Trans2Global(p2,robotLocation);				
    		DistBetw = Dist(p1,p2);
    		if (DistBetw < Gapdist)
@@ -538,7 +538,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set)
   	p1.setX(cos(ForceAngle)); p1.setY(sin(ForceAngle));
   	p2.setX(cos(robotLocation.phi)); p2.setY(sin(robotLocation.phi));
   	p0.setX(0.0); p0.setY(0.0);
-  	double anglebetw = acos (DotMultiply(p1, p2, p0));
+  	double anglebetw = NORMALIZE(acos (DotMultiply(p1, p2, p0)));
   	double TransformMatrix1[2][2] = {{cos(anglebetw), sin(anglebetw)},
  									{-sin(anglebetw), cos(anglebetw)}};
  	double p1test[2], p1new[2] = {p1.x(), p1.y()};

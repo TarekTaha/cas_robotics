@@ -27,7 +27,6 @@ class Comms: public QObject
 		bool startConnected,activateControl,ptzEnabled,occMapEnabled,localizerEnabled,laserEnabled
 			 ,vfhEnabled;
     	QString name,playerIp; 
-    	QVector <int> laserIds;
         int playerPort,positionControlId,ptzId,mapId,localizerId,vfhId;
 };
 

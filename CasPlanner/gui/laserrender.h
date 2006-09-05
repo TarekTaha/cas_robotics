@@ -1,6 +1,9 @@
 #ifndef LASERRENDER_H
 #define LASERRENDER_H
 
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
 #include "glrender.h"
 #include "interfaceprovider.h"
 
@@ -20,7 +23,7 @@ Q_OBJECT
         double maxRange; 
         int laserId; 
         LaserProvider *provider; 
-        QVector<QPointF> laserData; 
+        LaserScan laserData; 
 };
 
 #endif

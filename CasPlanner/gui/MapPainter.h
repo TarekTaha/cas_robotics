@@ -1,6 +1,9 @@
 #ifndef MAPPAINTER_H_
 #define MAPPAINTER_H_
 
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
 #include <QWidget>
 #include <QMouseEvent>
 #include <QPainter>

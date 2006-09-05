@@ -19,7 +19,7 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
             virtual int readConfigs(ConfigFile *cf);
             virtual int start(); 
             virtual int stop();
-            virtual QVector<QPointF> getLaserScan();
+            virtual LaserScan getLaserScan();
             virtual double getSpeed(); 
             virtual double getTurnRate();
             virtual Pose   getLocation();
@@ -44,6 +44,7 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
         protected:
             // Player stuff 
             PlayerInterface *player;
+           	QVector <Laser> lasers;
             Robot * robot;
 };
 #endif

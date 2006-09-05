@@ -55,11 +55,11 @@ void LaserRender::render()
     
     glBegin(GL_TRIANGLE_FAN);
     	glVertex2f(0,0);  
-	    if(laserData.size() > 0)
+	    if(laserData.points.size() > 0)
     	{
-        	for(int i=0; i < laserData.size(); i++)
+        	for(int i=0; i < laserData.points.size(); i++)
 	        {
-    	        glVertex2f(laserData[i].x(), laserData[i].y());  
+    	        glVertex2f(laserData.points[i].x(), laserData.points[i].y());  
         	}
 	    }
     	glVertex2f(0,0);
