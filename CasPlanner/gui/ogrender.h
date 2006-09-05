@@ -1,6 +1,9 @@
 #ifndef OGRENDER_H
 #define OGRENDER_H
 
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
 #include "glrender.h"
 #include "interfaceprovider.h"
 

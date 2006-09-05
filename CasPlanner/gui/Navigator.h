@@ -35,7 +35,8 @@ class Navigator : public Controller
 		void setPath(Node *path);
 		void setObstAvoidAlgo(int);
 		void StopNavigating();
-		double NearestObstacle(QVector<QPointF> laser_scan);
+		double NearestObstacle(LaserScan laser_scan);
+		bool inLaserSpace(LaserScan laserScan);
 		void  setPause(bool pause);
 		Node * ClosestPathSeg(QPointF location,Node * all_path);	
 		void GenerateLocalMap(QVector<QPointF> laser_scan,Pose laser_pose, Pose rob_location);
@@ -53,6 +54,7 @@ class Navigator : public Controller
 		void drawLocalPath(PathPlanner *,Pose *,int *);
 		void pathTraversed();
 		void glRender();
+		void setWayPoint(Pose *);
 	protected:
 		Pose	old_amcl,amcl_location,EstimatedPos,laser_pose;
 		double 	angle,prev_angle,theta,error_orientation,

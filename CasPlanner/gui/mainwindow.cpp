@@ -17,7 +17,6 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     QWidget *container = new QWidget(this); 
     tabcontainer = new TabContainer(parent,robotManager);
     robotManager->setNavContainer(tabcontainer->navCon);
-    robotManager->setMapViewer(tabcontainer->mapViewer);    
     QVBoxLayout *vLayout = new QVBoxLayout;
     QPushButton *emergStop = new QPushButton(" STOP ROBOT ");  
     QPushButton *connRobot = new QPushButton(" Connect to Robot ");

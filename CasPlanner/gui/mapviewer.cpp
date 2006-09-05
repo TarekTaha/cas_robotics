@@ -60,7 +60,7 @@ void MapViewer::setMapName(QString name)
 void MapViewer::initializeGL()
 {
 	glEnable(GL_TEXTURE_2D);				// Enable Texture Mapping
-	glShadeModel(GL_SMOOTH);				// Enable Smooth Shading
+//	glShadeModel(GL_SMOOTH);				// Enable Smooth Shading
 //	glClearColor(0.70f, 0.7f, 0.7f, 1.0f);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClearDepth(1.0f);						// Depth Buffer Setup
@@ -93,6 +93,11 @@ void  MapViewer::SetMapFileName(QString name)
 	this->mapName = name;	
 }
 
+void MapViewer::setWayPoint(Pose *wayPoint)
+{
+	this->wayPoint = *wayPoint;
+}
+
 Pose MapViewer::getStart()
 {
 	return this->start;	
@@ -115,7 +120,7 @@ void MapViewer::setProvider(MapProvider *)
 void MapViewer::renderLaser()
 {
 //	double maxRange = 8.0;
-    QVector<QPointF> laserData = robotManager->commManager->getLaserScan(); 
+    LaserScan laserScan = robotManager->commManager->getLaserScan(); 
     Pose loc = robotManager->robot->robotLocation;	
     glPushMatrix(); 
     glTranslatef(loc.p.x(),loc.p.y(),0);
@@ -135,11 +140,12 @@ void MapViewer::renderLaser()
     
     glBegin(GL_TRIANGLE_FAN);
     	glVertex2f(0,0);  
-	    if(laserData.size() > 0)
+	    if(laserScan.points.size() > 0)
     	{
-        	for(int i=0; i < laserData.size(); i++)
+        	for(int i=0; i < laserScan.points.size(); i++)
 	        {
-    	        glVertex2f(laserData[i].x(), laserData[i].y());  
+				laserScan.points[i] = Trans2Global(laserScan.points[i],laserScan.laserPose);	        	
+    	        glVertex2f(laserScan.points[i].x(), laserScan.points[i].y());  
         	}
 	    }
     	glVertex2f(0,0);
@@ -159,7 +165,7 @@ void MapViewer::renderRobot()
 	}
 	if(trail.size()>1)
 	{
-    	glColor4f(0,0,0,1);
+    	glColor4f(1,1,1,1);
 	    glBegin(GL_LINE_STRIP);
 		    for(int i =0;i<trail.size();i++)
 		    {
@@ -172,7 +178,7 @@ void MapViewer::renderRobot()
     glRotated(RTOD(loc.phi),0,0,1);
     glColor4f(0,0,1,0.8);
     glShadeModel(GL_FLAT);
-    // Map Boundaries BOX
+    // Robot Boundaries BOX
 	glColor4f(1,1,1,0.5); 
 	glBegin(GL_TRIANGLE_FAN);
 	for(int i=0;i<robotManager->robot->local_edge_points.size();i++)
@@ -298,12 +304,12 @@ void MapViewer::paintGL()
     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST); 
     glEnable(GL_LINE_SMOOTH); 
     glEnable(GL_POLYGON_SMOOTH);
-    glMatrixMode(GL_MODELVIEW);
-    glFlush();
-    
-    glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
-    glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
-    glGetIntegerv(GL_VIEWPORT,viewport); 
+//    glMatrixMode(GL_MODELVIEW);
+//    glFlush();
+//    
+//    glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
+//    glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
+//    glGetIntegerv(GL_VIEWPORT,viewport); 
     
     glPushMatrix();
     glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
@@ -369,7 +375,72 @@ void MapViewer::paintGL()
     renderMap();
     renderLaser();
     renderRobot();
-    
+    if(start_initialized)
+    {
+	    glPushMatrix();
+	    glTranslatef(start.p.x(),start.p.y(),0);
+	    glRotated(RTOD(start.phi),0,0,1);
+	    glColor4f(1,1,1,0.8);
+	    glShadeModel(GL_FLAT);
+	    // Path Start
+	    glBegin(GL_TRIANGLE_FAN);
+			glColor4f(1,1,1,1);  
+		    glVertex3f(-0.2,0.15,0);
+		    glVertex3f(0.3,0,0); 			    	
+		    glVertex3f(-0.2,-0.15,0);	    				    
+	    glEnd();
+		glPopMatrix(); 
+	    glPushMatrix();		   		    
+	    if(step == 2)
+	    {
+		    glBegin(GL_LINE_LOOP);
+				glColor4f(1,1,1,1);  
+			    glVertex3f(start.p.x(),start.p.y(),0);
+			    glVertex3f(mousePos.x(),mousePos.y(),0); 			    	
+		    glEnd();			    	
+	    }
+		glPopMatrix(); 	    
+    }
+    if(end_initialized)
+    {
+	    glPushMatrix();
+	    glTranslatef(end.p.x(),end.p.y(),0);
+	    glRotated(RTOD(end.phi),0,0,1);
+	    glColor4f(1,1,1,0.8);
+	    glShadeModel(GL_FLAT);
+	    // Path End
+	    glBegin(GL_TRIANGLE_FAN);
+			glColor4f(1,1,1,1);  
+		    glVertex3f(-0.2,0.15,0); 			
+		    glVertex3f(0.3,0,0); 			    	
+		    glVertex3f(-0.2,-0.15,0); 			    				    
+	    glEnd();
+		glPopMatrix(); 
+	    glPushMatrix();		   		    
+	    if(step == 4)
+	    {
+		    glBegin(GL_LINE_LOOP);
+				glColor4f(1,1,1,1);  
+			    glVertex3f(end.p.x(),end.p.y(),0);
+			    glVertex3f(mousePos.x(),mousePos.y(),0); 			    	
+		    glEnd();			    	
+	    }
+		glPopMatrix();   	
+    }    
+    // Draw Way Point
+	    glPushMatrix();
+		    glTranslatef(wayPoint.p.x(),wayPoint.p.y(),0);
+		    glRotated(RTOD(wayPoint.phi),0,0,1);		    
+		    glColor4f(1,0,0,0.8);
+		    glShadeModel(GL_FLAT);
+		    glBegin(GL_TRIANGLE_FAN);
+				glColor4f(1,0,0,1);  
+			    glVertex3f(-0.2,0.15,0); 			
+			    glVertex3f(0.1,0,0); 			    	
+			    glVertex3f(-0.2,-0.15,0); 			    				    
+		    glEnd();
+		glPopMatrix();   		        
+		
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_POINT_SMOOTH); 
@@ -393,11 +464,13 @@ void MapViewer::setShowOGs(int state)
 
 void MapViewer::setShowSnaps(int state)
 {
-    if(state==0){
-	showSnaps = false;  
+    if(state==0)
+    {
+		showSnaps = false;  
     }
-    else {
-	showSnaps = true; 
+    else 
+    {
+		showSnaps = true; 
     }
     update();
 }
@@ -454,87 +527,74 @@ void MapViewer::setShowPatchBorders(int state)
 }
 void MapViewer::mouseDoubleClickEvent(QMouseEvent *me)
 {
-	double x = me->x();
-	double y = me->y();
-    qDebug("Mouse Double click x: %f y: %f",x,y); 
-    mouseDouble.setX(x);
-    mouseDouble.setY(y);    
-    //getOGLPos(mouseDouble);
-    getOGLPos(x,y);		
+	QPointF p(me->x(),me->y());
+//	qDebug("Mouse Double click x: %f y: %f",p.x(),p.y()); 
+    p = getOGLPos(p.x(),p.y());		
 	if(step == 1)
 	{
-		start.p.setX(position[0]);
-		start.p.setY(position[1]);	
+		start.p = p;
 		step++;
-		start_initialized = end_initialized = false;
+		start_initialized = true; end_initialized = false;
+		setMouseTracking(true);		
 	}
 	else if(step==3)
 	{
-		end.p.setX(position[0]);
-		end.p.setY(position[1]);
+		end.p = p;
 		end_initialized = true;
 		step++;
+		setMouseTracking(true);
 	}
 
 }
 
-
-void MapViewer::getOGLPos(QPointF point)
+void MapViewer::mousePressEvent(QMouseEvent *me)
 {
-    gluUnProject(
-       point.x(),
-       point.y(),
-       0,
-       modelMatrix,
-       projMatrix,
-       viewport,
-    //the next 3 parameters are the pointers to the final object
-    //coordinates. Notice that these MUST be double's
-    &position[0], //-> pointer to your own position (optional)
-    &position[1], // id
-    &position[2] // id
-  	);
-    qDebug("Translated to x: %f y: %f z:%f",position[0],position[1],position[2]); 	  	
-};
+	QPointF p(me->x(),me->y());
+    p = getOGLPos(me->x(),me->y());	
+    //qDebug("Mouse pressed x: %f y: %f",x,y); 
+	if(step ==2)
+	{
+		start.phi = atan2(p.y() - start.p.y(),p.x() - start.p.x());
+//		qDebug("Start Angle =%f",RTOD(start.phi));				
+		step++;
+		update();
+		setMouseTracking(false);
+	}
+	else if(step == 4)
+	{
+		end.phi = atan2(p.y() - end.p.y(),p.x() - end.p.x());
+//		qDebug("End Angle =%f",RTOD(end.phi));		
+		end_initialized = true;
+		step = 1;
+		update();
+		setMouseTracking(false);		
+	}
+}
 
-void MapViewer::getOGLPos(double x, double y)
+void MapViewer::mouseMoveEvent ( QMouseEvent * me )
 {
+	QPointF p(me->x(),me->y());	
+    mousePos = getOGLPos(me->x(),me->y());	
+//    mousePos = getOGLPos(p);
+	update();
+}
+
+QPointF MapViewer::getOGLPos(double x, double y)
+{
+	QPointF retval;
 	GLfloat winX, winY, winZ;
 	GLdouble posX, posY, posZ;
-
-//	glGetDoublev( GL_MODELVIEW_MATRIX, modelMatrix );
-//	glGetDoublev( GL_PROJECTION_MATRIX, projMatrix );
-//	glGetIntegerv( GL_VIEWPORT, viewport );
 
 	winX = x;
 	winY = (float)viewport[3] - y;
 	glReadPixels( (int)x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
 	gluUnProject( winX, winY, winZ, modelMatrix, projMatrix, viewport, &posX, &posY, &posZ);
-    qDebug("Translated to x: %f y: %f z:%f",posX*0.025,posY*0.025,posZ*0.025); 	
-    position[0] = posX*0.025;
-    position[1] = posY*0.025;
-}
-
-void MapViewer::mousePressEvent(QMouseEvent *me)
-{
-	double x = me->x();
-	double y = me->y();
-    //qDebug("Mouse pressed x: %f y: %f",x,y); 
-	setMouseTracking(true);
-	if(step ==2)
-	{
-		start.phi = atan2(start.p.y()-y,x-start.p.x());
-		qDebug("Start Angle =%f",RTOD(start.phi));				
-		start_initialized = true;	
-		step++;
-	}
-	else if(step == 4)
-	{
-		end.phi = atan2(end.p.y()-y,x-end.p.x());
-		qDebug("End Angle =%f",RTOD(end.phi));		
-		end_initialized = true;
-		step = 1;
-	}
+//    qDebug("Translated to x: %f y: %f z:%f",posX*0.02,posY*0.02,posZ*0.02); 	
+    position[0] = posX*0.02;
+    position[1] = posY*0.02;
+  	retval.setX(position[0]);
+  	retval.setY(position[1]); 
+  	return retval;    
 }
 
 void MapViewer::mouseReleaseEvent(QMouseEvent *)

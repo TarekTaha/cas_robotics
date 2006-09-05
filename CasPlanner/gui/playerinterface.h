@@ -16,7 +16,22 @@
 
 using namespace PlayerCc;
 using namespace std;
-
+class Laser
+{
+	public: 
+		LaserProxy * lp;
+		int index;
+		Pose pose;
+		~Laser(){};
+};
+class LaserScan
+{
+	public:
+		QVector<QPointF> points;
+		Pose laserPose;
+		LaserScan(){};		
+		~LaserScan(){};
+};
 class PlayerInterface: public QThread 
 {
 Q_OBJECT    
@@ -25,12 +40,12 @@ Q_OBJECT
         void stop();
         void run();
         void enableControl(int driveId);
-        void setLasers(QVector<int>laserIds); 
+        void setLasers(QVector<Laser> lasers); 
 		void enablePtz(int ptzId);
 		void enableVfh(int vfhId);
 		void enableMap(int mapId);
 		void enableLocalizer(int localizerId);
-        QVector<QPointF> getLaserScan();
+        LaserScan getLaserScan();
         void provideLocation(Pose location);
 	    Map provideMap(); 
 		void setPtz(double pan, double tilt);
@@ -57,15 +72,14 @@ Q_OBJECT
         bool ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized,emergencyStopped,
         	 velControl,vfhEnabled; 
         int positionId,ptzId,mapId,localizerId,vfhId;
-        QVector <int> laserIds;
-        QVector <LaserProxy *> laser;
+        QVector <Laser> lasers;
         Position2dProxy *drive, *vfh;
         MapProxy *map;
 		PtzProxy *ptz;
 		LocalizeProxy *localizer;
 		Pose location,goal,odom_location,vfhGoal;
 		double pan,tilt,pose[3], pose_covar[3];
-        QVector<QPointF> laserScanPoints;
+        LaserScan laserScan;
         double speed,turnRate,getspeed,getturnrate;
         QReadWriteLock dataLock;       
 };

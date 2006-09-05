@@ -1,6 +1,9 @@
 #ifndef MAPMANAGER_H_
 #define MAPMANAGER_H_
 
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
 #include <QObject>
 #include <QString>
 #include <QPointF>

@@ -29,8 +29,9 @@ Q_OBJECT
 		void keyPressEvent(QKeyEvent *e);
 		void mousePressEvent(QMouseEvent *me);
 		void mouseDoubleClickEvent(QMouseEvent *me);
-		void getOGLPos(double x, double y);
-		void getOGLPos(QPointF point);	
+		void mouseMoveEvent ( QMouseEvent * me );
+		QPointF getOGLPos(double x, double y);
+		QPointF getOGLPos(QPointF point);	
 		void mouseReleaseEvent(QMouseEvent *me);
 		void focusInEvent(QFocusEvent *fe);
 		void focusOutEvent(QFocusEvent *fe);
@@ -54,6 +55,7 @@ Q_OBJECT
 		void setShowRobots      (int state);
 		void setShowPointclouds (int state);
 		void setShowPatchBorders(int state);
+		void setWayPoint        (Pose *wayPoint);
 		
     signals:
 		void moveMOLeft(); 
@@ -84,11 +86,12 @@ Q_OBJECT
 		Pose start,end;
 		QString mapName;
 //		RobotRender * robotRender;
-	    MapManager mapManager; 
+	    MapManager mapManager;
+	    Pose wayPoint;
 	    Map * mapData; 	
 	    QColor clearColor;
 	   	QImage image;
-	   	QPointF mouseDouble;
+	   	QPointF mousePos;
 		QHash<QString, int> snapDLs;
 	    GLdouble modelMatrix[16];
 	    double position[3];

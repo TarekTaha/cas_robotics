@@ -232,7 +232,7 @@ int Navigator::readConfigs( ConfigFile *cf)
  	return 1;
 }
 
-double Navigator::NearestObstacle(QVector<QPointF> laser_scan)
+double Navigator::NearestObstacle(LaserScan laser_scan)
 {
 	QPointF ray_end,temp[4],intersection;
 	Line L1;
@@ -241,9 +241,9 @@ double Navigator::NearestObstacle(QVector<QPointF> laser_scan)
 	{
 		temp[i] = robotManager->robot->local_edge_points[i];
 	}
-	for(int i=0;i<laser_scan.size();i++)
+	for(int i=0;i<laser_scan.points.size();i++)
 	{
-		ray_end = Trans2Global(laser_scan[i],laser_pose);
+		ray_end = Trans2Global(laser_scan.points[i],laser_scan.laserPose);
 		for(int j=0;j<4;j++)
 		{
 			L1.SetStart(temp[j%4]);      L1.SetEnd(temp[(j+1)%4]);
@@ -391,6 +391,14 @@ void Navigator::StopNavigating()
 	this->stop_navigating = true;
 }
 /*!
+ * Determines if a Point is in the current laser's free space or not
+ */
+bool Navigator::inLaserSpace(LaserScan laserScan)
+{
+	
+}
+
+/*!
  * This is the Navigation Thread's main, where the control and the path following takes place.
  */
 Pose Navigator::getGoal(Node *global_path,Pose robotLocation,double traversable_dist)
@@ -404,15 +412,22 @@ Pose Navigator::getGoal(Node *global_path,Pose robotLocation,double traversable_
  		retval.p = temp->pose.p;
  		retval.phi = angle;
  		temp= temp->next;
- 	}	
+ 	}
  	return retval;
 }
+
 void Navigator::run()
 {
+	qDebug("Starting Path Following"); fflush(stdout);
 	if(robotManager->renderingMethod == PAINTER_2D)
 		connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));	
-	if(robotManager->renderingMethod == OPENGL)	
-		connect(this, SIGNAL(glRender()),robotManager->mapViewer, SLOT(update()));		
+	if(robotManager->renderingMethod == OPENGL)
+	{
+		connect(this, SIGNAL(glRender()),robotManager->navCon->mapViewer, SLOT(update()));	
+		connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));
+		connect(this, SIGNAL(setWayPoint(Pose*)),robotManager->navCon->mapViewer,SLOT(setWayPoint(Pose*)));				
+	}
+	qDebug("Starting Path Following TEST ENDED"); fflush(stdout);			
 	ControlAction cntrl;
 	QTime amcl_timer,delta_timer,redraw_timer;
 	double closest_obst=10;
@@ -461,10 +476,9 @@ void Navigator::run()
 	end_reached = false;
 	stop_navigating = false;
 	double speed,turnRate;
-	QVector <QPointF> laser_set;
+	LaserScan laserScan;
 	while(!end_reached && !stop_navigating)
 	{
-		laser_set.clear();
 		delta_t = delta_timer.elapsed()/1e3;
 		delta_timer.restart();
 		usleep(10000);
@@ -474,7 +488,7 @@ void Navigator::run()
 		robotManager->robot->setPose(amcl_location);
 		speed = robotManager->commManager->getSpeed();
 		turnRate = robotManager->commManager->getTurnRate();
-		laser_set = robotManager->commManager->getLaserScan();
+		laserScan = robotManager->commManager->getLaserScan();
 //		qDebug("Navigator Turn Rate is:%f Orientation:%f",turnRate,amcl_location.phi);
 //		cout<<"\n Current Location X:"<<amcl_location.p.x()<<" Y:"<<amcl_location.p.y()<<" Theta:"<<amcl_location.phi;
 		/* If this location is new, then use it. Otherwise
@@ -536,7 +550,7 @@ void Navigator::run()
 				else
 				{
 					qDebug("--->>> Destination Reached !!!");
-					//emit pathTraversed();
+					emit pathTraversed();
 		 			end_reached = true;
 					break;
 				}
@@ -574,7 +588,7 @@ void Navigator::run()
 		 */
 
 		QTime local_planning_time,icp_time;
-		closest_obst = NearestObstacle(laser_set);
+		closest_obst = NearestObstacle(laserScan);
 //		qDebug("Closest Distance to Obstacles is:%f Saftey Dist:%f",closest_obst,sf);
 //		if(closest_obst < safety_dist)
 //		{
@@ -598,7 +612,7 @@ void Navigator::run()
 ////				qDebug("Location Global Pixel  X:%f Y:%f",pixel_loc.p.x(),pixel_loc.p.y());
 //	
 //				local_planning_time.restart();
-//			 	local_planner->SetMap(laser_set,local_dist,EstimatedPos);
+//			 	local_planner->SetMap(laserScan,local_dist,EstimatedPos);
 //				local_planner->GenerateSpace();
 //			 	Node * temp;
 //			 	temp = global_path;
@@ -700,7 +714,8 @@ void Navigator::run()
 		 * the generated paths.
 		 */
 //		Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
-		Pose goal = getGoal(global_path,EstimatedPos,traversable_dist);		 
+		Pose goal = getGoal(global_path,EstimatedPos,traversable_dist);
+		emit setWayPoint(&goal);
 		QTime ff_time;
 		if(!pause)
 		{
@@ -711,7 +726,7 @@ void Navigator::run()
 					velVector action;
 					ff_time.restart();
 				 	//qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);
-					action = FF->GenerateField(amcl_location,laser_set,goal,speed,turnRate);
+					action = FF->GenerateField(amcl_location,laserScan,goal,speed,turnRate);
 					qDebug("FF Speed is:%f TurnRate is:%f  time is:%dms",action.speed,action.turnRate,ff_time.elapsed());	
 					robotManager->commManager->setSpeed(action.speed);						
 					robotManager->commManager->setTurnRate(action.turnRate);		

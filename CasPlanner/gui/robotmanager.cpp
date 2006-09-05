@@ -13,9 +13,14 @@ robot(NULL)
 RobotManager::~RobotManager()
 {
 	// Empty Destructor
-	delete commManager;
-	delete navigator;
-	delete robot;
+	if(commManager)
+		delete commManager;
+	if(navigator)
+		delete navigator;
+	if(robot)
+		delete robot;
+	if(planner)
+		delete planner;
 }
 /* Read Configuration File and Initialize corresponding Sections :
  *  1- Initialize communication with the Player Server.
@@ -91,11 +96,6 @@ RobotManager::RobotManager(QStringList configFiles)
 int RobotManager::setNavContainer(NavContainer* con)
 {
 	this->navCon = con;
-	return 1;
-}	
-int RobotManager::setMapViewer(MapViewer* mapV)
-{
-	this->mapViewer = mapV;
 	return 1;
 }	
 
