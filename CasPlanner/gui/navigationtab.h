@@ -12,31 +12,23 @@
 #include <QPushButton>
 #include <QHash>
 #include "mapviewer.h"
-#include "MapPainter.h"
-#include "robotmanager.h"
+#include "mappainter.h"
+#include "playground.h"
 #include "Node.h"
 #include "configfile.h"
 
 class RobotManager;
 class MapViewer;
+class PlayGround;
+class NavContainer;
 
 class NavControlPanel: public QWidget 
 {
 Q_OBJECT
     public:  
-		NavControlPanel(QWidget *parent ,RobotManager *rob);
-	public slots:
-		void updateMap(); 
-		void updateSelectedObject(double);
-		void updateSelectedAvoidanceAlgo(bool);
-		void save();
-		void captureMap(); 
-		void exportHtml(); 
-		void setToRoot(); 
-    signals:
-		void propsChanged();
+		NavControlPanel(NavContainer *container,int currRobot);
     private: 
-		RobotManager * robotManager;
+		NavContainer *navContainer;
 		// Planning Steps
 		QGroupBox planningGB;
 		QCheckBox bridgeTest;
@@ -70,7 +62,6 @@ Q_OBJECT
 		QPushButton pathFollowBtn;
 		QPushButton loadMapBtn;	
 		
-		bool pause,following;
 		friend class NavContainer;
 		static unsigned *image, *null;
         static int width, height, components;
@@ -80,21 +71,30 @@ class NavContainer : public QWidget
 {
 Q_OBJECT
     public:
-		NavContainer(QWidget *parent ,RobotManager *robotManager);
+		NavContainer(QWidget *parent ,PlayGround *playGround);
 		~NavContainer();
 		MapPainter * mapPainter;
 		MapViewer  * mapViewer;
 	public slots:
-		void Plan();
-		void LoadMap(); 
-		void GenerateSpace();
-		void Follow();
+		void updateMap(); 
+		void updateSelectedObject(double);
+		void updateSelectedAvoidanceAlgo(bool);
+		void save();
+		void captureMap(); 
+		void exportHtml(); 
+		void setToRoot(); 	
+		void pathPlan();
+		void loadMap(); 
+		void generateSpace();
+		void pathFollow();
 		void Finished();
     private:
        	Node * path;
-    	RobotManager * robotManager;
+    	PlayGround * playGround;
 		NavControlPanel navControlPanel; 
-	friend class NavControlPanel; 
+    	int currRobot;
+		bool pause,following;
+		friend class NavControlPanel; 
 };
 
 #endif

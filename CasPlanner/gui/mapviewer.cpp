@@ -1,9 +1,9 @@
 #include "mapviewer.h"
 
-MapViewer::MapViewer(QWidget *parent,RobotManager *rob,QString map_name)
+MapViewer::MapViewer(QWidget *parent,PlayGround *playG,QString map_name)
  : QGLWidget(QGLFormat(QGL::AlphaChannel), parent),
  step(1),
- robotManager(rob),
+ playGround(playG),
  zoomFactor(10),
  xOffset(0), 
  yOffset(0), 
@@ -20,6 +20,7 @@ MapViewer::MapViewer(QWidget *parent,RobotManager *rob,QString map_name)
  showPatchBorders(true),
  start_initialized(false),
  end_initialized(false),
+ mainMapBuilt(false),
  mapName(map_name)
 {
   	clearColor = Qt::black;
@@ -69,6 +70,7 @@ void MapViewer::initializeGL()
 	glEnable(GL_BLEND);						// Enable Blending    
     renderText(0,0,0,""); 
     glFlush();
+    mapList = glGenLists(1);
 }
 
 void MapViewer::resizeGL(int w, int h)
@@ -119,96 +121,177 @@ void MapViewer::setProvider(MapProvider *)
 }
 void MapViewer::renderLaser()
 {
-//	double maxRange = 8.0;
-    LaserScan laserScan = robotManager->commManager->getLaserScan(); 
-    Pose loc = robotManager->robot->robotLocation;	
-    glPushMatrix(); 
-    glTranslatef(loc.p.x(),loc.p.y(),0);
-    glRotated(RTOD(loc.phi),0,0,1);    
-//    glBegin(GL_QUADS); 
-//    	glVertex2f(-maxRange, -maxRange); 
-//	    glVertex2f(-maxRange, maxRange); 
-//	    glVertex2f(maxRange, maxRange); 
-//    	glVertex2f(maxRange, -maxRange); 
-////    	glVertex2f(0, 0); 
-////	    glVertex2f(0, 1); 
-////	    glVertex2f(1, 1); 
-////    	glVertex2f(1, 0); 
-//    glEnd(); 
-    
-    glColor3f(0.623,0.811,0.3); 
-    
-    glBegin(GL_TRIANGLE_FAN);
-    	glVertex2f(0,0);  
-	    if(laserScan.points.size() > 0)
-    	{
-        	for(int i=0; i < laserScan.points.size(); i++)
-	        {
-				laserScan.points[i] = Trans2Global(laserScan.points[i],laserScan.laserPose);	        	
-    	        glVertex2f(laserScan.points[i].x(), laserScan.points[i].y());  
-        	}
-	    }
-    	glVertex2f(0,0);
-    glEnd(); 
-    glPopMatrix();	
+	for(int i=0;i<playGround->robotPlatforms.size();i++)
+	{
+	    LaserScan laserScan = playGround->robotPlatforms[i]->commManager->getLaserScan(); 
+	    Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;	
+	    glPushMatrix(); 
+	    glTranslatef(loc.p.x(),loc.p.y(),0);
+	    glRotated(RTOD(loc.phi),0,0,1);    
+
+	    glColor3f(0.623,0.811,0.3); 
+	    
+	    glBegin(GL_TRIANGLE_FAN);
+	    	glVertex2f(0,0);  
+		    if(laserScan.points.size() > 0)
+	    	{
+	        	for(int i=0; i < laserScan.points.size(); i++)
+		        {
+					laserScan.points[i] = Trans2Global(laserScan.points[i],laserScan.laserPose);	        	
+	    	        glVertex2f(laserScan.points[i].x(), laserScan.points[i].y());  
+	        	}
+		    }
+	    	glVertex2f(0,0);
+	    glEnd(); 
+	    glPopMatrix();	
+	}
 }
 void MapViewer::renderRobot()
 {
-    Pose loc = robotManager->robot->robotLocation;	
-	if(trail.size()==0 && loc.p!=QPointF(0,0))
+	for(int i=0;i<playGround->robotPlatforms.size();i++)
 	{
-		trail.push_back(loc.p);		
-	}
-	else if(trail[trail.size()-1]!=loc.p)
-	{
-		trail.push_back(loc.p);
-	}
-	if(trail.size()>1)
-	{
-    	glColor4f(1,1,1,1);
-	    glBegin(GL_LINE_STRIP);
-		    for(int i =0;i<trail.size();i++)
-		    {
-		    	glVertex2f(trail[i].x(),trail[i].y());
-		    }
+	    Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;	
+		if(trail.size()==0 && loc.p!=QPointF(0,0))
+		{
+			trail.push_back(loc.p);		
+		}
+		else if(trail[trail.size()-1]!=loc.p)
+		{
+			trail.push_back(loc.p);
+		}
+		if(trail.size()>1)
+		{
+	    	glColor4f(1,1,1,1);
+		    glBegin(GL_LINE_STRIP);
+			    for(int i =0;i<trail.size();i++)
+			    {
+			    	glVertex2f(trail[i].x(),trail[i].y());
+			    }
+		    glEnd();
+		}
+	
+	    glPushMatrix();
+	    glTranslatef(loc.p.x(),loc.p.y(),0);
+	    glRotated(RTOD(loc.phi),0,0,1);
+	    glColor4f(0,0,1,0.8);
+	    glShadeModel(GL_FLAT);
+	    // Robot Boundaries BOX
+		glColor4f(1,1,1,0.5); 
+		glBegin(GL_TRIANGLE_FAN);
+		for(int i=0;i<playGround->robotPlatforms[i]->robot->local_edge_points.size();i++)
+		{
+			glVertex2f(playGround->robotPlatforms[i]->robot->local_edge_points[i].x(),playGround->robotPlatforms[i]->robot->local_edge_points[i].y());
+		}
+		glEnd();
+	
+	    glBegin(GL_LINE_LOOP);
+			glColor4f(0,0,1,0.5);  
+		    glVertex3f(1.3, 0.15,0); 			
+		    glVertex3f(1.5,0,0); 			    	
+		    glVertex3f(1.3,-0.15,0); 			    				    
 	    glEnd();
+	    
+	    glBegin(GL_LINE_LOOP);
+			glColor4f(0,0,1,0.5);  
+		    glVertex3f(0,0,0); 			
+		    glVertex3f(1.5,0,0); 			    	
+	    glEnd();    
+	    
+	    renderText(1.6,0,0, "Robot Direction");		    	    
+	
+	    glPopMatrix();
 	}
-    glPushMatrix();
-    glTranslatef(loc.p.x(),loc.p.y(),0);
-    glRotated(RTOD(loc.phi),0,0,1);
-    glColor4f(0,0,1,0.8);
-    glShadeModel(GL_FLAT);
-    // Robot Boundaries BOX
-	glColor4f(1,1,1,0.5); 
-	glBegin(GL_TRIANGLE_FAN);
-	for(int i=0;i<robotManager->robot->local_edge_points.size();i++)
-	{
-		glVertex2f(robotManager->robot->local_edge_points[i].x(),robotManager->robot->local_edge_points[i].y());
-	}
-	glEnd();
-
-    glBegin(GL_LINE_LOOP);
-		glColor4f(0,0,1,0.5);  
-	    glVertex3f(1.3, 0.15,0); 			
-	    glVertex3f(1.5,0,0); 			    	
-	    glVertex3f(1.3,-0.15,0); 			    				    
-    glEnd();
-    
-    glBegin(GL_LINE_LOOP);
-		glColor4f(0,0,1,0.5);  
-	    glVertex3f(0,0,0); 			
-	    glVertex3f(1.5,0,0); 			    	
-    glEnd();    
-    
-    renderText(1.6,0,0, "Robot Direction");		    	    
-
-    glPopMatrix();
 }
 
 void MapViewer::update()
 {
       this->updateGL();
 }
+void MapViewer::renderMapPatch(Map * mapPatch)
+{
+    int mapWidth,mapHeight; 
+    float ratioW, ratioH; 	
+	qDebug("Rendering Map Patch");
+	#ifdef NOPOTD
+	   mapWidth  = powl(2,  ceill(log(mapPatch->width)/log(2)));
+	   mapHeight = powl(2, ceill(log(mapPatch->height)/log(2)));
+	   ratioW  = ((float) mapPatch->width))/mapWidth; 
+	   ratioH  = ((float) mapPatch->height))/mapHeight; 
+	#else 
+	    mapWidth  = mapPatch->width;
+	    mapHeight = mapPatch->height;
+	    ratioW = 1; 
+	    ratioH = 1; 
+	#endif	
+    unsigned char imgData[mapWidth*mapHeight*4];
+	long int count=0;
+    for(int i=0; i < mapWidth; i++)
+    {
+		for(int j=0; j < mapHeight; j++)
+		{
+		    if(mapPatch->data[i][j] == true)
+			{
+		    	count++;
+				imgData[(j*mapPatch->width+i)*4]   = 255;
+				imgData[(j*mapPatch->width+i)*4+1] = 0; 
+				imgData[(j*mapPatch->width+i)*4+2] = 0; 
+				imgData[(j*mapPatch->width+i)*4+3] = 255;
+			}
+		    else 
+		    {
+				imgData[(j*mapPatch->width+i)*4] = 0;  
+				imgData[(j*mapPatch->width+i)*4+1] = 0; 
+				imgData[(j*mapPatch->width+i)*4+2] = 0;  
+				imgData[(j*mapPatch->width+i)*4+3] = 0;   
+		    }
+		}
+    }
+    qDebug(" Count %ld",count);
+    
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texId);  //Select our texture
+   
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, mapPatch->width, mapPatch->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
+  
+
+    glPushMatrix();
+    
+    // Inverse the Y-axis    
+    glScalef(1,-1,1);
+    glTranslatef(-(mapPatch->width*mapPatch->resolution)/2.0,-(mapPatch->height*mapPatch->resolution)/2.0,0);
+//    glColor4f(0,0,1,0.8);
+    glColor4f(1,1,1,0.8);
+    glShadeModel(GL_FLAT);
+	// Define Coordinate System
+    glBegin(GL_QUADS);
+	    glTexCoord2f(ratioW,ratioH);	glVertex2f(mapPatch->width*mapPatch->resolution,mapPatch->height*mapPatch->resolution);
+	    glTexCoord2f(ratioW,0.0);		glVertex2f(mapPatch->width*mapPatch->resolution,0.0);
+	    glTexCoord2f(0.0,0.0);			glVertex2f(0.0,0.0);
+	    glTexCoord2f(0.0,ratioH);    	glVertex2f(0.0,mapPatch->height*mapPatch->resolution);
+    glEnd();
+
+    glDisable(GL_TEXTURE_2D);
+    
+    // Surrounding BOX
+	glColor4f(1,1,1,0.5); 
+	glBegin(GL_LINE_LOOP); 
+		glVertex2f(0,0);
+		glVertex2f(0.0,mapPatch->height*mapPatch->resolution);
+		glVertex2f(mapPatch->width*mapPatch->resolution,mapPatch->height*mapPatch->resolution);
+		glVertex2f(mapPatch->width*mapPatch->resolution,0.0);
+	glEnd();
+
+    glPopMatrix();	
+}
+/*!
+ *  Renders The main Map loaded from the image file
+ */
 void MapViewer::renderMap()
 {
     int mapWidth,mapHeight; 
@@ -252,7 +335,8 @@ void MapViewer::renderMap()
 		    }
 		}
     }
-    
+    glNewList(mapList, GL_COMPILE);	
+
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texId);  //Select our texture
    
@@ -293,6 +377,8 @@ void MapViewer::renderMap()
 	glEnd();
 
     glPopMatrix();
+    glEndList();
+    mainMapBuilt = true;
 }
 void MapViewer::paintGL()
 {
@@ -371,8 +457,9 @@ void MapViewer::paintGL()
     }
 
     glColor4f(0,0,0,1.0);
-
-    renderMap();
+	if(!mainMapBuilt)
+	    renderMap();
+    glCallList(mapList); 	    
     renderLaser();
     renderRobot();
     if(start_initialized)
@@ -384,7 +471,7 @@ void MapViewer::paintGL()
 	    glShadeModel(GL_FLAT);
 	    // Path Start
 	    glBegin(GL_TRIANGLE_FAN);
-			glColor4f(1,1,1,1);  
+			glColor4f(0,1,0,1);  
 		    glVertex3f(-0.2,0.15,0);
 		    glVertex3f(0.3,0,0); 			    	
 		    glVertex3f(-0.2,-0.15,0);	    				    
@@ -410,7 +497,7 @@ void MapViewer::paintGL()
 	    glShadeModel(GL_FLAT);
 	    // Path End
 	    glBegin(GL_TRIANGLE_FAN);
-			glColor4f(1,1,1,1);  
+			glColor4f(0,1,0,1);  
 		    glVertex3f(-0.2,0.15,0); 			
 		    glVertex3f(0.3,0,0); 			    	
 		    glVertex3f(-0.2,-0.15,0); 			    				    

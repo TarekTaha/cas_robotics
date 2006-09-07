@@ -14,13 +14,15 @@
 #include "robotmanager.h"
 #include "Robot.h"
 #include "planningmanager.h"
-#include "Controller.h"
+#include "mapmanager.h"
+#include "controller.h"
 #include "configfile.h"
 #include "ForceField.h"
 #include "Node.h"
 #include "icp.h"
 
 class PlanningManager;
+class RobotManager;
 using namespace CasPlanner;
 
 class Navigator : public Controller
@@ -36,12 +38,12 @@ class Navigator : public Controller
 		void setObstAvoidAlgo(int);
 		void StopNavigating();
 		double NearestObstacle(LaserScan laser_scan);
-		bool inLaserSpace(LaserScan laserScan);
+		bool inLaserSpace(LaserScan laserScan,Pose robotLocation,QPointF waypoint);
 		void  setPause(bool pause);
 		Node * ClosestPathSeg(QPointF location,Node * all_path);	
 		void GenerateLocalMap(QVector<QPointF> laser_scan,Pose laser_pose, Pose rob_location);
 		bool MapModified(QVector<QPointF> laser_scan,Pose rob_location);
-		Pose getGoal(Node *global_path,Pose robotLocation,double traversable_dist);
+		Pose getGoal(Node *global_path,Pose robotLocation,double traversable_dist,LaserScan laserScan);
         void stop();
         void run();
         void setupLocalPlanner();
@@ -55,6 +57,7 @@ class Navigator : public Controller
 		void pathTraversed();
 		void glRender();
 		void setWayPoint(Pose *);
+		void renderMapPatch(Map*);
 	protected:
 		Pose	old_amcl,amcl_location,EstimatedPos,laser_pose;
 		double 	angle,prev_angle,theta,error_orientation,
@@ -72,6 +75,8 @@ class Navigator : public Controller
 		int		platform,direction,path2Draw,obstAvoidAlgo;					
 		Node * local_path,* global_path,*last,*first,*path2Follow;
 		PlanningManager *local_planner,*global_planner;
+		MapManager mapManager;
+		Map * mapPatch;
 		Geom2D::ICP icp;
 		std::vector<Geom2D::Point> local_map_icp,laser_scan_icp;
 		Geom2D::Pose	delta_pose;		

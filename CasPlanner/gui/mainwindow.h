@@ -7,6 +7,7 @@
 
 #include <QMainWindow>
 #include "robotmanager.h"
+#include "playground.h"
 #include "statusbar.h"
 #include "tabcontainer.h"
 class MainWindow : public QMainWindow 
@@ -22,7 +23,8 @@ public:
 private: 
     TabContainer * tabcontainer;
     RobotManager * robotManager;
-	StatusLogger * statusLogger; 
+	StatusLogger * statusLogger;
+	PlayGround   * playGround;
 	int logCount; 
 };
 #endif

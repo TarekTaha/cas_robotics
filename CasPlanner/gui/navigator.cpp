@@ -1,4 +1,4 @@
-#include "Navigator.h"
+#include "navigator.h"
 /** @ingroup Components */
 /** @{ */
 /** @defgroup ComponentNavigator Navigator
@@ -148,7 +148,7 @@ globalPath(NULL),
 localPath(NULL),
 robotManager(r),
 local_planner(NULL),
-global_planner(r->planner)
+global_planner(r->planningManager)
 {
 	connect(this, SIGNAL(drawLocalPath(PathPlanner *,Pose *,int *)),robotManager, SLOT(rePaint(PathPlanner*,Pose *,int *)));
 }
@@ -393,20 +393,34 @@ void Navigator::StopNavigating()
 /*!
  * Determines if a Point is in the current laser's free space or not
  */
-bool Navigator::inLaserSpace(LaserScan laserScan)
+bool Navigator::inLaserSpace(LaserScan laserScan,Pose robotLocation,QPointF wayPoint)
 {
+	laserScan.laserPose = Trans2Global(laserScan.laserPose,robotLocation);
+	double ang, angle = ATAN2(wayPoint,laserScan.laserPose.p);
 	
+	for(int i=0;i<laserScan.points.size();i++)
+	{
+		laserScan.points[i] = Trans2Global(laserScan.points[i],laserScan.laserPose);
+		ang = ATAN2(laserScan.points[i],laserScan.laserPose.p);
+		if(RTOD(abs(angle-ang))<5)
+		{
+			if(Dist(laserScan.laserPose.p,laserScan.points[i]) < Dist(laserScan.laserPose.p,wayPoint))
+				return false;
+		}
+	}
+	return true;
 }
 
 /*!
  * This is the Navigation Thread's main, where the control and the path following takes place.
  */
-Pose Navigator::getGoal(Node *global_path,Pose robotLocation,double traversable_dist)
+Pose Navigator::getGoal(Node *global_path,Pose robotLocation,double traversable_dist,LaserScan laserScan)
 {
 	Node *temp;
 	Pose retval;
 	temp = ClosestPathSeg(robotLocation.p,global_path);
- 	while(temp->next && Dist(robotLocation.p,temp->pose.p) < traversable_dist)
+ 	while(temp->next && Dist(robotLocation.p,temp->pose.p) < traversable_dist && 
+ 	      inLaserSpace(laserScan,robotLocation,temp->pose.p))
  	{
  		double angle = ATAN2(temp->next->pose.p,temp->pose.p);
  		retval.p = temp->pose.p;
@@ -418,16 +432,23 @@ Pose Navigator::getGoal(Node *global_path,Pose robotLocation,double traversable_
 
 void Navigator::run()
 {
-	qDebug("Starting Path Following"); fflush(stdout);
-	if(robotManager->renderingMethod == PAINTER_2D)
-		connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));	
+//	if(robotManager->renderingMethod == PAINTER_2D)
+//		connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));	
+//	if(robotManager->renderingMethod == OPENGL)
+//	{
+//		connect(this, SIGNAL(glRender()),robotManager->->mapViewer, SLOT(update()));	
+//		connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));
+//		connect(this, SIGNAL(setWayPoint(Pose*)),robotManager->navCon->mapViewer,SLOT(setWayPoint(Pose*)));				
+//		connect(this, SIGNAL(renderMapPatch(Map*)),robotManager->navCon->mapViewer,SLOT(renderMapPatch(Map*)));						
+//	}
 	if(robotManager->renderingMethod == OPENGL)
 	{
-		connect(this, SIGNAL(glRender()),robotManager->navCon->mapViewer, SLOT(update()));	
-		connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));
-		connect(this, SIGNAL(setWayPoint(Pose*)),robotManager->navCon->mapViewer,SLOT(setWayPoint(Pose*)));				
+		connect(this, SIGNAL(glRender()),robotManager,SLOT(update()));	
+		connect(this, SIGNAL(pathTraversed()),robotManager,SLOT(Finished()));
+		connect(this, SIGNAL(setWayPoint(Pose*)),robotManager,SLOT(setWayPoint(Pose*)));				
+		connect(this, SIGNAL(renderMapPatch(Map*)),robotManager,SLOT(renderMapPatch(Map*)));						
 	}
-	qDebug("Starting Path Following TEST ENDED"); fflush(stdout);			
+
 	ControlAction cntrl;
 	QTime amcl_timer,delta_timer,redraw_timer;
 	double closest_obst=10;
@@ -703,10 +724,17 @@ void Navigator::run()
 //		}
  		if (redraw_timer.elapsed()>100)
  		{
+//			if(this->mapPatch)
+//				delete mapPatch;
+//			mapPatch = mapManager.provideLaserOG(laserScan,2.0,0.05,EstimatedPos);	
 			if(robotManager->renderingMethod == PAINTER_2D) 			
 		 		emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);	
 			else if(robotManager->renderingMethod == OPENGL)		 			
+			{
 			 	emit glRender();
+//			 	emit renderMapPatch(mapPatch);
+//			 	emit renderMapPatch(robotManager->planner->pathPlanner->map);
+			}
 		 	redraw_timer.restart();	
  		}
 		/* Get the control Action to be applied, in this case it's a
@@ -714,7 +742,7 @@ void Navigator::run()
 		 * the generated paths.
 		 */
 //		Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
-		Pose goal = getGoal(global_path,EstimatedPos,traversable_dist);
+		Pose goal = getGoal(global_path,EstimatedPos,traversable_dist,laserScan);
 		emit setWayPoint(&goal);
 		QTime ff_time;
 		if(!pause)

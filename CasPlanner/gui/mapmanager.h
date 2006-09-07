@@ -13,7 +13,7 @@
 #include <QBitArray>
 #include "interfaceprovider.h"
 
-/* Changes different Map representations into an occupancy
+/*! Changes different Map representations into an occupancy
  * grid represented by a bit array. This OG will be sent to 
  * the path planner for planning. This manager currently supports
  * the following input:
@@ -27,7 +27,7 @@ class MapManager : public Map, public QObject
 	public:
 		MapManager();
 		virtual ~MapManager();
-		Map * provideLaserOG(QVector<QPointF> laser_scan,double local_dist,double pixel_res,Pose laser_pose,Pose pose);
+		Map * provideLaserOG(LaserScan laserScan,double local_dist,double pixel_res,Pose pose);
 		Map * provideMapOG  (QImage image,double pixel_res,Pose p,bool negate);
 };
 

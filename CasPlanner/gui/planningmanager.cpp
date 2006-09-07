@@ -1,6 +1,7 @@
 #include "planningmanager.h"
 
-/*! Constructor, parameters are provided directly rather than
+/*! 
+ * Constructor, parameters are provided directly rather than
  * read from the configuration file
  */
 PlanningManager::PlanningManager(RobotManager *robMan,
@@ -32,7 +33,7 @@ PlanningManager::PlanningManager(RobotManager *robMan,
 	this->showTreeEnabled   = false;
 	robotManager->robot->setCheckPoints(obst_exp);	
 	qDebug("Pixel Res in Navigator =%f",this->pixel_res);	
-	start();
+	this->start();
 }
 
 PlanningManager::PlanningManager(RobotManager *robMan):
@@ -139,11 +140,11 @@ void PlanningManager::SetMap(QImage map)
 	pathPlanner->SetMap(provideMapOG(map,pixel_res,Pose(0,0,0),negate));	
 }
 
-void PlanningManager::SetMap(QVector<QPointF> laser_scan,double local_dist,Pose pose)
+void PlanningManager::SetMap(LaserScan laser_scan,double local_dist,Pose pose)
 {
 	if(!this->pathPlanner)
 		this->start();
-	pathPlanner->SetMap(provideLaserOG(laser_scan,local_dist,pixel_res,Pose(0,0,0),pose));
+	pathPlanner->SetMap(provideLaserOG(laser_scan,local_dist,pixel_res,pose));
 }
 
 void PlanningManager::GenerateSpace()

@@ -1,4 +1,4 @@
-#include "CommManager.h"
+#include "commmanager.h"
 
 CommManager::CommManager(Robot *rob):
 Comms(),
@@ -108,88 +108,77 @@ LaserScan CommManager::getLaserScan()
   	return player->getLaserScan();
 }
 
-int CommManager::readConfigs( ConfigFile *cf)
+int CommManager::readConfigs( ConfigFile *cf,int secId)
 {
-	int numSec,cnt;
-	numSec = cf->GetSectionCount(); 
-	for(int i=0; i < numSec; i++)
+	int cnt;
+   	name =                   cf->ReadString(secId, "name", "No-Name");
+   	startConnected =  (bool) cf->ReadInt   (secId, "startConnected", 1);
+  	activateControl = (bool) cf->ReadInt   (secId, "activateControl", 1);
+	playerIp =               cf->ReadString(secId, "playerIp", "127.0.0.1");
+	playerPort =             cf->ReadInt   (secId, "playerPort", 6665);
+	cnt = cf->GetTupleCount(secId,"lasers");
+	if (cnt)
 	{
-	    QString sectionName = cf->GetSectionType(i);
-	    if(sectionName == "CommInterfaces")
-	    {
-		   	name =                   cf->ReadString(i, "name", "No-Name");
-		   	startConnected =  (bool) cf->ReadInt   (i, "startConnected", 1);
-		  	activateControl = (bool) cf->ReadInt   (i, "activateControl", 1);
-			playerIp =               cf->ReadString(i, "playerIp", "127.0.0.1");
-			playerPort =             cf->ReadInt   (i, "playerPort", 6665);
-			cnt = cf->GetTupleCount(i,"lasers");
-			if (cnt)
-			{
-				laserEnabled = true;
-				for(int c=0; c<cnt; c++)
-				{
-					Laser ls;
-					int id = cf->ReadTupleInt(i,"lasers",c ,0);							
-					ls.index = id;
-					lasers.push_back(ls);							
-				}
-			}
-			else
-				laserEnabled = false;
-			cnt = cf->GetTupleCount(i,"position");				
-			if (cnt)
-			{
-				activateControl = true;
-				for(int c=0; c<cnt; c++)
-				{
-					positionControlId = cf->ReadTupleInt(i,"position",c ,0);							
-				}
-			}
-			else
-				activateControl = false;
-			cnt = cf->GetTupleCount(i,"map");				
-			if (cnt)
-			{
-				occMapEnabled = true;
-				for(int c=0; c<cnt; c++)
-				{
-					mapId = cf->ReadTupleInt(i,"map",c ,0);							
-				}
-			}
-			else
-				occMapEnabled = false;
-			cnt = cf->GetTupleCount(i,"localizer");				
-			if (cnt==1)
-			{
-				localizerEnabled = true;
-				for(int c=0; c<cnt; c++)
-				{
-					localizerId = cf->ReadTupleInt(i,"localizer",c ,0);							
-				}
-			}
-			else
-				localizerEnabled = false;		
-			cnt = cf->GetTupleCount(i,"vfh");				
-			if (cnt==1)
-			{
-				vfhEnabled = true;
-				for(int c=0; c<cnt; c++)
-				{
-					vfhId = cf->ReadTupleInt(i,"vfh",c,0);							
-				}
-			}
-			else
-				vfhEnabled = false;							
-		  	qDebug("Start Connected is %d",startConnected);
-		  	if(startConnected)
-			{
-				this->start();
-			}
-	    }
-	    if(sectionName == "Planner")
-	    {
-	    }
-	}	
+		laserEnabled = true;
+		for(int c=0; c<cnt; c++)
+		{
+			Laser ls;
+			int id = cf->ReadTupleInt(secId,"lasers",c ,0);							
+			ls.index = id;
+			lasers.push_back(ls);							
+		}
+	}
+	else
+		laserEnabled = false;
+	cnt = cf->GetTupleCount(secId,"position");				
+	if (cnt)
+	{
+		activateControl = true;
+		for(int c=0; c<cnt; c++)
+		{
+			positionControlId = cf->ReadTupleInt(secId,"position",c ,0);							
+		}
+	}
+	else
+		activateControl = false;
+	cnt = cf->GetTupleCount(secId,"map");				
+	if (cnt)
+	{
+		occMapEnabled = true;
+		for(int c=0; c<cnt; c++)
+		{
+			mapId = cf->ReadTupleInt(secId,"map",c ,0);							
+		}
+	}
+	else
+		occMapEnabled = false;
+	cnt = cf->GetTupleCount(secId,"localizer");				
+	if (cnt==1)
+	{
+		localizerEnabled = true;
+		for(int c=0; c<cnt; c++)
+		{
+			localizerId = cf->ReadTupleInt(secId,"localizer",c ,0);							
+		}
+	}
+	else
+		localizerEnabled = false;		
+	cnt = cf->GetTupleCount(secId,"vfh");				
+	if (cnt==1)
+	{
+		vfhEnabled = true;
+		for(int c=0; c<cnt; c++)
+		{
+			vfhId = cf->ReadTupleInt(secId,"vfh",c,0);							
+		}
+	}
+	else
+		vfhEnabled = false;							
+  	qDebug("Start Connected is %d",startConnected);
+  	if(startConnected)
+	{
+		this->start();
+	}
   	return 1;
 }
 

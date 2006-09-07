@@ -13,10 +13,12 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     QMainWindow(parent), logCount(0)
 {
     // Reads Robot Configurations from the file(s)
-    robotManager = new RobotManager(configFiles);
+    playGround = new PlayGround (configFiles);
+//    robotManager = new RobotManager(configFiles);
     QWidget *container = new QWidget(this); 
-    tabcontainer = new TabContainer(parent,robotManager);
-    robotManager->setNavContainer(tabcontainer->navCon);
+    tabcontainer = new TabContainer(parent,playGround);
+//    robotManager->setNavContainer(tabcontainer->navCon);
+    playGround->setNavContainer(tabcontainer->navCon);
     QVBoxLayout *vLayout = new QVBoxLayout;
     QPushButton *emergStop = new QPushButton(" STOP ROBOT ");  
     QPushButton *connRobot = new QPushButton(" Connect to Robot ");
@@ -47,26 +49,26 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
 
     //Comms is now set up, connect map view to map manager. 
 //    qDebug("Initializing Tabs"); 
-    connect(robotManager->commManager, SIGNAL(statusMsg(int,int,QString)), statusLogger, SLOT(addStatusMsg(int,int,QString))); 
+//    connect(playGround->commManager, SIGNAL(statusMsg(int,int,QString)), statusLogger, SLOT(addStatusMsg(int,int,QString))); 
 //    connect(emergStop, SIGNAL(pressed()), robotManager->commManager, SLOT(emergencyStop()));
-    connect(emergStop, SIGNAL(pressed()), robotManager->navigator, SLOT(StopRobot()));
-    connect(connRobot, SIGNAL(pressed()), this, SLOT(commStart()));
+    connect(emergStop, SIGNAL(pressed()), playGround, SLOT(stopRobots()));
+    connect(connRobot, SIGNAL(pressed()), playGround, SLOT(startRobotsComm()));
     connect(logButton, SIGNAL(clicked()),statusLogger, SLOT(showLog())); 
-    statusLogger->addStatusMsg(0,1,"GUI started successfully ... "); 
-
+    statusLogger->addStatusMsg(0,1,"Navigation System Started ... "); 
+	// Data Logging Timer
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(logData()));
     timer->start(60000);
 }
 void MainWindow::logData()
 {
+	QApplication::beep();
     //qDebug("Am not sure , but i might be Logging :)"); 
     return;
 }
 
 void MainWindow::commStart()
 {
-    robotManager->startComms();
 }
 
 MainWindow::~MainWindow()
