@@ -61,7 +61,7 @@ map
 model
 (
   size [ 0.8 0.8 ]
-  pose [-6 0 180]
+  pose [-6 1.9 180]
   color "red" 
   gui_nose 1
   gui_grid 1
@@ -71,14 +71,32 @@ model
   laser_return 1
   ranger_return 1
   fiducial_return 1
+  blob_return 1
 )
 # extend the wheelchair definition from wheelchair.inc
+
 
 wheelchair
 (
    name "robot"
-   #pose [-5 0 90]
-   pose [0 0 0]
+   pose [-7.15 -0.35 0]
+#    ptz(
+#      blobfinder( 
+#        channel_count 6 
+#        channels [ "red" "blue" "green" "cyan" "yellow" "magenta" ]  
+#                )
+#      )
+   sick_laser
+	(
+		pose [0.030 0.000 0.000 ]
+	)
+)
+
+
+wheelchair
+(
+   name "robot2"
+   pose [8.2 1.1 180]
    sick_laser
 	(
 		pose [0.030 0.000 0.000 ]

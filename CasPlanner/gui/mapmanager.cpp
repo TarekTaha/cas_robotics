@@ -1,4 +1,4 @@
-#include "MapManager.h"
+#include "mapmanager.h"
 #include "utils.h"
 MapManager::MapManager()
 {
@@ -8,7 +8,7 @@ MapManager::~MapManager()
 {
 }
 
-Map * MapManager::provideLaserOG(QVector<QPointF> laser_scan, double local_dist,double res,Pose laser_pose,Pose map_pose)
+Map * MapManager::provideLaserOG(LaserScan laserScan, double local_dist,double res,Pose map_pose)
 {
 	Map *retval;
 	double dist=0;
@@ -18,12 +18,12 @@ Map * MapManager::provideLaserOG(QVector<QPointF> laser_scan, double local_dist,
 	width =  int(2.0*local_dist/res);	
 	// Creating Map with the right size
 	retval = new Map(width,height,res,QPointF(width/2.0,height/2.0),map_pose);
-	for(int i =0; i < laser_scan.size();i++)
+	for(int i =0; i < laserScan.points.size();i++)
 	{
 		// Rotate it now, it will reduce the computation later on
-		QPointF p(laser_scan[i].x(),laser_scan[i].y());
+		QPointF p(laserScan.points[i].x(),laserScan.points[i].y());
 		p = Rotate(p,map_pose.phi);
-		p = Trans2Global(p,laser_pose);
+		p = Trans2Global(p,laserScan.laserPose);
 		dist = Dist(QPointF(0,0),p);
 //		assert( p.x() > 0 );
 		//qDebug("Metric X:%f Y:%f dist=%f",p.x(),p.y(),dist);		

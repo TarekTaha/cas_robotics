@@ -26,8 +26,8 @@ class Robot
 		void setCheckPoints(double o_r);
 		void setPose(Pose location);
 		void findR();
-		int  readConfigs(ConfigFile *cf);
-		Robot(ConfigFile *cf);
+		int  readConfigs(ConfigFile *cf,int secId);
+		Robot(ConfigFile *cf,int secId);
 		Robot();
 		~Robot();
 };

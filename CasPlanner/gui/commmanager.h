@@ -16,7 +16,7 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
         public:
             CommManager(Robot *);
             ~CommManager(); 
-            virtual int readConfigs(ConfigFile *cf);
+            virtual int readConfigs(ConfigFile *cf,int secId);
             virtual int start(); 
             virtual int stop();
             virtual LaserScan getLaserScan();

@@ -1,13 +1,13 @@
 #include "tabcontainer.h"
 
-TabContainer::TabContainer(QWidget *parent,RobotManager *rob)
+TabContainer::TabContainer(QWidget *parent,PlayGround *playG)
     : QTabWidget(parent),
-      robotManager(rob)
+      playGround(playG)
 {
-    navCon = 	new NavContainer(parent,rob);
+    navCon = 	new NavContainer(parent,playG);
     //mapViewer = new MapViewer(parent,rob);
     //sensorsGui = new SensorsGui(parent,rob);
-    if(rob->renderingMethod == PAINTER_2D)
+    if(playG->renderingMethod == PAINTER_2D)
     {
     	addTab(navCon, "2D Painter Navigation Panel"); 
     }
@@ -19,9 +19,9 @@ TabContainer::TabContainer(QWidget *parent,RobotManager *rob)
     //addTab(sensorsGui, "Sensors Pannel");  
     updateGeometry();
 }
-void TabContainer::setRobotManager(RobotManager *robManager)
+void TabContainer::setPlayGround(PlayGround *playG)
 {
-	robotManager = robManager;
+	playGround = playG;
 }
 
 TabContainer::~TabContainer()

@@ -7,19 +7,19 @@
 #include <QtOpenGL>
 #include <GL/glut.h>
 #include "interfaceprovider.h"
-#include "MapManager.h"
-#include "robotmanager.h"
+#include "mapmanager.h"
+#include "playground.h"
 //#include "robotrender.h"
 #include "map.h"
 
 //class RobotRender;
-class RobotManager;
+class PlayGround;
 
 class MapViewer : public QGLWidget
 {
 Q_OBJECT
     public:
-        MapViewer(QWidget *parent=0,RobotManager *rob=0,QString map="");
+        MapViewer(QWidget *parent=0,PlayGround *playG=0,QString map="");
 		~MapViewer();
         void initializeGL();
         void paintGL();
@@ -56,6 +56,7 @@ Q_OBJECT
 		void setShowPointclouds (int state);
 		void setShowPatchBorders(int state);
 		void setWayPoint        (Pose *wayPoint);
+		void renderMapPatch     (Map * mapPatch);	
 		
     signals:
 		void moveMOLeft(); 
@@ -68,7 +69,7 @@ Q_OBJECT
     private:
 		int screenWidth,count,step;
 		QVector <QPointF> trail;
-	    RobotManager * robotManager;
+		PlayGround *playGround;
 	    int screenHeight;  
 		float zoomFactor; 
 		float xOffset, yOffset, zOffset; 
@@ -82,7 +83,7 @@ Q_OBJECT
 		bool showRobots; 
 		bool showPointclouds; 
 		bool showPatchBorders; 
-		bool start_initialized,end_initialized;
+		bool start_initialized,end_initialized,mainMapBuilt;
 		Pose start,end;
 		QString mapName;
 //		RobotRender * robotRender;
@@ -95,7 +96,7 @@ Q_OBJECT
 		QHash<QString, int> snapDLs;
 	    GLdouble modelMatrix[16];
 	    double position[3];
-	    int viewport[4];		
+	    int viewport[4],mapList;		
 	    GLdouble projMatrix[16];	    
 		friend class MapControlPanel; 
 		GLuint texId; 

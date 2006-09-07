@@ -1,38 +1,31 @@
 #include "Robot.h"
 
-Robot::Robot(ConfigFile *cf)
+Robot::Robot(ConfigFile *cf,int secId)
 {
-	readConfigs(cf);
+	readConfigs(cf,secId);
 	findR();
-	qDebug("Robot Radius:%f",robotRadius);
 };
-int Robot::readConfigs(ConfigFile *cf)
+int Robot::readConfigs(ConfigFile *cf,int secId)
 {
-	int numSec,cnt;
-	numSec = cf->GetSectionCount(); 
-	for(int i=0; i < numSec; i++)
+	int cnt;
+	// Read Parameters of interest
+   	robotName  =           cf->ReadString(secId, "robotName", "No-Name");
+   	robotModel =           cf->ReadString(secId, "robotModel", "Diff");		   	
+	robotIp =              cf->ReadString(secId, "robotIp", "127.0.0.1");
+	robotPort =            cf->ReadInt   (secId, "robotPort", 6665);
+	robotLength =          cf->ReadFloat (secId, "robotLength", 6665);			
+	robotWidth =           cf->ReadFloat (secId, "robotWidth", 6665);			
+	robotMass =            cf->ReadFloat (secId, "robotMass", 6665);						
+	robotMI =              cf->ReadFloat (secId, "robotMI", 6665);									
+	cnt =	 		   	   cf->GetTupleCount(secId,"robotCenter");
+	if (cnt != 2)
 	{
-	    QString sectionName = cf->GetSectionType(i);
-	    if(sectionName == "Robot")
-	    {
-		   	robotName  =           cf->ReadString(i, "robotName", "No-Name");
-		   	robotModel =           cf->ReadString(i, "robotModel", "Diff");		   	
-			robotIp =              cf->ReadString(i, "robotIp", "127.0.0.1");
-			robotPort =            cf->ReadInt   (i, "robotPort", 6665);
-			robotLength =          cf->ReadFloat (i, "robotLength", 6665);			
-			robotWidth =           cf->ReadFloat (i, "robotWidth", 6665);			
-			robotMass =            cf->ReadFloat (i, "robotMass", 6665);						
-			robotMI =              cf->ReadFloat (i, "robotMI", 6665);									
-			cnt =	 		   	   cf->GetTupleCount(i,"robotCenter");
-			if (cnt != 2)
-			{
-				cout<<"\n ERROR: center should consist of 2 tuples !!!";
-				exit(1);
-			}
-			robotCenter.setX(cf->ReadTupleFloat(i,"robotCenter",0 ,0));
-			robotCenter.setY(cf->ReadTupleFloat(i,"robotCenter",1 ,0));			
-	    }
+		cout<<"\n ERROR: center should consist of 2 tuples !!!";
+		exit(1);
 	}
+	
+	robotCenter.setX(cf->ReadTupleFloat(secId,"robotCenter",0 ,0));
+	robotCenter.setY(cf->ReadTupleFloat(secId,"robotCenter",1 ,0));			
 	findR();
     qDebug("-> Robot Configurations Read."); 
     qDebug("*********************************************************************"); 	

@@ -1,4 +1,4 @@
-#include "MapPainter.h"
+#include "mappainter.h"
 
 MapPainter::MapPainter(QWidget *parent,QString name): 
 	QWidget(parent),

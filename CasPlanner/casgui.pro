@@ -1,19 +1,20 @@
-HEADERS +=  gui/CommManager.h\
+HEADERS +=  gui/commmanager.h\
 			gui/comms.h\
 			gui/configfile.h\
-			gui/Controller.h\
+			gui/controller.h\
 			gui/glrender.h\
 			gui/interfaceprovider.h\
 			gui/laserrender.h\
 			gui/mainwindow.h\
 			gui/mapviewer.h\	
-			gui/MapPainter.h\		
-			gui/MapManager.h\
+			gui/mappainter.h\		
+			gui/mapmanager.h\
 			gui/navigationtab.h\
-			gui/Navigator.h\
+			gui/navigator.h\
 			gui/ogrender.h\
 			gui/playerinterface.h\
-			gui/planningmanager.h\
+			gui/playground.h\
+			gui/robothandler.h\
 			gui/robotmanager.h\
 			gui/robotrender.h\
 			gui/sensors.h\
@@ -41,20 +42,21 @@ HEADERS +=  gui/CommManager.h\
 			includes/Vector2D.h\
 			includes/wheelchairproxy.h
 
-SOURCES +=  gui/CommManager.cpp\
+SOURCES +=  gui/commmanager.cpp\
 			gui/configfile.cc\
-			gui/Controller.cpp\
+			gui/controller.cpp\
 			gui/laserrender.cpp\
 			gui/main.cpp\
 			gui/mainwindow.cpp\
 			gui/mapviewer.cpp\			
-			gui/MapPainter.cpp\
-			gui/MapManager.cpp\
+			gui/mappainter.cpp\
+			gui/mapmanager.cpp\
 			gui/navigationtab.cpp\
-			gui/Navigator.cpp\
+			gui/navigator.cpp\
 			gui/ogrender.cpp\			
 			gui/playerinterface.cpp\
 			gui/planningmanager.cpp\
+			gui/playground.cpp\
 			gui/robotmanager.cpp\
 			gui/robotrender.cpp\
 			gui/sensors.cpp\
