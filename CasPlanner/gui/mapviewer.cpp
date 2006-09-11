@@ -1,9 +1,10 @@
 #include "mapviewer.h"
 
-MapViewer::MapViewer(QWidget *parent,PlayGround *playG,QString map_name)
+MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
  : QGLWidget(QGLFormat(QGL::AlphaChannel), parent),
  step(1),
  playGround(playG),
+ navControlPanel(navCo),
  zoomFactor(10),
  xOffset(0), 
  yOffset(0), 
@@ -21,16 +22,30 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,QString map_name)
  start_initialized(false),
  end_initialized(false),
  mainMapBuilt(false),
- mapName(map_name)
+ mapName(playG->mapName)
 {
+	// Data Logging Timer
+    renderTimer = new QTimer(this);
+    connect(renderTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
+    renderTimer->start(100);
+	qDebug("Initializing OpenGL"); fflush(stdout);
   	clearColor = Qt::black;
     setFocusPolicy(Qt::StrongFocus);
     glGenTextures(1, &texId); 
+	connect(this, SIGNAL(setStart(Pose)),  navControlPanel, SLOT(setStart(Pose)));
+	connect(this, SIGNAL(setEnd(Pose))  ,  navControlPanel, SLOT(setEnd(Pose)));
+	connect(this, SIGNAL(setMap(QImage)),  navControlPanel, SLOT(setMap(QImage)));	    
 	if(!loadImage(mapName))
 	{
 		qDebug("Error Loading Image");
 		exit(1);
 	}
+	emit setMap(image);
+	for(int i=0;i<playGround->robotPlatforms.size();i++)
+	{
+		wayPoints.push_back(&playGround->robotPlatforms[i]->navigator->wayPoint);
+	}
+	qDebug("OpenGL Initialized"); fflush(stdout);	
 }
 
 int MapViewer::loadImage(QString name)
@@ -61,8 +76,8 @@ void MapViewer::setMapName(QString name)
 void MapViewer::initializeGL()
 {
 	glEnable(GL_TEXTURE_2D);				// Enable Texture Mapping
-//	glShadeModel(GL_SMOOTH);				// Enable Smooth Shading
-//	glClearColor(0.70f, 0.7f, 0.7f, 1.0f);
+	glShadeModel(GL_SMOOTH);				// Enable Smooth Shading
+	glClearColor(0.70f, 0.7f, 0.7f, 1.0f);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClearDepth(1.0f);						// Depth Buffer Setup
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
@@ -97,17 +112,7 @@ void  MapViewer::SetMapFileName(QString name)
 
 void MapViewer::setWayPoint(Pose *wayPoint)
 {
-	this->wayPoint = *wayPoint;
-}
-
-Pose MapViewer::getStart()
-{
-	return this->start;	
-}
-
-Pose MapViewer::getEnd()
-{
-	return this->end;
+	//this->wayPoint = *wayPoint;
 }
 
 QImage MapViewer::getImage()
@@ -119,12 +124,56 @@ void MapViewer::setProvider(MapProvider *)
 {
     
 }
+
+void MapViewer::renderPaths()
+{
+	if(!playGround)
+	{
+		qDebug("WHAT THEEEE !!!");
+		exit(1);
+	}
+	for(int i=0;i<playGround->robotPlatforms.size();i++)
+	{
+		if(playGround->robotPlatforms[i]->planningManager->pathPlanner->path)
+		{
+			Node * path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;
+	    	glColor4f(1,1,1,1);
+		    glBegin(GL_LINE_STRIP);
+			while(path && path->next)
+			{
+		    	glVertex2f(path->pose.p.x(),path->pose.p.y());
+				path = path->next;
+			}
+		    glEnd();
+		    // Draw Way Point
+		    glPushMatrix();
+			    glTranslatef(wayPoints[i]->p.x(),wayPoints[i]->p.y(),0);
+			    glRotated(RTOD(wayPoints[i]->phi),0,0,1);		    
+			    glColor4f(1,0,0,0.8);
+			    glShadeModel(GL_FLAT);
+			    glBegin(GL_TRIANGLE_FAN);
+					glColor4f(1,0,0,1);  
+				    glVertex3f(-0.2,0.15,0); 			
+				    glVertex3f(0.1,0,0); 			    	
+				    glVertex3f(-0.2,-0.15,0); 			    				    
+			    glEnd();
+			glPopMatrix();  
+		}
+	}	
+}
+
 void MapViewer::renderLaser()
 {
+	if(!playGround)
+	{
+		qDebug("WHAT THEEEE !!!");
+		exit(1);
+	}
 	for(int i=0;i<playGround->robotPlatforms.size();i++)
 	{
 	    LaserScan laserScan = playGround->robotPlatforms[i]->commManager->getLaserScan(); 
-	    Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;	
+	    //Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;	
+	    Pose loc = playGround->robotPlatforms[i]->commManager->getOdomLocation();;	
 	    glPushMatrix(); 
 	    glTranslatef(loc.p.x(),loc.p.y(),0);
 	    glRotated(RTOD(loc.phi),0,0,1);    
@@ -135,10 +184,10 @@ void MapViewer::renderLaser()
 	    	glVertex2f(0,0);  
 		    if(laserScan.points.size() > 0)
 	    	{
-	        	for(int i=0; i < laserScan.points.size(); i++)
+	        	for(int m=0; m < laserScan.points.size(); m++)
 		        {
-					laserScan.points[i] = Trans2Global(laserScan.points[i],laserScan.laserPose);	        	
-	    	        glVertex2f(laserScan.points[i].x(), laserScan.points[i].y());  
+					laserScan.points[m] = Trans2Global(laserScan.points[m],laserScan.laserPose);	        	
+	    	        glVertex2f(laserScan.points[m].x(), laserScan.points[m].y());  
 	        	}
 		    }
 	    	glVertex2f(0,0);
@@ -148,28 +197,33 @@ void MapViewer::renderLaser()
 }
 void MapViewer::renderRobot()
 {
+	if(!playGround)
+	{
+		qDebug("WHAT THEEEE !!!");
+		exit(1);
+	}
 	for(int i=0;i<playGround->robotPlatforms.size();i++)
 	{
-	    Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;	
-		if(trail.size()==0 && loc.p!=QPointF(0,0))
-		{
-			trail.push_back(loc.p);		
-		}
-		else if(trail[trail.size()-1]!=loc.p)
-		{
-			trail.push_back(loc.p);
-		}
-		if(trail.size()>1)
-		{
-	    	glColor4f(1,1,1,1);
-		    glBegin(GL_LINE_STRIP);
-			    for(int i =0;i<trail.size();i++)
-			    {
-			    	glVertex2f(trail[i].x(),trail[i].y());
-			    }
-		    glEnd();
-		}
-	
+	    //Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;	
+	    Pose loc = playGround->robotPlatforms[i]->commManager->getOdomLocation();
+//		if(trail.size()==0 && loc.p!=QPointF(0,0))
+//		{
+//			trail.push_back(loc.p);		
+//		}
+//		else if(trail[trail.size()-1]!=loc.p)
+//		{
+//			trail.push_back(loc.p);
+//		}
+//		if(trail.size()>1)
+//		{
+//	    	glColor4f(1,1,1,1);
+//		    glBegin(GL_LINE_STRIP);
+//			    for(int i =0;i<trail.size();i++)
+//			    {
+//			    	glVertex2f(trail[i].x(),trail[i].y());
+//			    }
+//		    glEnd();
+//		}
 	    glPushMatrix();
 	    glTranslatef(loc.p.x(),loc.p.y(),0);
 	    glRotated(RTOD(loc.phi),0,0,1);
@@ -178,12 +232,11 @@ void MapViewer::renderRobot()
 	    // Robot Boundaries BOX
 		glColor4f(1,1,1,0.5); 
 		glBegin(GL_TRIANGLE_FAN);
-		for(int i=0;i<playGround->robotPlatforms[i]->robot->local_edge_points.size();i++)
+		for(int m=0;m<playGround->robotPlatforms[i]->robot->local_edge_points.size();m++)
 		{
-			glVertex2f(playGround->robotPlatforms[i]->robot->local_edge_points[i].x(),playGround->robotPlatforms[i]->robot->local_edge_points[i].y());
+			glVertex2f(playGround->robotPlatforms[i]->robot->local_edge_points[m].x(),playGround->robotPlatforms[i]->robot->local_edge_points[m].y());
 		}
 		glEnd();
-	
 	    glBegin(GL_LINE_LOOP);
 			glColor4f(0,0,1,0.5);  
 		    glVertex3f(1.3, 0.15,0); 			
@@ -462,6 +515,7 @@ void MapViewer::paintGL()
     glCallList(mapList); 	    
     renderLaser();
     renderRobot();
+    renderPaths();
     if(start_initialized)
     {
 	    glPushMatrix();
@@ -514,19 +568,6 @@ void MapViewer::paintGL()
 	    }
 		glPopMatrix();   	
     }    
-    // Draw Way Point
-	    glPushMatrix();
-		    glTranslatef(wayPoint.p.x(),wayPoint.p.y(),0);
-		    glRotated(RTOD(wayPoint.phi),0,0,1);		    
-		    glColor4f(1,0,0,0.8);
-		    glShadeModel(GL_FLAT);
-		    glBegin(GL_TRIANGLE_FAN);
-				glColor4f(1,0,0,1);  
-			    glVertex3f(-0.2,0.15,0); 			
-			    glVertex3f(0.1,0,0); 			    	
-			    glVertex3f(-0.2,-0.15,0); 			    				    
-		    glEnd();
-		glPopMatrix();   		        
 		
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
@@ -642,6 +683,7 @@ void MapViewer::mousePressEvent(QMouseEvent *me)
 	if(step ==2)
 	{
 		start.phi = atan2(p.y() - start.p.y(),p.x() - start.p.x());
+		emit setStart(start);
 //		qDebug("Start Angle =%f",RTOD(start.phi));				
 		step++;
 		update();
@@ -650,7 +692,8 @@ void MapViewer::mousePressEvent(QMouseEvent *me)
 	else if(step == 4)
 	{
 		end.phi = atan2(p.y() - end.p.y(),p.x() - end.p.x());
-//		qDebug("End Angle =%f",RTOD(end.phi));		
+//		qDebug("End Angle =%f",RTOD(end.phi));	
+		emit setEnd(end)	;
 		end_initialized = true;
 		step = 1;
 		update();

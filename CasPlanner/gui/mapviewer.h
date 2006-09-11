@@ -9,17 +9,20 @@
 #include "interfaceprovider.h"
 #include "mapmanager.h"
 #include "playground.h"
+#include "navigationtab.h"
+#include "Node.h"
 //#include "robotrender.h"
 #include "map.h"
 
 //class RobotRender;
 class PlayGround;
+class NavControlPanel;
 
 class MapViewer : public QGLWidget
 {
 Q_OBJECT
     public:
-        MapViewer(QWidget *parent=0,PlayGround *playG=0,QString map="");
+        MapViewer(QWidget *parent=0,PlayGround *playG=0,NavControlPanel *navControlPanel=0);
 		~MapViewer();
         void initializeGL();
         void paintGL();
@@ -38,15 +41,15 @@ Q_OBJECT
 		int  loadImage(QString name);
 		QImage getImage();
 		void  SetMapFileName(QString name);
-		Pose getStart();
-		Pose getEnd();
 		void setMapName(QString name);
 		void renderRobot();
 		void renderLaser();	
+		void renderPaths();
 		GLuint makeObject();
 		QImage captureMap();
         virtual void setProvider(MapProvider *provider);
         void renderMap();
+   	   	QImage image;
     public slots:
 		void update();
 		void setShowOGs         (int state);
@@ -56,8 +59,8 @@ Q_OBJECT
 		void setShowPointclouds (int state);
 		void setShowPatchBorders(int state);
 		void setWayPoint        (Pose *wayPoint);
-		void renderMapPatch     (Map * mapPatch);	
-		
+		void renderMapPatch     (Map * mapPatch);
+				
     signals:
 		void moveMOLeft(); 
 		void moveMORight(); 
@@ -65,11 +68,15 @@ Q_OBJECT
 		void moveMODown(); 
 		void yawMOPos(); 
 		void yawMONeg();
+		virtual void  setMap(QImage);		
+		virtual void  setStart(Pose);
+		virtual void    setEnd(Pose);		
 		
     private:
 		int screenWidth,count,step;
 		QVector <QPointF> trail;
 		PlayGround *playGround;
+		NavControlPanel *navControlPanel;
 	    int screenHeight;  
 		float zoomFactor; 
 		float xOffset, yOffset, zOffset; 
@@ -84,20 +91,19 @@ Q_OBJECT
 		bool showPointclouds; 
 		bool showPatchBorders; 
 		bool start_initialized,end_initialized,mainMapBuilt;
-		Pose start,end;
 		QString mapName;
-//		RobotRender * robotRender;
 	    MapManager mapManager;
-	    Pose wayPoint;
+	    Pose start,end;
+	    QVector <Pose * >wayPoints;
 	    Map * mapData; 	
 	    QColor clearColor;
-	   	QImage image;
 	   	QPointF mousePos;
 		QHash<QString, int> snapDLs;
 	    GLdouble modelMatrix[16];
 	    double position[3];
 	    int viewport[4],mapList;		
-	    GLdouble projMatrix[16];	    
+	    GLdouble projMatrix[16];	   
+	    QTimer * renderTimer; 
 		friend class MapControlPanel; 
 		GLuint texId; 
 };

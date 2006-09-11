@@ -41,6 +41,7 @@ class RobotManager : public QObject//public CommManager, public PlanningManager 
 		PathPlanner     *local_planner;
 		Navigator       *navigator;
 		Robot           *robot;
+		bool notPaused,notFollowing;
    public slots:
   		void rePaint(PathPlanner*,Pose *,int *);
 };

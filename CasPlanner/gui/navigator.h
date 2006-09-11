@@ -36,6 +36,7 @@ class Navigator : public Controller
 		int readConfigs(ConfigFile *cf);
 		void setPath(Node *path);
 		void setObstAvoidAlgo(int);
+		int  getObstAvoidAlgo();
 		void StopNavigating();
 		double NearestObstacle(LaserScan laser_scan);
 		bool inLaserSpace(LaserScan laserScan,Pose robotLocation,QPointF waypoint);
@@ -47,6 +48,7 @@ class Navigator : public Controller
         void stop();
         void run();
         void setupLocalPlanner();
+        Pose wayPoint;
         RobotManager *robotManager;
 	public
 	slots:

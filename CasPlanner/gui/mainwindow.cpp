@@ -12,9 +12,8 @@ QMainWindow(parent)
 MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     QMainWindow(parent), logCount(0)
 {
-    // Reads Robot Configurations from the file(s)
+    // Create the PlayGround where all the RobotManagers will run
     playGround = new PlayGround (configFiles);
-//    robotManager = new RobotManager(configFiles);
     QWidget *container = new QWidget(this); 
     tabcontainer = new TabContainer(parent,playGround);
 //    robotManager->setNavContainer(tabcontainer->navCon);
@@ -47,10 +46,7 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     setCentralWidget(container);
     statusLogger->addStatusMsg(0,1,"Start of Loggs ..."); 
 
-    //Comms is now set up, connect map view to map manager. 
-//    qDebug("Initializing Tabs"); 
 //    connect(playGround->commManager, SIGNAL(statusMsg(int,int,QString)), statusLogger, SLOT(addStatusMsg(int,int,QString))); 
-//    connect(emergStop, SIGNAL(pressed()), robotManager->commManager, SLOT(emergencyStop()));
     connect(emergStop, SIGNAL(pressed()), playGround, SLOT(stopRobots()));
     connect(connRobot, SIGNAL(pressed()), playGround, SLOT(startRobotsComm()));
     connect(logButton, SIGNAL(clicked()),statusLogger, SLOT(showLog())); 
