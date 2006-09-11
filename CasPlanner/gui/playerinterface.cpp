@@ -244,7 +244,7 @@ void PlayerInterface::run ()
 			    delete drive;
 			}
 	        drive = new Position2dProxy(pc,positionId);
-	   		qDebug("\t\t - Motor Control Interface Engaged Successfully"); 
+	   		qDebug("\t\t - Motor Control Interface Engaged Successfully, ID:%d",positionId); 
 	    }
 	    for(int i=0; i < lasers.size(); i++)
 	    {
@@ -259,22 +259,22 @@ void PlayerInterface::run ()
 	    if(mapEnabled)
 	    {
 	    	map = new MapProxy(pc,mapId);
-			qDebug("\t\t - Map Interface Engaged Successfully");
+			qDebug("\t\t - Map Interface Engaged Successfully, ID:%d",mapId);
 	    }
 	    if(ptzEnabled)
 	    {
 			ptz = new PtzProxy(pc, ptzId); 
-			qDebug("\t\t - Pan Tilt unit initialized Successfully");
+			qDebug("\t\t - Pan Tilt unit initialized Successfully ID:%d",ptzId);
 	    }
 	    if(localizerEnabled)
 	    {
 	    	localizer 	= new LocalizeProxy(pc,0);
-	    	qDebug("\t\t - Localizer Started Successfully");
+	    	qDebug("\t\t - Localizer Started Successfully ID:%d",0);
 	    }
 	    if(vfhEnabled)
 	    {
 	    	vfh 	= new Position2dProxy(pc,vfhId);
-	    	qDebug("\t\t - Vfh Started Successfully");
+	    	qDebug("\t\t - Vfh Started Successfully ID:%d",vfhId);
 	    }	    
     }
    catch (PlayerCc::PlayerError e)
@@ -315,6 +315,7 @@ void PlayerInterface::run ()
 	        	else
 	        	{
 //	        		drive->GoTo(goal.p.x(),goal.p.y(),goal.phi);
+//					qDebug("VFH recieved a goto X:%f Y:%f Phi%f",vfhGoal.p.x(),vfhGoal.p.y(),vfhGoal.phi);
 	        		vfh->GoTo(vfhGoal.p.x(),vfhGoal.p.y(),vfhGoal.phi);	        		
 	        	}
 	            getspeed = drive->GetXSpeed();

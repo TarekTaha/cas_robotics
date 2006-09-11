@@ -4,7 +4,7 @@ TabContainer::TabContainer(QWidget *parent,PlayGround *playG)
     : QTabWidget(parent),
       playGround(playG)
 {
-    navCon = 	new NavContainer(parent,playG);
+    navCon = 	new NavContainer(parent,playGround);
     //mapViewer = new MapViewer(parent,rob);
     //sensorsGui = new SensorsGui(parent,rob);
     if(playG->renderingMethod == PAINTER_2D)

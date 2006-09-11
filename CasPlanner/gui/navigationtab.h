@@ -21,14 +21,33 @@ class RobotManager;
 class MapViewer;
 class PlayGround;
 class NavContainer;
+class MapPainter;
 
 class NavControlPanel: public QWidget 
 {
 Q_OBJECT
-    public:  
-		NavControlPanel(NavContainer *container,int currRobot);
-    private: 
+    public:
+		NavControlPanel(NavContainer *container,PlayGround *playG);
+		void updateRobotSetting();
+	public slots:
+		void updateSelectedObject(double);
+		void updateSelectedAvoidanceAlgo(bool);
+		void updateSelectedRobot(bool);
+		void handleRobotSelection();		
+		void save();
+		void setNavigation(); 
+		void exportHtml();
+		void pathPlan();
+		void loadMap(); 
+		void generateSpace();
+		void pathFollow();
+		void Finished();
+		void setStart(Pose);
+		void setEnd(Pose);
+		void setMap(QImage);
+    private:
 		NavContainer *navContainer;
+		PlayGround * playGround;
 		// Planning Steps
 		QGroupBox planningGB;
 		QCheckBox bridgeTest;
@@ -53,7 +72,7 @@ Q_OBJECT
  		QRadioButton forceFieldRadBtn; 
  		QRadioButton configSpaceRadBtn;
  		QRadioButton vfhRadBtn;  		
-
+		QVector <QRadioButton *> availableRobots;
 		// Command Actions
 		QGroupBox actionGB;
 		QPushButton pauseBtn;
@@ -62,9 +81,20 @@ Q_OBJECT
 		QPushButton pathFollowBtn;
 		QPushButton loadMapBtn;	
 		
+		//Pointers to the currently selected Robot
+		QGroupBox robotsGB;
+		RobotManager *currRobot;
+		QTreeWidgetItem *robotItem; 
+		
+		QTreeWidget selectedRobot;
+//		QHash<QTreeWidgetItem *, RobotManager *> widget2RobMan;
+//		QHash<RobotManager *, QTreeWidgetItem *> robMan2Widget;		
 		friend class NavContainer;
 		static unsigned *image, *null;
+       	Node * path;
         static int width, height, components;
+		static const int AutonomousNav = QTreeWidgetItem::UserType+1; 
+		static const int ManualNav     = QTreeWidgetItem::UserType+2;
 };
 
 class NavContainer : public QWidget
@@ -76,24 +106,13 @@ Q_OBJECT
 		MapPainter * mapPainter;
 		MapViewer  * mapViewer;
 	public slots:
-		void updateMap(); 
-		void updateSelectedObject(double);
-		void updateSelectedAvoidanceAlgo(bool);
-		void save();
-		void captureMap(); 
-		void exportHtml(); 
-		void setToRoot(); 	
-		void pathPlan();
-		void loadMap(); 
-		void generateSpace();
-		void pathFollow();
-		void Finished();
+//		void renderPath();
+//		void setStart();
+//		void setEnd();
     private:
-       	Node * path;
     	PlayGround * playGround;
+		RobotManager *currRobot;
 		NavControlPanel navControlPanel; 
-    	int currRobot;
-		bool pause,following;
 		friend class NavControlPanel; 
 };
 

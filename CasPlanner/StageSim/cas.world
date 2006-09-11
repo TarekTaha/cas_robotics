@@ -13,6 +13,7 @@ include "wheelchair.inc"
 
 # defines 'map' object used for floorplans
 include "map.inc"
+include "pioneer.inc"
 
 # defines the laser model `sick_laser' configured like a Sick LMS-200
 include "sick.inc"
@@ -78,27 +79,29 @@ model
 
 wheelchair
 (
+  localization "gps"
+  localization_origin [ 0 0 0 ]
    name "robot"
    pose [-7.15 -0.35 0]
-#    ptz(
-#      blobfinder( 
-#        channel_count 6 
-#        channels [ "red" "blue" "green" "cyan" "yellow" "magenta" ]  
-#                )
-#      )
    sick_laser
 	(
 		pose [0.030 0.000 0.000 ]
 	)
 )
 
-
-wheelchair
+define dynamicRobot pioneer2dx
 (
-   name "robot2"
-   pose [8.2 1.1 180]
+
    sick_laser
 	(
 		pose [0.030 0.000 0.000 ]
 	)
+  localization "gps"
+  localization_origin [ 0 0 0 ]
+)
+dynamicRobot
+(
+  color "red"
+   name "robot2"
+   pose [8.2 1.1 180]
 )

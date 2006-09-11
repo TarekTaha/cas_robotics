@@ -1,10 +1,11 @@
 #include "mappainter.h"
 
-MapPainter::MapPainter(QWidget *parent,QString name): 
+MapPainter::MapPainter(QWidget *parent,QString name,NavControlPanel *navCo): 
 	QWidget(parent),
 	mapName(name),
 	step(1),
 	path2Draw(GLOBALPATH),
+	navControlPanel(navCo),	
 	local_planner(NULL),
 	global_planner(NULL),
 	start_initialized(false),
@@ -12,30 +13,19 @@ MapPainter::MapPainter(QWidget *parent,QString name):
 	drawPathEnabled(false),
 	drawTreeEnabled(false)
 {
+	connect(this, SIGNAL(setStart(Pose)),  navControlPanel, SLOT(setStart(Pose)));
+	connect(this, SIGNAL(setEnd(Pose))  ,  navControlPanel, SLOT(setEnd(Pose)));
+	connect(this, SIGNAL(setMap(QImage)),navControlPanel, SLOT(setMap(QImage)));
 	if(!image.load(mapName, 0))
 	{
 		qDebug("Error Loading Image: %s",qPrintable(mapName));
 		exit(1);
 	}
+	emit setMap(image);
 }
 void  MapPainter::SetMapFileName(QString name)
 {
 	this->mapName = name;	
-}
-
-Pose MapPainter::getStart()
-{
-	return this->start;	
-}
-
-Pose MapPainter::getEnd()
-{
-	return this->end;
-}
-
-QImage MapPainter::getImage()
-{
-	return this->image;
 }
 
 void   MapPainter::setPathEnabled(int set)
@@ -277,6 +267,7 @@ void MapPainter::mousePressEvent ( QMouseEvent * me )
 			// Delta swapped becuase of image coordinate		
 			start.phi = atan2(start.p.y()-y,x-start.p.x());
 			qDebug("Start Angle =%f",RTOD(start.phi));
+			emit setStart(start);
 			start_initialized = true;
 			step++;
 			break;
@@ -289,6 +280,7 @@ void MapPainter::mousePressEvent ( QMouseEvent * me )
 			// Delta swapped becuase of image coordinate
 			end.phi = atan2(end.p.y()-y,x-end.p.x());
 			qDebug("End Angle =%f",RTOD(end.phi));		
+			emit setEnd(end);
 			end_initialized = true;
 			step++;
 			break;

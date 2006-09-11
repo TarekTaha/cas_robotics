@@ -156,7 +156,7 @@ SensorsGui::SensorsGui(QWidget *parent,RobotManager *rob):
 {
     mapViewer = new MapViewer(parent);
     mapViewer->setProvider(rob->commManager);
-    connect(rob->commManager, SIGNAL(newData()), mapViewer, SLOT(update()));    
+    //connect(rob->commManager, SIGNAL(newData()), mapViewer, SLOT(update()));    
     
     QHBoxLayout *layout3 = new QHBoxLayout; 
     QVBoxLayout *layout1 = new QVBoxLayout(),*layout2 = new QVBoxLayout(),*layout4 = new QVBoxLayout();

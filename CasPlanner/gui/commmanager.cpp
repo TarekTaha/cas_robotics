@@ -2,7 +2,7 @@
 
 CommManager::CommManager(Robot *rob):
 Comms(),
-player(0),
+player(NULL),
 robot(rob)
 {
 	startConnected = false;
@@ -174,7 +174,6 @@ int CommManager::readConfigs( ConfigFile *cf,int secId)
 	}
 	else
 		vfhEnabled = false;							
-  	qDebug("Start Connected is %d",startConnected);
   	if(startConnected)
 	{
 		this->start();
@@ -184,7 +183,7 @@ int CommManager::readConfigs( ConfigFile *cf,int secId)
 
 int CommManager::start()
 {
-    qDebug("-> Communication Parameters"); 
+    qDebug("-> Communication Parameters"); fflush(stdout);
     qDebug("*********************************************************************"); 	
   	if (!player)
  	{
@@ -200,22 +199,22 @@ int CommManager::start()
   	//Laser
   	if(laserEnabled)
   	{
-   	  	qDebug("\t\t\t	- Laser:%d.",lasers.size()); 
+   	  	qDebug("\t\t\t	- Laser:%d.",lasers.size()); fflush(stdout);  	
     	player->setLasers(lasers);
   	}
   	if(occMapEnabled)
   	{
-   	  	qDebug("\t\t\t	- Occupancy Map."); 
+   	  	qDebug("\t\t\t	- Occupancy Map."); fflush(stdout);  	
     	player->enableMap(mapId);
   	}
   	if(localizerEnabled)
   	{
-  		qDebug("\t\t\t	- AMCL Localizer."); 
+  		qDebug("\t\t\t	- AMCL Localizer."); fflush(stdout);  	
   		player->enableLocalizer(localizerId);
   	}
   	if(vfhEnabled)
   	{
-  		qDebug("\t\t\t	- VFH Navigator."); 
+  		qDebug("\t\t\t	- VFH Navigator."); fflush(stdout);  	
   		player->enableVfh(vfhId);
   	}  	
   	if(player)
@@ -229,7 +228,7 @@ int CommManager::start()
     	connected = true;
   	}
     qDebug("*********************************************************************"); 
-    qDebug("-> Communication Manager Started."); 
+    qDebug("-> Communication Manager Started."); fflush(stdout);  	
     return 1;
 }
 

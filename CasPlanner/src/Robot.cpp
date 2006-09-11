@@ -101,11 +101,11 @@ void Robot::setCheckPoints(double obst_r)
 //		else 
 			i += (2*internal_radius);
 	}
-	for (int k=0;k<check_points.size();k++)
-	{
-		cout << "\nPoint to check "<<k<<"'---> X="<<check_points[k].x()<<" Y="<<check_points[k].y();
-		fflush(stdout);
-	}
+//	for (int k=0;k<check_points.size();k++)
+//	{
+//		cout << "\nPoint to check "<<k<<"'---> X="<<check_points[k].x()<<" Y="<<check_points[k].y();
+//		fflush(stdout);
+//	}
 	findR();
 };
 void Robot::findR()

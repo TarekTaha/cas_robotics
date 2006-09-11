@@ -308,6 +308,11 @@ void Navigator::setObstAvoidAlgo(int algo)
 	this->obstAvoidAlgo = algo;
 }
 
+int Navigator::getObstAvoidAlgo()
+{
+	return this->obstAvoidAlgo;
+}
+
 bool Navigator::MapModified(QVector<QPointF> laser_scan,Pose rob_location)
 {
 	local_map_icp.clear();
@@ -504,8 +509,8 @@ void Navigator::run()
 		delta_timer.restart();
 		usleep(10000);
 		// Get current Robot Location
-		amcl_location = robotManager->commManager->getLocation();
-//		amcl_location = robotManager->commManager->getOdomLocation();
+//		amcl_location = robotManager->commManager->getLocation();
+		amcl_location = robotManager->commManager->getOdomLocation();
 		robotManager->robot->setPose(amcl_location);
 		speed = robotManager->commManager->getSpeed();
 		turnRate = robotManager->commManager->getTurnRate();
@@ -743,7 +748,8 @@ void Navigator::run()
 		 */
 //		Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
 		Pose goal = getGoal(global_path,EstimatedPos,traversable_dist,laserScan);
-		emit setWayPoint(&goal);
+		wayPoint = goal;
+//		emit setWayPoint(&goal);
 		QTime ff_time;
 		if(!pause)
 		{
@@ -781,6 +787,7 @@ void Navigator::run()
 					robotManager->commManager->setTurnRate(cntrl.angular_velocity);							
 				case VFH:
 					// Vector Field Histogram
+//					qDebug("Sending to VFH goto X:%f Y:%f Phi%f",goal.p.x(),goal.p.y(),goal.phi);
 					robotManager->commManager->vfhGoto(goal);	
 					break;		
 				default:

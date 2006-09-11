@@ -5,7 +5,9 @@ commManager(NULL),
 planningManager(NULL),
 local_planner(NULL),
 navigator(NULL),
-robot(NULL)
+robot(NULL),
+notPaused(true),
+notFollowing(true)
 {
 	// Empty Constructor
 }
@@ -30,8 +32,8 @@ RobotManager::~RobotManager()
  */
 RobotManager::RobotManager(ConfigFile *cf,int secId)
 {
-	readCommManagerConfigs(cf,secId); 
 	readRobotConfigs(cf,secId);
+	readCommManagerConfigs(cf,secId); 
 	int numSections = cf->GetSectionCount(); 
 	for(int i=0; i < numSections; i++)
 	{
@@ -72,7 +74,7 @@ int RobotManager::readPlannerConfigs(ConfigFile *cf)
 {
 	planningManager = new PlanningManager(this);
 	planningManager->readConfigs(cf);
-	planningManager->start();
+	planningManager->setupPlanner();
     return 1;
 }
 
@@ -96,7 +98,7 @@ int RobotManager::startComms()
 
 int RobotManager::startPlanner()
 {
-    planningManager->start();
+    planningManager->setupPlanner();
     return 1;
 }
 

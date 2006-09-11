@@ -18,7 +18,7 @@ class Comms: public QObject
 		    return name; 
 		}
     signals:
-        void newData(); 
+        void newData();
 		void statusMsg(int,int,QString); 
     public slots:
         virtual void emergencyStop()=0; 

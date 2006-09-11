@@ -13,8 +13,8 @@ HEADERS +=  gui/commmanager.h\
 			gui/navigator.h\
 			gui/ogrender.h\
 			gui/playerinterface.h\
+			gui/planningmanager.h\
 			gui/playground.h\
-			gui/robothandler.h\
 			gui/robotmanager.h\
 			gui/robotrender.h\
 			gui/sensors.h\

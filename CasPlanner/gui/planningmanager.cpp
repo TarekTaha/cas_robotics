@@ -33,7 +33,7 @@ PlanningManager::PlanningManager(RobotManager *robMan,
 	this->showTreeEnabled   = false;
 	robotManager->robot->setCheckPoints(obst_exp);	
 	qDebug("Pixel Res in Navigator =%f",this->pixel_res);	
-	this->start();
+	this->setupPlanner();
 }
 
 PlanningManager::PlanningManager(RobotManager *robMan):
@@ -133,27 +133,38 @@ void PlanningManager::setBridgeResValue(double val)
 	pathPlanner->setBridgeRes(val);
 }
 
-void PlanningManager::SetMap(QImage map)
+void PlanningManager::setMap(QImage map)
 {
 	if(!this->pathPlanner)
-		this->start();	
+		this->setupPlanner();	
 	pathPlanner->SetMap(provideMapOG(map,pixel_res,Pose(0,0,0),negate));	
 }
 
-void PlanningManager::SetMap(LaserScan laser_scan,double local_dist,Pose pose)
+void PlanningManager::setMap(LaserScan laser_scan,double local_dist,Pose pose)
 {
 	if(!this->pathPlanner)
-		this->start();
+		this->setupPlanner();
 	pathPlanner->SetMap(provideLaserOG(laser_scan,local_dist,pixel_res,pose));
 }
 
-void PlanningManager::GenerateSpace()
+void PlanningManager::setStart(Pose start)
+{
+	this->start = start;
+}
+
+void PlanningManager::setEnd(Pose end)
+{
+	this->end = end;
+}
+
+void PlanningManager::generateSpace()
 {
 	if(!this->pathPlanner)
-		this->start();
+		this->setupPlanner();
 	if(pathPlanner->search_space)
 	{
-		pathPlanner->FreeSearchSpace();
+		return;
+		//pathPlanner->FreeSearchSpace();
 	}		
 	if(expObstEnabled)
 		pathPlanner->ExpandObstacles();
@@ -167,23 +178,18 @@ void PlanningManager::GenerateSpace()
 		pathPlanner->ConnectNodes();	
 	pathPlanner->ShowConnections();
 }
-Node * PlanningManager::FindPath(Pose start,Pose end)
+Node * PlanningManager::findPath(int coord)
 {
 	Node * retval;
 	if(!this->pathPlanner)
-		this->start();	
+		this->setupPlanner();	
 	if(!pathPlanner->search_space)
 	{
-		GenerateSpace();
+		generateSpace();
 	}
-	if(robotManager->renderingMethod == PAINTER_2D)
-	{
-		retval = pathPlanner->Search(start,end,PIXEL);
-	}
-	else
-	{
-		retval = pathPlanner->Search(start,end,METRIC);		
-	}
+
+	retval = pathPlanner->Search(start,end,coord);		
+
 	if(retval)
 	{
 		pathPlanner->PrintNodeList();
@@ -222,7 +228,7 @@ int PlanningManager::readConfigs( ConfigFile *cf)
   	return 1;
 }
 
-int PlanningManager::start()
+int PlanningManager::setupPlanner()
 {
 	qDebug("-> Starting Planner."); 
     qDebug("*********************************************************************");	

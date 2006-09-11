@@ -1,324 +1,38 @@
 #include "navigationtab.h"
 #include <QProcess>
 
-NavContainer::NavContainer(QWidget *parent,PlayGround *playGround_in)
- : QWidget(parent),
-   path(0),
-   playGround(playGround_in),   
-   navControlPanel(this,0)
-{
-//	qDebug("Map Name is %s", qPrintable(robotManager->mapName)); fflush(stdout);
-//  QVBoxLayout *vLayout = new QVBoxLayout;
-    QHBoxLayout *vLayout = new QHBoxLayout;
-    if(playGround->renderingMethod == PAINTER_2D)
-	{
-		mapPainter = new MapPainter(this,playGround->mapName);
- 	    vLayout->addWidget(mapPainter,4);
-	}
-	else
-	{
-   	 	mapViewer = new MapViewer(this,playGround,playGround->mapName);		
-	    vLayout->addWidget(mapViewer,4); 
-	}
-    vLayout->addWidget(&navControlPanel,1); 
-    setLayout(vLayout); 
-	
-    connect(&navControlPanel.bridgeTest, SIGNAL(stateChanged(int)),playGround->robotPlatforms[currRobot]->planningManager,SLOT(setBridgeTest( int ))); 
-    connect(&navControlPanel.connectNodes, SIGNAL(stateChanged(int)),playGround->robotPlatforms[currRobot]->planningManager,SLOT(setConnNodes( int ))); 
-    connect(&navControlPanel.regGrid, SIGNAL(stateChanged(int)),playGround->robotPlatforms[currRobot]->planningManager,SLOT(setRegGrid( int ))); 
-    connect(&navControlPanel.obstPenalty, SIGNAL(stateChanged(int)),playGround->robotPlatforms[currRobot]->planningManager,SLOT(setObstPen( int ))); 
-    connect(&navControlPanel.expandObst, SIGNAL(stateChanged(int)),playGround->robotPlatforms[currRobot]->planningManager,SLOT(setExpObst( int )));
-    connect(&navControlPanel.showTree, SIGNAL(stateChanged(int)),playGround->robotPlatforms[currRobot]->planningManager,SLOT(setShowTree( int )));
-
-	connect(&navControlPanel.pathPlanBtn, SIGNAL(pressed()),this, SLOT(Plan()));
-	connect(&navControlPanel.generateSpaceBtn, SIGNAL(pressed()),this, SLOT(GenerateSpace()));
-	connect(&navControlPanel.loadMapBtn, SIGNAL(pressed()),this, SLOT(LoadMap()));	
-	connect(&navControlPanel.pathFollowBtn, SIGNAL(pressed()),this, SLOT(Follow()));
-
-}
-
-void NavContainer::Finished()
-{
-	if(playGround->robotPlatforms[currRobot]->navigator->isRunning())
-	{
-		playGround->robotPlatforms[currRobot]->navigator->StopNavigating();
-		playGround->robotPlatforms[currRobot]->navigator->quit();	
-		qDebug("Quitting Thread");
-	}
-	navControlPanel.pathFollowBtn.setText("Follow");
-	following = true;	
-}
-
-void NavContainer::pathFollow()
-{
-	if(following)
-	{
-		if(playGround->robotPlatforms[currRobot]->navigator->isRunning())
-		{
-			playGround->robotPlatforms[currRobot]->navigator->quit();
-		}
-		playGround->robotPlatforms[currRobot]->navigator->setPath(path);
-		playGround->robotPlatforms[currRobot]->navigator->start();
-		navControlPanel.pathFollowBtn.setText("Stop");
-		following = false;
-	}
-	else
-	{
-		if(playGround->robotPlatforms[currRobot]->navigator->isRunning())
-		{
-			playGround->robotPlatforms[currRobot]->navigator->StopNavigating();
-			playGround->robotPlatforms[currRobot]->navigator->quit();	
-			qDebug("Quitting Thread");
-		}
-		navControlPanel.pathFollowBtn.setText("Follow");
-		following = true;		
-	}
-}
-
 NavContainer::~NavContainer()
 {
 	
 }
 
-void NavContainer::pathPlan()
+NavContainer::NavContainer(QWidget *parent,PlayGround *playGround_in)
+ : QWidget(parent),
+   playGround(playGround_in),   
+   currRobot(playGround_in->robotPlatforms[1]),
+   navControlPanel(this,playGround_in)
 {
-	if(!playGround->robotPlatforms[currRobot]->planningManager->pathPlanner->map)
+    QHBoxLayout *vLayout = new QHBoxLayout;
+    if(playGround->renderingMethod == PAINTER_2D)
 	{
-	    if(playGround->robotPlatforms[currRobot]->renderingMethod == PAINTER_2D)
-		{
-			playGround->robotPlatforms[currRobot]->planningManager->SetMap(mapPainter->getImage());					
-		}
-		else
-		{
-			playGround->robotPlatforms[currRobot]->planningManager->SetMap(mapViewer->getImage());							
-		}
-	}
-    if(playGround->robotPlatforms[currRobot]->renderingMethod == PAINTER_2D)
-	{
-		path = playGround->robotPlatforms[currRobot]->planningManager->FindPath(mapPainter->getStart(),mapPainter->getEnd());
-		mapPainter->drawPath(playGround->robotPlatforms[currRobot]->planningManager->pathPlanner);
+		mapPainter = new MapPainter(this,playGround->mapName,&navControlPanel);
+ 	    vLayout->addWidget(mapPainter,4);
 	}
 	else
 	{
-		path = playGround->robotPlatforms[currRobot]->planningManager->FindPath(mapViewer->getStart(),mapViewer->getEnd());						
-//		mapPainter->drawPath(robotManager->planningManager->pathPlanner);				
-	}	
+   	 	mapViewer = new MapViewer(this,playGround,&navControlPanel);		
+	    vLayout->addWidget(mapViewer,4); 
+	}
+    vLayout->addWidget(&navControlPanel,1); 
+    setLayout(vLayout); 
+	
+	qDebug("Container Initialized"); fflush(stdout);	
 }
 
-void NavContainer::generateSpace()
-{
-    if(playGround->robotPlatforms[currRobot]->renderingMethod == PAINTER_2D)
-	{			
-		playGround->robotPlatforms[currRobot]->planningManager->SetMap(mapPainter->getImage());
-		playGround->robotPlatforms[currRobot]->planningManager->GenerateSpace();
-		mapPainter->drawPath(playGround->robotPlatforms[currRobot]->planningManager->pathPlanner);
-	}
-	else
-	{
-		playGround->robotPlatforms[currRobot]->planningManager->SetMap(mapViewer->getImage());
-		playGround->robotPlatforms[currRobot]->planningManager->GenerateSpace();
-//		mapPainter->drawPath(robotManager->planningManager->pathPlanner);		
-	}
-}
-
-void NavContainer::loadMap()
-{
-	playGround->robotPlatforms[currRobot]->planningManager->SetMap(mapPainter->getImage());
-	mapPainter->drawPath(playGround->robotPlatforms[currRobot]->planningManager->pathPlanner);
-}
-
-void NavContainer::setToRoot()
-{
-    navControlPanel.bridgeTestResSB.setValue(0);
-    navControlPanel.bridgeSegLenSB.setValue(0); 
-    navControlPanel.regGridResSB.setValue(0);
-    navControlPanel.nodeConRadSB.setValue(0); 
-    navControlPanel.obstPenRadSB.setValue(0);
-}
-
-void NavContainer::updateSelectedObject(double)
-{
-	if(playGround->robotPlatforms[currRobot]->planningManager->pathPlanner==NULL)
-	{
-		playGround->robotPlatforms[currRobot]->startPlanner();
-	}
-	playGround->robotPlatforms[currRobot]->planningManager->setBridgeTestValue(navControlPanel.bridgeSegLenSB.value());
-	playGround->robotPlatforms[currRobot]->planningManager->setConnNodesValue(navControlPanel.nodeConRadSB.value());
-	playGround->robotPlatforms[currRobot]->planningManager->setRegGridValue(navControlPanel.regGridResSB.value());
-	playGround->robotPlatforms[currRobot]->planningManager->setObstPenValue(navControlPanel.obstPenRadSB.value());
-	playGround->robotPlatforms[currRobot]->planningManager->setExpObstValue(navControlPanel.obstExpRadSB.value());
-	playGround->robotPlatforms[currRobot]->planningManager->setBridgeResValue(navControlPanel.bridgeTestResSB.value());
-}
-
-void NavContainer::updateSelectedAvoidanceAlgo(bool)
-{
-	if(playGround->robotPlatforms[currRobot]->navigator==NULL)
-	{
-		playGround->robotPlatforms[currRobot]->startNavigator();
-	}
-	if(navControlPanel.vfhRadBtn.isChecked())
-	{
-//		qDebug("VFH");
-		playGround->robotPlatforms[currRobot]->navigator->setObstAvoidAlgo(VFH);
-	}
-	else if(navControlPanel.forceFieldRadBtn.isChecked())
-	{
-//		qDebug("Force Field");		
-		playGround->robotPlatforms[currRobot]->navigator->setObstAvoidAlgo(FORCE_FIELD);	
-	}
-	else if(navControlPanel.configSpaceRadBtn.isChecked())
-	{
-//		qDebug("Config Space");		
-		playGround->robotPlatforms[currRobot]->navigator->setObstAvoidAlgo(CONFIG_SPACE);	
-	}
-	else if(navControlPanel.noavoidRadBtn.isChecked())
-	{
-//		qDebug("NO Avoidace");		
-		playGround->robotPlatforms[currRobot]->navigator->setObstAvoidAlgo(NO_AVOID);	
-	}
-}
-
-//void navControlPanel::setActionValues(MapObject *mo)
-//{
-//    int visibility = mo->getVisibility();
-//    Vector6DOF pose = mo->getOrigin();
-//    obstExpRadSB.setValue(visibility); 
-//    bridgeTestResSB.setValue(pose.getX());
-//    bridgeSegLenSB.setValue(pose.getY()); 
-//    regGridResSB.setValue(pose.getZ()); 
-//    nodeConRadSB.setValue(pose.getRollDeg()); 
-//    obstPenRadSB.setValue(pose.getPitchDeg());
-//    yaSB.setValue(pose.getYawDeg());  
-//}
-
-//void navControlPanel::setMapManager( QTMapDataInterface *in_mapManager)
-//{
-//    //qDebug("set map manager");
-//fprintf(stdout, "setMapManager called, parameter=%x\n", in_mapManager); 
-//    mapManager = in_mapManager; 
-//    connect(mapManager, SIGNAL(patchChanged()), this, SLOT(updateMap())); 
-//}
-
-//void NavControlPanel::load()
-//{
-////fprintf(stdout, "Load button pressed, about to call load on mapmanager %x\n", mapManager); 
-////    QString dir = QFileDialog::getExistingDirectory(this, "Load log"); 
-////    mapManager->readIn(dir); 
-//}
-
-void NavContainer::save()
-{
-//    QString dir = QFileDialog::getSaveFileName(this, "Save log"); 
-//    mapManager->writeOut(dir); 
-}
-
-void NavContainer::captureMap()
-{
-	if(pause)
-	{
-		playGround->robotPlatforms[currRobot]->navigator->setPause(pause);
-		pause = false;
-		navControlPanel.pauseBtn.setText("Continue");
-	}
-	else
-	{
-		playGround->robotPlatforms[currRobot]->navigator->setPause(pause);		
-		pause = true;
-		navControlPanel.pauseBtn.setText("Pause");		
-	}
-//    bool ok;
-//    QString comment = QInputDialog::getText(this, "CAS Planner: Save Map", "Enter name for this map:", QLineEdit::Normal,
-//    QString::null, &ok);
-//    emit propsChanged();
-//    sleep(1);   
-//    emit propsChanged();
-//    sleep(1);
-//    if(ok)
-//    {
-//		//QImage capturedMap = ((NavContainer *) parent())->mapViewer.captureMap();
-//		//QImage capturedMap = ((NavContainer *) parent())->mapPainter->captureMap();
-//		//mapManager->addMapSnapshot(capturedMap, comment); 
-//    }
-}
-
-void NavContainer::exportHtml()
-{
-    // This should be in map
-//    QString url=mapManager->exportHtml();
-//    QProcess *firefox = new QProcess();
-//    QString command = QString("firefox ").append(url);
-//    qDebug("Opening %s", qPrintable(command)); 
-//    firefox->start(command);
-//    firefox->waitForStarted();  
-}
-
-void NavContainer::updateMap()
-{
-//    QVector<QString> robots = mapManager->getRobotIds();
-//    for(int i=0; i < robots.size(); i++){
-//	MapObject *robotMO = mapManager->getMORobotMap(robots[i]); 
-//	QTreeWidgetItem *robotItem; 
-//	if(!moToWi.contains(robotMO)){
-//	    robotItem = new QTreeWidgetItem(QStringList(QString("Robot ").append(robots[i])),RobotNodeType);
-//	    selectedObject.addTopLevelItem(robotItem); 
-//	    moToWi[robotMO] = robotItem; 
-//	    wiToMo[robotItem] = robotMO; 
-//	    selectedObject.expandItem(robotItem); 
-//	}
-//	else {
-//	    robotItem = moToWi[robotMO];  
-//	}
-//	QVector<QString> patches = mapManager->getPatchIds(robots[i]);
-//	for (int j=0; j < patches.size(); j++){
-//	    MapObject *patchMO = mapManager->getMOPatch(robots[i], patches[j]);
-//	    QTreeWidgetItem* patchItem; 
-//	    if(!moToWi.contains(patchMO)){
-//		patchItem = new QTreeWidgetItem(QStringList(QString("Patch ").append(patches[j])), PatchNodeType);
-//		robotItem->addChild(patchItem); 
-//		moToWi[patchMO] = patchItem; 
-//		wiToMo[patchItem] = patchMO; 
-//		selectedObject.expandItem(patchItem); 
-//	    }
-//	    else {
-//		patchItem = moToWi[patchMO]; 
-//	    }
-//	    QVector<Snap *> snaps = mapManager->getMOSnaps(robots[i], patches[j]); 
-//	    for(int k=0; k < snaps.size(); k++){
-//		MapObject *snapMO = snaps[k]; 
-//		if(!moToWi.contains(snapMO)){
-//		    QTreeWidgetItem *snapItem;
-//		    orca::SnapPtr oSnap = snaps[k]->getSnap();
-//		    if(oSnap->type == orca::SNAPVICTIM){
-//			snapItem = new QTreeWidgetItem(QStringList(QString("Victim: ").append(oSnap->desc.c_str())), SnapNodeType);
-//		    }
-//		    else {
-//			snapItem = new QTreeWidgetItem(QStringList(QString("Landmark: ").append(oSnap->desc.c_str())));	
-//		    }
-//		    patchItem->addChild(snapItem); 
-//		    moToWi[snapMO] = snapItem; 
-//		    wiToMo[snapItem] = snapMO; 
-//		}
-//	    }
-//	    QVector<Pointcloud *> pointclouds = mapManager->getMOPointclouds(robots[i], patches[j]); 
-//	    for(int k=0; k < pointclouds.size(); k++){
-//		MapObject *pointcloudMO = pointclouds[k];
-//		if(!moToWi.contains(pointcloudMO)){
-//		    QTreeWidgetItem *pointcloudItem = new QTreeWidgetItem(QStringList(QString("Pointcloud ").append(k)));
-//		    patchItem->addChild(pointcloudItem); 
-//		    moToWi[pointcloudMO] = pointcloudItem; 
-//		    wiToMo[pointcloudItem] = pointcloudMO; 
-//		    patchItem->addChild(pointcloudItem); 
-//		}
-//
-//	    }
-//	}
-//    }
-    
-}
-
-NavControlPanel::NavControlPanel(NavContainer *container,int currRobot):
+NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
 	QWidget(container),
 	navContainer(container),
+	playGround(playG),
 	planningGB("Planning"),
 	bridgeTest("Bridge Test"),
 	connectNodes("Connect Nodes"), 
@@ -343,9 +57,46 @@ NavControlPanel::NavControlPanel(NavContainer *container,int currRobot):
 	pathPlanBtn("Path Plan"),
 	generateSpaceBtn("Generate Space"), 
 	pathFollowBtn("Path Follow"),
-	loadMapBtn("Load Map")
-{  
+	loadMapBtn("Load Map"),
+	robotsGB("Select your Robot"),
+	path(0)
+{
+	qDebug("Initializing Control Panel"); fflush(stdout);	
+	RobotManager *temp= NULL;
+//	robMan2Widget.clear();
+//	widget2RobMan.clear();
+	QRadioButton *rob;
+    for(int i=0; i < navContainer->playGround->robotPlatforms.size(); i++)
+	{
+		temp = playGround->robotPlatforms[i]; 
+//		if(!robMan2Widget.contains(temp))
+//		{
+//			qDebug("Adding %s",qPrintable(temp->robot->robotName));	
+//		    robotItem = new QTreeWidgetItem(QStringList(QString("Robot: ").append(temp->robot->robotName)),AutonomousNav);
+//		    robMan2Widget[temp] = robotItem;
+//		    widget2RobMan[robotItem] = temp; 
+//		    selectedRobot.addTopLevelItem(robotItem);
+//		    selectedRobot.expandItem(robotItem);
+//		}
+//		else
+//		{
+//		    robotItem = robMan2Widget[temp];  
+//		}
+		rob = new QRadioButton(QString("Robot: ").append(temp->robot->robotName));
+		availableRobots.push_back(rob);
+	}
+	currRobot = playGround->robotPlatforms[0]; 
+	if(!currRobot)
+	{
+		qDebug("WHAT THEEEE !!!");
+		exit(1);
+	}
+	
+//    selectedRobot.setColumnCount(1); 
+//    selectedRobot.setHeaderLabels(QStringList("Available Robots")); 
     QVBoxLayout *hlayout = new QVBoxLayout;
+//    hlayout->addWidget(&selectedRobot,1);
+    hlayout->addWidget(&robotsGB,1);
     hlayout->addWidget(&planningGB,1);
     hlayout->addWidget(&parametersGB,1);
     hlayout->addWidget(&obstavoidGB,1);    
@@ -381,38 +132,38 @@ NavControlPanel::NavControlPanel(NavContainer *container,int currRobot):
     parLayout->addWidget(new QLabel("Obstacle Penalty"),5,0); 
     parLayout->addWidget(&obstPenRadSB,5,1);
     parametersGB.setLayout(parLayout);
-
+	
 	//Loading Default values from config file
     obstExpRadSB.setMinimum(0); 
     obstExpRadSB.setMaximum(1);
 	obstExpRadSB.setSingleStep(0.01);
-	obstExpRadSB.setValue(navContainer->playGround->robotPlatforms[currRobot]->planningManager->pathPlanner->obstacle_radius);
+	obstExpRadSB.setValue(currRobot->planningManager->pathPlanner->obstacle_radius);
 
     bridgeTestResSB.setMinimum(0.01); 
     bridgeTestResSB.setMaximum(1);
     bridgeTestResSB.setSingleStep(0.01); 
-	bridgeTestResSB.setValue(navContainer->playGround->robotPlatforms[currRobot]->planningManager->pathPlanner->bridge_res);
+	bridgeTestResSB.setValue(currRobot->planningManager->pathPlanner->bridge_res);
 	    
     bridgeSegLenSB.setMinimum(0.5); 
     bridgeSegLenSB.setMaximum(5);
     bridgeSegLenSB.setSingleStep(0.1);  
-	bridgeSegLenSB.setValue(navContainer->playGround->robotPlatforms[currRobot]->planningManager->pathPlanner->bridge_length);
+	bridgeSegLenSB.setValue(currRobot->planningManager->pathPlanner->bridge_length);
 	
     regGridResSB.setMinimum(0.02); 
     regGridResSB.setMaximum(5);
     regGridResSB.setSingleStep(0.01);  
-	regGridResSB.setValue(navContainer->playGround->robotPlatforms[currRobot]->planningManager->pathPlanner->reg_grid);
+	regGridResSB.setValue(currRobot->planningManager->pathPlanner->reg_grid);
 	
     nodeConRadSB.setMinimum(0.03); 
     nodeConRadSB.setMaximum(2);
     nodeConRadSB.setSingleStep(0.01);
     //nodeConRadSB.setDecimals(0);   
-	nodeConRadSB.setValue(navContainer->playGround->robotPlatforms[currRobot]->planningManager->pathPlanner->conn_radius);
+	nodeConRadSB.setValue(currRobot->planningManager->pathPlanner->conn_radius);
 	
     obstPenRadSB.setMinimum(1); 
     obstPenRadSB.setMaximum(5);
     obstPenRadSB.setSingleStep(0.1);
-   	obstPenRadSB.setValue(navContainer->playGround->robotPlatforms[currRobot]->planningManager->pathPlanner->obst_dist);
+   	obstPenRadSB.setValue(currRobot->planningManager->pathPlanner->obst_dist);
     //obstPenRadSB.setDecimals(0); 
 
     QVBoxLayout *showL = new QVBoxLayout; 
@@ -420,10 +171,20 @@ NavControlPanel::NavControlPanel(NavContainer *container,int currRobot):
     showL->addWidget(&forceFieldRadBtn);
     showL->addWidget(&configSpaceRadBtn);
     showL->addWidget(&vfhRadBtn);
-    
     forceFieldRadBtn.setChecked(true);
-//    updateSelectedAvoidanceAlgo(true);
+	updateSelectedAvoidanceAlgo(true);
     obstavoidGB.setLayout(showL); 
+
+    QVBoxLayout *robotsL = new QVBoxLayout; 
+    for(int i=0;i<availableRobots.size();i++)
+    {
+    	robotsL->addWidget(availableRobots[i]);
+	    connect(availableRobots[i],        SIGNAL(toggled(bool )), this,SLOT(updateSelectedRobot(bool)));    	
+    }
+    availableRobots[0]->setChecked(true);
+//	updateSelectedAvoidanceAlgo(true);
+    robotsGB.setLayout(robotsL); 
+
         
     QVBoxLayout *actionLayout = new QVBoxLayout; 
     actionLayout->addWidget(&pauseBtn); 
@@ -433,16 +194,272 @@ NavControlPanel::NavControlPanel(NavContainer *container,int currRobot):
     actionLayout->addWidget(&pathFollowBtn); 
     actionGB.setLayout(actionLayout); 
 
-    connect(&bridgeTestResSB,  SIGNAL(valueChanged(double)), navContainer, SLOT(updateSelectedObject(double)));
-    connect(&bridgeSegLenSB,   SIGNAL(valueChanged(double)), navContainer, SLOT(updateSelectedObject(double)));
-    connect(&regGridResSB,     SIGNAL(valueChanged(double)), navContainer, SLOT(updateSelectedObject(double)));
-    connect(&nodeConRadSB,     SIGNAL(valueChanged(double)), navContainer, SLOT(updateSelectedObject(double)));
-    connect(&obstPenRadSB,     SIGNAL(valueChanged(double)), navContainer, SLOT(updateSelectedObject(double)));
-    connect(&obstExpRadSB,     SIGNAL(valueChanged(double)), navContainer, SLOT(updateSelectedObject(double)));
-    connect(&pauseBtn,         SIGNAL(clicked()), navContainer,SLOT(captureMap())); 
-    connect(&vfhRadBtn,        SIGNAL(toggled(bool )), navContainer,SLOT(updateSelectedAvoidanceAlgo(bool)));
-    connect(&forceFieldRadBtn, SIGNAL(toggled(bool )), navContainer,SLOT(updateSelectedAvoidanceAlgo(bool)));    
-    connect(&configSpaceRadBtn,SIGNAL(toggled(bool )), navContainer,SLOT(updateSelectedAvoidanceAlgo(bool)));    
-    connect(&noavoidRadBtn,    SIGNAL(toggled(bool )), navContainer,SLOT(updateSelectedAvoidanceAlgo(bool)));            
+    connect(&bridgeTestResSB,  SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&bridgeSegLenSB,   SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&regGridResSB,     SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&nodeConRadSB,     SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&obstPenRadSB,     SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+    connect(&obstExpRadSB,     SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+//    connect(&selectedRobot,    SIGNAL(itemSelectionChanged()),this, SLOT(handleRobotSelection()));
+    connect(&vfhRadBtn,        SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));
+    connect(&forceFieldRadBtn, SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));    
+    connect(&configSpaceRadBtn,SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));    
+    connect(&noavoidRadBtn,    SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));            
+	connect(&pathPlanBtn,      SIGNAL(pressed()),this, SLOT(pathPlan()));
+	connect(&generateSpaceBtn, SIGNAL(pressed()),this, SLOT(generateSpace()));
+	connect(&loadMapBtn,       SIGNAL(pressed()),this, SLOT(loadMap()));	
+	connect(&pathFollowBtn,    SIGNAL(pressed()),this, SLOT(pathFollow()));
+	connect(&pauseBtn,         SIGNAL(pressed()),this, SLOT(setNavigation()));	
+
+    connect(&bridgeTest, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setBridgeTest( int ))); 
+    connect(&connectNodes, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setConnNodes( int ))); 
+    connect(&regGrid, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setRegGrid( int ))); 
+    connect(&obstPenalty, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setObstPen( int ))); 
+    connect(&expandObst, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setExpObst( int )));
+    connect(&showTree, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setShowTree( int )));
+
+	qDebug("Initializing Control Panel --->>>DONE"); fflush(stdout);		
 }
-    
+
+void NavControlPanel::Finished()
+{
+	if(currRobot->navigator->isRunning())
+	{
+		currRobot->navigator->StopNavigating();
+		currRobot->navigator->quit();	
+		qDebug("Quitting Thread");
+	}
+	pathFollowBtn.setText("Path Follow");
+	currRobot->notFollowing = true;
+}
+
+void NavControlPanel::pathFollow()
+{
+	if(currRobot->notFollowing)
+	{
+		if(currRobot->navigator->isRunning())
+		{
+			currRobot->navigator->quit();
+		}
+		currRobot->navigator->setPath(path);
+		currRobot->navigator->start();
+		pathFollowBtn.setText("Stop");
+		currRobot->notFollowing = false;
+	}
+	else
+	{
+		if(currRobot->navigator->isRunning())
+		{
+			currRobot->navigator->StopNavigating();
+			currRobot->navigator->quit();	
+			qDebug("Quitting Thread");
+		}
+		pathFollowBtn.setText("Path Follow");
+		currRobot->notFollowing = true;
+	}
+}
+
+void NavControlPanel::setNavigation()
+{
+	if(currRobot->notPaused)
+	{
+		currRobot->navigator->setPause(true);
+		currRobot->notPaused = false;
+		pauseBtn.setText("Continue");
+	}
+	else
+	{
+		currRobot->navigator->setPause(false);		
+		currRobot->notPaused = true;
+		pauseBtn.setText("Pause");		
+	}
+}
+
+void NavControlPanel::pathPlan()
+{
+    if(playGround->renderingMethod == PAINTER_2D)
+	{
+		path = currRobot->planningManager->findPath(PIXEL);
+		navContainer->mapPainter->drawPath(currRobot->planningManager->pathPlanner);
+	}
+	else
+	{
+		path = currRobot->planningManager->findPath(METRIC);						
+	}	
+}
+
+void NavControlPanel::generateSpace()
+{
+	currRobot->planningManager->generateSpace();
+}
+
+void NavControlPanel::loadMap()
+{
+//	currRobot->planningManager->setMap(mapPainter->getImage());
+//	mapPainter->drawPath(currRobot->planningManager->pathPlanner);
+}
+
+void NavControlPanel::updateSelectedObject(double)
+{
+	if(currRobot->planningManager->pathPlanner==NULL)
+	{
+		currRobot->startPlanner();
+	}
+	currRobot->planningManager->setBridgeTestValue(bridgeSegLenSB.value());
+	currRobot->planningManager->setConnNodesValue(nodeConRadSB.value());
+	currRobot->planningManager->setRegGridValue(regGridResSB.value());
+	currRobot->planningManager->setObstPenValue(obstPenRadSB.value());
+	currRobot->planningManager->setExpObstValue(obstExpRadSB.value());
+	currRobot->planningManager->setBridgeResValue(bridgeTestResSB.value());
+}
+
+void NavControlPanel::handleRobotSelection()
+{
+    qDebug("Robot Selected"); 
+//    QTreeWidgetItem *item = selectedRobot.currentItem();
+//	if(widget2RobMan.contains(item))
+//	{
+//	    currRobot = widget2RobMan.value(item);
+//	    qDebug("Robot Name:%s",qPrintable(currRobot->robot->robotName));
+//	    fflush(stdout);	    
+//	}
+//	else
+//	{
+//	    qDebug("Strange, the selection is not in the list");
+//	    currRobot = NULL;
+//	    fflush(stdout);	    		
+//	}
+////  setActionValues(mo); 	
+}
+
+void NavControlPanel::updateSelectedRobot(bool)
+{
+	for(int i=0;i<availableRobots.size();i++)
+	{
+		if(availableRobots[i]->isChecked())
+		{
+			currRobot = playGround->robotPlatforms[i];
+			updateRobotSetting();
+			break;
+		}
+	}
+}
+
+void NavControlPanel::updateRobotSetting()
+{
+	obstExpRadSB.setValue(currRobot->planningManager->pathPlanner->obstacle_radius);	
+	bridgeTestResSB.setValue(currRobot->planningManager->pathPlanner->bridge_res);
+	bridgeSegLenSB.setValue(currRobot->planningManager->pathPlanner->bridge_length);
+	regGridResSB.setValue(currRobot->planningManager->pathPlanner->reg_grid);	
+	nodeConRadSB.setValue(currRobot->planningManager->pathPlanner->conn_radius);
+	nodeConRadSB.setValue(currRobot->planningManager->pathPlanner->conn_radius);
+	if(navContainer->mapViewer)
+		currRobot->planningManager->setMap(navContainer->mapViewer->image);
+	switch(currRobot->navigator->getObstAvoidAlgo())
+	{
+		case VFH:
+		    vfhRadBtn.setChecked(true);		
+		case FORCE_FIELD:
+		    forceFieldRadBtn.setChecked(true);
+		case CONFIG_SPACE:
+		    configSpaceRadBtn.setChecked(true);
+		case NO_AVOID:
+		    noavoidRadBtn.setChecked(true);		
+	}
+	if(currRobot->notFollowing)
+	{
+		pathFollowBtn.setText("Path Follow");
+	}
+	else
+	{
+		pathFollowBtn.setText("Stop");		
+	}
+	if(currRobot->notPaused)
+	{
+		pathFollowBtn.setText("Pause");
+	}
+	else
+	{
+		pathFollowBtn.setText("Continue");		
+	}
+}
+
+void NavControlPanel::updateSelectedAvoidanceAlgo(bool)
+{
+	if(currRobot->navigator==NULL)
+	{
+		currRobot->startNavigator();
+	}
+	if(vfhRadBtn.isChecked())
+	{
+//		qDebug("VFH");
+		currRobot->navigator->setObstAvoidAlgo(VFH);
+	}
+	else if(forceFieldRadBtn.isChecked())
+	{
+//		qDebug("Force Field");		
+		currRobot->navigator->setObstAvoidAlgo(FORCE_FIELD);	
+	}
+	else if(configSpaceRadBtn.isChecked())
+	{
+//		qDebug("Config Space");		
+		currRobot->navigator->setObstAvoidAlgo(CONFIG_SPACE);	
+	}
+	else if(noavoidRadBtn.isChecked())
+	{
+//		qDebug("NO Avoidace");		
+		currRobot->navigator->setObstAvoidAlgo(NO_AVOID);	
+	}
+}
+
+void NavControlPanel::save()
+{
+//    QString dir = QFileDialog::getSaveFileName(this, "Save log"); 
+//    mapManager->writeOut(dir); 
+}
+
+void NavControlPanel::setStart(Pose startLoc)
+{
+	if(this->currRobot)
+	{
+		currRobot->planningManager->setStart(startLoc);
+	}
+	else
+	{
+		qDebug("No Robot is Selected");
+	}
+}
+
+void NavControlPanel::setEnd(Pose endLoc)
+{
+	if(this->currRobot)
+	{
+		currRobot->planningManager->setEnd(endLoc);
+	}
+	else
+	{
+		qDebug("No Robot is Selected");
+	}	
+}
+
+void NavControlPanel::setMap(QImage imageMap)
+{
+	if(this->currRobot)
+	{
+		currRobot->planningManager->setMap(imageMap);
+	}
+	else
+	{
+		qDebug("No Robot is Selected");
+	}		
+}
+
+void NavControlPanel::exportHtml()
+{
+//    QString url=mapManager->exportHtml();
+//    QProcess *firefox = new QProcess();
+//    QString command = QString("firefox ").append(url);
+//    qDebug("Opening %s", qPrintable(command)); 
+//    firefox->start(command);
+//    firefox->waitForStarted();  
+}
