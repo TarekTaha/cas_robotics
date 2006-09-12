@@ -3,7 +3,7 @@
 RobotManager::RobotManager():
 commManager(NULL),
 planningManager(NULL),
-local_planner(NULL),
+//local_planner(NULL),
 navigator(NULL),
 robot(NULL),
 notPaused(true),
@@ -30,8 +30,9 @@ RobotManager::~RobotManager()
  *  3- Initialize Map management layer to provide the planner with maps.
  *  4- Initialize the Path Planning solver with the specified parameters.
  */
-RobotManager::RobotManager(ConfigFile *cf,int secId)
+RobotManager::RobotManager(PlayGround *playG,ConfigFile *cf,int secId)
 {
+	this->playGround = playG;
 	readRobotConfigs(cf,secId);
 	readCommManagerConfigs(cf,secId); 
 	int numSections = cf->GetSectionCount(); 
@@ -65,7 +66,7 @@ int RobotManager::readCommManagerConfigs(ConfigFile *cf,int secId)
 
 int RobotManager::readNavigatorConfigs(ConfigFile *cf)
 {
-	navigator = new Navigator(this);
+	navigator = new Navigator(playGround,this);
 	navigator->readConfigs(cf);
 	return 1;
 }

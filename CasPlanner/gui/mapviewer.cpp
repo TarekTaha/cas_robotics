@@ -41,10 +41,6 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
 		exit(1);
 	}
 	emit setMap(image);
-	for(int i=0;i<playGround->robotPlatforms.size();i++)
-	{
-		wayPoints.push_back(&playGround->robotPlatforms[i]->navigator->wayPoint);
-	}
 	qDebug("OpenGL Initialized"); fflush(stdout);	
 }
 
@@ -110,11 +106,6 @@ void  MapViewer::SetMapFileName(QString name)
 	this->mapName = name;	
 }
 
-void MapViewer::setWayPoint(Pose *wayPoint)
-{
-	//this->wayPoint = *wayPoint;
-}
-
 QImage MapViewer::getImage()
 {
 	return this->image;
@@ -145,10 +136,11 @@ void MapViewer::renderPaths()
 				path = path->next;
 			}
 		    glEnd();
+		    wayPoint = playGround->robotPlatforms[i]->navigator->wayPoint;
 		    // Draw Way Point
 		    glPushMatrix();
-			    glTranslatef(wayPoints[i]->p.x(),wayPoints[i]->p.y(),0);
-			    glRotated(RTOD(wayPoints[i]->phi),0,0,1);		    
+			    glTranslatef(wayPoint.p.x(),wayPoint.p.y(),0);
+			    glRotated(RTOD(wayPoint.phi),0,0,1);		    
 			    glColor4f(1,0,0,0.8);
 			    glShadeModel(GL_FLAT);
 			    glBegin(GL_TRIANGLE_FAN);

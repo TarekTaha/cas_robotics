@@ -23,7 +23,6 @@ class PathPlanner : public Astar
 		void   ExpandObstacles();
 		void   AddCostToNodes();
 		void   BridgeTest();
-		bool   CheckShortestDistance(double i,double j,double neigbhour_pixel_distance);
 		void   GenerateRegularGrid();
 		void   ConnectNodes();
 		void   ShowConnections();
@@ -31,6 +30,9 @@ class PathPlanner : public Astar
 		void   DetermineCheckPoints();
 		void   FindRoot();
 		void   FreePath();
+		bool   CheckShortestDistance(double i,double j,double neigbhour_pixel_distance);
+		bool   readSpaceFromFile(const char *filename);
+		bool   saveSpace2File(const char *filename);
 		PathPlanner(Robot *,double dG,double bridge_len,
 					double bridge_res,double reg_grid,double obst_exp,double conn_rad,double obst_pen);
 		PathPlanner();

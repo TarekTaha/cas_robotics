@@ -182,9 +182,8 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
 	    connect(availableRobots[i],        SIGNAL(toggled(bool )), this,SLOT(updateSelectedRobot(bool)));    	
     }
     availableRobots[0]->setChecked(true);
-//	updateSelectedAvoidanceAlgo(true);
     robotsGB.setLayout(robotsL); 
-
+	updateRobotSetting();
         
     QVBoxLayout *actionLayout = new QVBoxLayout; 
     actionLayout->addWidget(&pauseBtn); 
@@ -339,6 +338,7 @@ void NavControlPanel::updateSelectedRobot(bool)
 		if(availableRobots[i]->isChecked())
 		{
 			currRobot = playGround->robotPlatforms[i];
+			//qDebug("Seleted Robot is:%s",qPrintable(currRobot->robot->robotName));
 			updateRobotSetting();
 			break;
 		}
@@ -359,12 +359,18 @@ void NavControlPanel::updateRobotSetting()
 	{
 		case VFH:
 		    vfhRadBtn.setChecked(true);		
+		    break;
 		case FORCE_FIELD:
 		    forceFieldRadBtn.setChecked(true);
+		    break;
 		case CONFIG_SPACE:
 		    configSpaceRadBtn.setChecked(true);
+		    break;
 		case NO_AVOID:
 		    noavoidRadBtn.setChecked(true);		
+		    break;
+		default:
+			qDebug("Unkown ALGO");
 	}
 	if(currRobot->notFollowing)
 	{
@@ -376,11 +382,11 @@ void NavControlPanel::updateRobotSetting()
 	}
 	if(currRobot->notPaused)
 	{
-		pathFollowBtn.setText("Pause");
+		pauseBtn.setText("Pause");
 	}
 	else
 	{
-		pathFollowBtn.setText("Continue");		
+		pauseBtn.setText("Continue");		
 	}
 }
 

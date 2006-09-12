@@ -143,9 +143,10 @@ Navigator
 */
 
 /** @} */
-Navigator::Navigator(RobotManager *r) :
+Navigator::Navigator(PlayGround * playG,RobotManager *r) :
 globalPath(NULL),
 localPath(NULL),
+playGround(playG),
 robotManager(r),
 local_planner(NULL),
 global_planner(r->planningManager)
@@ -172,7 +173,7 @@ void Navigator::setupLocalPlanner()
 											  conn_rad,
 											  obst_pen
 										   );
-	robotManager->local_planner = local_planner->pathPlanner;							   
+	//robotManager->local_planner = local_planner->pathPlanner;							   
 	}
 }
 
@@ -186,6 +187,22 @@ int Navigator::readConfigs( ConfigFile *cf)
 	    if(sectionName == "Navigator")
 	    {
 		   	obst_avoid    =   cf->ReadString(i, "obst_avoid", "non");
+		   	if(obst_avoid == "VFH")
+		   	{
+		   		this->obstAvoidAlgo = VFH;
+		   	}
+		   	else if(obst_avoid == "FORCE_FIELD")
+		   	{
+		   		this->obstAvoidAlgo = FORCE_FIELD;		   		
+		   	}
+		   	else if(obst_avoid == "CONFIG_SPACE")
+		   	{
+		   		this->obstAvoidAlgo = CONFIG_SPACE;
+		   	}
+		   	else if(obst_avoid == "NO_AVOID")
+		   	{
+		   		this->obstAvoidAlgo = NO_AVOID;		   		
+		   	}
 		 	k_dist        =   cf->ReadFloat (i, "k_dist", 1.8);
 		  	k_theta       =   cf->ReadFloat (i, "k_theta", 2.5);
 		  	safety_dist   =   cf->ReadFloat (i, "safety_dist", 0.5);
@@ -455,7 +472,7 @@ void Navigator::run()
 	}
 
 	ControlAction cntrl;
-	QTime amcl_timer,delta_timer,redraw_timer;
+	QTime amcl_timer,delta_timer,redraw_timer,control_timer;
 	double closest_obst=10;
 	Pose loc;
 	if(!local_planner)
@@ -479,6 +496,7 @@ void Navigator::run()
 	}
 	path2Draw = GLOBALPATH;
 	redraw_timer.restart();
+	control_timer.restart();
 	Pose initial_pos;
 	initial_pos.p.setX(global_path->pose.p.x());
 	initial_pos.p.setY(global_path->pose.p.y());	
@@ -512,8 +530,8 @@ void Navigator::run()
 //		amcl_location = robotManager->commManager->getLocation();
 		amcl_location = robotManager->commManager->getOdomLocation();
 		robotManager->robot->setPose(amcl_location);
-		speed = robotManager->commManager->getSpeed();
-		turnRate = robotManager->commManager->getTurnRate();
+		speed = robotManager->robot->robotTurnRate = robotManager->commManager->getSpeed();
+		turnRate = robotManager->robot->robotTurnRate = robotManager->commManager->getTurnRate();
 		laserScan = robotManager->commManager->getLaserScan();
 //		qDebug("Navigator Turn Rate is:%f Orientation:%f",turnRate,amcl_location.phi);
 //		cout<<"\n Current Location X:"<<amcl_location.p.x()<<" Y:"<<amcl_location.p.y()<<" Theta:"<<amcl_location.phi;
@@ -741,7 +759,7 @@ void Navigator::run()
 //			 	emit renderMapPatch(robotManager->planner->pathPlanner->map);
 			}
 		 	redraw_timer.restart();	
- 		}
+		}
 		/* Get the control Action to be applied, in this case it's a
 		 * simple linear control. It's accurate enough for traversing 
 		 * the generated paths.
@@ -750,20 +768,30 @@ void Navigator::run()
 		Pose goal = getGoal(global_path,EstimatedPos,traversable_dist,laserScan);
 		wayPoint = goal;
 //		emit setWayPoint(&goal);
+		QVector <Robot> availableRobots;
 		QTime ff_time;
 		if(!pause)
 		{
 			switch(obstAvoidAlgo)		 
 			{
 				case FORCE_FIELD:
+					for(int i=0;i<playGround->robotPlatforms.size();i++)
+					{
+						if(playGround->robotPlatforms[i]!= robotManager)
+							availableRobots.push_back(*playGround->robotPlatforms[i]->robot);
+					}
 					//Force Field
 					velVector action;
 					ff_time.restart();
 				 	//qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);
-					action = FF->GenerateField(amcl_location,laserScan,goal,speed,turnRate);
+					action = FF->GenerateField(amcl_location,laserScan,goal,speed,turnRate,availableRobots);
 					qDebug("FF Speed is:%f TurnRate is:%f  time is:%dms",action.speed,action.turnRate,ff_time.elapsed());	
-					robotManager->commManager->setSpeed(action.speed);						
-					robotManager->commManager->setTurnRate(action.turnRate);		
+					if(control_timer.elapsed()>100)
+					{
+						robotManager->commManager->setSpeed(action.speed);						
+						robotManager->commManager->setTurnRate(action.turnRate);		
+						control_timer.restart();
+					}
 					break;		
 				case CONFIG_SPACE:
 					break;

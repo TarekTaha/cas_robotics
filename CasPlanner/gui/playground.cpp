@@ -36,7 +36,7 @@ PlayGround::PlayGround(QStringList configFiles)
 			}
 		    if(sectionName == "Robot")
 		    {
-		    	RobotManager *rbm = new RobotManager(cf,i);
+		    	RobotManager *rbm = new RobotManager(this,cf,i);
 		    	robotPlatforms.push_back(rbm);
 		    }
 		    if(sectionName == "Map")
