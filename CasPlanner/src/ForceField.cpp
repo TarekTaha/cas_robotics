@@ -107,7 +107,7 @@ velVector ForceField::GenerateField(Pose pose,LaserScan laser_set,Pose Goal,doub
 	QVector<Interaction> obstacle_interaction_set;
 	Interaction inter_point, max_inter;	
 		
-	qDebug("here"); fflush(stdout);
+	//qDebug("here"); fflush(stdout);
 	velVector action;
  	this->robotLocation = pose;
  	//qDebug("Robot Pose x:%f y:%f phi%f",robotLocation.p.x(),robotLocation.p.y(),robotLocation.phi);
@@ -200,6 +200,7 @@ QVector<Interaction>  ForceField::getDynamicInteractionSet(QVector <Robot> robot
 	QVector<QPointF> robotsDmax_set;
 	for (int i_robots = 0; i_robots < robots.size() ; i_robots ++)
 	{
+		qDebug("robot:  size=%f, X=%f, Y=%f, Speed=%f, Dirc=%f",robots[i_robots].robotRadius, robots[i_robots].robotSpeed,robots[i_robots].robotLocation.phi, robots[i_robots].robotLocation.p.x(), robots[i_robots].robotLocation.p.y());
 		//qDebug("1i = %d", i_robots);fflush(stdout);
 		//qDebug("HERE START"); fflush(stdout);
 		
@@ -642,10 +643,10 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
 //  	}
 	//double robotTurnRate_new = (double)anglebetw * (double)TimeStep;
 	//double robotTurnRate_new = 3 * robotSpeed * TimeStep * anglebetw * fabs(cos(Mindist_angle))/ Mindist; //(double)anglebetw * (double)TimeStep;
-	double x2goal = robotLocation.p.x() - goalLocation.p.x();
-	double y2goal = robotLocation.p.y() - goalLocation.p.y();
-	double dist2goal = sqrt(x2goal * x2goal + y2goal * y2goal);
-	Mindist = Min(dist2goal, Mindist);
+	//double x2goal = robotLocation.p.x() - goalLocation.p.x();
+	//double y2goal = robotLocation.p.y() - goalLocation.p.y();
+	//double dist2goal = sqrt(x2goal * x2goal + y2goal * y2goal);
+	Mindist = Min(0.1, Mindist);
 	qDebug ("Mindist=%f", Mindist);
   	double turnfaster = 3;
   	double robotTurnRate_new = turnfaster * robotSpeed * TimeStep * anglebetw / Mindist; //(double)anglebetw * (double)TimeStep;
