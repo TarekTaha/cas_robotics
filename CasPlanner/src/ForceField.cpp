@@ -405,7 +405,7 @@ double ForceField::ForceValue(QPointF ray_end, double &DMAX, double &DMIN, doubl
  	}
  	else
  	{
-   		ForceAmp = (1 - Ratio / 0.22) * SysP * 110;
+   		ForceAmp = (1 - Ratio / (1.1 * FixedRatio)) * SysP * 22;
  	}
  	//qDebug ("Ratio=%f,ForceAmp=%f, closest_dist=%f, DMAX=%f",Ratio,ForceAmp, closest_dist, DMAX);
 	//qDebug("Er:%f Angle:%f Dmax:%f Dmin:%f Ratio:%f ClosestDist:%f ForceAmp:%f",Er,angle,Dmax,Dmin,Ratio,closest_dist,ForceAmp); 	
@@ -595,7 +595,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   	double FtotalY = FattY + FrepYTotal + FrepYTotal_robots;
   	double ForceAngle = atan2(FtotalY, FtotalX);
       	
-  	double robotSpeed_new = Max(MaxSpeed / (1 + 2 * MaxRep / SysP), 0);
+  	double robotSpeed_new = Max(MaxSpeed / (1 + 2 * MaxRep / SysP), 0.005);
   	double MaxSpeedIncr = 0.01;
   	if ((robotSpeed_new - robotSpeed) > MaxSpeedIncr)
   	{
@@ -612,7 +612,21 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
 
   	anglebetw = Delta_Angle (robotLocation.phi, ForceAngle);
   	qDebug ("FtotalX=%f, FtotalY=%f, ForceAngle=%f, anglebetw=%f,robotTurnRate=%f ", FtotalX, FtotalY, ForceAngle, anglebetw, robotTurnRate);
-//  	double turnRate_incr = (double)anglebetw / (double)TimeStep;
+  	double anglemax = 1;
+  	if (anglebetw > anglemax)
+  	{
+  		anglebetw = anglemax;
+  	}
+  	else if (anglebetw < -anglemax)
+  	{
+  		anglebetw = -anglemax;
+  	}
+  	else
+  	{
+  		anglebetw = anglebetw;
+  	}
+  	qDebug("anglebetw=%f", anglebetw);
+  	//  	double turnRate_incr = (double)anglebetw / (double)TimeStep;
 //  	double MaxTurnRateIncr = 0.02;
 //  	if (turnRate_incr > MaxTurnRateIncr)
 //  	{
@@ -629,11 +643,11 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
 	//double robotTurnRate_new = (double)anglebetw * (double)TimeStep;
 	//double robotTurnRate_new = 3 * robotSpeed * TimeStep * anglebetw * fabs(cos(Mindist_angle))/ Mindist; //(double)anglebetw * (double)TimeStep;
 	double x2goal = robotLocation.p.x() - goalLocation.p.x();
-    double y2goal = robotLocation.p.y() - goalLocation.p.y();
-    double dist2goal = sqrt(x2goal * x2goal + y2goal * y2goal);
-    Mindist = Min(dist2goal, Mindist);
-    qDebug ("Mindist=%f", Mindist);
-  	double turnfaster = 5;
+	double y2goal = robotLocation.p.y() - goalLocation.p.y();
+	double dist2goal = sqrt(x2goal * x2goal + y2goal * y2goal);
+	Mindist = Min(dist2goal, Mindist);
+	qDebug ("Mindist=%f", Mindist);
+  	double turnfaster = 3;
   	double robotTurnRate_new = turnfaster * robotSpeed * TimeStep * anglebetw / Mindist; //(double)anglebetw * (double)TimeStep;
   	//double robotTurnRate_new = robotTurnRate + turnRate_incr;
   	if (robotTurnRate_new > OmegaMax)
