@@ -157,8 +157,19 @@ void PlanningManager::setEnd(Pose end)
 	this->end = end;
 }
 
+bool PlanningManager::fileExist(const char * fname)
+{
+	//cout<<fname<<endl;
+	struct stat stat_buf;
+ 	if (stat(fname,&stat_buf) != 0)
+ 		return false;
+  	return (stat_buf.st_mode & S_IFMT) == S_IFREG;
+}
+
 void PlanningManager::generateSpace()
 {
+	QTime timer;
+	const char * filename = "SearchSpace.txt";
 	if(!this->pathPlanner)
 		this->setupPlanner();
 	if(pathPlanner->search_space)
@@ -166,16 +177,29 @@ void PlanningManager::generateSpace()
 		return;
 		//pathPlanner->FreeSearchSpace();
 	}		
-	if(expObstEnabled)
-		pathPlanner->ExpandObstacles();
-	if(regGridEnabled)
-		pathPlanner->GenerateRegularGrid();
-	if(bridgeTestEnabled)
-		pathPlanner->BridgeTest();
-	if(obstPenEnabled)
-		pathPlanner->AddCostToNodes();
-	if(connNodesEnabled)
-		pathPlanner->ConnectNodes();	
+	timer.restart();
+	if(fileExist(filename))
+	{
+		pathPlanner->readSpaceFromFile(filename);
+		if(connNodesEnabled)
+			pathPlanner->ConnectNodes();	
+		qDebug("Reading Space from File took:%f sec",timer.elapsed()/double(1000.00));
+	}
+	else
+	{
+		if(expObstEnabled)
+			pathPlanner->ExpandObstacles();
+		if(regGridEnabled)
+			pathPlanner->GenerateRegularGrid();
+		if(bridgeTestEnabled)
+			pathPlanner->BridgeTest();
+		if(obstPenEnabled)
+			pathPlanner->AddCostToNodes();
+		if(connNodesEnabled)
+			pathPlanner->ConnectNodes();	
+		pathPlanner->saveSpace2File(filename);
+		qDebug("Generating Space from Scratch took:%f sec",timer.elapsed()/double(1000.00));		
+	}
 	pathPlanner->ShowConnections();
 }
 Node * PlanningManager::findPath(int coord)

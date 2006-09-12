@@ -156,6 +156,67 @@ void PathPlanner::ExpandObstacles()
 	//ShowConnections();
 };
 
+bool PathPlanner::readSpaceFromFile(const char *filename)
+{
+  	double locationx,locationy,obstacle_cost;
+  	SearchSpaceNode *temp;
+  	assert(filename != NULL);
+  	filename = strdup(filename);
+  	FILE *file = fopen(filename, "r");
+  	if (!file)
+  	{
+  		qDebug("Error Opening File");
+    	fclose(file);
+    	return false;
+  	}
+  	while (!feof(file))
+  	{
+  		fscanf(file,"%lf %lf %lf\n",&locationx,&locationy,&obstacle_cost);
+		if (search_space == NULL ) // Constructing the ROOT NODE
+		{
+			temp = new SearchSpaceNode;
+			temp->location.setX(locationx);
+			temp->location.setY(locationy);
+			temp->obstacle_cost = obstacle_cost;
+			temp->parent   = NULL;
+			temp->next     = NULL;
+			search_space = temp;
+		}
+		else
+		{
+			temp = new SearchSpaceNode;
+			temp->location.setX(locationx);
+			temp->location.setY(locationy);
+			temp->parent = NULL; 
+			temp->next   = search_space;
+			search_space = temp;
+		}
+  	}
+  	fclose(file);
+  	return true;
+}
+
+bool PathPlanner::saveSpace2File(const char *filename)
+{
+  	assert(filename != NULL);
+  	filename = strdup(filename);
+  	FILE *file = fopen(filename, "wb");
+  	if (!file)
+  	{
+  		qDebug("Error Opening File");
+    	fclose(file);
+    	return false;
+  	}
+  	SearchSpaceNode *temp=search_space;
+  	while (temp)
+  	{
+  		fprintf(file,"%f %f %f\n",temp->location.x(),temp->location.y(),temp->obstacle_cost);
+		temp = temp->next;
+  	}
+  	fclose(file);
+  	return true;
+}
+
 void PathPlanner::GenerateRegularGrid()
 {
 	SearchSpaceNode *temp;

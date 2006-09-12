@@ -12,6 +12,8 @@
 #include <QObject>
 #include <QString>
 #include <QPointF>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 class RobotManager;
 using namespace CasPlanner;
@@ -46,6 +48,7 @@ class PlanningManager : public MapManager
 	        void  setObstPenValue(double);
 	        void  setExpObstValue(double);
 			void  setBridgeResValue(double val);
+			bool fileExist(const char * fname);
        signals:
 		    void statusMsg(int,int, QString);
         protected:

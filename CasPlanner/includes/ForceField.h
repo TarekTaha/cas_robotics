@@ -16,28 +16,36 @@ typedef struct _interaction
 		QPointF location;
 		double force;
 		double direction;
+		double closestdist;
+		double angle;
 	}   Interaction;
 typedef struct _velVector
 {
 	double speed;
 	double turnRate;
-}   velVector;	
+}   velVector;
+
 class ForceField : public Robot
 {
 	enum {VariableSpeedFF,SimpleFF};
 public:
 	ForceField(Robot r,ConfigFile *cf);
 	virtual ~ForceField();
-	velVector GenerateField(Pose pose,LaserScan laser_set,Pose Goal,double speed,double turnrate);
+    velVector GenerateField(Pose pose,LaserScan laser_set,Pose Goal,double speed,double turnrate,QVector <Robot> robots);
 	QVector < QVector<QPointF> > DivObst(LaserScan laser_set,Pose laser_pose);	
-	void    LSCurveFitting (QVector<QPointF> obstacle, double a[], int m);
-	double  Dist2Robot(QPointF ray_end,double &angle);
-	void    VSFF(QVector<Interaction> obstacle_interaction_set);	
+	void    LSCurveFitting (QVector<QPointF>, double[], int);
+	double  Dist2Robot(QPointF,double &);
+	void    VSFF(QVector<Interaction>, QVector<Interaction>);	
 	double  FindNorm(QPointF interaction_point, double Tang);
 	void    CrossProduct(double MatrixA[3], double MatrixB[3], double MatrixC[3]);
-	void    SimFF(QVector<Interaction> obstacle_interaction_set);
-	double  ForceValue(QPointF ray_end,Pose laser_pose);
-	double  Delta_Angle(double a1, double a2);
+	//void    SimFF(QVector<Interaction> obstacle_interaction_set);
+	double  ForceValue(QPointF ray_end, double &, double &, double &, double &);
+	double  Delta_Angle(double, double);
+	void    robotForceFieldShape(Robot, QVector<QPointF>&, QVector<QPointF>&);
+	//double  ForceValue_dynamicobstalce(dymamicobstacle, obstacleDmaxPoint);
+	void    SimFF(QVector<Interaction>, QVector<Interaction>);
+	QVector<Interaction> getDynamicInteractionSet(QVector <Robot> robots);
+	//double  ForceValue_dynamicobstalce(dymamicobstacle, obstacleDmaxPoint);
 private :
 	double   FixedRatio,TimeStep,SysK,SysC,SysP,SysQ,MaxSpeed,MaxAcceT,OmegadotMax,OmegaMax,
 			 Gapdist,NPOL,INF,EP;

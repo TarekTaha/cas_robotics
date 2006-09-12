@@ -5,6 +5,7 @@
 #include <libplayercore/player.h>
 
 #include <QObject>
+#include <QThread>
 #include <QString>
 #include <QPointF>
 #include <QVector>
@@ -21,7 +22,7 @@
  * 2- A Laser scan.
  * 3- Occupancy Grid Map.
  */
-class MapManager : public Map, public QObject
+class MapManager : public Map, public QObject//public QThread
 {
 	//Q_OBJECT
 	public:

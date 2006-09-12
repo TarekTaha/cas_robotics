@@ -58,7 +58,6 @@ Q_OBJECT
 		void setShowRobots      (int state);
 		void setShowPointclouds (int state);
 		void setShowPatchBorders(int state);
-		void setWayPoint        (Pose *wayPoint);
 		void renderMapPatch     (Map * mapPatch);
 				
     signals:
@@ -94,7 +93,7 @@ Q_OBJECT
 		QString mapName;
 	    MapManager mapManager;
 	    Pose start,end;
-	    QVector <Pose * >wayPoints;
+	    Pose wayPoint;
 	    Map * mapData; 	
 	    QColor clearColor;
 	   	QPointF mousePos;

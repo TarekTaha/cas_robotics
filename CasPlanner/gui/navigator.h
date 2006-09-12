@@ -11,6 +11,7 @@
 #include <QReadWriteLock>
 #include <QTime>
 #include <vector>
+#include "playground.h"
 #include "robotmanager.h"
 #include "Robot.h"
 #include "planningmanager.h"
@@ -23,13 +24,14 @@
 
 class PlanningManager;
 class RobotManager;
+class PlayGround;
 using namespace CasPlanner;
 
 class Navigator : public Controller
 {
 	Q_OBJECT
 	public:
-		Navigator(RobotManager *);
+		Navigator(PlayGround *,RobotManager *);
 		~Navigator();	
 		QString obst_avoid;
 		Node * globalPath, *localPath;
@@ -49,6 +51,7 @@ class Navigator : public Controller
         void run();
         void setupLocalPlanner();
         Pose wayPoint;
+        PlayGround * playGround;
         RobotManager *robotManager;
 	public
 	slots:

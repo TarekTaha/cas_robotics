@@ -10,11 +10,12 @@
 #include "navigator.h"
 #include "configfile.h"
 #include "Robot.h"
-
+#include "playground.h"
 class Navigator;
 class NavContainer;
 class PlanningManager;
 class MapViewer;
+class PlayGround;
 
 enum{FORCE_FIELD,VFH,CONFIG_SPACE,NO_AVOID};
 enum{OPENGL,PAINTER_2D};
@@ -24,7 +25,7 @@ class RobotManager : public QObject//public CommManager, public PlanningManager 
 	Q_OBJECT
     public:
     	RobotManager();
-		RobotManager(ConfigFile *cf,int secId);
+		RobotManager(PlayGround *playG,ConfigFile *cf,int secId);
 		~RobotManager(); 
 		int readRobotConfigs(ConfigFile *cf,int secId);
 		int readCommManagerConfigs(ConfigFile *cf,int secId);
@@ -36,9 +37,9 @@ class RobotManager : public QObject//public CommManager, public PlanningManager 
 		int startNavigator();
 		int startComms();
 		int renderingMethod;
+		PlayGround *playGround;
 		CommManager     *commManager;
 		PlanningManager *planningManager;
-		PathPlanner     *local_planner;
 		Navigator       *navigator;
 		Robot           *robot;
 		bool notPaused,notFollowing;
