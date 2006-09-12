@@ -1,7 +1,7 @@
 #ifndef SEARCHSPACENODE_H_
 #define SEARCHSPACENODE_H_
 #include<QPointF>
-#include<vector>
+#include<QVector>
 using namespace std;
 namespace CasPlanner
 {
@@ -12,7 +12,7 @@ class SearchSpaceNode
 		QPointF location;
 		SearchSpaceNode * parent, * next;
 		double obstacle_cost;
-		vector <SearchSpaceNode *>  children;
+		QVector <SearchSpaceNode *>  children;
 		 SearchSpaceNode ();
 		~SearchSpaceNode ();
 	};

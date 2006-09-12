@@ -485,6 +485,27 @@ void PathPlanner::SaveSearchSpace()
 		temp =temp->next;
 	}
 }
+
+void PathPlanner::updateMap(Map *mapPatch)
+{
+	QPointF p;
+	for(int i=0;i<mapPatch->pointCloud.size();i++)
+	{
+		p = mapPatch->pointCloud[i];
+		this->ConvertToPixel(&p);		
+		if(this->map->data[int(p.x())][(int)p.y()] == false)
+			this->map->data[int(p.x())][(int)p.y()]= false;
+	}
+	SearchSpaceNode *swap,*temp = search_space;
+	while (temp != NULL)
+	{
+		p = temp->location;
+		this->ConvertToPixel(&p);
+		this->map->data[int(p.x())][(int)p.y()]= true ;
+		temp =temp->next;
+	}
+}
+
 /*! Sets the converted QImage or the Laser Scan Map to 
  * the Current Planner
  */ 

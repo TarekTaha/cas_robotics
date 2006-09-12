@@ -30,6 +30,7 @@ class PathPlanner : public Astar
 		void   DetermineCheckPoints();
 		void   FindRoot();
 		void   FreePath();
+		void   updateMap(Map *mapPatch);
 		bool   CheckShortestDistance(double i,double j,double neigbhour_pixel_distance);
 		bool   readSpaceFromFile(const char *filename);
 		bool   saveSpace2File(const char *filename);

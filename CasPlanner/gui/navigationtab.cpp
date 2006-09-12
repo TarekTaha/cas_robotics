@@ -26,7 +26,7 @@ NavContainer::NavContainer(QWidget *parent,PlayGround *playGround_in)
     vLayout->addWidget(&navControlPanel,1); 
     setLayout(vLayout); 
 	
-	qDebug("Container Initialized"); fflush(stdout);	
+//	qDebug("Container Initialized"); fflush(stdout);	
 }
 
 NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
@@ -61,7 +61,7 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
 	robotsGB("Select your Robot"),
 	path(0)
 {
-	qDebug("Initializing Control Panel"); fflush(stdout);	
+//	qDebug("Initializing Control Panel"); fflush(stdout);	
 	RobotManager *temp= NULL;
 //	robMan2Widget.clear();
 //	widget2RobMan.clear();
@@ -217,7 +217,7 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
     connect(&expandObst, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setExpObst( int )));
     connect(&showTree, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setShowTree( int )));
 
-	qDebug("Initializing Control Panel --->>>DONE"); fflush(stdout);		
+//	qDebug("Initializing Control Panel --->>>DONE"); fflush(stdout);		
 }
 
 void NavControlPanel::Finished()
@@ -314,7 +314,7 @@ void NavControlPanel::updateSelectedObject(double)
 
 void NavControlPanel::handleRobotSelection()
 {
-    qDebug("Robot Selected"); 
+//    qDebug("Robot Selected"); 
 //    QTreeWidgetItem *item = selectedRobot.currentItem();
 //	if(widget2RobMan.contains(item))
 //	{
