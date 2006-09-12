@@ -596,7 +596,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   	double FtotalY = FattY + FrepYTotal + FrepYTotal_robots;
   	double ForceAngle = atan2(FtotalY, FtotalX);
       	
-  	double robotSpeed_new = Max(MaxSpeed / (1 + 2 * MaxRep / SysP), 0.005);
+  	double robotSpeed_new = Max(MaxSpeed / (1 + 0.4 *  MaxRep / SysP), 0.005);
   	double MaxSpeedIncr = 0.01;
   	if ((robotSpeed_new - robotSpeed) > MaxSpeedIncr)
   	{
