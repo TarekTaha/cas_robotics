@@ -28,7 +28,7 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
     renderTimer = new QTimer(this);
     connect(renderTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
     renderTimer->start(100);
-	qDebug("Initializing OpenGL"); fflush(stdout);
+//	qDebug("Initializing OpenGL"); fflush(stdout);
   	clearColor = Qt::black;
     setFocusPolicy(Qt::StrongFocus);
     glGenTextures(1, &texId); 
@@ -41,7 +41,7 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
 		exit(1);
 	}
 	emit setMap(image);
-	qDebug("OpenGL Initialized"); fflush(stdout);	
+//	qDebug("OpenGL Initialized"); fflush(stdout);	
 }
 
 int MapViewer::loadImage(QString name)
@@ -116,6 +116,16 @@ void MapViewer::setProvider(MapProvider *)
     
 }
 
+void MapViewer::updateMap(Map *newMap)
+{
+	qDebug("Updating Map");
+	if(this->mapData)
+		delete mapData;
+	this->mapData = newMap;
+    mainMapBuilt = false;
+    updateGL();
+}
+
 void MapViewer::renderPaths()
 {
 	if(!playGround)
@@ -187,6 +197,40 @@ void MapViewer::renderLaser()
 	    glPopMatrix();	
 	}
 }
+
+void MapViewer::renderSearchTree()
+{
+	for(int i=0;i<1;i++)
+	{
+		SearchSpaceNode * temp,*child;
+		if(!playGround->robotPlatforms[i]->planningManager->renderTree)
+			continue;
+		temp =  playGround->robotPlatforms[i]->planningManager->pathPlanner->search_space;
+	    glPushMatrix();
+	    glColor3f(1,0,0);
+		while(temp)
+		{
+			for(int j=0;j<temp->children.size();j++)
+			{
+				//qDebug("J is:%d",j); fflush(stdout);
+				child = temp->children[j];
+				if(!child)
+				{
+					qDebug("Why the hell there is an empty CHILD ???");
+					fflush(stdout);
+					continue;
+				}
+			    glBegin(GL_LINE_LOOP);
+			    	glVertex2f(temp->location.x(),temp->location.y());  
+			    	glVertex2f(child->location.x(),child->location.y());
+			    glEnd(); 
+			}
+		    temp = temp->next;
+		}
+	    glPopMatrix();			
+	}
+}
+
 void MapViewer::renderRobot()
 {
 	if(!playGround)
@@ -256,7 +300,7 @@ void MapViewer::renderMapPatch(Map * mapPatch)
 {
     int mapWidth,mapHeight; 
     float ratioW, ratioH; 	
-	qDebug("Rendering Map Patch");
+//	qDebug("Rendering Map Patch");
 	#ifdef NOPOTD
 	   mapWidth  = powl(2,  ceill(log(mapPatch->width)/log(2)));
 	   mapHeight = powl(2, ceill(log(mapPatch->height)/log(2)));
@@ -291,7 +335,7 @@ void MapViewer::renderMapPatch(Map * mapPatch)
 		    }
 		}
     }
-    qDebug(" Count %ld",count);
+//    qDebug(" Count %ld",count);
     
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texId);  //Select our texture
@@ -508,6 +552,7 @@ void MapViewer::paintGL()
     renderLaser();
     renderRobot();
     renderPaths();
+    //renderSearchTree();
     if(start_initialized)
     {
 	    glPushMatrix();

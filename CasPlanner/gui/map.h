@@ -9,7 +9,8 @@ class Map
         double resolution;
         Pose global_pose;
         QByteArray rawData; // for OG-Maps
-        bool ** data;       // for Planners
+        bool    ** data;       // for Planners
+        QVector <QPointF> pointCloud;
         QPointF center;		// Axis Center of the Map
         Map(int width, int height, double resolution,QPointF center,Pose p)
         {
@@ -27,6 +28,12 @@ class Map
 					data[i][j] = false;
 			}
         }
+        Map(Pose p)
+        {
+        	this->global_pose = p;
+            this->rawData = NULL;
+			this->data = NULL;
+        }        
         Map(int width, int height, double resolution,  QByteArray rawData)
         {
             this->width   = width; 

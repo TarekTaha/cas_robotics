@@ -29,6 +29,7 @@ class PlanningManager : public MapManager
             int setupPlanner(); 
             int stop();
            	PathPlanner * pathPlanner;
+           	bool renderTree;
         public slots: 
 	        Node* findPath(int coord);
 	        void  generateSpace();
@@ -48,9 +49,11 @@ class PlanningManager : public MapManager
 	        void  setObstPenValue(double);
 	        void  setExpObstValue(double);
 			void  setBridgeResValue(double val);
-			bool fileExist(const char * fname);
+			void  updateMap(LaserScan laserScan,double local_dist,Pose robotLocation);
+			bool  fileExist(const char * fname);
        signals:
 		    void statusMsg(int,int, QString);
+		    void updateMap(Map* map);
         protected:
             double pixel_res,dist_goal,bridge_len,bridge_res,reg_grid,obst_exp,conn_rad,obst_pen;
             RobotManager *robotManager;

@@ -8,7 +8,27 @@ MapManager::~MapManager()
 {
 }
 
-Map * MapManager::provideLaserOG(LaserScan laserScan, double local_dist,double res,Pose map_pose)
+Map * MapManager::providePointCloud(LaserScan laserScan, double local_dist,Pose robotPose)
+{
+	Map *retval;
+	double dist=0;
+	Pose globalPose = Trans2Global(laserScan.laserPose,robotPose);
+	// Creating Map with the right size
+	retval = new Map(globalPose);
+	for(int i =0; i < laserScan.points.size();i++)
+	{
+		QPointF p(laserScan.points[i].x(),laserScan.points[i].y());
+		p = Trans2Global(p,globalPose);
+		dist = Dist(robotPose.p,p);
+		if(dist <=local_dist)
+		{
+			retval->pointCloud.push_back(p);
+		}
+	}
+	return retval;		
+}
+
+Map * MapManager::provideLaserOG(LaserScan laserScan, double local_dist,double res,Pose robotPose)
 {
 	Map *retval;
 	double dist=0;
@@ -16,13 +36,14 @@ Map * MapManager::provideLaserOG(LaserScan laserScan, double local_dist,double r
 	// getting right Map dimensions
 	height = int(2.0*local_dist/res);
 	width =  int(2.0*local_dist/res);	
+	Pose globalPose = Trans2Global(laserScan.laserPose,robotPose);
 	// Creating Map with the right size
-	retval = new Map(width,height,res,QPointF(width/2.0,height/2.0),map_pose);
+	retval = new Map(width,height,res,QPointF(width/2.0,height/2.0),globalPose);
 	for(int i =0; i < laserScan.points.size();i++)
 	{
 		// Rotate it now, it will reduce the computation later on
 		QPointF p(laserScan.points[i].x(),laserScan.points[i].y());
-		p = Rotate(p,map_pose.phi);
+		p = Rotate(p,robotPose.phi);
 		p = Trans2Global(p,laserScan.laserPose);
 		dist = Dist(QPointF(0,0),p);
 //		assert( p.x() > 0 );

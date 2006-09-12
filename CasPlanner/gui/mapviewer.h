@@ -45,6 +45,7 @@ Q_OBJECT
 		void renderRobot();
 		void renderLaser();	
 		void renderPaths();
+		void renderSearchTree();
 		GLuint makeObject();
 		QImage captureMap();
         virtual void setProvider(MapProvider *provider);
@@ -59,7 +60,7 @@ Q_OBJECT
 		void setShowPointclouds (int state);
 		void setShowPatchBorders(int state);
 		void renderMapPatch     (Map * mapPatch);
-				
+		void updateMap          (Map *newMap);
     signals:
 		void moveMOLeft(); 
 		void moveMORight(); 

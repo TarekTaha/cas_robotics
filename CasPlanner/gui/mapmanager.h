@@ -29,6 +29,7 @@ class MapManager : public Map, public QObject//public QThread
 		MapManager();
 		virtual ~MapManager();
 		Map * provideLaserOG(LaserScan laserScan,double local_dist,double pixel_res,Pose pose);
+		Map * providePointCloud(LaserScan laserScan, double loca_dist,Pose robotPose);
 		Map * provideMapOG  (QImage image,double pixel_res,Pose p,bool negate);
 };
 

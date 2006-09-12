@@ -274,7 +274,10 @@ double Navigator::NearestObstacle(LaserScan laser_scan)
 	return shortest_dist;	
 };
 
-// Only get the Existing Map points that are useful for Allignement
+/*!
+ * Gets the equivalent area of what u see in ur laser scan from 
+ * the Map already stored in the PlanningManager
+ */
 void Navigator::GenerateLocalMap(QVector<QPointF> laser_scan,Pose laser_pose, Pose rob_location)
 {
 	double farest_laser_dist = 0,dist, num_pixels;
@@ -436,17 +439,22 @@ bool Navigator::inLaserSpace(LaserScan laserScan,Pose robotLocation,QPointF wayP
 /*!
  * This is the Navigation Thread's main, where the control and the path following takes place.
  */
-Pose Navigator::getGoal(Node *global_path,Pose robotLocation,double traversable_dist,LaserScan laserScan)
+bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
 {
 	Node *temp;
-	Pose retval;
+	bool retval = false;
+	double dist;
+	Pose robotLocation = robotManager->robot->robotLocation;
 	temp = ClosestPathSeg(robotLocation.p,global_path);
- 	while(temp->next && Dist(robotLocation.p,temp->pose.p) < traversable_dist && 
- 	      inLaserSpace(laserScan,robotLocation,temp->pose.p))
+ 	while(temp->next && (Dist(robotLocation.p,temp->pose.p) < traversable_dist))
  	{
- 		double angle = ATAN2(temp->next->pose.p,temp->pose.p);
- 		retval.p = temp->pose.p;
- 		retval.phi = angle;
+ 		if (inLaserSpace(laserScan,robotLocation,temp->pose.p) && (Dist(robotLocation.p,temp->pose.p) > 1))
+ 		{
+ 			double angle = ATAN2(temp->next->pose.p,temp->pose.p);
+ 			goal.p = temp->pose.p;
+ 			goal.phi = angle;
+ 			retval = true;
+ 		}
  		temp= temp->next;
  	}
  	return retval;
@@ -521,8 +529,14 @@ void Navigator::run()
 	stop_navigating = false;
 	double speed,turnRate;
 	LaserScan laserScan;
-	while(!end_reached && !stop_navigating)
+	while(!end_reached)
 	{
+		if(stop_navigating)
+		{
+			robotManager->commManager->setSpeed(0);
+			robotManager->commManager->setTurnRate(0);
+			break;			
+		}
 		delta_t = delta_timer.elapsed()/1e3;
 		delta_timer.restart();
 		usleep(10000);
@@ -765,7 +779,17 @@ void Navigator::run()
 		 * the generated paths.
 		 */
 //		Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
-		Pose goal = getGoal(global_path,EstimatedPos,traversable_dist,laserScan);
+		Pose goal;
+		if(!getGoal(laserScan,goal))
+		{
+			robotManager->commManager->setSpeed(0);
+			robotManager->commManager->setTurnRate(0);			
+			robotManager->planningManager->setStart(robotManager->robot->robotLocation);
+			//TODO: ICP with the local Area and give the Corrected Location to the function Below
+			robotManager->planningManager->updateMap(laserScan,local_dist,robotManager->robot->robotLocation);
+			robotManager->planningManager->findPath(METRIC);
+			continue;
+		}
 		wayPoint = goal;
 //		emit setWayPoint(&goal);
 		QVector <Robot> availableRobots;

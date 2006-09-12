@@ -38,6 +38,7 @@ PlanningManager::PlanningManager(RobotManager *robMan,
 
 PlanningManager::PlanningManager(RobotManager *robMan):
 pathPlanner(NULL),
+renderTree(false),
 robotManager(robMan),
 bridgeTestEnabled(true),
 connNodesEnabled(true),
@@ -140,11 +141,21 @@ void PlanningManager::setMap(QImage map)
 	pathPlanner->SetMap(provideMapOG(map,pixel_res,Pose(0,0,0),negate));	
 }
 
-void PlanningManager::setMap(LaserScan laser_scan,double local_dist,Pose pose)
+void PlanningManager::setMap(LaserScan laserScan,double local_dist,Pose robotLocation)
 {
 	if(!this->pathPlanner)
 		this->setupPlanner();
-	pathPlanner->SetMap(provideLaserOG(laser_scan,local_dist,pixel_res,pose));
+	pathPlanner->SetMap(provideLaserOG(laserScan,local_dist,pixel_res,robotLocation));
+}
+
+void PlanningManager::updateMap(LaserScan laserScan,double local_dist,Pose robotLocation)
+{
+//	connect(this, SIGNAL(updateMap(Map *)),  robotManager->playGround->mapViewer, SLOT(updateMap(Map *)));	
+	Map *newMap = providePointCloud(laserScan,local_dist,robotLocation);
+	if(!this->pathPlanner)
+		this->setupPlanner();
+	pathPlanner->updateMap(newMap);
+//	emit updateMap(newMap);
 }
 
 void PlanningManager::setStart(Pose start)
@@ -180,13 +191,15 @@ void PlanningManager::generateSpace()
 	timer.restart();
 	if(fileExist(filename))
 	{
+		qDebug("Loading Space From file ...");
 		pathPlanner->readSpaceFromFile(filename);
 		if(connNodesEnabled)
 			pathPlanner->ConnectNodes();	
-		qDebug("Reading Space from File took:%f sec",timer.elapsed()/double(1000.00));
+		qDebug("File loading took:%f sec",timer.elapsed()/double(1000.00));
 	}
 	else
 	{
+		qDebug("Generating Space ...");		
 		if(expObstEnabled)
 			pathPlanner->ExpandObstacles();
 		if(regGridEnabled)
@@ -198,8 +211,9 @@ void PlanningManager::generateSpace()
 		if(connNodesEnabled)
 			pathPlanner->ConnectNodes();	
 		pathPlanner->saveSpace2File(filename);
-		qDebug("Generating Space from Scratch took:%f sec",timer.elapsed()/double(1000.00));		
+		qDebug("Space Generation took:%f sec",timer.elapsed()/double(1000.00));		
 	}
+	this->renderTree = true;
 	pathPlanner->ShowConnections();
 }
 Node * PlanningManager::findPath(int coord)
