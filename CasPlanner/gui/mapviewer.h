@@ -61,6 +61,7 @@ Q_OBJECT
 		void setShowPatchBorders(int state);
 		void renderMapPatch     (Map * mapPatch);
 		void updateMap          (Map *newMap);
+		void saveImage          ();
     signals:
 		void moveMOLeft(); 
 		void moveMORight(); 
@@ -106,6 +107,7 @@ Q_OBJECT
 	    QTimer * renderTimer; 
 		friend class MapControlPanel; 
 		GLuint texId; 
+		double RGB[10][3];
 };
 
 

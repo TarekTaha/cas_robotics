@@ -57,7 +57,7 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
 	pathPlanBtn("Path Plan"),
 	generateSpaceBtn("Generate Space"), 
 	pathFollowBtn("Path Follow"),
-	loadMapBtn("Load Map"),
+	captureImage("Capture Image"),
 	robotsGB("Select your Robot"),
 	path(0)
 {
@@ -187,7 +187,7 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
         
     QVBoxLayout *actionLayout = new QVBoxLayout; 
     actionLayout->addWidget(&pauseBtn); 
-    actionLayout->addWidget(&loadMapBtn);     
+    actionLayout->addWidget(&captureImage);     
     actionLayout->addWidget(&pathPlanBtn);
     actionLayout->addWidget(&generateSpaceBtn); 
     actionLayout->addWidget(&pathFollowBtn); 
@@ -206,7 +206,7 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
     connect(&noavoidRadBtn,    SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));            
 	connect(&pathPlanBtn,      SIGNAL(pressed()),this, SLOT(pathPlan()));
 	connect(&generateSpaceBtn, SIGNAL(pressed()),this, SLOT(generateSpace()));
-	connect(&loadMapBtn,       SIGNAL(pressed()),this, SLOT(loadMap()));	
+	connect(&captureImage,       SIGNAL(pressed()),this, SLOT(save()));	
 	connect(&pathFollowBtn,    SIGNAL(pressed()),this, SLOT(pathFollow()));
 	connect(&pauseBtn,         SIGNAL(pressed()),this, SLOT(setNavigation()));	
 
@@ -420,8 +420,7 @@ void NavControlPanel::updateSelectedAvoidanceAlgo(bool)
 
 void NavControlPanel::save()
 {
-//    QString dir = QFileDialog::getSaveFileName(this, "Save log"); 
-//    mapManager->writeOut(dir); 
+	navContainer->mapViewer->saveImage();
 }
 
 void NavControlPanel::setStart(Pose startLoc)

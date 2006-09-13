@@ -79,7 +79,7 @@ Q_OBJECT
 		QPushButton pathPlanBtn;
 		QPushButton generateSpaceBtn;
 		QPushButton pathFollowBtn;
-		QPushButton loadMapBtn;	
+		QPushButton captureImage;	
 		
 		//Pointers to the currently selected Robot
 		QGroupBox robotsGB;

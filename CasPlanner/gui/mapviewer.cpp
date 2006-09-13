@@ -41,6 +41,16 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
 		exit(1);
 	}
 	emit setMap(image);
+  	RGB[0][0] = 1.0; RGB[0][1] = 0.0;   RGB[0][2] = 1.0; // Magenta
+  	RGB[1][0] = 0.8; RGB[1][1] = 0.0;   RGB[1][2] = 0.0; // Red
+  	RGB[2][0] = 0.0; RGB[2][1] = 0.7;   RGB[2][2] = 0.0; // Green
+  	RGB[3][0] = 0.7; RGB[3][1] = 0.7;   RGB[3][2] = 0.0; // Yellow
+  	RGB[4][0] = 0.0; RGB[4][1] = 0.7;   RGB[4][2] = 0.7; // Lightblue
+  	RGB[5][0] = 1.0; RGB[5][1] = 0.0;   RGB[5][2] = 1.0; // Magenta
+  	RGB[6][0] = 0.0; RGB[6][1] = 0.0;   RGB[6][2] = 0.7; // Blue
+  	RGB[7][0] = 1.0; RGB[7][1] = 0.65;  RGB[7][2] = 0.0; // Orange
+  	RGB[8][0] = 1.0; RGB[8][1] = 0.078; RGB[8][2] = 0.576; // DeepPink
+  	RGB[9][0] = 1.0; RGB[9][1] = 0.51;  RGB[9][2] = 0.278; // Sienna1	
 //	qDebug("OpenGL Initialized"); fflush(stdout);	
 }
 
@@ -148,6 +158,8 @@ void MapViewer::renderPaths()
 		    glEnd();
 		    wayPoint = playGround->robotPlatforms[i]->navigator->wayPoint;
 		    // Draw Way Point
+		    if(wayPoint.p.x()==0 && wayPoint.p.y()==0)
+		    	continue;
 		    glPushMatrix();
 			    glTranslatef(wayPoint.p.x(),wayPoint.p.y(),0);
 			    glRotated(RTOD(wayPoint.phi),0,0,1);		    
@@ -173,6 +185,8 @@ void MapViewer::renderLaser()
 	}
 	for(int i=0;i<playGround->robotPlatforms.size();i++)
 	{
+		// Just draw laser for the first robot, just for the ICRA paper display
+		if (i>0) continue;
 	    LaserScan laserScan = playGround->robotPlatforms[i]->commManager->getLaserScan(); 
 	    //Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;	
 	    Pose loc = playGround->robotPlatforms[i]->commManager->getOdomLocation();;	
@@ -180,10 +194,21 @@ void MapViewer::renderLaser()
 	    glTranslatef(loc.p.x(),loc.p.y(),0);
 	    glRotated(RTOD(loc.phi),0,0,1);    
 
-	    glColor3f(0.623,0.811,0.3); 
-	    
-	    glBegin(GL_TRIANGLE_FAN);
-	    	glVertex2f(0,0);  
+	    //glColor3f(0.623,0.811,0.3); 
+	    glColor4f(0,1.0f/double(i+1),0.2,1.0f/double(i+1));
+//	    glBegin(GL_TRIANGLE_FAN);
+//	    	glVertex2f(0,0);  
+//		    if(laserScan.points.size() > 0)
+//	    	{
+//	        	for(int m=0; m < laserScan.points.size(); m++)
+//		        {
+//					laserScan.points[m] = Trans2Global(laserScan.points[m],laserScan.laserPose);	        	
+//	    	        glVertex2f(laserScan.points[m].x(), laserScan.points[m].y());  
+//	        	}
+//		    }
+//	    	glVertex2f(0,0);
+//	    glEnd(); 
+	    glBegin(GL_LINE_LOOP);
 		    if(laserScan.points.size() > 0)
 	    	{
 	        	for(int m=0; m < laserScan.points.size(); m++)
@@ -192,7 +217,6 @@ void MapViewer::renderLaser()
 	    	        glVertex2f(laserScan.points[m].x(), laserScan.points[m].y());  
 	        	}
 		    }
-	    	glVertex2f(0,0);
 	    glEnd(); 
 	    glPopMatrix();	
 	}
@@ -240,39 +264,52 @@ void MapViewer::renderRobot()
 	}
 	for(int i=0;i<playGround->robotPlatforms.size();i++)
 	{
-	    //Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;	
+//	    Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;
 	    Pose loc = playGround->robotPlatforms[i]->commManager->getOdomLocation();
-//		if(trail.size()==0 && loc.p!=QPointF(0,0))
-//		{
-//			trail.push_back(loc.p);		
-//		}
-//		else if(trail[trail.size()-1]!=loc.p)
-//		{
-//			trail.push_back(loc.p);
-//		}
-//		if(trail.size()>1)
-//		{
-//	    	glColor4f(1,1,1,1);
-//		    glBegin(GL_LINE_STRIP);
-//			    for(int i =0;i<trail.size();i++)
-//			    {
-//			    	glVertex2f(trail[i].x(),trail[i].y());
-//			    }
-//		    glEnd();
-//		}
+	    // Render Robot's trail
+	    if(playGround->robotPlatforms[i]->robot->robotName=="Static Obstacle")
+	    {
+		    // Obstacle
+		    glPushMatrix();
+		    glTranslatef(loc.p.x(),loc.p.y(),0);
+		    glRotated(RTOD(loc.phi),0,0,1);
+		    glShadeModel(GL_FLAT);		    
+			glColor4f(1,0,0,1); 
+			glBegin(GL_TRIANGLE_FAN);
+			for(int m=0;m<playGround->robotPlatforms[i]->robot->local_edge_points.size();m++)
+			{
+				glVertex2f(playGround->robotPlatforms[i]->robot->local_edge_points[m].x(),playGround->robotPlatforms[i]->robot->local_edge_points[m].y());
+			}
+			glEnd();	  
+			glPopMatrix();  	
+			continue;
+	    }
+		if(playGround->robotPlatforms[i]->navigator->trail.size()>1)
+		{
+	    	glColor4f(0,0,1,1);
+		    glBegin(GL_LINE_STRIP);
+			    for(int k =0;k<playGround->robotPlatforms[i]->navigator->trail.size();k++)
+			    {
+			    	glVertex2f(playGround->robotPlatforms[i]->navigator->trail[k].x(),
+			    			   playGround->robotPlatforms[i]->navigator->trail[k].y());
+			    }
+		    glEnd();
+		}
 	    glPushMatrix();
 	    glTranslatef(loc.p.x(),loc.p.y(),0);
 	    glRotated(RTOD(loc.phi),0,0,1);
-	    glColor4f(0,0,1,0.8);
 	    glShadeModel(GL_FLAT);
 	    // Robot Boundaries BOX
-		glColor4f(1,1,1,0.5); 
+//		glColor4f(0.63,0.58,0.22,1.0f/double(i+1)); 
+//		glColor4f(0.5,0.5/double(i+1),0.5,1.0f/double(i+1)); 
+		glColor4f(RGB[i][0],RGB[i][1],RGB[i][2],1); 
 		glBegin(GL_TRIANGLE_FAN);
 		for(int m=0;m<playGround->robotPlatforms[i]->robot->local_edge_points.size();m++)
 		{
 			glVertex2f(playGround->robotPlatforms[i]->robot->local_edge_points[m].x(),playGround->robotPlatforms[i]->robot->local_edge_points[m].y());
 		}
 		glEnd();
+		
 	    glBegin(GL_LINE_LOOP);
 			glColor4f(0,0,1,0.5);  
 		    glVertex3f(1.3, 0.15,0); 			
@@ -286,8 +323,8 @@ void MapViewer::renderRobot()
 		    glVertex3f(1.5,0,0); 			    	
 	    glEnd();    
 	    
-	    renderText(1.6,0,0, "Robot Direction");		    	    
-	
+	    glColor4f(0.89,1,0.18,1);
+	    renderText(1.6,0,0, qPrintable(playGround->robotPlatforms[i]->robot->robotName));		    	    
 	    glPopMatrix();
 	}
 }
@@ -908,7 +945,19 @@ QImage MapViewer::captureMap()
 {
     return grabFrameBuffer();
 }
-
+void MapViewer::saveImage()
+{
+    bool ok;
+    QString filename = QInputDialog::getText(this, "Image Capture","Enter a name for the Image:", QLineEdit::Normal,
+	    QString::null, &ok);
+	const char * type = "PNG";
+    sleep(1);
+    if(ok && !filename.isEmpty())
+    {
+		QImage capturedMap = this->captureMap();
+		capturedMap.save(filename,type,-1);
+    }
+}
 MapViewer::~MapViewer()
 {
 

@@ -529,6 +529,7 @@ void Navigator::run()
 	stop_navigating = false;
 	double speed,turnRate;
 	LaserScan laserScan;
+	trail.clear();
 	while(!end_reached)
 	{
 		if(stop_navigating)
@@ -544,6 +545,7 @@ void Navigator::run()
 //		amcl_location = robotManager->commManager->getLocation();
 		amcl_location = robotManager->commManager->getOdomLocation();
 		robotManager->robot->setPose(amcl_location);
+		trail.push_back(amcl_location.p);
 		speed = robotManager->robot->robotTurnRate = robotManager->commManager->getSpeed();
 		turnRate = robotManager->robot->robotTurnRate = robotManager->commManager->getTurnRate();
 		laserScan = robotManager->commManager->getLaserScan();
