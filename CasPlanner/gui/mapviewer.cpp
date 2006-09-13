@@ -14,8 +14,8 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
  fudgeFactor(3),
  showOGs(true), 
  showSnaps(true), 
- showLabels(true), 
- showGrids(true),  
+ showLabels(true),
+ showGrids(true), 
  showRobots(true), 
  showPointclouds(true), 
  showPatchBorders(true),
@@ -41,16 +41,16 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
 		exit(1);
 	}
 	emit setMap(image);
-  	RGB[0][0] = 1.0; RGB[0][1] = 0.0;   RGB[0][2] = 1.0; // Magenta
-  	RGB[1][0] = 0.8; RGB[1][1] = 0.0;   RGB[1][2] = 0.0; // Red
-  	RGB[2][0] = 0.0; RGB[2][1] = 0.7;   RGB[2][2] = 0.0; // Green
-  	RGB[3][0] = 0.7; RGB[3][1] = 0.7;   RGB[3][2] = 0.0; // Yellow
-  	RGB[4][0] = 0.0; RGB[4][1] = 0.7;   RGB[4][2] = 0.7; // Lightblue
-  	RGB[5][0] = 1.0; RGB[5][1] = 0.0;   RGB[5][2] = 1.0; // Magenta
-  	RGB[6][0] = 0.0; RGB[6][1] = 0.0;   RGB[6][2] = 0.7; // Blue
-  	RGB[7][0] = 1.0; RGB[7][1] = 0.65;  RGB[7][2] = 0.0; // Orange
+  	RGB[0][0] = 0.0; RGB[0][1] = 0.7;   RGB[0][2] = 0.7;   // Lightblue	
+  	RGB[1][0] = 1.0; RGB[1][1] = 0.51;  RGB[1][2] = 0.278; // Sienna1	  	
+  	RGB[2][0] = 0.0; RGB[2][1] = 0.7;   RGB[2][2] = 0.0;   // Green
+  	RGB[3][0] = 0.7; RGB[3][1] = 0.7;   RGB[3][2] = 0.0;   // Yellow
+  	RGB[5][0] = 1.0; RGB[5][1] = 0.0;   RGB[5][2] = 1.0;   // Magenta
+  	RGB[6][0] = 0.0; RGB[6][1] = 0.0;   RGB[6][2] = 0.7;   // Blue
+  	RGB[7][0] = 1.0; RGB[7][1] = 0.65;  RGB[7][2] = 0.0;   // Orange
   	RGB[8][0] = 1.0; RGB[8][1] = 0.078; RGB[8][2] = 0.576; // DeepPink
-  	RGB[9][0] = 1.0; RGB[9][1] = 0.51;  RGB[9][2] = 0.278; // Sienna1	
+  	RGB[9][0] = 0.8; RGB[9][1] = 0.0;   RGB[9][2] = 0.0;   // Red  	
+
 //	qDebug("OpenGL Initialized"); fflush(stdout);	
 }
 
@@ -145,10 +145,12 @@ void MapViewer::renderPaths()
 	}
 	for(int i=0;i<playGround->robotPlatforms.size();i++)
 	{
+		if(i>0) continue;
 		if(playGround->robotPlatforms[i]->planningManager->pathPlanner->path)
 		{
 			Node * path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;
 	    	glColor4f(1,1,1,1);
+	    	//glColor4f(RGB[3][0],RGB[3][1],RGB[3][2],1);
 		    glBegin(GL_LINE_STRIP);
 			while(path && path->next)
 			{
@@ -286,7 +288,7 @@ void MapViewer::renderRobot()
 	    }
 		if(playGround->robotPlatforms[i]->navigator->trail.size()>1)
 		{
-	    	glColor4f(0,0,1,1);
+	    	glColor4f(RGB[i][0],RGB[i][1],RGB[i][2],1);
 		    glBegin(GL_LINE_STRIP);
 			    for(int k =0;k<playGround->robotPlatforms[i]->navigator->trail.size();k++)
 			    {
@@ -309,10 +311,10 @@ void MapViewer::renderRobot()
 			glVertex2f(playGround->robotPlatforms[i]->robot->local_edge_points[m].x(),playGround->robotPlatforms[i]->robot->local_edge_points[m].y());
 		}
 		glEnd();
-		
+	    renderText(1.6,0,0, qPrintable(playGround->robotPlatforms[i]->robot->robotName));		
 	    glBegin(GL_LINE_LOOP);
 			glColor4f(0,0,1,0.5);  
-		    glVertex3f(1.3, 0.15,0); 			
+		    glVertex3f(1.3, 0.15,0);
 		    glVertex3f(1.5,0,0); 			    	
 		    glVertex3f(1.3,-0.15,0); 			    				    
 	    glEnd();
@@ -323,8 +325,6 @@ void MapViewer::renderRobot()
 		    glVertex3f(1.5,0,0); 			    	
 	    glEnd();    
 	    
-	    glColor4f(0.89,1,0.18,1);
-	    renderText(1.6,0,0, qPrintable(playGround->robotPlatforms[i]->robot->robotName));		    	    
 	    glPopMatrix();
 	}
 }

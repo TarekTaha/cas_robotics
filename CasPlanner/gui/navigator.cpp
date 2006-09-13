@@ -443,7 +443,6 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
 {
 	Node *temp;
 	bool retval = false;
-	double dist;
 	Pose robotLocation = robotManager->robot->robotLocation;
 	temp = ClosestPathSeg(robotLocation.p,global_path);
  	while(temp->next && (Dist(robotLocation.p,temp->pose.p) < traversable_dist))
@@ -540,7 +539,7 @@ void Navigator::run()
 		}
 		delta_t = delta_timer.elapsed()/1e3;
 		delta_timer.restart();
-		usleep(10000);
+		usleep(20000);
 		// Get current Robot Location
 //		amcl_location = robotManager->commManager->getLocation();
 		amcl_location = robotManager->commManager->getOdomLocation();
@@ -597,7 +596,7 @@ void Navigator::run()
 		// Is it the last Segment ?
 		if (!first->next->next)
 		{
-			if(Dist(first->next->pose.p,EstimatedPos.p)<=0.2)
+			if(Dist(first->next->pose.p,EstimatedPos.p)<=0.4)
 			{
 				if (local_planner->pathPlanner->path)
 				{
@@ -859,6 +858,7 @@ void Navigator::run()
 	robotManager->commManager->setSpeed(0);
 	robotManager->commManager->setTurnRate(0);
 	local_planner->pathPlanner->FreeResources();
+	qDebug("Thread Loop Terminated Normally !!!");
 	return;
 }
 
