@@ -53,6 +53,7 @@ class Navigator : public Controller
         Pose wayPoint;
         PlayGround * playGround;
         RobotManager *robotManager;
+        QVector<QPointF> trail;
 	public
 	slots:
 		void FollowPath();
