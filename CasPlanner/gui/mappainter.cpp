@@ -92,7 +92,7 @@ void MapPainter::paintEvent(QPaintEvent *)
 		if(start_initialized)
 		{
 			paint.drawArc(int(start.p.x()-5),int(start.p.y()-5),10,10,0,5760);
-			paint.drawPie(int(start.p.x()-5),int(start.p.y()-5),10,10,(RTOD(start.phi)-10)*16,(RTOD(start.phi)+10)*16);
+			paint.drawPie(int(start.p.x()-5),int(start.p.y()-5),10,10,int(RTOD(start.phi)-10)*16,int(RTOD(start.phi)+10)*16);
 		}
 		if(end_initialized)
 		{

@@ -782,13 +782,13 @@ void Navigator::run()
 		Pose goal;
 		if(!getGoal(laserScan,goal))
 		{
-			robotManager->commManager->setSpeed(0);
-			robotManager->commManager->setTurnRate(0);			
-			robotManager->planningManager->setStart(robotManager->robot->robotLocation);
-			//TODO: ICP with the local Area and give the Corrected Location to the function Below
-			robotManager->planningManager->updateMap(laserScan,local_dist,robotManager->robot->robotLocation);
-			robotManager->planningManager->findPath(METRIC);
-			continue;
+//			robotManager->commManager->setSpeed(0);
+//			robotManager->commManager->setTurnRate(0);			
+//			robotManager->planningManager->setStart(robotManager->robot->robotLocation);
+//			//TODO: ICP with the local Area and give the Corrected Location to the function Below
+//			robotManager->planningManager->updateMap(laserScan,local_dist,robotManager->robot->robotLocation);
+//			robotManager->planningManager->findPath(METRIC);
+//			continue;
 		}
 		wayPoint = goal;
 //		emit setWayPoint(&goal);
@@ -837,6 +837,7 @@ void Navigator::run()
 					//Normal Linear Follower
 					robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
 					robotManager->commManager->setTurnRate(cntrl.angular_velocity);							
+					break;
 				case VFH:
 					// Vector Field Histogram
 //					qDebug("Sending to VFH goto X:%f Y:%f Phi%f",goal.p.x(),goal.p.y(),goal.phi);
