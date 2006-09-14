@@ -44,7 +44,8 @@ class Navigator : public Controller
 		double NearestObstacle(LaserScan laser_scan);
 		bool inLaserSpace(LaserScan laserScan,Pose robotLocation,QPointF waypoint);
 		void  setPause(bool pause);
-		Node * ClosestPathSeg(QPointF location,Node * all_path);	
+		Node * closestPathSeg(QPointF location,Node * all_path);	
+		Node * closestPathNode(QPointF location,Node * all_path);		
 		void GenerateLocalMap(QVector<QPointF> laser_scan,Pose laser_pose, Pose rob_location);
 		bool MapModified(QVector<QPointF> laser_scan,Pose rob_location);
 		bool getGoal(LaserScan laserScan, Pose &goal);

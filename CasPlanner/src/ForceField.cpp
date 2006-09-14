@@ -179,7 +179,6 @@ velVector ForceField::GenerateField(Pose pose,LaserScan laser_set,Pose Goal,doub
 	}
 	else
 	{
-		qDebug ("----------------------------------------------------------"); fflush(stdout);
 		//qDebug("Before SimFF"); fflush(stdout);		
 		SimFF(obstacle_interaction_set, robots_interaction_set, deltaTime);
 		//qDebug("After SimFF"); fflush(stdout);				
@@ -549,7 +548,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
 {
 	
 	//qDebug ("Simple FF!"); fflush(stdout);
-	qDebug ("OldSpeed=%f, OldDirec=%f, Turnate=%f", robotSpeed,robotLocation.phi,robotTurnRate);  
+	//qDebug ("OldSpeed=%f, OldDirec=%f, Turnate=%f", robotSpeed,robotLocation.phi,robotTurnRate);  
 	double FattAmp = SysQ;
   	double FattAngleA[2] = {goalLocation.p.x() - robotLocation.p.x(), goalLocation.p.y() - robotLocation.p.y()};
   	double FattAngle = atan2(FattAngleA[1], FattAngleA[0]);
@@ -613,42 +612,40 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   	}
 
   	anglebetw = Delta_Angle (robotLocation.phi, ForceAngle);
-  	qDebug ("FtotalX=%f, FtotalY=%f, ForceAngle=%f, anglebetw=%f", FtotalX, FtotalY, ForceAngle, anglebetw);
+  	qDebug ("\tFtotalX=%f, FtotalY=%f, ForceAngle=%f, Angle Difference=%f", FtotalX, FtotalY, RTOD(ForceAngle), RTOD(anglebetw));
 	double robotTurnRate_desired= anglebetw / realtime;
-  	double turnRate_incr_max = OmegadotMax * realtime;
+  	double velocityMax = OmegadotMax * realtime;
   	double turnRate_incr_desired = robotTurnRate_desired - robotTurnRate;
-//  	double MaxTurnRateIncr = 0.02;
 	double turnRate_incr_chosen; 
-  	if (turnRate_incr_desired > turnRate_incr_max)
+	int direction;
+  	if (turnRate_incr_desired > velocityMax)
   	{
-  		turnRate_incr_chosen = turnRate_incr_max;
+  		turnRate_incr_chosen =  velocityMax;
   	}
-  	else if (turnRate_incr_desired < -turnRate_incr_max)
+  	else if (turnRate_incr_desired < -velocityMax)
   	{
-  		turnRate_incr_chosen = -turnRate_incr_max;
+  		turnRate_incr_chosen = -velocityMax;
   	}
   	else
   	{
-  		turnRate_incr_chosen = turnRate_incr_max;
+  		turnRate_incr_chosen = turnRate_incr_desired;
   	}
-  	
-	double robotTurnRate_new = robotTurnRate + turnRate_incr_chosen;
+//  	if (robotTurnRate*turnRate_incr_chosen < 0)
+//  		robotTurnRate =0;
+	robotTurnRate += turnRate_incr_chosen;
 	
-  	if (robotTurnRate_new > OmegaMax)
+  	if (robotTurnRate > OmegaMax)
   	{
   		robotTurnRate = OmegaMax;
   	}
-  	else if (robotTurnRate_new < -OmegaMax)
+  	else if (robotTurnRate < -OmegaMax)
   	{
   		robotTurnRate = - OmegaMax;
   	}
-  	else
-  	{
-  		robotTurnRate = robotTurnRate_new;
-  	}
-	qDebug ("realtime=%f, robotTurnRate_desired=%f, turnRate_incr_max=%f, turnRate_incr_chosen=%f, robotTurnRate_new=%f, robotTurnRate=%f", realtime, robotTurnRate_desired, turnRate_incr_max, turnRate_incr_chosen, robotTurnRate_new, robotTurnRate);  
-  	qDebug ("NewSpeed=%f, robotTurnRate_new=%f, robotTurnRate=%f", robotSpeed, robotTurnRate_new, robotTurnRate);  
-  	
+	//direction = (anglebetw>0)?1:-1;
+  	robotTurnRate = DTOR(40)*((anglebetw)/M_PI);
+	qDebug ("\tRobotTurnRate_desired=%f, Max Velocity=%f, turnRate_incr_chosen=%f", robotTurnRate_desired, velocityMax, turnRate_incr_chosen);  
+  	qDebug ("\tOUT PUT NewSpeed=%f, New Turn Rate=%f", robotSpeed, robotTurnRate);  
 }
 
 double ForceField::Delta_Angle(double a1, double a2) 
