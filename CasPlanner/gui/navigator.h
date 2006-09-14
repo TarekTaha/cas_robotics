@@ -21,6 +21,7 @@
 #include "ForceField.h"
 #include "Node.h"
 #include "icp.h"
+#include "Timer.h"
 
 class PlanningManager;
 class RobotManager;

@@ -98,7 +98,7 @@ void ForceField::CrossProduct(double MatrixA[3], double MatrixB[3], double Matri
 	MatrixC[1] = (MatrixA[2] * MatrixB[0]) - (MatrixB[2] * MatrixA[0]);
  	MatrixC[2] = (MatrixA[0] * MatrixB[1]) - (MatrixB[0] * MatrixA[1]);
 };	
-velVector ForceField::GenerateField(Pose pose,LaserScan laser_set,Pose Goal,double speed,double turnrate,QVector <Robot> robots)
+velVector ForceField::GenerateField(Pose pose,LaserScan laser_set,Pose Goal,double speed,double turnrate,QVector <Robot> robots,double deltaTime)
 {
 	QVector<Interaction> robots_interaction_set;
  	double coefficient[curvefittingorder];
