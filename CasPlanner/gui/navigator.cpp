@@ -447,12 +447,18 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
 	temp = ClosestPathSeg(robotLocation.p,global_path);
  	while(temp->next && (Dist(robotLocation.p,temp->pose.p) < traversable_dist))
  	{
- 		if (inLaserSpace(laserScan,robotLocation,temp->pose.p) && (Dist(robotLocation.p,temp->pose.p) > 1))
+		double angle = ATAN2(temp->next->pose.p,temp->pose.p); 		
+ 		if (inLaserSpace(laserScan,robotLocation,temp->pose.p) && (Dist(robotLocation.p,temp->pose.p) > 1) )
  		{
- 			double angle = ATAN2(temp->next->pose.p,temp->pose.p);
  			goal.p = temp->pose.p;
  			goal.phi = angle;
  			retval = true;
+ 		}
+ 		else if((Dist(robotLocation.p,temp->next->pose.p) < 1) && !temp->next->next )
+ 		{
+ 			goal.p = temp->next->pose.p;
+ 			goal.phi = angle;
+ 			retval = true; 			
  		}
  		temp= temp->next;
  	}
@@ -520,29 +526,22 @@ void Navigator::run()
 	/**********************         Start by the Global Path     ************************/
 	path2Follow = global_path;
 	/************************************************************************************/
-	amcl_timer.restart();
-	delta_timer.restart();
+	amcl_timer.restart();	delta_timer.restart();
 	// Reset Times
 	last_time=0; delta_t=0;	velocity=0;
-	end_reached = false;
-	stop_navigating = false;
+	end_reached = false;stop_navigating = false;
 	double speed,turnRate;
 	LaserScan laserScan;
 	trail.clear();
-	while(!end_reached)
+	while(!end_reached && !stop_navigating)
 	{
-		if(stop_navigating)
-		{
-			robotManager->commManager->setSpeed(0);
-			robotManager->commManager->setTurnRate(0);
-			break;			
-		}
 		delta_t = delta_timer.secElapsed();
 		delta_timer.restart();
-		//usleep(20000);
+		usleep(20000);
 		// Get current Robot Location
 //		amcl_location = robotManager->commManager->getLocation();
 		amcl_location = robotManager->commManager->getOdomLocation();
+		EstimatedPos = amcl_location;
 		robotManager->robot->setPose(amcl_location);
 		trail.push_back(amcl_location.p);
 		speed = robotManager->robot->robotTurnRate = robotManager->commManager->getSpeed();
@@ -553,41 +552,45 @@ void Navigator::run()
 		/* If this location is new, then use it. Otherwise
 		 * estimate the location based on the last reading.
 		 */
-		if(old_amcl != amcl_location)
-		{
-			// Recording the last time Data changed
-			last_time = amcl_timer.secElapsed();
-			// resetting the timer
-			amcl_timer.restart(); 
-			// Override the Estimated Location with the AMCL hypothesis
-			old_amcl.p.setX(amcl_location.p.x()); EstimatedPos.p.setX(amcl_location.p.x());
-			old_amcl.p.setY(amcl_location.p.y()); EstimatedPos.p.setY(amcl_location.p.y());
-			old_amcl.phi = EstimatedPos.phi = amcl_location.phi;
-		}
-		else
-		{
-			// Estimate the location based on the Last AMCL location and the vehichle model
-			EstimatedPos.phi += robotManager->commManager->getTurnRate()*delta_t;
-			EstimatedPos.p.setX(EstimatedPos.p.x() + velocity*cos(EstimatedPos.phi)*delta_t);
-			EstimatedPos.p.setY(EstimatedPos.p.y() + velocity*sin(EstimatedPos.phi)*delta_t);
-			//cout<<"\nVelocity is:"<<velocity<<" Side Speed is:"<<pp->SideSpeed();
-			if (velocity!= speed) //	Velocity Changed?
-				velocity = speed;
-			//cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
-		}
+//		if(old_amcl != amcl_location)
+//		{
+//			// Recording the last time Data changed
+//			last_time = amcl_timer.secElapsed();
+//			qDebug("last Time amcl Change took:%f",last_time);
+//			// resetting the timer
+//			amcl_timer.restart(); 
+//			// Override the Estimated Location with the AMCL hypothesis
+//			old_amcl.p.setX(amcl_location.p.x()); EstimatedPos.p.setX(amcl_location.p.x());
+//			old_amcl.p.setY(amcl_location.p.y()); EstimatedPos.p.setY(amcl_location.p.y());
+//			old_amcl.phi = EstimatedPos.phi = amcl_location.phi;
+//		}
+//		else
+//		{
+//			// Estimate the location based on the Last AMCL location and the vehichle model
+//			EstimatedPos.phi += robotManager->commManager->getTurnRate()*delta_t;
+//			EstimatedPos.p.setX(EstimatedPos.p.x() + velocity*cos(EstimatedPos.phi)*delta_t);
+//			EstimatedPos.p.setY(EstimatedPos.p.y() + velocity*sin(EstimatedPos.phi)*delta_t);
+//			//cout<<"\nVelocity is:"<<velocity<<" Side Speed is:"<<pp->SideSpeed();
+//			if (velocity!= speed) //	Velocity Changed?
+//				velocity = speed;
+//			//cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
+//		}
 		/* if we were following a local path and crossed the boundaried of the local
 		 * area without reaching the local destination then go back to the global path
 		 */
-		if (path2Follow == local_path)
-		{
-			if(Dist(EstimatedPos.p,local_planner->pathPlanner->map->global_pose.p)>local_dist)
-			{
-				local_planner->pathPlanner->FreeResources();
-				path2Follow = global_path;
-				path2Draw = GLOBALPATH;
-			}
-		}
-		first = ClosestPathSeg(loc.p,path2Follow);
+//		if (path2Follow == local_path)
+//		{
+//			if(Dist(EstimatedPos.p,local_planner->pathPlanner->map->global_pose.p)>local_dist)
+//			{
+//				local_planner->pathPlanner->FreeResources();
+//				path2Follow = global_path;
+//				path2Draw = GLOBALPATH;
+//			}
+//		}
+		//first = ClosestPathSeg(EstimatedPos.p,path2Follow);
+		//qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);		
+		fflush(stdout);
+		first = ClosestPathSeg(EstimatedPos.p,global_path);
 		if(!first)
 		{
 			qDebug("Path Doesn't contain any segment to follow !!!");
@@ -646,8 +649,8 @@ void Navigator::run()
 		 * 5- Follow that path
 		 */
 
-		QTime local_planning_time,icp_time;
-		closest_obst = NearestObstacle(laserScan);
+//		QTime local_planning_time,icp_time;
+//		closest_obst = NearestObstacle(laserScan);
 //		qDebug("Closest Distance to Obstacles is:%f Saftey Dist:%f",closest_obst,sf);
 //		if(closest_obst < safety_dist)
 //		{
@@ -795,7 +798,6 @@ void Navigator::run()
 //		emit setWayPoint(&goal);
 		QVector <Robot> availableRobots;
 		QTime ff_time;
-		double DT;
 		if(!pause)
 		{
 			switch(obstAvoidAlgo)		 
@@ -809,7 +811,7 @@ void Navigator::run()
 					//Force Field
 					velVector action;
 					ff_time.restart();
-				 	//qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);
+				 	qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);
 				 	control_timer.restart();
 					action = FF->GenerateField(amcl_location,laserScan,goal,speed,turnRate,availableRobots,delta_t);
 					qDebug("FF Speed is:%f TurnRate is:%f  time to calculate FF is:%dms",action.speed,action.turnRate,ff_time.elapsed());	
