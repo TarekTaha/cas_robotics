@@ -547,7 +547,6 @@ void Navigator::run()
 		speed = robotManager->robot->robotTurnRate = robotManager->commManager->getSpeed();
 		turnRate = robotManager->robot->robotTurnRate = robotManager->commManager->getTurnRate();
 		laserScan = robotManager->commManager->getLaserScan();
-//		qDebug("Navigator Turn Rate is:%f Orientation:%f",turnRate,amcl_location.phi);
 //		cout<<"\n Current Location X:"<<amcl_location.p.x()<<" Y:"<<amcl_location.p.y()<<" Theta:"<<amcl_location.phi;
 		/* If this location is new, then use it. Otherwise
 		 * estimate the location based on the last reading.
@@ -811,15 +810,14 @@ void Navigator::run()
 					//Force Field
 					velVector action;
 					ff_time.restart();
-				 	qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);
+					qDebug("PlayerInterface returned --->>> Turn Rate:%f and Speed is:%f",turnRate,speed);					
+				 	//qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);
 				 	control_timer.restart();
 					action = FF->GenerateField(amcl_location,laserScan,goal,speed,turnRate,availableRobots,delta_t);
-					qDebug("FF Speed is:%f TurnRate is:%f  time to calculate FF is:%dms",action.speed,action.turnRate,ff_time.elapsed());	
+					qDebug("FF Returned--->>> Speed is:%f TurnRate is:%f  time to calculate FF is:%dms Loop Delta_t:%fsec",action.speed,action.turnRate,ff_time.elapsed(),delta_t);	
 					robotManager->commManager->setSpeed(action.speed);						
 					robotManager->commManager->setTurnRate(action.turnRate);		
-					control_timer.restart();
-				 	usleep(1000000);					
-					qDebug("Delta time is :%f",delta_t);
+					control_timer.restart();				
 					break;		
 				case CONFIG_SPACE:
 					break;
