@@ -372,7 +372,7 @@ bool Navigator::MapModified(QVector<QPointF> laser_scan,Pose rob_location)
 	}
 };
 
-Node * Navigator::ClosestPathSeg(QPointF location,Node * all_path)
+Node * Navigator::closestPathSeg(QPointF location,Node * all_path)
 {
 	Node * nearest = NULL;
 	double dist,shortest= 100000;
@@ -396,6 +396,22 @@ Node * Navigator::ClosestPathSeg(QPointF location,Node * all_path)
 	return nearest;
 }
 
+Node * Navigator::closestPathNode(QPointF location,Node * all_path)
+{
+	Node * nearest = NULL;
+	double dist,shortest= 100000;
+	while(all_path)
+	{
+		dist = Dist(all_path->pose.p,location);
+		if(dist < shortest)
+		{
+			shortest = dist;
+			nearest = all_path;
+		}
+		all_path = all_path->next;
+	}
+	return nearest;
+}
 void Navigator::setPath(Node *p)
 {
 	this->global_path = p;	
@@ -444,20 +460,23 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
 	Node *temp;
 	bool retval = false;
 	Pose robotLocation = robotManager->robot->robotLocation;
-	temp = ClosestPathSeg(robotLocation.p,global_path);
- 	while(temp->next && (Dist(robotLocation.p,temp->pose.p) < traversable_dist))
+	double angle=0;
+	temp = closestPathNode(robotLocation.p,global_path);
+ 	while(temp && (Dist(robotLocation.p,temp->pose.p) < traversable_dist))
  	{
-		double angle = ATAN2(temp->next->pose.p,temp->pose.p); 		
+ 		if(temp->next)
+			angle = ATAN2(temp->next->pose.p,temp->pose.p); 		
  		if (inLaserSpace(laserScan,robotLocation,temp->pose.p) && (Dist(robotLocation.p,temp->pose.p) > 1) )
  		{
  			goal.p = temp->pose.p;
  			goal.phi = angle;
  			retval = true;
  		}
- 		else if((Dist(robotLocation.p,temp->next->pose.p) < 1) && !temp->next->next )
+ 		// if this is the last node then take it anyways
+ 		else if((Dist(robotLocation.p,temp->next->pose.p) < 1) && !temp->next )
  		{
- 			goal.p = temp->next->pose.p;
- 			goal.phi = angle;
+ 			goal.p = temp->pose.p;
+ 			goal.phi = angle; 			
  			retval = true; 			
  		}
  		temp= temp->next;
@@ -469,13 +488,13 @@ void Navigator::run()
 {
 //	if(robotManager->renderingMethod == PAINTER_2D)
 //		connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));	
-//	if(robotManager->renderingMethod == OPENGL)
-//	{
+	if(robotManager->renderingMethod == OPENGL)
+	{
 //		connect(this, SIGNAL(glRender()),robotManager->->mapViewer, SLOT(update()));	
-//		connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));
+//		connect(this, SIGNAL(pathTraversed()),playGround->navCon->navControlPanel, SLOT(Finished()));
 //		connect(this, SIGNAL(setWayPoint(Pose*)),robotManager->navCon->mapViewer,SLOT(setWayPoint(Pose*)));				
 //		connect(this, SIGNAL(renderMapPatch(Map*)),robotManager->navCon->mapViewer,SLOT(renderMapPatch(Map*)));						
-//	}
+	}
 	if(robotManager->renderingMethod == OPENGL)
 	{
 		connect(this, SIGNAL(glRender()),robotManager,SLOT(update()));	
@@ -486,7 +505,7 @@ void Navigator::run()
 
 	ControlAction cntrl;
 	Timer amcl_timer,delta_timer,redraw_timer,control_timer;
-	double closest_obst=10;
+//	double closest_obst=10;
 	Pose loc;
 	if(!local_planner)
 	{
@@ -537,7 +556,7 @@ void Navigator::run()
 	{
 		delta_t = delta_timer.secElapsed();
 		delta_timer.restart();
-		usleep(20000);
+		usleep(30000);
 		// Get current Robot Location
 //		amcl_location = robotManager->commManager->getLocation();
 		amcl_location = robotManager->commManager->getOdomLocation();
@@ -589,7 +608,7 @@ void Navigator::run()
 		//first = ClosestPathSeg(EstimatedPos.p,path2Follow);
 		//qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);		
 		fflush(stdout);
-		first = ClosestPathSeg(EstimatedPos.p,global_path);
+		first = closestPathSeg(EstimatedPos.p,global_path);
 		if(!first)
 		{
 			qDebug("Path Doesn't contain any segment to follow !!!");
@@ -810,14 +829,16 @@ void Navigator::run()
 					//Force Field
 					velVector action;
 					ff_time.restart();
-					qDebug("PlayerInterface returned --->>> Turn Rate:%f and Speed is:%f",turnRate,speed);					
-				 	//qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);
+					qDebug("================================= FORCE FIELD STARTS ===============================");
+					qDebug("Current Robot      --->>> Turn Rate:%f and Speed is:%f Delta Time:%f",turnRate,speed,delta_t);
+				 	qDebug("Current Robot Pose --->>> x:%f y:%f phi:%f",EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi));
 				 	control_timer.restart();
 					action = FF->GenerateField(amcl_location,laserScan,goal,speed,turnRate,availableRobots,delta_t);
-					qDebug("FF Returned--->>> Speed is:%f TurnRate is:%f  time to calculate FF is:%dms Loop Delta_t:%fsec",action.speed,action.turnRate,ff_time.elapsed(),delta_t);	
+//					qDebug("Force Field Returned     --->>> Speed is:%f TurnRate is:%f  time to calculate FF is:%dms Loop Delta_t:%fsec",action.speed,action.turnRate,ff_time.elapsed(),delta_t);	
 					robotManager->commManager->setSpeed(action.speed);						
 					robotManager->commManager->setTurnRate(action.turnRate);		
 					control_timer.restart();				
+					qDebug("================================= FORCE FIELD ENDS  ===============================\n");					
 					break;		
 				case CONFIG_SPACE:
 					break;
