@@ -31,7 +31,7 @@ class ForceField : public Robot
 public:
 	ForceField(Robot r,ConfigFile *cf);
 	virtual ~ForceField();
-    velVector GenerateField(Pose pose,LaserScan laser_set,Pose Goal,double speed,double turnrate,QVector <Robot> robots);
+    velVector GenerateField(Pose pose,LaserScan laser_set,Pose Goal,double speed,double turnrate,QVector <Robot> robots,double deltaTime);
 	QVector < QVector<QPointF> > DivObst(LaserScan laser_set,Pose laser_pose);	
 	void    LSCurveFitting (QVector<QPointF>, double[], int);
 	double  Dist2Robot(QPointF,double &);

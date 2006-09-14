@@ -37,6 +37,7 @@ HEADERS +=  gui/commmanager.h\
 			includes/Robot.h\
 			includes/SearchSpace.h\
 			includes/SearchSpaceNode.h\
+			inlcudes/Timer.h\
 			includes/Transformations.h\
 			includes/utils.h\
 			includes/Vector2D.h\
@@ -75,6 +76,7 @@ SOURCES +=  gui/commmanager.cpp\
 		    src/Robot.cpp\
 		    src/SearchSpace.cpp\
 		    src/SearchSpaceNode.cpp\
+		    src/Timer.cpp\
 		    src/Vector2d.cpp
 RESOURCES = resources/icons.qrc
 QT += opengl

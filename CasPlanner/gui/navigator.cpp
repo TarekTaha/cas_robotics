@@ -479,7 +479,7 @@ void Navigator::run()
 	}
 
 	ControlAction cntrl;
-	QTime amcl_timer,delta_timer,redraw_timer,control_timer;
+	Timer amcl_timer,delta_timer,redraw_timer,control_timer;
 	double closest_obst=10;
 	Pose loc;
 	if(!local_planner)
@@ -520,8 +520,8 @@ void Navigator::run()
 	/**********************         Start by the Global Path     ************************/
 	path2Follow = global_path;
 	/************************************************************************************/
-	amcl_timer.start();
-	delta_timer.start();
+	amcl_timer.restart();
+	delta_timer.restart();
 	// Reset Times
 	last_time=0; delta_t=0;	velocity=0;
 	end_reached = false;
@@ -537,9 +537,9 @@ void Navigator::run()
 			robotManager->commManager->setTurnRate(0);
 			break;			
 		}
-		delta_t = delta_timer.elapsed()/1e3;
+		delta_t = delta_timer.secElapsed();
 		delta_timer.restart();
-		usleep(20000);
+		//usleep(20000);
 		// Get current Robot Location
 //		amcl_location = robotManager->commManager->getLocation();
 		amcl_location = robotManager->commManager->getOdomLocation();
@@ -556,7 +556,7 @@ void Navigator::run()
 		if(old_amcl != amcl_location)
 		{
 			// Recording the last time Data changed
-			last_time = amcl_timer.elapsed()/1e3;
+			last_time = amcl_timer.secElapsed();
 			// resetting the timer
 			amcl_timer.restart(); 
 			// Override the Estimated Location with the AMCL hypothesis
@@ -760,7 +760,7 @@ void Navigator::run()
 //		 		qDebug("Local Planning took %dms",local_planning_time.elapsed());	
 //			}
 //		}
- 		if (redraw_timer.elapsed()>100)
+ 		if (redraw_timer.msecElapsed()>100)
  		{
 //			if(this->mapPatch)
 //				delete mapPatch;
@@ -795,6 +795,7 @@ void Navigator::run()
 //		emit setWayPoint(&goal);
 		QVector <Robot> availableRobots;
 		QTime ff_time;
+		double DT;
 		if(!pause)
 		{
 			switch(obstAvoidAlgo)		 
@@ -809,14 +810,13 @@ void Navigator::run()
 					velVector action;
 					ff_time.restart();
 				 	//qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);
-					action = FF->GenerateField(amcl_location,laserScan,goal,speed,turnRate,availableRobots);
-					qDebug("FF Speed is:%f TurnRate is:%f  time is:%dms",action.speed,action.turnRate,ff_time.elapsed());	
-					if(control_timer.elapsed()>100)
-					{
-						robotManager->commManager->setSpeed(action.speed);						
-						robotManager->commManager->setTurnRate(action.turnRate);		
-						control_timer.restart();
-					}
+				 	control_timer.restart();
+					action = FF->GenerateField(amcl_location,laserScan,goal,speed,turnRate,availableRobots,delta_t);
+					qDebug("FF Speed is:%f TurnRate is:%f  time to calculate FF is:%dms",action.speed,action.turnRate,ff_time.elapsed());	
+					robotManager->commManager->setSpeed(action.speed);						
+					robotManager->commManager->setTurnRate(action.turnRate);		
+					control_timer.restart();
+					qDebug("Delta time is :%f",delta_t);
 					break;		
 				case CONFIG_SPACE:
 					break;
@@ -834,7 +834,7 @@ void Navigator::run()
 					if(cntrl.angular_velocity <  -0.2)
 						cntrl.angular_velocity = -0.2;
 					if(log)
-						fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.elapsed()/1e3,last_time);			
+						fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.secElapsed(),last_time);			
 					//Normal Linear Follower
 					robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
 					robotManager->commManager->setTurnRate(cntrl.angular_velocity);							

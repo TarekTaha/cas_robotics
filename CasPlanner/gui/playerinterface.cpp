@@ -287,13 +287,14 @@ void PlayerInterface::run ()
     qDebug("\t\t - Connection Established"); 
     qDebug("/********************************************************************/");
 //    long int cnt=0;
+	Timer timer;
     while(true)
     {
+    	//qDebug("Loop Time is:%f QTimer:%d",timer.elapsed(),tt.elapsed()); fflush(stdout);
+    	timer.restart();
     	// Read Only if new Data is Available
 		//pc->ReadIfWaiting();
-		pc->Read();
-//		qDebug("\t\t PLAYER THREAD LOOP START %d",++cnt);		
-//		qDebug("\t\t Number of lasers %d",lasers.size());		
+		pc->Read();		
     	if(!emergencyStopped)
     	{
 		    for(int laser_indx=0; laser_indx < lasers.size(); laser_indx++)

@@ -12,6 +12,8 @@
 #include "playerinterface.h"
 #include "utils.h"
 #include "map.h"
+#include "Timer.h"
+
 #define MAX_LASERS 4
 
 using namespace PlayerCc;
