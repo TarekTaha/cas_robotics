@@ -175,13 +175,13 @@ velVector ForceField::GenerateField(Pose pose,LaserScan laser_set,Pose Goal,doub
 	if(FF_algorithm == VariableSpeedFF)
 	{
 		//qDebug("Obstacle Interaction Set Before VSFF=%d",obstacle_interaction_set.size());
- 		VSFF(obstacle_interaction_set, robots_interaction_set);
+ 		VSFF(obstacle_interaction_set, robots_interaction_set, deltaTime);
 	}
 	else
 	{
 		qDebug ("----------------------------------------------------------"); fflush(stdout);
 		//qDebug("Before SimFF"); fflush(stdout);		
-		SimFF(obstacle_interaction_set, robots_interaction_set);
+		SimFF(obstacle_interaction_set, robots_interaction_set, deltaTime);
 		//qDebug("After SimFF"); fflush(stdout);				
 	}
  	action.speed= robotSpeed;
@@ -421,7 +421,7 @@ QVector < QVector<QPointF> > ForceField::DivObst(LaserScan laser_set,Pose laser_
 	QVector < QVector<QPointF> > obstacles_set;
 	QVector<QPointF> obstacle;
 	p1.setX(laser_set.points[1].x()); p1.setY(laser_set.points[1].y());
-	//qDebug("first P1X=%f, P1Y=%f", p1.x(), p1.y());		
+	//qDebug("first P1X=%f, P1Y=%f", p1.x(), p1.y());		double 
 	obstacle.push_back(p1);		
 	for (int i = 1; i < laser_set.points.size() - 1; i++)
  	{
@@ -545,7 +545,7 @@ void ForceField::LSCurveFitting (QVector<QPointF> obstacle, double a[], int m)
 }
 
 /*****************************************************************/
-void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<Interaction> robots_interaction_set)
+void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<Interaction> robots_interaction_set, double realtime)
 {
 	
 	//qDebug ("Simple FF!"); fflush(stdout);
@@ -614,40 +614,26 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
 
   	anglebetw = Delta_Angle (robotLocation.phi, ForceAngle);
   	qDebug ("FtotalX=%f, FtotalY=%f, ForceAngle=%f, anglebetw=%f", FtotalX, FtotalY, ForceAngle, anglebetw);
-//  	double anglemax = 1;
-//  	if (anglebetw > anglemax)
-//  	{
-//  		anglebetw = anglemax;
-//  	}
-//  	else if (anglebetw < -anglemax)
-//  	{
-//  		anglebetw = -anglemax;
-//  	}
-//  	else
-//  	{
-//  		anglebetw = anglebetw;
-//  	}
-  	//qDebug("anglebetw=%f", anglebetw);
-  	//  	double turnRate_incr = (double)anglebetw / (double)TimeStep;
+	double robotTurnRate_desired= anglebetw / realtime;
+  	double turnRate_incr_max = OmegadotMax * realtime;
+  	double turnRate_incr_desired = robotTurnRate_desired - robotTurnRate;
 //  	double MaxTurnRateIncr = 0.02;
-//  	if (turnRate_incr > MaxTurnRateIncr)
-//  	{
-//  		turnRate_incr = MaxTurnRateIncr;
-//  	}
-//  	else if (turnRate_incr < -MaxTurnRateIncr)
-//  	{
-//  		turnRate_incr = -MaxTurnRateIncr;
-//  	}
-//  	else
-//  	{
-//  		turnRate_incr = turnRate_incr;
-//  	}
-
-//	Mindist = Min(0.1, Mindist);
-//	qDebug ("Mindist=%f", Mindist);
-//  	double turnfaster = 3;
-//  	double robotTurnRate_new = turnfaster * robotSpeed * TimeStep * anglebetw / Mindist; //(double)anglebetw * (double)TimeStep;
-  	double robotTurnRate_new = anglebetw / TimeStep;
+	double turnRate_incr_chosen; 
+  	if (turnRate_incr_desired > turnRate_incr_max)
+  	{
+  		turnRate_incr_chosen = turnRate_incr_max;
+  	}
+  	else if (turnRate_incr_desired < -turnRate_incr_max)
+  	{
+  		turnRate_incr_chosen = -turnRate_incr_max;
+  	}
+  	else
+  	{
+  		turnRate_incr_chosen = turnRate_incr_max;
+  	}
+  	
+	double robotTurnRate_new = robotTurnRate + turnRate_incr_chosen;
+	
   	if (robotTurnRate_new > OmegaMax)
   	{
   		robotTurnRate = OmegaMax;
@@ -660,7 +646,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   	{
   		robotTurnRate = robotTurnRate_new;
   	}
-  	//qDebug ("NewSpeed=%f, turnRate_incr=%f, robotTurnRate_new=%f, robotTurnRate=%f", robotSpeed, turnRate_incr, robotTurnRate_new, robotTurnRate);  
+	qDebug ("realtime=%f, robotTurnRate_desired=%f, turnRate_incr_max=%f, turnRate_incr_chosen=%f, robotTurnRate_new=%f, robotTurnRate=%f", realtime, robotTurnRate_desired, turnRate_incr_max, turnRate_incr_chosen, robotTurnRate_new, robotTurnRate);  
   	qDebug ("NewSpeed=%f, robotTurnRate_new=%f, robotTurnRate=%f", robotSpeed, robotTurnRate_new, robotTurnRate);  
   	
 }
@@ -754,7 +740,7 @@ void ForceField::robotForceFieldShape(Robot anotherrobot, QVector<QPointF> &Dmax
 //}
 
 /******************************************************************/
-void ForceField::VSFF(QVector<Interaction> obstacle_interaction_set, QVector<Interaction> robots_interaction_set)
+void ForceField::VSFF(QVector<Interaction> obstacle_interaction_set, QVector<Interaction> robots_interaction_set, double realtime)
 {
 	qDebug ("VSFF!");
 	qDebug ("OldSpeed=%f, OldDirec=%f, Turnate=%f, RR=%f", robotSpeed,robotLocation.phi,robotTurnRate, robotRadius);  
