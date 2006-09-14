@@ -35,3 +35,23 @@ define wheelchair position
   # lasers, where the laser is taller than the robot
   # laser_return 0
 )
+# a Pioneer 2 or 3 in standard configuration
+define Obstacle position
+(
+  size [0.8 0.8]
+  origin [0 0.0 0]
+  gui_nose 1
+  mass 15.0 
+
+  polygons 1
+  polygon[0].points 4
+  polygon[0].point[0] [  0.4  0.4 ]
+  polygon[0].point[1] [  0.4  -0.4 ]
+  polygon[0].point[2] [ -0.4  -0.4 ]
+  polygon[0].point[3] [ -0.4  0.4 ]
+
+  # differential steering model
+  drive "diff"
+
+ laser_return 1
+) 
