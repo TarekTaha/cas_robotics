@@ -37,7 +37,7 @@ HEADERS +=  gui/commmanager.h\
 			includes/Robot.h\
 			includes/SearchSpace.h\
 			includes/SearchSpaceNode.h\
-			inlcudes/Timer.h\
+			includes/Timer.h\
 			includes/Transformations.h\
 			includes/utils.h\
 			includes/Vector2D.h\
