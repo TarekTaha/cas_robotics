@@ -818,6 +818,7 @@ void Navigator::run()
 					robotManager->commManager->setSpeed(action.speed);						
 					robotManager->commManager->setTurnRate(action.turnRate);		
 					control_timer.restart();
+				 	usleep(1000000);					
 					qDebug("Delta time is :%f",delta_t);
 					break;		
 				case CONFIG_SPACE:
