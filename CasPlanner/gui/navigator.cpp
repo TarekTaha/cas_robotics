@@ -40,34 +40,7 @@ a starting point to an end point.
 
 - Navigator settings:
   - k_dist (float)
-    - Default: 1.8	double robotTurnRate_desired= anglebetw / realtime;
-  	double velocityMax = OmegadotMax * realtime;
-  	double turnRate_incr_desired = robotTurnRate_desired - robotTurnRate;
-	double turnRate_incr_chosen; 
-	int direction;
-  	if (turnRate_incr_desired > velocityMax)
-  	{
-  		turnRate_incr_chosen =  velocityMax;
-  	}
-  	else if (turnRate_incr_desired < -velocityMax)
-  	{
-  		turnRate_incr_chosen = -velocityMax;
-  	}
-  	else
-  	{
-  		turnRate_incr_chosen = turnRate_incr_desired;
-  	}
-
-	robotTurnRate += turnRate_incr_chosen;
-	
-  	if (robotTurnRate > OmegaMax)
-  	{
-  		robotTurnRate = OmegaMax;
-  	}
-  	else if (robotTurnRate < -OmegaMax)
-  	{
-  		robotTurnRate = - OmegaMax;
-  	}
+    - Default: 1.8
     - Gain on distance error.
   - k_theta (float)
     - Default: 2.5
@@ -99,34 +72,7 @@ a starting point to an end point.
   - conn_rad (float)
     - Default 0.1
     - ???        
-  - obst_pen (float)	double robotTurnRate_desired= anglebetw / realtime;
-  	double velocityMax = OmegadotMax * realtime;
-  	double turnRate_incr_desired = robotTurnRate_desired - robotTurnRate;
-	double turnRate_incr_chosen; 
-	int direction;
-  	if (turnRate_incr_desired > velocityMax)
-  	{
-  		turnRate_incr_chosen =  velocityMax;
-  	}
-  	else if (turnRate_incr_desired < -velocityMax)
-  	{
-  		turnRate_incr_chosen = -velocityMax;
-  	}
-  	else
-  	{
-  		turnRate_incr_chosen = turnRate_incr_desired;
-  	}
-
-	robotTurnRate += turnRate_incr_chosen;
-	
-  	if (robotTurnRate > OmegaMax)
-  	{
-  		robotTurnRate = OmegaMax;
-  	}
-  	else if (robotTurnRate < -OmegaMax)
-  	{
-  		robotTurnRate = - OmegaMax;
-  	}
+  - obst_pen (float)
     - Default 0.1
     - ???        
   - dist_goal (float)
@@ -151,34 +97,7 @@ a starting point to an end point.
 - Coordinate System:
 Global Pixel Coordinate : Follows the image coordinate system where (0,0) is
 the upper left corner.
-Local Planner Coordinate: where the (0,0) is the center of the laser map	double robotTurnRate_desired= anglebetw / realtime;
-  	double velocityMax = OmegadotMax * realtime;
-  	double turnRate_incr_desired = robotTurnRate_desired - robotTurnRate;
-	double turnRate_incr_chosen; 
-	int direction;
-  	if (turnRate_incr_desired > velocityMax)
-  	{
-  		turnRate_incr_chosen =  velocityMax;
-  	}
-  	else if (turnRate_incr_desired < -velocityMax)
-  	{
-  		turnRate_incr_chosen = -velocityMax;
-  	}
-  	else
-  	{
-  		turnRate_incr_chosen = turnRate_incr_desired;
-  	}
-
-	robotTurnRate += turnRate_incr_chosen;
-	
-  	if (robotTurnRate > OmegaMax)
-  	{
-  		robotTurnRate = OmegaMax;
-  	}
-  	else if (robotTurnRate < -OmegaMax)
-  	{
-  		robotTurnRate = - OmegaMax;
-  	}
+Local Planner Coordinate: where the (0,0) is the center of the laser map
 Global Planner Coordinate: where the (0,0) is the center of the map.
 
 @par Example: Using the Navigator Model on the Wheelchair
@@ -455,6 +374,7 @@ bool Navigator::MapModified(QVector<QPointF> laser_scan,Pose rob_location)
 
 Node * Navigator::closestPathSeg(QPointF location,Node * all_path)
 {
+	qDebug("did i segment here ?"); fflush(stdout);
 	Node * nearest = NULL;
 	double dist,shortest= 100000;
 	while(all_path && all_path->next)
@@ -474,6 +394,7 @@ Node * Navigator::closestPathSeg(QPointF location,Node * all_path)
 			if(nearest->next->next)
 				nearest = nearest->next;
 	}
+	qDebug("No not here"); fflush(stdout);	
 	return nearest;
 }
 
@@ -697,6 +618,7 @@ void Navigator::run()
 			break;
 		}
 		// Is it the last Segment ?
+		if (first->next)
 		if (!first->next->next)
 		{
 			if(Dist(first->next->pose.p,EstimatedPos.p)<=0.4)
