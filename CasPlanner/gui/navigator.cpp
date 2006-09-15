@@ -469,7 +469,7 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
  	{
  		if(temp->next)
 			angle = ATAN2(temp->next->pose.p,temp->pose.p); 		
- 		if (inLaserSpace(laserScan,robotLocation,temp->pose.p) && (Dist(robotLocation.p,temp->pose.p) > 1) )
+ 		if (inLaserSpace(laserScan,robotLocation,temp->pose.p) && (Dist(robotLocation.p,temp->pose.p) > 0.5) )
  		{
  			goal.p = temp->pose.p;
  			goal.phi = angle;

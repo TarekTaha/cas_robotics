@@ -200,7 +200,7 @@ QVector<Interaction>  ForceField::getDynamicInteractionSet(QVector <Robot> robot
 	QVector<QPointF> robotsDmax_set;
 	for (int i_robots = 0; i_robots < robots.size() ; i_robots ++)
 	{
-		//qDebug("robot:  size=%f, X=%f, Y=%f, Speed=%f, Dirc=%f",robots[i_robots].robotRadius, robots[i_robots].robotSpeed,robots[i_robots].robotLocation.phi, robots[i_robots].robotLocation.p.x(), robots[i_robots].robotLocation.p.y());
+		qDebug("robot:  size=%f, X=%f, Y=%f, Speed=%f, Dirc=%f",robots[i_robots].robotRadius, robots[i_robots].robotSpeed,robots[i_robots].robotLocation.phi, robots[i_robots].robotLocation.p.x(), robots[i_robots].robotLocation.p.y());
 		//qDebug("1i = %d", i_robots);fflush(stdout);
 		//qDebug("HERE START"); fflush(stdout);
 		
@@ -276,7 +276,7 @@ QVector<Interaction>  ForceField::getDynamicInteractionSet(QVector <Robot> robot
 	 		//qDebug("robotsinter_size=%d", robots_interaction_set.size());
 	 		//qDebug("HERE 92"); fflush(stdout);
 			robots_interaction_set.push_back(max_inter_robots);
-			//qDebug("force=%f, direc=%f, x=%f, y=%f", max_inter_robots.force,max_inter_robots.direction,max_inter_robots.location.x(),max_inter_robots.location.y());
+			qDebug("force=%f, direc=%f, x=%f, y=%f", max_inter_robots.force,max_inter_robots.direction,max_inter_robots.location.x(),max_inter_robots.location.y());
 			//qDebug("robotsinter_size=%d", robots_interaction_set.size());
 			//qDebug("HERE 10"); fflush(stdout);
 		}
@@ -582,7 +582,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
     	FrepAngle_robots = robots_interaction_set[i].direction;
     	FrepX_robots = FrepAmp_robots * cos(FrepAngle_robots);
     	FrepY_robots = FrepAmp_robots * sin(FrepAngle_robots);
-    	//qDebug ("robotinterX=%f, robotinerY=%f, FrepAmp = %f, FrepAngle = %f, FrepX = %f, FrepY = %f", robots_interaction_set[i].location.x(), robots_interaction_set[i].location.y(), FrepAmp_robots, FrepAngle_robots, FrepX_robots, FrepY_robots);
+    	qDebug ("robotinterX=%f, robotinerY=%f, FrepAmp = %f, FrepAngle = %f, FrepX = %f, FrepY = %f", robots_interaction_set[i].location.x(), robots_interaction_set[i].location.y(), FrepAmp_robots, FrepAngle_robots, FrepX_robots, FrepY_robots);
     	FrepXTotal_robots = FrepXTotal_robots + FrepX_robots;
     	FrepYTotal_robots = FrepYTotal_robots + FrepY_robots;
     	if (FrepAmp_robots > MaxRep)
@@ -604,7 +604,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   	double factor;
   	if (Frepmag > 0.001)
   	{
-  	factor=5 * Frepmag;
+  	factor=1.5 * Frepmag;
   	}
   	else
   	{
@@ -619,7 +619,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   	double ForceAngle = atan2(FtotalY, FtotalX);
      qDebug("Frepmag=%f, Frepangle=%f, FattAngle=%f, ForceAngle=%f", Frepmag, Frepangle, FattAngle, ForceAngle);
       	
-  	double robotSpeed_new = Max(MaxSpeed / (1 + MaxRep / SysP), 0.005);
+  	double robotSpeed_new = Max(MaxSpeed / (1 + MaxRep / SysP), 0.05);
   	double MaxSpeedIncr = 0.01;
   	if ((robotSpeed_new - robotSpeed) > MaxSpeedIncr)
   	{
