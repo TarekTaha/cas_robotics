@@ -153,6 +153,7 @@ void MapViewer::renderPaths()
 			Node * path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;
 	    	//glColor4f(1,1,1,1);
 	    	glColor4f(RGB[3][0],RGB[3][1],RGB[3][2],1);
+	    	glLineWidth(2);
 		    glBegin(GL_LINE_STRIP);
 			while(path && path->next)
 			{
@@ -160,22 +161,22 @@ void MapViewer::renderPaths()
 				path = path->next;
 			}
 		    glEnd();
-		    wayPoint = playGround->robotPlatforms[i]->navigator->wayPoint;
-		    // Draw Way Point
-		    if(wayPoint.p.x()==0 && wayPoint.p.y()==0)
-		    	continue;
-		    glPushMatrix();
-			    glTranslatef(wayPoint.p.x(),wayPoint.p.y(),0);
-			    glRotated(RTOD(wayPoint.phi),0,0,1);		    
-			    glColor4f(1,0,0,0.8);
-			    glShadeModel(GL_FLAT);
-			    glBegin(GL_TRIANGLE_FAN);
-					glColor4f(1,0,0,1);  
-				    glVertex3f(-0.2,0.15,0); 			
-				    glVertex3f(0.1,0,0); 			    	
-				    glVertex3f(-0.2,-0.15,0); 			    				    
-			    glEnd();
-			glPopMatrix();  
+//		    wayPoint = playGround->robotPlatforms[i]->navigator->wayPoint;
+//		    // Draw Way Point
+//		    if(wayPoint.p.x()==0 && wayPoint.p.y()==0)
+//		    	continue;
+//		    glPushMatrix();
+//			    glTranslatef(wayPoint.p.x(),wayPoint.p.y(),0);
+//			    glRotated(RTOD(wayPoint.phi),0,0,1);		    
+//			    glColor4f(1,0,0,0.8);
+//			    glShadeModel(GL_FLAT);
+//			    glBegin(GL_TRIANGLE_FAN);
+//					glColor4f(1,0,0,1);  
+//				    glVertex3f(-0.2,0.15,0); 			
+//				    glVertex3f(0.1,0,0); 			    	
+//				    glVertex3f(-0.2,-0.15,0); 			    				    
+//			    glEnd();
+//			glPopMatrix();  
 		}
 	}	
 }
@@ -337,7 +338,8 @@ void MapViewer::renderRobot()
 			glVertex2f(playGround->robotPlatforms[i]->robot->local_edge_points[m].x(),playGround->robotPlatforms[i]->robot->local_edge_points[m].y());
 		}
 		glEnd();
-	    renderText(1.6,0,0, qPrintable(playGround->robotPlatforms[i]->robot->robotName));		
+        QFont font40; font40.setPointSize(10);
+	    renderText(1.6,0,0, qPrintable(playGround->robotPlatforms[i]->robot->robotName),font40);		
 	    glBegin(GL_LINE_LOOP);
 			glColor4f(0,0,1,0.5);  
 		    glVertex3f(1.3, 0.15,0);
@@ -613,12 +615,12 @@ void MapViewer::paintGL()
 	//if(!mainMapBuilt)
 	    renderMap();
     glCallList(mapList); 	    
-    renderLaser();
+//    renderLaser();
     renderRobot();
     renderPaths();
 //  renderSearchTree();
 //	renderExpandedTree();
-	if(!hideGoals)
+	//if(!hideGoals)
 	{
     if(start_initialized)
     {
@@ -627,23 +629,26 @@ void MapViewer::paintGL()
 	    glRotated(RTOD(start.phi),0,0,1);
 	    glColor4f(1,1,1,0.8);
 	    glShadeModel(GL_FLAT);
-	    // Path Start
-	    glBegin(GL_TRIANGLE_FAN);
-			glColor4f(0,1,0,1);  
-		    glVertex3f(-0.2,0.15,0);
-		    glVertex3f(0.3,0,0); 			    	
-		    glVertex3f(-0.2,-0.15,0);	    				    
-	    glEnd();
-		glPopMatrix(); 
-	    glPushMatrix();		   		    
-	    if(step == 2)
-	    {
-		    glBegin(GL_LINE_LOOP);
-				glColor4f(1,1,1,1);  
-			    glVertex3f(start.p.x(),start.p.y(),0);
-			    glVertex3f(mousePos.x(),mousePos.y(),0); 			    	
-		    glEnd();			    	
-	    }
+//	    // Path Start
+//	    glBegin(GL_TRIANGLE_FAN);
+//			glColor4f(0,1,0,1);  
+//		    glVertex3f(-0.2,0.15,0);
+//		    glVertex3f(0.3,0,0); 			    	
+//		    glVertex3f(-0.2,-0.15,0);	    				    
+//	    glEnd();
+//		glPopMatrix(); 
+//	    glPushMatrix();		   		    
+//	    if(step == 2)
+//	    {
+//		    glBegin(GL_LINE_LOOP);
+//				glColor4f(1,1,1,1);  
+//			    glVertex3f(start.p.x(),start.p.y(),0);
+//			    glVertex3f(mousePos.x(),mousePos.y(),0); 			    	
+//		    glEnd();			    	
+//	    }
+	    glColor4f(0,0,0,0.8);
+        QFont font40; font40.setPointSize(14);
+        renderText(0.2,0,0,QString("Start"), font40);
 		glPopMatrix(); 	    
     }
     if(end_initialized)
@@ -653,23 +658,26 @@ void MapViewer::paintGL()
 	    glRotated(RTOD(end.phi),0,0,1);
 	    glColor4f(1,1,1,0.8);
 	    glShadeModel(GL_FLAT);
-	    // Path End
-	    glBegin(GL_TRIANGLE_FAN);
-			glColor4f(0,1,0,1);  
-		    glVertex3f(-0.2,0.15,0); 			
-		    glVertex3f(0.3,0,0); 			    	
-		    glVertex3f(-0.2,-0.15,0); 			    				    
-	    glEnd();
-		glPopMatrix(); 
-	    glPushMatrix();		   		    
-	    if(step == 4)
-	    {
-		    glBegin(GL_LINE_LOOP);
-				glColor4f(1,1,1,1);  
-			    glVertex3f(end.p.x(),end.p.y(),0);
-			    glVertex3f(mousePos.x(),mousePos.y(),0); 			    	
-		    glEnd();    	
-	    }
+//	    // Path End
+//	    glBegin(GL_TRIANGLE_FAN);
+//			glColor4f(0,1,0,1);  
+//		    glVertex3f(-0.2,0.15,0); 			
+//		    glVertex3f(0.3,0,0); 			    	
+//		    glVertex3f(-0.2,-0.15,0); 			    				    
+//	    glEnd();
+//		glPopMatrix(); 
+//	    glPushMatrix();		   		    
+//	    if(step == 4)
+//	    {
+//		    glBegin(GL_LINE_LOOP);
+//				glColor4f(1,1,1,1);  
+//			    glVertex3f(end.p.x(),end.p.y(),0);
+//			    glVertex3f(mousePos.x(),mousePos.y(),0); 			    	
+//		    glEnd();    	
+//	    }
+	    glColor4f(0,0,0,0.8);
+        QFont font40; font40.setPointSize(14);
+        renderText(0.2,0,0,QString("End"), font40);
 		glPopMatrix();   	
     }
 	}

@@ -325,7 +325,9 @@ void Navigator::setPause(bool pause)
 
 void Navigator::setObstAvoidAlgo(int algo)
 {
+    dataLock.lockForWrite();
 	this->obstAvoidAlgo = algo;
+    dataLock.unlock();
 }
 
 int Navigator::getObstAvoidAlgo()
@@ -417,7 +419,9 @@ Node * Navigator::closestPathNode(QPointF location,Node * all_path)
 
 void Navigator::setPath(Node *p)
 {
+    dataLock.lockForWrite();
 	this->global_path = p;	
+    dataLock.unlock();	
 }
 
 void Navigator::FollowPath()
@@ -427,12 +431,16 @@ void Navigator::FollowPath()
 
 void Navigator::StopRobot()
 {
+    dataLock.lockForWrite();
 	this->stop_navigating = true;
+    dataLock.unlock();		
 }
 
 void Navigator::StopNavigating()
 {
+    dataLock.lockForWrite();
 	this->stop_navigating = true;
+    dataLock.unlock();			
 }
 /*!
  * Determines if a Point is in the current laser's free space or not

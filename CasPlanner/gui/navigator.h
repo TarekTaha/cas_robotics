@@ -90,6 +90,7 @@ class Navigator : public Controller
 		Geom2D::Pose	delta_pose;		
 		QVector<QPointF> local_map;
 		FILE * file;
+        QReadWriteLock dataLock; 
 };
 
 #endif /*NAVIGATOR_H_*/
