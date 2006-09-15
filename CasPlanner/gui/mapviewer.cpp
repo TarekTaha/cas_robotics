@@ -83,8 +83,9 @@ void MapViewer::initializeGL()
 {
 	glEnable(GL_TEXTURE_2D);				// Enable Texture Mapping
 	glShadeModel(GL_SMOOTH);				// Enable Smooth Shading
-	glClearColor(0.70f, 0.7f, 0.7f, 1.0f);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+//	glClearColor(0.70f, 0.7f, 0.7f, 1.0f);
+//	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClearDepth(1.0f);						// Depth Buffer Setup
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE);		// Set The Blending Function For Translucency
@@ -149,8 +150,8 @@ void MapViewer::renderPaths()
 		if(playGround->robotPlatforms[i]->planningManager->pathPlanner->path)
 		{
 			Node * path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;
-	    	glColor4f(1,1,1,1);
-	    	//glColor4f(RGB[3][0],RGB[3][1],RGB[3][2],1);
+	    	//glColor4f(1,1,1,1);
+	    	glColor4f(RGB[3][0],RGB[3][1],RGB[3][2],1);
 		    glBegin(GL_LINE_STRIP);
 			while(path && path->next)
 			{
@@ -256,7 +257,30 @@ void MapViewer::renderSearchTree()
 	    glPopMatrix();			
 	}
 }
-
+void MapViewer::renderExpandedTree()
+{
+	for(int i=0;i<1;i++)
+	{
+		vector <Tree> tree;
+		QPointF child;
+		tree =  playGround->robotPlatforms[i]->planningManager->pathPlanner->tree;
+	    glPushMatrix();
+	    glColor3f(1,0,0);
+		for(unsigned int k=0;k<tree.size();k++)
+		{
+			for(int j=0;j<tree[k].children.size();j++)
+			{
+				//qDebug("J is:%d",j); fflush(stdout);
+				child = tree[k].children[j];
+			    glBegin(GL_LINE_LOOP);
+			    	glVertex2f(tree[k].location.x(),tree[k].location.y());  
+			    	glVertex2f(child.x(),child.y());
+			    glEnd(); 
+			}
+		}
+	    glPopMatrix();			
+	}
+}
 void MapViewer::renderRobot()
 {
 	if(!playGround)
@@ -447,16 +471,16 @@ void MapViewer::renderMap()
 //				imgData[(j*mapData->width+i)*4+1] =0; 
 //				imgData[(j*mapData->width+i)*4+2] = 255; 
 //				imgData[(j*mapData->width+i)*4+3] = 255;
-				imgData[(j*mapData->width+i)*4]   = 255;
-				imgData[(j*mapData->width+i)*4+1] = 255; 
-				imgData[(j*mapData->width+i)*4+2] = 255; 
+				imgData[(j*mapData->width+i)*4]   = 0;
+				imgData[(j*mapData->width+i)*4+1] = 0; 
+				imgData[(j*mapData->width+i)*4+2] = 0; 
 				imgData[(j*mapData->width+i)*4+3] = 255;
 			}
 		    else 
 		    {
-				imgData[(j*mapData->width+i)*4] = 0;  
+				imgData[(j*mapData->width+i)*4]   = 0;  
 				imgData[(j*mapData->width+i)*4+1] = 0; 
-				imgData[(j*mapData->width+i)*4+2] = 0;  
+				imgData[(j*mapData->width+i)*4+2] = 0;
 				imgData[(j*mapData->width+i)*4+3] = 0;   
 		    }
 		}
@@ -525,8 +549,8 @@ void MapViewer::paintGL()
     
     glPushMatrix();
     glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
-    glColor4f(0,0,0,1); 
-   
+//    glColor4f(0,0,0,1); 
+    glColor4f(1,1,1,1);    
     renderText(zoomFactor*aspectRatio*0.90-1, -0.9*zoomFactor, 0, "grid: 1 m");
     
     glRotatef(pitch,1,0,0); 
@@ -535,7 +559,7 @@ void MapViewer::paintGL()
     glTranslatef(xOffset, yOffset, zOffset);
 
 //	getOGLPos(mouseDouble.x(),mouseDouble.x());
-
+	showGrids = false;
     if(showGrids)
     {
 		for(int i=-(int) zoomFactor*3; i < (int) zoomFactor*3; i++)
@@ -543,8 +567,8 @@ void MapViewer::paintGL()
 		    glBegin(GL_LINES);
 			    if(i==0)
 			    {
-//					glColor4f(0,0,0,0.5);  
-					glColor4f(1,1,1,0.5);  
+					glColor4f(0,0,0,0.5);  
+//					glColor4f(1,1,1,0.5);  
 			    }
 			    else 
 			    {
@@ -560,8 +584,8 @@ void MapViewer::paintGL()
 	    int i = int((mapData->width*mapData->resolution)/2.0 + 2);
 	    {
 		    glBegin(GL_LINE_LOOP);
-//				glColor4f(0,0,0,0.5);  
-				glColor4f(1,1,1,0.5);  
+				glColor4f(0,0,0,0.5);  
+//				glColor4f(1,1,1,0.5);  
 			    glVertex3f(i-1,0.5,0); 			    	
 			    glVertex3f(i,0,0); 			    	
 			    glVertex3f(i-1,-0.5,0); 				    
@@ -572,8 +596,8 @@ void MapViewer::paintGL()
 	    int j = int((mapData->height*mapData->resolution)/2.0 + 2);
 	    {
 		    glBegin(GL_LINE_LOOP);
-//				glColor4f(0,0,0,0.5);  
-				glColor4f(1,1,1,0.5);  
+				glColor4f(0,0,0,0.5);  
+//				glColor4f(1,1,1,0.5);  
 			    glVertex3f(-0.5,j-1,0); 			    	
 			    glVertex3f(0,j,0); 				    				    			    
 			    glVertex3f(0.5,j-1,0); 				    
@@ -582,14 +606,16 @@ void MapViewer::paintGL()
 		 }		 
     }
 
-    glColor4f(0,0,0,1.0);
-	if(!mainMapBuilt)
+//    glColor4f(0,0,0,1.0);
+    glColor4f(1,1,1,1.0);
+	//if(!mainMapBuilt)
 	    renderMap();
     glCallList(mapList); 	    
     renderLaser();
     renderRobot();
     renderPaths();
-    //renderSearchTree();
+//  renderSearchTree();
+//	renderExpandedTree();
     if(start_initialized)
     {
 	    glPushMatrix();
@@ -929,7 +955,8 @@ void MapViewer::focusInEvent(QFocusEvent *)
 {
     makeCurrent(); 
 //    glClearColor(0.7f,0.7f,0.7f,1.0f);   
-    glClearColor(0.0f,0.0f,0.0f,1.0f);   
+//    glClearColor(0.0f,0.0f,0.0f,1.0f); 
+    glClearColor(1.0f,1.0f,1.0f,1.0f);   
     updateGL();
 }
 
@@ -937,7 +964,8 @@ void MapViewer::focusOutEvent(QFocusEvent *)
 {
     makeCurrent();  
 //    glClearColor(0.7f,0.7f,0.7f,1.0f);
-    glClearColor(0.0f,0.0f,0.0f,1.0f);       
+//    glClearColor(0.0f,0.0f,0.0f,1.0f);       
+    glClearColor(1.0f,1.0f,1.0f,1.0f);   
     updateGL(); 
 }
 

@@ -412,6 +412,7 @@ Node * Navigator::closestPathNode(QPointF location,Node * all_path)
 	}
 	return nearest;
 }
+
 void Navigator::setPath(Node *p)
 {
 	this->global_path = p;	
@@ -473,7 +474,7 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
  			retval = true;
  		}
  		// if this is the last node then take it anyways
- 		else if((Dist(robotLocation.p,temp->next->pose.p) < 1) && !temp->next )
+ 		else if((Dist(robotLocation.p,temp->pose.p) < 1) && !temp->next )
  		{
  			goal.p = temp->pose.p;
  			goal.phi = angle; 			
@@ -812,7 +813,10 @@ void Navigator::run()
 //			robotManager->planningManager->findPath(METRIC);
 //			continue;
 		}
-		wayPoint = goal;
+		else
+		{
+			wayPoint = goal;
+		}
 //		emit setWayPoint(&goal);
 		QVector <Robot> availableRobots;
 		QTime ff_time;
@@ -833,7 +837,7 @@ void Navigator::run()
 					qDebug("Current Robot      --->>> Turn Rate:%f and Speed is:%f Delta Time:%f",turnRate,speed,delta_t);
 				 	qDebug("Current Robot Pose --->>> x:%f y:%f phi:%f",EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi));
 				 	control_timer.restart();
-					action = FF->GenerateField(amcl_location,laserScan,goal,speed,turnRate,availableRobots,delta_t);
+					action = FF->GenerateField(amcl_location,laserScan,wayPoint,speed,turnRate,availableRobots,delta_t);
 //					qDebug("Force Field Returned     --->>> Speed is:%f TurnRate is:%f  time to calculate FF is:%dms Loop Delta_t:%fsec",action.speed,action.turnRate,ff_time.elapsed(),delta_t);	
 					robotManager->commManager->setSpeed(action.speed);						
 					robotManager->commManager->setTurnRate(action.turnRate);		
@@ -864,7 +868,7 @@ void Navigator::run()
 				case VFH:
 					// Vector Field Histogram
 //					qDebug("Sending to VFH goto X:%f Y:%f Phi%f",goal.p.x(),goal.p.y(),goal.phi);
-					robotManager->commManager->vfhGoto(goal);	
+					robotManager->commManager->vfhGoto(wayPoint);	
 					break;		
 				default:
 					qDebug("Unknown Obstacle Avoidance Algorithm used !!!");

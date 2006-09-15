@@ -46,6 +46,7 @@ Q_OBJECT
 		void renderLaser();	
 		void renderPaths();
 		void renderSearchTree();
+		void renderExpandedTree();
 		GLuint makeObject();
 		QImage captureMap();
         virtual void setProvider(MapProvider *provider);

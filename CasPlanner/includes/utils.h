@@ -21,12 +21,12 @@
 #include <QVector>
 
 //a few useful constants
-const int     MaxInt    = (std::numeric_limits<int>::max)();
-const double  MaxDouble = (std::numeric_limits<double>::max)();
-const double  MinDouble = (std::numeric_limits<double>::min)();
-const float   MaxFloat  = (std::numeric_limits<float>::max)();
-const float   MinFloat  = (std::numeric_limits<float>::min)();
-
+const int      MaxInt    = (std::numeric_limits<int>::max)();
+const double   MaxDouble = (std::numeric_limits<double>::max)();
+const double   MinDouble = (std::numeric_limits<double>::min)();
+const float    MaxFloat  = (std::numeric_limits<float>::max)();
+const float    MinFloat  = (std::numeric_limits<float>::min)();
+const long int MaxLong  =  (std::numeric_limits<long int>::max)();
 const double   Pi        = 3.14159;
 const double   TwoPi     = Pi * 2;
 const double   HalfPi    = Pi / 2;
@@ -387,11 +387,21 @@ public :
 inline double anglediff(double alfa, double beta) 
 {
 	double diff;
-	if( alfa < 0 ) alfa+= 2*M_PI; 	if( alfa > 2*M_PI) alfa-= 2*M_PI;
-	if( beta < 0 ) beta+= 2*M_PI;	if( beta > 2*M_PI) beta-= 2*M_PI;		
-	diff = alfa - beta;
-	if ( diff >  M_PI) diff=( 2*M_PI  - diff);
-	if ( diff < -M_PI) diff=(-2*M_PI - diff);
+  	diff = beta - alfa;
+  	if (diff > M_PI)
+  	{
+    	diff -= 2 * M_PI;
+  	}
+  	else if (diff < -M_PI) 
+  	{
+    	diff += 2 * M_PI;
+  	}
+//	double diff;
+//	if( alfa < 0 ) alfa+= 2*M_PI; 	if( alfa > 2*M_PI) alfa-= 2*M_PI;
+//	if( beta < 0 ) beta+= 2*M_PI;	if( beta > 2*M_PI) beta-= 2*M_PI;		
+//	diff = alfa - beta;
+//	if ( diff >  M_PI) diff=( 2*M_PI  - diff);
+//	if ( diff < -M_PI) diff=(-2*M_PI - diff);
 	return Abs(diff);
 };
 

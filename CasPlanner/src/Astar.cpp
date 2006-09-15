@@ -150,6 +150,7 @@ Node *  Astar::Search(Pose start,Pose end, int coord)
       		p = current->parent;
     		qDebug("	--->>> Goal state reached with :%d nodes created and :%d nodes expanded <<<---",ID,NodesExpanded);
 			qDebug("	--->>> General Clean UP <<<---");
+			fflush(stdout);
       		p = current;
 //			int m=0;
 //   		while (p != NULL) 
@@ -200,7 +201,7 @@ Node *  Astar::Search(Pose start,Pose end, int coord)
   			childList = childList->next;
 		    // set up the rest of the child node details
   			curChild->parent = current;
-  			curChild->depth = current->depth + 1;
+  			curChild->depth  = current->depth + 1;
   			curChild->id = ID++;
   			//qDebug("ID is:%d",ID);
   			curChild->next = NULL;
@@ -225,7 +226,7 @@ Node *  Astar::Search(Pose start,Pose end, int coord)
 				 	//cout<<"\n	--->>> Opened list -- Node is deleted, current child X="<<curChild->pose.x<<" Y="<<curChild->pose.y<<" has shorter path<<<---";
 					fflush(stdout);
 
-				}					
+				}
 			}
 			// test whether the child is in the closed list (already been there)			
 			if (curChild)
@@ -246,7 +247,15 @@ Node *  Astar::Search(Pose start,Pose end, int coord)
 						 * Another Solution is simply to comment everything and do nothing, doing this, the child will be added to the
 						 * Open List and it will be investigated further later on.
 						 */
-						//closedList->Remove(p);
+						//TODO : this SHOULD be fixed, very very DODGY
+//						Node *ptr = closedList->Start;
+//						while(ptr)
+//						{
+//							if(ptr->parent == p)
+//								ptr->parent = NULL;
+//							ptr = ptr->next;
+//						}
+//						closedList->Remove(p);
 					 	//cout<<"\n	--->>> Closed list -- Node is deleted, current child X="<<curChild->pose.x<<" Y="<<curChild->pose.y<<" has shorter path<<<---";
 						fflush(stdout);
 	
@@ -324,7 +333,7 @@ bool Astar :: GoalReached (Node *n)
 	{
 		angle_diff =	anglediff(end.phi,n->pose.phi + M_PI);
 	}
-	if ( delta_d <= distGoal  && angle_diff <= DTOR(30))
+	if ( delta_d <= distGoal  && angle_diff <= DTOR(60))
 	{
 //		cout<<" \n Desired Final Orientation ="<<RTOD(end.phi)<<" Current="<<RTOD(n->pose.phi);
 //		cout<<"\n Reached Destination with Diff Orientation="<< RTOD(angle_diff);
@@ -363,7 +372,7 @@ Node *Astar :: MakeChildrenNodes(Node *parent)
 	q = NULL;
 	// Check Each neighbour
 	//qDebug("WHAT??? %d x=%f y=%f",temp->children.size(),P.x(),P.y());
-	for (unsigned int i=0;i<temp->children.size();i++) 
+	for (int i=0;i<temp->children.size();i++) 
 	{
 		// What will be our orientation when we go to this child node ?
 		angle = ATAN2(temp->children[i]->location,P);
