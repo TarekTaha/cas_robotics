@@ -40,7 +40,34 @@ a starting point to an end point.
 
 - Navigator settings:
   - k_dist (float)
-    - Default: 1.8
+    - Default: 1.8	double robotTurnRate_desired= anglebetw / realtime;
+  	double velocityMax = OmegadotMax * realtime;
+  	double turnRate_incr_desired = robotTurnRate_desired - robotTurnRate;
+	double turnRate_incr_chosen; 
+	int direction;
+  	if (turnRate_incr_desired > velocityMax)
+  	{
+  		turnRate_incr_chosen =  velocityMax;
+  	}
+  	else if (turnRate_incr_desired < -velocityMax)
+  	{
+  		turnRate_incr_chosen = -velocityMax;
+  	}
+  	else
+  	{
+  		turnRate_incr_chosen = turnRate_incr_desired;
+  	}
+
+	robotTurnRate += turnRate_incr_chosen;
+	
+  	if (robotTurnRate > OmegaMax)
+  	{
+  		robotTurnRate = OmegaMax;
+  	}
+  	else if (robotTurnRate < -OmegaMax)
+  	{
+  		robotTurnRate = - OmegaMax;
+  	}
     - Gain on distance error.
   - k_theta (float)
     - Default: 2.5
@@ -72,7 +99,34 @@ a starting point to an end point.
   - conn_rad (float)
     - Default 0.1
     - ???        
-  - obst_pen (float)
+  - obst_pen (float)	double robotTurnRate_desired= anglebetw / realtime;
+  	double velocityMax = OmegadotMax * realtime;
+  	double turnRate_incr_desired = robotTurnRate_desired - robotTurnRate;
+	double turnRate_incr_chosen; 
+	int direction;
+  	if (turnRate_incr_desired > velocityMax)
+  	{
+  		turnRate_incr_chosen =  velocityMax;
+  	}
+  	else if (turnRate_incr_desired < -velocityMax)
+  	{
+  		turnRate_incr_chosen = -velocityMax;
+  	}
+  	else
+  	{
+  		turnRate_incr_chosen = turnRate_incr_desired;
+  	}
+
+	robotTurnRate += turnRate_incr_chosen;
+	
+  	if (robotTurnRate > OmegaMax)
+  	{
+  		robotTurnRate = OmegaMax;
+  	}
+  	else if (robotTurnRate < -OmegaMax)
+  	{
+  		robotTurnRate = - OmegaMax;
+  	}
     - Default 0.1
     - ???        
   - dist_goal (float)
@@ -97,7 +151,34 @@ a starting point to an end point.
 - Coordinate System:
 Global Pixel Coordinate : Follows the image coordinate system where (0,0) is
 the upper left corner.
-Local Planner Coordinate: where the (0,0) is the center of the laser map
+Local Planner Coordinate: where the (0,0) is the center of the laser map	double robotTurnRate_desired= anglebetw / realtime;
+  	double velocityMax = OmegadotMax * realtime;
+  	double turnRate_incr_desired = robotTurnRate_desired - robotTurnRate;
+	double turnRate_incr_chosen; 
+	int direction;
+  	if (turnRate_incr_desired > velocityMax)
+  	{
+  		turnRate_incr_chosen =  velocityMax;
+  	}
+  	else if (turnRate_incr_desired < -velocityMax)
+  	{
+  		turnRate_incr_chosen = -velocityMax;
+  	}
+  	else
+  	{
+  		turnRate_incr_chosen = turnRate_incr_desired;
+  	}
+
+	robotTurnRate += turnRate_incr_chosen;
+	
+  	if (robotTurnRate > OmegaMax)
+  	{
+  		robotTurnRate = OmegaMax;
+  	}
+  	else if (robotTurnRate < -OmegaMax)
+  	{
+  		robotTurnRate = - OmegaMax;
+  	}
 Global Planner Coordinate: where the (0,0) is the center of the map.
 
 @par Example: Using the Navigator Model on the Wheelchair
@@ -346,7 +427,7 @@ bool Navigator::MapModified(QVector<QPointF> laser_scan,Pose rob_location)
 		local_map_icp.push_back(temp);
 	}
 	for(int i=0;i<laser_scan.size();i++)
-	{
+	{	
 		QPointF t(laser_scan[i].x(),laser_scan[i].y());
 		t = Trans2Global(t,rob_location);
 		temp.x = t.x();
@@ -833,16 +914,16 @@ void Navigator::run()
 					//Force Field
 					velVector action;
 					ff_time.restart();
-					qDebug("================================= FORCE FIELD STARTS ===============================");
-					qDebug("Current Robot      --->>> Turn Rate:%f and Speed is:%f Delta Time:%f",turnRate,speed,delta_t);
-				 	qDebug("Current Robot Pose --->>> x:%f y:%f phi:%f",EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi));
+					//qDebug("================================= FORCE FIELD STARTS ===============================");
+					//qDebug("Current Robot      --->>> Turn Rate:%f and Speed is:%f Delta Time:%f",turnRate,speed,delta_t);
+				 	//qDebug("Current Robot Pose --->>> x:%f y:%f phi:%f",EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi));
 				 	control_timer.restart();
 					action = FF->GenerateField(amcl_location,laserScan,wayPoint,speed,turnRate,availableRobots,delta_t);
 //					qDebug("Force Field Returned     --->>> Speed is:%f TurnRate is:%f  time to calculate FF is:%dms Loop Delta_t:%fsec",action.speed,action.turnRate,ff_time.elapsed(),delta_t);	
 					robotManager->commManager->setSpeed(action.speed);						
 					robotManager->commManager->setTurnRate(action.turnRate);		
 					control_timer.restart();				
-					qDebug("================================= FORCE FIELD ENDS  ===============================\n");					
+					//qDebug("================================= FORCE FIELD ENDS  ===============================\n");					
 					break;		
 				case CONFIG_SPACE:
 					break;
