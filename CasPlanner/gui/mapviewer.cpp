@@ -19,6 +19,7 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
  showRobots(true),
  showPointclouds(true),
  showPatchBorders(true),
+ hideGoals(false),
  start_initialized(false),
  end_initialized(false),
  mainMapBuilt(false),
@@ -617,6 +618,8 @@ void MapViewer::paintGL()
     renderPaths();
 //  renderSearchTree();
 //	renderExpandedTree();
+	if(!hideGoals)
+	{
     if(start_initialized)
     {
 	    glPushMatrix();
@@ -665,11 +668,11 @@ void MapViewer::paintGL()
 				glColor4f(1,1,1,1);  
 			    glVertex3f(end.p.x(),end.p.y(),0);
 			    glVertex3f(mousePos.x(),mousePos.y(),0); 			    	
-		    glEnd();			    	
+		    glEnd();    	
 	    }
 		glPopMatrix();   	
-    }    
-		
+    }
+	}
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_POINT_SMOOTH); 
@@ -765,6 +768,7 @@ void MapViewer::mouseDoubleClickEvent(QMouseEvent *me)
 		step++;
 		start_initialized = true; end_initialized = false;
 		setMouseTracking(true);		
+		hideGoals = false;
 	}
 	else if(step==3)
 	{
@@ -798,7 +802,8 @@ void MapViewer::mousePressEvent(QMouseEvent *me)
 		end_initialized = true;
 		step = 1;
 		update();
-		setMouseTracking(false);		
+		setMouseTracking(false);	
+	    hideGoals = true;			
 	}
 }
 
@@ -838,7 +843,10 @@ void MapViewer::keyPressEvent(QKeyEvent *e)
     {
 		if(e->modifiers() && Qt::ShiftModifier)
 		{
-		    trail.clear();
+			for(int i=0;i<playGround->robotPlatforms.size();i++)
+			{
+				playGround->robotPlatforms[i]->navigator->trail.clear();
+			}    
 		}
 		else 
 		{

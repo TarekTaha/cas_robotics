@@ -76,7 +76,6 @@ Q_OBJECT
 		
     private:
 		int screenWidth,count,step;
-		QVector <QPointF> trail;
 		PlayGround *playGround;
 		NavControlPanel *navControlPanel;
 	    int screenHeight;  
@@ -92,6 +91,7 @@ Q_OBJECT
 		bool showRobots; 
 		bool showPointclouds; 
 		bool showPatchBorders; 
+		bool hideGoals;
 		bool start_initialized,end_initialized,mainMapBuilt;
 		QString mapName;
 	    MapManager mapManager;
