@@ -505,7 +505,7 @@ void Navigator::run()
 		connect(this, SIGNAL(setWayPoint(Pose*)),robotManager,SLOT(setWayPoint(Pose*)));				
 		connect(this, SIGNAL(renderMapPatch(Map*)),robotManager,SLOT(renderMapPatch(Map*)));						
 	}
-
+	QVector <Robot *> availableRobots;
 	ControlAction cntrl;
 	Timer amcl_timer,delta_timer,redraw_timer,control_timer;
 //	double closest_obst=10;
@@ -566,8 +566,13 @@ void Navigator::run()
 		EstimatedPos = amcl_location;
 		robotManager->robot->setPose(amcl_location);
 		trail.push_back(amcl_location.p);
-		speed = robotManager->robot->robotTurnRate = robotManager->commManager->getSpeed();
-		turnRate = robotManager->robot->robotTurnRate = robotManager->commManager->getTurnRate();
+		
+		speed    = robotManager->commManager->getSpeed();
+		turnRate =  robotManager->commManager->getTurnRate();		
+		// Updating the current Robot Info 
+		robotManager->robot->setSpeed(speed);
+		robotManager->robot->setTurnRate(turnRate);
+		
 		laserScan = robotManager->commManager->getLaserScan();
 //		cout<<"\n Current Location X:"<<amcl_location.p.x()<<" Y:"<<amcl_location.p.y()<<" Theta:"<<amcl_location.phi;
 		/* If this location is new, then use it. Otherwise
@@ -821,17 +826,18 @@ void Navigator::run()
 			wayPoint = goal;
 		}
 //		emit setWayPoint(&goal);
-		QVector <Robot> availableRobots;
+
 		QTime ff_time;
 		if(!pause)
 		{
 			switch(obstAvoidAlgo)		 
 			{
 				case FORCE_FIELD:
+					availableRobots.clear();
 					for(int i=0;i<playGround->robotPlatforms.size();i++)
 					{
 						if(playGround->robotPlatforms[i]!= robotManager)
-							availableRobots.push_back(*playGround->robotPlatforms[i]->robot);
+							availableRobots.push_back(playGround->robotPlatforms[i]->robot);
 					}
 					//Force Field
 					velVector action;

@@ -31,7 +31,7 @@ class ForceField : public Robot
 public:
 	ForceField(Robot r,ConfigFile *cf);
 	virtual ~ForceField();
-    velVector GenerateField(Pose pose,LaserScan laser_set,Pose Goal,double speed,double turnrate,QVector <Robot> robots,double deltaTime);
+    velVector GenerateField(Pose pose,LaserScan laser_set,Pose Goal,double speed,double turnrate,QVector <Robot*> robots,double deltaTime);
 	QVector < QVector<QPointF> > DivObst(LaserScan laser_set,Pose laser_pose);	
 	void    LSCurveFitting (QVector<QPointF>, double[], int);
 	double  Dist2Robot(QPointF,double &);
@@ -41,10 +41,10 @@ public:
 	//void    SimFF(QVector<Interaction> obstacle_interaction_set);
 	double  ForceValue(QPointF ray_end, double &, double &, double &, double &);
 	double  Delta_Angle(double, double);
-	void    robotForceFieldShape(Robot, QVector<QPointF>&, QVector<QPointF>&);
+	void    robotForceFieldShape(Robot*, QVector<QPointF>&, QVector<QPointF>&);
 	//double  ForceValue_dynamicobstalce(dymamicobstacle, obstacleDmaxPoint);
 	void    SimFF(QVector<Interaction>, QVector<Interaction>, double);
-	QVector<Interaction> getDynamicInteractionSet(QVector <Robot> robots);
+	QVector<Interaction> getDynamicInteractionSet(QVector <Robot*> robots);
 	//double  ForceValue_dynamicobstalce(dymamicobstacle, obstacleDmaxPoint);
 private :
 	double   FixedRatio,TimeStep,SysK,SysC,SysP,SysQ,MaxSpeed,MaxAcceT,OmegadotMax,OmegaMax,

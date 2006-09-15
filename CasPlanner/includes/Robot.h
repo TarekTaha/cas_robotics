@@ -25,6 +25,8 @@ class Robot
 		QVector<QPointF> local_edge_points, check_points;
 		void setCheckPoints(double o_r);
 		void setPose(Pose location);
+		void setSpeed(double speed);
+		void setTurnRate(double turnRate);
 		void findR();
 		int  readConfigs(ConfigFile *cf,int secId);
 		Robot(ConfigFile *cf,int secId);

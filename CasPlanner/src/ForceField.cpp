@@ -98,7 +98,7 @@ void ForceField::CrossProduct(double MatrixA[3], double MatrixB[3], double Matri
 	MatrixC[1] = (MatrixA[2] * MatrixB[0]) - (MatrixB[2] * MatrixA[0]);
  	MatrixC[2] = (MatrixA[0] * MatrixB[1]) - (MatrixB[0] * MatrixA[1]);
 };	
-velVector ForceField::GenerateField(Pose pose,LaserScan laser_set,Pose Goal,double speed,double turnrate,QVector <Robot> robots,double deltaTime)
+velVector ForceField::GenerateField(Pose pose,LaserScan laser_set,Pose Goal,double speed,double turnrate,QVector <Robot*> robots,double deltaTime)
 {
 	QVector<Interaction> robots_interaction_set;
  	double coefficient[curvefittingorder];
@@ -188,7 +188,7 @@ velVector ForceField::GenerateField(Pose pose,LaserScan laser_set,Pose Goal,doub
 	//qDebug("Function Ended"); fflush(stdout);
  	return action;
 };
-QVector<Interaction>  ForceField::getDynamicInteractionSet(QVector <Robot> robots)
+QVector<Interaction>  ForceField::getDynamicInteractionSet(QVector <Robot*> robots)
 {
 	QVector<Interaction> robots_interaction_set;
 	double coefficient_robots[curvefittingorder],inter_robot_dmax,
@@ -200,7 +200,7 @@ QVector<Interaction>  ForceField::getDynamicInteractionSet(QVector <Robot> robot
 	QVector<QPointF> robotsDmax_set;
 	for (int i_robots = 0; i_robots < robots.size() ; i_robots ++)
 	{
-		qDebug("robot:  size=%f, X=%f, Y=%f, Speed=%f, Dirc=%f",robots[i_robots].robotRadius, robots[i_robots].robotSpeed,robots[i_robots].robotLocation.phi, robots[i_robots].robotLocation.p.x(), robots[i_robots].robotLocation.p.y());
+		qDebug("robot %s:  size=%f,Speed=%f, Dirc=%f, X=%f, Y=%f, ",qPrintable(robots[i_robots]->robotName),robots[i_robots]->robotRadius, robots[i_robots]->robotSpeed,robots[i_robots]->robotLocation.phi, robots[i_robots]->robotLocation.p.x(), robots[i_robots]->robotLocation.p.y());
 		//qDebug("1i = %d", i_robots);fflush(stdout);
 		//qDebug("HERE START"); fflush(stdout);
 		
@@ -276,7 +276,7 @@ QVector<Interaction>  ForceField::getDynamicInteractionSet(QVector <Robot> robot
 	 		//qDebug("robotsinter_size=%d", robots_interaction_set.size());
 	 		//qDebug("HERE 92"); fflush(stdout);
 			robots_interaction_set.push_back(max_inter_robots);
-			qDebug("force=%f, direc=%f, x=%f, y=%f", max_inter_robots.force,max_inter_robots.direction,max_inter_robots.location.x(),max_inter_robots.location.y());
+			//qDebug("force=%f, direc=%f, x=%f, y=%f", max_inter_robots.force,max_inter_robots.direction,max_inter_robots.location.x(),max_inter_robots.location.y());
 			//qDebug("robotsinter_size=%d", robots_interaction_set.size());
 			//qDebug("HERE 10"); fflush(stdout);
 		}
@@ -617,7 +617,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   	double FtotalY = FattY + FreptotalY;
   	
   	double ForceAngle = atan2(FtotalY, FtotalX);
-     qDebug("Frepmag=%f, Frepangle=%f, FattAngle=%f, ForceAngle=%f", Frepmag, Frepangle, FattAngle, ForceAngle);
+//     qDebug("Frepmag=%f, Frepangle=%f, FattAngle=%f, ForceAngle=%f", Frepmag, Frepangle, FattAngle, ForceAngle);
       	
   	double robotSpeed_new = Max(MaxSpeed / (1 + MaxRep / SysP), 0.05);
   	double MaxSpeedIncr = 0.01;
@@ -685,14 +685,14 @@ double ForceField::Delta_Angle(double a1, double a2)
 }
 
 
-void ForceField::robotForceFieldShape(Robot anotherrobot, QVector<QPointF> &Dmax_anotherrobot, QVector<QPointF> &Dmin_anotherrobot)
+void ForceField::robotForceFieldShape(Robot * anotherrobot, QVector<QPointF> &Dmax_anotherrobot, QVector<QPointF> &Dmin_anotherrobot)
 {
 	//treated as circle
 	//?????robots.x, robots.y, dynamicobstalce.phi, robotsRadius, robotsSpeed;
 	double MaxSpeed_anotherrobot = MaxSpeed, SysC_anotherrobot = SysC, SysK_anotherrobot = SysK, FixedRatio_anotherrobot = FixedRatio;
 	double angle_own = 0, number = 360, angleincr= 2 * M_PI / 360;
 	//double number = ceil [2 * PI / angleincr];
- 	double Er_anotherrobot = anotherrobot.robotSpeed / (MaxSpeed_anotherrobot  * SysC_anotherrobot);
+ 	double Er_anotherrobot = anotherrobot->robotSpeed / (MaxSpeed_anotherrobot  * SysC_anotherrobot);
  	double Safedist_anotherrobot = 0.1;
  	//qDebug("HERE 3"); fflush(stdout);
  	//double Dmax_robots [number], Dmin_robots [number];
@@ -705,23 +705,23 @@ void ForceField::robotForceFieldShape(Robot anotherrobot, QVector<QPointF> &Dmax
  		angle_own += angleincr;
  		//qDebug("HERE 4"); fflush(stdout);
  		//qDebug("HERE 5"); fflush(stdout);
- 		//angle_anotherrobot = Delta_Angle(anotherrobot.robotLocation.phi, angle_own);
- 		Dmax_anotherrobot_value = SysK_anotherrobot  * Er_anotherrobot  * anotherrobot.robotRadius / (1 - Er_anotherrobot * cos(angle_own));
+ 		//angle_anotherrobot = Delta_Angle(anotherrobot->robotLocation.phi, angle_own);
+ 		Dmax_anotherrobot_value = SysK_anotherrobot  * Er_anotherrobot  * anotherrobot->robotRadius / (1 - Er_anotherrobot * cos(angle_own));
  		Dmin_anotherrobot_value = FixedRatio_anotherrobot * Dmax_anotherrobot_value;
  		//qDebug("Dmax_anotherrobot_value = %f, Dmin_anotherrobot_value = %f", Dmax_anotherrobot_value, Dmin_anotherrobot_value);
  		//qDebug("HERE 6"); fflush(stdout);
  		
-// 		Dmax_anotherrobot[i].setX (anotherrobot.robotLocation.p.x() + (Dmax_anotherrobot_value + anotherrobot.robotRadius) * cos(angle_own + anotherrobot.robotLocation.phi));
-// 		Dmax_anotherrobot[i].setY (anotherrobot.robotLocation.p.y() + (Dmax_anotherrobot_value + anotherrobot.robotRadius) * sin(angle_own + anotherrobot.robotLocation.phi));
-// 		Dmin_anotherrobot[i].setX (anotherrobot.robotLocation.p.x() + (Dmin_anotherrobot_value + anotherrobot.robotRadius) * cos(angle_own + anotherrobot.robotLocation.phi));
-// 		Dmin_anotherrobot[i].setY (anotherrobot.robotLocation.p.y() + (Dmin_anotherrobot_value + anotherrobot.robotRadius) * sin(angle_own + anotherrobot.robotLocation.phi));
+// 		Dmax_anotherrobot[i].setX (anotherrobot->robotLocation.p.x() + (Dmax_anotherrobot_value + anotherrobot->robotRadius) * cos(angle_own + anotherrobot->robotLocation.phi));
+// 		Dmax_anotherrobot[i].setY (anotherrobot->robotLocation.p.y() + (Dmax_anotherrobot_value + anotherrobot->robotRadius) * sin(angle_own + anotherrobot->robotLocation.phi));
+// 		Dmin_anotherrobot[i].setX (anotherrobot->robotLocation.p.x() + (Dmin_anotherrobot_value + anotherrobot->robotRadius) * cos(angle_own + anotherrobot->robotLocation.phi));
+// 		Dmin_anotherrobot[i].setY (anotherrobot->robotLocation.p.y() + (Dmin_anotherrobot_value + anotherrobot->robotRadius) * sin(angle_own + anotherrobot->robotLocation.phi));
  		 
- 		Temp1.setX (anotherrobot.robotLocation.p.x() + (Dmax_anotherrobot_value + anotherrobot.robotRadius) * cos(angle_own + anotherrobot.robotLocation.phi));
- 		Temp1.setY (anotherrobot.robotLocation.p.y() + (Dmax_anotherrobot_value + anotherrobot.robotRadius) * sin(angle_own + anotherrobot.robotLocation.phi));
+ 		Temp1.setX (anotherrobot->robotLocation.p.x() + (Dmax_anotherrobot_value + anotherrobot->robotRadius) * cos(angle_own + anotherrobot->robotLocation.phi));
+ 		Temp1.setY (anotherrobot->robotLocation.p.y() + (Dmax_anotherrobot_value + anotherrobot->robotRadius) * sin(angle_own + anotherrobot->robotLocation.phi));
  		//qDebug ("%f     %f", Temp1.x(),Temp1.y());  /*****show Dmax*****/
  		Dmax_anotherrobot.push_back(Temp1);
- 		Temp2.setX (anotherrobot.robotLocation.p.x() + (Dmin_anotherrobot_value + anotherrobot.robotRadius) * cos(angle_own + anotherrobot.robotLocation.phi));
- 		Temp2.setY (anotherrobot.robotLocation.p.y() + (Dmin_anotherrobot_value + anotherrobot.robotRadius) * sin(angle_own + anotherrobot.robotLocation.phi));
+ 		Temp2.setX (anotherrobot->robotLocation.p.x() + (Dmin_anotherrobot_value + anotherrobot->robotRadius) * cos(angle_own + anotherrobot->robotLocation.phi));
+ 		Temp2.setY (anotherrobot->robotLocation.p.y() + (Dmin_anotherrobot_value + anotherrobot->robotRadius) * sin(angle_own + anotherrobot->robotLocation.phi));
  		//qDebug ("%f     %f", Temp2.x(),Temp2.y());
  		Dmin_anotherrobot.push_back(Temp2);
  		//qDebug ("Dmax_anotherrobotX=%f, Dmax_anotherrobotY=%f, Dmin_anotherrobotX=%f, Dmin_anotherrobotY=%f", Dmax_anotherrobot[i].x, Dmax_anotherrobot[i].y, Dmin_anotherrobot[i].x, Dmin_anotherrobot[i].y); 		
@@ -733,7 +733,7 @@ void ForceField::robotForceFieldShape(Robot anotherrobot, QVector<QPointF> &Dmax
 //{
 //	double angle_anotherrobotDmax,closest_dist_anotherrobotDmax;
 //	????closest_dist_anotherrobotDmax = Dist2Robot(obstacleDmaxPoint,angle_obstacleDmax);
-//	double Er_anotherrobotDmax = anotherrobot.robotSpeed / (MaxSpeed * SysC);
+//	double Er_anotherrobotDmax = anotherrobot->robotSpeed / (MaxSpeed * SysC);
 // 	//double Safedist = 0.1;
 // 	double Dmax_obstalceDmax = SysK * Er * robotRadius / (1 - Er_obstalceDmax * cos(angle_obstalceDmax));
 // 	double Dmin_obstalceDmax = FixedRatio * Dmax_obstalceDmax;

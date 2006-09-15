@@ -126,6 +126,14 @@ void Robot::setPose(Pose location)
 	this->robotLocation = location;
 }
 
+void Robot::setSpeed(double speed)
+{
+	this->robotSpeed = speed;
+}
+void Robot::setTurnRate(double turnRate)
+{
+	this->robotTurnRate = turnRate;
+}
 Robot::Robot() 
 {
 };
