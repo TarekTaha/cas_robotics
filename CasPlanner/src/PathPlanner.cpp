@@ -353,7 +353,7 @@ void PathPlanner :: PrintNodeList()
 		}
 		p = p->next;
 	}
-	qDebug("\n --------------------   END OF LIST ---------------------- ");
+	qDebug("\n --------------------   END OF LIST ---------------------- ");fflush(stdout);
 }
 
 void PathPlanner::AddCostToNodes()
@@ -458,7 +458,7 @@ void PathPlanner::ShowConnections()
 	int m=0,n=0;
 	while (temp != NULL)
 	{
-		for(unsigned int i=0; i < temp->children.size();i++)
+		for(int i=0; i < temp->children.size();i++)
 		{
 			loc1 = temp->location;
 			ConvertToPixel(&loc1);
@@ -496,7 +496,7 @@ void PathPlanner::updateMap(Map *mapPatch)
 		if(this->map->data[int(p.x())][(int)p.y()] == false)
 			this->map->data[int(p.x())][(int)p.y()]= false;
 	}
-	SearchSpaceNode *swap,*temp = search_space;
+	SearchSpaceNode *temp = search_space;
 	while (temp != NULL)
 	{
 		p = temp->location;
@@ -518,7 +518,7 @@ void PathPlanner :: SetMap(Map * map_in)
 	if(this->map)
 		delete map;
 	this->map = map_in;
-	MAXNODES = map->height*map->width;
+	MAXNODES = MaxLong;//map->height*map->width*map->width*map->height;
 	//qDebug("W_in:%d H_in:%d",map->width,map->height);
 	map_initialized = true;
 };

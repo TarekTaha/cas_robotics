@@ -642,8 +642,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   	{
   		robotTurnRate = - OmegaMax;
   	}
-	//direction = (anglebetw>0)?1:-1;
-  	robotTurnRate = DTOR(40)*((anglebetw)/M_PI);
+  	robotTurnRate = DTOR(20)*((anglebetw)/M_PI);
 	qDebug ("\tRobotTurnRate_desired=%f, Max Velocity=%f, turnRate_incr_chosen=%f", robotTurnRate_desired, velocityMax, turnRate_incr_chosen);  
   	qDebug ("\tOUT PUT NewSpeed=%f, New Turn Rate=%f", robotSpeed, robotTurnRate);  
 }
