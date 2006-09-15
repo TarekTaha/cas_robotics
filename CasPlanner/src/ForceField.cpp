@@ -689,7 +689,7 @@ void ForceField::robotForceFieldShape(Robot * anotherrobot, QVector<QPointF> &Dm
 {
 	//treated as circle
 	//?????robots.x, robots.y, dynamicobstalce.phi, robotsRadius, robotsSpeed;
-	double MaxSpeed_anotherrobot = MaxSpeed, SysC_anotherrobot = SysC, SysK_anotherrobot = SysK, FixedRatio_anotherrobot = FixedRatio;
+	double MaxSpeed_anotherrobot = 0.1, SysC_anotherrobot = 1, SysK_anotherrobot = SysK, FixedRatio_anotherrobot = 0.5;
 	double angle_own = 0, number = 360, angleincr= 2 * M_PI / 360;
 	//double number = ceil [2 * PI / angleincr];
  	double Er_anotherrobot = anotherrobot->robotSpeed / (MaxSpeed_anotherrobot  * SysC_anotherrobot);
