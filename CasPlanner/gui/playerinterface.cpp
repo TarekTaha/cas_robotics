@@ -249,11 +249,15 @@ void PlayerInterface::run ()
 	    for(int i=0; i < lasers.size(); i++)
 	    {
 	    	player_pose_t 	lp_pose;
+	    	lp_pose.px = 0;
+	    	lp_pose.py = 0;
+	    	lp_pose.pa = 0;
 	    	lasers[i].lp = new LaserProxy(pc,lasers[i].index);
-	    	lp_pose = lasers[i].lp->GetPose();
+	    	//lp_pose = lasers[i].lp->GetPose();
 	    	lasers[i].pose.p.setX(lp_pose.px);
 	    	lasers[i].pose.p.setY(lp_pose.py);	    	
 	    	lasers[i].pose.phi = lp_pose.pa;
+	    	//qDebug("Laser Pose X:%f Y:%f Phi:%f",lasers[i].pose.p.x(),lasers[i].pose.p.y(),lasers[i].pose.phi);	    	
        		qDebug("\t\t - Laser interface:%d Interface Added Successfully",lasers[i].index);  
 	    }
 	    if(mapEnabled)
@@ -301,6 +305,9 @@ void PlayerInterface::run ()
 		    {
 		    	if (laserScan.points.size())
 		    		laserScan.points.clear();
+		    	laserScan.laserPose.p.setX(lasers[laser_indx].pose.p.x());
+		    	laserScan.laserPose.p.setY(lasers[laser_indx].pose.p.y());		    	
+		    	laserScan.laserPose.phi =  lasers[laser_indx].pose.phi;		    	
 		        for(uint i=0; i< lasers[laser_indx].lp->GetCount(); i++)
 		        {
 			    	laserScan.points.push_back(QPointF(lasers[laser_indx].lp->GetPoint(i).px, lasers[laser_indx].lp->GetPoint(i).py));    

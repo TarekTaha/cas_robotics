@@ -193,10 +193,11 @@ void MapViewer::renderLaser()
 	    LaserScan laserScan = playGround->robotPlatforms[i]->commManager->getLaserScan(); 
 	    //Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;	
 	    Pose loc = playGround->robotPlatforms[i]->commManager->getOdomLocation();;	
-	    glPushMatrix(); 
+	    glPushMatrix();
+	    //qDebug("Laser Pose X:%f Y:%f Phi:%f",laserScan.laserPose.p.x(),laserScan.laserPose.p.y(),laserScan.laserPose.phi);
 	    glTranslatef(loc.p.x(),loc.p.y(),0);
 	    glRotated(RTOD(loc.phi),0,0,1);    
-
+   	    
 	    //glColor3f(0.623,0.811,0.3); 
 	    glColor4f(0,1.0f/double(i+1),0.2,1.0f/double(i+1));
 //	    glBegin(GL_TRIANGLE_FAN);
