@@ -374,7 +374,7 @@ bool Navigator::MapModified(QVector<QPointF> laser_scan,Pose rob_location)
 
 Node * Navigator::closestPathSeg(QPointF location,Node * all_path)
 {
-	qDebug("did i segment here ?"); fflush(stdout);
+//	qDebug("did i segment here ?"); fflush(stdout);
 	Node * nearest = NULL;
 	double dist,shortest= 100000;
 	while(all_path && all_path->next)
@@ -394,7 +394,7 @@ Node * Navigator::closestPathSeg(QPointF location,Node * all_path)
 			if(nearest->next->next)
 				nearest = nearest->next;
 	}
-	qDebug("No not here"); fflush(stdout);	
+//	qDebug("No not here"); fflush(stdout);	
 	return nearest;
 }
 
