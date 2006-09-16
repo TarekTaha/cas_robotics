@@ -47,6 +47,7 @@ Q_OBJECT
 		void renderPaths();
 		void renderSearchTree();
 		void renderExpandedTree();
+		void setRobotsLocation();
 		GLuint makeObject();
 		QImage captureMap();
         virtual void setProvider(MapProvider *provider);
@@ -95,8 +96,8 @@ Q_OBJECT
 		bool start_initialized,end_initialized,mainMapBuilt;
 		QString mapName;
 	    MapManager mapManager;
-	    Pose start,end;
-	    Pose wayPoint;
+	    Pose start,end,wayPoint;
+	    QVector <Pose> robotsLocation;
 	    Map * mapData; 	
 	    QColor clearColor;
 	   	QPointF mousePos;

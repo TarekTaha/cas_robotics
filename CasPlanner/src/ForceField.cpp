@@ -549,7 +549,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
 {
 	
 	//qDebug ("Simple FF!"); fflush(stdout);
-	qDebug ("OldSpeed=%f, OldDirec=%f, Turnate=%f", robotSpeed,robotLocation.phi,robotTurnRate);  
+	//qDebug ("OldSpeed=%f, OldDirec=%f, Turnate=%f", robotSpeed,robotLocation.phi,robotTurnRate);  
 	//double FattAmp = SysQ;
   	double FattAngleA = atan2(goalLocation.p.y() - (robotLocation.p.y() + robotRadius * sin(robotLocation.phi)), goalLocation.p.x() - (robotLocation.p.x() + robotRadius * cos(robotLocation.phi)));
   	double FattAngleR =	Delta_Angle(robotLocation.phi, FattAngleA);
@@ -558,14 +558,14 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   	//double FattX = FattAmp * cos(FattAngle);
   	//double FattY = FattAmp * sin(FattAngle);
   	//qDebug ("Simple FF 1!"); fflush(stdout);
-  	qDebug("FattAngleA=%f,FattAngleR=%f,RX=%f, RY=%f, GX=%f,GY=%f", FattAngleA,FattAngleR, robotLocation.p.x(), robotLocation.p.y(), goalLocation.p.x(), goalLocation.p.y());
+  	//qDebug("FattAngleA=%f,FattAngleR=%f,RX=%f, RY=%f, GX=%f,GY=%f", FattAngleA,FattAngleR, robotLocation.p.x(), robotLocation.p.y(), goalLocation.p.x(), goalLocation.p.y());
   	
   	double FrepAmp=0, FrepAngleR=0, FrepXR=0, FrepYR=0, FrepXTotal=0, FrepYTotal=0, MrepTotal=0;
   	double FrepAmp_robots=0, FrepAngleR_robots=0, FrepXR_robots=0, FrepYR_robots=0, FrepXTotal_robots=0, FrepYTotal_robots=0, MrepTotal_robots=0;
   	
   	for(int i = 0; i < obstacle_interaction_set.size();i++)
   	{
-  		qDebug ("obstacles:  i=%d, force=%f, direction=%f, IX=%f, IY=%f", i, obstacle_interaction_set[i].force, obstacle_interaction_set[i].direction, obstacle_interaction_set[i].location.x(), obstacle_interaction_set[i].location.y());
+  		//qDebug ("obstacles:  i=%d, force=%f, direction=%f, IX=%f, IY=%f", i, obstacle_interaction_set[i].force, obstacle_interaction_set[i].direction, obstacle_interaction_set[i].location.x(), obstacle_interaction_set[i].location.y());
   		FrepAmp   = obstacle_interaction_set[i].force;
    		FrepAngleR = Delta_Angle(robotLocation.phi,obstacle_interaction_set[i].direction);
    		//double FrepAngle = Delta_Angle (robotLocation.phi, obstacle_interaction_set[i].direction);
@@ -578,8 +578,8 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   		double FrepForce[3] = {FrepXR, FrepYR, 0};
    		double Mrep[3];
    		CrossProduct (FrepArm, FrepForce, Mrep);
-   		qDebug("Obstacles:	FrepAngleR=%f, FrepXR=%f, FrepYR=%f, Mrep=%f", FrepAngleR, FrepXR, FrepYR, Mrep[2]);
-  		qDebug("Obstacles:			FrepArmA[0]=%f, FrepArmA[1]=%f, FrepArmR[0]=%f, FrepArmR[1]=%f", FrepArmA[0], FrepArmA[1], FrepArmR[0], FrepArmR[1]);
+   		//qDebug("Obstacles:	FrepAngleR=%f, FrepXR=%f, FrepYR=%f, Mrep=%f", FrepAngleR, FrepXR, FrepYR, Mrep[2]);
+  		//qDebug("Obstacles:			FrepArmA[0]=%f, FrepArmA[1]=%f, FrepArmR[0]=%f, FrepArmR[1]=%f", FrepArmA[0], FrepArmA[1], FrepArmR[0], FrepArmR[1]);
   		//qDebug ("ObstacleX=%f, ObstacleY=%f, FrepAmp = %f, FrepAngle = %f, FrepX = %f, FrepY = %f, FrepArm[0] = %f, FrepArm[1] = %f, Mrep[2] = %f", obstacle_interaction_set[i].location.x(), obstacle_interaction_set[i].location.y(), FrepAmp, FrepAngle, FrepX, FrepY, FrepArm[0], FrepArm[1], Mrep[2]);
   		FrepXTotal = FrepXTotal + FrepXR;
 		FrepYTotal = FrepYTotal + FrepYR;
@@ -592,7 +592,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   	
   	for(int i = 0; i < robots_interaction_set.size();i++)
   	{
-    	qDebug ("robots:  i=%d, force=%f, direction=%f, IX=%f,IY=%f", i, robots_interaction_set[i].force, robots_interaction_set[i].direction, robots_interaction_set[i].location.x(), robots_interaction_set[i].location.y());
+    	//qDebug ("robots:  i=%d, force=%f, direction=%f, IX=%f,IY=%f", i, robots_interaction_set[i].force, robots_interaction_set[i].direction, robots_interaction_set[i].location.x(), robots_interaction_set[i].location.y());
     	FrepAmp_robots = robots_interaction_set[i].force;
     	FrepAngleR_robots = Delta_Angle(robotLocation.phi,robots_interaction_set[i].direction);
     	//FrepAngle_robots = Delta_Angle (robotLocation.phi, robots_interaction_set[i].direction);
@@ -605,8 +605,8 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   		double FrepForce_robots[3] = {FrepXR_robots, FrepYR_robots, 0};
    		double Mrep_robots[3];
    		CrossProduct (FrepArm_robots, FrepForce_robots, Mrep_robots);
-   		qDebug("robots:		FrepAngleR_robots=%f, FrepXR_robots=%f, FrepYR_robots=%f, Mrep_robots=%f", FrepAngleR_robots, FrepXR_robots, FrepYR_robots, Mrep_robots[2]);
-  		qDebug("robots:				FrepArmA_robots:[0]=%f, FrepArmA_robots[1]=%f, FrepArmR_robots[0]=%f, FrepArmR[1]_robots=%f", FrepArmA_robots[0], FrepArmA_robots[1], FrepArmR_robots[0], FrepArmR_robots[1]);
+   		//qDebug("robots:		FrepAngleR_robots=%f, FrepXR_robots=%f, FrepYR_robots=%f, Mrep_robots=%f", FrepAngleR_robots, FrepXR_robots, FrepYR_robots, Mrep_robots[2]);
+  		//qDebug("robots:				FrepArmA_robots:[0]=%f, FrepArmA_robots[1]=%f, FrepArmR_robots[0]=%f, FrepArmR[1]_robots=%f", FrepArmA_robots[0], FrepArmA_robots[1], FrepArmR_robots[0], FrepArmR_robots[1]);
   		//qDebug ("ObstacleX=%f, ObstacleY=%f, FrepAmp = %f, FrepAngle = %f, FrepX = %f, FrepY = %f, FrepArm[0] = %f, FrepArm[1] = %f, Mrep[2] = %f", obstacle_interaction_set[i].location.x(), obstacle_interaction_set[i].location.y(), FrepAmp, FrepAngle, FrepX, FrepY, FrepArm[0], FrepArm[1], Mrep[2]);
   		FrepXTotal_robots = FrepXTotal_robots + FrepXR_robots;
 		FrepYTotal_robots = FrepYTotal_robots + FrepYR_robots;
@@ -636,7 +636,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
     double FtotalX = FattX + FreptotalX;
   	double FtotalY = FattY + FreptotalY;
   	double ForceAngle = atan2(FtotalY, FtotalX);
-  	qDebug("FreptotalX=%f,FreptotalY=%f, FattX=%f, FattY=%f, FtotalX=%f, FtotalY=%f", FreptotalX,FreptotalY, FattX, FattY, FtotalX, FtotalY);
+  	//qDebug("FreptotalX=%f,FreptotalY=%f, FattX=%f, FattY=%f, FtotalX=%f, FtotalY=%f", FreptotalX,FreptotalY, FattX, FattY, FtotalX, FtotalY);
   	
     
     //double FattAngleR[2];
@@ -648,7 +648,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
  	double FattForce[3] = {FattX, FattY, 0};
  	double Matt[3];
  	CrossProduct (FattArmR, FattForce, Matt);
-    qDebug("				FattArmR[0]=%f,FattArmR[1]=%f, Matt[2]=%f", FattArmR[0],FattArmR[1], Matt[2]);
+    //qDebug("				FattArmR[0]=%f,FattArmR[1]=%f, Matt[2]=%f", FattArmR[0],FattArmR[1], Matt[2]);
     
     double Mass = 50, MI = 10;
     double AcceT=0;
@@ -684,11 +684,17 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
     {
     	robotSpeed = MaxSpeed;
     }
+    else if(SpeedValue < -MaxSpeed)
+    {
+    	qDebug("True Value is:%f",SpeedValue);
+    	sleep(1);
+    	robotSpeed = -MaxSpeed;
+    }
     else
     {
     	robotSpeed = SpeedValue;
     }
-    qDebug("AcceX=%f, MaxAcceT=%f,AcceT=%f, realtime=%f, Speed_desired=%f", AcceX, MaxAcceT,AcceT, realtime, SpeedValue);
+    //qDebug("AcceX=%f, MaxAcceT=%f,AcceT=%f, realtime=%f, Speed_desired=%f", AcceX, MaxAcceT,AcceT, realtime, SpeedValue);
     /********turnRate************/
     
     double TotalMI = Matt[2] + MrepTotal + MrepTotal_robots;
