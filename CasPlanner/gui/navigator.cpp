@@ -851,8 +851,8 @@ void Navigator::run()
 					velVector action;
 					ff_time.restart();
 					//qDebug("================================= FORCE FIELD STARTS ===============================");
-					//qDebug("Current Robot      --->>> Turn Rate:%f and Speed is:%f Delta Time:%f",turnRate,speed,delta_t);
-				 	//qDebug("Current Robot Pose --->>> x:%f y:%f phi:%f",EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi));
+					qDebug("Current Robot      --->>> Turn Rate:%f and Speed is:%f Delta Time:%f",turnRate,speed,delta_t);
+				 	qDebug("Current Robot Pose --->>> x:%f y:%f phi:%f",EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi));
 				 	control_timer.restart();
 					action = FF->GenerateField(amcl_location,laserScan,wayPoint,speed,turnRate,availableRobots,delta_t);
 //					qDebug("Force Field Returned     --->>> Speed is:%f TurnRate is:%f  time to calculate FF is:%dms Loop Delta_t:%fsec",action.speed,action.turnRate,ff_time.elapsed(),delta_t);	
