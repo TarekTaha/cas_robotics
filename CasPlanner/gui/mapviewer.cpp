@@ -180,7 +180,14 @@ void MapViewer::renderPaths()
 		}
 	}	
 }
-
+void MapViewer::setRobotsLocation()
+{
+	robotsLocation.clear();
+	for(int i=0;i<playGround->robotPlatforms.size();i++)
+	{	
+		robotsLocation.push_back(playGround->robotPlatforms[i]->commManager->getOdomLocation());
+	}
+}
 void MapViewer::renderLaser()
 {
 	if(!playGround)
@@ -194,7 +201,7 @@ void MapViewer::renderLaser()
 		if (i>0) continue;
 	    LaserScan laserScan = playGround->robotPlatforms[i]->commManager->getLaserScan(); 
 	    //Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;	
-	    Pose loc = playGround->robotPlatforms[i]->commManager->getOdomLocation();;	
+	    Pose loc = robotsLocation[i];	
 	    glPushMatrix();
 	    //qDebug("Laser Pose X:%f Y:%f Phi:%f",laserScan.laserPose.p.x(),laserScan.laserPose.p.y(),laserScan.laserPose.phi);
 	    glTranslatef(loc.p.x(),loc.p.y(),0);
@@ -293,8 +300,7 @@ void MapViewer::renderRobot()
 	}
 	for(int i=0;i<playGround->robotPlatforms.size();i++)
 	{
-//	    Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;
-	    Pose loc = playGround->robotPlatforms[i]->commManager->getOdomLocation();
+	    Pose loc = robotsLocation[i];
 	    // Render Robot's trail
 	    if(playGround->robotPlatforms[i]->robot->robotName=="Static Obstacle")
 	    {
@@ -614,7 +620,8 @@ void MapViewer::paintGL()
     glColor4f(1,1,1,1.0);
 	//if(!mainMapBuilt)
 	    renderMap();
-    glCallList(mapList); 	    
+    glCallList(mapList);
+	setRobotsLocation();
 //    renderLaser();
     renderRobot();
     renderPaths();

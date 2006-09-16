@@ -320,7 +320,9 @@ void Navigator::GenerateLocalMap(QVector<QPointF> laser_scan,Pose laser_pose, Po
 
 void Navigator::setPause(bool pause)
 {
+    dataLock.lockForWrite();	
 	this->pause = pause;
+    dataLock.unlock();	
 }
 
 void Navigator::setObstAvoidAlgo(int algo)
@@ -576,7 +578,9 @@ void Navigator::run()
 		robotManager->robot->setPose(amcl_location);
 		dataLock.unlock();
 		trail.push_back(amcl_location.p);
-		
+//		for testing reasons only
+		if (robotManager->robot->robotName=="Dynamic Obstacle")
+			continue;
 		speed    = robotManager->commManager->getSpeed();
 		turnRate =  robotManager->commManager->getTurnRate();		
 		// Updating the current Robot Info 
