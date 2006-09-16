@@ -621,16 +621,16 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   	double Frepmag = sqrt(FreptotalX * FreptotalX + FreptotalY * FreptotalY );
   	double Frepangle = atan2(FreptotalY, FreptotalX);
   	
-//  	double factor;
-//  	if (Frepmag > 0.001)
-//  	{
-//  		factor=1.5 * Frepmag;
-//  	}
-//  	else
-//  	{
-//  		factor = SysQ;
-//  	}
-  	double factor = SysQ;
+  	double factor;
+  	if (Frepmag > 0.001)
+  	{
+  		factor=2 * Frepmag;
+  	}
+  	else
+  	{
+  		factor = SysQ;
+  	}
+  	//double factor = SysQ;
   	double FattX = factor * cos(FattAngleR);
     double FattY = factor * sin(FattAngleR);
     double FtotalX = FattX + FreptotalX;
@@ -650,7 +650,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
  	CrossProduct (FattArmR, FattForce, Matt);
     //qDebug("				FattArmR[0]=%f,FattArmR[1]=%f, Matt[2]=%f", FattArmR[0],FattArmR[1], Matt[2]);
     
-    double Mass = 50, MI = 10;
+    double Mass = 5, MI = 20;
     double AcceT=0;
     double AcceX = FtotalX / Mass;
 //    double AcceY = FtotalY / Mass;
@@ -694,10 +694,11 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
     {
     	robotSpeed = SpeedValue;
     }
+    robotSpeed = Max(robotSpeed, 0.05);
     //qDebug("AcceX=%f, MaxAcceT=%f,AcceT=%f, realtime=%f, Speed_desired=%f", AcceX, MaxAcceT,AcceT, realtime, SpeedValue);
     /********turnRate************/
     
-    double TotalMI = Matt[2] + MrepTotal + MrepTotal_robots;
+    double TotalMI =  Matt[2] + MrepTotal + MrepTotal_robots;
     double omegadot_calcuted = TotalMI / MI;
     double omegadot_chosen;
     if (omegadot_calcuted > OmegadotMax)
