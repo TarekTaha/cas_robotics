@@ -572,14 +572,18 @@ void Navigator::run()
 //		amcl_location = robotManager->commManager->getLocation();
 		amcl_location = robotManager->commManager->getOdomLocation();
 		EstimatedPos = amcl_location;
+		dataLock.lockForWrite();
 		robotManager->robot->setPose(amcl_location);
+		dataLock.unlock();
 		trail.push_back(amcl_location.p);
 		
 		speed    = robotManager->commManager->getSpeed();
 		turnRate =  robotManager->commManager->getTurnRate();		
 		// Updating the current Robot Info 
+		dataLock.lockForWrite();
 		robotManager->robot->setSpeed(speed);
 		robotManager->robot->setTurnRate(turnRate);
+		dataLock.unlock();
 		
 		laserScan = robotManager->commManager->getLaserScan();
 //		cout<<"\n Current Location X:"<<amcl_location.p.x()<<" Y:"<<amcl_location.p.y()<<" Theta:"<<amcl_location.phi;
@@ -851,8 +855,8 @@ void Navigator::run()
 					velVector action;
 					ff_time.restart();
 					//qDebug("================================= FORCE FIELD STARTS ===============================");
-					qDebug("Current Robot      --->>> Turn Rate:%f and Speed is:%f Delta Time:%f",turnRate,speed,delta_t);
-				 	qDebug("Current Robot Pose --->>> x:%f y:%f phi:%f",EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi));
+					qDebug("Current Robot      --->>> Turn Rate:%lf and Speed is:%lf Delta Time:%lf",turnRate,speed,delta_t);
+				 	qDebug("Current Robot Pose --->>> x:%f y:%f phi:%f",amcl_location.p.x(),amcl_location.p.y(),RTOD(amcl_location.phi));
 				 	control_timer.restart();
 					action = FF->GenerateField(amcl_location,laserScan,wayPoint,speed,turnRate,availableRobots,delta_t);
 //					qDebug("Force Field Returned     --->>> Speed is:%f TurnRate is:%f  time to calculate FF is:%dms Loop Delta_t:%fsec",action.speed,action.turnRate,ff_time.elapsed(),delta_t);	

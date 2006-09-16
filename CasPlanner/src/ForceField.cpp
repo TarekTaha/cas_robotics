@@ -394,7 +394,7 @@ double ForceField::ForceValue(QPointF ray_end, double &DMAX, double &DMIN, doubl
  	double Safedist = 0.1;
  	DMAX = Max (SysK * Er * robotRadius / (1 - Er * cos(angle)), Safedist / FixedRatio);
  	DMIN = FixedRatio * DMAX;
- 	//qDebug ("Dmin=%f, Dmax=%f, clost_dist=%f", Dmin, Dmax, clostest_dist);
+ 	//qDebug ("Dmin=%f, Dmax=%f, clost_dist=%f", DMIN, DMAX, closest_dist);
  	double Ratio = closest_dist / DMAX;
  	double ForceAmp;
  	if (Ratio >= 1)
@@ -611,7 +611,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   		FrepXTotal_robots = FrepXTotal_robots + FrepXR_robots;
 		FrepYTotal_robots = FrepYTotal_robots + FrepYR_robots;
    		MrepTotal_robots = MrepTotal_robots + Mrep_robots[2];
-  		//qDebug ("i=%d, force=%f, direction=%f", i, obstacle_interaction_set[i].force, obstacle_interaction_set[i].direction);
+  		//qDebug ("i=%d, force=%f, direction=%f", i, obstacle_interaction_set[i].force, obstacfactor = SysQ;le_interaction_set[i].direction);
     }
 
     double FreptotalX = FrepXTotal + FrepXTotal_robots;
@@ -621,16 +621,16 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   	double Frepmag = sqrt(FreptotalX * FreptotalX + FreptotalY * FreptotalY );
   	double Frepangle = atan2(FreptotalY, FreptotalX);
   	
-  	double factor;
-  	if (Frepmag > 0.001)
-  	{
-  		factor=1.5 * Frepmag;
-  	}
-  	else
-  	{
-  		factor = SysQ;
-  	}
-  	
+//  	double factor;
+//  	if (Frepmag > 0.001)
+//  	{
+//  		factor=1.5 * Frepmag;
+//  	}
+//  	else
+//  	{
+//  		factor = SysQ;
+//  	}
+  	double factor = SysQ;
   	double FattX = factor * cos(FattAngleR);
     double FattY = factor * sin(FattAngleR);
     double FtotalX = FattX + FreptotalX;
@@ -679,6 +679,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
 //    double SpeedY = robotSpeed * sin(robotLocation.phi) + AcceY * realtime;
 //    double SpeedValue = sqrt(SpeedX * SpeedX + SpeedY * SpeedY);
     //????double SpeedAngle = atan2(SpeedY,SpeedX);
+//    qDebug("Max Speed is:%f",MaxSpeed);
     if (SpeedValue > MaxSpeed)
     {
     	robotSpeed = MaxSpeed;
