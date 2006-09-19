@@ -451,15 +451,17 @@ bool Navigator::inLaserSpace(LaserScan laserScan,Pose robotLocation,QPointF wayP
 {
 	laserScan.laserPose = Trans2Global(laserScan.laserPose,robotLocation);
 	double ang, angle = ATAN2(wayPoint,laserScan.laserPose.p);
-	
 	for(int i=0;i<laserScan.points.size();i++)
 	{
 		laserScan.points[i] = Trans2Global(laserScan.points[i],laserScan.laserPose);
 		ang = ATAN2(laserScan.points[i],laserScan.laserPose.p);
-		if(RTOD(abs(angle-ang))<5)
+		if(RTOD(abs(anglediff(angle,ang))) < 0.5)
 		{
 			if(Dist(laserScan.laserPose.p,laserScan.points[i]) < Dist(laserScan.laserPose.p,wayPoint))
+			{
+//				break;
 				return false;
+			}
 		}
 	}
 	return true;
@@ -475,18 +477,19 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
 	Pose robotLocation = robotManager->robot->robotLocation;
 	double angle=0;
 	temp = closestPathNode(robotLocation.p,global_path);
+	temp = global_path;
  	while(temp && (Dist(robotLocation.p,temp->pose.p) < traversable_dist))
  	{
  		if(temp->next)
 			angle = ATAN2(temp->next->pose.p,temp->pose.p); 		
- 		if (inLaserSpace(laserScan,robotLocation,temp->pose.p) && (Dist(robotLocation.p,temp->pose.p) > 0.5) )
+ 		if (inLaserSpace(laserScan,robotLocation,temp->pose.p) && (Dist(robotLocation.p,temp->pose.p) > 0.2) )
  		{
  			goal.p = temp->pose.p;
  			goal.phi = angle;
  			retval = true;
  		}
  		// if this is the last node then take it anyways
- 		else if((Dist(robotLocation.p,temp->pose.p) < 1) && !temp->next )
+ 		else if((Dist(robotLocation.p,temp->pose.p) < 0.2) && !temp->next )
  		{
  			goal.p = temp->pose.p;
  			goal.phi = angle; 			

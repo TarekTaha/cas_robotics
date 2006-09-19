@@ -70,6 +70,7 @@ QSize MapViewer::sizeHint()
     return QSize(640,480);   
 }
 
+
 QSize MapViewer::minimumSizeHint()
 {
     return QSize(320,240);   
@@ -161,22 +162,22 @@ void MapViewer::renderPaths()
 				path = path->next;
 			}
 		    glEnd();
-//		    wayPoint = playGround->robotPlatforms[i]->navigator->wayPoint;
-//		    // Draw Way Point
-//		    if(wayPoint.p.x()==0 && wayPoint.p.y()==0)
-//		    	continue;
-//		    glPushMatrix();
-//			    glTranslatef(wayPoint.p.x(),wayPoint.p.y(),0);
-//			    glRotated(RTOD(wayPoint.phi),0,0,1);		    
-//			    glColor4f(1,0,0,0.8);
-//			    glShadeModel(GL_FLAT);
-//			    glBegin(GL_TRIANGLE_FAN);
-//					glColor4f(1,0,0,1);  
-//				    glVertex3f(-0.2,0.15,0); 			
-//				    glVertex3f(0.1,0,0); 			    	
-//				    glVertex3f(-0.2,-0.15,0); 			    				    
-//			    glEnd();
-//			glPopMatrix();  
+		    wayPoint = playGround->robotPlatforms[i]->navigator->wayPoint;
+		    // Draw Way Point
+		    if(wayPoint.p.x()==0 && wayPoint.p.y()==0)
+		    	continue;
+		    glPushMatrix();
+			    glTranslatef(wayPoint.p.x(),wayPoint.p.y(),0);
+			    glRotated(RTOD(wayPoint.phi),0,0,1);		    
+			    glColor4f(1,0,0,0.8);
+			    glShadeModel(GL_FLAT);
+			    glBegin(GL_TRIANGLE_FAN);
+					glColor4f(1,0,0,1);  
+				    glVertex3f(-0.2,0.15,0); 			
+				    glVertex3f(0.1,0,0); 			    	
+				    glVertex3f(-0.2,-0.15,0); 			    				    
+			    glEnd();
+			glPopMatrix();  
 		}
 	}	
 }
@@ -301,12 +302,14 @@ void MapViewer::renderRobot()
 	for(int i=0;i<playGround->robotPlatforms.size();i++)
 	{
 	    Pose loc = robotsLocation[i];
+//	    qDebug("Robot Location is X:%f Y:%f Phi:%f",robotsLocation[i].p.x(),robotsLocation[i].p.y(),
+//	    	   robotsLocation[i].phi);
 	    // Render Robot's trail
 	    if(playGround->robotPlatforms[i]->robot->robotName=="Static Obstacle")
 	    {
 		    // Obstacle
 		    glPushMatrix();
-		    glTranslatef(loc.p.x(),loc.p.y(),0);
+		    glTranslated(loc.p.x(),loc.p.y(),0);
 		    glRotated(RTOD(loc.phi),0,0,1);
 		    glShadeModel(GL_FLAT);		    
 			glColor4f(1,0,0,1); 
@@ -449,9 +452,71 @@ void MapViewer::renderMapPatch(Map * mapPatch)
 
     glPopMatrix();	
 }
-/*!
- *  Renders The main Map loaded from the image file
- */
+///*!
+// *  Renders The main Map loaded from the image file
+// */
+//void MapViewer::renderMap()
+//{
+//    int mapWidth,mapHeight; 
+//    float ratioW, ratioH; 	
+////	qDebug("Rendering Map");
+////	#ifdef NOPOTD
+////	   mapWidth  = powl(2,  ceill(log(mapData->width)/log(2)));
+////	   mapHeight = powl(2, ceill(log(mapData->height)/log(2)));
+////	   ratioW  = ((float) mapData->width))/mapWidth; 
+////	   ratioH  = ((float) mapData->height))/mapHeight; 
+////	#else 
+//	    mapWidth  = mapData->width;
+//	    mapHeight = mapData->height;
+//	    ratioW = 1; 
+//	    ratioH = 1; 
+////	#endif	
+//    unsigned char imgData[mapWidth*mapHeight*4];
+//	long int count=0;
+//    glNewList(mapList, GL_COMPILE);		
+//    glPushMatrix();
+//    // Inverse the Y-axis    
+//    glScalef(1,-1,1);
+//    glTranslatef(-(mapData->width*mapData->resolution)/2.0f,-(mapData->height*mapData->resolution)/2.0f,0);
+//   	glColor4f(0,0,0,1); 
+//   	glBegin(GL_POINTS);
+//    for(int i=0; i < mapWidth; i++)
+//    {
+//		for(int j=0; j < mapHeight; j++)
+//		{
+//		    if(mapData->data[i][j] == true)
+//			{
+//		    	count++;
+//				imgData[(j*mapData->width+i)*4]   = 0;
+//				imgData[(j*mapData->width+i)*4+1] = 0; 
+//				imgData[(j*mapData->width+i)*4+2] = 0; 
+//				imgData[(j*mapData->width+i)*4+3] = 255;
+//				glVertex2f(i*mapData->resolution,j*mapData->resolution);
+//			}
+//		    else 
+//		    {
+//				imgData[(j*mapData->width+i)*4]   = 0;  
+//				imgData[(j*mapData->width+i)*4+1] = 0; 
+//				imgData[(j*mapData->width+i)*4+2] = 0;
+//				imgData[(j*mapData->width+i)*4+3] = 0;   
+//		    }
+//		}
+//    }
+//	glEnd();
+//	
+//    // Surrounding BOX
+//	glColor4f(0,0,0,0.5); 	  
+//	glBegin(GL_LINE_LOOP); 
+//		glVertex2f(0,0);
+//		glVertex2f(0.0,mapData->height*mapData->resolution);
+//		glVertex2f(mapData->width*mapData->resolution,mapData->height*mapData->resolution);
+//		glVertex2f(mapData->width*mapData->resolution,0.0);
+//	glEnd();
+//
+//    glPopMatrix();
+//    glEndList();
+//    mainMapBuilt = true;
+//}
 void MapViewer::renderMap()
 {
     int mapWidth,mapHeight; 
@@ -503,8 +568,8 @@ void MapViewer::renderMap()
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-   
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); 
+
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, mapData->width, mapData->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
   
@@ -513,16 +578,20 @@ void MapViewer::renderMap()
     
     // Inverse the Y-axis    
     glScalef(1,-1,1);
-    glTranslatef(-(mapData->width*mapData->resolution)/2.0,-(mapData->height*mapData->resolution)/2.0,0);
+    glTranslatef(-(mapData->width*mapData->resolution)/2.0f,-(mapData->height*mapData->resolution)/2.0f,0);
 //    glColor4f(0,0,1,0.8);
     glColor4f(1,1,1,0.8);
     glShadeModel(GL_FLAT);
 	// Define Coordinate System
-    glBegin(GL_QUADS);
+    glBegin(GL_QUADS);   
 	    glTexCoord2f(ratioW,ratioH);	glVertex2f(mapData->width*mapData->resolution,mapData->height*mapData->resolution);
 	    glTexCoord2f(ratioW,0.0);		glVertex2f(mapData->width*mapData->resolution,0.0);
 	    glTexCoord2f(0.0,0.0);			glVertex2f(0.0,0.0);
 	    glTexCoord2f(0.0,ratioH);    	glVertex2f(0.0,mapData->height*mapData->resolution);
+//	    glTexCoord2f(0.0,0.0);			glVertex2f(0.0,0.0);
+//	    glTexCoord2f(ratioW,0.0);		glVertex2f(mapData->width*mapData->resolution,0.0);	
+//	    glTexCoord2f(ratioW,ratioH);	glVertex2f(mapData->width*mapData->resolution,mapData->height*mapData->resolution);	        
+//	    glTexCoord2f(0.0,ratioH);    	glVertex2f(0.0,mapData->height*mapData->resolution);
     glEnd();
 
     glDisable(GL_TEXTURE_2D);
@@ -550,12 +619,6 @@ void MapViewer::paintGL()
     glHint(GL_POINT_SMOOTH_HINT, GL_NICEST); 
     glEnable(GL_LINE_SMOOTH); 
     glEnable(GL_POLYGON_SMOOTH);
-//    glMatrixMode(GL_MODELVIEW);
-//    glFlush();
-//    
-//    glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
-//    glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
-//    glGetIntegerv(GL_VIEWPORT,viewport); 
     
     glPushMatrix();
     glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
@@ -568,7 +631,6 @@ void MapViewer::paintGL()
  
     glTranslatef(xOffset, yOffset, zOffset);
 
-//	getOGLPos(mouseDouble.x(),mouseDouble.x());
 	showGrids = false;
     if(showGrids)
     {
@@ -625,6 +687,7 @@ void MapViewer::paintGL()
 //    renderLaser();
     renderRobot();
     renderPaths();
+
 //  renderSearchTree();
 //	renderExpandedTree();
 	//if(!hideGoals)
