@@ -20,6 +20,9 @@ WheelChairProxy::WheelChairProxy(PlayerClient *aPc, uint aIndex)
   // how can I get this into the clientproxy.cc?
   // right now, we're dependent on knowing its device type
   mInfo = &(mDevice->info);
+  mData.data_count = sizeof(player_wheelchair_config_t);
+  config = reinterpret_cast<player_wheelchair_config_t*>(mData.data);
+  size = sizeof(mData) - sizeof(mData.data) + mData.data_count;  
 }
 
 WheelChairProxy::~WheelChairProxy()
@@ -58,14 +61,13 @@ WheelChairProxy::Unsubscribe()
 int WheelChairProxy::GetPower()
 {
 	scoped_lock_t lock(mPc->mMutex);	
-	player_wheelchair_config_t config;
-	memset( &config, 0, sizeof(config) );
-	config.request = PLAYER_WHEELCHAIR_GET_POWER_REQ;		
+	memset(config, 0, sizeof(config) );
+	config->request = PLAYER_WHEELCHAIR_GET_POWER_REQ;		
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                            NULL,  (void*)&config,sizeof(config)) < 0)	
+                             reinterpret_cast<void*>(&mData),reinterpret_cast<void*>(&mData),size) < 0)	
 		return -1;
 	else
-		return config.value; 
+		return config->value; 
 }
 /*****************************************************************************
  **           Get JOYSTICK  X Position Request Starts                       **
@@ -73,14 +75,13 @@ int WheelChairProxy::GetPower()
 double WheelChairProxy::JoyX()
 {
 	scoped_lock_t lock(mPc->mMutex);		
-	player_wheelchair_config_t config;
-	memset( &config, 0, sizeof(config) );
-	config.request = PLAYER_WHEELCHAIR_GET_JOYX_REQ;
+	memset( config, 0, sizeof(config) );
+	config->request = PLAYER_WHEELCHAIR_GET_JOYX_REQ;
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                           NULL,  (void*)&config,sizeof(config)) < 0)	
+                             reinterpret_cast<void*>(&mData),reinterpret_cast<void*>(&mData),size) < 0)	
 		return -1;
 	else
-		return config.value; 
+		return config->value; 
 }
 /*****************************************************************************
  **           Get JOYSTICK  Y Position Request Starts                       **
@@ -88,14 +89,13 @@ double WheelChairProxy::JoyX()
 double WheelChairProxy::JoyY()
 {
 	scoped_lock_t lock(mPc->mMutex);		
-	player_wheelchair_config_t config;
-	memset( &config, 0, sizeof(config) );
-	config.request = PLAYER_WHEELCHAIR_GET_JOYY_REQ;		
+	memset(config, 0, sizeof(config) );
+	config->request = PLAYER_WHEELCHAIR_GET_JOYY_REQ;		
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                            NULL,  (void*)&config,sizeof(config)) < 0)	
+                             reinterpret_cast<void*>(&mData),reinterpret_cast<void*>(&mData),size) < 0)	
 		return -1;
 	else
-		return config.value; 
+		return config->value; 
 }
 /*****************************************************************************
  **                      Sound Horn Request Starts                          **
@@ -103,11 +103,10 @@ double WheelChairProxy::JoyY()
 int WheelChairProxy::SoundHorn(unsigned int duration)
 {
 	scoped_lock_t lock(mPc->mMutex);		
-	player_wheelchair_config_t config;
-	config.value = 100; // 100ms
-	config.request = PLAYER_WHEELCHAIR_SOUND_HORN_REQ;	
+	config->value = 100; // 100ms
+	config->request = PLAYER_WHEELCHAIR_SOUND_HORN_REQ;	
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                            NULL,  (void*)&config,sizeof(config)) < 0)	
+                             reinterpret_cast<void*>(&mData),reinterpret_cast<void*>(&mData),size) < 0)	
 		return -1;
 	else
 		return 0;
@@ -119,14 +118,13 @@ int WheelChairProxy::SoundHorn(unsigned int duration)
 int WheelChairProxy::GetMode()
 {
 	scoped_lock_t lock(mPc->mMutex);		
-	player_wheelchair_config_t config;
-	memset( &config, 0, sizeof(config) );
-	config.request = PLAYER_WHEELCHAIR_GET_MODE_REQ;
+	memset(config, 0, sizeof(config) );
+	config->request = PLAYER_WHEELCHAIR_GET_MODE_REQ;
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                            NULL,  (void*)&config,sizeof(config)) < 0)	
+                             reinterpret_cast<void*>(&mData),reinterpret_cast<void*>(&mData),size) < 0)	
 		return -1;
 	else
-		return config.value; 
+		return config->value; 
 }
 int WheelChairProxy::IncrementGear(int gears)
 {
@@ -136,11 +134,10 @@ int WheelChairProxy::IncrementGear(int gears)
 		printf("\n	-->Gears Value can be between 1 and 5 only");
 		return -1;
 	}
-	player_wheelchair_config_t config;
-	config.value = gears;
-	config.request = PLAYER_WHEELCHAIR_INC_GEAR_REQ;		
+	config->value = gears;
+	config->request = PLAYER_WHEELCHAIR_INC_GEAR_REQ;		
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                           NULL,  (void*)&config,sizeof(config)) < 0)	
+                             reinterpret_cast<void*>(&mData),0,0) < 0)	
 		return -1;
 	else
 		return 0;
@@ -156,11 +153,10 @@ int WheelChairProxy::DecrementGear(int gears)
 		printf("\n	-->Gears Value can be between 1 and 5 only");
 		return -1;
 	}
-	player_wheelchair_config_t config;
-	config.value = gears;
-	config.request = PLAYER_WHEELCHAIR_DEC_GEAR_REQ;	
+	config->value = gears;
+	config->request = PLAYER_WHEELCHAIR_DEC_GEAR_REQ;	
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-							NULL,  (void*)&config,sizeof(config)) < 0)	
+                             reinterpret_cast<void*>(&mData),0,0) < 0)	
 		return -1;
 	else
 		return 0;
@@ -171,11 +167,10 @@ int WheelChairProxy::DecrementGear(int gears)
 int WheelChairProxy::SetPower(int state_to_set)
 {
 	scoped_lock_t lock(mPc->mMutex);		
-	player_wheelchair_config_t config;
-	config.value = state_to_set;
-	config.request = PLAYER_WHEELCHAIR_SET_POWER_REQ;
+	config->value = state_to_set;
+	config->request = PLAYER_WHEELCHAIR_SET_POWER_REQ;
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                            NULL,  (void*)&config,sizeof(config)) < 0)	
+                             reinterpret_cast<void*>(&mData),0,0) < 0)	
 		return -1;
 	else
 		return 0;
@@ -187,11 +182,10 @@ int WheelChairProxy::SetPower(int state_to_set)
 int WheelChairProxy::SetMode(int mode_to_set)
 { 	
 	scoped_lock_t lock(mPc->mMutex);		
-	player_wheelchair_config_t config;
-	config.value = mode_to_set;
-	config.request = PLAYER_WHEELCHAIR_SET_MODE_REQ;
+	config->value = mode_to_set;
+	config->request = PLAYER_WHEELCHAIR_SET_MODE_REQ;
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                           NULL,  (void*)&config,sizeof(config)) < 0)                            
+                             reinterpret_cast<void*>(&mData),0,0) < 0)	
 		return -1;
 	else
 		return 0;
