@@ -36,26 +36,15 @@ int main()
     	return 1;
   	}  
   	printf("\033[2J");
-  	printf("\033[;H");  
-  	printf("Loading...");  
-  	fflush(stdout);
+  	printf("\033[;H");  fflush(stdout);
   	
   	PlayerClient    robot("192.168.0.101",6665);
 	Position2dProxy pp(&robot,0);
 	WheelChairProxy WCp(&robot,0);
-	LaserProxy lp(&robot,0);
-	#ifdef localize
-		LocalizeProxy localp(&robot,0,'r');
-		if(localp.access == 'e')
-		{
-			puts( "\ncan't read from localizer" );
-		  	exit(-1);
-		} 
-	#endif
-	
+  	printf("\n Turning ON WheelChair"); fflush(stdout);
   	WCp.SetPower(ON);
   	WCp.SetMode(AUTO);
-  	printf("\n WheelChair is on");
+  	printf("\n WheelChair is on"); fflush(stdout);
   	fflush(stdout);
   	usleep(2000000);  
   
@@ -71,9 +60,7 @@ int main()
  	printf("    + / -      - used to increment / decrement the gear\n");
   	printf("    r          - used to reset speed and turn angle\n");
   	fflush(stdout);
-  	/* go into read-think-act loop */
-	//  wcPrevX = pp.xpos;
- 	// wcPrevY = pp.ypos;
+
   	#ifdef log
   		FILE * file;
   		file=fopen("log.txt","wt");
@@ -84,7 +71,6 @@ int main()
     	while(SDL_PollEvent(&event))
      	{
      		changed=0;
-     		//What kind of event has occurred?
       		switch(event.type)
       		{
         		case SDL_KEYDOWN:	//A key has been pressed
@@ -108,9 +94,11 @@ int main()
 		  					WCp.SetMode(AUTO);
 		  					break;		
 						case SDLK_p:	
+							printf("\n	---> Turning Wheelchair ON");						
 							WCp.SetPower(ON);	
 							break;
 						case SDLK_o:    
+							printf("\n	---> Turning Wheelchair OFF");												
 							WCp.SetPower(OFF);	
 							break;
 						case SDLK_q:    
@@ -185,7 +173,7 @@ int main()
 		fflush(stdout);   
 	    // WCp.Print();
 	    // pp.Print();
-	    if (changed==1) 
+	    if (changed==1)
 	    	pp.SetSpeed((dirFR + frOffset),(dirLR + lrOffset)); 
 		//printf("\n X reading=%lf Y readings=%lf",WCp.JoyX(),WCp.JoyY());
 		if(count==50)
