@@ -14,8 +14,7 @@ using std::endl;
 #include <sys/time.h> 
 //#include <sys/types.h>
 //#include <stdint.h>
-//#include <math.h>
-#include <cmath>
+#include <math.h>
 #include <fstream>
 //using std::ofstream;
 
@@ -65,9 +64,9 @@ int main()
 // Workspace vars !!ALSO SHOULD BE INPUT
 //////////////    
 	//when dividing up the workspace this hold how many cubes there are per row
-	Point cubes_per_row(50,50,50);
+	Point cubes_per_row(25,25,25);
 	//workspace width, height, depth
-	Point workspace_size(4,4,4);
+	Point workspace_size(2,2,2);
 	//workspace start
 	Point workspace_origin(0,0,0);
 	//size of side of cube
