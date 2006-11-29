@@ -13,16 +13,10 @@ NavContainer::NavContainer(QWidget *parent,PlayGround *playGround_in)
    navControlPanel(this,playGround_in)
 {
     QHBoxLayout *vLayout = new QHBoxLayout;
-    if(playGround->renderingMethod == PAINTER_2D)
-	{
-		mapPainter = new MapPainter(this,playGround->mapName,&navControlPanel);
- 	    vLayout->addWidget(mapPainter,4);
-	}
-	else
-	{
-   	 	mapViewer = new MapViewer(this,playGround,&navControlPanel);		
-	    vLayout->addWidget(mapViewer,4); 
-	}
+
+ 	mapViewer = new MapViewer(this,playGround,&navControlPanel);		
+    vLayout->addWidget(mapViewer,4); 
+
     vLayout->addWidget(&navControlPanel,1); 
     setLayout(vLayout); 
 	
@@ -276,12 +270,12 @@ void NavControlPanel::setNavigation()
 
 void NavControlPanel::pathPlan()
 {
-    if(playGround->renderingMethod == PAINTER_2D)
-	{
-		path = currRobot->planningManager->findPath(PIXEL);
-		navContainer->mapPainter->drawPath(currRobot->planningManager->pathPlanner);
-	}
-	else
+//    if(playGround->renderingMethod == PAINTER_2D)
+//	{
+//		path = currRobot->planningManager->findPath(PIXEL);
+//		navContainer->mapPainter->drawPath(currRobot->planningManager->pathPlanner);
+//	}
+//	else
 	{
 		path = currRobot->planningManager->findPath(METRIC);						
 	}	

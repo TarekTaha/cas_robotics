@@ -12,7 +12,6 @@
 #include <QPushButton>
 #include <QHash>
 #include "mapviewer.h"
-#include "mappainter.h"
 #include "playground.h"
 #include "Node.h"
 #include "configfile.h"
@@ -21,7 +20,8 @@ class RobotManager;
 class MapViewer;
 class PlayGround;
 class NavContainer;
-class MapPainter;
+
+using namespace CasPlanner;
 
 class NavControlPanel: public QWidget 
 {
@@ -103,7 +103,7 @@ Q_OBJECT
     public:
 		NavContainer(QWidget *parent ,PlayGround *playGround);
 		~NavContainer();
-		MapPainter * mapPainter;
+//		MapPainter * mapPainter;
 		MapViewer  * mapViewer;
 	public slots:
 //		void renderPath();

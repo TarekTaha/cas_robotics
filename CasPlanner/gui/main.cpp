@@ -1,18 +1,9 @@
 #include "mainwindow.h"
 #include <qapplication.h>
 
-
 int main( int argc, char ** argv ) 
 {
-    QApplication a( argc, argv );
-    if(argc == 1)
-    {
-		MainWindow *main_win = new MainWindow(); 
-		main_win->setWindowTitle("Testing Mode only"); 
-		main_win->show(); 
-		a.connect( &a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()) );
-		return a.exec();
-    }
+	QApplication a( argc, argv );
     if(argc > 1)
     {
 		MainWindow* main_win = new MainWindow(QApplication::arguments());
@@ -23,6 +14,6 @@ int main( int argc, char ** argv )
     }
     else 
     {
-        qFatal("Usage: CasPlannerGui <cfgfile>\n"); 
+        qFatal("Usage: CasPlanner <cfgfile>\n"); 
     }
 }
