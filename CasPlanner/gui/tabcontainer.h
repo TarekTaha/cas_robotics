@@ -6,7 +6,7 @@
 
 #include <QTabWidget>
 #include "playground.h"
-#include "sensorsgui.h"
+#include "tasksgui.h"
 #include "navigationtab.h"
 #include "mapviewer.h"
 
@@ -20,7 +20,7 @@ Q_OBJECT
     public:
 	    PlayGround   *playGround;
 		NavContainer *navCon;
-		SensorsGui *sensorsGui;
+		TasksGui *tasksGui;
 		MapViewer *mapViewer;
 };
 

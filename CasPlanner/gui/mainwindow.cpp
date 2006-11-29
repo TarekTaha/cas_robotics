@@ -16,8 +16,9 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     playGround = new PlayGround (configFiles);
     QWidget *container = new QWidget(this); 
     tabcontainer = new TabContainer(parent,playGround);
-//    robotManager->setNavContainer(tabcontainer->navCon);
     playGround->setNavContainer(tabcontainer->navCon);
+    
+    // Buttons
     QVBoxLayout *vLayout = new QVBoxLayout;
     QPushButton *emergStop = new QPushButton(" STOP ROBOT ");  
     QPushButton *connRobot = new QPushButton(" Connect to Robot ");
@@ -29,6 +30,8 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     connRobot->setPalette(palette);
     palette.setColor(QPalette::Button, Qt::yellow);
     logButton->setPalette(palette);    
+    
+    // Window Layout
     setMinimumSize(QSize(900,700)); 
     QHBoxLayout *layout = new QHBoxLayout, *layout2 = new QHBoxLayout; 
     layout->addWidget(tabcontainer,1); 
@@ -51,6 +54,7 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     connect(connRobot, SIGNAL(pressed()), playGround, SLOT(startRobotsComm()));
     connect(logButton, SIGNAL(clicked()),statusLogger, SLOT(showLog())); 
     statusLogger->addStatusMsg(0,1,"Navigation System Started ... "); 
+
 	// Data Logging Timer
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(logData()));

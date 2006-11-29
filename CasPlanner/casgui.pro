@@ -1,100 +1,115 @@
-HEADERS +=  gui/commmanager.h\
-			gui/comms.h\
-			gui/configfile.h\
-			gui/controller.h\
-			gui/glrender.h\
-			gui/interfaceprovider.h\
-			gui/laserrender.h\
+HEADERS +=  modules/CommManager/commmanager.h\
+			modules/CommManager/comms.h\
+			modules/Parser/configfile.h\
+			modules/Navigator/controller.h\
+			modules/Rendering/glrender.h\
+			modules/CommManager/interfaceprovider.h\
+			modules/Rendering/laserrender.h\
 			gui/mainwindow.h\
-			gui/mapviewer.h\	
-			gui/mappainter.h\		
-			gui/mapmanager.h\
+			modules/MapManager/map.h\
+			modules/Rendering/mapviewer.h\	
+			modules/MapManager/mapmanager.h\
 			gui/navigationtab.h\
-			gui/navigator.h\
-			gui/ogrender.h\
-			gui/playerinterface.h\
-			gui/planningmanager.h\
-			gui/playground.h\
-			gui/robotmanager.h\
-			gui/robotrender.h\
-			gui/sensors.h\
-			gui/sensorsgui.h\
-			gui/speedrender.h\
+			modules/Navigator/navigator.h\
+			modules/Rendering/ogrender.h\
+			modules/CommManager/playerinterface.h\
+			modules/PlanningManager/planningmanager.h\
+			modules/PlayGround/playground.h\
+			modules/PlayGround/robotmanager.h\
+			modules/Rendering/robotrender.h\
+			modules/Sensors/sensors.h\
+			modules/TasksManager/tasksgui.h\
+			modules/Rendering/speedrender.h\
 			gui/statusbar.h\
 			gui/tabcontainer.h\
-			includes/Astar.h\
-			includes/C2DMatrix.h\
-			includes/common.h\
-			includes/defs.h\
-			includes/ForceField.h\
-			includes/geometry.h\
-			includes/geometry2D.h\			
-			includes/icp.h\			
-			includes/LList.h\
-			includes/nn.h\			
-			includes/Node.h\
-			includes/PathPlanner.h\
-			includes/Robot.h\
-			includes/SearchSpace.h\
-			includes/SearchSpaceNode.h\
-			includes/Timer.h\
-			includes/Transformations.h\
-			includes/utils.h\
-			includes/Vector2D.h\
-			includes/wheelchairproxy.h
+			modules/PathPlanner/Astar.h\
+			modules/GeometricTools/C2DMatrix.h\
+			modules/Controller/common.h\
+			modules/ObstacleAvoidance/ForceField.h\
+			modules/GeometricTools/geometry.h\
+			modules/ScanMatching/geometry2D.h\			
+			modules/ScanMatching/icp.h\			
+			modules/PathPlanner/LList.h\
+			modules/ScanMatching/nn.h\			
+			modules/PathPlanner/Node.h\
+			modules/PathPlanner/PathPlanner.h\
+			modules/PathPlanner/Robot.h\
+			modules/PathPlanner/SearchSpace.h\
+			modules/PathPlanner/SearchSpaceNode.h\
+			modules/Misc/Timer.h\
+			modules/GeometricTools/Transformations.h\
+			modules/GeometricTools/utils.h\
+			modules/GeometricTools/Vector2D.h\
+			modules/Voronoi/mapskeleton.h\
+#			modules/Voronoi/VoronoiDiagramGenerator.h\
+			modules/Controller/wheelchairproxy.h
 
-SOURCES +=  gui/commmanager.cpp\
-			gui/configfile.cc\
-			gui/controller.cpp\
-			gui/laserrender.cpp\
+SOURCES +=  modules/CommManager/commmanager.cpp\
+			modules/Parser/configfile.cc\
+			modules/Navigator/controller.cpp\
+			modules/Rendering/laserrender.cpp\
 			gui/main.cpp\
 			gui/mainwindow.cpp\
-			gui/mapviewer.cpp\			
-			gui/mappainter.cpp\
-			gui/mapmanager.cpp\
+			modules/Rendering/mapviewer.cpp\			
+			modules/MapManager/mapmanager.cpp\
 			gui/navigationtab.cpp\
-			gui/navigator.cpp\
-			gui/ogrender.cpp\			
-			gui/playerinterface.cpp\
-			gui/planningmanager.cpp\
-			gui/playground.cpp\
-			gui/robotmanager.cpp\
-			gui/robotrender.cpp\
-			gui/sensors.cpp\
-			gui/sensorsgui.cpp\
-			gui/speedrender.cpp\
+			modules/Navigator/navigator.cpp\
+			modules/Rendering/ogrender.cpp\			
+			modules/CommManager/playerinterface.cpp\
+			modules/PlanningManager/planningmanager.cpp\
+			modules/PlayGround/playground.cpp\
+			modules/PlayGround/robotmanager.cpp\
+			modules/Rendering/robotrender.cpp\
+			modules/Sensors/sensors.cpp\
+			modules/TasksManager/tasksgui.cpp\
+			modules/Rendering/speedrender.cpp\
 			gui/statusbar.cpp\
 			gui/tabcontainer.cpp\
-			src/Astar.cpp\
-		    src/ForceField.cpp\
-		    src/geometry2D.cpp\		    
-		    src/icp.cpp\		    
-		    src/nn.cpp\		    
-		    src/LList.cpp\
-		    src/Node.cpp\
-		    src/PathPlanner.cpp\
-		    src/Robot.cpp\
-		    src/SearchSpace.cpp\
-		    src/SearchSpaceNode.cpp\
-		    src/Timer.cpp\
-		    src/Vector2d.cpp
+			modules/PathPlanner/Astar.cpp\
+		    modules/ObstacleAvoidance/ForceField.cpp\
+		    modules/ScanMatching/geometry2D.cpp\		    
+		    modules/ScanMatching/icp.cpp\		    
+		    modules/ScanMatching/nn.cpp\		    
+		    modules/PathPlanner/LList.cpp\
+		    modules/PathPlanner/Node.cpp\
+		    modules/PathPlanner/PathPlanner.cpp\
+		    modules/PathPlanner/Robot.cpp\
+		    modules/PathPlanner/SearchSpace.cpp\
+		    modules/PathPlanner/SearchSpaceNode.cpp\
+		    modules/Misc/Timer.cpp\
+  			modules/Voronoi/mapskeleton.cpp\
+#			modules/Voronoi/VoronoiDiagramGenerator.cpp\
+		    modules/GeometricTools/Vector2d.cpp
+		    
 RESOURCES = resources/icons.qrc
 QT += opengl
 QMAKE_CFLAGS_RELEASE+= -g -O3 -o 
+QMAKE_CFLAGS_RELEASE+= $$system(soqt-config --cflags )
 #QMAKE_CFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse 
 #QMAKE_CXXFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
 #QMAKE_LFLAGS_RELEASE += -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
 #QMAKE_CFLAGS_DEBUG +=-pg
 #QMAKE_CXXFLAGS_DEBUG +=-pg
 #QMAKE_LFLAGS_DEBUG+=-pg
-#LIBS += -L/usr/local/lib $$system(pkg-config --cflags --libs gtk+-2.0 gthread-2.0 playerclient) -lGL -lGLU -lglut -ljpeg 
+# Player 1.6.5
+	#LIBS += -L/usr/local/lib $$system(pkg-config --cflags --libs gtk+-2.0 gthread-2.0 playerclient) -lGL -lGLU -lglut -ljpeg 
+# Player 2.0
 LIBS += -L/usr/local/lib $$system(pkg-config --cflags --libs gthread-2.0 playerc++ playercore) -lGL -lGLU -lglut -ljpeg 
-INCLUDEPATH += includes gui /usr/include/gtk-2.0
+LIBS += -lCGAL
+
+# Coin3d + SoQt until now they don't support QT4 so i have to ignore it
+# LIBS += -lSoQt -lCoin -lbz2 -lz -lfreetype -lfontconfig -ldl -lpthread -lm -lXi
+
+INCLUDEPATH += modules/PathPlanner modules/ObstacleAvoidance includes gui /usr/include/gtk-2.0
+INCLUDEPATH += modules/ScanMatching modules/Misc modules/GeometricTools modules/Controller
+INCLUDEPATH += modules/CommManager modules/MapManager modules/Navigator modules/Parser modules/PlanningManager
+INCLUDEPATH += modules/PlayGround modules/Rendering modules/Sensors modules/Voronoi modules/TasksManager
 INCLUDEPATH += /usr/lib/gtk-2.0/include
 INCLUDEPATH += /usr/include/atk-1.0
 INCLUDEPATH += /usr/include/cairo
 INCLUDEPATH += /usr/include/pango-1.0
 INCLUDEPATH += /usr/include/glib-2.0
+INCLUDEPATH += /usr/include/Coin2
 INCLUDEPATH += /usr/lib/glib-2.0/include
 TEMPLATE = app
 CONFIG += release thread

@@ -6,7 +6,7 @@
 #include <libplayercore/player.h>
 
 #include <QMainWindow>
-#include "robotmanager.h"
+
 #include "playground.h"
 #include "statusbar.h"
 #include "tabcontainer.h"
@@ -22,7 +22,6 @@ public:
 		void commStart(); 
 private: 
     TabContainer * tabcontainer;
-    RobotManager * robotManager;
 	StatusLogger * statusLogger;
 	PlayGround   * playGround;
 	int logCount; 
