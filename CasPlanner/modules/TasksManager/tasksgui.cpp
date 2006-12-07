@@ -14,18 +14,23 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
 	generateSkeletonBtn("Generate Skeleton"),
 	randomTasksBtn("Random Tasks"),
 	captureImage("Capture Image"),
-	robotsGB("Set of Tasks")
+	tasksGB("Set of Tasks"),
+	tasksList(this)
 {
     QVBoxLayout *hlayout = new QVBoxLayout;
 
-    hlayout->addWidget(&robotsGB,1);
+    hlayout->addWidget(&tasksGB,1);
     hlayout->addWidget(&bayesianNetGB,1);
     hlayout->addWidget(&voronoiGB,1);
     hlayout->addWidget(&actionGB,1);
     this->setLayout(hlayout);
 
 
-    QGridLayout *parLayout = new QGridLayout;
+	QVBoxLayout *tasksLayout = new QVBoxLayout;    
+	tasksLayout->addWidget(&tasksList);
+	tasksGB.setLayout(tasksLayout);
+	
+	QGridLayout *parLayout = new QGridLayout;
     parLayout->addWidget(new QLabel("Distance 2 Vertix"),0,0);
     parLayout->addWidget(&distanceToVetix,0,1);
     bayesianNetGB.setLayout(parLayout);
@@ -41,7 +46,7 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
     innerSkeletonBtn.setChecked(true);
 	updateSelectedVoronoiMethod(true);
     voronoiGB.setLayout(showL);
-
+	
     QVBoxLayout *actionLayout = new QVBoxLayout;
     actionLayout->addWidget(&pauseBtn);
     actionLayout->addWidget(&captureImage);
@@ -289,8 +294,6 @@ void MapGL::renderSkeleton()
     int watchdog_limit = sskel->size_of_halfedges();
 
 	glPushMatrix();
-//     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//     glScalef(0.2,0.2,1);
 	glLineWidth(2);
 	for ( Face_const_iterator fit = sskel->faces_begin(), efit = sskel->faces_end(); fit != efit; ++ fit)
     {
@@ -574,11 +577,11 @@ void MapGL::keyPressEvent(QKeyEvent *e)
 	updateGL();
 }
 
-TasksGui::TasksGui(QWidget *parent):
+TasksGui::TasksGui(QWidget *parent,PlayGround *playG):
 	voronoiPlanner(NULL),
+	playGround(playG),
 	tabContainer((QTabWidget*) parent),
 	tasksControlPanel(this,parent),
-//	mapGL(parent,sskel),
 	mapGL(this,parent),	
 	mapSkeleton(sskel),	
     speed(0.15),
@@ -621,16 +624,21 @@ void TasksGui::loadTasks(string filename)
 {
  	std::ifstream in(filename.c_str());
  	tasks.clear();
+ 	int row;
 	if ( in )
     {
     	while ( ! in.eof() )
-      	{
+      	{ 
           	double x1,x2,y1,y2 ;
           	string name;
           	//char name[20];
           	in >> x1 >> y1 >> x2 >> y2>> name ;
           	Task t(QPointF(x1,y1),QPointF(x2,y2),name.c_str());
-			tasks.push_back(t); 
+	        tasks.push_back(t);
+	        
+	        QListWidgetItem *newItem = new QListWidgetItem;
+	        newItem->setText(name.c_str());
+	        tasksControlPanel.tasksList.insertItem(row++, newItem);          	 
       	}
     }
 	else
@@ -890,6 +898,11 @@ void TasksGui::requestSnap()
 void TasksGui::generateSkeleton()
 {
 	qDebug("Generating Skeleton");
+//	QString s = QFileDialog::getOpenFileName(
+//                    this,
+//                    "Polygonal PolygonalRegion Files ",
+//                    "/home/BlackCoder/workspace/CasPlanner",
+//                    "Files (*.poly)");	 	
 	mapSkeleton.loadMap();
 	mapSkeleton.generateInnerSkeleton();
 	if (! this->sskel)

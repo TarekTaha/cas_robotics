@@ -22,6 +22,7 @@ HEADERS += modules/CommManager/commmanager.h \
            modules/TasksManager/task.h \
            modules/TasksManager/tasksgui.h \
            modules/Rendering/speedrender.h \
+           gui/playgroundtab.h \
            gui/statusbar.h \
            gui/tabcontainer.h \
            modules/PathPlanner/astar.h \
@@ -66,6 +67,7 @@ SOURCES += modules/CommManager/commmanager.cpp \
            modules/TasksManager/task.cpp \
            modules/TasksManager/tasksgui.cpp \
            modules/Rendering/speedrender.cpp \
+           gui/playgroundtab.cpp \            
            gui/statusbar.cpp \
            gui/tabcontainer.cpp \
            modules/PathPlanner/astar.cpp \

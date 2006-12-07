@@ -10,7 +10,7 @@
 #include <QPointer>
 #include <QLabel>
 #include <QGridLayout>
-
+#include <QFileDialog>
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QCheckBox>
@@ -22,6 +22,7 @@
 #include <QObject>
 #include <QHash>
 
+#include "playground.h"
 #include "mapskeleton.h"
 #include "voronoipathplanner.h"
 #include "sensors.h"
@@ -86,8 +87,9 @@ class TasksControlPanel: public QWidget
 		QPushButton captureImage;
 
 		//Pointers to the currently selected Robot
-		QGroupBox robotsGB;
+		QGroupBox tasksGB;
 		QTreeWidgetItem *robotItem;
+		QListWidget tasksList;
 
 		QTreeWidget selectedRobot;
 //		QHash<QTreeWidgetItem *, RobotManager *> widget2RobMan;
@@ -136,7 +138,7 @@ class TasksGui :public QWidget
 {
     Q_OBJECT
     public:
-        TasksGui(QWidget *parent = 0);
+        TasksGui(QWidget *parent = 0,PlayGround *playG=0);
         ~TasksGui();
         virtual int config();
 		void requestSnap();
@@ -161,6 +163,7 @@ class TasksGui :public QWidget
     signals:
         void newData();
     private:
+    	PlayGround * playGround;
 		QTabWidget *tabContainer;
 		TasksControlPanel tasksControlPanel;
 		SSkelPtr  sskel;

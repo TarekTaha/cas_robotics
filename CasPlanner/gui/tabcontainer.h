@@ -5,6 +5,7 @@
 #include <libplayercore/player.h>
 
 #include <QTabWidget>
+#include "playgroundtab.h"
 #include "playground.h"
 #include "tasksgui.h"
 #include "navigationtab.h"
@@ -18,6 +19,7 @@ Q_OBJECT
 		void setPlayGround(PlayGround *playG);
 		~TabContainer();
     public:
+    	PlayGroundTab*playGroundTab;
 	    PlayGround   *playGround;
 		NavContainer *navCon;
 		TasksGui *tasksGui;
