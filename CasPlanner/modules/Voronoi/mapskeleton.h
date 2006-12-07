@@ -54,31 +54,25 @@ using namespace defs;
 
 class MapSkeleton
 {
-public:
-	MapSkeleton(SSkelPtr & sskel);
-//	MapSkeleton(Map *);
-	virtual ~MapSkeleton();
-	bool convertGridToLineWithVoronoi(float minThreshold, float maxThreshold,
-												  bool filterByCellValue, float valueToSet);
-	void generateInnerSkeleton();
-	void loadMap();
-	void clear();
-	void draw();
-	SSkelPtr getSSkelPtr();
-private:
-    void something_changed()
-    {
-    	current_state++;
-    };
-//	Map * ogMap;
-    int current_state;
-	SSkelPtr & sskel;
-	bool     sskel_valid ;
-	Regions  input ;
-	Regions  output ;
-	Doubles  offsets ;
-  	const Halfedge_const_handle null_halfedge ;
-  	const Vertex_const_handle   null_vertex ;
+	public:
+		MapSkeleton(SSkelPtr & sskel);
+	//	MapSkeleton(Map *);
+		virtual ~MapSkeleton();
+		bool convertGridToLineWithVoronoi(float minThreshold, float maxThreshold,
+													  bool filterByCellValue, float valueToSet);
+		void generateInnerSkeleton();
+		void loadMap();
+		void clear();
+		void draw();
+		SSkelPtr getSSkelPtr();
+	private:
+	//	Map * ogMap;
+		SSkelPtr & sskel;
+		bool     sskel_valid ;
+		Regions  input ;
+		Regions  output ;
+	  	const Halfedge_const_handle null_halfedge ;
+	  	const Vertex_const_handle   null_vertex ;
 };
 
 #endif /*MAPSKELETON_H_*/
