@@ -1,0 +1,15 @@
+This program manages a 3d laser scanner consisting of a Hokuyo URG 
+laser scanner mounted on a Megarobotics AI motor.
+
+The program can be compiled with the compile_scanner.sh script.  
+Dependencies include OpenGL, GLUT and Playerclient.  Components include 
+the zpr library for mouse-based zooming and rotating of OpenGL models, 
+simpleSerialComms for communication through a serial port, and AI for 
+communicating with a Megarobotics AI motor.
+
+Player is used to communicate with the URG laser, so the URGlaser plugin 
+driver is also required.  The AI motor is accessed directly via the AI 
+library.
+
+Jonathan Paxman 
+5/12/3006
