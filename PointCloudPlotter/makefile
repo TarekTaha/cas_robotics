@@ -8,4 +8,5 @@ clean:
 	g++ -c zpr.c
 	g++ -c AI.cc
 	g++ -c simpleSerialComms.cc
-	g++ laser_scan.o AI.o simpleSerialComms.o zpr.o -o laser_scan -lglut `pkg-config --libs --cflags playerc++`	
+	g++ -c LaserBuffer.cpp
+	g++ LaserBuffer.o laser_scan.o AI.o simpleSerialComms.o zpr.o -o laser_scan -lglut `pkg-config --libs --cflags playerc++`	

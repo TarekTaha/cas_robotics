@@ -32,11 +32,11 @@
 #endif
 
 
-#define absMax3(a) fmax(fabs((a)[0]),fmax(fabs((a)[1]),fabs((a)[2])))
+#define absMax3(a) fmax(fabs((a).x),fmax(fabs((a).y),fabs((a).z)))
 
-#define maxDiff(a,b,c) fmax(fmax(fabs((a)[0]-(b)[0]),fmax(fabs((a)[1]-(b)[1]),fabs((a)[2]-(b)[2]))), \
-			fmax(fmax(fabs((c)[0]-(b)[0]),fmax(fabs((c)[1]-(b)[1]),fabs((c)[2]-(b)[2]))), \
-			fmax(fabs((a)[0]-(c)[0]),fmax(fabs((a)[1]-(c)[1]),fabs((a)[2]-(c)[2])))))
+#define maxDiff(a,b,c) fmax(fmax(fabs((a).x-(b).x),fmax(fabs((a).y-(b).y),fabs((a).z-(b).z))), \
+			fmax(fmax(fabs((c).x-(b).x),fmax(fabs((c).y-(b).y),fabs((c).z-(b).z))), \
+			fmax(fabs((a).x-(c).x),fmax(fabs((a).y-(c).y),fabs((a).z-(c).z)))))
 
 #define HALF_RESOLUTION 0
 #define PI M_PI
@@ -73,23 +73,8 @@ unsigned char currentposset,currentposget;
 double current_angle;
 bool increasing=true;
 
-typedef struct laserbuffer
-{
-	float points[SERVOMAXPOINTS][LASERMAXPOINTS][3];
-//	vector< vector< vector<float> > > points;
-	int numscans;
-	int pointsperscan;
-	bool scanning;
-	float lastscan[1024];
-	int lastscan_count;
-	float triangles[400000][9];
-//	vector< vector<float> > triangles;
-	float normals[400000][3];
-//	vector< vector<float> > normals;
-	int numtri;
-};
-laserbuffer laserdata;
-laserbuffer (*adddata);
+LaserBuffer laserData(SERVOMAXPOINTS,LASERMAXPOINTS);
+LaserBuffer (*adddata);
 bool use_adddata;
 
 #define TRANSPARENCY 0
@@ -183,47 +168,47 @@ void transformMult(float out[4], float mat[4][4], float in[4])  //Matrix multipl
 	out[3]=mat[3][0]*in[0]+mat[3][1]*in[1]+mat[3][2]*in[2]+mat[3][3]*in[3];
 }
 
-void calcNormal(float v[3][3], float out[3])				// Calculates Normal For A Quad Using 3 Points
+void calcNormal(Triangle v, float out[3])				// Calculates Normal For A Quad Using 3 Points
 {
-	float v1[3],v2[3];						// Vector 1 (x,y,z) & Vector 2 (x,y,z)
-	static const int x = 0;						// Define X Coord
-	static const int y = 1;						// Define Y Coord
-	static const int z = 2;						// Define Z Coord
+	Point  v1,v2;						// Vector 1 (x,y,z) & Vector 2 (x,y,z)
 
 	// Finds The Vector Between 2 Points By Subtracting
 	// The x,y,z Coordinates From One Point To Another.
 
 	// Calculate The Vector From Point 1 To Point 0
-	v1[x] = v[0][x] - v[1][x];					// Vector 1.x=Vertex[0].x-Vertex[1].x
-	v1[y] = v[0][y] - v[1][y];					// Vector 1.y=Vertex[0].y-Vertex[1].y
-	v1[z] = v[0][z] - v[1][z];					// Vector 1.z=Vertex[0].y-Vertex[1].z
+	v1.x = v.p1.x - v.p2.x;					// Vector 1.x=Vertex[0].x-Vertex[1].x
+	v1.y = v.p1.y - v.p2.x;					// Vector 1.y=Vertex[0].y-Vertex[1].y
+	v1.z = v.p1.z - v.p2.x;					// Vector 1.z=Vertex[0].y-Vertex[1].z
 	// Calculate The Vector From Point 2 To Point 1
-	v2[x] = v[1][x] - v[2][x];					// Vector 2.x=Vertex[0].x-Vertex[1].x
-	v2[y] = v[1][y] - v[2][y];					// Vector 2.y=Vertex[0].y-Vertex[1].y
-	v2[z] = v[1][z] - v[2][z];					// Vector 2.z=Vertex[0].z-Vertex[1].z
+	v2.x = v.p2.x - v.p3.x;					// Vector 2.x=Vertex[0].x-Vertex[1].x
+	v2.y = v.p2.y - v.p3.y;					// Vector 2.y=Vertex[0].y-Vertex[1].y
+	v2.z = v.p2.z - v.p3.z;					// Vector 2.z=Vertex[0].z-Vertex[1].z
 	// Compute The Cross Product To Give Us A Surface Normal
-	out[x] = v1[y]*v2[z] - v1[z]*v2[y];				// Cross Product For Y - Z
-	out[y] = v1[z]*v2[x] - v1[x]*v2[z];				// Cross Product For X - Z
-	out[z] = v1[x]*v2[y] - v1[y]*v2[x];				// Cross Product For X - Y
-	if((out[x]*v1[x]+out[y]*v1[y]+out[z]*v1[z])>0)		//Choose the normal 'out' of the observed surface
+	out[0] = v1.y*v2.z - v1.z*v2.y;				// Cross Product For Y - Z
+	out[1] = v1.z*v2.x - v1.x*v2.z;				// Cross Product For X - Z
+	out[2] = v1.x*v2.y - v1.y*v2.x;				// Cross Product For X - Y
+	if((out[0]*v1.x+out[1]*v1.y+out[2]*v1.z)>0)		//Choose the normal 'out' of the observed surface
 	{
-		out[x]=-out[x];
-		out[y]=-out[y];
-		out[z]=-out[z];
+		out[0]=-out[0];
+		out[1]=-out[1];
+		out[2]=-out[2];
 	}
 
 	ReduceToUnit(out);						// Normalize The Vectors
 }
-
+inline void drawGlPoint(Point p)
+{
+	glVertex3f((float) p.x,(float)p.y,(float)p.z);
+}
 void SaveData(void)
 {
 	FILE* fileHandle;
 	int i,j;
 	fileHandle=fopen(cloud_filename,"w");
-	fprintf(fileHandle,"%6d %6d\n",laserdata.numscans,laserdata.pointsperscan);
-	for(i=0;i<laserdata.numscans;i++)
-		for(j=0;j<laserdata.pointsperscan;j++)
-			fprintf(fileHandle,"%6.3f %6.3f %6.3f\n",laserdata.points[i][j][0],laserdata.points[i][j][1],laserdata.points[i][j][2]);
+	fprintf(fileHandle,"%6d %6d\n",laserData.numScans,laserData.pointsPerScan);
+	for(i=0;i<laserData.numScans;i++)
+		for(j=0;j<laserData.pointsPerScan;j++)
+			fprintf(fileHandle,"%6.3f %6.3f %6.3f\n",laserData.scans[i].points[j].x,laserData.scans[i].points[j].y,laserData.scans[i].points[j].z);
 	fclose(fileHandle);
 	printf("Data logged to file %s\n",cloud_filename);
 }
@@ -231,7 +216,7 @@ void SaveData(void)
 void GLDisplayLaserScan(void)									// Here's Where We Do All The Drawing
 {
 	// Get current motor position
-	if(laserdata.scanning)
+	if(laserData.scanning)
 	{
 		servomotor.getPos(&currentposget);
 		uchar2ang(currentposget,&current_angle,LASERBACKMOUNT);
@@ -251,24 +236,24 @@ void GLDisplayLaserScan(void)									// Here's Where We Do All The Drawing
 	{
 		glBegin(GL_POINTS);						// Drawing Data Points
 		glColor4f(0.7f,0.7f,0.7f,0.5f);
-		for(i=0; i<laserdata.numscans; i++)
-			for(j=0; j<laserdata.pointsperscan; j++)
-				if(MAX(fabs(laserdata.points[i][j][0]),MAX(fabs(laserdata.points[i][j][1]),fabs(laserdata.points[i][j][2])))>0)
-					glVertex3f((float)laserdata.points[i][j][0],(float)laserdata.points[i][j][1],(float)laserdata.points[i][j][2]);
+		for(i=0; i<laserData.numScans; i++)
+			for(j=0; j<laserData.pointsPerScan; j++)
+				if(MAX(fabs(laserData.scans[i].points[j].x),MAX(fabs(laserData.scans[i].points[j].y),fabs(laserData.scans[i].points[j].z)))>0)
+					glVertex3f((float)laserData.scans[i].points[j].x,(float)laserData.scans[i].points[j].y,(float)laserData.scans[i].points[j].z);
 		glEnd();	// Finished Drawing points 
 	}
 
 	//Draw triangles!
-	if((!laserdata.scanning)&&(display.triangles))
-		for(i=0;i<laserdata.numtri;i++)
+	if((!laserData.scanning)&&(display.triangles))
+		for(i=0;i<laserData.numtri;i++)
 		{
 			glBegin(GL_TRIANGLES);		// Drawing triangles
 			//glColor3f (0.2,0.8,0.8);
-			//glColor3f ((laserdata.normals[i][0]+1.0)/2, (laserdata.normals[i][1]+1.0)/2, (laserdata.normals[i][2]+1.0)/2);
-			glColor4f(fabs(laserdata.normals[i][0]), fabs(laserdata.normals[i][1]), fabs(laserdata.normals[i][2]),0.5f);
-			glVertex3f((float)laserdata.triangles[i][0],(float)laserdata.triangles[i][1],(float)laserdata.triangles[i][2]);
-			glVertex3f((float)laserdata.triangles[i][3],(float)laserdata.triangles[i][4],(float)laserdata.triangles[i][5]);
-			glVertex3f((float)laserdata.triangles[i][6],(float)laserdata.triangles[i][7],(float)laserdata.triangles[i][8]);
+			//glColor3f ((laserData.normals[i][0]+1.0)/2, (laserData.normals[i][1]+1.0)/2, (laserData.normals[i][2]+1.0)/2);
+			glColor4f(fabs(laserData.normals[i][0]), fabs(laserData.normals[i][1]), fabs(laserData.normals[i][2]),0.5f);
+			drawGlPoint(laserData.triangles[i].p1);
+			drawGlPoint(laserData.triangles[i].p2);
+			drawGlPoint(laserData.triangles[i].p3);						
 			glEnd();
 		}
 
@@ -302,13 +287,13 @@ void GLDisplayLaserScan(void)									// Here's Where We Do All The Drawing
 		{
 			glBegin(GL_POINTS);						// Drawing Data Points
 			glColor4f(0.8f,0.8f,0.2f,0.5f);
-			for(i=0; i<(*adddata).numscans; i++)
-				for(j=0; j<(*adddata).pointsperscan; j++)
-					if(MAX(fabs((*adddata).points[i][j][0]),MAX(fabs((*adddata).points[i][j][1]),fabs((*adddata).points[i][j][2])))>0)
+			for(i=0; i<(*adddata).numScans; i++)
+				for(j=0; j<(*adddata).pointsPerScan; j++)
+					if(MAX(fabs((*adddata).scans[i].points[j].x),MAX(fabs((*adddata).scans[i].points[j].y),fabs((*adddata).scans[i].points[j].z)))>0)
 						{
-							inputVec[0]=(*adddata).points[i][j][0];
-							inputVec[1]=(*adddata).points[i][j][1];
-							inputVec[2]=(*adddata).points[i][j][2];
+							inputVec[0]=(*adddata).scans[i].points[j].x;
+							inputVec[1]=(*adddata).scans[i].points[j].x;
+							inputVec[2]=(*adddata).scans[i].points[j].x;
 							inputVec[3]=1.0;
 							transformMult(transformedVec,transformMatrix,inputVec);
 							//glVertex3f((float)(*adddata).points[i][j][0]+transformer.x,(float)(*adddata).points[i][j][1]+transformer.y,(float)(*adddata).points[i][j][2]+transformer.z);
@@ -325,9 +310,9 @@ void GLDisplayLaserScan(void)									// Here's Where We Do All The Drawing
 				//glColor3f (0.2,0.8,0.8);
 				//glColor3f (((*adddata).normals[i][0]+1.0)/2, ((*adddata).normals[i][1]+1.0)/2, ((*adddata).normals[i][2]+1.0)/2);
 				glColor4f(fabs((*adddata).normals[i][0]), fabs((*adddata).normals[i][1]), fabs((*adddata).normals[i][2]),0.5f);
-				glVertex3f((float)(*adddata).triangles[i][0]+transformer.x,(float)(*adddata).triangles[i][1]+transformer.y,(float)(*adddata).triangles[i][2]+transformer.z);
-				glVertex3f((float)(*adddata).triangles[i][3]+transformer.x,(float)(*adddata).triangles[i][4]+transformer.y,(float)(*adddata).triangles[i][5]+transformer.z);
-				glVertex3f((float)(*adddata).triangles[i][6]+transformer.x,(float)(*adddata).triangles[i][7]+transformer.y,(float)(*adddata).triangles[i][8]+transformer.z);
+				glVertex3f((float)(*adddata).triangles[i].p1.x+transformer.x,(float)(*adddata).triangles[i].p1.y+transformer.y,(float)(*adddata).triangles[i].p1.z+transformer.z);
+				glVertex3f((float)(*adddata).triangles[i].p2.x+transformer.x,(float)(*adddata).triangles[i].p2.y+transformer.y,(float)(*adddata).triangles[i].p2.z+transformer.z);
+				glVertex3f((float)(*adddata).triangles[i].p3.x+transformer.x,(float)(*adddata).triangles[i].p3.y+transformer.y,(float)(*adddata).triangles[i].p3.z+transformer.z);
 				glEnd();
 			}
 	}
@@ -339,21 +324,21 @@ void GLDisplayLaserScan(void)									// Here's Where We Do All The Drawing
 	FILE *fileHandle;
 
 	//Draw the new data
-	if(laserdata.scanning)
+	if(laserData.scanning)
 	{
 		//Open data file for logging
 		fileHandle=fopen(data_filename,"a");
 		fprintf(fileHandle,"#%6.3f %6.3f %6.3f\n",-LASEROFFSET*sin(PI*current_angle/180),+LASEROFFSET*cos(PI*current_angle/180),current_angle);
-		laserdata.lastscan_count=(*lp).GetCount ();
+		laserData.lastScanCount=(*lp).GetCount ();
 
-		if(laserdata.pointsperscan<(*lp).GetCount ())
-			laserdata.pointsperscan=(*lp).GetCount ();
+		if(laserData.pointsPerScan<(*lp).GetCount ())
+			laserData.pointsPerScan=(*lp).GetCount ();
 
 		for(i=0; i<(*lp).GetCount(); i++)
 		{
 			//Log data to file
 			fprintf(fileHandle,"%6.3f %6.3f ",180*((float)i-342)/512,(*lp)[i]);
-			laserdata.lastscan[i]=(*lp)[i];
+			laserData.lastscan[i]=(*lp)[i];
 			if(((*lp)[i]<LASERMAXRANGE)&&((*lp)[i]>LASERMINRANGE))
 			{
 				theta=PI*(i-342)/512;
@@ -362,35 +347,43 @@ void GLDisplayLaserScan(void)									// Here's Where We Do All The Drawing
 				//glVertex2f((float)x,(float)y);
 				if(LASERBACKMOUNT)
 				{
-					laserdata.points[laserdata.numscans][i][0]=x*cos(PI*current_angle/180)-LASEROFFSET*sin(PI*current_angle/180);
-					laserdata.points[laserdata.numscans][i][1]=y;
-					laserdata.points[laserdata.numscans][i][2]=x*sin(PI*current_angle/180)+LASEROFFSET*cos(PI*current_angle/180);
-					glVertex3f((float)laserdata.points[laserdata.numscans][i][0],(float)laserdata.points[laserdata.numscans][i][1],laserdata.points[laserdata.numscans][i][2]);
+					laserData.scans[laserData.numScans].points[i].setXYZ(
+					x*cos(PI*current_angle/180)-LASEROFFSET*sin(PI*current_angle/180),
+					y,
+					x*sin(PI*current_angle/180)+LASEROFFSET*cos(PI*current_angle/180));
+					drawGlPoint(laserData.scans[laserData.numScans].points[i]);
 				}
 				else
 				{
-					laserdata.points[laserdata.numscans][i][0]=y*sin(PI*current_angle/180)-LASEROFFSET*cos(PI*current_angle/180);
-					laserdata.points[laserdata.numscans][i][1]=y*cos(PI*current_angle/180)+LASEROFFSET*sin(PI*current_angle/180);
-					laserdata.points[laserdata.numscans][i][2]=x;
-					glVertex3f((float)laserdata.points[laserdata.numscans][i][0],(float)laserdata.points[laserdata.numscans][i][1],laserdata.points[laserdata.numscans][i][2]);
+					laserData.scans[laserData.numScans].points[i].setXYZ(
+					y*sin(PI*current_angle/180)-LASEROFFSET*cos(PI*current_angle/180),
+					y*cos(PI*current_angle/180)+LASEROFFSET*sin(PI*current_angle/180),
+					x);
+					drawGlPoint(laserData.scans[laserData.numScans].points[i]);
 				}
 				//Find triangles
-				if((i>1)&&(laserdata.numscans>1)&&(fabs((*lp)[i]-(*lp)[i-1])<MINTRI)&&(i<laserdata.lastscan_count)&&(fabs((*lp)[i]-laserdata.lastscan[i])<MINTRI))
+				if((i>1)&&(laserData.numScans>1)&&(fabs((*lp)[i]-(*lp)[i-1])<MINTRI)&&(i<laserData.lastScanCount)&&(fabs((*lp)[i]-laserData.lastscan[i])<MINTRI))
 				{
-					laserdata.triangles[laserdata.numtri][0]=laserdata.points[laserdata.numscans][i][0];
-					laserdata.triangles[laserdata.numtri][1]=laserdata.points[laserdata.numscans][i][1];
-					laserdata.triangles[laserdata.numtri][2]=laserdata.points[laserdata.numscans][i][2];
-					laserdata.triangles[laserdata.numtri][3]=laserdata.points[laserdata.numscans][i-1][0];
-					laserdata.triangles[laserdata.numtri][4]=laserdata.points[laserdata.numscans][i-1][1];
-					laserdata.triangles[laserdata.numtri][5]=laserdata.points[laserdata.numscans][i-1][2];
-					laserdata.triangles[laserdata.numtri][6]=laserdata.points[laserdata.numscans-1][i][0];
-					laserdata.triangles[laserdata.numtri][7]=laserdata.points[laserdata.numscans-1][i][1];
-					laserdata.triangles[laserdata.numtri][8]=laserdata.points[laserdata.numscans-1][i][2];
-					laserdata.numtri++;
+					
+					laserData.triangles[laserData.numtri].p1.setXYZ(
+					laserData.scans[laserData.numScans].points[i].x,
+					laserData.scans[laserData.numScans].points[i].y,
+					laserData.scans[laserData.numScans].points[i].z);
+					
+					laserData.triangles[laserData.numtri].p2.setXYZ(
+					laserData.scans[laserData.numScans].points[i-1].x,
+					laserData.scans[laserData.numScans].points[i-1].y,
+					laserData.scans[laserData.numScans].points[i-1].z);
+					
+					laserData.triangles[laserData.numtri].p3.setXYZ(
+					laserData.scans[laserData.numScans-1].points[i].x,
+					laserData.scans[laserData.numScans-1].points[i].y,
+					laserData.scans[laserData.numScans-1].points[i].z);
+					laserData.numtri++;
 				}
 			}
 		}
-		laserdata.numscans++;
+		laserData.numScans++;
 		fprintf(fileHandle,"\n");
 		fclose(fileHandle);
 	}
@@ -441,7 +434,7 @@ void GLDisplayLaserScan(void)									// Here's Where We Do All The Drawing
 	glutSwapBuffers( );//
 
 	//Set motor position
-	if(laserdata.scanning)
+	if(laserData.scanning)
 	{
 		if(increasing)
 		{
@@ -449,13 +442,13 @@ void GLDisplayLaserScan(void)									// Here's Where We Do All The Drawing
 			if(currentposset>253) //Finished the current scan
 			{
 				increasing=0;
-				laserdata.scanning=0;
+				laserData.scanning=0;
 				SaveData();
 /*				fileHandle=fopen(cloud_filename,"w");
-				fprintf(fileHandle,"%6d %6d\n",laserdata.numscans,laserdata.pointsperscan);
-				for(i=0;i<laserdata.numscans;i++)
-					for(j=0;j<laserdata.pointsperscan;j++)
-						fprintf(fileHandle,"%6.3f %6.3f %6.3f\n",laserdata.points[i][j][0],laserdata.points[i][j][1],laserdata.points[i][j][2]);
+				fprintf(fileHandle,"%6d %6d\n",laserData.numscans,laserData.pointsperscan);
+				for(i=0;i<laserData.numscans;i++)
+					for(j=0;j<laserData.pointsperscan;j++)
+						fprintf(fileHandle,"%6.3f %6.3f %6.3f\n",laserData.points[i][j][0],laserData.points[i][j][1],laserData.points[i][j][2]);
 				fclose(fileHandle);
 				printf("Data logged to file %s\n",cloud_filename);*/
 				//servomotor.powerDown();
@@ -468,13 +461,13 @@ void GLDisplayLaserScan(void)									// Here's Where We Do All The Drawing
 			if(currentposset<1) //Finished the current scan
 			{
 				increasing=1;
-				laserdata.scanning=0;
+				laserData.scanning=0;
 				SaveData();
 /*				fileHandle=fopen(cloud_filename,"w");
-				fprintf(fileHandle,"%6d %6d\n",laserdata.numscans,laserdata.pointsperscan);
-				for(i=0;i<laserdata.numscans;i++)
-					for(j=0;j<laserdata.pointsperscan;j++)
-						fprintf(fileHandle,"%6.3f %6.3f %6.3f\n",laserdata.points[i][j][0],laserdata.points[i][j][1],laserdata.points[i][j][2]);
+				fprintf(fileHandle,"%6d %6d\n",laserData.numscans,laserData.pointsperscan);
+				for(i=0;i<laserData.numscans;i++)
+					for(j=0;j<laserData.pointsperscan;j++)
+						fprintf(fileHandle,"%6.3f %6.3f %6.3f\n",laserData.points[i][j][0],laserData.points[i][j][1],laserData.points[i][j][2]);
 				fclose(fileHandle);
 				printf("Data logged to file %s\n",cloud_filename);*/
 				//servomotor.powerDown();
@@ -501,7 +494,8 @@ void glutKeyboardCallback(unsigned char key, int x, int y)
 	keystate[key]=true;
 	char	filename[128];
 	FILE	*fileHandle;
-	float tripoints[3][3], xtemp, ytemp, ztemp;
+	float xtemp, ytemp, ztemp;
+	Triangle tripoints;
 
 	switch(key){
 	case 'v':	// Toggle GL view
@@ -551,7 +545,7 @@ void glutKeyboardCallback(unsigned char key, int x, int y)
 	case 'h':	// Home the laser
 		printf("Homing laser head.\n");		
 		currentposset=127;
-		laserdata.scanning=false;
+		laserData.scanning=false;
 		servomotor.setPos(currentposset,MOT_SPEED2);	
 		while(abs(currentposset-currentposget)>2)
 			servomotor.getPos(&currentposget);
@@ -561,20 +555,11 @@ void glutKeyboardCallback(unsigned char key, int x, int y)
 		printf("Initialising data.\n");		
 
 		//Initialise data structure
-		for (i=0;i<laserdata.numscans;i++)
-			for(j=0;j<laserdata.pointsperscan;j++)
-				for(k=0;k<3;k++)
-					laserdata.points[i][j][k]=0;
-		laserdata.numscans=0;
-		laserdata.pointsperscan=0;
-		laserdata.scanning=true;
-		for(i=0;i<laserdata.lastscan_count;i++)
-			laserdata.lastscan[i]=0.0;
-		laserdata.lastscan_count=0;
-		for(i=0;i<laserdata.numtri;i++)
-			for(j=0;j<9;j++)
-				laserdata.triangles[i][j]=0;
-		laserdata.numtri=0;
+		laserData.clear();
+		laserData.scanning=true;
+		for(i=0;i<laserData.lastScanCount;i++)
+			laserData.lastscan[i]=0.0;
+		laserData.lastScanCount=0;
 
 		printf("Homing laser.\n");		
 		// Home the servo
@@ -600,68 +585,51 @@ void glutKeyboardCallback(unsigned char key, int x, int y)
 		use_adddata=true;
 		printf("Please enter a new data filename.\n");
 		scanf("%s",filename);
-		adddata = new laserbuffer;
 		fileHandle=fopen(filename,"r");
-		fscanf(fileHandle,"%d %d",&(*adddata).numscans,&(*adddata).pointsperscan);
-		for(i=0;i<(*adddata).numscans;i++)
-			for(j=0;j<(*adddata).pointsperscan;j++)
+		int numScans,numPoints;
+		fscanf(fileHandle,"%d %d",&numScans,&numPoints);
+		adddata = new LaserBuffer(numScans,numPoints);
+		for(i=0;i<(*adddata).numScans;i++)
+			for(j=0;j<(*adddata).pointsPerScan;j++)
 				if(EOF!=fscanf(fileHandle,"%f %f %f",&xtemp,&ytemp,&ztemp))
 				{
-					(*adddata).points[i][j][0]=xtemp;
-					(*adddata).points[i][j][1]=ytemp;
-					(*adddata).points[i][j][2]=ztemp;
+					(*adddata).scans[i].points[j].setXYZ(xtemp,ytemp,ztemp);
 					if((i>0)&&(j>0)&&(RENDERTRIANGLES))
 					{
-						if((absMax3((*adddata).points[i][j])>0)&&(absMax3((*adddata).points[i][j-1])>0)&&(absMax3((*adddata).points[i-1][j-1])>0)&&(maxDiff((*adddata).points[i][j],(*adddata).points[i][j-1],(*adddata).points[i-1][j-1])<MINTRI))
+						if((absMax3((*adddata).scans[i].points[j])>0)&&(absMax3((*adddata).scans[i].points[j-1])>0)&&(absMax3((*adddata).scans[i-1].points[j-1])>0)&&(maxDiff((*adddata).scans[i].points[j],(*adddata).scans[i].points[j-1],(*adddata).scans[i-1].points[j-1])<MINTRI))
 						{
-							(*adddata).triangles[(*adddata).numtri][0]=(*adddata).points[i][j][0];
-							(*adddata).triangles[(*adddata).numtri][1]=(*adddata).points[i][j][1];
-							(*adddata).triangles[(*adddata).numtri][2]=(*adddata).points[i][j][2];
-							(*adddata).triangles[(*adddata).numtri][3]=(*adddata).points[i][j-1][0];
-							(*adddata).triangles[(*adddata).numtri][4]=(*adddata).points[i][j-1][1];
-							(*adddata).triangles[(*adddata).numtri][5]=(*adddata).points[i][j-1][2];
-							(*adddata).triangles[(*adddata).numtri][6]=(*adddata).points[i-1][j-1][0];
-							(*adddata).triangles[(*adddata).numtri][7]=(*adddata).points[i-1][j-1][1];
-							(*adddata).triangles[(*adddata).numtri][8]=(*adddata).points[i-1][j-1][2];
-							tripoints[0][0]=(*adddata).points[i][j][0];
-							tripoints[0][1]=(*adddata).points[i][j][1];
-							tripoints[0][2]=(*adddata).points[i][j][2];
-							tripoints[1][0]=(*adddata).points[i][j-1][0];
-							tripoints[1][1]=(*adddata).points[i][j-1][1];
-							tripoints[1][2]=(*adddata).points[i][j-1][2];
-							tripoints[2][0]=(*adddata).points[i-1][j-1][0];
-							tripoints[2][1]=(*adddata).points[i-1][j-1][1];
-							tripoints[2][2]=(*adddata).points[i-1][j-1][2];
+							(*adddata).triangles[(*adddata).numtri].setPoints(
+							(*adddata).scans[i].points[j],
+							(*adddata).scans[i].points[j-1],
+							(*adddata).scans[i-1].points[j-1]);
+							
+							tripoints.setPoints(
+							(*adddata).scans[i].points[j],
+							(*adddata).scans[i].points[j-1],
+							(*adddata).scans[i-1].points[j-1]);
+
 							calcNormal(tripoints,(*adddata).normals[(*adddata).numtri]);
 							(*adddata).numtri++;
 						}
-						if((absMax3((*adddata).points[i][j])>0)&&(absMax3((*adddata).points[i-1][j])>0)&&(absMax3((*adddata).points[i-1][j-1])>0)&&(maxDiff((*adddata).points[i][j],(*adddata).points[i-1][j],(*adddata).points[i-1][j-1])<MINTRI))
+						if((absMax3((*adddata).scans[i].points[j])>0)&&(absMax3((*adddata).scans[i-1].points[j])>0)&&(absMax3((*adddata).scans[i-1].points[j-1])>0)&&(maxDiff((*adddata).scans[i].points[j],(*adddata).scans[i-1].points[j],(*adddata).scans[i-1].points[j-1])<MINTRI))
 						{
-							(*adddata).triangles[(*adddata).numtri][0]=(*adddata).points[i][j][0];
-							(*adddata).triangles[(*adddata).numtri][1]=(*adddata).points[i][j][1];
-							(*adddata).triangles[(*adddata).numtri][2]=(*adddata).points[i][j][2];
-							(*adddata).triangles[(*adddata).numtri][3]=(*adddata).points[i-1][j][0];
-							(*adddata).triangles[(*adddata).numtri][4]=(*adddata).points[i-1][j][1];
-							(*adddata).triangles[(*adddata).numtri][5]=(*adddata).points[i-1][j][2];
-							(*adddata).triangles[(*adddata).numtri][6]=(*adddata).points[i-1][j-1][0];
-							(*adddata).triangles[(*adddata).numtri][7]=(*adddata).points[i-1][j-1][1];
-							(*adddata).triangles[(*adddata).numtri][8]=(*adddata).points[i-1][j-1][2];
-							tripoints[0][0]=(*adddata).points[i][j][0];
-							tripoints[0][1]=(*adddata).points[i][j][1];
-							tripoints[0][2]=(*adddata).points[i][j][2];
-							tripoints[1][0]=(*adddata).points[i-1][j-1][0];
-							tripoints[1][1]=(*adddata).points[i-1][j-1][1];
-							tripoints[1][2]=(*adddata).points[i-1][j-1][2];
-							tripoints[2][0]=(*adddata).points[i-1][j][0];
-							tripoints[2][1]=(*adddata).points[i-1][j][1];
-							tripoints[2][2]=(*adddata).points[i-1][j][2];
+							(*adddata).triangles[(*adddata).numtri].setPoints(
+							(*adddata).scans[i].points[j],
+							(*adddata).scans[i-1].points[j],
+							(*adddata).scans[i-1].points[j-1]);
+							
+							tripoints.setPoints(
+							(*adddata).scans[i].points[j],
+							(*adddata).scans[i-1].points[j-1],
+							(*adddata).scans[i-1].points[j]);
+
 							calcNormal(tripoints,(*adddata).normals[(*adddata).numtri]);
 							(*adddata).numtri++;
 						}
 					}
 				}
 		(*adddata).scanning=false;
-		printf("Read %d scans from file %s.  %d triangles.\n",(*adddata).numscans,in_filename,(*adddata).numtri);		
+		printf("Read %d scans from file %s.  %d triangles.\n",(*adddata).numScans,in_filename,(*adddata).numtri);		
 		break;	
 	case '8':
 		transformer.y+=0.005;
@@ -705,7 +673,7 @@ void glutKeyboardCallback(unsigned char key, int x, int y)
 
 void RefreshData(void)
 {
-	if(laserdata.scanning)
+	if(laserData.scanning)
 	{
 		(*robot).Read();
 		while((*robot).Peek())
@@ -776,39 +744,13 @@ int main(int argc, char **argv)
 {
 	bool resolution;
 	int i,j;
-	float tripoints[3][3];
+	Triangle tripoints;
 
 	if(LASERBACKMOUNT)
 		resolution=HIRES;
 	else
 		resolution=LOWRES;
-
-	// Setup the laser data structure
-	laserdata.numscans=0;
-	laserdata.pointsperscan=0;
-	laserdata.numtri=0;
-	laserdata.lastscan_count=0;
-	for(i=0;i<SERVOMAXPOINTS;i++)
-		for(j=0;j<LASERMAXPOINTS;j++)
-		{
-			laserdata.points[i][j][0]=0;
-			laserdata.points[i][j][1]=0;
-			laserdata.points[i][j][2]=0;
-		}
 	
-	//vector <float> v_temp(3,0);
-	//vector <vector <float> v2_temp(LASERMAXPOINTS,v_temp);
-	//laserdata.points.assign(SERVOMAXPOINTS,v2_temp);
-
-	//v_temp.clear();
-	//v_temp.assign(9,0);
-	//laserdata.triangles.assign(400000,v_temp);
-
-	//v_temp.clear();
-	//v_temp.assign(3,0);
-	//laserdata.normals.assign(400000,v_temp);
-
-
 	// Setup the display data structure
 	display.triangles=false;
 	display.points=true;
@@ -824,79 +766,62 @@ int main(int argc, char **argv)
 	if(strlen(in_filename)>0)
 	{
 		fileHandle=fopen(in_filename,"r");
-		fscanf(fileHandle,"%d %d",&laserdata.numscans,&laserdata.pointsperscan);
-		for(i=0;i<laserdata.numscans;i++)
-			for(j=0;j<laserdata.pointsperscan;j++)
+		fscanf(fileHandle,"%d %d",&laserData.numScans,&laserData.pointsPerScan);
+		for(i=0;i<laserData.numScans;i++)
+			for(j=0;j<laserData.pointsPerScan;j++)
 				if(EOF!=fscanf(fileHandle,"%f %f %f",&xtemp,&ytemp,&ztemp))
 				{
-					laserdata.points[i][j][0]=xtemp;
-					laserdata.points[i][j][1]=ytemp;
-					laserdata.points[i][j][2]=ztemp;
+					laserData.scans[i].points[j].setXYZ(xtemp,ytemp,ztemp);
 					if((i>0)&&(j>0)&&(RENDERTRIANGLES))
 					{
-						if((absMax3(laserdata.points[i][j])>0)&&(absMax3(laserdata.points[i][j-1])>0)&&(absMax3(laserdata.points[i-1][j-1])>0)&&(maxDiff(laserdata.points[i][j],laserdata.points[i][j-1],laserdata.points[i-1][j-1])<MINTRI))
+						if((absMax3(laserData.scans[i].points[j])>0)&&(absMax3(laserData.scans[i].points[j-1])>0)&&(absMax3(laserData.scans[i-1].points[j-1])>0)&&(maxDiff(laserData.scans[i].points[j],laserData.scans[i].points[j-1],laserData.scans[i-1].points[j-1])<MINTRI))
 						{
-							laserdata.triangles[laserdata.numtri][0]=laserdata.points[i][j][0];
-							laserdata.triangles[laserdata.numtri][1]=laserdata.points[i][j][1];
-							laserdata.triangles[laserdata.numtri][2]=laserdata.points[i][j][2];
-							laserdata.triangles[laserdata.numtri][3]=laserdata.points[i][j-1][0];
-							laserdata.triangles[laserdata.numtri][4]=laserdata.points[i][j-1][1];
-							laserdata.triangles[laserdata.numtri][5]=laserdata.points[i][j-1][2];
-							laserdata.triangles[laserdata.numtri][6]=laserdata.points[i-1][j-1][0];
-							laserdata.triangles[laserdata.numtri][7]=laserdata.points[i-1][j-1][1];
-							laserdata.triangles[laserdata.numtri][8]=laserdata.points[i-1][j-1][2];
-							tripoints[0][0]=laserdata.points[i][j][0];
-							tripoints[0][1]=laserdata.points[i][j][1];
-							tripoints[0][2]=laserdata.points[i][j][2];
-							tripoints[1][0]=laserdata.points[i][j-1][0];
-							tripoints[1][1]=laserdata.points[i][j-1][1];
-							tripoints[1][2]=laserdata.points[i][j-1][2];
-							tripoints[2][0]=laserdata.points[i-1][j-1][0];
-							tripoints[2][1]=laserdata.points[i-1][j-1][1];
-							tripoints[2][2]=laserdata.points[i-1][j-1][2];
-							calcNormal(tripoints,laserdata.normals[laserdata.numtri]);
-							laserdata.numtri++;
+							laserData.triangles[laserData.numtri].setPoints(
+							laserData.scans[i].points[j],
+							laserData.scans[i].points[j-1],
+							laserData.scans[i-1].points[j-1]);
+							
+							
+							tripoints.setPoints(
+							laserData.scans[i].points[j],
+							laserData.scans[i].points[j-1],
+							laserData.scans[i-1].points[j-1]);
+							
+							calcNormal(tripoints,laserData.normals[laserData.numtri]);
+							laserData.numtri++;
 						}
-						if((absMax3(laserdata.points[i][j])>0)&&(absMax3(laserdata.points[i-1][j])>0)&&(absMax3(laserdata.points[i-1][j-1])>0)&&(maxDiff(laserdata.points[i][j],laserdata.points[i-1][j],laserdata.points[i-1][j-1])<MINTRI))
+						if((absMax3(laserData.scans[i].points[j])>0)&&(absMax3(laserData.scans[i-1].points[j])>0)&&(absMax3(laserData.scans[i-1].points[j-1])>0)&&(maxDiff(laserData.scans[i].points[j],laserData.scans[i-1].points[j],laserData.scans[i-1].points[j-1])<MINTRI))
 						{
-							laserdata.triangles[laserdata.numtri][0]=laserdata.points[i][j][0];
-							laserdata.triangles[laserdata.numtri][1]=laserdata.points[i][j][1];
-							laserdata.triangles[laserdata.numtri][2]=laserdata.points[i][j][2];
-							laserdata.triangles[laserdata.numtri][3]=laserdata.points[i-1][j][0];
-							laserdata.triangles[laserdata.numtri][4]=laserdata.points[i-1][j][1];
-							laserdata.triangles[laserdata.numtri][5]=laserdata.points[i-1][j][2];
-							laserdata.triangles[laserdata.numtri][6]=laserdata.points[i-1][j-1][0];
-							laserdata.triangles[laserdata.numtri][7]=laserdata.points[i-1][j-1][1];
-							laserdata.triangles[laserdata.numtri][8]=laserdata.points[i-1][j-1][2];
-							tripoints[0][0]=laserdata.points[i][j][0];
-							tripoints[0][1]=laserdata.points[i][j][1];
-							tripoints[0][2]=laserdata.points[i][j][2];
-							tripoints[1][0]=laserdata.points[i-1][j-1][0];
-							tripoints[1][1]=laserdata.points[i-1][j-1][1];
-							tripoints[1][2]=laserdata.points[i-1][j-1][2];
-							tripoints[2][0]=laserdata.points[i-1][j][0];
-							tripoints[2][1]=laserdata.points[i-1][j][1];
-							tripoints[2][2]=laserdata.points[i-1][j][2];
-							calcNormal(tripoints,laserdata.normals[laserdata.numtri]);
-							laserdata.numtri++;
+							laserData.triangles[laserData.numtri].setPoints(
+							laserData.scans[i].points[j],
+							laserData.scans[i-1].points[j],
+							laserData.scans[i-1].points[j-1]);
+
+							tripoints.setPoints(
+							laserData.scans[i].points[j],
+							laserData.scans[i-1].points[j-1],
+							laserData.scans[i-1].points[j]);
+																					
+							calcNormal(tripoints,laserData.normals[laserData.numtri]);
+							laserData.numtri++;
 						}
 					}
 				}
-		laserdata.scanning=false;
-		printf("Read %d scans from file %s.  %d triangles.\n",laserdata.numscans,in_filename,laserdata.numtri);
+		laserData.scanning=false;
+		printf("Read %d scans from file %s.  %d triangles.\n",laserData.numScans,in_filename,laserData.numtri);
 	}
 	else // We will be logging from the sensor
 	{
 		//If the data_file exists, erase it.
 		fileHandle=fopen(data_filename,"w");
 		fclose(fileHandle);
-		laserdata.scanning=true;
+		laserData.scanning=true;
 	}
 
 	//Setup AI servo, Player Client and Laser Proxy
 
 	unsigned char angleMinChar, angleMaxChar, angleChar;
-	if(laserdata.scanning)
+	if(laserData.scanning)
 	{
 		robot = new PlayerClient(host,port);
 		lp = new LaserProxy(robot,device_index);
@@ -915,7 +840,7 @@ int main(int argc, char **argv)
 		else
 			printf("Servo appears to be initialized correctly.\n");
 	
-		laserdata.scanning=false;
+		laserData.scanning=false;
 	}
 	//Setup OpenGL window
 
@@ -959,7 +884,7 @@ int main(int argc, char **argv)
 	glEnable(GL_COLOR_MATERIAL);
 
 	glutMainLoop( );
-	if(laserdata.scanning)
+	if(laserData.scanning)
 	{	
 		delete lp;
 		delete robot;
