@@ -3,16 +3,15 @@
 TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
 	QWidget(parent),
 	tasksGui(tasksGui),
-	bayesianNetGB("Bayesian Network Parameters"),
-	distanceToVetix(),
+	randomTasksGB("Random Tasks"),
+	numRandomRuns(),
 	voronoiGB("Map Voronoi Skeleton"),
 	innerSkeletonBtn("Inner Skeleton"),
 	outerSkeletonBtn("Outer Skeleton"),
 	actionGB("Action"),
 	pauseBtn("Pause"),
-	pathPlanBtn("Random Tasks"),
+	randomTasksBtn("Run Random Tasks"),
 	generateSkeletonBtn("Generate Skeleton"),
-	randomTasksBtn("Random Tasks"),
 	captureImage("Capture Image"),
 	tasksGB("Set of Tasks"),
 	tasksList(this)
@@ -20,7 +19,7 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
     QVBoxLayout *hlayout = new QVBoxLayout;
 
     hlayout->addWidget(&tasksGB,1);
-    hlayout->addWidget(&bayesianNetGB,1);
+    hlayout->addWidget(&randomTasksGB,1);
     hlayout->addWidget(&voronoiGB,1);
     hlayout->addWidget(&actionGB,1);
     this->setLayout(hlayout);
@@ -28,17 +27,22 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
 
 	QVBoxLayout *tasksLayout = new QVBoxLayout;    
 	tasksLayout->addWidget(&tasksList);
+    tasksLayout->addWidget(&numRandomRuns);	
 	tasksGB.setLayout(tasksLayout);
 	
-	QGridLayout *parLayout = new QGridLayout;
-    parLayout->addWidget(new QLabel("Distance 2 Vertix"),0,0);
-    parLayout->addWidget(&distanceToVetix,0,1);
-    bayesianNetGB.setLayout(parLayout);
+	QHBoxLayout *parHLayout = new QHBoxLayout; 
+	QVBoxLayout *parVLayout = new QVBoxLayout;	
+    parHLayout->addWidget(new QLabel("Random Runs"));
+    parHLayout->addWidget(&numRandomRuns);
+	
+	parVLayout->addLayout(parHLayout);
+    parVLayout->addWidget(&randomTasksBtn);    
+    randomTasksGB.setLayout(parVLayout);
 
-    distanceToVetix.setMinimum(0);
-    distanceToVetix.setMaximum(1);
-	distanceToVetix.setSingleStep(0.01);
-	distanceToVetix.setValue(0.5);
+    numRandomRuns.setMinimum(0);
+    numRandomRuns.setMaximum(100);
+	numRandomRuns.setSingleStep(1);
+	numRandomRuns.setValue(10);
 
     QVBoxLayout *showL = new QVBoxLayout;
     showL->addWidget(&innerSkeletonBtn);
@@ -50,79 +54,59 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
     QVBoxLayout *actionLayout = new QVBoxLayout;
     actionLayout->addWidget(&pauseBtn);
     actionLayout->addWidget(&captureImage);
-    actionLayout->addWidget(&pathPlanBtn);
     actionLayout->addWidget(&generateSkeletonBtn);
-    actionLayout->addWidget(&randomTasksBtn);
     actionGB.setLayout(actionLayout);
 
-	connect(&distanceToVetix,  SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
+	connect(&numRandomRuns,  SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
 //    	connect(&selectedRobot,    SIGNAL(itemSelectionChanged()),this, SLOT(handleRobotSelection()));
     connect(&innerSkeletonBtn, SIGNAL(toggled(bool )), this,SLOT(updateSelectedVoronoiMethod(bool)));
   	connect(&outerSkeletonBtn, SIGNAL(toggled(bool )), this,SLOT(updateSelectedVoronoiMethod(bool)));
-	connect(&pathPlanBtn,      SIGNAL(pressed()),this, SLOT(pathPlan()));
 	connect(&generateSkeletonBtn, SIGNAL(pressed()),tasksGui, SLOT(generateSkeleton()));
 	connect(&captureImage,     SIGNAL(pressed()),this, SLOT(save()));
-	connect(&randomTasksBtn,   SIGNAL(pressed()),this, SLOT(pathFollow()));
+	connect(&randomTasksBtn,   SIGNAL(pressed()),this, SLOT(runRandomTasks()));
+	connect(&tasksList,        SIGNAL(currentRowChanged(int)),this, SLOT(taskSelected(int)));	
 	connect(&pauseBtn,         SIGNAL(pressed()),this, SLOT(setNavigation()));
 }
 
-void TasksControlPanel::Finished()
-{
-
-}
-
-void TasksControlPanel::pathFollow()
-{
-
-}
-
-void TasksControlPanel::setNavigation()
-{
-
-}
-
-void TasksControlPanel::pathPlan()
-{
-
-}
 
 void TasksControlPanel::loadMap()
 {
 
 }
 
-void TasksControlPanel::updateSelectedObject(double)
+//void TasksControlPanel::handleRobotSelection()
+//{
+////    qDebug("Robot Selected");
+////    QTreeWidgetItem *item = selectedRobot.currentItem();
+////	if(widget2RobMan.contains(item))
+////	{
+////	    currRobot = widget2RobMan.value(item);
+////	    qDebug("Robot Name:%s",qPrintable(currRobot->robot->robotName));
+////	    fflush(stdout);
+////	}
+////	else
+////	{
+////	    qDebug("Strange, the selection is not in the list");
+////	    currRobot = NULL;
+////	    fflush(stdout);
+////	}
+//////  setActionValues(mo);
+//}
+void TasksControlPanel::runRandomTasks()
 {
-
-}
-
-void TasksControlPanel::handleRobotSelection()
-{
-//    qDebug("Robot Selected");
-//    QTreeWidgetItem *item = selectedRobot.currentItem();
-//	if(widget2RobMan.contains(item))
-//	{
-//	    currRobot = widget2RobMan.value(item);
-//	    qDebug("Robot Name:%s",qPrintable(currRobot->robot->robotName));
-//	    fflush(stdout);
-//	}
-//	else
-//	{
-//	    qDebug("Strange, the selection is not in the list");
-//	    currRobot = NULL;
-//	    fflush(stdout);
-//	}
-////  setActionValues(mo);
-}
-
-void TasksControlPanel::updateSelectedRobot(bool)
-{
-
-}
-
-void TasksControlPanel::updateRobotSetting()
-{
-
+	if(!tasksGui->skeletonGenerated)
+		tasksGui->generateSkeleton();
+	int r;
+	for(int i=0;i<numRandomRuns.value();i++)
+	{
+		r = rand()%tasksGui->tasks.size();
+		qDebug("Using Task %s %d ",qPrintable(tasksGui->tasks[r].getName()),r);
+		Pose start(tasksGui->tasks[r].getStart().x(),tasksGui->tasks[r].getStart().y(),0);
+		Pose   end(tasksGui->tasks[r].getEnd().x(),tasksGui->tasks[r].getEnd().y(),0);		
+		tasksGui->voronoiPlanner->startSearch(start,end,METRIC);
+		if(tasksGui->voronoiPlanner->path)
+			tasksGui->voronoiPlanner->printNodeList();			
+	}
 }
 
 void TasksControlPanel::updateSelectedVoronoiMethod(bool)
@@ -135,14 +119,10 @@ void TasksControlPanel::save()
 //	navContainer->mapViewer->saveImage();
 }
 
-void TasksControlPanel::setStart()
+void TasksControlPanel::taskSelected(int row)
 {
-
-}
-
-void TasksControlPanel::setEnd()
-{
-
+	qDebug("Selected Task is:%d",row);	
+	fflush(stdout);
 }
 
 void TasksControlPanel::setMap(QImage imageMap)
@@ -579,6 +559,7 @@ void MapGL::keyPressEvent(QKeyEvent *e)
 
 TasksGui::TasksGui(QWidget *parent,PlayGround *playG):
 	voronoiPlanner(NULL),
+	skeletonGenerated(false),
 	playGround(playG),
 	tabContainer((QTabWidget*) parent),
 	tasksControlPanel(this,parent),
@@ -907,11 +888,13 @@ void TasksGui::generateSkeleton()
 	mapSkeleton.generateInnerSkeleton();
 	if (! this->sskel)
 	{
+		skeletonGenerated = false;		
 		qDebug("\nNo Skeleton Generated");
 		return;
 	}
 	else
 	{
+		skeletonGenerated = true;
 		mapGL.setSSkelPtr(mapSkeleton.getSSkelPtr());
 		mapGL.paintGL();
 		if (voronoiPlanner)
@@ -920,8 +903,5 @@ void TasksGui::generateSkeleton()
 		}
 		voronoiPlanner = new VoronoiPathPlanner(this->sskel);
 		voronoiPlanner->buildSpace();
-		voronoiPlanner->startSearch(Pose(0,0,0),Pose(3,4,0),METRIC);
-		if(voronoiPlanner->path)
-			voronoiPlanner->printNodeList();		
 	}
 }

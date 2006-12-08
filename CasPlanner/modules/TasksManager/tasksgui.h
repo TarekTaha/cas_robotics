@@ -48,28 +48,22 @@ class TasksControlPanel: public QWidget
 		TasksControlPanel(TasksGui *tasksGui,QWidget *tasksGui);
 		void updateRobotSetting();
 	public slots:
-		void updateSelectedObject(double);
 		void updateSelectedVoronoiMethod(bool);
-		void updateSelectedRobot(bool);
-		void handleRobotSelection();
+//		void updateSelectedRobot(bool);
 		void save();
-		void setNavigation();
 		void exportHtml();
-		void pathPlan();
 		void loadMap();
-		void pathFollow();
-		void Finished();
-		void setStart();
-		void setEnd();
 		void setMap(QImage);
+		void taskSelected(int);
+		void runRandomTasks();		
 // 	signals:
 //		void generateSkeleton();
     private:
 
 		TasksGui *tasksGui;
 		// BayesianNetwork Parameters
-		QGroupBox bayesianNetGB;
-		QDoubleSpinBox distanceToVetix;
+		QGroupBox randomTasksGB;
+		QDoubleSpinBox numRandomRuns;
 
 		// Voronoi Method
 		QGroupBox voronoiGB;
@@ -81,9 +75,8 @@ class TasksControlPanel: public QWidget
 		// Command Actions
 		QGroupBox   actionGB;
 		QPushButton pauseBtn;
-		QPushButton pathPlanBtn;
-		QPushButton generateSkeletonBtn;
 		QPushButton randomTasksBtn;
+		QPushButton generateSkeletonBtn;
 		QPushButton captureImage;
 
 		//Pointers to the currently selected Robot
@@ -146,7 +139,8 @@ class TasksGui :public QWidget
         void setRadMode(int mode);
 		void loadTasks(string filename);        
     	VoronoiPathPlanner * voronoiPlanner;    
-    	QVector <Task> tasks;    
+    	QVector <Task> tasks;
+    	bool skeletonGenerated;    
     public slots:
         void updateData();
 //         void mousePressEvent(QMouseEvent *me);
