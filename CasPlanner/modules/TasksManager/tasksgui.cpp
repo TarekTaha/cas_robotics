@@ -64,7 +64,8 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
 	connect(&generateSkeletonBtn, SIGNAL(pressed()),tasksGui, SLOT(generateSkeleton()));
 	connect(&captureImage,     SIGNAL(pressed()),this, SLOT(save()));
 	connect(&randomTasksBtn,   SIGNAL(pressed()),this, SLOT(runRandomTasks()));
-	connect(&tasksList,        SIGNAL(currentRowChanged(int)),this, SLOT(taskSelected(int)));	
+	connect(&tasksList,        SIGNAL(currentRowChanged(int)),this, SLOT(taskSelected(int)));
+	connect(&tasksList,        SIGNAL(itemClicked(QListWidgetItem * item )),this, SLOT(taskClicked(QListWidgetItem * item)));	
 	connect(&pauseBtn,         SIGNAL(pressed()),this, SLOT(setNavigation()));
 }
 
@@ -74,39 +75,41 @@ void TasksControlPanel::loadMap()
 
 }
 
-//void TasksControlPanel::handleRobotSelection()
-//{
-////    qDebug("Robot Selected");
-////    QTreeWidgetItem *item = selectedRobot.currentItem();
-////	if(widget2RobMan.contains(item))
-////	{
-////	    currRobot = widget2RobMan.value(item);
-////	    qDebug("Robot Name:%s",qPrintable(currRobot->robot->robotName));
-////	    fflush(stdout);
-////	}
-////	else
-////	{
-////	    qDebug("Strange, the selection is not in the list");
-////	    currRobot = NULL;
-////	    fflush(stdout);
-////	}
-//////  setActionValues(mo);
-//}
 void TasksControlPanel::runRandomTasks()
 {
+	QTime t;
+	Node * p;
 	if(!tasksGui->skeletonGenerated)
 		tasksGui->generateSkeleton();
 	int r;
+	t.start();
 	for(int i=0;i<numRandomRuns.value();i++)
 	{
 		r = rand()%tasksGui->tasks.size();
+		//tasksList.setCurrentRow(r);
 		qDebug("Using Task %s %d ",qPrintable(tasksGui->tasks[r].getName()),r);
 		Pose start(tasksGui->tasks[r].getStart().x(),tasksGui->tasks[r].getStart().y(),0);
 		Pose   end(tasksGui->tasks[r].getEnd().x(),tasksGui->tasks[r].getEnd().y(),0);		
 		tasksGui->voronoiPlanner->startSearch(start,end,METRIC);
 		if(tasksGui->voronoiPlanner->path)
-			tasksGui->voronoiPlanner->printNodeList();			
+		{
+			tasksGui->voronoiPlanner->printNodeList();				
+			p = tasksGui->voronoiPlanner->path;
+			while(p)
+			{
+				for(int j=0; j<tasksGui->mapSkeleton.verticies.size(); j++)
+				{
+					if((p->pose.p.x() == tasksGui->mapSkeleton.verticies[j].location.x())&&
+					   (p->pose.p.y() == tasksGui->mapSkeleton.verticies[j].location.y()))
+					   {
+					   		tasksGui->mapSkeleton.verticies[j].prob = (++tasksGui->mapSkeleton.verticies[j].visits)/double(++tasksGui->totalVisits); 
+					   }
+				}		
+				p = p->next;
+			}
+		}	
 	}
+	qDebug("Generationg %f Random Paths took:%d",numRandomRuns.value(),t.elapsed());
 }
 
 void TasksControlPanel::updateSelectedVoronoiMethod(bool)
@@ -119,9 +122,12 @@ void TasksControlPanel::save()
 //	navContainer->mapViewer->saveImage();
 }
 
-void TasksControlPanel::taskSelected(int row)
+void TasksControlPanel::taskSelected(int r)
 {
-	qDebug("Selected Task is:%d",row);	
+	qDebug("Selected Task is:%d",r);	
+	Pose start(tasksGui->tasks[r].getStart().x(),tasksGui->tasks[r].getStart().y(),0);
+	Pose   end(tasksGui->tasks[r].getEnd().x(),tasksGui->tasks[r].getEnd().y(),0);		
+	tasksGui->voronoiPlanner->startSearch(start,end,METRIC);	
 	fflush(stdout);
 }
 
@@ -169,12 +175,14 @@ MapGL::MapGL(TasksGui *tsg, QWidget *parent):
 
 QSize MapGL::sizeHint()
 {
-	return QSize(800,600);
+	//return QSize(800,600);
+	return QSize(800,800);
 }
 
 QSize MapGL::setMinimumSizeHint()
 {
-    return QSize(400,300);
+    //return QSize(400,300);
+	return QSize(400,400);    
 }
 
 void MapGL::initializeGL()
@@ -213,14 +221,20 @@ void MapGL::setSSkelPtr(SSkelPtr sskel)
 
 void MapGL::drawProbHisto(QPointF pos, double prob)
 {
+	QString str = QString("%1 \%").arg((int)(prob*100));  
+	if(prob==0)
+		return;
 	glPushMatrix();
-	glTranslatef(pos.x(),pos.y(),0.0f);	
+	glTranslatef(pos.x(),pos.y(),0.0f);
+    glColor4f(0,0,0,1);
+ 	renderText(0 ,0 + 0.2, prob + 0.2, str);
 	glScalef(1/12.0, 1/12.0, prob);
   	//glRotatef(rotqube,0.0f,1.0f,0.0f);	// Rotate The cube around the Y axis
   	//glRotatef(rotqube,1.0f,1.0f,1.0f);
   	glBegin(GL_QUADS);		// Draw The Cube Using quads  
 	
- 		glColor3f(1.0f,0.0f,1.0f);	// Color Violet
+ 		//glColor3f(1.0f,0.0f,1.0f);	// Color Violet
+		glColor4f(0.0f,1.0f,0.0f,1.0f); 		
 	    
 //	    glColor3f(0.0f,1.0f,0.0f);	// Color Blue
 	    glVertex3f( 1.0f, 1.0f,-0.0f);	// Top Right Of The Quad (Top)
@@ -274,7 +288,7 @@ void MapGL::renderSkeleton()
     int watchdog_limit = sskel->size_of_halfedges();
 
 	glPushMatrix();
-	glLineWidth(2);
+	//glLineWidth(2);
 	for ( Face_const_iterator fit = sskel->faces_begin(), efit = sskel->faces_end(); fit != efit; ++ fit)
     {
       	Halfedge_const_handle hstart = fit->halfedge();
@@ -299,7 +313,6 @@ void MapGL::renderSkeleton()
 						glVertex2f(he->opposite()->vertex()->point().x(),he->opposite()->vertex()->point().y());
 		    			glVertex2f(he->vertex()->point().x(),he->vertex()->point().y());
 					glEnd();
-					drawProbHisto(QPointF(he->vertex()->point().x(),he->vertex()->point().y()),1.0);
 //					if (firstTime)
 //					{
 //						std::cout<<"\nDrawing Line at Start X:"<<he->opposite()->vertex()->point().x()<<" Y:"<<he->opposite()->vertex()->point().y();
@@ -329,6 +342,10 @@ void MapGL::renderSkeleton()
       	}
       	while ( -- watchdog > 0 && he != hstart ) ;
     }
+    for(int i=0;i<tasksGui->mapSkeleton.verticies.size();i++)
+    {
+		drawProbHisto(tasksGui->mapSkeleton.verticies[i].location,tasksGui->mapSkeleton.verticies[i].prob);    	
+    }
 	firstTime = false;
     glPopMatrix();
 }
@@ -345,8 +362,8 @@ void MapGL::renderPath()
 		Node * path = tasksGui->voronoiPlanner->path;
 		//glColor4f(1,1,1,1);
 		glPushMatrix();
-		glColor4f(0,1,0,1);
-		glLineWidth(2);
+		glColor4f(0,0,1,1);
+		glLineWidth(5);
 	    glBegin(GL_LINE_STRIP);
 		while(path)
 		{
@@ -354,8 +371,10 @@ void MapGL::renderPath()
 			path = path->next;
 		}
 	    glEnd();
+	    glLineWidth(1);
 		glPopMatrix();	    
 	}
+	//qDebug("WHAT THEEEE !!!");	
 }
 
 void MapGL::paintGL()
@@ -363,7 +382,7 @@ void MapGL::paintGL()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glEnable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
+	//glDisable(GL_BLEND);
 	glEnable(GL_POINT_SMOOTH);
 	//glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 	//glEnable(GL_LINE_SMOOTH);
@@ -570,7 +589,8 @@ TasksGui::TasksGui(QWidget *parent,PlayGround *playG):
 	ptzPan(0),
 	ptzTilt(0),
 	radPerPixel(0.001),
-	msperWheel(0.0005)
+	msperWheel(0.0005),
+	totalVisits(0)
 {
     QHBoxLayout *layout = new QHBoxLayout();
 	layout->addWidget(&mapGL,4);
@@ -605,7 +625,7 @@ void TasksGui::loadTasks(string filename)
 {
  	std::ifstream in(filename.c_str());
  	tasks.clear();
- 	int row;
+ 	int row=0;
 	if ( in )
     {
     	while ( ! in.eof() )
@@ -895,6 +915,7 @@ void TasksGui::generateSkeleton()
 	else
 	{
 		skeletonGenerated = true;
+		qDebug("\nSkeleton Generated, it contains%d Verticies",mapSkeleton.verticies.size());		
 		mapGL.setSSkelPtr(mapSkeleton.getSSkelPtr());
 		mapGL.paintGL();
 		if (voronoiPlanner)

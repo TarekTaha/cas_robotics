@@ -7,7 +7,7 @@ MapSkeleton::MapSkeleton(SSkelPtr & ssk):sskel(ssk)
 
 MapSkeleton::~MapSkeleton()
 {
-
+	clear();
 }
 
 void MapSkeleton::clear()
@@ -70,9 +70,50 @@ SSkelPtr MapSkeleton::getSSkelPtr()
 {
 	return this->sskel;
 }
-
+//void MapSkeleton::Someting()
+//{
+//  	const Halfedge_const_handle null_halfedge ;
+//  	const Vertex_const_handle   null_vertex ;		
+//    if ( !this->sskel )
+//      return ;
+//    int watchdog_limit = sskel->size_of_halfedges();
+//    	
+//	for ( Face_const_iterator fit = sskel->faces_begin(), efit = sskel->faces_end(); fit != efit; ++ fit)
+//    {
+//      	Halfedge_const_handle hstart = fit->halfedge();
+//     	Halfedge_const_handle he     = hstart ;
+//      	int watchdog = watchdog_limit ;
+//      	do
+//      	{
+//        	if ( he == null_halfedge )
+//          		break ;
+//        	if ( he->is_bisector() )
+//        	{
+//	          	bool lVertexOK      = he->vertex() != null_vertex ;
+//	          	bool lOppositeOK    = he->opposite() != null_halfedge ;
+//	          	bool lOppVertexOK   = lOppositeOK && he->opposite()->vertex() != null_vertex ;
+//	          	bool lVertexHeOK    = lVertexOK && he->vertex()->halfedge() != null_halfedge ;
+//	          	bool lOppVertexHeOK = lOppVertexOK && he->opposite()->vertex()->halfedge() != null_halfedge ;
+//          		if ( lVertexOK && lOppVertexOK && lVertexHeOK && lOppVertexHeOK )
+//          		{
+////			    	he->is_inner_bisector()? glColor4f(0,0,1,1) : glColor4f(1,0,0,1);
+////					glBegin(GL_LINES);
+////						//if(he->opposite()->vertex()->is_skeleton())
+////						glVertex2f(he->opposite()->vertex()->point().x(),he->opposite()->vertex()->point().y());
+////		    			glVertex2f(he->vertex()->point().x(),he->vertex()->point().y());
+////					glEnd();
+////					drawProbHisto(QPointF(he->vertex()->point().x(),he->vertex()->point().y()),1.0);		
+//          		}	
+//        	}
+//        	he = he->next();
+//      	}
+//      	while ( -- watchdog > 0 && he != hstart ) ;
+//    }
+//};
+	
 void MapSkeleton::generateInnerSkeleton()
 {
+	Vertex v;
     if ( input.size() > 0 )
 	{
 		defs::Region const& lRegion = *input.front();
@@ -83,12 +124,45 @@ void MapSkeleton::generateInnerSkeleton()
 			//std::cout<<"\n Begin"<<(*bit)->begin()->x();
      	}
       	sskel = builder.construct_skeleton() ;
-      	sskel_valid = sskel ;
-      	if ( !sskel_valid )
+	  	const Halfedge_const_handle null_halfedge ;
+	  	const Vertex_const_handle   null_vertex ;		
+      	if ( !sskel )
+      	{
       		std::cout<<"\n Something is WRONG";
-	  	else
-			std::cout<<"\n Skeleton Generated !!!!!\n";
-    }
+      		return;
+      	}
+	    int watchdog_limit = sskel->size_of_halfedges();  	
+		for ( Face_const_iterator fit = sskel->faces_begin(), efit = sskel->faces_end(); fit != efit; ++ fit)
+	    {
+	      	Halfedge_const_handle hstart = fit->halfedge();
+	     	Halfedge_const_handle he     = hstart ;
+	      	int watchdog = watchdog_limit ;
+	      	do
+	      	{
+	        	if ( he == null_halfedge )
+	          		break ;
+	        	if ( he->is_bisector() )
+	        	{
+		          	bool lVertexOK      = he->vertex() != null_vertex ;
+		          	bool lOppositeOK    = he->opposite() != null_halfedge ;
+		          	bool lOppVertexOK   = lOppositeOK && he->opposite()->vertex() != null_vertex ;
+		          	bool lVertexHeOK    = lVertexOK && he->vertex()->halfedge() != null_halfedge ;
+		          	bool lOppVertexHeOK = lOppVertexOK && he->opposite()->vertex()->halfedge() != null_halfedge ;
+	          		if ( lVertexOK && lOppVertexOK && lVertexHeOK && lOppVertexHeOK )
+	          		{
+	          			v.setLocation(he->vertex()->point().x(),he->vertex()->point().y());
+	       			    int i = verticies.indexOf(v);
+    						if (i == -1)
+	          					verticies.push_back(v);
+//				    	he->is_inner_bisector()? glColor4f(0,0,1,1) : glColor4f(1,0,0,1);
+	          		}	
+	        	}
+	        	he = he->next();
+	      	}
+	      	while ( -- watchdog > 0 && he != hstart ) ;	      	
+    	}
+		std::cout<<"\n Skeleton Generated !!!!!\n";    	
+	}
 	else
 	{
 		std::cout<<"\n Empty Input !!!!!\n";

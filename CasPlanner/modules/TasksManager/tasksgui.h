@@ -21,6 +21,7 @@
 #include <QRadioButton>
 #include <QObject>
 #include <QHash>
+#include <QTime>
 
 #include "playground.h"
 #include "mapskeleton.h"
@@ -56,6 +57,7 @@ class TasksControlPanel: public QWidget
 		void setMap(QImage);
 		void taskSelected(int);
 		void runRandomTasks();		
+//		void taskClicked(QListWidgetItem * item);		
 // 	signals:
 //		void generateSkeleton();
     private:
@@ -140,7 +142,9 @@ class TasksGui :public QWidget
 		void loadTasks(string filename);        
     	VoronoiPathPlanner * voronoiPlanner;    
     	QVector <Task> tasks;
-    	bool skeletonGenerated;    
+    	bool skeletonGenerated;
+		MapSkeleton mapSkeleton;
+        int totalVisits;		    	    
     public slots:
         void updateData();
 //         void mousePressEvent(QMouseEvent *me);
@@ -162,7 +166,6 @@ class TasksGui :public QWidget
 		TasksControlPanel tasksControlPanel;
 		SSkelPtr  sskel;
         MapGL mapGL;
-		MapSkeleton mapSkeleton;
         double speed;
         double turnRatio;
         double startX, startY;

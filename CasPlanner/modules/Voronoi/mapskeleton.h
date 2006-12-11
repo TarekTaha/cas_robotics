@@ -11,6 +11,8 @@
 #include<list>
 #include<map>
 
+#include <QPointF> 
+#include <QVector>
 #include <QString>
 #include <CGAL/basic.h>
 #include <CGAL/Unique_hash_map.h>
@@ -49,7 +51,40 @@ namespace defs
 	typedef SSkel::Vertex_const_handle   										Vertex_const_handle ;
 	typedef boost::shared_ptr<SSkel> 											SSkelPtr ;
 }
-
+class Vertex
+{
+	public:	
+		QPointF location;
+		double prob;
+		int visits;
+		Vertex()
+		{
+			location.setX(0);
+			location.setY(0);
+			prob = 0;
+			visits = 0;
+		};
+		Vertex(double x,double y)
+		{
+			location.setX(x);
+			location.setY(y);
+		};
+		void setLocation(QPointF p)
+		{
+			this->location = p;
+		};
+		void setLocation(double x,double y)
+		{
+			location.setX(x);
+			location.setY(y);
+		};
+		bool operator==(const Vertex& v) const
+	  	{
+	    	return ((this->location.x()== v.location.x()) && (this->location.y()==v.location.y()) && 
+	    			(this->prob==v.prob));
+	  	};
+		
+};
 using namespace defs;
 
 class MapSkeleton
@@ -65,10 +100,10 @@ class MapSkeleton
 		void clear();
 		void draw();
 		SSkelPtr getSSkelPtr();
+		QVector <Vertex> verticies;
 	private:
 	//	Map * ogMap;
 		SSkelPtr & sskel;
-		bool     sskel_valid ;
 		Regions  input ;
 		Regions  output ;
 	  	const Halfedge_const_handle null_halfedge ;
