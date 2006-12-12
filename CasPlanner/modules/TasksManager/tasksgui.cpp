@@ -57,16 +57,15 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
     actionLayout->addWidget(&generateSkeletonBtn);
     actionGB.setLayout(actionLayout);
 
-	connect(&numRandomRuns,  SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
-//    	connect(&selectedRobot,    SIGNAL(itemSelectionChanged()),this, SLOT(handleRobotSelection()));
+//	connect(&numRandomRuns,  SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
     connect(&innerSkeletonBtn, SIGNAL(toggled(bool )), this,SLOT(updateSelectedVoronoiMethod(bool)));
   	connect(&outerSkeletonBtn, SIGNAL(toggled(bool )), this,SLOT(updateSelectedVoronoiMethod(bool)));
 	connect(&generateSkeletonBtn, SIGNAL(pressed()),tasksGui, SLOT(generateSkeleton()));
 	connect(&captureImage,     SIGNAL(pressed()),this, SLOT(save()));
 	connect(&randomTasksBtn,   SIGNAL(pressed()),this, SLOT(runRandomTasks()));
 	connect(&tasksList,        SIGNAL(currentRowChanged(int)),this, SLOT(taskSelected(int)));
-	connect(&tasksList,        SIGNAL(itemClicked(QListWidgetItem * item )),this, SLOT(taskClicked(QListWidgetItem * item)));	
-	connect(&pauseBtn,         SIGNAL(pressed()),this, SLOT(setNavigation()));
+//	connect(&tasksList,        SIGNAL(itemClicked(QListWidgetItem * item )),this, SLOT(taskClicked(QListWidgetItem * item)));	
+//	connect(&pauseBtn,         SIGNAL(pressed()),this, SLOT(setNavigation()));
 }
 
 

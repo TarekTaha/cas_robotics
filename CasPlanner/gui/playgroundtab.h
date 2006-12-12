@@ -16,27 +16,64 @@
 #include <QtGui/QTableWidget>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QWidget>
+#include <QtGui/QDialog>
 
 #include "playground.h"
 
-class PlayGroundTab : public QWidget
+class PlayGround;
+class QListWidget;
+class QListWidgetItem;
+class QStackedWidget;
+class PlayGroundTab;
+
+class RobotConfigPage : public QWidget
 {
-//	Q_OBJECT	
+Q_OBJECT	
 	public:
-		PlayGroundTab(QWidget *parent=0,PlayGround *playG=0);
-		~PlayGroundTab(){};
-		PlayGround * playGround;
-	    QHBoxLayout *hboxLayout;
-	    QGroupBox *groupBox;
-	    QSplitter *splitter;
-	    QWidget *widget1;
-	    QVBoxLayout *vboxLayout;
-	    QLabel *label;
-	    QListView *listView;
-	    QWidget *widget2;
-	    QVBoxLayout *vboxLayout1;
-	    QLabel *label_2;
-	    QTableWidget *tableWidget;	
+    	RobotConfigPage(QWidget *parent = 0,PlayGround *playG=0);
+    public slots:
+		void updateSelection(int r);
+	public:    	
+    	PlayGround * playGround;
+    	QComboBox  * robotsCombo;
+    	QLabel robotName,robotIp,robotPort,robotLength,robotWidth,robotModel,robotCenter,robotMass,
+    		   robotInirtia;
+        QLineEdit robotNameE,robotIpE;
+    	QRadioButton modelDiff,modelCar;    
+    	QDoubleSpinBox robotCenterX,robotCenterY,robotPortE,robotLengthE,robotWidthE,robotMassE,
+    				   robotInirtiaE;    
+		QCheckBox laserInterfaceBox,posInterfaceBox,vfhInterfaceBox,LocalizerInterfaceBox;				   
+};
+
+class MapConfigPage : public QWidget
+{
+Q_OBJECT	
+	public:
+    	MapConfigPage(QWidget *parent = 0,PlayGround *playG=0);
+    	PlayGround * playGround;
+};
+
+class ProfileConfigPage : public QWidget
+{
+Q_OBJECT	
+	public:
+    	ProfileConfigPage(QWidget *parent = 0,PlayGround *playG=0);
+    	PlayGround * playGround;
+};
+ 
+class PlayGroundTab : public  QWidget
+{
+Q_OBJECT
+	public:
+	   	virtual ~PlayGroundTab();  	
+    	PlayGroundTab(QWidget *parent=0,PlayGround *playG=0); 	
+    	PlayGround * playGround;
+	public slots:
+    	void changePage(QListWidgetItem *current, QListWidgetItem *previous);
+	private:
+    	void createIcons();
+		QListWidget 	*contentsWidget;
+    	QStackedWidget  *pagesWidget;
 };
 
 #endif /*PLAYGROUNDTAB_H_*/

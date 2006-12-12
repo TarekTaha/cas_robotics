@@ -1,5 +1,8 @@
-<RCC>
-    <qresource prefix="/" >
-        <file>warning.png</file>
-    </qresource>
-</RCC>
+<!DOCTYPE RCC><RCC version="1.0">
+ <qresource>
+    <file>robot.jpg</file>
+    <file>lab.png</file>  
+    <file>flagein.jpg</file>
+    <file>warning.png</file>
+ </qresource>
+ </RCC>
