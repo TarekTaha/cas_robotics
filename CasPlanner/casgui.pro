@@ -132,4 +132,3 @@ CONFIG += 	release \
 			exceptions \
 			stl
 TEMPLATE = app
-CONFIG -= moc

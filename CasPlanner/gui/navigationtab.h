@@ -101,8 +101,8 @@ class NavContainer : public QWidget
 {
 Q_OBJECT
     public:
-		NavContainer(QWidget *parent ,PlayGround *playGround);
 		~NavContainer();
+		NavContainer(QWidget *parent ,PlayGround *playGround);
 //		MapPainter * mapPainter;
 		MapViewer  * mapViewer;
 	public slots:
