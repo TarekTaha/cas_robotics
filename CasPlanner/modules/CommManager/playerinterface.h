@@ -3,6 +3,7 @@
 
 #include <libplayerc++/playerc++.h>
 #include <libplayercore/player.h>
+#include <libplayerc/playerc.h>
 
 #include <QThread> 
 #include <QReadWriteLock>
@@ -18,6 +19,32 @@
 
 using namespace PlayerCc;
 using namespace std;
+
+// Callback prototypes
+typedef void (*fndestroy_t) (void*);
+typedef void (*fnupdate_t) (void*);
+
+// Somewhere to store which devices are available.
+typedef struct
+{
+  // Device identifier.
+  player_devaddr_t addr;
+
+  // Driver name
+  char *drivername;
+
+  // Handle to the GUI proxy for this device.
+  void *proxy;
+
+  // Callbacks
+  fndestroy_t fndestroy;
+  fnupdate_t fnupdate;
+
+  // Non-zero if should be subscribed.
+  int subscribe;
+
+} device_t;
+
 class Laser
 {
 	public: 
@@ -56,6 +83,7 @@ Q_OBJECT
         bool getLocalized();
         Pose getLocation();
         Pose getOdomLocation();
+        void listDevices();
         void gotoGoal(Pose);
         void vfhGoto(Pose);
         void setSpeed(double speed);
@@ -70,7 +98,10 @@ Q_OBJECT
         QString playerHost; 
         int playerPort; 
         PlayerClient *pc;
-     
+       	playerc_client_t *client;
+	    device_t devices[PLAYER_MAX_DEVICES];
+	  	device_t *device;
+	  	void *proxy;       	
         bool ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized,emergencyStopped,
         	 velControl,vfhEnabled; 
         int positionId,ptzId,mapId,localizerId,vfhId;

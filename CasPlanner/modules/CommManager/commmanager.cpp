@@ -18,6 +18,11 @@ CommManager::~CommManager()
 {
 }
 
+void CommManager::listDevices()
+{
+  player->listDevices();
+}
+
 void CommManager::emergencyStop()
 {
   player->emergencyStop();

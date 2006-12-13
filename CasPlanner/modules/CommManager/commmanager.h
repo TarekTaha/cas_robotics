@@ -33,6 +33,7 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
 		    virtual void   provideSpeed(double &speed, double &turnRate);
 		    virtual void   provideLocation(Pose & location);
 		    virtual bool   getLocalized();
+		    virtual void   listDevices();
         public slots: 
             virtual void setSpeed(double speed, double turnRate); 
             virtual void setLocation(Pose location);
