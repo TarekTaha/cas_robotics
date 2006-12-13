@@ -17,7 +17,7 @@
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QWidget>
 #include <QtGui/QDialog>
-
+#include <QFrame>
 #include "playground.h"
 
 class PlayGround;
@@ -25,6 +25,28 @@ class QListWidget;
 class QListWidgetItem;
 class QStackedWidget;
 class PlayGroundTab;
+class QDragEnterEvent;
+class QDropEvent;
+
+class DragToWidget : public QFrame
+{
+	public:
+    	DragToWidget(QWidget *parent=0);
+	protected:
+    	void dragEnterEvent(QDragEnterEvent *event);
+     	void dropEvent(QDropEvent *event);
+     	void mousePressEvent(QMouseEvent *event);
+};
+
+class DragFromWidget : public QFrame
+{
+	public:
+    	DragFromWidget(QWidget *parent=0);
+	protected:
+    	//void dragEnterEvent(QDragEnterEvent *event);
+     	void dropEvent(QDropEvent *event);
+     	void mousePressEvent(QMouseEvent *event);
+};
 
 class RobotConfigPage : public QWidget
 {

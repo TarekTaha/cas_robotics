@@ -2,7 +2,9 @@
  <qresource>
     <file>robot.jpg</file>
     <file>lab.png</file>  
+    <file>amcl_s.jpg</file>      
     <file>flagein.jpg</file>
+    <file>laser_s.jpg</file>    
     <file>warning.png</file>
  </qresource>
  </RCC>
