@@ -1,207 +1,489 @@
 #include "playgroundtab.h"
-DragToWidget::DragToWidget(QWidget *parent)
-    : QFrame(parent)
+
+InterfacesList::InterfacesList(QWidget *parent)
+    : QListWidget(parent)
 {
-     setMinimumSize(200, 200);
-     setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
-     setAcceptDrops(true);
-
-     QLabel *boatIcon = new QLabel(this);
-     boatIcon->setPixmap(QPixmap(":/laser_s.jpg"));
-     boatIcon->move(20, 20);
-     boatIcon->show();
-     boatIcon->setAttribute(Qt::WA_DeleteOnClose);
-
-     QLabel *carIcon = new QLabel(this);
-     carIcon->setPixmap(QPixmap(":/amcl_s.jpg"));
-     carIcon->move(120, 20);
-     carIcon->show();
-     carIcon->setAttribute(Qt::WA_DeleteOnClose);
-
-     QLabel *houseIcon = new QLabel(this);
-     houseIcon->setPixmap(QPixmap(":/images/house.png"));
-     houseIcon->move(20, 120);
-     houseIcon->show();
-     houseIcon->setAttribute(Qt::WA_DeleteOnClose);
+    setDragEnabled(true);
+    setViewMode(QListView::IconMode);
+    setIconSize(QSize(60, 60));
+    setSpacing(10);
+    setAcceptDrops(true);
+    setDropIndicatorShown(true);
 }
 
-void DragToWidget::dragEnterEvent(QDragEnterEvent *event)
+void InterfacesList::dragEnterEvent(QDragEnterEvent *event)
 {
-     if (event->mimeData()->hasFormat("application/x-dnditemdata")) 
-     {
-         if (event->source() == this) 
-         {
-             event->setDropAction(Qt::MoveAction);
-             event->accept();
-         } 
-         else 
-         {
-             event->acceptProposedAction();
-         }
-     } else 
-     {
-         event->ignore();
-     }
+    if (event->mimeData()->hasFormat("image/x-puzzle-piece"))
+        event->accept();
+    else
+        event->ignore();
 }
 
-void DragToWidget::dropEvent(QDropEvent *event)
+void InterfacesList::dragMoveEvent(QDragMoveEvent *event)
 {
-     if (event->mimeData()->hasFormat("application/x-dnditemdata")) 
-     {
-         QByteArray itemData = event->mimeData()->data("application/x-dnditemdata");
-         QDataStream dataStream(&itemData, QIODevice::ReadOnly);
+    if (event->mimeData()->hasFormat("image/x-puzzle-piece")) 
+    {
+        event->setDropAction(Qt::MoveAction);
+        event->accept();
+    } 
+    else
+    	event->ignore();
+}
 
-         QPixmap pixmap;
-         QPoint offset;
-         dataStream >> pixmap >> offset;
+void InterfacesList::dropEvent(QDropEvent *event)
+{
+    if (event->mimeData()->hasFormat("image/x-puzzle-piece")) 
+    {
+        QByteArray pieceData = event->mimeData()->data("image/x-puzzle-piece");
+        QDataStream dataStream(&pieceData, QIODevice::ReadOnly);
+        QPixmap pixmap;
+        QPoint location;
+        dataStream >> pixmap >> location;
+        addPiece(pixmap, location);
+        event->setDropAction(Qt::MoveAction);
+		event->accept();
+    } 
+    else
+        event->ignore();
+}
 
-         QLabel *newIcon = new QLabel(this);
-         newIcon->setPixmap(pixmap);
-         newIcon->move(event->pos() - offset);
-         newIcon->show();
-         newIcon->setAttribute(Qt::WA_DeleteOnClose);
+void InterfacesList::addPiece(QPixmap pixmap, QPoint location)
+{
+    QListWidgetItem *pieceItem = new QListWidgetItem(this);
+    pieceItem->setIcon(QIcon(pixmap));
+    pieceItem->setData(Qt::UserRole, QVariant(pixmap));
+    pieceItem->setData(Qt::UserRole+1, location);
+    pieceItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
+}
 
-         if (event->source() == this) 
-         {
-             event->setDropAction(Qt::MoveAction);
-             event->accept();
-         } 
-         else 
-         {
-             event->acceptProposedAction();
-         }
+void InterfacesList::startDrag(Qt::DropActions supportedActions)
+{
+    QListWidgetItem *item = currentItem();
+    QByteArray itemData;
+    QDataStream dataStream(&itemData, QIODevice::WriteOnly);
+    QPixmap pixmap = qVariantValue<QPixmap>(item->data(Qt::UserRole));
+    QPoint location = item->data(Qt::UserRole+1).toPoint();
+
+    dataStream << pixmap << location;
+    QMimeData *mimeData = new QMimeData;
+    mimeData->setData("image/x-puzzle-piece", itemData);
+    QDrag *drag = new QDrag(this);
+    drag->setMimeData(mimeData);
+    drag->setHotSpot(QPoint(pixmap.width()/2, pixmap.height()/2));
+    drag->setPixmap(pixmap);
+    if (drag->start(Qt::MoveAction) == Qt::MoveAction)
+		delete takeItem(row(item));
+}
+ 
+RobotInterfaces::RobotInterfaces(QWidget *parent)
+    : QWidget(parent)
+{
+	setAcceptDrops(true);
+    setMinimumSize(200, 300);
+    setMaximumSize(200, 300);
+}
+
+void RobotInterfaces::clear()
+{
+    pieceLocations.clear();
+    piecePixmaps.clear();
+    pieceRects.clear();
+    highlightedRect = QRect();
+    inPlace = 0;
+    update();
+}
+
+void RobotInterfaces::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasFormat("image/x-puzzle-piece"))
+        event->accept();
+    else
+        event->ignore();
+}
+
+void RobotInterfaces::dragLeaveEvent(QDragLeaveEvent *event)
+{
+    QRect updateRect = highlightedRect;
+    highlightedRect = QRect();
+    update(updateRect);
+    event->accept();
+}
+
+void RobotInterfaces::dragMoveEvent(QDragMoveEvent *event)
+{
+    QRect updateRect = highlightedRect.unite(targetSquare(event->pos()));
+    if (event->mimeData()->hasFormat("image/x-puzzle-piece")
+        && findPiece(targetSquare(event->pos())) == -1) 
+    {
+		highlightedRect = targetSquare(event->pos());
+        event->setDropAction(Qt::MoveAction);
+        event->accept();
+    }
+    else 
+    {
+		highlightedRect = QRect();
+        event->ignore();
+    }
+    update(updateRect);
+}
+
+void RobotInterfaces::dropEvent(QDropEvent *event)
+{
+    if (event->mimeData()->hasFormat("image/x-puzzle-piece")
+        && findPiece(targetSquare(event->pos())) == -1) 
+	{
+    	QByteArray pieceData = event->mimeData()->data("image/x-puzzle-piece");
+        QDataStream dataStream(&pieceData, QIODevice::ReadOnly);
+        QRect square = targetSquare(event->pos());
+        QPixmap pixmap;
+        QPoint location;
+        dataStream >> pixmap >> location;
+        pieceLocations.append(location);
+	    piecePixmaps.append(pixmap);
+        pieceRects.append(square);
+
+        highlightedRect = QRect();
+        update(square);
+
+        event->setDropAction(Qt::MoveAction);
+        event->accept();
+        if (location == QPoint(square.x()/80, square.y()/80)) 
+        {
+            inPlace++;
+            if (inPlace == 25)
+                emit puzzleCompleted();
+        }
      } 
      else 
      {
-         event->ignore();
+		highlightedRect = QRect();
+        event->ignore();
      }
 }
 
-void DragToWidget::mousePressEvent(QMouseEvent *event)
+int RobotInterfaces::findPiece(const QRect &pieceRect) const
 {
-     QLabel *child = static_cast<QLabel*>(childAt(event->pos()));
-     if (!child)
-         return;
-
-     QPixmap pixmap = *child->pixmap();
-
-     QByteArray itemData;
-     QDataStream dataStream(&itemData, QIODevice::WriteOnly);
-     dataStream << pixmap << QPoint(event->pos() - child->pos());
-
-     QMimeData *mimeData = new QMimeData;
-     mimeData->setData("application/x-dnditemdata", itemData);
-
-     QDrag *drag = new QDrag(this);
-     drag->setMimeData(mimeData);
-     drag->setPixmap(pixmap);
-     drag->setHotSpot(event->pos() - child->pos());
-
-     QPixmap tempPixmap = pixmap;
-     QPainter painter;
-     painter.begin(&tempPixmap);
-     painter.fillRect(pixmap.rect(), QColor(127, 127, 127, 127));
-     painter.end();
-
-     child->setPixmap(tempPixmap);
-
-     if (drag->start(Qt::CopyAction | Qt::MoveAction) == Qt::MoveAction)
-         child->close();
-     else 
-     {
-         child->show();
-         child->setPixmap(pixmap);
-     }
-}
-////////////////////////////////////
-DragFromWidget::DragFromWidget(QWidget *parent)
-    : QFrame(parent)
-{
-     setMinimumSize(200, 200);
-     setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
-     setAcceptDrops(true);
-
-     QLabel *boatIcon = new QLabel(this);
-     boatIcon->setPixmap(QPixmap(":/laser_s.jpg"));
-     boatIcon->move(20, 20);
-     boatIcon->show();
-     boatIcon->setAttribute(Qt::WA_DeleteOnClose);
-
-     QLabel *carIcon = new QLabel(this);
-     carIcon->setPixmap(QPixmap(":/amcl_s.jpg"));
-     carIcon->move(120, 20);
-     carIcon->show();
-     carIcon->setAttribute(Qt::WA_DeleteOnClose);
-
-     QLabel *houseIcon = new QLabel(this);
-     houseIcon->setPixmap(QPixmap(":/images/house.png"));
-     houseIcon->move(20, 120);
-     houseIcon->show();
-     houseIcon->setAttribute(Qt::WA_DeleteOnClose);
+    for (int i = 0; i < pieceRects.size(); ++i) 
+    {
+		if (pieceRect == pieceRects[i]) 
+		{
+        	return i;
+        }
+    }
+    return -1;
 }
 
-void DragFromWidget::dropEvent(QDropEvent *event)
+void RobotInterfaces::mousePressEvent(QMouseEvent *event)
 {
-     if (event->mimeData()->hasFormat("application/x-dnditemdata")) {
-         QByteArray itemData = event->mimeData()->data("application/x-dnditemdata");
-         QDataStream dataStream(&itemData, QIODevice::ReadOnly);
+    QRect square = targetSquare(event->pos());
+    int found = findPiece(square);
+    if (found == -1)
+        return;
+	QPoint location = pieceLocations[found];
+    QPixmap pixmap = piecePixmaps[found];
+    pieceLocations.removeAt(found);
+    piecePixmaps.removeAt(found);
+    pieceRects.removeAt(found);
 
-         QPixmap pixmap;
-         QPoint offset;
-         dataStream >> pixmap >> offset;
+    if (location == QPoint(square.x()/80, square.y()/80))
+        inPlace--;
+	update(square);
+    QByteArray itemData;
+    QDataStream dataStream(&itemData, QIODevice::WriteOnly);
+    dataStream << pixmap << location;
 
-         QLabel *newIcon = new QLabel(this);
-         newIcon->setPixmap(pixmap);
-         newIcon->move(event->pos() - offset);
-         newIcon->show();
-         newIcon->setAttribute(Qt::WA_DeleteOnClose);
+    QMimeData *mimeData = new QMimeData;
+    mimeData->setData("image/x-puzzle-piece", itemData);
 
-         if (event->source() == this) {
-             event->setDropAction(Qt::MoveAction);
-             event->accept();
-         } else {
-             event->acceptProposedAction();
-         }
-     } else {
-         event->ignore();
-     }
+    QDrag *drag = new QDrag(this);
+    drag->setMimeData(mimeData);
+    drag->setHotSpot(event->pos() - square.topLeft());
+    drag->setPixmap(pixmap);
+    if (!(drag->start(Qt::MoveAction) == Qt::MoveAction)) 
+    {
+    	pieceLocations.insert(found, location);
+        piecePixmaps.insert(found, pixmap);
+        pieceRects.insert(found, square);
+        update(targetSquare(event->pos()));
+
+        if (location == QPoint(square.x()/80, square.y()/80))
+            inPlace++;
+    }
 }
 
-void DragFromWidget::mousePressEvent(QMouseEvent *event)
+void RobotInterfaces::paintEvent(QPaintEvent *event)
 {
-     QLabel *child = static_cast<QLabel*>(childAt(event->pos()));
-     if (!child)
-         return;
+    QPainter painter;
+    painter.begin(this);
+    painter.fillRect(event->rect(), Qt::white);
+    if (highlightedRect.isValid()) 
+    {
+        painter.setBrush(QColor("#ffcccc"));
+        painter.setPen(Qt::NoPen);
+        painter.drawRect(highlightedRect.adjusted(0, 0, -1, -1));
+    }
 
-     QPixmap pixmap = *child->pixmap();
-
-     QByteArray itemData;
-     QDataStream dataStream(&itemData, QIODevice::WriteOnly);
-     dataStream << pixmap << QPoint(event->pos() - child->pos());
-
-     QMimeData *mimeData = new QMimeData;
-     mimeData->setData("application/x-dnditemdata", itemData);
-
-     QDrag *drag = new QDrag(this);
-     drag->setMimeData(mimeData);
-     drag->setPixmap(pixmap);
-     drag->setHotSpot(event->pos() - child->pos());
-
-     QPixmap tempPixmap = pixmap;
-     QPainter painter;
-     painter.begin(&tempPixmap);
-     painter.fillRect(pixmap.rect(), QColor(127, 127, 127, 127));
-     painter.end();
-
-     child->setPixmap(tempPixmap);
-
-     if (drag->start(Qt::CopyAction | Qt::MoveAction) == Qt::MoveAction)
-         child->close();
-     else {
-         child->show();
-         child->setPixmap(pixmap);
-     }
+    for (int i = 0; i < pieceRects.size(); ++i) 
+    {
+        painter.drawPixmap(pieceRects[i], piecePixmaps[i]);
+    }
+    painter.end();
 }
+
+const QRect RobotInterfaces::targetSquare(const QPoint &position) const
+{
+    return QRect(position.x()/80 * 80, position.y()/80 * 80, 80, 80);
+}
+ 
+//DragToWidget::DragToWidget(QWidget *parent)
+//    : QFrame(parent)
+//{
+//    setMinimumSize(200, 200);
+//    setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
+//    setAcceptDrops(true);
+//	
+////	QListWidget 	*contentsWidget;	
+////	contentsWidget = new QListWidget(this);
+////    contentsWidget->setViewMode(QListView::IconMode);
+////    contentsWidget->setIconSize(QSize(180, 84));
+////    contentsWidget->setMovement(QListView::Static);
+////    contentsWidget->setMaximumWidth(180);
+////    contentsWidget->setMaximumHeight(800);
+////    contentsWidget->setSpacing(12);
+////    	
+////	QListWidgetItem *configButton = new QListWidgetItem(contentsWidget);
+////    configButton->setIcon(QIcon(":/robot.jpg"));
+//// 	configButton->setText(("Robot Configurations"));
+//// 	configButton->setTextAlignment(Qt::AlignHCenter);
+//// 	configButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+//
+//     QLabel *boatIcon = new QLabel(this);
+//     boatIcon->setPixmap(QPixmap(":/laser_s.jpg"));
+//     boatIcon->setText("Something");
+//     boatIcon->move(20, 20);
+//     boatIcon->show();
+//     boatIcon->setAttribute(Qt::WA_DeleteOnClose);
+//
+//     QLabel *carIcon = new QLabel(this);
+//     carIcon->setPixmap(QPixmap(":/amcl_s.jpg"));
+//     carIcon->move(120, 20);
+//     carIcon->show();
+//     carIcon->setAttribute(Qt::WA_DeleteOnClose);
+//
+//     QLabel *houseIcon = new QLabel(this);
+//     houseIcon->setPixmap(QPixmap(":/images/house.png"));
+//     houseIcon->move(20, 120);
+//     houseIcon->show();
+//     houseIcon->setAttribute(Qt::WA_DeleteOnClose);
+//}
+
+//void DragToWidget::dragEnterEvent(QDragEnterEvent *event)
+//{
+//     if (event->mimeData()->hasFormat("application/x-dnditemdata")) 
+//     {
+//         if (event->source() == this) 
+//         {
+//             event->setDropAction(Qt::MoveAction);
+//             event->accept();
+//         } 
+//         else 
+//         {
+//             event->acceptProposedAction();
+//         }
+//     } else 
+//     {
+//         event->ignore();
+//     }
+//}
+
+//void DragToWidget::dropEvent(QDropEvent *event)
+//{
+//     if (event->mimeData()->hasFormat("application/x-dnditemdata")) 
+//     {
+//         QByteArray itemData = event->mimeData()->data("application/x-dnditemdata");
+//         QDataStream dataStream(&itemData, QIODevice::ReadOnly);
+//
+//         QPixmap pixmap;
+//         QPoint offset;
+//         dataStream >> pixmap >> offset;
+//
+//         QLabel *newIcon = new QLabel(this);
+//         newIcon->setPixmap(pixmap);
+//         newIcon->move(event->pos() - offset);
+//         newIcon->show();
+//         newIcon->setAttribute(Qt::WA_DeleteOnClose);
+//
+//         if (event->source() == this) 
+//         {
+//             event->setDropAction(Qt::MoveAction);
+//             event->accept();
+//         } 
+//         else 
+//         {
+//             event->acceptProposedAction();
+//         }
+//     } 
+//     else 
+//     {
+//         event->ignore();
+//     }
+//}
+
+//void DragToWidget::mousePressEvent(QMouseEvent *event)
+//{
+//     QLabel *child = static_cast<QLabel*>(childAt(event->pos()));
+//     if (!child)
+//         return;
+//
+//     QPixmap pixmap = *child->pixmap();
+//
+//     QByteArray itemData;
+//     QDataStream dataStream(&itemData, QIODevice::WriteOnly);
+//     dataStream << pixmap << QPoint(event->pos() - child->pos());
+//
+//     QMimeData *mimeData = new QMimeData;
+//     mimeData->setData("application/x-dnditemdata", itemData);
+//
+//     QDrag *drag = new QDrag(this);
+//     drag->setMimeData(mimeData);
+//     drag->setPixmap(pixmap);
+//     drag->setHotSpot(event->pos() - child->pos());
+//
+//     QPixmap tempPixmap = pixmap;
+//     QPainter painter;
+//     painter.begin(&tempPixmap);
+//     painter.fillRect(pixmap.rect(), QColor(127, 127, 127, 127));
+//     painter.end();
+//
+//     child->setPixmap(tempPixmap);
+//
+//     if (drag->start(Qt::CopyAction | Qt::MoveAction) == Qt::MoveAction)
+//         child->close();
+//     else 
+//     {
+//         child->show();
+//         child->setPixmap(pixmap);
+//     }
+//}
+//////////////////////////////////////
+//DragFromWidget::DragFromWidget(QWidget *parent)
+//    : QFrame(parent)
+//{
+//     setMinimumSize(200, 200);
+//     setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
+//     setAcceptDrops(true);
+////     QLabel *boatIcon = new QLabel(this);
+////     boatIcon->setPixmap(QPixmap(":/laser_s.jpg"));
+////     boatIcon->move(20, 20);
+////     boatIcon->show();
+////     boatIcon->setAttribute(Qt::WA_DeleteOnClose);
+////
+////     QLabel *carIcon = new QLabel(this);
+////     carIcon->setPixmap(QPixmap(":/amcl_s.jpg"));
+////     carIcon->move(120, 20);
+////     carIcon->show();
+////     carIcon->setAttribute(Qt::WA_DeleteOnClose);
+////
+////     QLabel *houseIcon = new QLabel(this);
+////     houseIcon->setPixmap(QPixmap(":/images/house.png"));
+////     houseIcon->move(20, 120);
+////     houseIcon->show();
+////     houseIcon->setAttribute(Qt::WA_DeleteOnClose);
+//}
+//
+//void DragFromWidget::createIcons(QVector <device_t> devices)
+//{
+//	char section[256];
+//	QLabel * icon[10] ;
+//  	//printf("Available devices: %s:%d\n",  qPrintable(robotIpE.text()), int (robotPortE.value()));
+//  	for (int i = 0; i < devices.size(); i++)
+//  	{
+//    	snprintf(section, sizeof(section), "%s:%d",playerc_lookup_name(devices[i].addr.interf), devices[i].addr.index);
+//    	printf("%-16s %-40s", section, devices[i].drivername);
+//		icon[i] = new QLabel(this);
+//		//icons.push_back(icon); 
+//		
+//		if(devices[i].addr.interf == PLAYER_LASER_CODE)
+//		switch(devices[i].addr.interf)
+//		{
+//			case PLAYER_LASER_CODE :
+//				icon[i]->setPixmap(QPixmap(":/laser_s.jpg"));
+//				break;
+//			case PLAYER_POSITION2D_CODE:
+//				icon[i]->setPixmap(QPixmap(":/amcl_s.jpg"));
+//			default:
+//				icon[i]->setPixmap(QPixmap(":/amcl_s.jpg"));
+//		}
+//		printf("\n");
+//	    icon[i]->move((i*10)+20, 20);
+//	    icon[i]->show();
+//	    icon[i]->setAttribute(Qt::WA_DeleteOnClose); 	
+//  	}
+////  		if (device.addr.index == 0)
+//}
+//
+//void DragFromWidget::dropEvent(QDropEvent *event)
+//{
+//     if (event->mimeData()->hasFormat("application/x-dnditemdata")) {
+//         QByteArray itemData = event->mimeData()->data("application/x-dnditemdata");
+//         QDataStream dataStream(&itemData, QIODevice::ReadOnly);
+//
+//         QPixmap pixmap;
+//         QPoint offset;
+//         dataStream >> pixmap >> offset;
+//
+//         QLabel *newIcon = new QLabel(this);
+//         newIcon->setPixmap(pixmap);
+//         newIcon->move(event->pos() - offset);
+//         newIcon->show();
+//         newIcon->setAttribute(Qt::WA_DeleteOnClose);
+//
+//         if (event->source() == this) {
+//             event->setDropAction(Qt::MoveAction);
+//             event->accept();
+//         } else {
+//             event->acceptProposedAction();
+//         }
+//     } else {
+//         event->ignore();
+//     }
+//}
+//
+//void DragFromWidget::mousePressEvent(QMouseEvent *event)
+//{
+//     QLabel *child = static_cast<QLabel*>(childAt(event->pos()));
+//     if (!child)
+//         return;
+//
+//     QPixmap pixmap = *child->pixmap();
+//
+//     QByteArray itemData;
+//     QDataStream dataStream(&itemData, QIODevice::WriteOnly);
+//     dataStream << pixmap << QPoint(event->pos() - child->pos());
+//
+//     QMimeData *mimeData = new QMimeData;
+//     mimeData->setData("application/x-dnditemdata", itemData);
+//
+//     QDrag *drag = new QDrag(this);
+//     drag->setMimeData(mimeData);
+//     drag->setPixmap(pixmap);
+//     drag->setHotSpot(event->pos() - child->pos());
+//
+//     QPixmap tempPixmap = pixmap;
+//     QPainter painter;
+//     painter.begin(&tempPixmap);
+//     painter.fillRect(pixmap.rect(), QColor(127, 127, 127, 127));
+//     painter.end();
+//
+//     child->setPixmap(tempPixmap);
+//
+//     if (drag->start(Qt::CopyAction | Qt::MoveAction) == Qt::MoveAction)
+//         child->close();
+//     else {
+//         child->show();
+//         child->setPixmap(pixmap);
+//     }
+//}
  
 PlayGroundTab::~PlayGroundTab()
 {
@@ -388,8 +670,10 @@ RobotConfigPage::RobotConfigPage(QWidget * parent,PlayGround *playG):
 
 
     QHBoxLayout *interfaceHLayout = new QHBoxLayout;
-    interfaceHLayout->addWidget(new DragToWidget);
-    interfaceHLayout->addWidget(new DragFromWidget);
+	robotInterfaces = new RobotInterfaces(this);
+	interfacesList  = new InterfacesList(this);
+    interfaceHLayout->addWidget(robotInterfaces);
+    interfaceHLayout->addWidget(interfacesList);
 
     QVBoxLayout *interfaceVLayout = new QVBoxLayout;
     interfaceVLayout->addLayout(interfaceHLayout);
@@ -425,7 +709,7 @@ void RobotConfigPage::updateSelection(int r)
 		modelDiff.setChecked(true);
 	else
 		modelCar.setChecked(true);		
-	playGround->robotPlatforms[r]->commManager->listDevices();
+	//dragFromWidget->createIcons(playGround->robotPlatforms[r]->commManager->getDevices(robotIpE.text(),int (robotPortE.value())));
 }
 MapConfigPage::MapConfigPage(QWidget * parent,PlayGround *playG): 
 	QWidget(parent),
