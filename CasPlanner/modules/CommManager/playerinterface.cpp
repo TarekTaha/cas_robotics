@@ -17,75 +17,31 @@ PlayerInterface::PlayerInterface(QString host, int port):
 {
 }
 
-void PlayerInterface::listDevices()
+QVector<device_t> PlayerInterface::getDevices(QString host,int port )
 {
   	// Connect to the server
-  	printf("Connecting to [%s:%d]\n", qPrintable(playerHost), playerPort);
-  	client = playerc_client_create(NULL, qPrintable(playerHost), playerPort);
+  	devices.clear();
+  	printf("Connecting to [%s:%d]\n", qPrintable(host), port);
+  	client = playerc_client_create(NULL, qPrintable(host), port);
   	if (playerc_client_connect(client) != 0)
   	{
     	printf("%s", playerc_error_str());
-    	return;
+    	return devices;
   	}	
   	// Get the available devices.
   	if (playerc_client_get_devlist(client) != 0)
   	{
     	printf("%s", playerc_error_str());
-    	return;
+    	return devices;
   	}  	
-  	int device_count=0;
-  	char section[256];
+  	device_t device;
   	for (int i = 0; i < client->devinfo_count; i++)
   	{
-    	device = devices + device_count;
-    	device->addr = client->devinfos[i].addr;
-    	device->drivername = strdup(client->devinfos[i].drivername);
-
-    	// See if the device should be subscribed immediately.
-    	snprintf(section, sizeof(section), "%s:%d",playerc_lookup_name(device->addr.interf), device->addr.index);
-//    	device->subscribe = opt_get_int(opt, section, "", 0);
-//    	device->subscribe = opt_get_int(opt, section, "subscribe", device->subscribe);
-    	if (device->addr.index == 0)
-    	{
-      		snprintf(section, sizeof(section), "%s",playerc_lookup_name(device->addr.interf));
-//      		device->subscribe = opt_get_int(opt, section, "", device->subscribe);
-//      		device->subscribe = opt_get_int(opt, section, "subscribe", device->subscribe);
-    	}
-	    // Allow for --position instead of --position2d
-    	if(device->addr.interf == PLAYER_POSITION2D_CODE)
-    	{
-      		snprintf(section, sizeof(section), "%s:%d",PLAYER_POSITION2D_STRING, device->addr.index);
-//      		device->subscribe = opt_get_int(opt, section, "", device->subscribe);
-//      		device->subscribe = opt_get_int(opt, section, "subscribe", device->subscribe);
-      		if (device->addr.index == 0)
-      		{
-        		snprintf(section, sizeof(section), "%s", PLAYER_POSITION2D_STRING);
-//        		device->subscribe = opt_get_int(opt, section, "", device->subscribe);
-//        		device->subscribe = opt_get_int(opt, section, "subscribe", device->subscribe);
-	      	}
-    	}
-	    // Create the GUI proxy for this device.
-//    	create_proxy(device, opt, mainwnd, client);
-	    device_count++;
+    	device.addr = client->devinfos[i].addr;
+    	device.drivername = strdup(client->devinfos[i].drivername);
+    	devices.push_back(device);
   	}  	
-  	// Print the list of available devices.
-  	printf("Available devices: %s:%d\n",  qPrintable(playerHost), playerPort);
-  	for (int i = 0; i < device_count; i++)
-  	{
-    	device = devices + i;
-    	snprintf(section, sizeof(section), "%s:%d",playerc_lookup_name(device->addr.interf), device->addr.index);
-    	printf("%-16s %-40s", section, device->drivername);
-    	if (device->proxy)
-    	{
-      		if (device->subscribe)
-        		printf("subscribed");
-      		else
-        		printf("ready");
-    	}
-    	else
-      		printf("unsupported");
-    	printf("\n");
-  	}  	
+  	return devices;
 }
 
 void PlayerInterface::emergencyStop()

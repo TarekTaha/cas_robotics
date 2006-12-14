@@ -18,14 +18,14 @@ CommManager::~CommManager()
 {
 }
 
-void CommManager::listDevices()
+QVector <device_t> CommManager::getDevices(QString host,int port)
 {
-  player->listDevices();
+	return player->getDevices(host,port);
 }
 
 void CommManager::emergencyStop()
 {
-  player->emergencyStop();
+  	player->emergencyStop();
 }
 
 void CommManager::emergencyRelease()
