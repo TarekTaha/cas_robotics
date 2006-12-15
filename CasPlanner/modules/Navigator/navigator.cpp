@@ -151,7 +151,7 @@ robotManager(r),
 local_planner(NULL),
 global_planner(r->planningManager)
 {
-	connect(this, SIGNAL(drawLocalPath(PathPlanner *,Pose *,int *)),robotManager, SLOT(rePaint(PathPlanner*,Pose *,int *)));
+//	connect(this, SIGNAL(drawLocalPath(PathPlanner *,Pose *,int *)),robotManager, SLOT(rePaint(PathPlanner*,Pose *,int *)));
 }
 
 Navigator::~Navigator()
@@ -502,22 +502,11 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
 
 void Navigator::run()
 {
-//	if(robotManager->renderingMethod == PAINTER_2D)
-//		connect(this, SIGNAL(pathTraversed()),robotManager->navCon, SLOT(Finished()));	
-	if(robotManager->renderingMethod == OPENGL)
-	{
-//		connect(this, SIGNAL(glRender()),robotManager->->mapViewer, SLOT(update()));	
-//		connect(this, SIGNAL(pathTraversed()),playGround->navCon->navControlPanel, SLOT(Finished()));
-//		connect(this, SIGNAL(setWayPoint(Pose*)),robotManager->navCon->mapViewer,SLOT(setWayPoint(Pose*)));				
-//		connect(this, SIGNAL(renderMapPatch(Map*)),robotManager->navCon->mapViewer,SLOT(renderMapPatch(Map*)));						
-	}
-	if(robotManager->renderingMethod == OPENGL)
-	{
-		connect(this, SIGNAL(glRender()),robotManager,SLOT(update()));	
-		connect(this, SIGNAL(pathTraversed()),robotManager,SLOT(Finished()));
-		connect(this, SIGNAL(setWayPoint(Pose*)),robotManager,SLOT(setWayPoint(Pose*)));				
-		connect(this, SIGNAL(renderMapPatch(Map*)),robotManager,SLOT(renderMapPatch(Map*)));						
-	}
+	connect(this, SIGNAL(glRender()),robotManager,SLOT(update()));	
+	connect(this, SIGNAL(pathTraversed()),robotManager,SLOT(Finished()));
+	connect(this, SIGNAL(setWayPoint(Pose*)),robotManager,SLOT(setWayPoint(Pose*)));				
+	connect(this, SIGNAL(renderMapPatch(Map*)),robotManager,SLOT(renderMapPatch(Map*)));						
+
 	QVector <Robot *> availableRobots;
 	ControlAction cntrl;
 	Timer amcl_timer,delta_timer,redraw_timer,control_timer;
@@ -814,14 +803,9 @@ void Navigator::run()
 //			if(this->mapPatch)
 //				delete mapPatch;
 //			mapPatch = mapManager.provideLaserOG(laserScan,2.0,0.05,EstimatedPos);	
-			if(robotManager->renderingMethod == PAINTER_2D) 			
-		 		emit drawLocalPath(local_planner->pathPlanner,&loc,&path2Draw);	
-			else if(robotManager->renderingMethod == OPENGL)		 			
-			{
 			 	emit glRender();
 //			 	emit renderMapPatch(mapPatch);
 //			 	emit renderMapPatch(robotManager->planner->pathPlanner->map);
-			}
 		 	redraw_timer.restart();	
 		}
 		/* Get the control Action to be applied, in this case it's a

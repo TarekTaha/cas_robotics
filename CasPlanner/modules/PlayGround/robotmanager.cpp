@@ -109,12 +109,4 @@ int RobotManager::startNavigator()
     return 1;
 }
 
-void RobotManager::rePaint(PathPlanner *pl,Pose * ps,int *draw)
-{
-//	if(*draw == LOCALPATH)
-//		this->local_planner = pl;
-//	navCon->mapPainter->setPathEnabled(1);
-//	navCon->mapPainter->drawPath(pl,*ps,draw);
-}
-
 

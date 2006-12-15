@@ -29,34 +29,13 @@ class QDragEnterEvent;
 class QDropEvent;
 class QMouseEvent;
  
-class DragToWidget : public QFrame
-{
-	public:
-    	DragToWidget(QWidget *parent=0);
-	protected:
-    	void dragEnterEvent(QDragEnterEvent *event);
-     	void dropEvent(QDropEvent *event);
-     	void mousePressEvent(QMouseEvent *event);
-};
-
-class DragFromWidget : public QFrame
-{
-	public:
-    	DragFromWidget(QWidget *parent=0);
-		void createIcons(QVector <device_t> devices);    	
-	protected:
-    	//void dragEnterEvent(QDragEnterEvent *event);
-    	QVector <QLabel> icons;
-     	void dropEvent(QDropEvent *event);
-     	void mousePressEvent(QMouseEvent *event);    	
-};
-
 class InterfacesList : public QListWidget
 {
 	Q_OBJECT
 	public:
     	InterfacesList(QWidget *parent = 0);
-     	void addPiece(QPixmap pixmap, QPoint location);
+     	void addInterface(QPixmap icon,QString name, QPoint location);
+		void createIcons(QVector <device_t> devices);     	
 	protected:
     	void dragEnterEvent(QDragEnterEvent *event);
      	void dragMoveEvent(QDragMoveEvent *event);
@@ -64,29 +43,18 @@ class InterfacesList : public QListWidget
      	void startDrag(Qt::DropActions supportedActions);
 };
 
-class RobotInterfaces : public QWidget
+class RobotInterfaces : public QListWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 	public:
     	RobotInterfaces(QWidget *parent = 0);
-    	void clear();
-	signals:
-    	void puzzleCompleted();
+     	void addInterface(QPixmap icon,QString name, QPoint location);
+		void createIcons(QVector <device_t> devices);     	
 	protected:
     	void dragEnterEvent(QDragEnterEvent *event);
-     	void dragLeaveEvent(QDragLeaveEvent *event);
      	void dragMoveEvent(QDragMoveEvent *event);
      	void dropEvent(QDropEvent *event);
-     	void mousePressEvent(QMouseEvent *event);
-     	void paintEvent(QPaintEvent *event);
-	private:
-    	int findPiece(const QRect &pieceRect) const;
-     	const QRect targetSquare(const QPoint &position) const;
-     	QList<QPixmap> piecePixmaps;
-     	QList<QRect> pieceRects;
-     	QList<QPoint> pieceLocations;
-     	QRect highlightedRect;
-     	int inPlace;
+     	void startDrag(Qt::DropActions supportedActions);
 };
 
 class RobotConfigPage : public QWidget
@@ -99,8 +67,6 @@ Q_OBJECT
 	public:    	
     	PlayGround * playGround;
     	QComboBox  * robotsCombo;
-//    	DragFromWidget * dragFromWidget;
-//    	DragToWidget   * dragToWidget;
     	InterfacesList * interfacesList;
     	RobotInterfaces * robotInterfaces;
     	QLabel robotName,robotIp,robotPort,robotLength,robotWidth,robotModel,robotCenter,robotMass,

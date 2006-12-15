@@ -33,7 +33,6 @@ Q_OBJECT
 		void updateSelectedObject(double);
 		void updateSelectedAvoidanceAlgo(bool);
 		void updateSelectedRobot(bool);
-		void handleRobotSelection();
 		void save();
 		void setNavigation();
 		void exportHtml();
@@ -86,9 +85,6 @@ Q_OBJECT
 		RobotManager *currRobot;
 		QTreeWidgetItem *robotItem;
 
-		QTreeWidget selectedRobot;
-//		QHash<QTreeWidgetItem *, RobotManager *> widget2RobMan;
-//		QHash<RobotManager *, QTreeWidgetItem *> robMan2Widget;
 		friend class NavContainer;
 		static unsigned *image, *null;
        	Node * path;
@@ -103,7 +99,6 @@ Q_OBJECT
     public:
 		~NavContainer();
 		NavContainer(QWidget *parent ,PlayGround *playGround);
-//		MapPainter * mapPainter;
 		MapViewer  * mapViewer;
 	public slots:
 //		void renderPath();

@@ -20,6 +20,7 @@ PlayerInterface::PlayerInterface(QString host, int port):
 QVector<device_t> PlayerInterface::getDevices(QString host,int port )
 {
   	// Connect to the server
+  	dataLock.lockForWrite(); 
   	devices.clear();
   	printf("Connecting to [%s:%d]\n", qPrintable(host), port);
   	client = playerc_client_create(NULL, qPrintable(host), port);
@@ -41,6 +42,7 @@ QVector<device_t> PlayerInterface::getDevices(QString host,int port )
     	device.drivername = strdup(client->devinfos[i].drivername);
     	devices.push_back(device);
   	}  	
+  	dataLock.unlock();
   	return devices;
 }
 
