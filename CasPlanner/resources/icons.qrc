@@ -5,6 +5,8 @@
     <file>amcl_s.jpg</file>      
     <file>flagein.jpg</file>
     <file>laser_s.jpg</file>    
+    <file>pos_s.png</file>    
+    <file>map_s.png</file>    
     <file>warning.png</file>
  </qresource>
  </RCC>

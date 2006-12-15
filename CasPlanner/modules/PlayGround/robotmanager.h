@@ -18,7 +18,6 @@ class MapViewer;
 class PlayGround;
 
 enum{FORCE_FIELD,VFH,CONFIG_SPACE,NO_AVOID};
-enum{OPENGL,PAINTER_2D};
 
 class RobotManager : public QObject//public CommManager, public PlanningManager ,public Navigator
 {
@@ -43,8 +42,6 @@ class RobotManager : public QObject//public CommManager, public PlanningManager 
 		Navigator       *navigator;
 		Robot           *robot;
 		bool notPaused,notFollowing;
-   public slots:
-  		void rePaint(PathPlanner*,Pose *,int *);
 };
 
 #endif

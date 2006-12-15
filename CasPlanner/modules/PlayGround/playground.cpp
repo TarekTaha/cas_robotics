@@ -20,18 +20,7 @@ PlayGround::PlayGround(QStringList configFiles)
 				QString render = cf->ReadString(i, "renderingMethod", "OpenGL");
 				if(render =="OpenGL")
 				{
-					this->renderingMethod = OPENGL;
-					//qDebug("OpenGL !!!");					
-				}
-				else if (render =="Painter2D")
-				{
-					this->renderingMethod = PAINTER_2D;
-					//qDebug("2D Painter !!!");										
-				}
-				else
-				{
-					qDebug("Unknown Rendering Method !!!");
-					exit(1);
+			
 				}
 			}
 		    if(sectionName == "Robot")
@@ -71,11 +60,3 @@ PlayGround::~PlayGround()
 	for(int i=0;i<robotPlatforms.size();i++)
 	    delete robotPlatforms[i];
 }
-
-//void RobotManager::rePaint(PathPlanner *pl,Pose * ps,int *draw)
-//{
-//	if(*draw == LOCALPATH)
-//		this->local_planner = pl;
-//	navCon->mapPainter->setPathEnabled(1);
-//	navCon->mapPainter->drawPath(pl,*ps,draw);
-//}
