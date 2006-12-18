@@ -35,14 +35,16 @@ class InterfacesList : public QListWidget
 	Q_OBJECT
 	public:
     	InterfacesList(QWidget *parent = 0);
-     	void addInterface(QPixmap icon,QString name, QPoint location);
+     	void addInterface(DeviceType dev,QPixmap icon,QString name, QPoint location);
 		void createIcons(QVector <DeviceType> * devices);     	
-	protected:
+	public slots:
+		void itemSelectionChanged();
+	protected:		
     	void dragEnterEvent(QDragEnterEvent *event);
      	void dragMoveEvent(QDragMoveEvent *event);
      	void dropEvent(QDropEvent *event);
      	void startDrag(Qt::DropActions supportedActions);
-     	QHash <QListWidgetItem *, DeviceType> hash;
+     	QHash <QListWidgetItem *, DeviceType> wi2Dev;
 };
 
 class RobotInterfaces : public QListWidget
@@ -51,7 +53,10 @@ class RobotInterfaces : public QListWidget
 	public:
     	RobotInterfaces(QWidget *parent = 0);
      	void addInterface(QPixmap icon,QString name, QPoint location);
-		void createIcons(QVector <DeviceType> * devices);     	
+		void createIcons(QVector <DeviceType> * devices);
+//	public slots:
+//		void itemSelectionChanged();
+//		void itemChanged( QListWidgetItem * item ); 		     	
 	protected:
     	void dragEnterEvent(QDragEnterEvent *event);
      	void dragMoveEvent(QDragMoveEvent *event);

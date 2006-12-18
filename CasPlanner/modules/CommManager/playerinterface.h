@@ -9,6 +9,7 @@
 #include <QReadWriteLock>
 #include <QTime>
 #include <iostream>
+#include <QDataStream>
 
 #include "playerinterface.h"
 #include "utils.h"
@@ -19,7 +20,10 @@
 
 using namespace PlayerCc;
 using namespace std;
-class DeviceType
+
+QT_BEGIN_HEADER
+QT_MODULE(Core)
+class Q_CORE_EXPORT DeviceType
 {
 	public:
 		DeviceType()
@@ -39,10 +43,23 @@ class DeviceType
 		{
 			this->driverName = name;
 		};
+//		QDataStream & operator << (std::ostream& os, DeviceType* e)
+//		QDataStream &operator<<(QDataStream & out)
+//		{
+//			//out << dev;
+//		};
+//		QDataStream &operator>>(QDataStream &);
+//		{
+//		};
 		player_devaddr_t addr;
   		QString driverName;
   		bool subscribed;
 };
+
+//Q_GUI_EXPORT 
+QDataStream &operator<<(QDataStream &, const DeviceType &);
+//Q_GUI_EXPORT 
+QDataStream &operator>>(QDataStream &, DeviceType &);
 
 class Laser
 {
