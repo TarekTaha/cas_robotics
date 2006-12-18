@@ -9,7 +9,17 @@ InterfacesList::InterfacesList(QWidget *parent)
     setSpacing(10);
     setAcceptDrops(true);
     setDropIndicatorShown(true);
+    connect(this,SIGNAL(itemSelectionChanged()),this,SLOT(itemSelectionChanged()));    
     clear();
+}
+
+void InterfacesList::itemSelectionChanged ()
+{
+	char section[256];
+	QListWidgetItem *item = currentItem();
+	DeviceType dev = wi2Dev[item];
+	snprintf(section, sizeof(section), "%s:%d ",playerc_lookup_name(dev.addr.interf),dev.addr.index);
+	qDebug("Selection Changed %-16s %-40s",section,qPrintable(dev.driverName));
 }
 
 void InterfacesList::createIcons(QVector <DeviceType> * devices)
@@ -26,16 +36,16 @@ void InterfacesList::createIcons(QVector <DeviceType> * devices)
 		switch((*devices)[i].addr.interf)
 		{
 			case PLAYER_LASER_CODE :
-				addInterface(QPixmap(":/laser_s.jpg"),QString(section).append((*devices)[i].driverName),QPoint(0,i));
+				addInterface((*devices)[i],QPixmap(":/laser_s.jpg"),QString(section).append((*devices)[i].driverName),QPoint(0,i));
 				break;
 			case PLAYER_MAP_CODE :
-				addInterface(QPixmap(":/map_s.png"),QString(section).append((*devices)[i].driverName),QPoint(0,i));
+				addInterface((*devices)[i],QPixmap(":/map_s.png"),QString(section).append((*devices)[i].driverName),QPoint(0,i));
 				break;				
 			case PLAYER_POSITION2D_CODE:
-				addInterface(QPixmap(":/pos_s.png"),QString(section).append((*devices)[i].driverName),QPoint(0,i));	
+				addInterface((*devices)[i],QPixmap(":/pos_s.png"),QString(section).append((*devices)[i].driverName),QPoint(0,i));	
 				break;		
 			default:
-				addInterface(QPixmap(":/amcl_s.jpg"),QString(section).append((*devices)[i].driverName),QPoint(0,i));
+				addInterface((*devices)[i],QPixmap(":/amcl_s.jpg"),QString(section).append((*devices)[i].driverName),QPoint(0,i));
 		}
   	}
 }
@@ -68,9 +78,11 @@ void InterfacesList::dropEvent(QDropEvent *event)
         QPixmap pixmap;
         QPoint location;
         QString name;
+        //DeviceType dev = wi2Dev[item];
         DeviceType dev;
         dataStream >> pixmap >> location >> name >> dev;
-        addInterface(pixmap,name , location);
+        
+        addInterface(dev,pixmap,name , location);
         event->setDropAction(Qt::MoveAction);
 		event->accept();
     } 
@@ -78,7 +90,7 @@ void InterfacesList::dropEvent(QDropEvent *event)
         event->ignore();
 }
 
-void InterfacesList::addInterface(QPixmap icon,QString name, QPoint location)
+void InterfacesList::addInterface(DeviceType dev,QPixmap icon,QString name, QPoint location)
 {
     QListWidgetItem *pieceItem = new QListWidgetItem(this);
     pieceItem->setIcon(QIcon(icon));
@@ -87,6 +99,7 @@ void InterfacesList::addInterface(QPixmap icon,QString name, QPoint location)
  	pieceItem->setText(name);
  	pieceItem->setTextAlignment(Qt::AlignHCenter);
     pieceItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
+    wi2Dev.insert(pieceItem,dev);
 }
 
 void InterfacesList::startDrag(Qt::DropActions )
@@ -97,6 +110,7 @@ void InterfacesList::startDrag(Qt::DropActions )
     QPixmap pixmap = qVariantValue<QPixmap>(item->data(Qt::UserRole));
     QPoint location = item->data(Qt::UserRole+1).toPoint();
 	QString name = item->text();
+	
 	DeviceType dev;
     dataStream << pixmap << location << name << dev;
     QMimeData *mimeData = new QMimeData;
