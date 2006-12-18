@@ -19,25 +19,30 @@
 
 using namespace PlayerCc;
 using namespace std;
-
-// Callback prototypes
-typedef void (*fndestroy_t) (void*);
-typedef void (*fnupdate_t) (void*);
-
-typedef struct
+class DeviceType
 {
-  // Device identifier.
-  player_devaddr_t addr;
-  // Driver name
-  char *drivername;
-  // Handle to the GUI proxy for this device.
-  void *proxy;
-  // Callbacks
-  fndestroy_t fndestroy;
-  fnupdate_t fnupdate;
-  // Non-zero if should be subscribed.
-  int subscribe;
-} device_t;
+	public:
+		DeviceType()
+		{
+			this->subscribed = false;
+		};
+		DeviceType(player_devaddr_t addr,QString name)
+		{
+			this->addr = addr;
+			this->driverName = name;
+		};
+		void setAddress(player_devaddr_t addr)
+		{
+			this->addr = addr;
+		};
+		void setName(QString name)
+		{
+			this->driverName = name;
+		};
+		player_devaddr_t addr;
+  		QString driverName;
+  		bool subscribed;
+};
 
 class Laser
 {
@@ -78,7 +83,7 @@ Q_OBJECT
         bool getLocalized();
         Pose getLocation();
         Pose getOdomLocation();
-        QVector<device_t> getDevices(QString,int);
+        QVector<DeviceType> * getDevices(QString,int);
         void gotoGoal(Pose);
         void vfhGoto(Pose);
         void setSpeed(double speed);
@@ -94,8 +99,7 @@ Q_OBJECT
         int playerPort; 
         PlayerClient *pc;
        	playerc_client_t *client;
-       	QVector <device_t> devices;
-	  	void *proxy;       	
+       	QVector <DeviceType> *devices; 	
         bool ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized,emergencyStopped,
         	 velControl,vfhEnabled;
         int positionId,ptzId,mapId,localizerId,vfhId;

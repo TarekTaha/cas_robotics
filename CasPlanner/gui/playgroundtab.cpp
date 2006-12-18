@@ -12,30 +12,31 @@ InterfacesList::InterfacesList(QWidget *parent)
     clear();
 }
 
-void InterfacesList::createIcons(QVector <device_t> devices)
+void InterfacesList::createIcons(QVector <DeviceType> * devices)
 {
+	if(!devices)
+		return;
 	char section[256];
 	clear();
-  	for (int i = 0; i < devices.size(); i++)
+  	for (int i = 0; i < devices->size(); i++)
   	{
-    	snprintf(section, sizeof(section), "%s:%d ",playerc_lookup_name(devices[i].addr.interf), devices[i].addr.index);
+    	snprintf(section, sizeof(section), "%s:%d ",playerc_lookup_name((*devices)[i].addr.interf), (*devices)[i].addr.index);
 //    	printf("%-16s %-40s", section, devices[i].drivername);
-
-		switch(devices[i].addr.interf)
+		if(!(*devices)[i].subscribed)
+		switch((*devices)[i].addr.interf)
 		{
 			case PLAYER_LASER_CODE :
-				addInterface(QPixmap(":/laser_s.jpg"),QString(section).append(devices[i].drivername),QPoint(0,i));
+				addInterface(QPixmap(":/laser_s.jpg"),QString(section).append((*devices)[i].driverName),QPoint(0,i));
 				break;
 			case PLAYER_MAP_CODE :
-				addInterface(QPixmap(":/map_s.png"),QString(section).append(devices[i].drivername),QPoint(0,i));
+				addInterface(QPixmap(":/map_s.png"),QString(section).append((*devices)[i].driverName),QPoint(0,i));
 				break;				
 			case PLAYER_POSITION2D_CODE:
-				addInterface(QPixmap(":/pos_s.png"),QString(section).append(devices[i].drivername),QPoint(0,i));	
+				addInterface(QPixmap(":/pos_s.png"),QString(section).append((*devices)[i].driverName),QPoint(0,i));	
 				break;		
 			default:
-				addInterface(QPixmap(":/amcl_s.jpg"),QString(section).append(devices[i].drivername),QPoint(0,i));
+				addInterface(QPixmap(":/amcl_s.jpg"),QString(section).append((*devices)[i].driverName),QPoint(0,i));
 		}
-//		printf("\n");
   	}
 }
 
@@ -67,7 +68,8 @@ void InterfacesList::dropEvent(QDropEvent *event)
         QPixmap pixmap;
         QPoint location;
         QString name;
-        dataStream >> pixmap >> location >> name;
+        DeviceType dev;
+        dataStream >> pixmap >> location >> name >> dev;
         addInterface(pixmap,name , location);
         event->setDropAction(Qt::MoveAction);
 		event->accept();
@@ -95,7 +97,8 @@ void InterfacesList::startDrag(Qt::DropActions )
     QPixmap pixmap = qVariantValue<QPixmap>(item->data(Qt::UserRole));
     QPoint location = item->data(Qt::UserRole+1).toPoint();
 	QString name = item->text();
-    dataStream << pixmap << location << name;
+	DeviceType dev;
+    dataStream << pixmap << location << name << dev;
     QMimeData *mimeData = new QMimeData;
     mimeData->setData("image/interface", itemData);
     QDrag *drag = new QDrag(this);
@@ -117,29 +120,31 @@ RobotInterfaces::RobotInterfaces(QWidget *parent)
     clear();    
 }
 
-void RobotInterfaces::createIcons(QVector <device_t> devices)
+void RobotInterfaces::createIcons(QVector <DeviceType> * devices)
 {
+	if(!devices)
+		return;	
 	char section[256];
 	clear();
-  	for (int i = 0; i < devices.size(); i++)
+  	for (int i = 0; i < devices->size(); i++)
   	{
-    	snprintf(section, sizeof(section), "%s:%d ",playerc_lookup_name(devices[i].addr.interf), devices[i].addr.index);
+    	snprintf(section, sizeof(section), "%s:%d ",playerc_lookup_name((*devices)[i].addr.interf), (*devices)[i].addr.index);
 //    	printf("%-16s %-40s", section, devices[i].drivername);
-		switch(devices[i].addr.interf)
+		if((*devices)[i].subscribed)
+		switch((*devices)[i].addr.interf)
 		{
 			case PLAYER_LASER_CODE :
-				addInterface(QPixmap(":/laser_s.jpg"),QString(section).append(devices[i].drivername),QPoint(0,i));
+				addInterface(QPixmap(":/laser_s.jpg"),QString(section).append((*devices)[i].driverName),QPoint(0,i));
 				break;
 			case PLAYER_MAP_CODE :
-				addInterface(QPixmap(":/map_s.png"),QString(section).append(devices[i].drivername),QPoint(0,i));
+				addInterface(QPixmap(":/map_s.png"),QString(section).append((*devices)[i].driverName),QPoint(0,i));
 				break;				
 			case PLAYER_POSITION2D_CODE:
-				addInterface(QPixmap(":/pos_s.png"),QString(section).append(devices[i].drivername),QPoint(0,i));	
+				addInterface(QPixmap(":/pos_s.png"),QString(section).append((*devices)[i].driverName),QPoint(0,i));	
 				break;		
 			default:
-				addInterface(QPixmap(":/amcl_s.jpg"),QString(section).append(devices[i].drivername),QPoint(0,i));
+				addInterface(QPixmap(":/amcl_s.jpg"),QString(section).append((*devices)[i].driverName),QPoint(0,i));
 		}
-//		printf("\n");
   	}
 }
 
@@ -157,7 +162,7 @@ void RobotInterfaces::dragMoveEvent(QDragMoveEvent *event)
     {
         event->setDropAction(Qt::MoveAction);
         event->accept();
-    } 
+    }
     else
     	event->ignore();
 }
@@ -282,7 +287,6 @@ void PlayGroundTab::changePage(QListWidgetItem *current, QListWidgetItem *previo
     if (!current)
 		current = previous;
     pagesWidget->setCurrentIndex(contentsWidget->row(current));
-    qDebug("Here"); fflush(stdout);
 }
 
 RobotConfigPage::RobotConfigPage(QWidget * parent,PlayGround *playG): 
@@ -427,9 +431,8 @@ void RobotConfigPage::updateSelection(int r)
 {
     if(!playGround)
        	return;
-    if(playGround->robotPlatforms.size()<(r-1))
+    if(r > (playGround->robotPlatforms.size()-1))
     	return;
-
    	robotNameE.setText(playGround->robotPlatforms[r]->robot->robotName);		
    	robotIpE.setText(playGround->robotPlatforms[r]->robot->robotIp);   	
 	robotCenterX.setValue(playGround->robotPlatforms[r]->robot->robotCenter.x());
@@ -445,7 +448,24 @@ void RobotConfigPage::updateSelection(int r)
 		modelCar.setChecked(true);		
 	interfacesList->clear();
 	robotInterfaces->clear();
-	interfacesList->createIcons(playGround->robotPlatforms[r]->commManager->getDevices(robotIpE.text(),int (robotPortE.value())));
+	if(!playGround)
+	{
+		qDebug("playGround NULL"); fflush(stdout);
+		return;
+	}
+	if(!playGround->robotPlatforms[r])
+	{
+		qDebug("robotPlatform NULL"); fflush(stdout);
+		return;
+	}
+	if(!playGround->robotPlatforms[r]->commManager)
+	{
+		qDebug("commManager NULL"); fflush(stdout);
+		return;
+	}
+	QVector <DeviceType> * d = playGround->robotPlatforms[r]->commManager->getDevices(robotIpE.text(),int (robotPortE.value()));
+	robotInterfaces->createIcons(d);
+	interfacesList->createIcons(d);
 }
 MapConfigPage::MapConfigPage(QWidget * parent,PlayGround *playG): 
 	QWidget(parent),

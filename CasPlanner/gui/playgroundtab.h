@@ -18,6 +18,7 @@
 #include <QtGui/QWidget>
 #include <QtGui/QDialog>
 #include <QFrame>
+#include <QHash>
 #include "playground.h"
 
 class PlayGround;
@@ -35,12 +36,13 @@ class InterfacesList : public QListWidget
 	public:
     	InterfacesList(QWidget *parent = 0);
      	void addInterface(QPixmap icon,QString name, QPoint location);
-		void createIcons(QVector <device_t> devices);     	
+		void createIcons(QVector <DeviceType> * devices);     	
 	protected:
     	void dragEnterEvent(QDragEnterEvent *event);
      	void dragMoveEvent(QDragMoveEvent *event);
      	void dropEvent(QDropEvent *event);
      	void startDrag(Qt::DropActions supportedActions);
+     	QHash <QListWidgetItem *, DeviceType> hash;
 };
 
 class RobotInterfaces : public QListWidget
@@ -49,7 +51,7 @@ class RobotInterfaces : public QListWidget
 	public:
     	RobotInterfaces(QWidget *parent = 0);
      	void addInterface(QPixmap icon,QString name, QPoint location);
-		void createIcons(QVector <device_t> devices);     	
+		void createIcons(QVector <DeviceType> * devices);     	
 	protected:
     	void dragEnterEvent(QDragEnterEvent *event);
      	void dragMoveEvent(QDragMoveEvent *event);

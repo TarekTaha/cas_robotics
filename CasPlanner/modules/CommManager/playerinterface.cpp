@@ -4,6 +4,7 @@ PlayerInterface::PlayerInterface(QString host, int port):
     playerHost(host),
     playerPort(port),   
     pc(0), 
+    devices(NULL),
     ptzEnabled(false),
     ctrEnabled(false),
     mapEnabled(false),
@@ -17,30 +18,63 @@ PlayerInterface::PlayerInterface(QString host, int port):
 {
 }
 
-QVector<device_t> PlayerInterface::getDevices(QString host,int port )
+QVector<DeviceType> * PlayerInterface::getDevices(QString host,int port )
 {
   	// Connect to the server
-  	dataLock.lockForWrite(); 
-  	devices.clear();
+  	dataLock.lockForWrite();
+  	if(devices)
+  		devices->clear();
+  	else
+  		devices = new QVector<DeviceType>;
   	printf("Connecting to [%s:%d]\n", qPrintable(host), port);
   	client = playerc_client_create(NULL, qPrintable(host), port);
   	if (playerc_client_connect(client) != 0)
   	{
     	printf("%s", playerc_error_str());
-    	return devices;
+    	return NULL;
   	}	
   	// Get the available devices.
   	if (playerc_client_get_devlist(client) != 0)
   	{
     	printf("%s", playerc_error_str());
     	return devices;
-  	}  	
-  	device_t device;
+  	}
+  	DeviceType device;
   	for (int i = 0; i < client->devinfo_count; i++)
   	{
-    	device.addr = client->devinfos[i].addr;
-    	device.drivername = strdup(client->devinfos[i].drivername);
-    	devices.push_back(device);
+    	device.setAddress(client->devinfos[i].addr);
+    	device.setName(strdup(client->devinfos[i].drivername));
+		switch(client->devinfos[i].addr.interf)
+		{
+			case PLAYER_LASER_CODE :
+				for(int j=0;j<lasers.size();j++)
+				{
+					if(lasers[j].lp && (client->devinfos[i].addr.index == j))
+						device.subscribed = true;
+				}
+				break;
+			case PLAYER_MAP_CODE :
+				if(this->map)
+					device.subscribed = true;
+				break;				
+			case PLAYER_POSITION2D_CODE:
+				if(this->drive && (client->devinfos[i].addr.index == 0))
+					device.subscribed = true;
+				else if((this->vfh && (client->devinfos[i].addr.index == 1)))
+					device.subscribed = true;
+				break;		
+			case PLAYER_LOCALIZE_CODE:
+				if(this->localizer)
+					device.subscribed = true;	
+				break;		
+			case PLAYER_PTZ_CODE:
+				if(this->ptz)
+					device.subscribed = true;	
+				break;						
+			default:
+				device.subscribed = false;
+		}
+		devices->push_back(device);
   	}  	
   	dataLock.unlock();
   	return devices;
