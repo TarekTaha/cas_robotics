@@ -30,38 +30,50 @@ class QDragEnterEvent;
 class QDropEvent;
 class QMouseEvent;
  
-class InterfacesList : public QListWidget
-{
-	Q_OBJECT
-	public:
-    	InterfacesList(QWidget *parent = 0);
-     	void addInterface(DeviceType dev,QPixmap icon,QString name, QPoint location);
-		void createIcons(QVector <DeviceType> * devices);     	
-	public slots:
-		void itemSelectionChanged();
-	protected:		
-    	void dragEnterEvent(QDragEnterEvent *event);
-     	void dragMoveEvent(QDragMoveEvent *event);
-     	void dropEvent(QDropEvent *event);
-     	void startDrag(Qt::DropActions supportedActions);
-     	QHash <QListWidgetItem *, DeviceType> wi2Dev;
-};
-
-class RobotInterfaces : public QListWidget
-{
-	Q_OBJECT
-	public:
-    	RobotInterfaces(QWidget *parent = 0);
-     	void addInterface(QPixmap icon,QString name, QPoint location);
-		void createIcons(QVector <DeviceType> * devices);
+//class InterfacesList : public QListWidget
+//{
+//	Q_OBJECT
+//	public:
+//    	InterfacesList(QWidget *parent = 0);
+//     	void addInterface(DeviceType dev,QPixmap icon,QString name, QPoint location);
+//		void createIcons(QVector <DeviceType> * devices);     	
 //	public slots:
 //		void itemSelectionChanged();
-//		void itemChanged( QListWidgetItem * item ); 		     	
-	protected:
-    	void dragEnterEvent(QDragEnterEvent *event);
-     	void dragMoveEvent(QDragMoveEvent *event);
-     	void dropEvent(QDropEvent *event);
-     	void startDrag(Qt::DropActions supportedActions);
+//	protected:		
+//    	void dragEnterEvent(QDragEnterEvent *event);
+//     	void dragMoveEvent(QDragMoveEvent *event);
+//     	void dropEvent(QDropEvent *event);
+//     	void startDrag(Qt::DropActions supportedActions);
+//     	QHash <QListWidgetItem *, DeviceType> wi2Dev;
+//};
+//
+//class RobotInterfaces : public QListWidget
+//{
+//	Q_OBJECT
+//	public:
+//    	RobotInterfaces(QWidget *parent = 0);
+//     	void addInterface(QPixmap icon,QString name, QPoint location);
+//		void createIcons(QVector <DeviceType> * devices);
+////	public slots:
+////		void itemSelectionChanged();
+////		void itemChanged( QListWidgetItem * item ); 		     	
+//	protected:
+//    	void dragEnterEvent(QDragEnterEvent *event);
+//     	void dragMoveEvent(QDragMoveEvent *event);
+//     	void dropEvent(QDropEvent *event);
+//     	void startDrag(Qt::DropActions supportedActions);
+//};
+
+class Interfaces : public QWidget
+{
+	Q_OBJECT
+	public:
+		Interfaces(QWidget *parent = 0);
+		void createIcons(QVector <DeviceType> * devices);
+		void addInterface(DeviceType dev,QString name);		
+	private:
+		QVBoxLayout * vLayout;
+		QVector <QCheckBox *> devicesBox;	
 };
 
 class RobotConfigPage : public QWidget
@@ -74,8 +86,9 @@ Q_OBJECT
 	public:    	
     	PlayGround * playGround;
     	QComboBox  * robotsCombo;
-    	InterfacesList * interfacesList;
-    	RobotInterfaces * robotInterfaces;
+    	Interfaces * interfaces;
+//    	InterfacesList * interfacesList;
+//    	RobotInterfaces * robotInterfaces;
     	QLabel robotName,robotIp,robotPort,robotLength,robotWidth,robotModel,robotCenter,robotMass,
     		   robotInirtia;
         QLineEdit robotNameE,robotIpE;

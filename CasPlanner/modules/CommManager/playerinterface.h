@@ -21,9 +21,7 @@
 using namespace PlayerCc;
 using namespace std;
 
-QT_BEGIN_HEADER
-QT_MODULE(Core)
-class Q_CORE_EXPORT DeviceType
+class DeviceType
 {
 	public:
 		DeviceType()
@@ -43,23 +41,22 @@ class Q_CORE_EXPORT DeviceType
 		{
 			this->driverName = name;
 		};
-//		QDataStream & operator << (std::ostream& os, DeviceType* e)
-//		QDataStream &operator<<(QDataStream & out)
-//		{
-//			//out << dev;
-//		};
-//		QDataStream &operator>>(QDataStream &);
-//		{
-//		};
 		player_devaddr_t addr;
   		QString driverName;
   		bool subscribed;
 };
 
-//Q_GUI_EXPORT 
-QDataStream &operator<<(QDataStream &, const DeviceType &);
-//Q_GUI_EXPORT 
-QDataStream &operator>>(QDataStream &, DeviceType &);
+////Q_GUI_EXPORT 
+//QDataStream &operator<<(QDataStream & out , const DeviceType &dev)
+//{
+//	out<<dev.subscribed;
+//};
+//
+////Q_GUI_EXPORT 
+//QDataStream &operator>>(QDataStream & in , DeviceType &dev)
+//{
+//	in>>dev.subscribed;
+//};
 
 class Laser
 {
