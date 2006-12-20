@@ -20,8 +20,14 @@ void Interfaces::addInterface(DeviceType dev,QString name)
     	device->setCheckState(Qt::Unchecked);
     vLayout->addWidget(device);
     devicesBox.push_back(device);
-    //wi2Dev.insert(pieceItem,dev);
+    chk2Dev.insert(device,dev);
+    connect(device,SIGNAL(stateChanged(int)),this,SLOT(checkChanged(int)));
     return;
+}
+
+void Interfaces::checkChanged(int state)
+{
+	qDebug("State is %d",state);
 }
 
 void Interfaces::createIcons(QVector <DeviceType> * devices)
@@ -30,19 +36,13 @@ void Interfaces::createIcons(QVector <DeviceType> * devices)
 		return;
 	if(vLayout)
 	{
-	 	QLayoutItem *child;
-	 	while ((child = vLayout->takeAt(0)) != 0) 
-	 	{
-	 		vLayout->removeWidget(child);
-			delete child;
-	 	}
-		delete vLayout;
-		vLayout =  new QVBoxLayout;
-		setLayout(vLayout);
+		for(int i=0;i< devicesBox.size();i++)
+			delete devicesBox[i];
 	}		
  	update();
 	char section[256];
 	this->devicesBox.clear();
+	this->chk2Dev.clear();
   	for (int i = 0; i < devices->size(); i++)
   	{
     	snprintf(section, sizeof(section), "%s:%d ",playerc_lookup_name((*devices)[i].addr.interf), (*devices)[i].addr.index);
