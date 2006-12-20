@@ -83,15 +83,14 @@ void MapViewer::setMapName(QString name)
 
 void MapViewer::initializeGL()
 {
-	glEnable(GL_TEXTURE_2D);				// Enable Texture Mapping
-	glShadeModel(GL_SMOOTH);				// Enable Smooth Shading
+//	glShadeModel(GL_SMOOTH);				// Enable Smooth Shading
 //	glClearColor(0.70f, 0.7f, 0.7f, 1.0f);
 //	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClearDepth(1.0f);						// Depth Buffer Setup
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE);		// Set The Blending Function For Translucency
-	glEnable(GL_BLEND);						// Enable Blending
+//	glClearDepth(1.0f);						// Depth Buffer Setup
+//	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
+//	glBlendFunc(GL_SRC_ALPHA,GL_ONE);		// Set The Blending Function For Translucency
+//	glEnable(GL_BLEND);						// Enable Blending
     renderText(0,0,0,"");
     glFlush();
     mapList = glGenLists(1);
@@ -101,14 +100,28 @@ void MapViewer::resizeGL(int w, int h)
 {
     screenWidth = w;
     screenHeight = h;
-    aspectRatio = ((float) w)/((float) h);
+	aspectRatio = ((float) w)/((float) h);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	gluPerspective(180, aspectRatio, 1,1000);
+	glViewport(0,0,w,h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60, aspectRatio, 1,1000);
+	glOrtho(-aspectRatio, aspectRatio, -1, 1, -1, 1);
     glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glTranslatef(0,0,-2);
-    glViewport(0,0,w,h);
+	glLoadIdentity();
+	updateGL();
+
+    
+//    aspectRatio = ((float) w)/((float) h);
+//    glMatrixMode(GL_PROJECTION);
+//    glLoadIdentity();
+//    gluPerspective(60, aspectRatio, 1,1000);
+//    glMatrixMode(GL_MODELVIEW);
+//    glLoadIdentity();
+//    glTranslatef(0,0,-2);
+//    glViewport(0,0,w,h);
 
 // 	glOrtho(-aspectRatio, aspectRatio, -1, 1, -1, 1);
 // 	glMatrixMode(GL_MODELVIEW);
@@ -615,12 +628,12 @@ void MapViewer::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
+    //glEnable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
-    glEnable(GL_POINT_SMOOTH);
-    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-    glEnable(GL_LINE_SMOOTH);
-    glEnable(GL_POLYGON_SMOOTH);
+    //glEnable(GL_POINT_SMOOTH);
+    //glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    //glEnable(GL_LINE_SMOOTH);
+    //glEnable(GL_POLYGON_SMOOTH);
 
     glPushMatrix();
     glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
@@ -633,7 +646,7 @@ void MapViewer::paintGL()
 
     glTranslatef(xOffset, yOffset, zOffset);
 
-	showGrids = false;
+	showGrids = true;
     if(showGrids)
     {
 		for(int i=-(int) zoomFactor*3; i < (int) zoomFactor*3; i++)
@@ -679,17 +692,18 @@ void MapViewer::paintGL()
 		    renderText(1,j,0, "Y");
 		 }
     }
-
+	glPopMatrix();
 //    glColor4f(0,0,0,1.0);
     glColor4f(1,1,1,1.0);
-	//if(!mainMapBuilt)
+//	if(!mainMapBuilt)
 	    renderMap();
-    glCallList(mapList);
-	setRobotsLocation();
+	glPopMatrix();
+//    glCallList(mapList);
+//	setRobotsLocation();
 //    renderLaser();
     renderRobot();
-    renderPaths();
-
+//    renderPaths();
+	glPushMatrix();
 //  renderSearchTree();
 //	renderExpandedTree();
 	//if(!hideGoals)
@@ -753,11 +767,11 @@ void MapViewer::paintGL()
 		glPopMatrix();
     }
 	}
-    glDisable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_POINT_SMOOTH);
-    glDisable(GL_LINE_SMOOTH);
-    glDisable(GL_POLYGON_SMOOTH);
+    //glDisable(GL_BLEND);
+    //glEnable(GL_DEPTH_TEST);
+    //glDisable(GL_POINT_SMOOTH);
+    //glDisable(GL_LINE_SMOOTH);
+    //glDisable(GL_POLYGON_SMOOTH);
     glPopMatrix();
 }
 

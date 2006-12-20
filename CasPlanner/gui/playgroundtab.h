@@ -70,10 +70,13 @@ class Interfaces : public QWidget
 	public:
 		Interfaces(QWidget *parent = 0);
 		void createIcons(QVector <DeviceType> * devices);
-		void addInterface(DeviceType dev,QString name);		
+		void addInterface(DeviceType dev,QString name);
+	public slots:		
+		void checkChanged(int state);		
 	private:
 		QVBoxLayout * vLayout;
 		QVector <QCheckBox *> devicesBox;	
+		QHash   <QCheckBox *, DeviceType> chk2Dev;
 };
 
 class RobotConfigPage : public QWidget

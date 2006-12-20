@@ -14,8 +14,8 @@ NavContainer::NavContainer(QWidget *parent,PlayGround *playGround_in)
 {
     QHBoxLayout *vLayout = new QHBoxLayout;
 
-// 	mapViewer = new MapViewer(this,playGround,&navControlPanel);		
-//    vLayout->addWidget(mapViewer,4); 
+ 	mapViewer = new MapViewer(this,playGround,&navControlPanel);		
+    vLayout->addWidget(mapViewer,4); 
 
     vLayout->addWidget(&navControlPanel,1); 
     setLayout(vLayout); 
@@ -60,7 +60,7 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
 	currRobot(NULL),
 	path(0)
 {
-	qDebug("Initializing Control Panel"); fflush(stdout);	
+//	qDebug("Initializing Control Panel"); fflush(stdout);	
 	RobotManager *temp= NULL;
 	QRadioButton *rob;
 	if(playGround)
@@ -83,7 +83,6 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
     hlayout->addWidget(&obstavoidGB,1);    
     hlayout->addWidget(&actionGB,1); 
     this->setLayout(hlayout);
-    qDebug("HERE1"); fflush(stdout);
     QVBoxLayout *showLayout = new QVBoxLayout; 
     showLayout->addWidget(&bridgeTest);
     bridgeTest.setCheckState(Qt::Checked); 
@@ -150,7 +149,6 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
 	updateSelectedAvoidanceAlgo(true);
     obstavoidGB.setLayout(showL); 
     
-	qDebug("HERE2"); fflush(stdout);
     QVBoxLayout *robotsL = new QVBoxLayout; 
     for(int i=0;i<availableRobots.size();i++)
     {
@@ -181,11 +179,10 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
 	connect(&pathFollowBtn,    SIGNAL(pressed()),this, SLOT(pathFollow()));
 	connect(&pauseBtn,         SIGNAL(pressed()),this, SLOT(setNavigation()));	
 
-	qDebug("HERE3"); fflush(stdout);    
     if(availableRobots.size()>0)
     	availableRobots[0]->setChecked(true);
     robotsGB.setLayout(robotsL); 
-	qDebug("Initializing Control Panel --->>>DONE"); fflush(stdout);		
+//	qDebug("Initializing Control Panel --->>>DONE"); fflush(stdout);		
 }
 
 void NavControlPanel::Finished()
@@ -300,24 +297,21 @@ void NavControlPanel::updateRobotSetting()
 	{
 		currRobot->startPlanner();
 	}
-	qDebug("UP1"); fflush(stdout);
     connect(&bridgeTest, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setBridgeTest( int ))); 
     connect(&connectNodes, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setConnNodes( int ))); 
     connect(&regGrid, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setRegGrid( int ))); 
     connect(&obstPenalty, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setObstPen( int ))); 
     connect(&expandObst, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setExpObst( int )));
     connect(&showTree, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setShowTree( int )));
-	qDebug("UP2"); fflush(stdout);
 	obstExpRadSB.setValue(currRobot->planningManager->pathPlanner->obstacle_radius);	
 	bridgeTestResSB.setValue(currRobot->planningManager->pathPlanner->bridge_res);
 	bridgeSegLenSB.setValue(currRobot->planningManager->pathPlanner->bridge_length);
 	regGridResSB.setValue(currRobot->planningManager->pathPlanner->reg_grid);	
 	nodeConRadSB.setValue(currRobot->planningManager->pathPlanner->conn_radius);
-	nodeConRadSB.setValue(currRobot->planningManager->pathPlanner->conn_radius);
-	qDebug("UP3"); fflush(stdout);		
-//	if(navContainer->mapViewer)
-//		currRobot->planningManager->setMap(navContainer->mapViewer->image);
-	qDebug("UP4"); fflush(stdout);		
+	nodeConRadSB.setValue(currRobot->planningManager->pathPlanner->conn_radius);	
+//	if(navContainer)	
+//		if(navContainer->mapViewer)
+//			currRobot->planningManager->setMap(navContainer->mapViewer->image);	
 	switch(currRobot->navigator->getObstAvoidAlgo())
 	{
 		case VFH:
@@ -351,7 +345,6 @@ void NavControlPanel::updateRobotSetting()
 	{
 		pauseBtn.setText("Continue");		
 	}
-	qDebug("UP5"); fflush(stdout);	
 }
 
 void NavControlPanel::updateSelectedAvoidanceAlgo(bool)
