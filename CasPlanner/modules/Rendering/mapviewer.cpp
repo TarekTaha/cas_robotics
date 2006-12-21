@@ -1,7 +1,7 @@
 #include "mapviewer.h"
 
 MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
- : QGLWidget(QGLFormat(QGL::AlphaChannel), parent),
+ : QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::Rgba | QGL::SampleBuffers), parent),
  step(1),
  playGround(playG),
  navControlPanel(navCo),
@@ -23,7 +23,7 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
  start_initialized(false),
  end_initialized(false),
  mainMapBuilt(false),
- mapName(playG->mapName)
+ mapData(playG->mapData)
 {
 	// Data Logging Timer
     renderTimer = new QTimer(this);
@@ -32,16 +32,8 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
 //	qDebug("Initializing OpenGL"); fflush(stdout);
   	clearColor = Qt::black;
     setFocusPolicy(Qt::StrongFocus);
-    glGenTextures(1, &texId);
 	connect(this, SIGNAL(setStart(Pose)),  navControlPanel, SLOT(setStart(Pose)));
 	connect(this, SIGNAL(setEnd(Pose))  ,  navControlPanel, SLOT(setEnd(Pose)));
-	connect(this, SIGNAL(setMap(QImage)),  navControlPanel, SLOT(setMap(QImage)));
-	if(!loadImage(mapName))
-	{
-		qDebug("Error Loading Image");
-		exit(1);
-	}
-	emit setMap(image);
   	RGB[0][0] = 0.0; RGB[0][1] = 0.7;   RGB[0][2] = 0.7;   // Lightblue
   	RGB[1][0] = 1.0; RGB[1][1] = 0.51;  RGB[1][2] = 0.278; // Sienna1
   	RGB[2][0] = 0.0; RGB[2][1] = 0.7;   RGB[2][2] = 0.0;   // Green
@@ -55,16 +47,6 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
 //	qDebug("OpenGL Initialized"); fflush(stdout);
 }
 
-int MapViewer::loadImage(QString name)
-{
-	if(!image.load(name, 0))
-	{
-		return -1;
-	}
-	mapData = mapManager.provideMapOG(image,0.05,Pose(0,0,0),false);
-	return 1;
-}
-
 QSize MapViewer::sizeHint()
 {
     return QSize(640,480);
@@ -76,21 +58,16 @@ QSize MapViewer::minimumSizeHint()
     return QSize(320,240);
 }
 
-void MapViewer::setMapName(QString name)
-{
-	this->mapName = name;
-}
-
 void MapViewer::initializeGL()
 {
-//	glShadeModel(GL_SMOOTH);				// Enable Smooth Shading
-//	glClearColor(0.70f, 0.7f, 0.7f, 1.0f);
-//	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-//	glClearDepth(1.0f);						// Depth Buffer Setup
-//	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
-//	glBlendFunc(GL_SRC_ALPHA,GL_ONE);		// Set The Blending Function For Translucency
-//	glEnable(GL_BLEND);						// Enable Blending
+    // Initialization
+    //glShadeModel(GL_SMOOTH);       
+    glShadeModel(GL_FLAT);
+    glClearDepth(1.0f);
+    glEnable(GL_DEPTH_TEST);
+    //glDepthFunc(GL_LEQUAL);
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+   	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     renderText(0,0,0,"");
     glFlush();
     mapList = glGenLists(1);
@@ -112,35 +89,10 @@ void MapViewer::resizeGL(int w, int h)
     glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	updateGL();
-
-    
-//    aspectRatio = ((float) w)/((float) h);
-//    glMatrixMode(GL_PROJECTION);
-//    glLoadIdentity();
-//    gluPerspective(60, aspectRatio, 1,1000);
-//    glMatrixMode(GL_MODELVIEW);
-//    glLoadIdentity();
-//    glTranslatef(0,0,-2);
-//    glViewport(0,0,w,h);
-
-// 	glOrtho(-aspectRatio, aspectRatio, -1, 1, -1, 1);
-// 	glMatrixMode(GL_MODELVIEW);
-// 	glLoadIdentity();
-
-    updateGL();
-    glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
-    glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
-    glGetIntegerv(GL_VIEWPORT,viewport);
-}
-
-void  MapViewer::SetMapFileName(QString name)
-{
-	this->mapName = name;
-}
-
-QImage MapViewer::getImage()
-{
-	return this->image;
+	
+//    glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
+//    glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
+//    glGetIntegerv(GL_VIEWPORT,viewport);
 }
 
 void MapViewer::setProvider(MapProvider *)
@@ -389,153 +341,159 @@ void MapViewer::update()
 {
       this->updateGL();
 }
-void MapViewer::renderMapPatch(Map * mapPatch)
+typedef struct {
+    int width;
+    int height;
+    unsigned char *data;
+} textureImage;
+
+int loadBMP(char *filename, textureImage *texture)
 {
-    int mapWidth,mapHeight;
-    float ratioW, ratioH;
-//	qDebug("Rendering Map Patch");
-	#ifdef NOPOTD
-	   mapWidth  = powl(2,  ceill(log(mapPatch->width)/log(2)));
-	   mapHeight = powl(2, ceill(log(mapPatch->height)/log(2)));
-	   ratioW  = ((float) mapPatch->width))/mapWidth;
-	   ratioH  = ((float) mapPatch->height))/mapHeight;
-	#else
-	    mapWidth  = mapPatch->width;
-	    mapHeight = mapPatch->height;
-	    ratioW = 1;
-	    ratioH = 1;
-	#endif
-    unsigned char imgData[mapWidth*mapHeight*4];
-	long int count=0;
-    for(int i=0; i < mapWidth; i++)
+    FILE *file;
+    unsigned short int bfType;
+    long int bfOffBits;
+    short int biPlanes;
+    short int biBitCount;
+    long int biSizeImage;
+    int i;
+    unsigned char temp;
+    /* make sure the file is there and open it read-only (binary) */
+    if ((file = fopen(filename, "rb")) == NULL)
     {
-		for(int j=0; j < mapHeight; j++)
+        printf("File not found : %s\n", filename);
+        return 0;
+    }
+    if(!fread(&bfType, sizeof(short int), 1, file))
+    {
+        printf("Error reading file!\n");
+        return 0;
+    }
+    /* check if file is a bitmap */
+    if (bfType != 19778)
+    {
+        printf("Not a Bitmap-File!\n");
+        return 0;
+    }        
+    /* get the file size */
+    /* skip file size and reserved fields of bitmap file header */
+    fseek(file, 8, SEEK_CUR);
+    /* get the position of the actual bitmap data */
+    if (!fread(&bfOffBits, sizeof(long int), 1, file))
+    {
+        printf("Error reading file!\n");
+        return 0;
+    }
+    printf("Data at Offset: %ld\n", bfOffBits);
+    /* skip size of bitmap info header */
+    fseek(file, 4, SEEK_CUR);
+    /* get the width of the bitmap */
+    fread(&texture->width, sizeof(int), 1, file);
+    printf("Width of Bitmap: %d\n", texture->width);
+    /* get the height of the bitmap */
+    fread(&texture->height, sizeof(int), 1, file);
+    printf("Height of Bitmap: %d\n", texture->height);
+    /* get the number of planes (must be set to 1) */
+    fread(&biPlanes, sizeof(short int), 1, file);
+    if (biPlanes != 1)
+    {
+        printf("Error: number of Planes not 1!\n");
+        return 0;
+    }
+    /* get the number of bits per pixel */
+    if (!fread(&biBitCount, sizeof(short int), 1, file))
+    {
+        printf("Error reading file!\n");
+        return 0;
+    }
+    printf("Bits per Pixel: %d\n", biBitCount);
+    if (biBitCount != 24)
+    {
+        printf("Bits per Pixel not 24\n");
+        return 0;
+    }
+    /* calculate the size of the image in bytes */
+    biSizeImage = texture->width * texture->height * 3;
+    printf("Size of the image data: %ld\n", biSizeImage);
+    texture->data = (unsigned char *) malloc(biSizeImage);
+    /* seek to the actual data */
+    fseek(file, bfOffBits, SEEK_SET);
+    if (!fread(texture->data, biSizeImage, 1, file))
+    {
+        printf("Error loading file!\n");
+        return 0;
+    }
+    /* swap red and blue (bgr -> rgb) */
+    for (i = 0; i < biSizeImage; i += 3)
+    {
+        temp = texture->data[i];
+        texture->data[i] = texture->data[i + 2];
+        texture->data[i + 2] = temp;
+    }
+    return 1;
+}
+void MapViewer::loadTexture()
+{	
+    float ratioW, ratioH;
+   	int newWidth =  (int) std::pow(2.0f, (int)ceil(log((float)mapData->width) / log(2.f)));
+   	int newHeight = (int) std::pow(2.0f, (int)ceil(log((float)mapData->height) / log(2.f)));
+	ratioW  = ((float) mapData->width)/newWidth;
+	ratioH  = ((float) mapData->height)/newHeight;
+	qDebug("MW:%d MH:%d RatioW:%f RatioH:%f",newWidth,newHeight,ratioW,ratioH);
+	
+    unsigned char imgData[mapData->width*mapData->height*4];
+	long int count=0;
+    for(int i=0; i < mapData->width; i++)
+    {
+		for(int j=0; j < mapData->height; j++)
 		{
-		    if(mapPatch->data[i][j] == true)
+		    if(mapData->data[i][j] == true)
 			{
 		    	count++;
-				imgData[(j*mapPatch->width+i)*4]   = 255;
-				imgData[(j*mapPatch->width+i)*4+1] = 0;
-				imgData[(j*mapPatch->width+i)*4+2] = 0;
-				imgData[(j*mapPatch->width+i)*4+3] = 255;
+				imgData[(j*mapData->width+i)*4]   = 0;
+				imgData[(j*mapData->width+i)*4+1] = 0;
+				imgData[(j*mapData->width+i)*4+2] = 0;
+				imgData[(j*mapData->width+i)*4+3] = 255;
 			}
 		    else
 		    {
-				imgData[(j*mapPatch->width+i)*4] = 0;
-				imgData[(j*mapPatch->width+i)*4+1] = 0;
-				imgData[(j*mapPatch->width+i)*4+2] = 0;
-				imgData[(j*mapPatch->width+i)*4+3] = 0;
+				imgData[(j*mapData->width+i)*4]   = 255;
+				imgData[(j*mapData->width+i)*4+1] = 255;
+				imgData[(j*mapData->width+i)*4+2] = 255;
+				imgData[(j*mapData->width+i)*4+3] = 255;
 		    }
 		}
     }
-//    qDebug(" Count %ld",count);
-
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texId);  //Select our texture
-
+	unsigned char * scaledData;
+   	if (newWidth != mapData->width && newHeight != mapData->height)
+   	{
+      	scaledData = new unsigned char[newWidth * newHeight * 4];
+      	if (gluScaleImage(GL_RGBA, mapData->width, mapData->height,
+                        GL_UNSIGNED_BYTE, imgData, newWidth, 
+                        newHeight, GL_UNSIGNED_BYTE, scaledData) != 0)
+      	{
+         	delete[] scaledData;
+         	return;
+      	}
+   	}
+   	else
+   		scaledData = imgData;
+    glEnable(GL_TEXTURE_2D);       /* Enable Texture Mapping */    
+    glGenTextures(1, &texId);    
+    glBindTexture(GL_TEXTURE_2D, texId); 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, newWidth, newHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledData);
+    
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, mapPatch->width, mapPatch->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
+	glDisable(GL_TEXTURE_2D);
+    mainMapBuilt = true;
+};
 
-
-    glPushMatrix();
-
-    // Inverse the Y-axis
-    glScalef(1,-1,1);
-    glTranslatef(-(mapPatch->width*mapPatch->resolution)/2.0,-(mapPatch->height*mapPatch->resolution)/2.0,0);
-//    glColor4f(0,0,1,0.8);
-    glColor4f(1,1,1,0.8);
-    glShadeModel(GL_FLAT);
-	// Define Coordinate System
-    glBegin(GL_QUADS);
-	    glTexCoord2f(ratioW,ratioH);	glVertex2f(mapPatch->width*mapPatch->resolution,mapPatch->height*mapPatch->resolution);
-	    glTexCoord2f(ratioW,0.0);		glVertex2f(mapPatch->width*mapPatch->resolution,0.0);
-	    glTexCoord2f(0.0,0.0);			glVertex2f(0.0,0.0);
-	    glTexCoord2f(0.0,ratioH);    	glVertex2f(0.0,mapPatch->height*mapPatch->resolution);
-    glEnd();
-
-    glDisable(GL_TEXTURE_2D);
-
-    // Surrounding BOX
-	glColor4f(1,1,1,0.5);
-	glBegin(GL_LINE_LOOP);
-		glVertex2f(0,0);
-		glVertex2f(0.0,mapPatch->height*mapPatch->resolution);
-		glVertex2f(mapPatch->width*mapPatch->resolution,mapPatch->height*mapPatch->resolution);
-		glVertex2f(mapPatch->width*mapPatch->resolution,0.0);
-	glEnd();
-
-    glPopMatrix();
-}
 ///*!
 // *  Renders The main Map loaded from the image file
 // */
-//void MapViewer::renderMap()
-//{
-//    int mapWidth,mapHeight;
-//    float ratioW, ratioH;
-////	qDebug("Rendering Map");
-////	#ifdef NOPOTD
-////	   mapWidth  = powl(2,  ceill(log(mapData->width)/log(2)));
-////	   mapHeight = powl(2, ceill(log(mapData->height)/log(2)));
-////	   ratioW  = ((float) mapData->width))/mapWidth;
-////	   ratioH  = ((float) mapData->height))/mapHeight;
-////	#else
-//	    mapWidth  = mapData->width;
-//	    mapHeight = mapData->height;
-//	    ratioW = 1;
-//	    ratioH = 1;
-////	#endif
-//    unsigned char imgData[mapWidth*mapHeight*4];
-//	long int count=0;
-//    glNewList(mapList, GL_COMPILE);
-//    glPushMatrix();
-//    // Inverse the Y-axis
-//    glScalef(1,-1,1);
-//    glTranslatef(-(mapData->width*mapData->resolution)/2.0f,-(mapData->height*mapData->resolution)/2.0f,0);
-//   	glColor4f(0,0,0,1);
-//   	glBegin(GL_POINTS);
-//    for(int i=0; i < mapWidth; i++)
-//    {
-//		for(int j=0; j < mapHeight; j++)
-//		{
-//		    if(mapData->data[i][j] == true)
-//			{
-//		    	count++;
-//				imgData[(j*mapData->width+i)*4]   = 0;
-//				imgData[(j*mapData->width+i)*4+1] = 0;
-//				imgData[(j*mapData->width+i)*4+2] = 0;
-//				imgData[(j*mapData->width+i)*4+3] = 255;
-//				glVertex2f(i*mapData->resolution,j*mapData->resolution);
-//			}
-//		    else
-//		    {
-//				imgData[(j*mapData->width+i)*4]   = 0;
-//				imgData[(j*mapData->width+i)*4+1] = 0;
-//				imgData[(j*mapData->width+i)*4+2] = 0;
-//				imgData[(j*mapData->width+i)*4+3] = 0;
-//		    }
-//		}
-//    }
-//	glEnd();
-//
-//    // Surrounding BOX
-//	glColor4f(0,0,0,0.5);
-//	glBegin(GL_LINE_LOOP);
-//		glVertex2f(0,0);
-//		glVertex2f(0.0,mapData->height*mapData->resolution);
-//		glVertex2f(mapData->width*mapData->resolution,mapData->height*mapData->resolution);
-//		glVertex2f(mapData->width*mapData->resolution,0.0);
-//	glEnd();
-//
-//    glPopMatrix();
-//    glEndList();
-//    mainMapBuilt = true;
-//}
 void MapViewer::renderMap()
 {
     int mapWidth,mapHeight;
@@ -552,101 +510,62 @@ void MapViewer::renderMap()
 	    ratioW = 1;
 	    ratioH = 1;
 	#endif
-    unsigned char imgData[mapWidth*mapHeight*4];
-	long int count=0;
-    for(int i=0; i < mapWidth; i++)
-    {
-		for(int j=0; j < mapHeight; j++)
-		{
-		    if(mapData->data[i][j] == true)
-			{
-		    	count++;
-				imgData[(j*mapData->width+i)*4]   = 0;
-				imgData[(j*mapData->width+i)*4+1] = 0;
-				imgData[(j*mapData->width+i)*4+2] = 0;
-				imgData[(j*mapData->width+i)*4+3] = 255;
-			}
-		    else
-		    {
-				imgData[(j*mapData->width+i)*4]   = 0;
-				imgData[(j*mapData->width+i)*4+1] = 0;
-				imgData[(j*mapData->width+i)*4+2] = 0;
-				imgData[(j*mapData->width+i)*4+3] = 0;
-		    }
-		}
-    }
-    glNewList(mapList, GL_COMPILE);
-
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texId);  //Select our texture
-
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, mapData->width, mapData->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
-
-
+    glNewList(mapList, GL_COMPILE);		
+    glEnable(GL_TEXTURE_2D);       /* Enable Texture Mapping */
     glPushMatrix();
-
+    glBindTexture(GL_TEXTURE_2D, texId);
     // Inverse the Y-axis
     glScalef(1,-1,1);
     glTranslatef(-(mapData->width*mapData->resolution)/2.0f,-(mapData->height*mapData->resolution)/2.0f,0);
-//    glColor4f(0,0,1,0.8);
-    glColor4f(1,1,1,0.8);
-    glShadeModel(GL_FLAT);
+    //glColor4f(1,1,1,0.8);
 	// Define Coordinate System
     glBegin(GL_QUADS);
 	    glTexCoord2f(ratioW,ratioH);	glVertex2f(mapData->width*mapData->resolution,mapData->height*mapData->resolution);
 	    glTexCoord2f(ratioW,0.0);		glVertex2f(mapData->width*mapData->resolution,0.0);
 	    glTexCoord2f(0.0,0.0);			glVertex2f(0.0,0.0);
 	    glTexCoord2f(0.0,ratioH);    	glVertex2f(0.0,mapData->height*mapData->resolution);
-//	    glTexCoord2f(0.0,0.0);			glVertex2f(0.0,0.0);
-//	    glTexCoord2f(ratioW,0.0);		glVertex2f(mapData->width*mapData->resolution,0.0);
-//	    glTexCoord2f(ratioW,ratioH);	glVertex2f(mapData->width*mapData->resolution,mapData->height*mapData->resolution);
-//	    glTexCoord2f(0.0,ratioH);    	glVertex2f(0.0,mapData->height*mapData->resolution);
     glEnd();
 
-    glDisable(GL_TEXTURE_2D);
-
     // Surrounding BOX
-	glColor4f(1,1,1,0.5);
+//	glColor4f(1,1,1,0.5);
 	glBegin(GL_LINE_LOOP);
 		glVertex2f(0,0);
 		glVertex2f(0.0,mapData->height*mapData->resolution);
 		glVertex2f(mapData->width*mapData->resolution,mapData->height*mapData->resolution);
 		glVertex2f(mapData->width*mapData->resolution,0.0);
 	glEnd();
-
     glPopMatrix();
-    glEndList();
-    mainMapBuilt = true;
+    glDisable(GL_TEXTURE_2D);
+    glEndList();	    
 }
+
 void MapViewer::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glEnable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
-    //glEnable(GL_POINT_SMOOTH);
-    //glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-    //glEnable(GL_LINE_SMOOTH);
-    //glEnable(GL_POLYGON_SMOOTH);
+    glEnable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+//    glDisable(GL_DEPTH_TEST);
+//    glEnable(GL_POINT_SMOOTH);
+//    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+//    glEnable(GL_LINE_SMOOTH);
+//    glEnable(GL_POLYGON_SMOOTH);
 
-    glPushMatrix();
+   	glPushMatrix();
     glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
-//    glColor4f(0,0,0,1);
     glColor4f(1,1,1,1);
     renderText(zoomFactor*aspectRatio*0.90-1, -0.9*zoomFactor, 0, "grid: 1 m");
 
     glRotatef(pitch,1,0,0);
     glRotatef(yaw,0,0,1);
-
     glTranslatef(xOffset, yOffset, zOffset);
 
-	showGrids = true;
+    glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
+    glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
+    glGetIntegerv(GL_VIEWPORT,viewport);
+    
+	showGrids = true;    
+	glPushMatrix();
     if(showGrids)
     {
 		for(int i=-(int) zoomFactor*3; i < (int) zoomFactor*3; i++)
@@ -692,20 +611,19 @@ void MapViewer::paintGL()
 		    renderText(1,j,0, "Y");
 		 }
     }
-	glPopMatrix();
-//    glColor4f(0,0,0,1.0);
-    glColor4f(1,1,1,1.0);
-//	if(!mainMapBuilt)
-	    renderMap();
-	glPopMatrix();
-//    glCallList(mapList);
+    glPopMatrix();
+	if(!mainMapBuilt)
+	{
+		loadTexture();
+		renderMap();
+	}
+    renderRobot();	
+    glCallList(mapList);
 //	setRobotsLocation();
 //    renderLaser();
-    renderRobot();
 //    renderPaths();
-	glPushMatrix();
-//  renderSearchTree();
-//	renderExpandedTree();
+//    renderSearchTree();
+//	  renderExpandedTree();
 	//if(!hideGoals)
 	{
     if(start_initialized)
@@ -715,23 +633,23 @@ void MapViewer::paintGL()
 	    glRotated(RTOD(start.phi),0,0,1);
 	    glColor4f(1,1,1,0.8);
 	    glShadeModel(GL_FLAT);
-//	    // Path Start
-//	    glBegin(GL_TRIANGLE_FAN);
-//			glColor4f(0,1,0,1);
-//		    glVertex3f(-0.2,0.15,0);
-//		    glVertex3f(0.3,0,0);
-//		    glVertex3f(-0.2,-0.15,0);
-//	    glEnd();
-//		glPopMatrix();
-//	    glPushMatrix();
-//	    if(step == 2)
-//	    {
-//		    glBegin(GL_LINE_LOOP);
-//				glColor4f(1,1,1,1);
-//			    glVertex3f(start.p.x(),start.p.y(),0);
-//			    glVertex3f(mousePos.x(),mousePos.y(),0);
-//		    glEnd();
-//	    }
+	    // Path Start
+	    glBegin(GL_TRIANGLE_FAN);
+			glColor4f(0,1,0,1);
+		    glVertex3f(-0.2,0.15,0);
+		    glVertex3f(0.3,0,0);
+		    glVertex3f(-0.2,-0.15,0);
+	    glEnd();
+		glPopMatrix();
+	    glPushMatrix();
+	    if(step == 2)
+	    {
+		    glBegin(GL_LINE_LOOP);
+				glColor4f(1,1,1,1);
+			    glVertex3f(start.p.x(),start.p.y(),0);
+			    glVertex3f(mousePos.x(),mousePos.y(),0);
+		    glEnd();
+	    }
 	    glColor4f(0,0,0,0.8);
         QFont font40; font40.setPointSize(14);
         renderText(0.2,0,0,QString("Start"), font40);
@@ -744,23 +662,23 @@ void MapViewer::paintGL()
 	    glRotated(RTOD(end.phi),0,0,1);
 	    glColor4f(1,1,1,0.8);
 	    glShadeModel(GL_FLAT);
-//	    // Path End
-//	    glBegin(GL_TRIANGLE_FAN);
-//			glColor4f(0,1,0,1);
-//		    glVertex3f(-0.2,0.15,0);
-//		    glVertex3f(0.3,0,0);
-//		    glVertex3f(-0.2,-0.15,0);
-//	    glEnd();
-//		glPopMatrix();
-//	    glPushMatrix();
-//	    if(step == 4)
-//	    {
-//		    glBegin(GL_LINE_LOOP);
-//				glColor4f(1,1,1,1);
-//			    glVertex3f(end.p.x(),end.p.y(),0);
-//			    glVertex3f(mousePos.x(),mousePos.y(),0);
-//		    glEnd();
-//	    }
+	    // Path End
+	    glBegin(GL_TRIANGLE_FAN);
+			glColor4f(0,1,0,1);
+		    glVertex3f(-0.2,0.15,0);
+		    glVertex3f(0.3,0,0);
+		    glVertex3f(-0.2,-0.15,0);
+	    glEnd();
+		glPopMatrix();
+	    glPushMatrix();
+	    if(step == 4)
+	    {
+		    glBegin(GL_LINE_LOOP);
+				glColor4f(1,1,1,1);
+			    glVertex3f(end.p.x(),end.p.y(),0);
+			    glVertex3f(mousePos.x(),mousePos.y(),0);
+		    glEnd();
+	    }
 	    glColor4f(0,0,0,0.8);
         QFont font40; font40.setPointSize(14);
         renderText(0.2,0,0,QString("End"), font40);
@@ -854,7 +772,7 @@ void MapViewer::setShowPatchBorders(int state)
 void MapViewer::mouseDoubleClickEvent(QMouseEvent *me)
 {
 	QPointF p(me->x(),me->y());
-//	qDebug("Mouse Double click x: %f y: %f",p.x(),p.y());
+	qDebug("Mouse Double click x: %f y: %f",p.x(),p.y());
     p = getOGLPos(p.x(),p.y());
 	if(step == 1)
 	{
@@ -883,7 +801,7 @@ void MapViewer::mousePressEvent(QMouseEvent *me)
 	{
 		start.phi = atan2(p.y() - start.p.y(),p.x() - start.p.x());
 		emit setStart(start);
-//		qDebug("Start Angle =%f",RTOD(start.phi));
+		qDebug("Start Angle =%f",RTOD(start.phi));
 		step++;
 		update();
 		setMouseTracking(false);
@@ -891,7 +809,7 @@ void MapViewer::mousePressEvent(QMouseEvent *me)
 	else if(step == 4)
 	{
 		end.phi = atan2(p.y() - end.p.y(),p.x() - end.p.x());
-//		qDebug("End Angle =%f",RTOD(end.phi));
+		qDebug("End Angle =%f",RTOD(end.phi));
 		emit setEnd(end)	;
 		end_initialized = true;
 		step = 1;
@@ -905,7 +823,6 @@ void MapViewer::mouseMoveEvent ( QMouseEvent * me )
 {
 	QPointF p(me->x(),me->y());
     mousePos = getOGLPos(me->x(),me->y());
-//    mousePos = getOGLPos(p);
 	update();
 }
 
@@ -919,9 +836,9 @@ QPointF MapViewer::getOGLPos(double x, double y)
 	winY = (float)viewport[3] - y;
 	glReadPixels( (int)x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
 	gluUnProject( winX, winY, winZ, modelMatrix, projMatrix, viewport, &posX, &posY, &posZ);
-//    qDebug("Translated to x: %f y: %f z:%f",posX*0.02,posY*0.02,posZ*0.02);
-    position[0] = posX*0.02;
-    position[1] = posY*0.02;
+//	qDebug("Translated to x: %f y: %f z:%f",posX,posY,posZ);
+    position[0] = posX;
+    position[1] = posY;
   	retval.setX(position[0]);
   	retval.setY(position[1]);
   	return retval;
@@ -1057,18 +974,14 @@ void MapViewer::keyPressEvent(QKeyEvent *e)
 void MapViewer::focusInEvent(QFocusEvent *)
 {
     makeCurrent();
-//    glClearColor(0.7f,0.7f,0.7f,1.0f);
-//    glClearColor(0.0f,0.0f,0.0f,1.0f);
-    glClearColor(1.0f,1.0f,1.0f,1.0f);
+   	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     updateGL();
 }
 
 void MapViewer::focusOutEvent(QFocusEvent *)
 {
     makeCurrent();
-//    glClearColor(0.7f,0.7f,0.7f,1.0f);
-//    glClearColor(0.0f,0.0f,0.0f,1.0f);
-    glClearColor(1.0f,1.0f,1.0f,1.0f);
+   	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     updateGL();
 }
 

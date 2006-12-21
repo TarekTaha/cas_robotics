@@ -280,9 +280,10 @@ void NavControlPanel::updateSelectedRobot(bool)
 		if(availableRobots[i]->isChecked())
 		{
 			currRobot = playGround->robotPlatforms[i];
-			//qDebug("Seleted Robot is:%s",qPrintable(currRobot->robot->robotName));
+			qDebug("Seleted Robot is:%s",qPrintable(currRobot->robot->robotName));
+			fflush(stdout);
 			updateRobotSetting();
-			break;
+			return;
 		}
 	}
 }
@@ -309,9 +310,10 @@ void NavControlPanel::updateRobotSetting()
 	regGridResSB.setValue(currRobot->planningManager->pathPlanner->reg_grid);	
 	nodeConRadSB.setValue(currRobot->planningManager->pathPlanner->conn_radius);
 	nodeConRadSB.setValue(currRobot->planningManager->pathPlanner->conn_radius);	
-//	if(navContainer)	
-//		if(navContainer->mapViewer)
-//			currRobot->planningManager->setMap(navContainer->mapViewer->image);	
+	if(navContainer)	
+		if(navContainer->mapViewer)
+			if(currRobot->planningManager)
+				currRobot->planningManager->setMap(playGround->mapData);	
 	switch(currRobot->navigator->getObstAvoidAlgo())
 	{
 		case VFH:
@@ -408,7 +410,7 @@ void NavControlPanel::setMap(QImage imageMap)
 {
 	if(this->currRobot)
 	{
-		currRobot->planningManager->setMap(imageMap);
+		currRobot->planningManager->setMap(playGround->mapData);
 	}
 	else
 	{

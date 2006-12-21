@@ -31,10 +31,25 @@ PlayGround::PlayGround(QStringList configFiles)
 		    if(sectionName == "Map")
 		    {
 				mapName = cf->ReadString(i, "mapname", "resources//casareaicpA.png");
+				if(!loadImage(mapName))
+				{
+					qDebug("Error Loading Image");
+					exit(1);
+				}
 		    }		
 		}
 		delete cf;    
     }
+}
+
+int PlayGround::loadImage(QString name)
+{
+	if(!image.load(name, 0))
+	{
+		return 0;
+	}
+	mapData = mapManager.provideMapOG(image,0.05,Pose(0,0,0),false);
+	return 1;
 }
 
 int PlayGround::setNavContainer(NavContainer* con)
