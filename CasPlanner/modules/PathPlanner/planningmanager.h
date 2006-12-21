@@ -17,7 +17,7 @@
 
 class RobotManager;
 using namespace CasPlanner;
-class PlanningManager : public MapManager
+class PlanningManager : public QObject
 {
         Q_OBJECT
         public:
@@ -35,8 +35,8 @@ class PlanningManager : public MapManager
 	        void  generateSpace();
 	        void  setStart(Pose);
 	        void  setEnd(Pose);
-	        void  setMap(QImage mpa);
-	        void  setMap(LaserScan laserScan,double local_dist,Pose pose);
+	        void  setMap(Map *);
+//	        void  setMap(LaserScan laserScan,double local_dist,Pose pose);
 	        void  setBridgeTest(int);
 	        void  setConnNodes(int);
 	        void  setRegGrid(int);
@@ -49,7 +49,7 @@ class PlanningManager : public MapManager
 	        void  setObstPenValue(double);
 	        void  setExpObstValue(double);
 			void  setBridgeResValue(double val);
-			void  updateMap(LaserScan laserScan,double local_dist,Pose robotLocation);
+//			void  updateMap(LaserScan laserScan,double local_dist,Pose robotLocation);
 			bool  fileExist(const char * fname);
        signals:
 		    void statusMsg(int,int, QString);

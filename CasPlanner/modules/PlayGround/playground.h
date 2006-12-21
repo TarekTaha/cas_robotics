@@ -18,11 +18,15 @@ class PlayGround: public QObject
 	public:
 		PlayGround();
 		PlayGround(QStringList configFiles);
+		int loadImage(QString name);
 		virtual ~PlayGround();
 		int renderingMethod;
 		QString mapName;
 		NavContainer *navCon;
-		MapViewer    *mapViewer;	
+		MapViewer    *mapViewer;
+		MapManager mapManager;	
+		Map * mapData;
+		QImage image;
 		QVector <RobotManager* > robotPlatforms;
 		int  setNavContainer(NavContainer* con);
 	public slots:	

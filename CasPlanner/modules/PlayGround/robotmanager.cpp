@@ -3,7 +3,6 @@
 RobotManager::RobotManager():
 commManager(NULL),
 planningManager(NULL),
-//local_planner(NULL),
 navigator(NULL),
 robot(NULL),
 notPaused(true),
@@ -75,7 +74,6 @@ int RobotManager::readPlannerConfigs(ConfigFile *cf)
 {
 	planningManager = new PlanningManager(this);
 	planningManager->readConfigs(cf);
-	planningManager->setupPlanner();
     return 1;
 }
 
@@ -89,6 +87,7 @@ int RobotManager::start()
 
 int RobotManager::stop()
 {
+	return 1;
 }
 
 int RobotManager::startComms()

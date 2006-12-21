@@ -42,10 +42,7 @@ Q_OBJECT
 		void mouseReleaseEvent(QMouseEvent *me);
 		void focusInEvent(QFocusEvent *fe);
 		void focusOutEvent(QFocusEvent *fe);
-		int  loadImage(QString name);
-		QImage getImage();
-		void  SetMapFileName(QString name);
-		void setMapName(QString name);
+		void loadTexture();
 		void renderRobot();
 		void renderLaser();
 		void renderPaths();
@@ -56,7 +53,6 @@ Q_OBJECT
 		QImage captureMap();
         virtual void setProvider(MapProvider *provider);
         void renderMap();
-   	   	QImage image;
     public slots:
 		void update();
 		void setShowOGs         (int state);
@@ -65,7 +61,6 @@ Q_OBJECT
 		void setShowRobots      (int state);
 		void setShowPointclouds (int state);
 		void setShowPatchBorders(int state);
-		void renderMapPatch     (Map * mapPatch);
 		void updateMap          (Map *newMap);
 		void saveImage          ();
     signals:
@@ -75,7 +70,6 @@ Q_OBJECT
 		void moveMODown();
 		void yawMOPos();
 		void yawMONeg();
-		virtual void  setMap(QImage);
 		virtual void  setStart(Pose);
 		virtual void    setEnd(Pose);
 
@@ -98,7 +92,6 @@ Q_OBJECT
 		bool showPatchBorders;
 		bool hideGoals;
 		bool start_initialized,end_initialized,mainMapBuilt;
-		QString mapName;
 	    MapManager mapManager;
 	    Pose start,end,wayPoint;
 	    QVector <Pose> robotsLocation;

@@ -34,6 +34,7 @@ Map * MapManager::provideLaserOG(LaserScan laserScan, double local_dist,double r
 	double dist=0;
 	int height,width;
 	// getting right Map dimensions
+	qDebug("HERE OG1"); fflush(stdout);	
 	height = int(2.0*local_dist/res);
 	width =  int(2.0*local_dist/res);	
 	Pose globalPose = Trans2Global(laserScan.laserPose,robotPose);
@@ -66,7 +67,8 @@ Map * MapManager::provideLaserOG(LaserScan laserScan, double local_dist,double r
 			retval->data[int(p.x())][int(p.y())] = false;			
 		}
 	}
-	//qDebug("Width:%d Height:%d",width,height);
+	qDebug("Width:%d Height:%d",width,height);
+	qDebug("HERE OG1"); fflush(stdout);	
 	return retval;
 }
 
