@@ -417,13 +417,14 @@ void PathPlanner::connectNodes()
 		while (S!=NULL)
 		{
 			distance = Dist(S->location,temp->location);
+			//qDebug("Distance =:%f and Con Radius=%f",distance,conn_radius);
 			if (distance <= conn_radius && distance !=0)
 			{
 				angle = atan2(S->location.y() - temp->location.y() ,S->location.x() - temp->location.x());
 				if(!inObstacle(temp->location,angle))
 				{
 					temp->children.push_back(S);
-					//qDebug("Child ADDED");
+//					qDebug("Child ADDED");
 				}
 			}
 			S = S->next;

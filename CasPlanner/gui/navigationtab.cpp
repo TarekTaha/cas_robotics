@@ -58,9 +58,9 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
 	captureImage("Capture Image"),
 	robotsGB("Select your Robot"),
 	currRobot(NULL),
+	robotInitialization(true),
 	path(0)
 {
-//	qDebug("Initializing Control Panel"); fflush(stdout);	
 	RobotManager *temp= NULL;
 	QRadioButton *rob;
 	if(playGround)
@@ -76,7 +76,6 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
 	}
 	
     QVBoxLayout *hlayout = new QVBoxLayout;
-//    hlayout->addWidget(&selectedRobot,1);
     hlayout->addWidget(&robotsGB,1);
     hlayout->addWidget(&planningGB,1);
     hlayout->addWidget(&parametersGB,1);
@@ -181,11 +180,10 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
 
     if(availableRobots.size()>0)
     	availableRobots[0]->setChecked(true);
-    robotsGB.setLayout(robotsL); 
-//	qDebug("Initializing Control Panel --->>>DONE"); fflush(stdout);		
+    robotsGB.setLayout(robotsL); 	
 }
 
-void NavControlPanel::Finished()
+void NavControlPanel::pathTraversed()
 {
 	if(currRobot->navigator->isRunning())
 	{
@@ -241,6 +239,7 @@ void NavControlPanel::setNavigation()
 
 void NavControlPanel::pathPlan()
 {
+	currRobot->planningManager->setMap(playGround->mapData);
 	path = currRobot->planningManager->findPath(METRIC);						
 }
 
@@ -251,26 +250,28 @@ void NavControlPanel::generateSpace()
 
 void NavControlPanel::loadMap()
 {
-//	currRobot->planningManager->setMap(mapPainter->getImage());
-//	mapPainter->drawPath(currRobot->planningManager->pathPlanner);
+
 }
 
 void NavControlPanel::updateSelectedObject(double)
 {
-	if(!currRobot)
-		return;
-	if(!currRobot->planningManager)
-		return;		
-	if(currRobot->planningManager->pathPlanner==NULL)
+	if(!robotInitialization)
 	{
-		currRobot->startPlanner();
+		if(!currRobot)
+			return;
+		if(!currRobot->planningManager)
+			return;		
+		if(currRobot->planningManager->pathPlanner==NULL)
+		{
+			currRobot->startPlanner();
+		}
+		currRobot->planningManager->setBridgeTestValue(bridgeSegLenSB.value());
+		currRobot->planningManager->setConnNodesValue(nodeConRadSB.value());
+		currRobot->planningManager->setRegGridValue(regGridResSB.value());
+		currRobot->planningManager->setObstPenValue(obstPenRadSB.value());
+		currRobot->planningManager->setExpObstValue(obstExpRadSB.value());
+		currRobot->planningManager->setBridgeResValue(bridgeTestResSB.value());
 	}
-	currRobot->planningManager->setBridgeTestValue(bridgeSegLenSB.value());
-	currRobot->planningManager->setConnNodesValue(nodeConRadSB.value());
-	currRobot->planningManager->setRegGridValue(regGridResSB.value());
-	currRobot->planningManager->setObstPenValue(obstPenRadSB.value());
-	currRobot->planningManager->setExpObstValue(obstExpRadSB.value());
-	currRobot->planningManager->setBridgeResValue(bridgeTestResSB.value());
 }
 
 void NavControlPanel::updateSelectedRobot(bool)
@@ -294,26 +295,24 @@ void NavControlPanel::updateRobotSetting()
 		return;
 	if(!currRobot->planningManager)
 		return;		
-	if(currRobot->planningManager->pathPlanner==NULL)
-	{
+	if(!currRobot->planningManager->pathPlanner)
 		currRobot->startPlanner();
-	}
+	robotInitialization = true;
+	obstExpRadSB.setValue(currRobot->planningManager->pathPlanner->obstacle_radius);	
+	bridgeTestResSB.setValue(currRobot->planningManager->pathPlanner->bridge_res);
+	bridgeSegLenSB.setValue(currRobot->planningManager->pathPlanner->bridge_length);
+	regGridResSB.setValue(currRobot->planningManager->pathPlanner->reg_grid);	
+	nodeConRadSB.setValue(currRobot->planningManager->pathPlanner->conn_radius);
+	obstPenRadSB.setValue(currRobot->planningManager->pathPlanner->obst_dist);
+	
     connect(&bridgeTest, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setBridgeTest( int ))); 
     connect(&connectNodes, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setConnNodes( int ))); 
     connect(&regGrid, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setRegGrid( int ))); 
     connect(&obstPenalty, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setObstPen( int ))); 
     connect(&expandObst, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setExpObst( int )));
     connect(&showTree, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setShowTree( int )));
-	obstExpRadSB.setValue(currRobot->planningManager->pathPlanner->obstacle_radius);	
-	bridgeTestResSB.setValue(currRobot->planningManager->pathPlanner->bridge_res);
-	bridgeSegLenSB.setValue(currRobot->planningManager->pathPlanner->bridge_length);
-	regGridResSB.setValue(currRobot->planningManager->pathPlanner->reg_grid);	
-	nodeConRadSB.setValue(currRobot->planningManager->pathPlanner->conn_radius);
-	nodeConRadSB.setValue(currRobot->planningManager->pathPlanner->conn_radius);	
-	if(navContainer)	
-		if(navContainer->mapViewer)
-			if(currRobot->planningManager)
-				currRobot->planningManager->setMap(playGround->mapData);	
+
+	connect(currRobot->navigator,SIGNAL(pathTraversed()),this,SLOT(pathTraversed()));
 	switch(currRobot->navigator->getObstAvoidAlgo())
 	{
 		case VFH:
@@ -331,6 +330,7 @@ void NavControlPanel::updateRobotSetting()
 		default:
 			qDebug("Unkown ALGO");
 	}
+	
 	if(currRobot->notFollowing)
 	{
 		pathFollowBtn.setText("Path Follow");
@@ -347,33 +347,37 @@ void NavControlPanel::updateRobotSetting()
 	{
 		pauseBtn.setText("Continue");		
 	}
+	robotInitialization = false;
 }
 
 void NavControlPanel::updateSelectedAvoidanceAlgo(bool)
 {
-	if(currRobot->navigator==NULL)
+	if(!robotInitialization)
 	{
-		currRobot->startNavigator();
-	}
-	if(vfhRadBtn.isChecked())
-	{
-		qDebug("VFH");
-		currRobot->navigator->setObstAvoidAlgo(VFH);
-	}
-	else if(forceFieldRadBtn.isChecked())
-	{
-		qDebug("Force Field");		
-		currRobot->navigator->setObstAvoidAlgo(FORCE_FIELD);	
-	}
-	else if(configSpaceRadBtn.isChecked())
-	{
-		qDebug("Config Space");		
-		currRobot->navigator->setObstAvoidAlgo(CONFIG_SPACE);	
-	}
-	else if(noavoidRadBtn.isChecked())
-	{
-		qDebug("NO Avoidace");		
-		currRobot->navigator->setObstAvoidAlgo(NO_AVOID);	
+		if(currRobot->navigator==NULL)
+		{
+			currRobot->startNavigator();
+		}
+		if(vfhRadBtn.isChecked())
+		{
+			qDebug("VFH");
+			currRobot->navigator->setObstAvoidAlgo(VFH);
+		}
+		else if(forceFieldRadBtn.isChecked())
+		{
+			qDebug("Force Field");		
+			currRobot->navigator->setObstAvoidAlgo(FORCE_FIELD);	
+		}
+		else if(configSpaceRadBtn.isChecked())
+		{
+			qDebug("Config Space");		
+			currRobot->navigator->setObstAvoidAlgo(CONFIG_SPACE);	
+		}
+		else if(noavoidRadBtn.isChecked())
+		{
+			qDebug("NO Avoidace");		
+			currRobot->navigator->setObstAvoidAlgo(NO_AVOID);	
+		}
 	}
 }
 
@@ -406,11 +410,11 @@ void NavControlPanel::setEnd(Pose endLoc)
 	}	
 }
 
-void NavControlPanel::setMap(QImage imageMap)
+void NavControlPanel::setMap(Map * map)
 {
 	if(this->currRobot)
 	{
-		currRobot->planningManager->setMap(playGround->mapData);
+		currRobot->planningManager->setMap(map);
 	}
 	else
 	{

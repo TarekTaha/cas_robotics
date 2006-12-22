@@ -32,6 +32,7 @@ RobotManager::~RobotManager()
 RobotManager::RobotManager(PlayGround *playG,ConfigFile *cf,int secId)
 {
 	this->playGround = playG;
+	connect(playGround,SIGNAL(mapUpdated(Map *)),this,SLOT(updateMap(Map *)));
 	readRobotConfigs(cf,secId);
 	readCommManagerConfigs(cf,secId); 
 	int numSections = cf->GetSectionCount(); 
@@ -47,6 +48,12 @@ RobotManager::RobotManager(PlayGround *playG,ConfigFile *cf,int secId)
 			readPlannerConfigs(cf); 
 	    }
 	}
+}
+
+void RobotManager::updateMap(Map * mapData)
+{
+	if(planningManager)
+		planningManager->setMap(mapData);
 }
 
 int RobotManager::readRobotConfigs(ConfigFile *cf,int secId)

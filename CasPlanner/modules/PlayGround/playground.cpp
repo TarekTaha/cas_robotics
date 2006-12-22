@@ -6,6 +6,7 @@ PlayGround::PlayGround()
 
 PlayGround::PlayGround(QStringList configFiles)
 {
+	mapData = NULL;
     for(int j=0; j < configFiles.size(); j++)
     {
 		ConfigFile *cf = new ConfigFile("localhost",6665);
@@ -23,21 +24,21 @@ PlayGround::PlayGround(QStringList configFiles)
 			
 				}
 			}
-		    if(sectionName == "Robot")
-		    {
-		    	RobotManager *rbm = new RobotManager(this,cf,i);
-		    	robotPlatforms.push_back(rbm);
-		    }
 		    if(sectionName == "Map")
 		    {
-				mapName = cf->ReadString(i, "mapname", "resources//casareaicpA.png");
+				mapName = cf->ReadString(i, "mapname", "resources//casareaicpB.png");
 				if(!loadImage(mapName))
 				{
 					qDebug("Error Loading Image");
 					exit(1);
 				}
-		    }		
-		}
+		    }			
+		    if(sectionName == "Robot")
+		    {
+		    	RobotManager *rbm = new RobotManager(this,cf,i);
+		    	robotPlatforms.push_back(rbm);
+		    }    
+		}		
 		delete cf;    
     }
 }
@@ -49,6 +50,8 @@ int PlayGround::loadImage(QString name)
 		return 0;
 	}
 	mapData = mapManager.provideMapOG(image,0.05,Pose(0,0,0),false);
+	qDebug("Map Generated");
+	emit mapUpdated(mapData);
 	return 1;
 }
 

@@ -266,19 +266,18 @@ int PlanningManager::readConfigs( ConfigFile *cf)
 
 int PlanningManager::setupPlanner()
 {
-	qDebug("-> Starting Planner."); 
-    qDebug("*********************************************************************");	
-   	qDebug("Planning Parameters:"); 
-    qDebug("\t\t Pixel Resolution = %f",pixel_res); 
-    qDebug("\t\t Distance to Goal = %f",dist_goal); 
-    qDebug("\t\t Bridge Test Lenght = %f",bridge_len); 
-    qDebug("\t\t Bridge Test Res = %f",bridge_res); 
-    qDebug("\t\t Reg Grid Res  = %f",reg_grid); 
-    qDebug("\t\t Obstacle Expansion Radius = %f",obst_exp);         
-    qDebug("\t\t Connection Radius = %f",conn_rad);         
-    qDebug("\t\t Obstacle Penalty = %f",obst_pen);
-    qDebug("*********************************************************************"); 	
 	if (!pathPlanner)
+	{
+		qDebug("-> Starting Planner."); 
+   		qDebug("\tPlanning Parameters:"); 
+    	qDebug("\t\t\t Pixel Resolution = %f",pixel_res); 
+    	qDebug("\t\t\t Distance to Goal = %f",dist_goal); 
+    	qDebug("\t\t\t Bridge Test Lenght = %f",bridge_len); 
+    	qDebug("\t\t\t Bridge Test Res = %f",bridge_res); 
+    	qDebug("\t\t\t Reg Grid Res  = %f",reg_grid); 
+    	qDebug("\t\t\t Obstacle Expansion Radius = %f",obst_exp);         
+    	qDebug("\t\t\t Connection Radius = %f",conn_rad);         
+    	qDebug("\t\t\t Obstacle Penalty = %f",obst_pen);	
 		pathPlanner = new PathPlanner(robotManager->robot,
 									  dist_goal,
 									  bridge_len,
@@ -287,7 +286,8 @@ int PlanningManager::setupPlanner()
 									  obst_exp,
 									  conn_rad,
 									  obst_pen);
-	qDebug("->Planner Started.");
+		qDebug("->Planner Started.");
+	}
 	return 1;
 }
 

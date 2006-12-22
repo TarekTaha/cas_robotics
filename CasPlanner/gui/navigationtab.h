@@ -40,10 +40,10 @@ Q_OBJECT
 		void loadMap();
 		void generateSpace();
 		void pathFollow();
-		void Finished();
+		void pathTraversed();
 		void setStart(Pose);
 		void setEnd(Pose);
-		void setMap(QImage);
+		void setMap(Map * map);
     private:
 		NavContainer *navContainer;
 		PlayGround * playGround;
@@ -84,7 +84,7 @@ Q_OBJECT
 		QGroupBox robotsGB;
 		RobotManager *currRobot;
 		QTreeWidgetItem *robotItem;
-
+		bool robotInitialization;
 		friend class NavContainer;
 		static unsigned *image, *null;
        	Node * path;

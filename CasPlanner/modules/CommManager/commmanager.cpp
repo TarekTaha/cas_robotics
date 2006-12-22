@@ -253,8 +253,8 @@ int CommManager::readConfigs( ConfigFile *cf,int secId)
 
 int CommManager::start()
 {
-    qDebug("-> Communication Parameters"); fflush(stdout);
-    qDebug("*********************************************************************"); 	
+    qDebug("-> Starting Communication Manager."); fflush(stdout);	
+    qDebug("\tCommunication Parameters:"); fflush(stdout);	
   	if (!player)
  	{
 	   	player = new PlayerInterface(robot->robotIp,robot->robotPort);
@@ -297,7 +297,6 @@ int CommManager::start()
     	player->start();	  	
     	connected = true;
   	}
-    qDebug("*********************************************************************"); 
     qDebug("-> Communication Manager Started."); fflush(stdout);  	
     return 1;
 }

@@ -49,6 +49,8 @@ Q_OBJECT
 		void renderSearchTree();
 		void renderExpandedTree();
 		void setRobotsLocation();
+		void displayGrid();
+		void showIndicators();
 		GLuint makeObject();
 		QImage captureMap();
         virtual void setProvider(MapProvider *provider);
@@ -107,6 +109,8 @@ Q_OBJECT
 		friend class MapControlPanel;
 		GLuint texId;
 		double RGB[10][3];
+		float ratioW, ratioH;
+		int newWidth,newHeight;
 };
 
 

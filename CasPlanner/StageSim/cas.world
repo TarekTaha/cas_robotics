@@ -21,7 +21,7 @@ include "sick.inc"
 include "hokuyo.inc"
 
 #size [16 16]
-size [40 20 ]
+size [13 13 ]
 
 gui_disable 0
 gui_interval 100
@@ -47,15 +47,18 @@ window
 (
   size [ 500 500 ] 
   center [0 0] 
-  scale 0.05
+  #scale 0.05
+  scale 0.04
 )
 
 map
 (
   #bitmap "bitmaps/casareaicp2.png"
-  bitmap "bitmaps/casareaicpA.png"
+  #bitmap "bitmaps/casareaicpA.png"
+  bitmap "bitmaps/casareaicpB.png"
   map_resolution 0.05
-  size [22.8 20.3]  # casarea
+  #size [22.8 20.3]  # casareaA
+  size [12.8 12.8]  # casareaB
   name "casarea"
 )
 # an obstacle that i can move around
@@ -79,7 +82,7 @@ Obstacle
 (
   localization "gps"
   localization_origin [ 0 0 0 ]
-  pose [-6 1.9 180]
+  pose [-1.33 0.85 180]
   name "StaticObstacle"
 )
 # extend the wheelchair definition from wheelchair.inc
@@ -88,7 +91,7 @@ wheelchair
   localization "gps"
   localization_origin [ 0 0 0 ]
    name "robot"
-   pose [-7.15 -0.35 0]
+   pose [-3.83 -1.43 0]
    sick_laser
 	(
 		pose [0.030 0.000 0.000 ]
@@ -109,5 +112,5 @@ dynamicRobot
 (
   color "red"
    name "robot2"
-   pose [8.2 1.1 180]
+   pose [5.85 -2.66 180]
 )
