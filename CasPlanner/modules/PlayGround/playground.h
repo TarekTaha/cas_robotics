@@ -32,6 +32,8 @@ class PlayGround: public QObject
 	public slots:	
 		void startRobotsComm();
 		void stopRobots();		
+    signals:
+	    void mapUpdated(Map * mapData);		
 };
 
 #endif /*PLAYGROUND_H_*/

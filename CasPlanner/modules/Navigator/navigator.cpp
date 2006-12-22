@@ -235,15 +235,13 @@ int Navigator::readConfigs( ConfigFile *cf)
 		FF = new ForceField(*robotManager->robot,cf);
 	}
 
-    qDebug("-> Starting Robot Navigator."); 
-    qDebug("*********************************************************************"); 	
-  	qDebug("Navigation Parameters:"); 
-  	qDebug("\t\t Obstacle Avoidance:\t%s", qPrintable(obst_avoid)); 
-    qDebug("\t\t Controller Distance Gain:%f",k_dist); 
-  	qDebug("\t\t Controller Theta    Gain:%f",k_theta);
-  	qDebug("\t\t Safet Distance :%f",safety_dist);
-  	qDebug("\t\t Tracking Distance :%f",tracking_dist);
-    qDebug("*********************************************************************"); 
+    qDebug("-> Starting Robot Navigator."); 	
+  	qDebug("\tNavigation Parameters:"); 
+  	qDebug("\t\t\t Obstacle Avoidance:\t%s", qPrintable(obst_avoid)); 
+    qDebug("\t\t\t Controller Distance Gain:%f",k_dist); 
+  	qDebug("\t\t\t Controller Theta    Gain:%f",k_theta);
+  	qDebug("\t\t\t Safet Distance :%f",safety_dist);
+  	qDebug("\t\t\t Tracking Distance :%f",tracking_dist);
     qDebug("-> Robot Navigator Started.");   	
 
  	return 1;
@@ -503,10 +501,7 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
 void Navigator::run()
 {
 	connect(this, SIGNAL(glRender()),robotManager,SLOT(update()));	
-	connect(this, SIGNAL(pathTraversed()),robotManager,SLOT(Finished()));
-	connect(this, SIGNAL(setWayPoint(Pose*)),robotManager,SLOT(setWayPoint(Pose*)));				
-	connect(this, SIGNAL(renderMapPatch(Map*)),robotManager,SLOT(renderMapPatch(Map*)));						
-
+	
 	QVector <Robot *> availableRobots;
 	ControlAction cntrl;
 	Timer amcl_timer,delta_timer,redraw_timer,control_timer;
@@ -804,8 +799,6 @@ void Navigator::run()
 //				delete mapPatch;
 //			mapPatch = mapManager.provideLaserOG(laserScan,2.0,0.05,EstimatedPos);	
 			 	emit glRender();
-//			 	emit renderMapPatch(mapPatch);
-//			 	emit renderMapPatch(robotManager->planner->pathPlanner->map);
 		 	redraw_timer.restart();	
 		}
 		/* Get the control Action to be applied, in this case it's a

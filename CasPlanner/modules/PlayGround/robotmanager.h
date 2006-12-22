@@ -42,6 +42,8 @@ class RobotManager : public QObject//public CommManager, public PlanningManager 
 		Navigator       *navigator;
 		Robot           *robot;
 		bool notPaused,notFollowing;
+	public slots:
+		void updateMap(Map * mapData);
 };
 
 #endif
