@@ -27,7 +27,8 @@ PlayGround::PlayGround(QStringList configFiles)
 		    if(sectionName == "Map")
 		    {
 				mapName = cf->ReadString(i, "mapname", "resources//casareaicpB.png");
-				if(!loadImage(mapName))
+				mapRes  = cf->ReadFloat(i, "pixel_res",0.05);
+				if(!loadImage(mapName,mapRes))
 				{
 					qDebug("Error Loading Image");
 					exit(1);
@@ -43,13 +44,15 @@ PlayGround::PlayGround(QStringList configFiles)
     }
 }
 
-int PlayGround::loadImage(QString name)
+int PlayGround::loadImage(QString name,float res)
 {
 	if(!image.load(name, 0))
 	{
 		return 0;
 	}
-	mapData = mapManager.provideMapOG(image,0.05,Pose(0,0,0),false);
+	if(mapData)
+		delete mapData;
+	mapData = mapManager.provideMapOG(image,res,Pose(0,0,0),false);
 	qDebug("Map Generated");
 	emit mapUpdated(mapData);
 	return 1;
