@@ -18,9 +18,9 @@ class PlayGround: public QObject
 	public:
 		PlayGround();
 		PlayGround(QStringList configFiles);
-		int loadImage(QString name);
 		virtual ~PlayGround();
 		int renderingMethod;
+		float mapRes;
 		QString mapName;
 		NavContainer *navCon;
 		MapViewer    *mapViewer;
@@ -31,7 +31,8 @@ class PlayGround: public QObject
 		int  setNavContainer(NavContainer* con);
 	public slots:	
 		void startRobotsComm();
-		void stopRobots();		
+		void stopRobots();
+		int loadImage(QString name,float res);				
     signals:
 	    void mapUpdated(Map * mapData);		
 };

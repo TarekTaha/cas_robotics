@@ -540,85 +540,89 @@ void RobotConfigPage::updateSelection(int r)
 	//robotInterfaces->createIcons(d);
 	//interfacesList->createIcons(d);
 }
+
 MapConfigPage::MapConfigPage(QWidget * parent,PlayGround *playG): 
 	QWidget(parent),
-	playGround(playG)
+	playGround(playG),
+	browseMapBtn("Browse"),
+	reloadMapBtn("Reload Map")
 {
-    QGroupBox *updateGroup = new QGroupBox(tr("Package selection"));
-    QCheckBox *systemCheckBox = new QCheckBox(tr("Update system"));
-    QCheckBox *appsCheckBox = new QCheckBox(tr("Update applications"));
-    QCheckBox *docsCheckBox = new QCheckBox(tr("Update documentation"));
+    mapGround = new QGroupBox(tr("Map Configurations"));
+    mapName = new QLabel(tr("MapName:"));
+    mapNameEdit = new QLineEdit;
 
-    QGroupBox *packageGroup = new QGroupBox(tr("Existing packages"));
-
-    QListWidget *packageList = new QListWidget;
-    QListWidgetItem *qtItem = new QListWidgetItem(packageList);
-    qtItem->setText(tr("Qt"));
-    QListWidgetItem *qsaItem = new QListWidgetItem(packageList);
-    qsaItem->setText(tr("QSA"));
-    QListWidgetItem *teamBuilderItem = new QListWidgetItem(packageList);
-    teamBuilderItem->setText(tr("Teambuilder"));
-
-    QPushButton *startUpdateButton = new QPushButton(tr("Start update"));
-
-    QVBoxLayout *updateLayout = new QVBoxLayout;
-    updateLayout->addWidget(systemCheckBox);
-    updateLayout->addWidget(appsCheckBox);
-    updateLayout->addWidget(docsCheckBox);
-    updateGroup->setLayout(updateLayout);
-
-    QVBoxLayout *packageLayout = new QVBoxLayout;
-    packageLayout->addWidget(packageList);
-    packageGroup->setLayout(packageLayout);
+    mapRes = new QLabel(tr("Resolution:"));;
+    mapResolution.setMinimum(0.01);
+    mapResolution.setMaximum(2);
+	mapResolution.setSingleStep(0.01);
+	
+	if(playGround->mapData)
+	{
+		fileName = playGround->mapName;
+		mapNameEdit->setText(playGround->mapName);
+		mapResolution.setValue(playGround->mapData->resolution);
+	}
+	else
+	{
+		mapResolution.setValue(0);
+	}
+   	
+    QGridLayout *mapConfigLayout = new QGridLayout;
+    mapConfigLayout->addWidget(mapName, 0, 0);
+    mapConfigLayout->addWidget(mapNameEdit, 0, 1);
+    mapConfigLayout->addWidget(&browseMapBtn, 0, 2);    
+    mapConfigLayout->addWidget(mapRes, 1, 0);
+    mapConfigLayout->addWidget(&mapResolution, 1, 1);
+	mapConfigLayout->addWidget(&reloadMapBtn,2, 0);
+	
+	connect(&browseMapBtn,SIGNAL(pressed()),this,SLOT(getFileName()));
+	connect(&reloadMapBtn,SIGNAL(pressed()),this,SLOT(reloadMap()));	
+    
+    mapGround->setLayout(mapConfigLayout);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
-    mainLayout->addWidget(updateGroup);
-    mainLayout->addWidget(packageGroup);
+    mainLayout->addWidget(mapGround);
     mainLayout->addSpacing(12);
-    mainLayout->addWidget(startUpdateButton);
     mainLayout->addStretch(1);
-    setLayout(mainLayout);
+    setLayout(mainLayout);	
+}
+
+void MapConfigPage::getFileName()
+{
+ 	fileName = QFileDialog::getOpenFileName(this, tr("Open Map File"),
+                                                "./resources",
+                                                tr("Images (*.png *.xpm *.jpg *.bmp *.jpeg)"));
+	mapNameEdit->setText(fileName);                                                
+}
+
+void MapConfigPage::reloadMap()
+{
+	if((playGround->mapName != fileName) || (playGround->mapRes  != float(mapResolution.value())))
+	{
+		playGround->mapName = fileName;	           
+		playGround->mapRes  = mapResolution.value();	
+		playGround->loadImage(fileName,mapResolution.value());
+		mapNameEdit->setText(playGround->mapName);
+	}                                     
 }
 
 ProfileConfigPage::ProfileConfigPage(QWidget * parent,PlayGround *playG): 
 	QWidget(parent),
 	playGround(playG)
 {
-    QGroupBox *packagesGroup = new QGroupBox(tr("Look for packages"));
+    QGroupBox *profileGroup = new QGroupBox(tr("User Profile"));
 
-    QLabel *nameLabel = new QLabel(tr("Name:"));
+    QLabel *nameLabel = new QLabel(tr("User Name:"));
     QLineEdit *nameEdit = new QLineEdit;
-
-    QLabel *dateLabel = new QLabel(tr("Released after:"));
-    QDateTimeEdit *dateEdit = new QDateTimeEdit(QDate::currentDate());
-
-    QCheckBox *releasesCheckBox = new QCheckBox(tr("Releases"));
-    QCheckBox *upgradesCheckBox = new QCheckBox(tr("Upgrades"));
-
-    QSpinBox *hitsSpinBox = new QSpinBox;
-    hitsSpinBox->setPrefix(tr("Return up to "));
-    hitsSpinBox->setSuffix(tr(" results"));
-    hitsSpinBox->setSpecialValueText(tr("Return only the first result"));
-    hitsSpinBox->setMinimum(1);
-    hitsSpinBox->setMaximum(100);
-    hitsSpinBox->setSingleStep(10); 
-
-    QPushButton *startQueryButton = new QPushButton(tr("Start query"));
 
     QGridLayout *packagesLayout = new QGridLayout;
     packagesLayout->addWidget(nameLabel, 0, 0);
     packagesLayout->addWidget(nameEdit, 0, 1);
-    packagesLayout->addWidget(dateLabel, 1, 0);
-    packagesLayout->addWidget(dateEdit, 1, 1);
-    packagesLayout->addWidget(releasesCheckBox, 2, 0);
-    packagesLayout->addWidget(upgradesCheckBox, 3, 0);
-    packagesLayout->addWidget(hitsSpinBox, 4, 0, 1, 2);
-    packagesGroup->setLayout(packagesLayout);
+    profileGroup->setLayout(packagesLayout);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
-    mainLayout->addWidget(packagesGroup);
+    mainLayout->addWidget(profileGroup);
     mainLayout->addSpacing(12);
-    mainLayout->addWidget(startQueryButton);
     mainLayout->addStretch(1);
     setLayout(mainLayout);
 }

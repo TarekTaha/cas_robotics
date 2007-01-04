@@ -107,6 +107,15 @@ Q_OBJECT
 	public:
     	MapConfigPage(QWidget *parent = 0,PlayGround *playG=0);
     	PlayGround * playGround;
+    	QGroupBox *mapGround; 
+    	QString fileName;
+    	QLabel *mapName,*mapRes ;
+    	QLineEdit *mapNameEdit ;    	
+    	QDoubleSpinBox mapResolution;
+    	QPushButton browseMapBtn,reloadMapBtn;   	
+    public slots:    	
+    	void getFileName();
+    	void reloadMap();
 };
 
 class ProfileConfigPage : public QWidget

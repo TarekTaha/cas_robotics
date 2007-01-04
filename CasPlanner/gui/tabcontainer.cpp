@@ -9,9 +9,9 @@ TabContainer::TabContainer(QWidget *parent,PlayGround *playG)
    	
 //    tasksGui = new TasksGui(parent,playGround);
 //    addTab(tasksGui, "Tasks Manager");
-//    
-//	playGroundTab = new PlayGroundTab(parent,playGround);    
-//    addTab(playGroundTab, "PlayGround");
+    
+	playGroundTab = new PlayGroundTab(parent,playGround);    
+    addTab(playGroundTab, "PlayGround");
 
     updateGeometry();
 }
