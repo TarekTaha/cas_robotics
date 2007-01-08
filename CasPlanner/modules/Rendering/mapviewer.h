@@ -64,7 +64,7 @@ Q_OBJECT
 		void setShowPointclouds (int state);
 		void setShowPatchBorders(int state);
 		void updateMap          (Map *newMap);
-		void saveImage          ();
+		void saveImage          ();         
     signals:
 		void moveMOLeft();
 		void moveMORight();
@@ -97,7 +97,7 @@ Q_OBJECT
 	    MapManager mapManager;
 	    Pose start,end,wayPoint;
 	    QVector <Pose> robotsLocation;
-	    Map * mapData;
+	    Map * ogMap;
 	    QColor clearColor;
 	   	QPointF mousePos;
 		QHash<QString, int> snapDLs;

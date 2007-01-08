@@ -96,13 +96,12 @@ class MapSkeleton
 		bool convertGridToLineWithVoronoi(float minThreshold, float maxThreshold,
 													  bool filterByCellValue, float valueToSet);
 		void generateInnerSkeleton();
-		void loadMap();
+		void loadMap(QString fileName);
 		void clear();
 		void draw();
 		SSkelPtr getSSkelPtr();
 		QVector <Vertex> verticies;
 	private:
-	//	Map * ogMap;
 		SSkelPtr & sskel;
 		Regions  input ;
 		Regions  output ;

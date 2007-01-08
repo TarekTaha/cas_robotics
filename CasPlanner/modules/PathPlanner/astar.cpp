@@ -35,15 +35,15 @@ Astar::~Astar()
 // transfers from pixel coordinate to the main coordinate system
 void Astar :: convertPix(QPointF  *p) 
 {
-	p->setX( p->x()*map->resolution - map->resolution*map->center.x());
-	p->setY(-p->y()*map->resolution + map->resolution*map->center.y());
+	p->setX( p->x()*map->mapRes - map->mapRes*map->center.x());
+	p->setY(-p->y()*map->mapRes + map->mapRes*map->center.y());
 };
 
 // transfers from main coordinate to the pixel coordinate system
 void Astar :: convert2Pix(QPointF *p)
 {
-	p->setX(( p->x() + map->resolution*map->center.x())/map->resolution);
-	p->setY((-p->y() + map->resolution*map->center.y())/map->resolution);
+	p->setX(( p->x() + map->mapRes*map->center.x())/map->mapRes);
+	p->setY((-p->y() + map->mapRes*map->center.y())/map->mapRes);
 }
 
 // Tests for whether a node is in an obstacle or not
@@ -62,7 +62,7 @@ int Astar :: inObstacle(QPointF P, double theta)
 		n = (int)det_point.y();
 		if (m <= 0 || n <= 0 || m >=map->width || n >=this->map->height)
 			return 1;
-		if (this->map->data[m][n])
+		if (this->map->grid[m][n])
 			return 1;
 	}
 	return 0;

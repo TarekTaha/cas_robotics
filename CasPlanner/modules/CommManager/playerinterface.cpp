@@ -275,7 +275,7 @@ Map PlayerInterface::provideMap()
 //    ogmapdata->origin.o = mapposphi;
 	retval.width      = map->GetWidth();
 	retval.height     = map->GetHeight()-1;
-	retval.resolution = map->GetResolution();
+	retval.mapRes 	  = map->GetResolution();
 //	for(int i=0 ;i<map->width*(map->height-1);i++)
 //	{
 //		if((uint8_t)map->cells[i]>100)

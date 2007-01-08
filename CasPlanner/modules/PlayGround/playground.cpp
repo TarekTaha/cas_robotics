@@ -1,12 +1,17 @@
 #include "playground.h"
 
-PlayGround::PlayGround()
+PlayGround::PlayGround():
+navCon(NULL),
+mapViewer(NULL),
+mapManager(NULL)	
 {
 }
 
-PlayGround::PlayGround(QStringList configFiles)
+PlayGround::PlayGround(QStringList configFiles):
+navCon(NULL),
+mapViewer(NULL),
+mapManager(NULL)
 {
-	mapData = NULL;
     for(int j=0; j < configFiles.size(); j++)
     {
 		ConfigFile *cf = new ConfigFile("localhost",6665);
@@ -26,36 +31,30 @@ PlayGround::PlayGround(QStringList configFiles)
 			}
 		    if(sectionName == "Map")
 		    {
-				mapName = cf->ReadString(i, "mapname", "resources//casareaicpB.png");
-				mapRes  = cf->ReadFloat(i, "pixel_res",0.05);
-				if(!loadImage(mapName,mapRes))
-				{
-					qDebug("Error Loading Image");
-					exit(1);
-				}
-		    }			
+				QString mapName = cf->ReadString(i, "mapname", "resources//casareaicpB.png");
+				float mapRes  =   cf->ReadFloat(i, "pixel_res",0.05);
+				bool mapNegate  = cf->ReadBool(i, "negate",0);
+				loadMap(mapName,mapRes,mapNegate,Pose(0,0,0));
+		    }
 		    if(sectionName == "Robot")
 		    {
 		    	RobotManager *rbm = new RobotManager(this,cf,i);
 		    	robotPlatforms.push_back(rbm);
 		    }    
 		}		
-		delete cf;    
+		delete cf;
     }
 }
 
-int PlayGround::loadImage(QString name,float res)
+void PlayGround::loadMap(QString name,float res,bool negate,Pose p)
 {
-	if(!image.load(name, 0))
-	{
-		return 0;
-	}
-	if(mapData)
-		delete mapData;
-	mapData = mapManager.provideMapOG(image,res,Pose(0,0,0),false);
-	qDebug("Map Generated");
-	emit mapUpdated(mapData);
-	return 1;
+	qDebug("Starting Map Manager"); fflush(stdout);
+	if(!mapManager)
+		mapManager = new MapManager(name,res,negate,p);
+	else
+		mapManager->loadMap(name,res,negate,p);
+	qDebug("Map Manager Started"); fflush(stdout);		
+	emit mapUpdated(mapManager->globalMap);
 }
 
 int PlayGround::setNavContainer(NavContainer* con)

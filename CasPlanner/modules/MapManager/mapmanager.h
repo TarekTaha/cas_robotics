@@ -12,8 +12,11 @@
 #include <QImage>
 #include <QRgb>
 #include <QBitArray>
-#include "interfaceprovider.h"
+#include <QFileDialog>
 
+#include "interfaceprovider.h"
+#include "mapskeleton.h"
+using namespace defs;
 /*! Changes different Map representations into an occupancy
  * grid represented by a bit array. This OG will be sent to 
  * the path planner for planning. This manager currently supports
@@ -27,10 +30,19 @@ class MapManager : public Map, public QObject//public QThread
 	//Q_OBJECT
 	public:
 		MapManager();
+		MapManager(QString name,float res,bool negate, Pose p);
+		void loadMap(QString name,float res,bool negate,Pose p);
+		void generateSkeleton();
 		virtual ~MapManager();
+		bool mapNegate,skeletonGenerated;
+		QString mapName;
+		QImage image;
+		Map * globalMap;
+		MapSkeleton mapSkeleton;		
+		SSkelPtr  sskel;		
 		Map * provideLaserOG(LaserScan laserScan,double local_dist,double pixel_res,Pose pose);
 		Map * providePointCloud(LaserScan laserScan, double loca_dist,Pose robotPose);
-		Map * provideMapOG  (QImage image,double pixel_res,Pose p,bool negate);
+		Map * provideMapOG  (QImage image,double pixel_res,bool negate,Pose p);
 };
 
 #endif /*MAPMANAGER_H_*/

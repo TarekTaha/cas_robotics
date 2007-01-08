@@ -20,19 +20,15 @@ class PlayGround: public QObject
 		PlayGround(QStringList configFiles);
 		virtual ~PlayGround();
 		int renderingMethod;
-		float mapRes;
-		QString mapName;
 		NavContainer *navCon;
 		MapViewer    *mapViewer;
-		MapManager mapManager;	
-		Map * mapData;
-		QImage image;
+		MapManager   *mapManager;	
 		QVector <RobotManager* > robotPlatforms;
 		int  setNavContainer(NavContainer* con);
 	public slots:	
 		void startRobotsComm();
 		void stopRobots();
-		int loadImage(QString name,float res);				
+		void loadMap(QString name,float res,bool negate, Pose p);				
     signals:
 	    void mapUpdated(Map * mapData);		
 };

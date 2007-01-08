@@ -112,7 +112,8 @@ Q_OBJECT
     	QLabel *mapName,*mapRes ;
     	QLineEdit *mapNameEdit ;    	
     	QDoubleSpinBox mapResolution;
-    	QPushButton browseMapBtn,reloadMapBtn;   	
+    	QPushButton browseMapBtn,reloadMapBtn;  
+    	QRadioButton whiteFree,blackFree; 	
     public slots:    	
     	void getFileName();
     	void reloadMap();

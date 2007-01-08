@@ -1,13 +1,66 @@
 #include "mapmanager.h"
 #include "utils.h"
-MapManager::MapManager()
+MapManager::MapManager():
+globalMap(NULL),
+mapSkeleton(sskel)
 {
+
 }
 
 MapManager::~MapManager()
 {
+
 }
 
+MapManager::MapManager(QString name,float res,bool negate, Pose p):
+globalMap(NULL),
+mapSkeleton(sskel)
+{
+	this->mapNegate = negate;
+	this->mapName = name;
+	loadMap(name,res,negate,p);
+}
+
+void MapManager::loadMap(QString name,float res,bool negate,Pose p)
+{
+	qDebug("Generating Map"); fflush(stdout);
+	this->mapNegate = negate;
+	this->mapName = name;	
+	if(!image.load(name, 0))
+	{
+		qDebug("Error Loading Image"); fflush(stdout);
+		exit(1);
+	}
+	qDebug("Generating Map"); fflush(stdout);	
+	if(this->globalMap)
+		delete globalMap;
+	globalMap = provideMapOG(image,res,negate,p);
+	qDebug("Map Generated");  fflush(stdout);
+	return;	
+}	
+
+void MapManager::generateSkeleton()
+{
+// 	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/complex_5.poly");
+//	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/map_polys.poly");
+// 	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/many_holes.poly");
+	QString s("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/alley_0.poly");
+	qDebug("Generating Skeleton");
+	mapSkeleton.loadMap(s);
+	mapSkeleton.generateInnerSkeleton();
+	if (! this->sskel)
+	{
+		skeletonGenerated = false;		
+		qDebug("\nNo Skeleton Generated");
+		return;
+	}
+	else
+	{
+		skeletonGenerated = true;
+		qDebug("\nSkeleton Generated, it contains%d Verticies",mapSkeleton.verticies.size());		
+	}
+}
+	
 Map * MapManager::providePointCloud(LaserScan laserScan, double local_dist,Pose robotPose)
 {
 	Map *retval;
@@ -60,11 +113,11 @@ Map * MapManager::provideLaserOG(LaserScan laserScan, double local_dist,double r
 		if(p.y() < 0) p.setY(0);
 		if (dist <= local_dist)
 		{
-			retval->data[int(p.x())][int(p.y())] = true;
+			retval->grid[int(p.x())][int(p.y())] = true;
 		}
 		else
 		{
-			retval->data[int(p.x())][int(p.y())] = false;			
+			retval->grid[int(p.x())][int(p.y())] = false;			
 		}
 	}
 	qDebug("Width:%d Height:%d",width,height);
@@ -72,7 +125,7 @@ Map * MapManager::provideLaserOG(LaserScan laserScan, double local_dist,double r
 	return retval;
 }
 
-Map *MapManager::provideMapOG(QImage image,double res,Pose map_pose,bool negate)
+Map *MapManager::provideMapOG(QImage image,double res,bool negate,Pose map_pose)
 {
 	Map * retval;
 	QPointF center(image.width()/2.0,image.height()/2.0);
@@ -89,20 +142,20 @@ Map *MapManager::provideMapOG(QImage image,double res,Pose map_pose,bool negate)
 			{
 				// White color(255) is Free and Black(0) is Occupied
 				if (  color_ratio > 0.9)
-					retval->data[i][j]= false;
+					retval->grid[i][j]= false;
 				else
 				{
-					retval->data[i][j]= true;
+					retval->grid[i][j]= true;
 					count++;
 				}
-			}
+			} 
 			else
 			{
 				// White color(255) is Occupied and Black(0) is Free
 				if ( color_ratio < 0.1)
-					retval->data[i][j]= false;
+					retval->grid[i][j]= false;
 				else 
-					retval->data[i][j]= true;				
+					retval->grid[i][j]= true;				
 			}
 		}
 	}

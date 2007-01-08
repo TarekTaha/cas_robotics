@@ -289,7 +289,7 @@ void Navigator::GenerateLocalMap(QVector<QPointF> laser_scan,Pose laser_pose, Po
 	}
 //	qDebug("Longest Laser Ray = %f",farest_laser_dist);
 	dist = sqrt(pow(laser_pose.p.x(),2)+pow(laser_pose.p.y(),2)); 
-	num_pixels = (dist + farest_laser_dist + 10)/global_planner->pathPlanner->map->resolution;
+	num_pixels = (dist + farest_laser_dist + 10)/global_planner->pathPlanner->map->mapRes;
 
  	global_planner->pathPlanner->convert2Pix(&rob_location.p);
 
@@ -305,7 +305,7 @@ void Navigator::GenerateLocalMap(QVector<QPointF> laser_scan,Pose laser_pose, Po
 		for(int j=(int)(grid_start.y());j<(2*num_pixels + grid_start.y()); j++)
 		{
 			if(i<(global_planner->pathPlanner->map->width - 1)  && j<(global_planner->pathPlanner->map->height - 1)) 
-				if (global_planner->pathPlanner->map->data[i][j])
+				if (global_planner->pathPlanner->map->grid[i][j])
 				{
 					temp.setX(i);
 					temp.setY(j);
