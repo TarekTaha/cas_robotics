@@ -215,7 +215,7 @@ void VoronoiPathPlanner::saveSearchSpace()
 	{
 		p = temp->location;
 		this->convert2Pix(&p);
-		this->map->data[int(p.x())][(int)p.y()]= true ;
+		this->map->grid[int(p.x())][(int)p.y()]= true ;
 		temp =temp->next;
 	}
 }

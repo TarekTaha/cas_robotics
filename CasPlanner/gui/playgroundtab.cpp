@@ -545,7 +545,9 @@ MapConfigPage::MapConfigPage(QWidget * parent,PlayGround *playG):
 	QWidget(parent),
 	playGround(playG),
 	browseMapBtn("Browse"),
-	reloadMapBtn("Reload Map")
+	reloadMapBtn("Reload Map"),
+	whiteFree("White is Free Space"),
+	blackFree("Black is Free Space")
 {
     mapGround = new QGroupBox(tr("Map Configurations"));
     mapName = new QLabel(tr("MapName:"));
@@ -556,11 +558,15 @@ MapConfigPage::MapConfigPage(QWidget * parent,PlayGround *playG):
     mapResolution.setMaximum(2);
 	mapResolution.setSingleStep(0.01);
 	
-	if(playGround->mapData)
+	if(playGround->mapManager->globalMap)
 	{
-		fileName = playGround->mapName;
-		mapNameEdit->setText(playGround->mapName);
-		mapResolution.setValue(playGround->mapData->resolution);
+		fileName = playGround->mapManager->mapName;
+		mapNameEdit->setText(playGround->mapManager->mapName);
+		mapResolution.setValue(playGround->mapManager->globalMap->mapRes);
+		if(playGround->mapManager->mapNegate)
+			blackFree.setChecked(true);
+		else
+			whiteFree.setChecked(true);
 	}
 	else
 	{
@@ -573,7 +579,9 @@ MapConfigPage::MapConfigPage(QWidget * parent,PlayGround *playG):
     mapConfigLayout->addWidget(&browseMapBtn, 0, 2);    
     mapConfigLayout->addWidget(mapRes, 1, 0);
     mapConfigLayout->addWidget(&mapResolution, 1, 1);
-	mapConfigLayout->addWidget(&reloadMapBtn,2, 0);
+	mapConfigLayout->addWidget(&whiteFree, 2, 0);    
+	mapConfigLayout->addWidget(&blackFree, 2, 1);	
+	mapConfigLayout->addWidget(&reloadMapBtn,3, 0);
 	
 	connect(&browseMapBtn,SIGNAL(pressed()),this,SLOT(getFileName()));
 	connect(&reloadMapBtn,SIGNAL(pressed()),this,SLOT(reloadMap()));	
@@ -597,12 +605,16 @@ void MapConfigPage::getFileName()
 
 void MapConfigPage::reloadMap()
 {
-	if((playGround->mapName != fileName) || (playGround->mapRes  != float(mapResolution.value())))
+	if((playGround->mapManager->mapName != fileName) || (playGround->mapManager->globalMap->mapRes  != float(mapResolution.value())))
 	{
-		playGround->mapName = fileName;	           
-		playGround->mapRes  = mapResolution.value();	
-		playGround->loadImage(fileName,mapResolution.value());
-		mapNameEdit->setText(playGround->mapName);
+		bool negate;
+		if(whiteFree.isChecked())
+			negate = false;
+		else
+			negate = true;
+		playGround->mapManager->mapName = fileName;	           
+		playGround->loadMap(fileName,mapResolution.value(),negate,Pose(0,0,0));
+		mapNameEdit->setText(playGround->mapManager->mapName);
 	}                                     
 }
 

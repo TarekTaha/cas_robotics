@@ -143,8 +143,8 @@ class TasksGui :public QWidget
     	VoronoiPathPlanner * voronoiPlanner;    
     	QVector <Task> tasks;
     	bool skeletonGenerated;
-		MapSkeleton mapSkeleton;
         int totalVisits;		    	    
+    	PlayGround * playGround;
     public slots:
         void updateData();
 //         void mousePressEvent(QMouseEvent *me);
@@ -161,11 +161,11 @@ class TasksGui :public QWidget
     signals:
         void newData();
     private:
-    	PlayGround * playGround;
 		QTabWidget *tabContainer;
 		TasksControlPanel tasksControlPanel;
 		SSkelPtr  sskel;
         MapGL mapGL;
+//        MapViewer mapGL;
         double speed;
         double turnRatio;
         double startX, startY;

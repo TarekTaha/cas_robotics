@@ -16,16 +16,9 @@ void MapSkeleton::clear()
     output.clear();
 }
 
-void MapSkeleton::loadMap()
+void MapSkeleton::loadMap(QString fileName)
 {
-
-//	QFileDialog::getOpenFileName(QString::null, "Polygonal PolygonalRegion Files (*.poly)", this );
-//    if ( s.isEmpty() )
-//    	return;
-// 	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/complex_5.poly");
-//	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/map_polys.poly");
-// 	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/many_holes.poly");
-	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/alley_0.poly");
+	std::ifstream in(qPrintable(fileName));
     if ( in )
     {
     	CGAL::set_ascii_mode(in);

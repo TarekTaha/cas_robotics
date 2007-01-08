@@ -23,7 +23,7 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
  start_initialized(false),
  end_initialized(false),
  mainMapBuilt(false),
- mapData(playG->mapData)
+ ogMap(playG->mapManager->globalMap)
 {
 	// Data Logging Timer
     renderTimer = new QTimer(this);
@@ -33,6 +33,8 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
     setFocusPolicy(Qt::StrongFocus);
 	connect(this, SIGNAL(setStart(Pose)),  navControlPanel, SLOT(setStart(Pose)));
 	connect(this, SIGNAL(setEnd(Pose))  ,  navControlPanel, SLOT(setEnd(Pose)));
+	connect(playGround,SIGNAL(mapUpdated(Map*)),this,       SLOT(updateMap(Map*)));
+	
   	RGB[0][0] = 0.0; RGB[0][1] = 0.7;   RGB[0][2] = 0.7;   // Lightblue
   	RGB[1][0] = 1.0; RGB[1][1] = 0.51;  RGB[1][2] = 0.278; // Sienna1
   	RGB[2][0] = 0.0; RGB[2][1] = 0.7;   RGB[2][2] = 0.0;   // Green
@@ -101,9 +103,7 @@ void MapViewer::setProvider(MapProvider *)
 void MapViewer::updateMap(Map *newMap)
 {
 	qDebug("Updating Map");
-	if(this->mapData)
-		delete mapData;
-	this->mapData = newMap;
+	this->ogMap = newMap;
     mainMapBuilt = false;
     updateGL();
 }
@@ -338,41 +338,41 @@ void MapViewer::update()
 
 void MapViewer::loadTexture()
 {	
-	qDebug("oldW:%d oldH:%d",mapData->width,mapData->height);	
-   	newWidth =  (int) std::pow(2.0f, (int)ceil(log((float)mapData->width) / log(2.f)));
-   	newHeight = (int) std::pow(2.0f, (int)ceil(log((float)mapData->height) / log(2.f)));
-	ratioW  = ((float) mapData->width)/newWidth;
-	ratioH  = ((float) mapData->height)/newHeight;
+	qDebug("oldW:%d oldH:%d",ogMap->width,ogMap->height);	
+   	newWidth =  (int) std::pow(2.0f, (int)ceil(log((float)ogMap->width) / log(2.f)));
+   	newHeight = (int) std::pow(2.0f, (int)ceil(log((float)ogMap->height) / log(2.f)));
+	ratioW  = ((float) ogMap->width)/newWidth;
+	ratioH  = ((float) ogMap->height)/newHeight;
 	qDebug("MW:%d MH:%d RatioW:%f RatioH:%f",newWidth,newHeight,ratioW,ratioH);
 	
-    unsigned char imgData[mapData->width*mapData->height*4];
+    unsigned char imgData[ogMap->width*ogMap->height*4];
 	long int count=0;
-    for(int i=0; i < mapData->width; i++)
+    for(int i=0; i < ogMap->width; i++)
     {
-		for(int j=0; j < mapData->height; j++)
+		for(int j=0; j < ogMap->height; j++)
 		{
-		    if(mapData->data[i][j] == true)
+		    if(ogMap->grid[i][j] == true)
 			{
 		    	count++;
-				imgData[(j*mapData->width+i)*4]   = 0;
-				imgData[(j*mapData->width+i)*4+1] = 0;
-				imgData[(j*mapData->width+i)*4+2] = 0;
-				imgData[(j*mapData->width+i)*4+3] = 255;
+				imgData[(j*ogMap->width+i)*4]   = 0;
+				imgData[(j*ogMap->width+i)*4+1] = 0;
+				imgData[(j*ogMap->width+i)*4+2] = 0;
+				imgData[(j*ogMap->width+i)*4+3] = 255;
 			}
 		    else
 		    {
-				imgData[(j*mapData->width+i)*4]   = 255;
-				imgData[(j*mapData->width+i)*4+1] = 255;
-				imgData[(j*mapData->width+i)*4+2] = 255;
-				imgData[(j*mapData->width+i)*4+3] = 255;
+				imgData[(j*ogMap->width+i)*4]   = 255;
+				imgData[(j*ogMap->width+i)*4+1] = 255;
+				imgData[(j*ogMap->width+i)*4+2] = 255;
+				imgData[(j*ogMap->width+i)*4+3] = 255;
 		    }
 		}
     }
 	unsigned char * scaledData;
-   	if (newWidth != mapData->width && newHeight != mapData->height)
+   	if (newWidth != ogMap->width && newHeight != ogMap->height)
    	{
       	scaledData = new unsigned char[newWidth * newHeight * 4];
-      	if (gluScaleImage(GL_RGBA, mapData->width, mapData->height,
+      	if (gluScaleImage(GL_RGBA, ogMap->width, ogMap->height,
                         GL_UNSIGNED_BYTE, imgData, newWidth, 
                         newHeight, GL_UNSIGNED_BYTE, scaledData) != 0)
       	{
@@ -407,28 +407,28 @@ void MapViewer::renderMap()
     glBindTexture(GL_TEXTURE_2D, texId);
     // Inverse the Y-axis
     glScalef(1,-1,1);
-    glTranslatef(-(newWidth*mapData->resolution)/2.0f,-(newHeight*mapData->resolution)/2.0f,0);
+    glTranslatef(-(newWidth*ogMap->mapRes)/2.0f,-(newHeight*ogMap->mapRes)/2.0f,0);
     //glColor4f(1,1,1,0.8);
 	// Define Coordinate System
     glBegin(GL_QUADS);
-	    glTexCoord2f(1,float(newHeight)/float(newWidth));			glVertex2f(newWidth*mapData->resolution,newHeight*mapData->resolution);
-	    glTexCoord2f(1,0.0);		glVertex2f(newWidth*mapData->resolution,0.0);
+	    glTexCoord2f(1,float(newHeight)/float(newWidth));			glVertex2f(newWidth*ogMap->mapRes,newHeight*ogMap->mapRes);
+	    glTexCoord2f(1,0.0);		glVertex2f(newWidth*ogMap->mapRes,0.0);
 	    glTexCoord2f(0.0,0.0);		glVertex2f(0.0,0.0);
-	    glTexCoord2f(0.0,float(newHeight)/float(newWidth));    	glVertex2f(0.0,newHeight*mapData->resolution);
+	    glTexCoord2f(0.0,float(newHeight)/float(newWidth));    	glVertex2f(0.0,newHeight*ogMap->mapRes);
 //    
-//	    glTexCoord2f(ratioW,ratioH);	glVertex2f(newWidth*mapData->resolution,newHeight*mapData->resolution);
-//	    glTexCoord2f(ratioW,0.0);		glVertex2f(newWidth*mapData->resolution,0.0);
+//	    glTexCoord2f(ratioW,ratioH);	glVertex2f(newWidth*ogMap->mapRes,newHeight*ogMap->mapRes);
+//	    glTexCoord2f(ratioW,0.0);		glVertex2f(newWidth*ogMap->mapRes,0.0);
 //	    glTexCoord2f(0.0,0.0);			glVertex2f(0.0,0.0);
-//	    glTexCoord2f(0.0,ratioH);    	glVertex2f(0.0,newHeight*mapData->resolution);
+//	    glTexCoord2f(0.0,ratioH);    	glVertex2f(0.0,newHeight*ogMap->mapRes);
     glEnd();
 
     // Surrounding BOX
 	glColor4f(0,0,0,0.5);
 	glBegin(GL_LINE_LOOP);
 		glVertex2f(0,0);
-		glVertex2f(0.0,newHeight*mapData->resolution);
-		glVertex2f(newWidth*mapData->resolution,newHeight*mapData->resolution);
-		glVertex2f(newWidth*mapData->resolution,0.0);
+		glVertex2f(0.0,newHeight*ogMap->mapRes);
+		glVertex2f(newWidth*ogMap->mapRes,newHeight*ogMap->mapRes);
+		glVertex2f(newWidth*ogMap->mapRes,0.0);
 	glEnd();
     glPopMatrix();
     glDisable(GL_TEXTURE_2D);
@@ -460,7 +460,7 @@ void MapViewer::displayGrid()
 		    glEnd();
 		}
 		// X-axis indicator
-	    int i = int((mapData->width*mapData->resolution)/2.0 + 2);
+	    int i = int((ogMap->width*ogMap->mapRes)/2.0 + 2);
 	    {
 		    glBegin(GL_LINE_LOOP);
 				glColor4f(0,0,0,0.5);
@@ -471,7 +471,7 @@ void MapViewer::displayGrid()
 		    renderText(i,-1,0, "X");
 		 }
 		 //Y-axis indicator
-	    int j = int((mapData->height*mapData->resolution)/2.0 + 2);
+	    int j = int((ogMap->height*ogMap->mapRes)/2.0 + 2);
 	    {
 		    glBegin(GL_LINE_LOOP);
 				glColor4f(0,0,0,0.5);
@@ -574,20 +574,23 @@ void MapViewer::paintGL()
     glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
     glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
     glGetIntegerv(GL_VIEWPORT,viewport);
- 
-	displayGrid();
-	showIndicators();
-    renderRobot();	    
-	setRobotsLocation();	
-    renderLaser();    
-    renderPaths();    
-//  renderSearchTree();
-//	renderExpandedTree();	
-	if(!mainMapBuilt)
-	{
-		loadTexture();
-		renderMap();
-	}
+
+	if(this->ogMap)
+	{ 
+		displayGrid();
+		showIndicators();
+	    renderRobot();	    
+		setRobotsLocation();	
+	    renderLaser();    
+	    renderPaths();    
+	//  renderSearchTree();
+	//	renderExpandedTree();	
+		if(!mainMapBuilt)
+		{
+			loadTexture();
+			renderMap();
+		}
+	}		
     glCallList(mapList);
         
     //glDisable(GL_BLEND);

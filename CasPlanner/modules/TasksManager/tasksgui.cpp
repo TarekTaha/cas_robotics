@@ -96,12 +96,12 @@ void TasksControlPanel::runRandomTasks()
 			p = tasksGui->voronoiPlanner->path;
 			while(p)
 			{
-				for(int j=0; j<tasksGui->mapSkeleton.verticies.size(); j++)
+				for(int j=0; j<tasksGui->playGround->mapManager->mapSkeleton.verticies.size(); j++)
 				{
-					if((p->pose.p.x() == tasksGui->mapSkeleton.verticies[j].location.x())&&
-					   (p->pose.p.y() == tasksGui->mapSkeleton.verticies[j].location.y()))
+					if((p->pose.p.x() == tasksGui->playGround->mapManager->mapSkeleton.verticies[j].location.x())&&
+					   (p->pose.p.y() == tasksGui->playGround->mapManager->mapSkeleton.verticies[j].location.y()))
 					   {
-					   		tasksGui->mapSkeleton.verticies[j].prob = (++tasksGui->mapSkeleton.verticies[j].visits)/double(++tasksGui->totalVisits); 
+					   		tasksGui->playGround->mapManager->mapSkeleton.verticies[j].prob = (++tasksGui->playGround->mapManager->mapSkeleton.verticies[j].visits)/double(++tasksGui->totalVisits); 
 					   }
 				}		
 				p = p->next;
@@ -125,12 +125,13 @@ void TasksControlPanel::taskSelected(int r)
 {
 	qDebug("Selected Task is:%d",r);	
 	Pose start(tasksGui->tasks[r].getStart().x(),tasksGui->tasks[r].getStart().y(),0);
-	Pose   end(tasksGui->tasks[r].getEnd().x(),tasksGui->tasks[r].getEnd().y(),0);		
-	tasksGui->voronoiPlanner->startSearch(start,end,METRIC);	
+	Pose   end(tasksGui->tasks[r].getEnd().x(),tasksGui->tasks[r].getEnd().y(),0);
+	if(tasksGui->voronoiPlanner)		
+		tasksGui->voronoiPlanner->startSearch(start,end,METRIC);	
 	fflush(stdout);
 }
 
-void TasksControlPanel::setMap(QImage imageMap)
+void TasksControlPanel::setMap(QImage)
 {
 //	if(this->currRobot)
 //	{
@@ -341,9 +342,9 @@ void MapGL::renderSkeleton()
       	}
       	while ( -- watchdog > 0 && he != hstart ) ;
     }
-    for(int i=0;i<tasksGui->mapSkeleton.verticies.size();i++)
+    for(int i=0;i<tasksGui->playGround->mapManager->mapSkeleton.verticies.size();i++)
     {
-		drawProbHisto(tasksGui->mapSkeleton.verticies[i].location,tasksGui->mapSkeleton.verticies[i].prob);    	
+		drawProbHisto(tasksGui->playGround->mapManager->mapSkeleton.verticies[i].location,tasksGui->playGround->mapManager->mapSkeleton.verticies[i].prob);    	
     }
 	firstTime = false;
     glPopMatrix();
@@ -578,18 +579,17 @@ void MapGL::keyPressEvent(QKeyEvent *e)
 TasksGui::TasksGui(QWidget *parent,PlayGround *playG):
 	voronoiPlanner(NULL),
 	skeletonGenerated(false),
+	totalVisits(0),
 	playGround(playG),
 	tabContainer((QTabWidget*) parent),
 	tasksControlPanel(this,parent),
 	mapGL(this,parent),	
-	mapSkeleton(sskel),	
     speed(0.15),
 	turnRatio(5),
 	ptzPan(0),
 	ptzTilt(0),
 	radPerPixel(0.001),
-	msperWheel(0.0005),
-	totalVisits(0)
+	msperWheel(0.0005)
 {
     QHBoxLayout *layout = new QHBoxLayout();
 	layout->addWidget(&mapGL,4);
@@ -610,7 +610,7 @@ void TasksGui::updateData()
 int TasksGui::config()
 {
     QString commsName ="Wheelchair";
-    mapGL.config();
+    //mapGL.config();
     // signals for changing modes
     //connect( OGRadBtn, SIGNAL(clicked()), this, SLOT(renderOG()));
     //connect( laserRadBtn, SIGNAL(clicked()), this, SLOT(renderLaser()));
@@ -897,31 +897,28 @@ void TasksGui::requestSnap()
 
 void TasksGui::generateSkeleton()
 {
-	qDebug("Generating Skeleton");
-//	QString s = QFileDialog::getOpenFileName(
-//                    this,
-//                    "Polygonal PolygonalRegion Files ",
-//                    "/home/BlackCoder/workspace/CasPlanner",
-//                    "Files (*.poly)");	 	
-	mapSkeleton.loadMap();
-	mapSkeleton.generateInnerSkeleton();
-	if (! this->sskel)
+	if(!playGround->mapManager->skeletonGenerated)
 	{
-		skeletonGenerated = false;		
-		qDebug("\nNo Skeleton Generated");
-		return;
-	}
-	else
-	{
-		skeletonGenerated = true;
-		qDebug("\nSkeleton Generated, it contains%d Verticies",mapSkeleton.verticies.size());		
-		mapGL.setSSkelPtr(mapSkeleton.getSSkelPtr());
-		mapGL.paintGL();
-		if (voronoiPlanner)
+		playGround->mapManager->generateSkeleton();
+		this->sskel = playGround->mapManager->sskel;
+		if (! this->sskel)
 		{
-			delete voronoiPlanner;
+			skeletonGenerated = false;		
+			qDebug("\nNo Skeleton Generated");
+			return;
 		}
-		voronoiPlanner = new VoronoiPathPlanner(this->sskel);
-		voronoiPlanner->buildSpace();
+		else
+		{
+			skeletonGenerated = true;
+			qDebug("\nSkeleton Generated, it contains%d Verticies",playGround->mapManager->mapSkeleton.verticies.size());		
+			mapGL.setSSkelPtr(playGround->mapManager->mapSkeleton.getSSkelPtr());
+			mapGL.paintGL();
+			if (voronoiPlanner)
+			{
+				delete voronoiPlanner;
+			}
+			voronoiPlanner = new VoronoiPathPlanner(this->sskel);
+			voronoiPlanner->buildSpace();
+		}
 	}
 }

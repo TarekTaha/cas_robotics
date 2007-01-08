@@ -239,7 +239,7 @@ void NavControlPanel::setNavigation()
 
 void NavControlPanel::pathPlan()
 {
-	currRobot->planningManager->setMap(playGround->mapData);
+	currRobot->planningManager->setMap(playGround->mapManager->globalMap);
 	path = currRobot->planningManager->findPath(METRIC);						
 }
 

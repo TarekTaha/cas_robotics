@@ -92,14 +92,14 @@ void PathPlanner::expandObstacles()
 	}
 	int thickness;
 	int m,n,x,y,radius;
-	thickness = int(this->obstacle_radius/map->resolution);
+	thickness = int(this->obstacle_radius/map->mapRes);
 	radius =2; // This covers vertical, horizontal and diagonal cells
 
-	Map temp_map(map->width,map->height,map->resolution,QPointF(map->width/2.0,map->height/2.0),Pose(0,0,0));
+	Map temp_map(map->width,map->height,map->mapRes,QPointF(map->width/2.0,map->height/2.0),Pose(0,0,0));
 	for(int i = 0;i<map->width;i++)
 		for(int j = 0;j<map->height;j++)
 		{
-			temp_map.data[i][j] = map->data[i][j];
+			temp_map.grid[i][j] = map->grid[i][j];
 		}
 	for(int i=0;i<this->map->width - 1;i++)
 		for(int j=0;j<this->map->height - 1 ;j++)
@@ -111,7 +111,7 @@ void PathPlanner::expandObstacles()
 				y = (int)(- sqrt(radius*radius - (x - i)*(x - i)) + j);
 				if (y < 0) y = 0;
 				if (y >= this->map->height) y = this->map->height - 1;
-				if (temp_map.data[i][j] && !temp_map.data[x][y])
+				if (temp_map.grid[i][j] && !temp_map.grid[x][y])
 				{
 				for (int r = 1; r <(int)(thickness);r++)
 					for( m = (int)(i - r); m <= (int)(i + r);m++)
@@ -121,18 +121,18 @@ void PathPlanner::expandObstacles()
 						n = (int)(- sqrt(r*r - (m - i)*(m - i)) + j);
 						if (n < 0) n = 0;
 						if (n >= this->map->height) n = this->map->height - 1;
-						this->map->data[m][n] = true;
+						this->map->grid[m][n] = true;
 						n = (int)(+ sqrt(r*r - (m - i)*(m - i)) + j);
 						if (n < 0) n = 0;
 						if (n >= this->map->height) n = this->map->height - 1;
-						this->map->data[m][n] = true;
+						this->map->grid[m][n] = true;
 					}
 				break;
 				}
 				y = (int)(+ sqrt(radius*radius - (x - i)*(x - i)) + j);
 				if (y < 0) y = 0;
 				if (y >= this->map->height) y = this->map->height - 1;
-				if (temp_map.data[i][j] && !temp_map.data[x][y])
+				if (temp_map.grid[i][j] && !temp_map.grid[x][y])
 				{
 				for (int r = 1; r <(int)(thickness);r++)
 					for( m = (int)(i - r); m <= (int)(i + r);m++)
@@ -142,11 +142,11 @@ void PathPlanner::expandObstacles()
 						n = (int)(- sqrt(r*r - (m - i)*(m - i)) + j);
 						if (n < 0) n = 0;
 						if (n >= this->map->height) n = this->map->height - 1;
-						this->map->data[m][n] = true;
+						this->map->grid[m][n] = true;
 						n = (int)(+ sqrt(r*r - (m - i)*(m - i)) + j);
 						if (n < 0) n = 0;
 						if (n >= this->map->height) n = this->map->height - 1;
-						this->map->data[m][n] = true;
+						this->map->grid[m][n] = true;
 					}
 				break;
 				}
@@ -231,7 +231,7 @@ void PathPlanner::generateRegularGrid()
 	{
 		for(int j=0;j<this->map->height;j++)
 		{
-			if (!this->map->data[i][j]) //Free Pixel
+			if (!this->map->grid[i][j]) //Free Pixel
 			{
 				if (search_space == NULL ) // Constructing the ROOT NODE
 				{
@@ -272,8 +272,8 @@ void PathPlanner::bridgeTest()
 	SearchSpaceNode *temp;
 	QPointF p;
 	double x,y,x2,y2;
-	pixels_per_bridge = (int) (robot->robotLength/map->resolution);
-	radius = (int) (robot->robotLength/(map->resolution*2.0));
+	pixels_per_bridge = (int) (robot->robotLength/map->mapRes);
+	radius = (int) (robot->robotLength/(map->mapRes*2.0));
 	for(int i=0; i < this->map->width - pixels_per_bridge; i++)
 		{
 		for(int j=0;j<this->map->height - pixels_per_bridge ;j++)
@@ -297,7 +297,7 @@ void PathPlanner::bridgeTest()
 					if (y2 >= this->map->height) y2 = this->map->height - 1;
 					//cout<<"\n x="<<x<<" y="<<y<<" x2="<<x2<<" y2="<<y2<<" i="<<i<<" j="<<j<<" R="<<radius;
 					//fflush(stdout);
-					if (!this->map->data[i][j]&&this->map->data[(int)x][(int)y]&&this->map->data[(int)x2][(int)y2])
+					if (!this->map->grid[i][j]&&this->map->grid[(int)x][(int)y]&&this->map->grid[(int)x2][(int)y2])
 					{
 						p.setX(i);
 						p.setY(j);
@@ -367,7 +367,7 @@ void PathPlanner::addCostToNodes()
 	if (!search_space) // Do nothing if Search Space is not Yet Created
 		return;
 	S = search_space;
-	number_of_pixels = obst_dist / map->resolution;
+	number_of_pixels = obst_dist / map->mapRes;
 	while (S!=NULL)
 	{
 		//cout<<"\n Node= "<<++n;
@@ -385,18 +385,18 @@ void PathPlanner::addCostToNodes()
 						j = (int)(- sqrt(radius*radius - (i - point.x())*(i - point.x())) + point.y());
 						if (j < 0) j = 0;
 						if (j >= this->map->height) j = this->map->height - 1;
-						if(this->map->data[i][j])
+						if(this->map->grid[i][j])
 								 nearest_obstacle = radius;
 						j = (int)(+ sqrt(radius*radius - (i - point.x())*(i - point.x())) + point.y());
 						if (j < 0) j = 0;
 						if (j >= this->map->height) j = this->map->height - 1;
 	
-						if(this->map->data[i][j])
+						if(this->map->grid[i][j])
 								 nearest_obstacle = radius;
 					}
 			}
 		// this is a normalized cost, it will make more sense later on 
-		S->obstacle_cost =  (obst_dist - nearest_obstacle*map->resolution)/obst_dist; 
+		S->obstacle_cost =  (obst_dist - nearest_obstacle*map->mapRes)/obst_dist; 
 		S = S->next;
 	}
 	qDebug("	--->>> Penalty Added <<<---	");
@@ -483,7 +483,7 @@ void PathPlanner::saveSearchSpace()
 	{
 		p = temp->location;
 		this->convert2Pix(&p);
-		this->map->data[int(p.x())][(int)p.y()]= true ;
+		this->map->grid[int(p.x())][(int)p.y()]= true ;
 		temp =temp->next;
 	}
 }
@@ -495,15 +495,15 @@ void PathPlanner::updateMap(Map *mapPatch)
 	{
 		p = mapPatch->pointCloud[i];
 		this->convert2Pix(&p);		
-		if(this->map->data[int(p.x())][(int)p.y()] == false)
-			this->map->data[int(p.x())][(int)p.y()]= false;
+		if(this->map->grid[int(p.x())][(int)p.y()] == false)
+			this->map->grid[int(p.x())][(int)p.y()]= false;
 	}
 	SearchSpaceNode *temp = search_space;
 	while (temp != NULL)
 	{
 		p = temp->location;
 		this->convert2Pix(&p);
-		this->map->data[int(p.x())][(int)p.y()]= true ;
+		this->map->grid[int(p.x())][(int)p.y()]= true ;
 		temp =temp->next;
 	}
 }
@@ -513,24 +513,24 @@ void PathPlanner::updateMap(Map *mapPatch)
  */ 
 void PathPlanner :: setMap(Map * map_in)
 {
+	qDebug("SETTING MAP"); fflush(stdout);
 	if(!map_in)
 	{
 		qDebug("Why the hell ur giving me an empty map ???");
 		fflush(stdout);
 		return;
 	}
-	if(!map_in->data)
+	if(!map_in->grid)
 	{
 		qDebug("Why the hell ur giving me an empty map data ???");
 		fflush(stdout);
 		return;		
 	}
-	if(this->map)
-		delete map;
 	this->map = map_in;
 	MAXNODES = MaxLong;//map->height*map->width*map->width*map->height;
 	//qDebug("W_in:%d H_in:%d",map->width,map->height);
 	map_initialized = true;	
+	qDebug("MAP SET"); fflush(stdout);	
 };
 
 }

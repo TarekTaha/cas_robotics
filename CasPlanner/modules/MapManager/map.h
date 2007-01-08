@@ -3,60 +3,67 @@
 
 class Map 
 {
-    public: 
-        int width; 
-        int height;
-        double resolution;
+    public:
+        int width, height;
+        float mapRes;
         Pose global_pose;
-        QByteArray rawData; // for OG-Maps
-        bool    ** data;       // for Planners
+        QByteArray rawData; 	// for OG-Maps
+        bool    ** grid;        // for Planners
         QVector <QPointF> pointCloud;
-        QPointF center;		// Axis Center of the Map
-        Map(int width, int height, double resolution,QPointF center,Pose p)
+        QPointF center;			// Axis Center of the Map
+        Map(int width, int height,float mapRes,QPointF center,Pose p)
         {
         	this->global_pose = p;
-            this->width   = width; 
-            this->height  = height; 
-            this->resolution = resolution;
+            this->width   = width;
+            this->height  = height;
             this->rawData = NULL;
             this->center = center;
-			this->data = new bool * [width];
+			this->mapRes = mapRes;         
+			this->grid = new bool * [width];
 			for(int i=0; i < width; i++)
 			{
-				data[i] = new bool [height];
+				grid[i] = new bool [height];
 				for(int j=0;j < height;j++)
-					data[i][j] = false;
+					grid[i][j] = false;
 			}
         }
         Map(Pose p)
         {
         	this->global_pose = p;
             this->rawData = NULL;
-			this->data = NULL;
+			this->grid = NULL;
+        }        
+        Map(float mapRes,Pose p)
+        {
+        	this->global_pose = p;
+        	this->mapRes = mapRes;
+            this->rawData = NULL;
+			this->grid = NULL;
+
         }        
         Map(int width, int height, double resolution,  QByteArray rawData)
         {
             this->width   = width; 
             this->height  = height; 
             this->rawData = rawData; 
-            this->resolution = resolution;
-			this->data = NULL;         
+            this->mapRes = resolution;
+			this->grid = NULL;         
         }        
-        Map(): width(0), height(0), resolution(0), rawData(NULL),data(NULL)
+        Map(): width(0), height(0), mapRes(0), rawData(NULL),grid(NULL)
         {
             
         }
         ~Map()
         {
-        	if(data)
+        	if(grid)
         	{
 				for (int i=0; i < width; i++)
 				{
 					//qDebug("Deleting Row %d",i);
 					//fflush(stdout);
-		    		delete  [] data[i];
+		    		delete  [] grid[i];
 				}
-				delete [] data;
+				delete [] grid;
 				//qDebug("Previous Map Data deleted");
         	}
         }
