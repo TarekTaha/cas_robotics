@@ -45,6 +45,8 @@ HEADERS += modules/CommManager/commmanager.h \
            modules/GeometricTools/utils.h \
            modules/GeometricTools/Vector2D.h \
            modules/Voronoi/mapskeleton.h \
+           modules/Voronoi/typedefs.h \                      
+           modules/Voronoi/voronoidiagram.h \           
            modules/Controller/wheelchairproxy.h 
            
 SOURCES += modules/CommManager/commmanager.cpp \
@@ -84,6 +86,7 @@ SOURCES += modules/CommManager/commmanager.cpp \
            modules/PathPlanner/voronoipathplanner.cpp \
            modules/Misc/timer.cpp \
            modules/Voronoi/mapskeleton.cpp \
+           modules/Voronoi/voronoidiagram.cpp \                      
            modules/GeometricTools/Vector2d.cpp 
            
 INCLUDEPATH += 	/usr/local/Trolltech/Qt-4.2.2/include/QtCore \
