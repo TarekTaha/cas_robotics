@@ -447,6 +447,9 @@ void MapGL::paintGL()
 	glPopMatrix();
 	renderSkeleton();
 	renderPath();
+	if(tasksGui->skeletonGenerated)
+		tasksGui->cvd->draw_sites();
+				
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_POINT_SMOOTH);
@@ -897,28 +900,62 @@ void TasksGui::requestSnap()
 
 void TasksGui::generateSkeleton()
 {
-	if(!playGround->mapManager->skeletonGenerated)
+    cvd = new VoronoiDiagram();
+    vvd = cvd;	
+    vvd->clear();
+    Rep::Point_2 p;
+    int counter=0;
+	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/test.pnts");
+    if ( in )
+    {
+	    while (in >> p) 
+	    {
+	    	vvd->insert(p);
+	      	counter++;
+	    }
+		qDebug("\n%d sites have been inserted...", counter);	
+		bool b = vvd->is_valid();
+	    if ( b ) 
+	    {
+      		qDebug("Voronoi diagram is valid.");
+      		skeletonGenerated = true;
+    	} 
+    	else 
+    	{
+      		qDebug("Voronoi diagram is NOT valid.");
+      		skeletonGenerated = false;
+    	}
+    }
+	else
 	{
-		playGround->mapManager->generateSkeleton();
-		this->sskel = playGround->mapManager->sskel;
-		if (! this->sskel)
-		{
-			skeletonGenerated = false;		
-			qDebug("\nNo Skeleton Generated");
-			return;
-		}
-		else
-		{
-			skeletonGenerated = true;
-			qDebug("\nSkeleton Generated, it contains%d Verticies",playGround->mapManager->mapSkeleton.verticies.size());		
-			mapGL.setSSkelPtr(playGround->mapManager->mapSkeleton.getSSkelPtr());
-			mapGL.paintGL();
-			if (voronoiPlanner)
-			{
-				delete voronoiPlanner;
-			}
-			voronoiPlanner = new VoronoiPathPlanner(this->sskel);
-			voronoiPlanner->buildSpace();
-		}
+		std::cout<<"\n File Not Found";
 	}
 }
+
+//void TasksGui::generateSkeleton()
+//{
+//	if(!playGround->mapManager->skeletonGenerated)
+//	{
+//		playGround->mapManager->generateSkeleton();
+//		this->sskel = playGround->mapManager->sskel;
+//		if (! this->sskel)
+//		{
+//			skeletonGenerated = false;		
+//			qDebug("\nNo Skeleton Generated");
+//			return;
+//		}
+//		else
+//		{
+//			skeletonGenerated = true;
+//			qDebug("\nSkeleton Generated, it contains%d Verticies",playGround->mapManager->mapSkeleton.verticies.size());		
+//			mapGL.setSSkelPtr(playGround->mapManager->mapSkeleton.getSSkelPtr());
+//			mapGL.paintGL();
+//			if (voronoiPlanner)
+//			{
+//				delete voronoiPlanner;
+//			}
+//			voronoiPlanner = new VoronoiPathPlanner(this->sskel);
+//			voronoiPlanner->buildSpace();
+//		}
+//	}
+//}

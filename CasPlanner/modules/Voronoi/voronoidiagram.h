@@ -1,6 +1,7 @@
 #ifndef VORONOIDIAGRAM_H_
 #define VORONOIDIAGRAM_H_
 
+
 #include <CGAL/basic.h>
 #include <CGAL/iterator.h>
 #include <CGAL/Apollonius_graph_constructions_C2.h>
@@ -10,6 +11,8 @@
 #include <CGAL/Voronoi_diagram_2.h>
 
 #include "typedefs.h"
+
+#include <GL/glu.h>
 
 template<class VDA>
 class Voronoi_diagram_halfedge_2: public VDA::Halfedge
@@ -172,134 +175,197 @@ class Virtual_Voronoi_diagram_base_2 : public VD, public Virtual_Voronoi_diagram
   		virtual void insert(const Circle_2&) {}
 		virtual void remove(const Object& o){};
 
-  		virtual  Object conflicts(const Site_2& s) const;
-
-  		Delaunay_edge opposite(const Delaunay_edge& e) const;
+  		virtual  Object conflicts(const Site_2& s) const
+		{
+			if ( Base::dual().dimension() < 2 ) 
+			{
+				return CGAL::make_object( (int)0 );
+			}
+			typedef std::vector<Delaunay_edge>          Edge_vector;
+			typedef std::vector<Delaunay_face_handle>   Face_vector;
+			typedef std::back_insert_iterator<Face_vector>   Face_output_iterator;
+			typedef std::back_insert_iterator<Edge_vector>   Edge_output_iterator;
+		    Edge_vector evec;
+			Face_vector fvec;
+		    Face_output_iterator fit(fvec);
+			Edge_output_iterator eit(evec);
+		    Base::dual().get_conflicts_and_boundary(s, fit, eit);
+		    return CGAL::make_object( std::make_pair(fvec, evec) );
+		}
+  		Delaunay_edge opposite(const Delaunay_edge& e) const
+		{
+			int j = Base::dual().tds().mirror_index(e.first, e.second);
+			Delaunay_face_handle n = e.first->neighbor(e.second);
+			return Delaunay_edge(n, j);
+		}  		
 		template<class Query, class Iterator>
-  		bool find(const Query& q, Iterator first, Iterator beyond) const;
-//#ifdef CGAL_USE_QT
-//  virtual void draw_conflicts(const Site_2& s, const Object& o,
-//			      Qt_widget& widget) const {
-//    typedef std::vector<Delaunay_edge>           Edge_vector;
-//    typedef std::vector<Delaunay_face_handle>    Face_vector;
-//    typedef std::pair<Face_vector,Edge_vector>   result_type;
-//
-//    result_type res;
-//    if ( !CGAL::assign(res, o) ) { return; }
-//
-//    Face_vector fvec = res.first;
-//    Edge_vector evec = res.second;
-//
-//    widget << CGAL::YELLOW;
-//    unsigned int linewidth = widget.lineWidth();
-//    widget << CGAL::LineWidth(4);
-//
-//    bool do_regular_draw = true;
-//    if ( evec.size() == 2 ) {
-//      Delaunay_edge e1 = evec[0];
-//      Delaunay_edge e2 = evec[1];
-//      if ( e1 == opposite(e2) ) {
-//	do_regular_draw = false;
-//	if ( !Base::dual().is_infinite(e1) ) {
-//	  Halfedge_with_draw ee(e1, 2, s);
-//	  widget << ee;
-//	}
-//      }
-//    }
-//
-//    if ( do_regular_draw ) {
-//      for (unsigned int i = 0; i < evec.size(); i++) {
-//	if ( Base::dual().is_infinite(evec[i]) ) { continue; }
-//	Delaunay_edge opp = opposite(evec[i]);
-//	Halfedge_with_draw ee(opp, Base::dual().is_infinite(opp.first), s);
-//	widget << ee;
-//      }
-//    }
-//
-//    typename Base::Adaptation_policy::Edge_rejector e_rejector =
-//      Base::adaptation_policy().edge_rejector_object();
-//    for (unsigned int i = 0; i < fvec.size(); i++) {
-//      for (int j = 0; j < 3; j++) {
-//	Delaunay_edge e(fvec[i], j);
-//	Delaunay_edge opp = opposite(e);
-//
-//	if ( Base::dual().is_infinite(e) ) { continue; }
-//
-//	if ( !find(e, evec.begin(), evec.end()) &&
-//	     !find(opp, evec.begin(), evec.end()) ) {
-//	  if ( !e_rejector(Base::dual(),e) ) {
-//	    Halfedge_with_draw ee(*Base::dual(e));
-//	    widget << ee;
-//	  }
-//	}
-//      }
-//    }
-//
-//    widget << CGAL::LineWidth(linewidth);
-//  }
-//#endif // CGAL_USE_QT
+  		bool find(const Query& q, Iterator first, Iterator beyond) const
+		{
+			for (Iterator it = first; it != beyond; ++it) 
+			{
+		  		if ( q == *it ) { return true; }
+			}
+			return false;
+		}  		
+		virtual void draw_conflicts(const Site_2& s, const Object& o) const 
+		{
+    		typedef std::vector<Delaunay_edge>           Edge_vector;
+    		typedef std::vector<Delaunay_face_handle>    Face_vector;
+    		typedef std::pair<Face_vector,Edge_vector>   result_type;
+    		result_type res;
+    		if ( !CGAL::assign(res, o) ) 
+    		{ 
+    			return; 
+    		}
+		    Face_vector fvec = res.first;
+    		Edge_vector evec = res.second;
+		
+//		    widget << CGAL::YELLOW;
+//    		unsigned int linewidth = widget.lineWidth();
+//    		widget << CGAL::LineWidth(4);
+			glPushMatrix();
+			glLineWidth(2);
+			glColor4f(1,0,0,1);	
+			glBegin(GL_POINT);	
+			
+		    bool do_regular_draw = true;
+    		if ( evec.size() == 2 ) 
+    		{
+      			Delaunay_edge e1 = evec[0];
+      			Delaunay_edge e2 = evec[1];
+      			if ( e1 == opposite(e2) ) 
+      			{
+					do_regular_draw = false;
+					if ( !Base::dual().is_infinite(e1) ) 
+					{
+	  					Halfedge_with_draw ee(e1, 2, s);
+//	  					widget << ee;
+					}
+      			}
+    		}
+			if ( do_regular_draw ) 
+			{
+				for (unsigned int i = 0; i < evec.size(); i++) 
+				{
+					if ( Base::dual().is_infinite(evec[i]) ) { continue; }
+					Delaunay_edge opp = opposite(evec[i]);
+					Halfedge_with_draw ee(opp, Base::dual().is_infinite(opp.first), s);
+//					widget << ee;
+      			}
+    		}
+    		typename Base::Adaptation_policy::Edge_rejector e_rejector = Base::adaptation_policy().edge_rejector_object();
+    		for (unsigned int i = 0; i < fvec.size(); i++) 
+    		{
+      			for (int j = 0; j < 3; j++) 
+      			{
+					Delaunay_edge e(fvec[i], j);
+					Delaunay_edge opp = opposite(e);
+					if ( Base::dual().is_infinite(e) ) { continue; }
+					if ( !find(e, evec.begin(), evec.end()) && !find(opp, evec.begin(), evec.end()) ) 
+					{
+	  					if ( !e_rejector(Base::dual(),e) ) 
+	  					{
+	    					Halfedge_with_draw ee(*Base::dual(e));
+//	    					widget << ee;
+	  					}
+					}
+      			}
+    		}
+		}
 	public:
-//		#ifdef CGAL_USE_QT
-//		  void draw_edge(const Halfedge& e, Qt_widget& widget) const {
-//		    Halfedge_with_draw ee(e);
+		void draw_edge(const Halfedge& e) const 
+		{
+			Halfedge_with_draw ee(e);
 //		    widget << ee;
-//		  }
-//		
-//		  virtual void draw_feature(const Object& o, Qt_widget& widget) const {
-//		    Locate_result lr;
-//		    //    if ( !CGAL::assign(lr, o) ) { return; }
-//		#if 1
-//		    const Locate_result* lrp0 = CGAL::object_cast<Locate_result>(&o);
-//		    Locate_result* lrp = const_cast<Locate_result*>(lrp0);
-//		    if ( lrp == NULL ) { return; }
-//		#else
-//		    try {
-//		      lr = CGAL::object_cast<Locate_result>(o);
-//		    } catch ( CGAL::Bad_object_cast ) {
-//		      return;
-//		    }
-//		#endif
-//		
-//		    if ( Face_handle* f = boost::get<Face_handle>(lrp) ) {
-//		      Ccb_halfedge_circulator ccb_start = (*f)->outer_ccb();
-//		      Ccb_halfedge_circulator ccb = ccb_start;
-//		      do {
-//			draw_edge(*ccb, widget);
-//			++ccb;
-//		      } while ( ccb != ccb_start );
-//		    }
-//		  }
-//		
-//		  virtual void draw_sites(Qt_widget& widget) const
-//		  {
-//		    for (Site_iterator sit = this->sites_begin();
-//			 sit != this->sites_end(); ++sit) {
-//		      widget << *sit;
-//		    }
-//		  }
-//		
-//		  virtual void draw_diagram(Qt_widget& widget) const
-//		  {
-//		    Edge_iterator it;
-//		    for (it = this->edges_begin(); it != this->edges_end(); ++it) {
-//		      draw_edge(*it, widget);
-//		    }
-//		  }
-//		
-//		  virtual void draw_conflicts(const Point_2& p,	const Object& o,
-//					      Qt_widget& widget) const {}
-//		
-//		  virtual void draw_conflicts(const Circle_2& c, const Object& o,
-//					      Qt_widget& widget) const {}
-//		
-//		#endif // CGAL_USE_QT
-
-		virtual Object locate(const Point_2& q) const;
-		virtual Object get_conflicts(const Point_2& q) const; 
-		virtual Object get_conflicts(const Circle_2& c) const; 
+		}
+		virtual void draw_feature(const Object& o) const 
+		{
+		    Locate_result lr;
+		    //    if ( !CGAL::assign(lr, o) ) { return; }
+		#if 1
+		    const Locate_result* lrp0 = CGAL::object_cast<Locate_result>(&o);
+			Locate_result* lrp = const_cast<Locate_result*>(lrp0);
+		    if ( lrp == NULL ) 
+		    {
+		    	return; 
+		    }
+		#else
+		    try 
+		    {
+		    	lr = CGAL::object_cast<Locate_result>(o);
+		    } 
+		    catch ( CGAL::Bad_object_cast ) 
+		    {
+		    	return;
+		    }
+		#endif
+		    if ( Face_handle* f = boost::get<Face_handle>(lrp) ) 
+		    {
+		    	Ccb_halfedge_circulator ccb_start = (*f)->outer_ccb();
+		      	Ccb_halfedge_circulator ccb = ccb_start;
+		      	do 
+		      	{
+					draw_edge(*ccb);
+					++ccb;
+		      	} 
+		      	while ( ccb != ccb_start );
+		    }
+		}
+		
+		virtual void draw_sites() const
+		{
+			printf("Here");fflush(stdout);			
+			glPushMatrix();
+			glLineWidth(2);
+			glColor4f(1,0,0,1);	
+			glBegin(GL_POINT);		
+			for (Site_iterator sit = this->sites_begin();sit != this->sites_end(); ++sit) 
+			{
+//			  	float x = sit.x();
+//			  	float y = sit.y();
+//				glVertex2f(x,y);
+		    }
+			glEnd();
+			glPopMatrix();	    	  
+		};
+		
+		virtual void draw_diagram() const
+		{
+			Edge_iterator it;
+		    for (it = this->edges_begin(); it != this->edges_end(); ++it) 
+		    {
+		    	draw_edge(*it);
+		    }
+		}
+		virtual void draw_conflicts(const Point_2& p,const Object& o) const {}
+		virtual void draw_conflicts(const Circle_2& c, const Object& o) const {}
+		virtual Object locate(const Point_2& q) const
+		{
+			if ( Base::number_of_faces() == 0 ) 
+			{
+				return CGAL::make_object(int(0));
+			}
+			typename Base::Adaptation_traits::Point_2 p(q.x(), q.y());
+			Locate_result lr = Base::locate(p);
+			return CGAL::make_object(lr);
+		}		
+		virtual Object get_conflicts(const Point_2& q) const
+		{
+			return CGAL::make_object((int)0);
+		}
+		virtual Object get_conflicts(const Circle_2& c) const
+		{
+			return CGAL::make_object((int)0);
+		}		
 		virtual Object ptr() = 0;
-		virtual bool is_valid() const; 
-		virtual void clear() ;
+		virtual bool is_valid() const
+		{
+			return Base::is_valid();
+		}		
+		virtual void clear()
+		{
+			Base::clear();
+		}		
 };
 
 //=========================================================================
