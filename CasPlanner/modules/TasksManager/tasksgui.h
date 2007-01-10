@@ -24,7 +24,6 @@
 #include <QTime>
 
 #include "playground.h"
-#include "mapskeleton.h"
 #include "voronoipathplanner.h"
 #include "sensors.h"
 #include "interfaceprovider.h"
@@ -33,6 +32,9 @@
 #include "ogrender.h"
 #include "mapviewer.h"
 #include "task.h"
+#include "mapskeleton.h"
+#include "voronoidiagram.h"
+
 
 class TasksGui;
 class TasksControlPanel;
@@ -145,6 +147,8 @@ class TasksGui :public QWidget
     	bool skeletonGenerated;
         int totalVisits;		    	    
     	PlayGround * playGround;
+		Virtual_Voronoi_diagram_2*      vvd;    
+		VoronoiDiagram *     cvd;	
     public slots:
         void updateData();
 //         void mousePressEvent(QMouseEvent *me);

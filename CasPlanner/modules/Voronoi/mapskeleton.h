@@ -1,7 +1,6 @@
 #ifndef MAPSKELETON_H_
 #define MAPSKELETON_H_
 
-
 #include <vector>
 #include<string>
 #include<iostream>
