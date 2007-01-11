@@ -127,6 +127,7 @@ class MapGL: public QGLWidget
 		bool showGrids;
 		bool firstTime;
 		QTimer * renderTimer;
+        int skeletonList;		
 		friend class TasksGui;
 };
 

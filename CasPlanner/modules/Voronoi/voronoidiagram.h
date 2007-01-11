@@ -29,8 +29,11 @@ class Voronoi_diagram_halfedge_2: public VDA::Halfedge
   		Voronoi_diagram_halfedge_2(const Base& e) : Base(e), is_conflict(false) {}
   		Voronoi_diagram_halfedge_2(const Delaunay_edge& e, int inf, const Site_2& s)
     	: Base(), is_conflict(true), e_(e), inf_(inf), s_(s) {}
-  		void draw() const//Qt_widget& qt_w) const
+  		void draw() const
   		{
+			glPushMatrix();
+			glLineWidth(2);
+			glColor4f(1,0,0,1);	  			
     		typedef typename Delaunay_triangulation_2::Geom_traits   Geom_traits;
     		typedef typename Geom_traits::Point_2                    Point_2;
     		typedef typename Geom_traits::Segment_2                  Segment_2;
@@ -48,6 +51,15 @@ class Voronoi_diagram_halfedge_2: public VDA::Halfedge
 					Point_2 c2 = circumcenter(e_.first->vertex(ccw_i)->point(),
 				  	e_.first->vertex(cw_i)->point(),
 				  	s_);
+				  	double scs_x, scs_y, sct_x, sct_y;
+				  	scs_x = CGAL::to_double(c1.x());
+				 	scs_y = CGAL::to_double(c1.y());
+				  	sct_x = CGAL::to_double(c2.x());
+				  	sct_y = CGAL::to_double(c2.y());
+					glBegin(GL_LINES);		
+						glVertex2f(scs_x,scs_y);
+						glVertex2f(sct_x,sct_y);
+					glEnd();
 					//qt_w << Segment_2(c1, c2);
       			} 
       			else 
@@ -76,7 +88,15 @@ class Voronoi_diagram_halfedge_2: public VDA::Halfedge
       			Point_2 c2 = circumcenter(this->up()->point(),
 				this->down()->point(),
 				this->right()->point());
-				
+			  	double scs_x, scs_y, sct_x, sct_y;
+			  	scs_x = CGAL::to_double(c1.x());
+			 	scs_y = CGAL::to_double(c1.y());
+			  	sct_x = CGAL::to_double(c2.x());
+			  	sct_y = CGAL::to_double(c2.y());
+				glBegin(GL_LINES);		
+					glVertex2f(scs_x,scs_y);
+					glVertex2f(sct_x,sct_y);
+				glEnd();				
 		      	//qt_w << Segment_2(c1, c2);
     		} 
     		else if ( this->has_source() && !this->has_target() ) 
@@ -107,9 +127,9 @@ class Voronoi_diagram_halfedge_2: public VDA::Halfedge
     		{
       			CGAL_assertion( !this->has_source() && !this->has_target() );
       			typename Geom_traits::Construct_bisector_2 c_bis;
-      			//qt_w << c_bis(this->up()->point(),
-		    	//this->down()->point());
-    		}	
+      			//qt_w << c_bis(this->up()->point(),this->down()->point());
+    		}
+    		glPopMatrix();	
  		}
 	private:
   		bool is_conflict;
@@ -220,12 +240,9 @@ class Virtual_Voronoi_diagram_base_2 : public VD, public Virtual_Voronoi_diagram
 		    Face_vector fvec = res.first;
     		Edge_vector evec = res.second;
 		
-//		    widget << CGAL::YELLOW;
-//    		unsigned int linewidth = widget.lineWidth();
-//    		widget << CGAL::LineWidth(4);
 			glPushMatrix();
 			glLineWidth(2);
-			glColor4f(1,0,0,1);	
+			glColor4f(0,1,0,1);	
 			glBegin(GL_POINT);	
 			
 		    bool do_regular_draw = true;
@@ -239,7 +256,7 @@ class Virtual_Voronoi_diagram_base_2 : public VD, public Virtual_Voronoi_diagram
 					if ( !Base::dual().is_infinite(e1) ) 
 					{
 	  					Halfedge_with_draw ee(e1, 2, s);
-//	  					widget << ee;
+	  					ee.draw();
 					}
       			}
     		}
@@ -250,7 +267,7 @@ class Virtual_Voronoi_diagram_base_2 : public VD, public Virtual_Voronoi_diagram
 					if ( Base::dual().is_infinite(evec[i]) ) { continue; }
 					Delaunay_edge opp = opposite(evec[i]);
 					Halfedge_with_draw ee(opp, Base::dual().is_infinite(opp.first), s);
-//					widget << ee;
+					ee.draw();
       			}
     		}
     		typename Base::Adaptation_policy::Edge_rejector e_rejector = Base::adaptation_policy().edge_rejector_object();
@@ -266,7 +283,7 @@ class Virtual_Voronoi_diagram_base_2 : public VD, public Virtual_Voronoi_diagram
 	  					if ( !e_rejector(Base::dual(),e) ) 
 	  					{
 	    					Halfedge_with_draw ee(*Base::dual(e));
-//	    					widget << ee;
+	    					ee.draw();
 	  					}
 					}
       			}
@@ -276,7 +293,7 @@ class Virtual_Voronoi_diagram_base_2 : public VD, public Virtual_Voronoi_diagram
 		void draw_edge(const Halfedge& e) const 
 		{
 			Halfedge_with_draw ee(e);
-//		    widget << ee;
+			ee.draw();
 		}
 		virtual void draw_feature(const Object& o) const 
 		{
@@ -307,22 +324,21 @@ class Virtual_Voronoi_diagram_base_2 : public VD, public Virtual_Voronoi_diagram
 		      	{
 					draw_edge(*ccb);
 					++ccb;
-		      	} 
+		      	}
 		      	while ( ccb != ccb_start );
 		    }
 		}
 		
 		virtual void draw_sites() const
 		{
-			printf("Here");fflush(stdout);			
 			glPushMatrix();
 			glLineWidth(2);
 			glColor4f(1,0,0,1);	
 			glBegin(GL_POINT);		
 			for (Site_iterator sit = this->sites_begin();sit != this->sites_end(); ++sit) 
 			{
-//			  	float x = sit.x();
-//			  	float y = sit.y();
+//			  	float x = sit.source.x();
+//			  	float y = sit.target.y();
 //				glVertex2f(x,y);
 		    }
 			glEnd();
@@ -337,8 +353,9 @@ class Virtual_Voronoi_diagram_base_2 : public VD, public Virtual_Voronoi_diagram
 		    	draw_edge(*it);
 		    }
 		}
-		virtual void draw_conflicts(const Point_2& p,const Object& o) const {}
-		virtual void draw_conflicts(const Circle_2& c, const Object& o) const {}
+		
+		virtual void draw_conflicts(const Point_2& ,const Object& ) const {}
+		virtual void draw_conflicts(const Circle_2& , const Object& ) const {}
 		virtual Object locate(const Point_2& q) const
 		{
 			if ( Base::number_of_faces() == 0 ) 
@@ -349,11 +366,11 @@ class Virtual_Voronoi_diagram_base_2 : public VD, public Virtual_Voronoi_diagram
 			Locate_result lr = Base::locate(p);
 			return CGAL::make_object(lr);
 		}		
-		virtual Object get_conflicts(const Point_2& q) const
+		virtual Object get_conflicts(const Point_2& ) const
 		{
 			return CGAL::make_object((int)0);
 		}
-		virtual Object get_conflicts(const Circle_2& c) const
+		virtual Object get_conflicts(const Circle_2& ) const
 		{
 			return CGAL::make_object((int)0);
 		}		
@@ -398,7 +415,7 @@ class VoronoiDiagram : public Virtual_Voronoi_diagram_base_2 <VD2,Voronoi_diagra
 	    	return conflicts( to_site(q) );
 	  	}
 	
-	  	virtual Object get_conflicts(const Circle_2& q) const 
+	  	virtual Object get_conflicts(const Circle_2& ) const 
 	  	{
 	    	return CGAL::make_object( (int)0 );
 	  	}

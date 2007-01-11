@@ -67,6 +67,17 @@ class Map
 				//qDebug("Previous Map Data deleted");
         	}
         }
- 
+		// transfers from pixel coordinate to the main coordinate system
+		void convertPix(QPointF  *p) 
+		{
+			p->setX( p->x()*mapRes - mapRes*center.x());
+			p->setY(-p->y()*mapRes + mapRes*center.y());
+		};
+		// transfers from main coordinate to the pixel coordinate system
+		void convert2Pix(QPointF *p)
+		{
+			p->setX(( p->x() + mapRes*center.x())/mapRes);
+			p->setY((-p->y() + mapRes*center.y())/mapRes);
+		}        
 };
 #endif /*MAP_H_*/
