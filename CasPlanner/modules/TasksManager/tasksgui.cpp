@@ -189,6 +189,7 @@ void MapGL::initializeGL()
 {
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glFlush();
+    skeletonList = glGenLists(1);
 }
 
 void MapGL::resizeGL(int w, int h)
@@ -383,7 +384,7 @@ void MapGL::paintGL()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glEnable(GL_DEPTH_TEST);
 	//glDisable(GL_BLEND);
-	glEnable(GL_POINT_SMOOTH);
+	//glEnable(GL_POINT_SMOOTH);
 	//glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 	//glEnable(GL_LINE_SMOOTH);
 	//glEnable(GL_POLYGON_SMOOTH);
@@ -447,9 +448,17 @@ void MapGL::paintGL()
 	glPopMatrix();
 	renderSkeleton();
 	renderPath();
-	if(tasksGui->skeletonGenerated)
-		tasksGui->cvd->draw_sites();
-				
+	if(tasksGui->skeletonGenerated && firstTime)
+	{
+		glNewList(skeletonList, GL_COMPILE);	
+			tasksGui->cvd->draw_diagram();
+			tasksGui->cvd->draw_sites();
+		glEndList();
+		glCallList(skeletonList);
+		firstTime = false;
+	}
+	else
+		glCallList(skeletonList);
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_POINT_SMOOTH);
@@ -903,33 +912,63 @@ void TasksGui::generateSkeleton()
     cvd = new VoronoiDiagram();
     vvd = cvd;	
     vvd->clear();
-    Rep::Point_2 p;
     int counter=0;
-	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/test.pnts");
-    if ( in )
+    if(playGround && playGround->mapManager)
     {
-	    while (in >> p) 
-	    {
-	    	vvd->insert(p);
-	      	counter++;
-	    }
-		qDebug("\n%d sites have been inserted...", counter);	
-		bool b = vvd->is_valid();
-	    if ( b ) 
-	    {
-      		qDebug("Voronoi diagram is valid.");
-      		skeletonGenerated = true;
-    	} 
-    	else 
-    	{
-      		qDebug("Voronoi diagram is NOT valid.");
-      		skeletonGenerated = false;
-    	}
+    	Map * map = playGround->mapManager->globalMap;
+    	for(int i=0;i<map->width;i++)
+    		for(int j =0;j<map->height;j++)
+    		{
+    			if(map->grid[i][j])
+    			{
+	    			QPointF pix(i,j);
+	    			map->convertPix(&pix);
+	    			Rep::Point_2 p(pix.x(),pix.y());    			
+	    			vvd->insert(p);
+					counter++;
+    			}    			
+    		}
+			bool b = vvd->is_valid();
+		    if ( b ) 
+		    {
+	      		qDebug("Voronoi diagram is valid. with:%d Points",counter);
+	      		skeletonGenerated = true;
+	    	} 
+	    	else 
+	    	{
+	      		qDebug("Voronoi diagram is NOT valid.");
+	      		skeletonGenerated = false;
+	    	}    		
     }
 	else
 	{
-		std::cout<<"\n File Not Found";
-	}
+		std::cout<<"\n Map not generated YET";
+	}    
+//	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/test.pnts");
+//    if ( in )
+//    {
+//	    while (in >> p) 
+//	    {
+//	    	vvd->insert(p);
+//	      	counter++;
+//	    }
+//		qDebug("\n%d sites have been inserted...", counter);	
+//		bool b = vvd->is_valid();
+//	    if ( b ) 
+//	    {
+//      		qDebug("Voronoi diagram is valid.");
+//      		skeletonGenerated = true;
+//    	} 
+//    	else 
+//    	{
+//      		qDebug("Voronoi diagram is NOT valid.");
+//      		skeletonGenerated = false;
+//    	}
+//    }
+//	else
+//	{
+//		std::cout<<"\n File Not Found";
+//	}
 }
 
 //void TasksGui::generateSkeleton()
