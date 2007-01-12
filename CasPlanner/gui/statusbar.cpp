@@ -1,8 +1,14 @@
 #include "statusbar.h"
 
-StatusLogger::StatusLogger(QStatusBar *in_statusBar)
+StatusLogger::StatusLogger(QStatusBar *in_statusBar):
+statusBar(in_statusBar)    
 {
-    statusBar = in_statusBar;
+    log.setReadOnly(true); 
+}
+
+StatusLogger::StatusLogger():
+statusBar(NULL)
+{
     log.setReadOnly(true); 
 }
 
@@ -20,21 +26,19 @@ void StatusLogger::addStatusMsg(int messageId, int messageType, QString message)
 {
 	switch (messageType)
 	{
-		case 0:
-			log.setTextColor(Qt::black); 
+		case INFO:
+			log.setTextColor(Qt::green); 
 			break;
-		case 1:
+		case ERROR:
 			log.setTextColor(Qt::red); 		
 			break;
-		case 2:
-			log.setTextColor(Qt::green); 		
-			break;
-		case 3:
+		case WARNING:
 			log.setTextColor(Qt::yellow); 		
 			break;
 		default:
 			log.setTextColor(Qt::black); 
 	}
     log.append(message); 
-    statusBar->showMessage(message); 
+    if(statusBar)
+    	statusBar->showMessage(message); 
 }

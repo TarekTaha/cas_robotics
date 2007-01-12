@@ -6,7 +6,7 @@
 MainWindow::MainWindow(QWidget *parent):
 QMainWindow(parent)
 {
-    statusLogger = new StatusLogger(statusBar()); 
+
 }
 
 MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
@@ -45,15 +45,14 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     statusBar()->showMessage("Welcome to CAS Navigation System ...", 20000); 
     statusBar()->showMessage("Initialization Done.");
 
-    statusLogger = new StatusLogger(statusBar()); 
+    playGround->statusLogger = new StatusLogger(statusBar()); 
     setCentralWidget(container);
-    statusLogger->addStatusMsg(0,1,"Start of Loggs ..."); 
+    playGround->statusLogger->addStatusMsg(0,INFO,"<-- Start of Loggs -->"); 
 
-//    connect(playGround->commManager, SIGNAL(statusMsg(int,int,QString)), statusLogger, SLOT(addStatusMsg(int,int,QString))); 
     connect(emergStop, SIGNAL(pressed()), playGround, SLOT(stopRobots()));
     connect(connRobot, SIGNAL(pressed()), playGround, SLOT(startRobotsComm()));
-    connect(logButton, SIGNAL(clicked()),statusLogger, SLOT(showLog())); 
-    statusLogger->addStatusMsg(0,1,"Navigation System Started ... "); 
+    connect(logButton, SIGNAL(clicked()), playGround->statusLogger, SLOT(showLog())); 
+    playGround->statusLogger->addStatusMsg(0,INFO,"Navigation System Started ... "); 
 
 	// Data Logging Timer
     QTimer *timer = new QTimer(this);
