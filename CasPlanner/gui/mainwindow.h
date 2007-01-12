@@ -22,7 +22,6 @@ public:
 		void commStart(); 
 private: 
     TabContainer * tabcontainer;
-	StatusLogger * statusLogger;
 	PlayGround   * playGround;
 	int logCount; 
 };

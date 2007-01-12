@@ -65,7 +65,7 @@ int RobotManager::readRobotConfigs(ConfigFile *cf,int secId)
 
 int RobotManager::readCommManagerConfigs(ConfigFile *cf,int secId)
 {
-	commManager = new CommManager(robot);
+	commManager = new CommManager(robot,playGround);
 	commManager->readConfigs(cf,secId);
     return 1;
 }

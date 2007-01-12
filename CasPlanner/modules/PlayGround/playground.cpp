@@ -5,6 +5,7 @@ navCon(NULL),
 mapViewer(NULL),
 mapManager(NULL)	
 {
+
 }
 
 PlayGround::PlayGround(QStringList configFiles):
@@ -40,10 +41,15 @@ mapManager(NULL)
 		    {
 		    	RobotManager *rbm = new RobotManager(this,cf,i);
 		    	robotPlatforms.push_back(rbm);
-		    }    
-		}		
+		    }
+		}	
 		delete cf;
     }
+}
+
+void PlayGround::addMsg(int id,int type,QString msg)
+{
+	statusLogger->addStatusMsg(id,type,msg);
 }
 
 void PlayGround::loadMap(QString name,float res,bool negate,Pose p)
@@ -61,7 +67,7 @@ int PlayGround::setNavContainer(NavContainer* con)
 {
 	this->navCon = con;
 	return 1;
-}	
+}
 
 void PlayGround::startRobotsComm()
 {

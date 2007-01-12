@@ -1,17 +1,19 @@
 #include "commmanager.h"
 
-CommManager::CommManager(Robot *rob):
+CommManager::CommManager(Robot *rob,PlayGround * playG):
 Comms(),
 player(NULL),
-robot(rob)
+robot(rob),
+playGround(playG)
 {
-	startConnected = false;
+	startConnected 	= false;
 	activateControl = false;
-	laserEnabled = false;
-	ptzEnabled = false;
-	occMapEnabled = false;
-	startConnected = false;
-	connected = false;
+	laserEnabled	= false;
+	ptzEnabled		= false;
+	occMapEnabled	= false;
+	startConnected	= false;
+	connected		= false;
+	connect(this,SIGNAL(addMsg(int,int,QString)),playGround,SLOT(addMsg(int,int,QString)));
 }
 
 CommManager::~CommManager()
@@ -253,6 +255,7 @@ int CommManager::readConfigs( ConfigFile *cf,int secId)
 
 int CommManager::start()
 {
+	//emit addMsg(0,INFO,QString("-> Starting Communication Manager."));
     qDebug("-> Starting Communication Manager."); fflush(stdout);	
     qDebug("\tCommunication Parameters:"); fflush(stdout);	
   	if (!player)
@@ -286,7 +289,7 @@ int CommManager::start()
   	{
   		qDebug("\t\t\t	- VFH Navigator."); fflush(stdout);  	
   		player->enableVfh(vfhId);
-  	}  	
+  	}
   	if(player)
   	{
  		if(player->isRunning())
