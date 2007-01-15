@@ -19,6 +19,10 @@ HEADERS += modules/CommManager/commmanager.h \
            modules/PlayGround/robotmanager.h \
            modules/Rendering/robotrender.h \
            modules/Sensors/sensors.h \
+           modules/TasksManager/hmm.h \           
+           modules/TasksManager/logprobs.h \           
+           modules/TasksManager/str2idmap.h \           
+           modules/TasksManager/tables.h \           
            modules/TasksManager/task.h \
            modules/TasksManager/tasksgui.h \
            modules/Rendering/speedrender.h \
@@ -66,6 +70,9 @@ SOURCES += modules/CommManager/commmanager.cpp \
            modules/PlayGround/robotmanager.cpp \
            modules/Rendering/robotrender.cpp \
            modules/Sensors/sensors.cpp \
+           modules/TasksManager/hmm.cpp \           
+           modules/TasksManager/logprobs.cpp \           
+           modules/TasksManager/tables.cpp \             
            modules/TasksManager/task.cpp \
            modules/TasksManager/tasksgui.cpp \
            modules/Rendering/speedrender.cpp \

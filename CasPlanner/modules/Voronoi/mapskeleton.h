@@ -9,6 +9,7 @@
 #include<iomanip>
 #include<list>
 #include<map>
+#include<hmm.h>
 
 #include <QPointF> 
 #include <QVector>
@@ -90,16 +91,15 @@ class MapSkeleton
 {
 	public:
 		MapSkeleton(SSkelPtr & sskel);
-	//	MapSkeleton(Map *);
 		virtual ~MapSkeleton();
-		bool convertGridToLineWithVoronoi(float minThreshold, float maxThreshold,
-													  bool filterByCellValue, float valueToSet);
+		bool convertGridToLineWithVoronoi(float minThreshold, float maxThreshold, bool filterByCellValue, float valueToSet);
 		void generateInnerSkeleton();
 		void loadMap(QString fileName);
 		void clear();
 		void draw();
 		SSkelPtr getSSkelPtr();
 		QVector <Vertex> verticies;
+		Hmm hmm;
 	private:
 		SSkelPtr & sskel;
 		Regions  input ;
