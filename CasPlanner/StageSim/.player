@@ -36370,3 +36370,34 @@ amcl.cc:551 shutdown done
 playertcp.cc:319 closing connection to client 1 on port 6666
 playertcp.cc:319 closing connection to client 2 on port 6667
 playertcp.cc:319 closing connection to client 3 on port 6665
+plugins.cc:147 trying to load /home/BlackCoder/workspace/CasPlanner/StageSim/./libstageplugin...
+plugins.cc:151 failed (/home/BlackCoder/workspace/CasPlanner/StageSim/./libstageplugin.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:161 trying to load /usr/local/lib/libstageplugin...
+plugins.cc:164 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:319 closing connection to client 2 on port 6667
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 1 on port 6666
+playertcp.cc:319 closing connection to client 2 on port 6665

@@ -421,7 +421,7 @@ class VoronoiDiagram : public Virtual_Voronoi_diagram_base_2 <VD2,Voronoi_diagra
 	  	}
 	
 	  	virtual Object ptr() 
-	  	{ 
+	  	{
 	  		return CGAL::make_object(this); 
 	  	}	
 };
