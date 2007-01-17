@@ -98,6 +98,8 @@ SOURCES += modules/CommManager/commmanager.cpp \
            
 INCLUDEPATH += 	/usr/local/Trolltech/Qt-4.2.2/include/QtCore \
 				/usr/local/Trolltech/Qt-4.2.2/include/QtGui \
+				/usr/local/high/include \			
+				/usr/local/include/opencx \
 				/usr/lib/gtk-2.0/include \
 				/usr/include/atk-1.0 \
 				/usr/include/cairo \
@@ -130,6 +132,7 @@ QMAKE_CXXFLAGS_RELEASE+= -g -O3 -o -ffast-math -march=pentium-m -msse2 -mfpmath=
 #QMAKE_CFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse 
 #QMAKE_LFLAGS_RELEASE += -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
 LIBS += $$system(pkg-config --cflags --libs gthread-2.0 playerc++ playercore) -lCGAL
+LIBS += -lhigh -lcxcore -lpnl  -ldl
 MOC_DIR = .tmp
 OBJECTS_DIR = .tmp
 RCC_DIR = .tmp

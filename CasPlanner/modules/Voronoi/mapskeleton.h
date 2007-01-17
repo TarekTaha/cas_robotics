@@ -25,6 +25,29 @@
 #include <CGAL/Polygon_offset_builder_2.h>
 #include <CGAL/compute_outer_frame_margin.h>
 
+//#include "MRF.hpp"
+//#include "pnlWGraph.hpp"
+//#include "WInner.hpp"
+//#include "pnlWProbabilisticNet.hpp"
+//#include "pnlException.hpp"
+//#include "pnl_dll.hpp"
+//#include "pnlRng.hpp"
+//#include "pnlGraphicalModel.hpp"
+//#include "BNet.hpp"
+//#include "Tokens.hpp"
+
+#if !defined(WIN32)
+#define itoa(__val,__str,__rad) sprintf((__str), "%i", (__val))
+#endif
+
+//PNLW_USING
+// FORWARDS
+//namespace pnl
+//{
+//    class CGraphicalModel;
+//    class MRF;
+//};
+
 namespace defs
 {
 	//typedef CGAL::Simple_cartesian<double> K ;
@@ -86,12 +109,13 @@ class Vertex
 		
 };
 using namespace defs;
-
+#include "pnlHigh.hpp"
 class MapSkeleton
 {
 	public:
 		MapSkeleton(SSkelPtr & sskel);
 		virtual ~MapSkeleton();
+//		pnlw::MRF * GridMRFModel();
 		bool convertGridToLineWithVoronoi(float minThreshold, float maxThreshold, bool filterByCellValue, float valueToSet);
 		void generateInnerSkeleton();
 		void loadMap(QString fileName);
@@ -99,7 +123,7 @@ class MapSkeleton
 		void draw();
 		SSkelPtr getSSkelPtr();
 		QVector <Vertex> verticies;
-		Hmm hmm;
+//		Hmm hmm;
 	private:
 		SSkelPtr & sskel;
 		Regions  input ;

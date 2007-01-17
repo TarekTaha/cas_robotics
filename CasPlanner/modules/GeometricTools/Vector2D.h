@@ -432,9 +432,9 @@ inline bool isSecondInFOVOfFirst(Vector2D posFirst,
 //-----------------------------------------------------------------------------
 inline double Magnitude( QPointF p1, QPointF p2 )
 {
-    QPointF Vector;
-    Vector = p2 - p1;
-    return sqrt( Vector.x() * Vector.x() + Vector.y() * Vector.y());
+    QPointF V;
+    V = p2 - p1;
+    return sqrt( V.x() * V.x() + V.y() * V.y());
 };
 
 /* This Function takes 2 line and returne the interstection Point
