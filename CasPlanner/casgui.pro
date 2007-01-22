@@ -49,6 +49,7 @@ HEADERS += modules/CommManager/commmanager.h \
            modules/GeometricTools/utils.h \
            modules/GeometricTools/Vector2D.h \
            modules/Voronoi/mapskeleton.h \
+           modules/Voronoi/mrfmodel.h \           
            modules/Voronoi/typedefs.h \                      
            modules/Voronoi/voronoidiagram.h \           
            modules/Controller/wheelchairproxy.h 
@@ -92,13 +93,15 @@ SOURCES += modules/CommManager/commmanager.cpp \
            modules/PathPlanner/searchspacenode.cpp \
            modules/PathPlanner/voronoipathplanner.cpp \
            modules/Misc/timer.cpp \
-           modules/Voronoi/mapskeleton.cpp \
+           modules/Voronoi/mapskeleton.cpp \           
+           modules/Voronoi/mrfmodel.cpp \                      
+           modules/Voronoi/TestMRF.cpp \
            modules/Voronoi/voronoidiagram.cpp \                      
            modules/GeometricTools/Vector2d.cpp 
            
 INCLUDEPATH += 	/usr/local/Trolltech/Qt-4.2.2/include/QtCore \
 				/usr/local/Trolltech/Qt-4.2.2/include/QtGui \
-				/usr/local/high/include \			
+				/usr/local/high/include \		
 				/usr/local/include/opencx \
 				/usr/lib/gtk-2.0/include \
 				/usr/include/atk-1.0 \
@@ -107,7 +110,7 @@ INCLUDEPATH += 	/usr/local/Trolltech/Qt-4.2.2/include/QtCore \
 				/usr/include/glib-2.0 \
 				/usr/include/Coin2 \
 				/usr/lib/glib-2.0/include \
-				/usr/include/gtk-2.0 \								
+				/usr/include/gtk-2.0 \		
 				modules/PathPlanner \
 				modules/ObstacleAvoidance \
 				modules/ScanMatching \
@@ -132,13 +135,13 @@ QMAKE_CXXFLAGS_RELEASE+= -g -O3 -o -ffast-math -march=pentium-m -msse2 -mfpmath=
 #QMAKE_CFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse 
 #QMAKE_LFLAGS_RELEASE += -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
 LIBS += $$system(pkg-config --cflags --libs gthread-2.0 playerc++ playercore) -lCGAL
-LIBS += -lhigh -lcxcore -lpnl  -ldl
+LIBS +=  -lhigh -lpnl /usr/local/lib/libcxcore.a
 MOC_DIR = .tmp
 OBJECTS_DIR = .tmp
 RCC_DIR = .tmp
 TARGET = bin/CasPlanner
 CONFIG += 	release \
-			warn_on \
+			warn1_on \
 			qt \
 			opengl \
 			thread \
