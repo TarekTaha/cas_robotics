@@ -2,14 +2,13 @@
 #define MAPSKELETON_H_
 
 #include <vector>
-#include<string>
-#include<iostream>
-#include<sstream>
-#include<fstream>
-#include<iomanip>
-#include<list>
-#include<map>
-#include<hmm.h>
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <iomanip>
+#include <list>
+#include <map>
 
 #include <QPointF> 
 #include <QVector>
@@ -24,29 +23,7 @@
 #include <CGAL/Straight_skeleton_builder_2.h>
 #include <CGAL/Polygon_offset_builder_2.h>
 #include <CGAL/compute_outer_frame_margin.h>
-
-//#include "MRF.hpp"
-//#include "pnlWGraph.hpp"
-//#include "WInner.hpp"
-//#include "pnlWProbabilisticNet.hpp"
-//#include "pnlException.hpp"
-//#include "pnl_dll.hpp"
-//#include "pnlRng.hpp"
-//#include "pnlGraphicalModel.hpp"
-//#include "BNet.hpp"
-//#include "Tokens.hpp"
-
-#if !defined(WIN32)
-#define itoa(__val,__str,__rad) sprintf((__str), "%i", (__val))
-#endif
-
-//PNLW_USING
-// FORWARDS
-//namespace pnl
-//{
-//    class CGraphicalModel;
-//    class MRF;
-//};
+//#include "mrfmodel.h"
 
 namespace defs
 {
@@ -109,21 +86,20 @@ class Vertex
 		
 };
 using namespace defs;
-#include "pnlHigh.hpp"
+
 class MapSkeleton
-{
+{ 
 	public:
 		MapSkeleton(SSkelPtr & sskel);
 		virtual ~MapSkeleton();
-//		pnlw::MRF * GridMRFModel();
 		bool convertGridToLineWithVoronoi(float minThreshold, float maxThreshold, bool filterByCellValue, float valueToSet);
 		void generateInnerSkeleton();
 		void loadMap(QString fileName);
 		void clear();
 		void draw();
 		SSkelPtr getSSkelPtr();
+//		MRFModel mrfModel;
 		QVector <Vertex> verticies;
-//		Hmm hmm;
 	private:
 		SSkelPtr & sskel;
 		Regions  input ;

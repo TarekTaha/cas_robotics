@@ -16,6 +16,7 @@
 
 #include "interfaceprovider.h"
 #include "mapskeleton.h"
+//#include "mrfmodel.h"
 using namespace defs;
 /*! Changes different Map representations into an occupancy
  * grid represented by a bit array. This OG will be sent to 
@@ -40,6 +41,7 @@ class MapManager : public Map, public QObject//public QThread
 		Map * globalMap;
 		MapSkeleton mapSkeleton;		
 		SSkelPtr  sskel;		
+		//MRFModel * mrfModel;
 		Map * provideLaserOG(LaserScan laserScan,double local_dist,double pixel_res,Pose pose);
 		Map * providePointCloud(LaserScan laserScan, double loca_dist,Pose robotPose);
 		Map * provideMapOG  (QImage image,double pixel_res,bool negate,Pose p);
