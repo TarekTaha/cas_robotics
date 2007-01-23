@@ -8,11 +8,12 @@ mapManager(NULL)
 
 }
 
-PlayGround::PlayGround(QStringList configFiles):
+PlayGround::PlayGround(QStringList configFiles,QStatusBar *in_statusBar):
 navCon(NULL),
 mapViewer(NULL),
 mapManager(NULL)
 {
+	statusLogger = new StatusLogger(in_statusBar);
     for(int j=0; j < configFiles.size(); j++)
     {
 		ConfigFile *cf = new ConfigFile("localhost",6665);
@@ -54,12 +55,16 @@ void PlayGround::addMsg(int id,int type,QString msg)
 
 void PlayGround::loadMap(QString name,float res,bool negate,Pose p)
 {
-	qDebug("Starting Map Manager"); fflush(stdout);
+	QString logMsg;
+	logMsg.append("\nStarting Map Manager");
+//	qDebug("Starting Map Manager"); fflush(stdout);
 	if(!mapManager)
 		mapManager = new MapManager(name,res,negate,p);
 	else
 		mapManager->loadMap(name,res,negate,p);
-	qDebug("Map Manager Started"); fflush(stdout);		
+//	qDebug("Map Manager Started"); fflush(stdout);
+	logMsg.append("\nMap Manager Started");
+	addMsg(0,INFO,logMsg);		
 	emit mapUpdated(mapManager->globalMap);
 }
 

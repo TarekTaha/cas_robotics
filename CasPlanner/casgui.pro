@@ -95,7 +95,6 @@ SOURCES += modules/CommManager/commmanager.cpp \
            modules/Misc/timer.cpp \
            modules/Voronoi/mapskeleton.cpp \           
            modules/Voronoi/mrfmodel.cpp \                      
-           modules/Voronoi/TestMRF.cpp \
            modules/Voronoi/voronoidiagram.cpp \                      
            modules/GeometricTools/Vector2d.cpp 
            
@@ -139,7 +138,7 @@ LIBS +=  -lhigh -lpnl /usr/local/lib/libcxcore.a
 MOC_DIR = .tmp
 OBJECTS_DIR = .tmp
 RCC_DIR = .tmp
-TARGET = bin/CasPlanner
+TARGET = CasPlanner
 CONFIG += 	release \
 			warn1_on \
 			qt \

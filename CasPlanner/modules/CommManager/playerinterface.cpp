@@ -26,7 +26,7 @@ QVector<DeviceType> * PlayerInterface::getDevices(QString host,int port )
   		devices->clear();
   	else
   		devices = new QVector<DeviceType>;
-  	printf("Connecting to [%s:%d]\n", qPrintable(host), port);
+  	//printf("Connecting to [%s:%d]\n", qPrintable(host), port);
   	client = playerc_client_create(NULL, qPrintable(host), port);
   	if (playerc_client_connect(client) != 0)
   	{
@@ -288,9 +288,13 @@ Map PlayerInterface::provideMap()
 
 void PlayerInterface::run ()
 {
-    qDebug("/********************************************************************/"); 	
-    qDebug("Connecting to Robot Server::");
-    qDebug("\t Connecting to %s:%d ...",qPrintable(playerHost), playerPort);
+	QString logMsg;
+	logMsg.append("\n/********************************************************************/");
+	logMsg.append("\nConnecting to Robot Server::");
+	logMsg.append(QString("\n\t Connecting to %1:%2 ...").arg(qPrintable(playerHost)).arg(playerPort));
+//    qDebug("/********************************************************************/"); 	
+//    qDebug("Connecting to Robot Server::");
+//    qDebug("\t Connecting to %s:%d ...",qPrintable(playerHost), playerPort);
     if(pc)
     {
 		delete pc; 
@@ -307,7 +311,8 @@ void PlayerInterface::run ()
 			    delete drive;
 			}
 	        drive = new Position2dProxy(pc,positionId);
-	   		qDebug("\t\t - Motor Control Interface Engaged Successfully, ID:%d",positionId); 
+//	   		qDebug("\t\t - Motor Control Interface Engaged Successfully, ID:%d",positionId);
+			logMsg.append(QString("\n\t\t - Motor Control Interface Engaged Successfully, ID:%1").arg(positionId));	   		 
 	    }
 	    for(int i=0; i < lasers.size(); i++)
 	    {
@@ -321,27 +326,32 @@ void PlayerInterface::run ()
 	    	lasers[i].pose.p.setY(lp_pose.py);	    	
 	    	lasers[i].pose.phi = lp_pose.pa;
 	    	//qDebug("Laser Pose X:%f Y:%f Phi:%f",lasers[i].pose.p.x(),lasers[i].pose.p.y(),lasers[i].pose.phi);	    	
-       		qDebug("\t\t - Laser interface:%d Interface Added Successfully",lasers[i].index);  
+//       		qDebug("\t\t - Laser interface:%d Interface Added Successfully",lasers[i].index);
+			logMsg.append(QString("\n\t\t - Laser interface:%1 Interface Added Successfully").arg(lasers[i].index));  
 	    }
 	    if(mapEnabled)
 	    {
 	    	map = new MapProxy(pc,mapId);
-			qDebug("\t\t - Map Interface Engaged Successfully, ID:%d",mapId);
+//			qDebug("\t\t - Map Interface Engaged Successfully, ID:%d",cc);
+			logMsg.append(QString("\n\t\t - Map Interface Engaged Successfully, ID:%1").arg(mapId));			
 	    }
 	    if(ptzEnabled)
 	    {
 			ptz = new PtzProxy(pc, ptzId); 
-			qDebug("\t\t - Pan Tilt unit initialized Successfully ID:%d",ptzId);
+//			qDebug("\t\t - Pan Tilt unit initialized Successfully ID:%d",ptzId);
+			logMsg.append(QString("\n\t\t - Pan Tilt unit initialized Successfully ID:%1").arg(ptzId));			
 	    }
 	    if(localizerEnabled)
 	    {
 	    	localizer 	= new LocalizeProxy(pc,0);
-	    	qDebug("\t\t - Localizer Started Successfully ID:%d",0);
+//	    	qDebug("\t\t - Localizer Started Successfully ID:%d",0);
+			logMsg.append(QString("\n\t\t - Localizer Started Successfully ID:%1").arg(0));	    	
 	    }
 	    if(vfhEnabled)
 	    {
 	    	vfh 	= new Position2dProxy(pc,vfhId);
-	    	qDebug("\t\t - Vfh Started Successfully ID:%d",vfhId);
+//	    	qDebug("\t\t - Vfh Started Successfully ID:%d",vfhId);
+			logMsg.append(QString("\n\t\t - Vfh Started Successfully ID:%1").arg(vfhId));	    	
 	    }	    
     }
    catch (PlayerCc::PlayerError e)
@@ -349,10 +359,15 @@ void PlayerInterface::run ()
     	std::cerr << e << std::endl;
     	return;
   	}
-    qDebug("\t Testing Player Server for Data Read:");    
-    qDebug("\t\t - Test Passed, You can read Data from Player Server Now");    
-    qDebug("\t\t - Connection Established"); 
-    qDebug("/********************************************************************/");
+	logMsg.append(QString("\n\t Testing Player Server for Data Read:"));  	
+	logMsg.append(QString("\n\t\t - Test Passed, You can read Data from Player Server Now"));
+	logMsg.append(QString("\n\t\t - Connection Established"));
+	logMsg.append(QString("\n/********************************************************************/"));	
+//    qDebug("\t Testing Player Server for Data Read:");    
+//    qDebug("\t\t - Test Passed, You can read Data from Player Server Now");    
+//    qDebug("\t\t - Connection Established"); 
+//    qDebug("/********************************************************************/");
+    emit addMsg(0,INFO,logMsg);
 //    long int cnt=0;
 	Timer timer;
     while(true)
@@ -431,4 +446,5 @@ void PlayerInterface::run ()
 	    }
     	emit newData();
     }
+
 }

@@ -200,7 +200,7 @@ void MapGL::resizeGL(int w, int h)
 	glLoadIdentity();
 
 	gluPerspective(180, aspectRatio, 1,1000);
-    qDebug("Resize NEW w = %d h = %d", w, h);
+//    qDebug("Resize NEW w = %d h = %d", w, h);
 	glViewport(0,0,w,h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -657,11 +657,11 @@ void TasksGui::loadTasks(string filename)
 	{
 		std::cout<<"\n File Not Found";
 	}    
-	for(int i=0; i<tasks.size();i++)
-	{
-		qDebug("Task %d: from [%f %f] to [%f %f] Name:%s ",i+1,tasks[i].getStart().x(),tasks[i].getStart().y(),
-		tasks[i].getEnd().x(),tasks[i].getEnd().y(),qPrintable(tasks[i].getName()));
-	}
+//	for(int i=0; i<tasks.size();i++)
+//	{
+//		qDebug("Task %d: from [%f %f] to [%f %f] Name:%s ",i+1,tasks[i].getStart().x(),tasks[i].getStart().y(),
+//		tasks[i].getEnd().x(),tasks[i].getEnd().y(),qPrintable(tasks[i].getName()));
+//	}
 }
 // void TasksGui::mousePressEvent(QMouseEvent *me)
 // {

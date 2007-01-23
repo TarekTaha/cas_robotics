@@ -338,12 +338,12 @@ void MapViewer::update()
 
 void MapViewer::loadTexture()
 {	
-	qDebug("oldW:%d oldH:%d",ogMap->width,ogMap->height);	
+//	qDebug("oldW:%d oldH:%d",ogMap->width,ogMap->height);	
    	newWidth =  (int) std::pow(2.0f, (int)ceil(log((float)ogMap->width) / log(2.f)));
    	newHeight = (int) std::pow(2.0f, (int)ceil(log((float)ogMap->height) / log(2.f)));
 	ratioW  = ((float) ogMap->width)/newWidth;
 	ratioH  = ((float) ogMap->height)/newHeight;
-	qDebug("MW:%d MH:%d RatioW:%f RatioH:%f",newWidth,newHeight,ratioW,ratioH);
+//	qDebug("MW:%d MH:%d RatioW:%f RatioH:%f",newWidth,newHeight,ratioW,ratioH);
 	
     unsigned char imgData[ogMap->width*ogMap->height*4];
 	long int count=0;

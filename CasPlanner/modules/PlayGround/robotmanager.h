@@ -42,8 +42,11 @@ class RobotManager : public QObject//public CommManager, public PlanningManager 
 		Navigator       *navigator;
 		Robot           *robot;
 		bool notPaused,notFollowing;
-	public slots:
+	public 
+	slots:
 		void updateMap(Map * mapData);
+	signals:
+		void addMsg(int,int,QString);
 };
 
 #endif

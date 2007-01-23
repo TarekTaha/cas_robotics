@@ -46,10 +46,10 @@ void Interfaces::createIcons(QVector <DeviceType> * devices)
   	for (int i = 0; i < devices->size(); i++)
   	{
     	snprintf(section, sizeof(section), "%s:%d ",playerc_lookup_name((*devices)[i].addr.interf), (*devices)[i].addr.index);
-		printf("%-16s %-40s", section, qPrintable((*devices)[i].driverName));    	
+		//printf("%-16s %-40s", section, qPrintable((*devices)[i].driverName));    	
 		//if(!(*devices)[i].subscribed)
 		addInterface((*devices)[i],QString(section).append((*devices)[i].driverName));
-		printf("\n");
+		//printf("\n");
   	}	 	
   	return;
 }

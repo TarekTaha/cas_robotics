@@ -36,7 +36,8 @@ void CommManager::emergencyStop()
 	if(player)
   		player->emergencyStop();
   	else
-  		qDebug("Communication Interface Not started YET!!!");
+  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));
+//  		qDebug("Communication Interface Not started YET!!!");
 }
 
 void CommManager::emergencyRelease()
@@ -44,7 +45,8 @@ void CommManager::emergencyRelease()
 	if(player)	
   		player->emergencyRelease();
   	else
-  		qDebug("Communication Interface Not started YET!!!");  		
+  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));
+//  		qDebug("Communication Interface Not started YET!!!");  		
 }
 
 void CommManager::setSpeed(double i_speed, double i_turnRate)
@@ -52,7 +54,8 @@ void CommManager::setSpeed(double i_speed, double i_turnRate)
 	if(player)	
   		player->setSpeed(i_speed, i_turnRate);
   	else
-  		qDebug("Communication Interface Not started YET!!!");  		
+  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  	
+//  		qDebug("Communication Interface Not started YET!!!");  		
 }
 
 void CommManager::gotoGoal(Pose goal)
@@ -60,7 +63,8 @@ void CommManager::gotoGoal(Pose goal)
 	if(player)	
 		player->gotoGoal(goal);
   	else
-  		qDebug("Communication Interface Not started YET!!!");		
+  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  	
+//  		qDebug("Communication Interface Not started YET!!!");		
 }
 
 void CommManager::vfhGoto(Pose goal)
@@ -68,7 +72,8 @@ void CommManager::vfhGoto(Pose goal)
 	if(player)
 		player->vfhGoto(goal);
   	else
-  		qDebug("Communication Interface Not started YET!!!");		
+  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  	
+//  		qDebug("Communication Interface Not started YET!!!");		
 }
 
 void CommManager::setLocation(Pose location)
@@ -76,7 +81,8 @@ void CommManager::setLocation(Pose location)
 	if(player)
 		player->setLocation(location);
   	else
-  		qDebug("Communication Interface Not started YET!!!");		
+  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  	
+//  		qDebug("Communication Interface Not started YET!!!");		
 }
 
 void CommManager::setPtz(double p, double t)
@@ -84,14 +90,16 @@ void CommManager::setPtz(double p, double t)
 	if(player)
 		player->setPtz(p,t);
   	else
-  		qDebug("Communication Interface Not started YET!!!");		
+  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  	
+//  		qDebug("Communication Interface Not started YET!!!");		
 }
 void CommManager::setSpeed(double i_speed)
 {
 	if(player)
   		player->setSpeed(i_speed);
   	else
-  		qDebug("Communication Interface Not started YET!!!");  		
+  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  	
+//  		qDebug("Communication Interface Not started YET!!!");  		
 }
 
 void CommManager::setTurnRate(double i_turnRate)
@@ -99,7 +107,8 @@ void CommManager::setTurnRate(double i_turnRate)
 	if(player)
   		player->setTurnRate(i_turnRate);
   	else
-  		qDebug("Communication Interface Not started YET!!!");  		
+  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  	
+//  		qDebug("Communication Interface Not started YET!!!");  		
 }
 
 double CommManager::getSpeed()
@@ -108,7 +117,8 @@ double CommManager::getSpeed()
   		return player->getSpeed();
   	else
   	{
-  		qDebug("Communication Interface Not started YET!!!");
+  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  		
+//  		qDebug("Communication Interface Not started YET!!!");
   		return 0;
   	}  		
 }
@@ -119,7 +129,8 @@ double CommManager::getTurnRate()
   		return player->getTurnRate();
   	else
   	{
-  		qDebug("Communication Interface Not started YET!!!");
+//  		qDebug("Communication Interface Not started YET!!!");
+  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));
   		return 0;
   	}  		
 }
@@ -130,7 +141,8 @@ Pose CommManager::getLocation()
   		return player->getLocation();
   	else
   	{
-  		qDebug("Communication Interface Not started YET!!!");
+//  		qDebug("Communication Interface Not started YET!!!");
+  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));
   		return Pose(0,0,0);
   	}  		
 }
@@ -141,7 +153,8 @@ Pose CommManager::getOdomLocation()
   		return player->getOdomLocation();
   	else
   	{
-  		qDebug("Communication Interface Not started YET!!!");
+//  		qDebug("Communication Interface Not started YET!!!");
+  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));
   		return Pose(0,0,0);
   	}  		
 }
@@ -152,7 +165,8 @@ bool CommManager::getLocalized()
 		return player->getLocalized();
   	else
   	{
-  		qDebug("Communication Interface Not started YET!!!");
+//  		qDebug("Communication Interface Not started YET!!!");
+  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));
   		return false;
   	}		
 }
@@ -255,39 +269,46 @@ int CommManager::readConfigs( ConfigFile *cf,int secId)
 
 int CommManager::start()
 {
-	//emit addMsg(0,INFO,QString("-> Starting Communication Manager."));
-    qDebug("-> Starting Communication Manager."); fflush(stdout);	
-    qDebug("\tCommunication Parameters:"); fflush(stdout);	
+	QString logMsg;
+	logMsg.append("-> Starting Communication Manager.\n\tCommunication Parameters:");
+//    qDebug("-> Starting Communication Manager."); fflush(stdout);	
+//    qDebug("\tCommunication Parameters:"); fflush(stdout);	
   	if (!player)
  	{
 	   	player = new PlayerInterface(robot->robotIp,robot->robotPort);
    		connect(player, SIGNAL(newData()), this, SIGNAL(newData()));
+   		connect(player, SIGNAL(addMsg(int,int,QString)), playGround,SLOT(addMsg(int,int,QString)));
  	}
   	//Enable Robot Control ?
   	if(activateControl)
   	{
-   	  	qDebug("\t\t\t 	- Position/Drive Contrl."); 
+//   	  	qDebug("\t\t\t 	- Position/Drive Contrl.");
+   	  	logMsg.append("\n\t\t 	- Position/Drive Contrl."); 
     	player->enableControl(positionControlId);
   	}
   	//Laser
   	if(laserEnabled)
   	{
-   	  	qDebug("\t\t\t	- Laser:%d.",lasers.size()); fflush(stdout);  	
+//   	  	qDebug("\t\t\t	- Laser:%d.",lasers.size()); fflush(stdout);  
+		logMsg.append(QString("\n\t\t	- Laser:%1.").arg(lasers.size()));	  		
     	player->setLasers(lasers);
   	}
   	if(occMapEnabled)
   	{
-   	  	qDebug("\t\t\t	- Occupancy Map."); fflush(stdout);  	
+//   	  	qDebug("\t\t\t	- Occupancy Map."); fflush(stdout); 
+		logMsg.append(QString("\n\t\t	- Occupancy Map.")); 	
     	player->enableMap(mapId);
   	}
   	if(localizerEnabled)
   	{
-  		qDebug("\t\t\t	- AMCL Localizer."); fflush(stdout);  	
+//  		qDebug("\t\t\t	- AMCL Localizer."); fflush(stdout);  	
+		logMsg.append(QString("\n\t\t	- AMCL Localizer."));  		
   		player->enableLocalizer(localizerId);
   	}
   	if(vfhEnabled)
   	{
-  		qDebug("\t\t\t	- VFH Navigator."); fflush(stdout);  	
+//  		qDebug("\t\t\t	- VFH Navigator."); fflush(stdout);  
+		logMsg.append(QString("\n\t\t	- VFH Navigator."));  			
   		player->enableVfh(vfhId);
   	}
   	if(player)
@@ -300,7 +321,9 @@ int CommManager::start()
     	player->start();	  	
     	connected = true;
   	}
-    qDebug("-> Communication Manager Started."); fflush(stdout);  	
+//    qDebug("-> Communication Manager Started."); fflush(stdout);
+	logMsg.append(QString("\n-> Communication Manager Started."));    
+    emit addMsg(0,INFO,logMsg);  	
     return 1;
 }
 
