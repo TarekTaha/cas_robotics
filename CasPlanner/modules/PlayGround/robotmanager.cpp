@@ -29,10 +29,17 @@ RobotManager::~RobotManager()
  *  3- Initialize Map management layer to provide the planner with maps.
  *  4- Initialize the Path Planning solver with the specified parameters.
  */
-RobotManager::RobotManager(PlayGround *playG,ConfigFile *cf,int secId)
+RobotManager::RobotManager(PlayGround *playG,ConfigFile *cf,int secId):
+commManager(NULL),
+planningManager(NULL),
+navigator(NULL),
+robot(NULL),
+notPaused(true),
+notFollowing(true),
+playGround(playG)
 {
-	this->playGround = playG;
 	connect(playGround,SIGNAL(mapUpdated(Map *)),this,SLOT(updateMap(Map *)));
+	connect(this,SIGNAL(addMsg(int,int,QString)),playGround,SLOT(addMsg(int,int,QString)));	
 	readRobotConfigs(cf,secId);
 	readCommManagerConfigs(cf,secId); 
 	int numSections = cf->GetSectionCount(); 
@@ -58,14 +65,28 @@ void RobotManager::updateMap(Map * mapData)
 
 int RobotManager::readRobotConfigs(ConfigFile *cf,int secId)
 {
+	QString logMsg;
 	robot = new Robot();
 	robot->readConfigs(cf,secId);
+	
+	logMsg.append("\n-> Robot Configurations Read.");
+	logMsg.append("\n*********************************************************************");
+	logMsg.append(QString("\n\t\t Robot  name:\t%1").arg(robot->robotName));
+	logMsg.append(QString("\n\t\t Robot Ip is:\t%1:%2").arg(robot->robotIp).arg(robot->robotPort));
+	logMsg.append("\n*********************************************************************");
+	emit addMsg(0,INFO,logMsg);
+//    qDebug("-> Robot Configurations Read.");
+//    qDebug("*********************************************************************");
+//   	qDebug("\t\t Robot  name:\t%s", qPrintable(robotName));
+//    qDebug("\t\t Robot Ip is:\t%s:%d", qPrintable(robotIp),robotPort);
+////   	qDebug("\t\t Robot Radius:%f",robotRadius);
+//    qDebug("*********************************************************************");	
     return 1;
 }       
 
 int RobotManager::readCommManagerConfigs(ConfigFile *cf,int secId)
 {
-	commManager = new CommManager(robot,playGround);
+	commManager = new CommManager(robot,this->playGround);
 	commManager->readConfigs(cf,secId);
     return 1;
 }

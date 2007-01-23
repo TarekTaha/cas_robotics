@@ -27,7 +27,7 @@ void StatusLogger::addStatusMsg(int messageId, int messageType, QString message)
 	switch (messageType)
 	{
 		case INFO:
-			log.setTextColor(Qt::green); 
+			log.setTextColor(Qt::black); 
 			break;
 		case ERROR:
 			log.setTextColor(Qt::red); 		

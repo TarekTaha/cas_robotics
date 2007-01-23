@@ -52,7 +52,7 @@ class PlanningManager : public QObject
 //			void  updateMap(LaserScan laserScan,double local_dist,Pose robotLocation);
 			bool  fileExist(const char * fname);
        signals:
-		    void statusMsg(int,int, QString);
+		    void addMsg(int,int, QString);
 		    void updateMap(Map* map);
         protected:
             double pixel_res,dist_goal,bridge_len,bridge_res,reg_grid,obst_exp,conn_rad,obst_pen;

@@ -66,6 +66,7 @@ class Navigator : public Controller
 		void glRender();
 		void setWayPoint(Pose *);
 		void renderMapPatch(Map*);
+		void addMsg(int,int,QString);
 	protected:
 		Pose	old_amcl,amcl_location,EstimatedPos,laser_pose;
 		double 	angle,prev_angle,theta,error_orientation,

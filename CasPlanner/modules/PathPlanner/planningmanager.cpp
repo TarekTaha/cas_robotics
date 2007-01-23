@@ -32,7 +32,8 @@ PlanningManager::PlanningManager(RobotManager *robMan,
 	this->bridgeTestEnabled = true;
 	this->showTreeEnabled   = false;
 	robotManager->robot->setCheckPoints(obst_exp);	
-	qDebug("Pixel Res in Navigator =%f",this->pixel_res);	
+   	connect(this, SIGNAL(addMsg(int,int,QString)), robMan->playGround,SLOT(addMsg(int,int,QString)));	
+//	qDebug("Pixel Res in Navigator =%f",this->pixel_res);	
 }
 
 PlanningManager::PlanningManager(RobotManager *robMan):
@@ -46,7 +47,7 @@ obstPenEnabled(true),
 expObstEnabled(true),
 showTreeEnabled(true)
 {
-
+   	connect(this, SIGNAL(addMsg(int,int,QString)), robMan->playGround,SLOT(addMsg(int,int,QString)));
 }
 
 PlanningManager::~PlanningManager()
@@ -266,18 +267,30 @@ int PlanningManager::readConfigs( ConfigFile *cf)
 
 int PlanningManager::setupPlanner()
 {
+	QString logMsg;
 	if (!pathPlanner)
 	{
-		qDebug("-> Starting Planner."); 
-   		qDebug("\tPlanning Parameters:"); 
-    	qDebug("\t\t\t Pixel Resolution = %f",pixel_res); 
-    	qDebug("\t\t\t Distance to Goal = %f",dist_goal); 
-    	qDebug("\t\t\t Bridge Test Lenght = %f",bridge_len); 
-    	qDebug("\t\t\t Bridge Test Res = %f",bridge_res); 
-    	qDebug("\t\t\t Reg Grid Res  = %f",reg_grid); 
-    	qDebug("\t\t\t Obstacle Expansion Radius = %f",obst_exp);         
-    	qDebug("\t\t\t Connection Radius = %f",conn_rad);         
-    	qDebug("\t\t\t Obstacle Penalty = %f",obst_pen);	
+		logMsg.append("\n-> Starting Planner.");
+		logMsg.append("\n\tPlanning Parameters:");
+		logMsg.append(QString("\n\t\t\t Pixel Resolution = %1").arg(pixel_res));
+		logMsg.append(QString("\n\t\t\t Distance to Goal = %1").arg(dist_goal));
+		logMsg.append(QString("\n\t\t\t Bridge Test Lenght = %1").arg(bridge_len));
+		logMsg.append(QString("\n\t\t\t Bridge Test Res = %1").arg(bridge_res));
+		logMsg.append(QString("\n\t\t\t Reg Grid Res  = %1").arg(reg_grid));
+		logMsg.append(QString("\n\t\t\t Obstacle Expansion Radius = %1").arg(obst_exp));
+		logMsg.append(QString("\n\t\t\t Connection Radius = %1").arg(conn_rad));
+		logMsg.append(QString("\n\t\t\t Obstacle Penalty = %1").arg(obst_pen));
+																	
+//		qDebug("-> Starting Planner."); 
+//		qDebug("\tPlanning Parameters:"); 
+//    	qDebug("\t\t\t Pixel Resolution = %f",pixel_res); 
+//    	qDebug("\t\t\t Distance to Goal = %f",dist_goal); 
+//    	qDebug("\t\t\t Bridge Test Lenght = %f",bridge_len); 
+//    	qDebug("\t\t\t Bridge Test Res = %f",bridge_res); 
+//    	qDebug("\t\t\t Reg Grid Res  = %f",reg_grid); 
+//    	qDebug("\t\t\t Obstacle Expansion Radius = %f",obst_exp);         
+//    	qDebug("\t\t\t Connection Radius = %f",conn_rad);         
+//    	qDebug("\t\t\t Obstacle Penalty = %f",obst_pen);	
 		pathPlanner = new PathPlanner(robotManager->robot,
 									  dist_goal,
 									  bridge_len,
@@ -286,7 +299,9 @@ int PlanningManager::setupPlanner()
 									  obst_exp,
 									  conn_rad,
 									  obst_pen);
-		qDebug("->Planner Started.");
+//		qDebug("->Planner Started.");
+		logMsg.append("\n->Planner Started.");	
+		emit addMsg(0,INFO,logMsg);	
 	}
 	return 1;
 }

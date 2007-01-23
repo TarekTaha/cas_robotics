@@ -15,6 +15,7 @@
 #include "utils.h"
 #include "map.h"
 #include "timer.h"
+#include "statusbar.h"
 
 #define MAX_LASERS 4
 
@@ -108,6 +109,7 @@ Q_OBJECT
         void emergencyRelease();
     signals:
         void newData(); 
+        void addMsg(int,int,QString);
     private:
         QString playerHost; 
         int playerPort; 

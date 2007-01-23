@@ -23,7 +23,6 @@ mapSkeleton(sskel)
 
 void MapManager::loadMap(QString name,float res,bool negate,Pose p)
 {
-	qDebug("Generating Map"); fflush(stdout);
 	this->mapNegate = negate;
 	this->mapName = name;	
 	if(!image.load(name, 0))
@@ -31,11 +30,9 @@ void MapManager::loadMap(QString name,float res,bool negate,Pose p)
 		qDebug("Error Loading Image"); fflush(stdout);
 		exit(1);
 	}
-	qDebug("Generating Map"); fflush(stdout);	
 	if(this->globalMap)
 		delete globalMap;
 	globalMap = provideMapOG(image,res,negate,p);
-	qDebug("Map Generated");  fflush(stdout);
 	return;	
 }	
 
@@ -87,7 +84,6 @@ Map * MapManager::provideLaserOG(LaserScan laserScan, double local_dist,double r
 	double dist=0;
 	int height,width;
 	// getting right Map dimensions
-	qDebug("HERE OG1"); fflush(stdout);	
 	height = int(2.0*local_dist/res);
 	width =  int(2.0*local_dist/res);	
 	Pose globalPose = Trans2Global(laserScan.laserPose,robotPose);
@@ -120,8 +116,8 @@ Map * MapManager::provideLaserOG(LaserScan laserScan, double local_dist,double r
 			retval->grid[int(p.x())][int(p.y())] = false;			
 		}
 	}
-	qDebug("Width:%d Height:%d",width,height);
-	qDebug("HERE OG1"); fflush(stdout);	
+//	qDebug("Width:%d Height:%d",width,height);
+//	qDebug("HERE OG1"); fflush(stdout);	
 	return retval;
 }
 

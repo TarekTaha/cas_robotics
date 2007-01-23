@@ -26,12 +26,6 @@ int Robot::readConfigs(ConfigFile *cf,int secId)
 
 	robotCenter.setX(cf->ReadTupleFloat(secId,"robotCenter",0 ,0));
 	robotCenter.setY(cf->ReadTupleFloat(secId,"robotCenter",1 ,0));
-    qDebug("-> Robot Configurations Read.");
-    qDebug("*********************************************************************");
-   	qDebug("\t\t Robot  name:\t%s", qPrintable(robotName));
-    qDebug("\t\t Robot Ip is:\t%s:%d", qPrintable(robotIp),robotPort);
-//   	qDebug("\t\t Robot Radius:%f",robotRadius);
-    qDebug("*********************************************************************");
   	return 1;
 }
 

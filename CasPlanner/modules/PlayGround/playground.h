@@ -1,7 +1,11 @@
 #ifndef PLAYGROUND_H_
 #define PLAYGROUND_H_
 
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
 #include <QVector>
+#include <QStatusBar> 
 #include "navigationtab.h"
 #include "mapviewer.h"
 #include "robotmanager.h"
@@ -18,7 +22,7 @@ class PlayGround: public QObject
 	Q_OBJECT
 	public:
 		PlayGround();
-		PlayGround(QStringList configFiles);
+		PlayGround(QStringList configFiles,QStatusBar *in_statusBar);
 		virtual ~PlayGround();
 		int renderingMethod;
 		NavContainer *navCon;

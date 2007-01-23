@@ -24,7 +24,6 @@ NavContainer::NavContainer(QWidget *parent,PlayGround *playGround_in)
 		if(playGround->robotPlatforms.size()>0)
 			currRobot = playGround->robotPlatforms[0];
 	}
-	qDebug("Container Initialized"); fflush(stdout);	
 }
 
 NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
@@ -281,7 +280,7 @@ void NavControlPanel::updateSelectedRobot(bool)
 		if(availableRobots[i]->isChecked())
 		{
 			currRobot = playGround->robotPlatforms[i];
-			qDebug("Seleted Robot is:%s",qPrintable(currRobot->robot->robotName));
+//			qDebug("Seleted Robot is:%s",qPrintable(currRobot->robot->robotName));
 			fflush(stdout);
 			updateRobotSetting();
 			return;

@@ -152,6 +152,7 @@ local_planner(NULL),
 global_planner(r->planningManager)
 {
 //	connect(this, SIGNAL(drawLocalPath(PathPlanner *,Pose *,int *)),robotManager, SLOT(rePaint(PathPlanner*,Pose *,int *)));
+   	connect(this, SIGNAL(addMsg(int,int,QString)), playGround,SLOT(addMsg(int,int,QString)));
 }
 
 Navigator::~Navigator()
@@ -234,16 +235,25 @@ int Navigator::readConfigs( ConfigFile *cf)
 	    }
 		FF = new ForceField(*robotManager->robot,cf);
 	}
-
-    qDebug("-> Starting Robot Navigator."); 	
-  	qDebug("\tNavigation Parameters:"); 
-  	qDebug("\t\t\t Obstacle Avoidance:\t%s", qPrintable(obst_avoid)); 
-    qDebug("\t\t\t Controller Distance Gain:%f",k_dist); 
-  	qDebug("\t\t\t Controller Theta    Gain:%f",k_theta);
-  	qDebug("\t\t\t Safet Distance :%f",safety_dist);
-  	qDebug("\t\t\t Tracking Distance :%f",tracking_dist);
-    qDebug("-> Robot Navigator Started.");   	
-
+	QString logMsg;
+	logMsg.append("\n-> Starting Robot Navigator.");
+	logMsg.append("\n\tNavigation Parameters:");
+	logMsg.append(QString("\n\t\t\t Obstacle Avoidance:\t%1").arg(obst_avoid));
+	logMsg.append(QString("\n\t\t\t Controller Distance Gain:%1").arg(k_dist));
+	logMsg.append(QString("\n\t\t\t Controller Theta    Gain:%1").arg(k_theta));
+	logMsg.append(QString("\n\t\t\t Safet Distance :%1").arg(safety_dist));
+	logMsg.append(QString("\n\t\t\t Tracking Distance :%1").arg(tracking_dist));
+	logMsg.append("\n-> Robot Navigator Started.");
+						
+//    	qDebug("-> Starting Robot Navigator."); 	
+//		qDebug("\tNavigation Parameters:"); 
+//		qDebug("\t\t\t Obstacle Avoidance:\t%s", qPrintable(obst_avoid)); 
+//    	qDebug("\t\t\t Controller Distance Gain:%f",k_dist); 
+//  	qDebug("\t\t\t Controller Theta    Gain:%f",k_theta);
+//  	qDebug("\t\t\t Safet Distance :%f",safety_dist);
+//  	qDebug("\t\t\t Tracking Distance :%f",tracking_dist);
+//    	qDebug("-> Robot Navigator Started.");   	
+	emit addMsg(0,INFO,logMsg);
  	return 1;
 }
 
@@ -500,8 +510,6 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
 
 void Navigator::run()
 {
-	connect(this, SIGNAL(glRender()),robotManager,SLOT(update()));	
-	
 	QVector <Robot *> availableRobots;
 	ControlAction cntrl;
 	Timer amcl_timer,delta_timer,redraw_timer,control_timer;
@@ -798,7 +806,7 @@ void Navigator::run()
 //			if(this->mapPatch)
 //				delete mapPatch;
 //			mapPatch = mapManager.provideLaserOG(laserScan,2.0,0.05,EstimatedPos);	
-			 	emit glRender();
+//			 	emit glRender();
 		 	redraw_timer.restart();	
 		}
 		/* Get the control Action to be applied, in this case it's a

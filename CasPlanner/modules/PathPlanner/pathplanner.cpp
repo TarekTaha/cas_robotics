@@ -513,7 +513,7 @@ void PathPlanner::updateMap(Map *mapPatch)
  */ 
 void PathPlanner :: setMap(Map * map_in)
 {
-	qDebug("SETTING MAP"); fflush(stdout);
+//	qDebug("SETTING MAP"); fflush(stdout);
 	if(!map_in)
 	{
 		qDebug("Why the hell ur giving me an empty map ???");
@@ -530,7 +530,7 @@ void PathPlanner :: setMap(Map * map_in)
 	MAXNODES = MaxLong;//map->height*map->width*map->width*map->height;
 	//qDebug("W_in:%d H_in:%d",map->width,map->height);
 	map_initialized = true;	
-	qDebug("MAP SET"); fflush(stdout);	
+//	qDebug("MAP SET"); fflush(stdout);	
 };
 
 }

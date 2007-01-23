@@ -34,7 +34,6 @@
 #include "task.h"
 #include "mapskeleton.h"
 #include "voronoidiagram.h"
-#include "TestMRF.h"
 
 class TasksGui;
 class TasksControlPanel;

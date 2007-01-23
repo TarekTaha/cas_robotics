@@ -13,7 +13,8 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     QMainWindow(parent), logCount(0)
 {
     // Create the PlayGround where all the RobotManagers will run
-    playGround = new PlayGround (configFiles);
+    playGround = new PlayGround (configFiles,statusBar());    
+        
     QWidget *container = new QWidget(this); 
     tabcontainer = new TabContainer(parent,playGround);
     playGround->setNavContainer(tabcontainer->navCon);
@@ -32,7 +33,7 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     logButton->setPalette(palette);    
     
     // Window Layout
-    setMinimumSize(QSize(900,800)); 
+    setMinimumSize(QSize(900,720)); 
     QHBoxLayout *layout = new QHBoxLayout, *layout2 = new QHBoxLayout; 
     layout->addWidget(tabcontainer,1); 
     layout2->addWidget(logButton);
@@ -42,18 +43,14 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     vLayout->addLayout(layout2);     
     container->setLayout(vLayout);
     
-    statusBar()->showMessage("Welcome to CAS Navigation System ...", 20000); 
-    statusBar()->showMessage("Initialization Done.");
-
-    playGround->statusLogger = new StatusLogger(statusBar()); 
     setCentralWidget(container);
-    playGround->statusLogger->addStatusMsg(0,INFO,"<-- Start of Loggs -->"); 
 
     connect(emergStop, SIGNAL(pressed()), playGround, SLOT(stopRobots()));
     connect(connRobot, SIGNAL(pressed()), playGround, SLOT(startRobotsComm()));
     connect(logButton, SIGNAL(clicked()), playGround->statusLogger, SLOT(showLog())); 
-    playGround->statusLogger->addStatusMsg(0,INFO,"Navigation System Started ... "); 
 
+    statusBar()->showMessage("Welcome to CAS Navigation System ...", 20000); 
+    statusBar()->showMessage("Initialization Done.");
 	// Data Logging Timer
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(logData()));
