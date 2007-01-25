@@ -191,6 +191,7 @@ void NavControlPanel::pathTraversed()
 		qDebug("Quitting Thread");
 	}
 	pathFollowBtn.setText("Path Follow");
+	pauseBtn.setText("Pause");
 	currRobot->notFollowing = true;
 }
 
@@ -202,10 +203,13 @@ void NavControlPanel::pathFollow()
 		{
 			currRobot->navigator->quit();
 		}
-		currRobot->navigator->setPath(path);
-		currRobot->navigator->start();
-		pathFollowBtn.setText("Stop");
-		currRobot->notFollowing = false;
+		if(path)
+		{
+			currRobot->navigator->setPath(path);
+			currRobot->navigator->start();
+			pathFollowBtn.setText("Stop");
+			currRobot->notFollowing = false;
+		}
 	}
 	else
 	{
@@ -280,8 +284,7 @@ void NavControlPanel::updateSelectedRobot(bool)
 		if(availableRobots[i]->isChecked())
 		{
 			currRobot = playGround->robotPlatforms[i];
-//			qDebug("Seleted Robot is:%s",qPrintable(currRobot->robot->robotName));
-			fflush(stdout);
+//			qDebug("Seleted Robot is:%s",qPrintable(currRobot->robot->robotName));	fflush(stdout);
 			updateRobotSetting();
 			return;
 		}

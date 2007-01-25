@@ -151,7 +151,6 @@ robotManager(r),
 local_planner(NULL),
 global_planner(r->planningManager)
 {
-//	connect(this, SIGNAL(drawLocalPath(PathPlanner *,Pose *,int *)),robotManager, SLOT(rePaint(PathPlanner*,Pose *,int *)));
    	connect(this, SIGNAL(addMsg(int,int,QString)), playGround,SLOT(addMsg(int,int,QString)));
 }
 
@@ -173,8 +172,7 @@ void Navigator::setupLocalPlanner()
 											  obst_exp,
 											  conn_rad,
 											  obst_pen
-										   );
-	//robotManager->local_planner = local_planner->pathPlanner;							   
+										   );					   
 	}
 }
 
@@ -243,8 +241,7 @@ int Navigator::readConfigs( ConfigFile *cf)
 	logMsg.append(QString("\n\t\t\t Controller Theta    Gain:%1").arg(k_theta));
 	logMsg.append(QString("\n\t\t\t Safet Distance :%1").arg(safety_dist));
 	logMsg.append(QString("\n\t\t\t Tracking Distance :%1").arg(tracking_dist));
-	logMsg.append("\n-> Robot Navigator Started.");
-						
+	logMsg.append("\n-> Robot Navigator Started.");		
 //    	qDebug("-> Starting Robot Navigator."); 	
 //		qDebug("\tNavigation Parameters:"); 
 //		qDebug("\t\t\t Obstacle Avoidance:\t%s", qPrintable(obst_avoid)); 
@@ -437,13 +434,6 @@ void Navigator::setPath(Node *p)
 void Navigator::FollowPath()
 {
 	return;
-}
-
-void Navigator::StopRobot()
-{
-    dataLock.lockForWrite();
-	this->stop_navigating = true;
-    dataLock.unlock();		
 }
 
 void Navigator::StopNavigating()
@@ -639,17 +629,18 @@ void Navigator::run()
 		{
 			if(Dist(first->next->pose.p,EstimatedPos.p)<=0.4)
 			{
-				if (local_planner->pathPlanner->path)
+//				if (local_planner->pathPlanner->path)
+//				{
+//					qDebug("--->>> Local Path Traversed !!!");					
+//					local_planner->pathPlanner->freePath();
+//					path2Follow = global_path;
+//					usleep(100000);
+//					continue;
+//				}
+//				else
 				{
-					qDebug("--->>> Local Path Traversed !!!");					
-					local_planner->pathPlanner->freePath();
-					path2Follow = global_path;
-					usleep(100000);
-					continue;
-				}
-				else
-				{
-					qDebug("--->>> Destination Reached !!!");
+					qDebug("--->>> Destination Reached !!!"); fflush(stdout);
+					emit addMsg(0,INFO,QString("--->>> Destination Reached !!!"));
 					emit pathTraversed();
 		 			end_reached = true;
 					break;
@@ -896,7 +887,7 @@ void Navigator::run()
 	}
 	robotManager->commManager->setSpeed(0);
 	robotManager->commManager->setTurnRate(0);
-	local_planner->pathPlanner->freeResources();
+	//local_planner->pathPlanner->freeResources();
 	qDebug("Thread Loop Terminated Normally !!!");
 	return;
 }

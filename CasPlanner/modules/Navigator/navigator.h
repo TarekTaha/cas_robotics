@@ -40,7 +40,6 @@ class Navigator : public Controller
 		void setPath(Node *path);
 		void setObstAvoidAlgo(int);
 		int  getObstAvoidAlgo();
-		void StopNavigating();
 		double NearestObstacle(LaserScan laser_scan);
 		bool inLaserSpace(LaserScan laserScan,Pose robotLocation,QPointF waypoint);
 		void  setPause(bool pause);
@@ -59,7 +58,7 @@ class Navigator : public Controller
 	public
 	slots:
 		void FollowPath();
-		void StopRobot();
+		void StopNavigating();
 	signals:
 		void drawLocalPath(PathPlanner *,Pose *,int *);
 		void pathTraversed();
