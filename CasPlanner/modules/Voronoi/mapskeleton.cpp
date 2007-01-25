@@ -1,6 +1,8 @@
 #include "mapskeleton.h"
 
-MapSkeleton::MapSkeleton(SSkelPtr & ssk):sskel(ssk)
+MapSkeleton::MapSkeleton(SSkelPtr & ssk):
+sskel(ssk),
+mrfModel(NULL)
 {
 
 }
@@ -107,6 +109,9 @@ SSkelPtr MapSkeleton::getSSkelPtr()
 void MapSkeleton::generateInnerSkeleton()
 {
 	Vertex v;
+	if(mrfModel)
+		delete mrfModel;
+	mrfModel = new MRF();
     if ( input.size() > 0 )
 	{
 		defs::Region const& lRegion = *input.front();
@@ -146,7 +151,11 @@ void MapSkeleton::generateInnerSkeleton()
 	          			v.setLocation(he->vertex()->point().x(),he->vertex()->point().y());
 	       			    int i = verticies.indexOf(v);
     						if (i == -1)
+    						{
 	          					verticies.push_back(v);
+	          					QString node_name= QString("node%1").arg(verticies.size());
+	          					mrfModel->AddNode(discrete ^ qPrintable(node_name), "right left up down");
+    						}
 //				    	he->is_inner_bisector()? glColor4f(0,0,1,1) : glColor4f(1,0,0,1);
 	          		}	
 	        	}
@@ -154,7 +163,8 @@ void MapSkeleton::generateInnerSkeleton()
 	      	}
 	      	while ( -- watchdog > 0 && he != hstart ) ;	      	
     	}
-		std::cout<<"\n Skeleton Generated !!!!!\n";    	
+		std::cout<<"\n Skeleton Generated !!!!!\n"; 
+		std::cout<<"\n Number of Nodes:"<<mrfModel->GetNumberOfNodes(); 	
 	}
 	else
 	{

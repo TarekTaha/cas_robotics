@@ -19,6 +19,20 @@ class MRFModel
 public:
 	MRFModel();
 	virtual ~MRFModel();
+	MRF * VerySimpleMRFModel();
+	MRF * SimpleMRFModel();
+	MRF * GridMRFModel();
+	MRF * mrfModel();
+	void  TestMRFModelCreate();
+	bool  bTokArrEqual(TokArr first, TokArr second, float eps);
+	void  TestMRFGetJPD();
+	void  TestNodeType();
+	void  TestSaveLoadMRF();
+	void  testEvidencesManipulationMRF();
+	void  testPropertiesMRF();
+	void  testLearningMRF();
+	void  testPNLObjectsRequestsMRF();
+	int   testMRF();
 };
 
 #endif /*MRFMODEL_H_*/

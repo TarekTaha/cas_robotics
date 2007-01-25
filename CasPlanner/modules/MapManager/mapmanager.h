@@ -16,7 +16,7 @@
 
 #include "interfaceprovider.h"
 #include "mapskeleton.h"
-//#include "mrfmodel.h"
+
 using namespace defs;
 /*! Changes different Map representations into an occupancy
  * grid represented by a bit array. This OG will be sent to 

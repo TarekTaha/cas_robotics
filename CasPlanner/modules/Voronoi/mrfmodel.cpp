@@ -8,13 +8,7 @@ MRFModel::~MRFModel()
 {
 }
 
-static char func_name[] = "testMRF";
-
-static char* test_desc = "Provide all tests for MRF";
-
-static char* test_class = "Algorithm";
-
-MRF *VerySimpleMRFModel()
+MRF * MRFModel::VerySimpleMRFModel()
 {
 //    node0 -- node1
 //      |        |    
@@ -35,7 +29,7 @@ MRF *VerySimpleMRFModel()
     return pMRF;
 }
 
-MRF *SimpleMRFModel()
+MRF * MRFModel::SimpleMRFModel()
 {
 //    node0 -- node1
 //      |   /    |    
@@ -55,7 +49,7 @@ MRF *SimpleMRFModel()
     return pMRF;
 }
 
-MRF *GridMRFModel()
+MRF * MRFModel::GridMRFModel()
 {
 //    node0 -- node1 -- node2
 //      |        |        |
@@ -87,7 +81,7 @@ MRF *GridMRFModel()
     return pMRF;
 }
 
-MRF *MRFModel()
+MRF * MRFModel::mrfModel()
 {
     // Node6--Node5--Node0--Node1 
     //     \   |  \ /  |   /  |
@@ -107,7 +101,7 @@ MRF *MRFModel()
     return net;
 }
 
-void TestMRFModelCreate()
+void MRFModel::TestMRFModelCreate()
 {
     MRF *net = SimpleMRFModel();
 
@@ -207,7 +201,7 @@ void TestMRFModelCreate()
 	delete netGrid;
 }
 
-bool bTokArrEqual(TokArr first, TokArr second, float eps)
+bool MRFModel::bTokArrEqual(TokArr first, TokArr second, float eps)
 {
     if(first.size() != second.size())
     {
@@ -226,7 +220,7 @@ bool bTokArrEqual(TokArr first, TokArr second, float eps)
     return true;
 }
 
-void TestMRFGetJPD()
+void MRFModel::TestMRFGetJPD()
 {
     MRF *net = GridMRFModel();
 
@@ -328,7 +322,7 @@ void TestMRFGetJPD()
 	delete net;
 }
 
-void TestNodeType()
+void MRFModel::TestNodeType()
 {
     MRF *net = SimpleMRFModel();
 	TokArr type = net->GetNodeType("node0");
@@ -336,7 +330,7 @@ void TestNodeType()
 	delete net;
 }
 
-void TestSaveLoadMRF()
+void MRFModel::TestSaveLoadMRF()
 {
     MRF *net = GridMRFModel();
     
@@ -357,7 +351,7 @@ void TestSaveLoadMRF()
 	delete newNet;	
 }
 
-void testEvidencesManipulationMRF()
+void MRFModel::testEvidencesManipulationMRF()
 {
     MRF *net = SimpleMRFModel();
 	
@@ -374,7 +368,7 @@ void testEvidencesManipulationMRF()
 
 }
 
-void testPropertiesMRF()
+void MRFModel::testPropertiesMRF()
 {
     MRF net;
 	//Adding new network property
@@ -384,7 +378,7 @@ void testPropertiesMRF()
 	printf("\n%s\n",value.c_str());
 }
 
-void testLearningMRF()
+void MRFModel::testLearningMRF()
 {
 	MRF *net;
 
@@ -420,7 +414,7 @@ void testLearningMRF()
 	delete net;
 
 }
-void testPNLObjectsRequestsMRF()
+void MRFModel::testPNLObjectsRequestsMRF()
 { 
 	MRF *net = SimpleMRFModel();
 	net->AddEvidToBuf("node0^Value0");
@@ -435,7 +429,7 @@ void testPNLObjectsRequestsMRF()
 	delete net;
 }
 
-int testMRF()
+int MRFModel::testMRF()
 {
 	int ret = true;
 	try 
@@ -456,8 +450,4 @@ int testMRF()
     }
 	return ret;
 }
-//
-//void initTestsMRF()
-//{
-//    trsReg(func_name, test_desc, test_class, testMRF);
-//}
+
