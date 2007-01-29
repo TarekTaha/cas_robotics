@@ -2,7 +2,7 @@
 
 MapSkeleton::MapSkeleton(SSkelPtr & ssk):
 sskel(ssk),
-mrfModel(NULL)
+net(NULL)
 {
 
 }
@@ -108,10 +108,10 @@ SSkelPtr MapSkeleton::getSSkelPtr()
 	
 void MapSkeleton::generateInnerSkeleton()
 {
-	Vertex v;
-	if(mrfModel)
-		delete mrfModel;
-	mrfModel = new MRF();
+	Vertex v,vOpp;
+	if(net)
+		delete net;
+	net = new DBN();
     if ( input.size() > 0 )
 	{
 		defs::Region const& lRegion = *input.front();
@@ -149,13 +149,20 @@ void MapSkeleton::generateInnerSkeleton()
 	          		if ( lVertexOK && lOppVertexOK && lVertexHeOK && lOppVertexHeOK )
 	          		{
 	          			v.setLocation(he->vertex()->point().x(),he->vertex()->point().y());
+	          			vOpp.setLocation(he->opposite()->vertex()->point().x(),he->opposite()->vertex()->point().y());
+	          			std::cout<<"\nV x:"<<v.location.x()<<" y:"<<v.location.y();
+	          			std::cout<<" Vopp x:"<<vOpp.location.x()<<" y:"<<vOpp.location.y();	          			
 	       			    int i = verticies.indexOf(v);
-    						if (i == -1)
-    						{
-	          					verticies.push_back(v);
-	          					QString node_name= QString("node%1").arg(verticies.size());
-	          					mrfModel->AddNode(discrete ^ qPrintable(node_name), "right left up down");
-    						}
+						if (i == -1)
+						{
+          					verticies.push_back(v);
+          					QString node_name= QString("node%1").arg(verticies.size());
+          					net->AddNode(discrete^qPrintable(node_name), "right left up down");
+          					verticies.push_back(vOpp);
+          					node_name= QString("node%1").arg(verticies.size());
+          					net->AddNode(discrete^qPrintable(node_name), "right left up down");          					
+         					net->SetClique(qPrintable(QString("node%1 node%2").arg(verticies.size()-1).arg(verticies.size())));
+						}
 //				    	he->is_inner_bisector()? glColor4f(0,0,1,1) : glColor4f(1,0,0,1);
 	          		}	
 	        	}
@@ -163,8 +170,19 @@ void MapSkeleton::generateInnerSkeleton()
 	      	}
 	      	while ( -- watchdog > 0 && he != hstart ) ;	      	
     	}
-		std::cout<<"\n Skeleton Generated !!!!!\n"; 
-		std::cout<<"\n Number of Nodes:"<<mrfModel->GetNumberOfNodes(); 	
+//	    float defaultProb = 1.0f / 4.0f;
+//    	TokArr P = net->GetPTabular("node1^up node2");
+//	    for(int i = 0; i < 4; i++)
+//	    {
+//	        if( P[i].FltValue() != defaultProb )
+//	        {
+//	        	PNL_THROW(pnl::CAlgorithmicException, "Setting or getting of tabular parameters for MRF is wrong");
+//	        }
+//	        else
+//				std::cout<<"\nP"<<i<<":"<<P[i].FltValue();	        
+//	    }
+		std::cout<<"\nSkeleton Generated !!!!!"; 
+//		std::cout<<"\n Number of Nodes=:"<<net->GetNumberOfNodes()<<" Verticies size=:"<<verticies.size(); 	
 	}
 	else
 	{

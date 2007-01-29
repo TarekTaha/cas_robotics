@@ -99,7 +99,8 @@ class MapSkeleton
 		void draw();
 		SSkelPtr getSSkelPtr();
 //		MRFModel mrfModel;
-		MRF * mrfModel;
+//		MRF * mrfModel;
+		DBN * net;
 		QVector <Vertex> verticies;
 	private:
 		SSkelPtr & sskel;

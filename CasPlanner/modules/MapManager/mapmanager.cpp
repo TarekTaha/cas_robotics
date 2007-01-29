@@ -42,7 +42,6 @@ void MapManager::generateSkeleton()
 //	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/map_polys.poly");
 // 	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/many_holes.poly");
 	QString s("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/alley_0.poly");
-	qDebug("Generating Skeleton");
 	mapSkeleton.loadMap(s);
 	mapSkeleton.generateInnerSkeleton();
 	if (! this->sskel)
@@ -54,7 +53,8 @@ void MapManager::generateSkeleton()
 	else
 	{
 		skeletonGenerated = true;
-		qDebug("\nSkeleton Generated, it contains%d Verticies",mapSkeleton.verticies.size());		
+//		std::cout<<"\n Number of Nodes=:"<<mapSkeleton.net->GetNumberOfNodes()<<" Verticies size=:"<<mapSkeleton.verticies.size();
+		std::cout<<" Verticies size=:"<<mapSkeleton.verticies.size();
 	}
 }
 	
