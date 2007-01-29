@@ -986,7 +986,6 @@ void TasksGui::generateSkeleton()
 		else
 		{
 			skeletonGenerated = true;
-			qDebug("\nSkeleton Generated, it contains%d Verticies",playGround->mapManager->mapSkeleton.verticies.size());		
 			mapGL.setSSkelPtr(playGround->mapManager->mapSkeleton.getSSkelPtr());
 			mapGL.paintGL();
 			if (voronoiPlanner)
