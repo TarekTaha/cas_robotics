@@ -46090,4 +46090,835 @@ playertcp.cc:319 closing connection to client 0 on port 6665
 amcl.cc:538 shutting down
 amcl.cc:551 shutdown done
 playertcp.cc:754 read() read zero bytes
-playertcp.cc:397 failed 
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6665
+playertcp.cc:249 accepted client 0 on port 6667, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6665, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6667
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 2 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+playertcp.cc:972 warning : skipping subscription to unknown device 4:97
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:389 warning : other error on client 2
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 3
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 1 on port 6666
+playertcp.cc:319 closing connection to client 2 on port 6667
+playertcp.cc:319 closing connection to client 3 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 3
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 1 on port 6666
+playertcp.cc:319 closing connection to client 2 on port 6667
+playertcp.cc:319 closing connection to client 3 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 3
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 1 on port 6666
+playertcp.cc:319 closing connection to client 2 on port 6667
+playertcp.cc:319 closing connection to client 3 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6665
+playertcp.cc:249 accepted client 0 on port 6666, fd 15
+playertcp.cc:249 accepted client 1 on port 6667, fd 16
+playertcp.cc:249 accepted client 2 on port 6665, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:521 write() failed: Broken pipe
+playertcp.cc:681 warning : failed to write to client 0
+
+playertcp.cc:521 write() failed: Broken pipe
+playertcp.cc:681 warning : failed to write to client 2
+
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 2 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:389 warning : other error on client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:319 closing connection to client 0 on port 6667
+playertcp.cc:319 closing connection to client 1 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:389 warning : other error on client 0
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:389 warning : other error on client 0
+playertcp.cc:389 warning : other error on client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 3
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 1 on port 6666
+playertcp.cc:319 closing connection to client 2 on port 6667
+playertcp.cc:319 closing connection to client 3 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+playertcp.cc:972 warning : skipping subscription to unknown device 4:97
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:389 warning : other error on client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6665
+plugins.cc:147 trying to load /home/BlackCoder/workspace/CasPlanner/StageSim/./libstageplugin...
+plugins.cc:151 failed (/home/BlackCoder/workspace/CasPlanner/StageSim/./libstageplugin.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:161 trying to load /usr/local/lib/libstageplugin...
+plugins.cc:164 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6667, fd 16
+playertcp.cc:249 accepted client 2 on port 6666, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:249 accepted client 4 on port 6665, fd 19
+playertcp.cc:249 accepted client 5 on port 6666, fd 20
+playertcp.cc:249 accepted client 6 on port 6667, fd 21
+playertcp.cc:249 accepted client 7 on port 6666, fd 22
+playertcp.cc:249 accepted client 8 on port 6665, fd 23
+playertcp.cc:249 accepted client 9 on port 6666, fd 24
+playertcp.cc:249 accepted client 10 on port 6667, fd 25
+playertcp.cc:249 accepted client 11 on port 6666, fd 26
+playertcp.cc:249 accepted client 12 on port 6665, fd 27
+playertcp.cc:249 accepted client 13 on port 6666, fd 28
+playertcp.cc:249 accepted client 14 on port 6667, fd 29
+playertcp.cc:249 accepted client 15 on port 6666, fd 30
+playertcp.cc:249 accepted client 16 on port 6665, fd 31
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 3
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 4
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 5
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 6
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 7
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 8
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 9
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 10
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 11
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 12
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 13
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 14
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 15
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 16
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6666
+playertcp.cc:319 closing connection to client 3 on port 6665
+playertcp.cc:319 closing connection to client 4 on port 6665
+playertcp.cc:319 closing connection to client 5 on port 6666
+playertcp.cc:319 closing connection to client 6 on port 6667
+playertcp.cc:319 closing connection to client 7 on port 6666
+playertcp.cc:319 closing connection to client 8 on port 6665
+playertcp.cc:319 closing connection to client 9 on port 6666
+playertcp.cc:319 closing connection to client 10 on port 6667
+playertcp.cc:319 closing connection to client 11 on port 6666
+playertcp.cc:319 closing connection to client 12 on port 6665
+playertcp.cc:319 closing connection to client 13 on port 6666
+playertcp.cc:319 closing connection to client 14 on port 6667
+playertcp.cc:319 closing connection to client 15 on port 6666
+playertcp.cc:319 closing connection to client 16 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+playertcp.cc:972 warning : skipping subscription to unknown device 4:97
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:389 warning : other error on client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+playertcp.cc:972 warning : skipping subscription to unknown device 4:97
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:389 warning : other error on client 0
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:389 warning : other error on client 0
+playertcp.cc:389 warning : other error on client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+playertcp.cc:972 warning : skipping subscription to unknown device 4:97
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:389 warning : other error on client 2
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 3
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 1 on port 6666
+playertcp.cc:319 closing connection to client 2 on port 6667
+playertcp.cc:319 closing connection to client 3 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+playertcp.cc:972 warning : skipping subscription to unknown device 4:97
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 1 on port 6666
+playertcp.cc:389 warning : other error on client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:319 closing connection to client 0 on port 6667
+playertcp.cc:319 closing connection to client 1 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+playertcp.cc:972 warning : skipping subscription to unknown device 4:97
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:521 write() failed: Broken pipe
+playertcp.cc:681 warning : failed to write to client 0
+
+playertcp.cc:521 write() failed: Broken pipe
+playertcp.cc:681 warning : failed to write to client 1
+
+playertcp.cc:521 write() failed: Connection reset by peer
+playertcp.cc:681 warning : failed to write to client 2
+
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 1 on port 6666
+playertcp.cc:319 closing connection to client 2 on port 6667
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 3
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 1 on port 6666
+playertcp.cc:319 closing connection to client 2 on port 6667
+playertcp.cc:319 closing connection to client 3 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6667, fd 16
+playertcp.cc:249 accepted client 2 on port 6666, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 3
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6666
+playertcp.cc:319 closing connection to client 3 on port 6665
+playertcp.cc:249 accepted client 0 on port 6667, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6665, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 3
+playertcp.cc:319 closing connection to client 0 on port 6667
+playertcp.cc:319 closing connection to client 1 on port 6666
+playertcp.cc:319 closing connection to client 2 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 3 on port 6665
+playertcp.cc:249 accepted client 0 on port 6666, fd 15
+playertcp.cc:249 accepted client 1 on port 6667, fd 16
+playertcp.cc:249 accepted client 2 on port 6665, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 3
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 3 on port 6665
+playertcp.cc:249 accepted client 0 on port 6666, fd 15
+playertcp.cc:249 accepted client 1 on port 6667, fd 16
+playertcp.cc:249 accepted client 2 on port 6665, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6667
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6665
+playertcp.cc:249 accepted client 0 on port 6666, fd 15
+playertcp.cc:249 accepted client 1 on port 6667, fd 16
+playertcp.cc:249 accepted client 2 on port 6665, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:389 warning : other error on client 0
+playertcp.cc:389 warning : other error on client 1
+playertcp.cc:389 warning : other error on client 2
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 3
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 3 on port 6665
+playertcp.cc:249 accepted client 0 on port 6666, fd 15
+playertcp.cc:249 accepted client 1 on port 6665, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:319 closing connection to client 0 on port 6667
+playertcp.cc:319 closing connection to client 1 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 3
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 1 on port 6666
+playertcp.cc:319 closing connection to client 2 on port 6667
+playertcp.cc:319 closing connection to client 3 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6665
+playertcp.cc:249 accepted client 0 on port 6666, fd 15
+playertcp.cc:249 accepted client 1 on port 6667, fd 16
+playertcp.cc:249 accepted client 2 on port 6665, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 3
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 3 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:319 closing connection to client 0 on port 6666
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6667, fd 16
+playertcp.cc:249 accepted client 2 on port 6666, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 3
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 1 on port 6667
+playertcp.cc:319 closing connection to client 2 on port 6666
+playertcp.cc:319 closing connection to client 3 on port 6665
+playertcp.cc:249 accepted client 0 on port 6665, fd 15
+playertcp.cc:249 accepted client 1 on port 6666, fd 16
+playertcp.cc:249 accepted client 2 on port 6667, fd 17
+amcl.cc:507 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:525 running
+playertcp.cc:249 accepted client 3 on port 6665, fd 18
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 0
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 1
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 2
+playertcp.cc:754 read() read zero bytes
+playertcp.cc:397 failed to read from client 3
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:538 shutting down
+amcl.cc:551 shutdown done
+playertcp.cc:319 closing connection to client 1 on port 6666
+playertcp.cc:319 closing connection to client 2 on port 6667
+playertcp.cc:319 closing connection to client 3 on port 6665

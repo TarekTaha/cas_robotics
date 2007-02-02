@@ -94,13 +94,14 @@ class MapSkeleton
 		virtual ~MapSkeleton();
 		bool convertGridToLineWithVoronoi(float minThreshold, float maxThreshold, bool filterByCellValue, float valueToSet);
 		void generateInnerSkeleton();
+		void testModel();
 		void loadMap(QString fileName);
 		void clear();
 		void draw();
 		SSkelPtr getSSkelPtr();
 //		MRFModel mrfModel;
 //		MRF * mrfModel;
-		DBN * net;
+		BayesNet * net;
 		QVector <Vertex> verticies;
 	private:
 		SSkelPtr & sskel;
