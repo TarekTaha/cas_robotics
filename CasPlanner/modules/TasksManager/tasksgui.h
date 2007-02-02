@@ -81,7 +81,7 @@ class TasksControlPanel: public QWidget
 		QPushButton randomTasksBtn;
 		QPushButton generateSkeletonBtn;
 		QPushButton captureImage;
-
+		QPushButton testModelBtn;
 		//Pointers to the currently selected Robot
 		QGroupBox tasksGB;
 		QTreeWidgetItem *robotItem;
@@ -151,17 +151,12 @@ class TasksGui :public QWidget
 		VoronoiDiagram *     cvd;	
     public slots:
         void updateData();
-//         void mousePressEvent(QMouseEvent *me);
-//         void mouseMoveEvent(QMouseEvent *me);
-//         void mouseReleaseEvent(QMouseEvent *me);
-//         void wheelEvent(QWheelEvent *we);
-//         void keyPressEvent(QKeyEvent *ke);
-//         void keyReleaseEvent(QKeyEvent *ke);
         void provideSpeed(double &speed, double &turnRate);
 		void generateSkeleton();
         void renderLaser();
         void renderOG();
         void renderStatic();
+        void testModel();
     signals:
         void newData();
     private:

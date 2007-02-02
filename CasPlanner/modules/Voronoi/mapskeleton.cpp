@@ -16,6 +16,8 @@ void MapSkeleton::clear()
 {
     input.clear();
     output.clear();
+	if(net)
+		delete net;    
 }
 
 void MapSkeleton::loadMap(QString fileName)
@@ -105,13 +107,88 @@ SSkelPtr MapSkeleton::getSSkelPtr()
 //      	while ( -- watchdog > 0 && he != hstart ) ;
 //    }
 //};
-	
+std::ostream &operator<<(std::ostream &str, const TokArr &ta)
+{
+    return str << String(ta);
+}
+void MapSkeleton::testModel()
+{
+    // NodeA  NodeB 
+    //     \ /
+    //    NodeC
+    //     / \
+    // NodeD  NodeE
+    
+    BayesNet *net;
+    net = new BayesNet();
+    net->AddNode(discrete^"NodeA NodeB NodeC NodeD NodeE", "up down right left");
+    net->AddNode(discrete^"NodeA NodeB NodeC NodeD NodeE", "up down right left");    
+    net->AddArc("NodeC", "NodeA NodeB NodeD NodeE");
+    
+    net->SetPTabular("NodeC^up"   , "0.2");
+    net->SetPTabular("NodeC^down" , "0.3");
+    net->SetPTabular("NodeC^right", "0.4");
+    net->SetPTabular("NodeC^left" , "0.1");
+
+//    net->SetPTabular("NodeA^up"   , "0.2","NodeC^up NodeC^down NodeC^right NodeC^left");
+//    net->SetPTabular("NodeA^down" , "0.3","NodeC^up NodeC^down NodeC^right NodeC^left");
+//    net->SetPTabular("NodeA^right", "0.4","NodeC^up NodeC^down NodeC^right NodeC^left");
+//    net->SetPTabular("NodeA^left" , "0.1","NodeC^up NodeC^down NodeC^right NodeC^left");
+
+    net->SetPTabular("NodeA^up NodeA^down NodeA^right NodeA^left", "0.2 0.2 0.2 0.4","NodeC^up");
+    net->SetPTabular("NodeA^up NodeA^down NodeA^right NodeA^left", "0.2 0.2 0.2 0.4","NodeC^down");
+    net->SetPTabular("NodeA^up NodeA^down NodeA^right NodeA^left", "0.2 0.2 0.2 0.4","NodeC^right");
+    net->SetPTabular("NodeA^up NodeA^down NodeA^right NodeA^left", "0.2 0.2 0.2 0.4","NodeC^left");
+        
+    TokArr NodeA = net->GetPTabular("NodeA");
+    TokArr NodeB = net->GetPTabular("NodeB");
+    TokArr NodeC = net->GetPTabular("NodeC");
+    TokArr NodeD = net->GetPTabular("NodeD");
+            
+    std::cout <<"NODE A:"<< NodeA << "\n";
+    std::cout <<"NODE B:"<< NodeB << "\n";
+    std::cout <<"NODE C:"<< NodeC << "\n";
+    std::cout <<"NODE D:"<< NodeD << "\n";
+
+//  The possible choices are: “pearl”, “jtree”, “gibbs”, or “naive” 
+/*! For Gibbs Sampling Inference, the number of iterations must be specified. 
+ *  The corresponding property name is "GibbsNumberOfIterations", and the default 
+ *  number of iterations is 600. Gibbs Sampling Inference works by producing a 
+ *  stream of evidence samples that approximate i.i.d. samples; however, it requires 
+ *  an initialization period (a "burn-in") at the beginning to allow the samples to 
+ *  converge to the correct distribution. After a sufficiently long burn-in period, 
+ * 	samples will approximately be drawn from the correct distribution. The number of 
+ *  samples to discard during the burn-in can be specified with the property 
+ *  "GibbsThresholdIteration" (the default value is 10). You can also choose to generate 
+ *  more than one independent stream of samples. The number of streams can be specified 
+ *  with the property "GibbsNumberOfStreams" (1 stream by default).
+ */
+ 	net->ClearEvidBuf();
+	net->AddEvidToBuf("NodeA^up");
+	net->AddEvidToBuf("NodeB^up NodeC^right");
+	net->AddEvidToBuf("NodeC^up NodeC^left");
+
+	net->SetProperty("EMMaxNumberOfIterations", "10");
+	net->SetProperty("EMTolerance", "1e-4");
+//	net->SetProperty("Learning", "bayes");	
+	net->SetProperty("Learning", "em");
+	net->LearnParameters();
+			 
+    net->SetProperty("Inference","gibbs");
+    net->SetProperty("GibbsNumberOfIterations","1000");
+    net->SetProperty("GibbsNumberOfStreams","2");
+    net->SetProperty("GibbsThresholdIteration","100");
+    TokArr nodeAJDP =  net->GetJPD("NodeA");
+    std::cout <<"nodeAJDP:"<< nodeAJDP << "\n";	
+	delete net;      
+}
+
 void MapSkeleton::generateInnerSkeleton()
 {
 	Vertex v,vOpp;
 	if(net)
 		delete net;
-	net = new DBN();
+	net = new BayesNet();
     if ( input.size() > 0 )
 	{
 		defs::Region const& lRegion = *input.front();
@@ -153,7 +230,7 @@ void MapSkeleton::generateInnerSkeleton()
 	          			std::cout<<"\nV x:"<<v.location.x()<<" y:"<<v.location.y();
 	          			std::cout<<" Vopp x:"<<vOpp.location.x()<<" y:"<<vOpp.location.y();	          			
 	       			    int i = verticies.indexOf(v);
-						if (i == -1)
+						//if (i == -1)
 						{
           					verticies.push_back(v);
           					QString node_name= QString("node%1").arg(verticies.size());
@@ -161,7 +238,8 @@ void MapSkeleton::generateInnerSkeleton()
           					verticies.push_back(vOpp);
           					node_name= QString("node%1").arg(verticies.size());
           					net->AddNode(discrete^qPrintable(node_name), "right left up down");          					
-         					net->SetClique(qPrintable(QString("node%1 node%2").arg(verticies.size()-1).arg(verticies.size())));
+         					//net->SetClique(qPrintable(QString("node%1 node%2").arg(verticies.size()-1).arg(verticies.size())));
+         					net->AddArc(qPrintable(QString("node%1").arg(verticies.size()-1)),qPrintable(QString("node%1").arg(verticies.size())));
 						}
 //				    	he->is_inner_bisector()? glColor4f(0,0,1,1) : glColor4f(1,0,0,1);
 	          		}	
@@ -170,8 +248,10 @@ void MapSkeleton::generateInnerSkeleton()
 	      	}
 	      	while ( -- watchdog > 0 && he != hstart ) ;	      	
     	}
-//	    float defaultProb = 1.0f / 4.0f;
-//    	TokArr P = net->GetPTabular("node1^up node2");
+	    float defaultProb = 1.0f / 4.0f;
+    	TokArr P = net->GetPTabular("node1","node2^down");
+    	String PCloudyStr = String(P);
+    	std::cout<<"\nProb "<<PCloudyStr;
 //	    for(int i = 0; i < 4; i++)
 //	    {
 //	        if( P[i].FltValue() != defaultProb )

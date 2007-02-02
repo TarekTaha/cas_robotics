@@ -13,6 +13,7 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
 	randomTasksBtn("Run Random Tasks"),
 	generateSkeletonBtn("Generate Skeleton"),
 	captureImage("Capture Image"),
+	testModelBtn("Test Bayesian Model"),
 	tasksGB("Set of Tasks"),
 	tasksList(this)
 {
@@ -52,6 +53,7 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
     voronoiGB.setLayout(showL);
 	
     QVBoxLayout *actionLayout = new QVBoxLayout;
+    actionLayout->addWidget(&testModelBtn);
     actionLayout->addWidget(&pauseBtn);
     actionLayout->addWidget(&captureImage);
     actionLayout->addWidget(&generateSkeletonBtn);
@@ -64,8 +66,8 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
 	connect(&captureImage,     SIGNAL(pressed()),this, SLOT(save()));
 	connect(&randomTasksBtn,   SIGNAL(pressed()),this, SLOT(runRandomTasks()));
 	connect(&tasksList,        SIGNAL(currentRowChanged(int)),this, SLOT(taskSelected(int)));
+	connect(&testModelBtn,     SIGNAL(pressed()),tasksGui, SLOT(testModel()));
 //	connect(&tasksList,        SIGNAL(itemClicked(QListWidgetItem * item )),this, SLOT(taskClicked(QListWidgetItem * item)));	
-//	connect(&pauseBtn,         SIGNAL(pressed()),this, SLOT(setNavigation()));
 }
 
 
@@ -970,6 +972,10 @@ void TasksGui::requestSnap()
 ////		std::cout<<"\n File Not Found";
 ////	}
 //}
+void TasksGui::testModel()
+{
+	playGround->mapManager->testModel();	
+}
 
 void TasksGui::generateSkeleton()
 {
