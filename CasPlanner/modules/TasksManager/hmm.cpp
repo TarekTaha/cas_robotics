@@ -77,20 +77,24 @@ double Hmm::viterbi(vector<Transition*>& path)
   init->logAlpha(0);
 
   // find the best path up to path t;
-  for (unsigned int t = 1; t<_timeSlots.size(); t++) {
+  for (unsigned int t = 1; t<_timeSlots.size(); t++) 
+  {
     ts = _timeSlots[t];
-    for (TimeSlot::iterator it = ts->begin(); it!=ts->end(); it++) {
+    for (TimeSlot::iterator it = ts->begin(); it!=ts->end(); it++) 
+    {
       HmmNode* node = *it;
       vector<Transition*>& ins = node->ins();
       double maxProb = log(0.0);
       Transition* bestTrans = 0;
-      for (unsigned int i = 0; i<ins.size(); i++) {
-	Transition* trans = ins[i];
-	double logProb = trans->_from->logAlpha()+getTransProb(trans)+getEmitProb(trans);
-	if (bestTrans==0 || maxProb<logProb) {
-	  bestTrans = trans;
-	  maxProb = logProb;
-	}
+      for (unsigned int i = 0; i<ins.size(); i++) 
+      {
+		Transition* trans = ins[i];
+		double logProb = trans->_from->logAlpha()+getTransProb(trans)+getEmitProb(trans);
+	if (bestTrans==0 || maxProb<logProb) 
+		{
+	  		bestTrans = trans;
+	  		maxProb = logProb;
+	   	}
       }
       node->logAlpha(maxProb); // store the highest probability in logAlpha
       node->psi(bestTrans); // store the best transition in psi
@@ -108,7 +112,7 @@ double Hmm::viterbi(vector<Transition*>& path)
   // retrieve the nodes in the best path
   for (HmmNode* nd = best; nd;) {
     if (nd->psi()) {
-      path.push_back(nd->psi());
+      path.push_back(nd->psi());    
       nd = nd->psi()->_from;
     }
     else

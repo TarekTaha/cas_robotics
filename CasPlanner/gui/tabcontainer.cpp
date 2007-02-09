@@ -7,11 +7,11 @@ TabContainer::TabContainer(QWidget *parent,PlayGround *playG)
     tasksGui = new TasksGui(parent,playGround);
     addTab(tasksGui, "Tasks Manager");
     	
-    navCon = 	new NavContainer(parent,playGround);
-   	addTab(navCon, "Navigation Panel");
-   	  
-	playGroundTab = new PlayGroundTab(parent,playGround);    
-    addTab(playGroundTab, "PlayGround");
+//    navCon = 	new NavContainer(parent,playGround);
+//   	addTab(navCon, "Navigation Panel");
+//   	  
+//	playGroundTab = new PlayGroundTab(parent,playGround);    
+//    addTab(playGroundTab, "PlayGround");
 
     updateGeometry();
 }
