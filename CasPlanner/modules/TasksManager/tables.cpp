@@ -154,7 +154,8 @@ bool OneDTable::rand(unsigned long& next)
 {
   double p = ((double) ::rand())/RAND_MAX;
   double total = 0;
-  for (OneDTable::iterator it = begin(); it!=end(); it++) {
+  for (OneDTable::iterator it = begin(); it!=end(); it++) 
+  {
     total += exp(it->second);
     if (total >= p) {
       next = it->first;
