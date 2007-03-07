@@ -111,6 +111,7 @@ std::ostream &operator<<(std::ostream &str, const TokArr &ta)
 {
     return str << String(ta);
 }
+
 void MapSkeleton::testModel()
 {
     // NodeA  NodeB
@@ -150,13 +151,13 @@ void MapSkeleton::testModel()
 
 	net->SetProperty("EMMaxNumberOfIterations", "10");
 	net->SetProperty("EMTolerance", "1e-4");
-//	net->SetProperty("Learning", "bayes");	
+//	net->SetProperty("Learning", "bayes");
 	net->SetProperty("Learning", "em");
 	net->LearnParameters();
 			 
 //    net->SetProperty("Inference","jtree");
     net->SetProperty("Inference","naive");
-//    net->SetProperty("Inference","pearl");    
+//    net->SetProperty("Inference","pearl");
 //    net->SetProperty("Inference","gibbs");
 //    net->SetProperty("GibbsNumberOfIterations","1000");
 //    net->SetProperty("GibbsNumberOfStreams","2");
@@ -165,18 +166,18 @@ void MapSkeleton::testModel()
     TokArr nodeAJDP =  net->GetJPD("NodeA");
     std::cout <<"nodeAJDP:"<< nodeAJDP << "\n";
     
-    TokArr nodeBJDP =  net->GetJPD("NodeB");    	
+    TokArr nodeBJDP =  net->GetJPD("NodeB");
     std::cout <<"nodeBJDP:"<< nodeBJDP << "\n";
     
-    TokArr nodeCJDP =  net->GetJPD("NodeC");    	
-    std::cout <<"nodeCJDP:"<< nodeCJDP << "\n"; 
+    TokArr nodeCJDP =  net->GetJPD("NodeC");
+    std::cout <<"nodeCJDP:"<< nodeCJDP << "\n";
     
-    TokArr nodeDJDP =  net->GetJPD("NodeD");    	
-    std::cout <<"nodeDJDP:"<< nodeDJDP << "\n";  
+    TokArr nodeDJDP =  net->GetJPD("NodeD");
+    std::cout <<"nodeDJDP:"<< nodeDJDP << "\n";
     
-    TokArr nodeEJDP =  net->GetJPD("NodeE");    	
-    std::cout <<"nodeEJDP:"<< nodeEJDP << "\n";              
-	delete net;      
+    TokArr nodeEJDP =  net->GetJPD("NodeE");
+    std::cout <<"nodeEJDP:"<< nodeEJDP << "\n";
+	delete net;
 }
 
 //void MapSkeleton::testModel()
