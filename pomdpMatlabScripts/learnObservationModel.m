@@ -1,4 +1,4 @@
-function [obsProbs obs] = learnObservationModel(pomdpModel)
+function obsProbs = learnObservationModel(pomdpModel)
 % This function build the observation probabilities from a set of recorded
 % data. The function reads a file that contains a task on each line
 % representing a sequence of positions and observations recoreded to reach
@@ -46,7 +46,7 @@ for i=1:length(fileTemp)
 end
 
 % build the probabilities
-obsProbs = zeros(pomdpModel.numSpatialStates*length(pomdpModel.destinations),length(pomdpModel.observations));
+obsSum = zeros(pomdpModel.numSpatialStates*length(pomdpModel.destinations),length(pomdpModel.observations));
 for i=1:length(obs)
     index = (obs{i}.dest-1)*pomdpModel.numSpatialStates + obs{i}.pos;
     indx = strfind(pomdpModel.observations,obs{i}.obs);
@@ -55,19 +55,16 @@ for i=1:length(obs)
             obsIndx = j;
         end 
     end    
-    obsProbs(index,obsIndx) = obsProbs(index,obsIndx) + 1;
-end
+    obsSum(index,obsIndx) = obsSum(index,obsIndx) + 1;
+end 
+obsProbs = zeros(pomdpModel.numSpatialStates*length(pomdpModel.destinations),length(pomdpModel.observations));
 
 % Normalize probabilities
-for i=1:length(obs)
-    index = (obs{i}.dest-1)*pomdpModel.numSpatialStates + obs{i}.pos;
-    indx = strfind(pomdpModel.observations,obs{i}.obs);
-    for j=1:length(indx)
-        if ~isempty(indx{j})
-            obsIndx = j;
-        end 
+for i=1:length(obsProbs)
+    for j=1:length(pomdpModel.observations)
+        obsProbs(i,j) = obsSum(i,j)/sum(obsSum(i,:));
     end
-    obsProbs(index,obsIndx) = obsProbs(index,obsIndx)/sum(obsProbs(index,:));
 end
-
+clear obsSum;
+clear fileTemp;
 end
