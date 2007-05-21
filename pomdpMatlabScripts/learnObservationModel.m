@@ -1,12 +1,20 @@
 function obsProbs = learnObservationModel(pomdpModel)
 % This function build the observation probabilities from a set of recorded
-% data. The function reads a file that contains a task on each line
-% representing a sequence of positions and observations recoreded to reach
+% data. The function reads a file that contains tasks on each line. Each
+% task is a sequence of positions and observations recoreded to reach
 % a destination. 
+%
+% Inputs:
+% pomdpModel = a structure containing information about the pomdel Model,
+% like the actions, observation, number of states ...
+% Output:
+% obsProbs = a (n,m) Matrix of observation probabilities where 'n' is the
+% number of states in the model and 'm' is the number of observations.
 
 % read the file and save in buffer
 file = textread(pomdpModel.obsDataFile,'%s','delimiter','\n','whitespace',' \b\t','bufsize',100000);
 k=0;
+
 %ignore comments
 for i=1:length(file)
   comment=strfind(file{i},'#');
@@ -57,14 +65,15 @@ for i=1:length(obs)
     end    
     obsSum(index,obsIndx) = obsSum(index,obsIndx) + 1;
 end 
-obsProbs = zeros(pomdpModel.numSpatialStates*length(pomdpModel.destinations),length(pomdpModel.observations));
 
 % Normalize probabilities
+obsProbs = zeros(pomdpModel.numSpatialStates*length(pomdpModel.destinations),length(pomdpModel.observations));
 for i=1:length(obsProbs)
     for j=1:length(pomdpModel.observations)
         obsProbs(i,j) = obsSum(i,j)/sum(obsSum(i,:));
     end
 end
+
 clear obsSum;
 clear fileTemp;
 end
