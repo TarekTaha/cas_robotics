@@ -154,18 +154,18 @@ end
 
 % Build Reward Function
 fprintf(fid,'\n\n# R: <action> : <start-state> : <end-state> : <observation> %%f');
-fprintf(fid,'\nR: * : * : * : * 0.0');
-for i=1:length(pomdpModel.destinations)
-    for j=1:pomdpModel.numSpatialStates
-        index = (i-1)*pomdpModel.numSpatialStates + j;
-        for s=1:length(pomdpModel.actions)
-            if (mapTopology.network(index,s)==0) % Undefine actions are penalized
-                fprintf(fid,'\nR: %s : * : s%dd%d : * -10',pomdpModel.actions{s},j,i);
-            end
-        end
-    end
-    fprintf(fid,'\n');
-end
+fprintf(fid,'\nR: * : * : * : * -1.0');
+% for i=1:length(pomdpModel.destinations)
+%     for j=1:pomdpModel.numSpatialStates
+%         index = (i-1)*pomdpModel.numSpatialStates + j;
+%         for s=1:length(pomdpModel.actions)
+%             if (mapTopology.network(index,s)==0) % Undefine actions are penalized
+%                 fprintf(fid,'\nR: %s : * : s%dd%d : * -10',pomdpModel.actions{s},j,i);
+%             end
+%         end
+%     end
+%     fprintf(fid,'\n');
+% end
 for i=1:length(pomdpModel.destinations)
     fprintf(fid,'\nR: Stop : %s : %s : * 10',pomdpModel.destinations{i},pomdpModel.destinations{i});
     fprintf(fid,'\nR: *    : *  : %s : * 100',pomdpModel.destinations{i});
