@@ -8,6 +8,9 @@
 
 # <Location-1> <Observation-1> ... <Location-n><observation-n>
 1 Down 4 Down 7 Nothing
+1 Down 4 Down 7 Nothing
+1 Down 4 Down 7 Nothing
+1 Nothing 1 Down 4 Down 7 Nothing
 1 Down 4 Right 5 Right 6 Up 3 Nothing
 2 Down 5 Right 6 Up 3 Nothing
 2 Down 5 Left 4 Down 7 Nothing

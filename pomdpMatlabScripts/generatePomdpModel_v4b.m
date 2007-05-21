@@ -138,18 +138,26 @@ fprintf(fid,'\n\n# O : <action> : <end-state> : <observation> %%f');
 fprintf(fid,'\nO: * : * : * 0.0');
 
 
-[obsProbs obs] = learnObservationModel(pomdpModel);
-% Normalize and print to file
-for i=1:length(obs)
-    index = (obs{i}.dest-1)*pomdpModel.numSpatialStates + obs{i}.pos;
-    indx = strfind(pomdpModel.observations,obs{i}.obs);
-    for j=1:length(indx)
-        if ~isempty(indx{j})
-            obsIndx = j;
-        end 
+[obsProbs] = learnObservationModel(pomdpModel);
+
+for i=1:length(obsProbs)
+    if mod(i,pomdpModel.numSpatialStates) == 0
+       state = pomdpModel.numSpatialStates;
+    else
+       state = mod(i,pomdpModel.numSpatialStates);
     end
-    obsProb = obsProbs(index,obsIndx)/sum(obsProbs(index,:));
-    fprintf(fid,'\nO: * : %s : %s %f',obs{i}.state,obs{i}.obs,obsProb);
+    if floor(i/pomdpModel.numSpatialStates) == 0 
+       dest = 1;
+    elseif mod(i,pomdpModel.numSpatialStates) == 0
+       dest  = floor(i/pomdpModel.numSpatialStates);
+    else
+       dest  = floor(i/pomdpModel.numSpatialStates) + 1;
+    end
+    for j=1:length(pomdpModel.observations)
+        obsProb = obsProbs(i,j)/sum(obsProbs(i,:));
+        fprintf(fid,'\nO: * : s%dd%d : %s %f',state,dest,pomdpModel.observations{j},obsProb);
+    end
+    fprintf(fid,'\n');
 end
 
 % Build Reward Function
@@ -167,7 +175,6 @@ fprintf(fid,'\nR: * : * : * : * -1.0');
 %     fprintf(fid,'\n');
 % end
 for i=1:length(pomdpModel.destinations)
-    fprintf(fid,'\nR: Stop : %s : %s : * 10',pomdpModel.destinations{i},pomdpModel.destinations{i});
     fprintf(fid,'\nR: *    : *  : %s : * 100',pomdpModel.destinations{i});
 end
 clear fileTemp;
