@@ -43,17 +43,19 @@ for i=1:length(fileTemp)
         destIndx = j;
       end 
   end
+  if ~exist(destIndx)
+      error(sprintf('Undefined Destination !!!');
+  end
   % build the observation set from this task
   for j=1:length(t)
       numObs = numObs + 1;
       obs{numObs}.obs   = fileTemp{i}(t{j}(2,1):t{j}(2,2));
       obs{numObs}.dest  = destIndx;
-      obs{numObs}.pos   = str2num(fileTemp{i}(t{j}(1,1):t{j}(1,2)));
-      obs{numObs}.state = sprintf('s%dd%d',obs{numObs}.pos,destIndx);            
+      obs{numObs}.pos   = str2num(fileTemp{i}(t{j}(1,1):t{j}(1,2)));         
   end
 end
 
-% build the probabilities
+% build the frequency based probabilities 
 obsSum = zeros(pomdpModel.numSpatialStates*length(pomdpModel.destinations),length(pomdpModel.observations));
 for i=1:length(obs)
     index = (obs{i}.dest-1)*pomdpModel.numSpatialStates + obs{i}.pos;
@@ -62,7 +64,7 @@ for i=1:length(obs)
         if ~isempty(indx{j})
             obsIndx = j;
         end 
-    end    
+    end   
     obsSum(index,obsIndx) = obsSum(index,obsIndx) + 1;
 end 
 
