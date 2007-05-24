@@ -43,8 +43,8 @@ for i=1:length(fileTemp)
         destIndx = j;
       end 
   end
-  if ~exist(destIndx)
-      error(sprintf('Undefined Destination !!!');
+  if ~exist('destIndx')
+      error(sprintf('Undefined Destination !!!'));
   end
   % build the observation set from this task
   for j=1:length(t)
@@ -59,7 +59,9 @@ end
 obsSum = zeros(pomdpModel.numSpatialStates*length(pomdpModel.destinations),length(pomdpModel.observations));
 for i=1:length(obs)
     index = (obs{i}.dest-1)*pomdpModel.numSpatialStates + obs{i}.pos;
-    indx = strfind(pomdpModel.observations,obs{i}.obs);
+    %indx = strfind(pomdpModel.observations,sprintf('%d-%s',obs{i}.pos,obs{i}.obs));
+    indx = strfind(pomdpModel.observations,sprintf('%s-%d',obs{i}.obs,obs{i}.pos));
+    %indx = strfind(pomdpModel.observations,obs{i}.obs);
     for j=1:length(indx)
         if ~isempty(indx{j})
             obsIndx = j;
@@ -70,7 +72,7 @@ end
 
 % Normalize probabilities
 obsProbs = zeros(pomdpModel.numSpatialStates*length(pomdpModel.destinations),length(pomdpModel.observations));
-for i=1:length(obsProbs)
+for i=1:size(obsProbs,1)
     for j=1:length(pomdpModel.observations)
         obsProbs(i,j) = obsSum(i,j)/sum(obsSum(i,:));
     end
