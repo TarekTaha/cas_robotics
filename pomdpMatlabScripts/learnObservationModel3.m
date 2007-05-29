@@ -82,8 +82,9 @@ for i=1:size(obsProbs,1)
     for j=1:length(pomdpModel.observations)
         obsProbs(i,j) = obsSum(i,j)/sum(obsSum(i,:));
         % Link the uncertainty to the observation
-        temp = pomdpModel.observations{j}(1:strfind(pomdpModel.observations{j},'-')-1);
-        indx = strfind(pomdpModel.obsStrings,temp);
+        %temp = pomdpModel.observations{j}(1:strfind(pomdpModel.observations{j},'-')-1);
+        %indx = strfind(pomdpModel.obsStrings,temp);
+        indx = strfind(pomdpModel.observations,pomdpModel.observations{j});
         for k=1:length(indx)
             if ~isempty(indx{k})
                 obsIndx = k;
