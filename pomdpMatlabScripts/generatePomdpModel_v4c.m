@@ -2,7 +2,7 @@ function generatePomdpModel(modelFileName,observationsDataFile)
 % This function generated the POMDP model according to Tony Cassandra's
 % syntaxt. You have to specify the actions, observations and the
 % uncertainty in their readings.
-
+format long;
 pomdpModel.outputFile  = modelFileName;
 pomdpModel.obsDataFile = observationsDataFile;
 
@@ -15,13 +15,12 @@ pomdpModel.numSpatialStates = 9;
 pomdpModel.destinations = {'s3d1','s7d2'};
 
 pomdpModel.actions = {'North','South','East','West','Stop'};
-observations = {'Up','Down','Right','Left','Nothing'};
+pomdpModel.obsStrings = {'Up','Down','Right','Left','Nothing'};
 numObs = 0;
 for i=1:pomdpModel.numSpatialStates
-    for j=1:length(observations)
+    for j=1:length(pomdpModel.obsStrings)
         numObs = numObs + 1;
-        %pomdpModel.observations{numObs} = sprintf('%d-%s',i,observations{j});
-        pomdpModel.observations{numObs} = sprintf('%s-%d',observations{j},i);
+        pomdpModel.observations{numObs} = sprintf('%s-%d',pomdpModel.obsStrings{j},i);
     end
 end
 
@@ -30,7 +29,7 @@ end
 pomdpModel.actionsUncertainty = [0,0,0,0,0];
 % Percentage Uncertainty in the Observations
 %pomdpModel.observationsUncertainty = [10,10,10,10,15];
-pomdpModel.observationsUncertainty = [0,0,0,0,0];
+pomdpModel.observationsUncertainty = [10,5,15,10,20];
 
 % Construct the Graph network by defining the number of states and the
 % translation inbetween the states. This will be used to build the
@@ -165,8 +164,8 @@ for i=1:size(obsProbs,1)
        dest  = floor(i/pomdpModel.numSpatialStates) + 1;
     end
     for j=1:length(pomdpModel.observations)
-        obsProb = obsProbs(i,j)/sum(obsProbs(i,:));
-        fprintf(fid,'\nO: * : s%dd%d : %s %f',state,dest,pomdpModel.observations{j},obsProb);
+        obsProb = obsProbs(i,j);
+        fprintf(fid,'\nO: * : s%dd%d : %s %g',state,dest,pomdpModel.observations{j},obsProb);
     end
     fprintf(fid,'\n');
 end

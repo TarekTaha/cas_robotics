@@ -16,8 +16,8 @@ pomdpModel.observations = {'Up','Down','Right','Left','Nothing'};
 %pomdpModel.actionsUncertainty = [10,10,20,20,10];    
 pomdpModel.actionsUncertainty = [0,0,0,0,0];
 % Percentage Uncertainty in the Observations
-%pomdpModel.observationsUncertainty = [10,10,10,10,15];
-pomdpModel.observationsUncertainty = [0,0,0,0,0];
+pomdpModel.observationsUncertainty = [10,10,10,10,15];
+%pomdpModel.observationsUncertainty = [0,0,0,0,0];
 
 % Construct the Graph network by defining the number of states and the
 % translation inbetween the states. This will be used to build the
@@ -137,7 +137,7 @@ end
 fprintf(fid,'\n\n# O : <action> : <end-state> : <observation> %%f');
 fprintf(fid,'\nO: * : * : * 0.0');
 
-[obsProbs] = learnObservationModel(pomdpModel);
+[obsProbs] = learnObservationModel3(pomdpModel);
 
 for i=1:length(obsProbs)
     if mod(i,pomdpModel.numSpatialStates) == 0
