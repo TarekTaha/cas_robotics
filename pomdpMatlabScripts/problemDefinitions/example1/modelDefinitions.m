@@ -1,7 +1,7 @@
-function pomdpModel = modelDefinitions()
+function pomdpModel = modelDefinitions(outputFile,obsDataFile)
 
-pomdpModel.outputFile  = 'simple_network.pomdp';
-pomdpModel.obsDataFile = sprintf('%s%s',pwd,'/pomdpMatlabScripts/tasks_list');
+pomdpModel.outputFile  = outputFile;
+pomdpModel.obsDataFile = obsDataFile;
 
 global mapTopology;
 pomdpModel.discount = 0.95;
