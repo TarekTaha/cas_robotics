@@ -1,16 +1,18 @@
-function generatePomdpModel(modelFileName,observationsDataFile)
+function generatePomdpModel()
 % This function generated the POMDP model according to Tony Cassandra's
 % syntax. You have to specify the actions, observations and the
 % uncertainty in their readings.
 
 format long;
 pomdpModel = modelDefinitions();
+
+fid = fopen(pomdpModel.outputFile, 'wb');
 % Write to File the top comments and warnings
 fprintf(fid,'# This POMDP Model is generated Using Tarek''s MATLAB Script');
 fprintf(fid,'\n# This script is still experimental and bugs might appear');
 fprintf(fid,'\n# Tarek Taha - Center of Autonomous Systems, UTS\n');
 % Specify Essential Parameters
-fprintf(fid,'\ndiscount: %f',discount);
+fprintf(fid,'\ndiscount: %f',pomdpModel.discount);
 fprintf(fid,'\nvalues: reward');
 
 fprintf(fid,'\n\nstates: ');
@@ -28,9 +30,9 @@ fprintf(fid,'\n\nobservations:');
 for i=1:length(pomdpModel.observations)
     fprintf(fid,' %s',pomdpModel.observations{i});
 end
-startBelief = 1.0/mapTopology.nnodes;
+startBelief = 1.0/pomdpModel.mapTopology.nnodes;
 fprintf(fid,'\nstart:');
-for i=1:mapTopology.nnodes
+for i=1:pomdpModel.mapTopology.nnodes
     fprintf(fid,' %f',startBelief);
 end
 
@@ -39,7 +41,7 @@ fprintf(fid,'\n\n# T: <action> : <start-state> : <end-state> %%f');
 fprintf(fid,'\nT: * : * : * 0.0');
 for i=1:length(pomdpModel.actions)
     % Find the number of reachable nodes (connected)
-    % n = length(find(mapTopology.network(j,:)));  
+    % n = length(find(pomdpModel.mapTopology.network(j,:)));  
     n = length(pomdpModel.destinations);
     % Uncertainty in the final state given this action is divided
     % equally to the connected neighbouring nodes
@@ -51,7 +53,7 @@ for i=1:length(pomdpModel.actions)
         actionProb  = 1;
         actionNoise = 0;
     end
-    for j=1:mapTopology.nnodes
+    for j=1:pomdpModel.mapTopology.nnodes
         if mod(j,pomdpModel.numSpatialStates) == 0
             state = pomdpModel.numSpatialStates;
         else
@@ -67,24 +69,24 @@ for i=1:length(pomdpModel.actions)
         end
 %         % Deterministic Case
         if length(find(pomdpModel.actionsUncertainty)) == 0
-            if (mapTopology.network(j,i)==0)
+            if (pomdpModel.mapTopology.network(j,i)==0)
                 fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %f',pomdpModel.actions{i},state,dest,state,dest,actionProb);
             else
-                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %f',pomdpModel.actions{i},state,dest,mapTopology.network(j,i),dest,actionProb);
+                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %f',pomdpModel.actions{i},state,dest,pomdpModel.mapTopology.network(j,i),dest,actionProb);
             end
             continue;
         end
         % Allow change of intention by switching in between destinations
         for k=1:n
             % Undefined action to this state
-            if (mapTopology.network(j,i)==0)
+            if (pomdpModel.mapTopology.network(j,i)==0)
                 fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %f',pomdpModel.actions{i},state,dest,state,k,1/n);
                 continue;
             end
             if k==dest
-                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %f',pomdpModel.actions{i},state,dest,mapTopology.network(j,i),k,actionProb);
+                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %f',pomdpModel.actions{i},state,dest,pomdpModel.mapTopology.network(j,i),k,actionProb);
             else
-                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %f',pomdpModel.actions{i},state,dest,mapTopology.network(j,i),k,actionNoise);
+                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %f',pomdpModel.actions{i},state,dest,pomdpModel.mapTopology.network(j,i),k,actionNoise);
             end
         end
         fprintf(fid,'\n');
