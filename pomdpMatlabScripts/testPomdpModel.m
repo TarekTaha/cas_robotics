@@ -8,7 +8,7 @@ obsStrings  = {'Up','Down','Right','Left','Nothing'};
 destStrings = {'s3d1','s7d2'};
 
 pomdp  = readPOMDP(pomdpFileModelName,0);
-policy = zmdpParser(solutionFile);
+policy = zmdpPolicyParse(solutionFile);
 
 n = pomdp.nrStates;
 m = pomdp.nrStates/2;
