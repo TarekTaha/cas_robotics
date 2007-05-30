@@ -12,6 +12,7 @@ function obsProbs = learnObservationModel(pomdpModel)
 % number of states in the model and 'm' is the number of observations.
 
 % read the file and save in buffer
+
 file = textread(pomdpModel.obsDataFile,'%s','delimiter','\n','whitespace',' \b\t','bufsize',100000);
 k=0;
 

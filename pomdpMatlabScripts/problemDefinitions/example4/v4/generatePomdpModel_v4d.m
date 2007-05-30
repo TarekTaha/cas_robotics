@@ -1,12 +1,9 @@
-function generatePomdpModel(modelFileName,observationsDataFile)
+function generatePomdpModel(pomdpModel)
 % This function generated the POMDP model according to Tony Cassandra's
 % syntaxt. You have to specify the actions, observations and the
 % uncertainty in their readings.
 
-pomdpModel.outputFile  = modelFileName;
-pomdpModel.obsDataFile = observationsDataFile;
-
-fid = fopen(modelFileName, 'wb');
+fid = fopen(pomdpModel.outputFile, 'wb');
 global mapTopology;
 discount = 0.95;
 pomdpModel.numSpatialStates = 9;
@@ -148,7 +145,7 @@ end
 fprintf(fid,'\n\n# O : <action> : <end-state> : <observation> %%f');
 fprintf(fid,'\nO: * : * : * 0.0');
 
-[obsProbs] = learnObservationModel2(pomdpModel);
+[obsProbs] = learnObservationModel(pomdpModel);
 
 for i=1:size(obsProbs,1)
     if mod(i,pomdpModel.numSpatialStates) == 0
