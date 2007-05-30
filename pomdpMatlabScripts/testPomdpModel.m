@@ -48,29 +48,34 @@ for i=1:length(fileTemp)
     end
 end
 
-
-currentBelief=zeros(1,n);
 for i=1:length(obs)
     % first state is assumed to be known
-    currentBelief(1,obs{i}.pos{1}) = 1;    
-    for j=1:size(obs{i}.obs,2)      
+    currentBelief=zeros(1,n);
+    currentBelief(1,obs{i}.pos{1}) = 1;   
+    prevAction = 5; % Nothing Action
+%     if i==4
+%         keyboard
+%     end
+    for j=1:size(obs{i}.obs,2)   
+        % Take an Observation
         currentObs = strfind(obsStrings,obs{i}.obs{j});
         for k=1:length(currentObs)
             if ~isempty(currentObs{k})
                 obsIndx = k;
             end 
-        end          
-        [maxValue action] = zmdpParser(solutionFile,currentBelief);
-        [value , mostProbableCurrentLocation] = max(currentBelief);
+        end      
+        % Update the Belief
+        updatedBelief = updateBelief(pomdp,currentBelief,obsIndx,prevAction);
+        [value , mostProbableCurrentLocation] = max(updatedBelief);
+        % Determine the action
+        [maxValue action] = zmdpParser(solutionFile,updatedBelief);
+        prevAction = action; 
+        [value , mostProbableCurrentLocation] = max(updatedBelief);
+        % See where this action will take us
         [value, index] = max(pomdp.transition(:,mostProbableCurrentLocation,action));
-        index
+        %index
         currentBelief=zeros(1,n);
-        currentBelief(index) = 1;
-        % We don't really care about the previous action at this stage
-        %prevAction = 1; 
-        %updatedBelief = updateBelief(pomdp,currentBelief,obsIndx,prevAction);
-        %[value , mostProbableCurrentLocation] = max(updatedBelief);
-        %mostProbableCurrentLocation
+        currentBelief(index) = value;
     end
     destIndx = floor(index/m) + 1;
     if destIndx == obs{i}.dest{1}
