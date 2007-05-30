@@ -81,7 +81,11 @@ for i=1:size(obsProbs,1)
     uncertainty = 0;
     n = length(pomdpModel.observations) - length(find(obsSum(i,:)));
     for j=1:length(pomdpModel.observations)
-        obsProbs(i,j) = obsSum(i,j)/sum(obsSum(i,:));
+        if sum(obsSum(i,:)) ~= 0
+            obsProbs(i,j) = obsSum(i,j)/sum(obsSum(i,:));
+        else
+            obsProbs(i,j) = 0;
+        end
         % Link the uncertainty to the observation
         temp = pomdpModel.observations{j}(1:strfind(pomdpModel.observations{j},'-')-1);
         indx = strfind(pomdpModel.obsStrings,temp);

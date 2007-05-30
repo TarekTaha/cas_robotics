@@ -11,15 +11,8 @@ pomdpModel.numSpatialStates = 9;
 pomdpModel.destinations = {'s3d1','s7d2'};
 
 pomdpModel.actions = {'North','South','East','West','Stop'};
-pomdpModel.obsStrings = {'Up','Down','Right','Left','Nothing'};
-numObs = 0;
-for i=1:pomdpModel.numSpatialStates
-    for j=1:length(pomdpModel.obsStrings)
-        numObs = numObs + 1;
-        pomdpModel.observations{numObs} = sprintf('%s-%d',pomdpModel.obsStrings{j},i);
-    end
-end
-
+pomdpModel.observations = {'Up','Down','Right','Left','Nothing'};
+pomdpModel.obsStrings = pomdpModel.observations;
 % Percentage Uncertainty in the actions
 %pomdpModel.actionsUncertainty = [10,10,20,20,10];    
 pomdpModel.actionsUncertainty = [0,0,0,0,0];
