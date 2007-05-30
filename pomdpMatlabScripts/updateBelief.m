@@ -1,10 +1,10 @@
-function updatedBelief = updateBelief(filename,prevBelief,currentObs,prevAction)
+function updatedBelief = updateBelief(pomdp,prevBelief,currentObs,prevAction)
 % This function updates the beliefs given a current observation and the
 % last action taken.
 % Parameters:
 % -Inputs
-% filename = the filename of the POMDP mode usually ends with .pomdp, this
-%   filename is used to extract the translation and the observation
+% pomdp = the POMDP model read from a file that usually ends with .pomdp, this
+%   model is used to extract the translation and the observation
 %   probabilities needed for the update.
 % prevBelief = the current belief vector of length (1,n) where n is the
 %   number of states in the POMDP model.
@@ -13,9 +13,8 @@ function updatedBelief = updateBelief(filename,prevBelief,currentObs,prevAction)
 % -Outputs
 % updatedBelief = a belief vector of length (1,n) with the updates beliefs.
 
-n = length(prevBelief);
-% read the POMDP model file
-pomdp = readPOMDP(filename,0);
+% get the number of states from the model
+n = pomdp.nrStates;
 
 updatedBelief = zeros(1,n);
 
