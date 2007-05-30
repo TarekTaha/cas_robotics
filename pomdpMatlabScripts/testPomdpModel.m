@@ -7,7 +7,9 @@ k=0;
 obsStrings  = {'Up','Down','Right','Left','Nothing'};
 destStrings = {'s3d1','s7d2'};
 
-pomdp = readPOMDP(pomdpFileModelName,0);
+pomdp  = readPOMDP(pomdpFileModelName,0);
+policy = zmdpParser(solutionFile);
+
 n = pomdp.nrStates;
 m = pomdp.nrStates/2;
 
@@ -68,7 +70,7 @@ for i=1:length(obs)
         updatedBelief = updateBelief(pomdp,currentBelief,obsIndx,prevAction);
         [value , mostProbableCurrentLocation] = max(updatedBelief);
         % Determine the action
-        [maxValue action] = zmdpParser(solutionFile,updatedBelief);
+        action = findPolicyAction(policy,updatedBelief);
         prevAction = action; 
         [value , mostProbableCurrentLocation] = max(updatedBelief);
         % See where this action will take us
