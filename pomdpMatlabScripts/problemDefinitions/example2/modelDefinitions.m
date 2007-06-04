@@ -32,7 +32,7 @@ pomdpModel.observationsUncertainty = [10,5,15,10,20];
 % wants to go to.
 
 pomdpModel.mapTopology.nnodes = pomdpModel.numSpatialStates;
-pomdpModel.mapTopology.network = zeros(mapTopology.nnodes,length(pomdpModel.actions));
+pomdpModel.mapTopology.network = zeros(pomdpModel.mapTopology.nnodes,length(pomdpModel.actions));
     
     pomdpModel.mapTopology.network(1,:) = [0,2,0,0,1]; 
     pomdpModel.mapTopology.network(2,:) = [1,3,48,0,2]; 
