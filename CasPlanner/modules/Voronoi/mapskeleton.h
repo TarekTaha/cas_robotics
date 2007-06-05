@@ -23,7 +23,6 @@
 #include <CGAL/Straight_skeleton_builder_2.h>
 #include <CGAL/Polygon_offset_builder_2.h>
 #include <CGAL/compute_outer_frame_margin.h>
-#include "mrfmodel.h"
 
 namespace defs
 {
@@ -99,9 +98,6 @@ class MapSkeleton
 		void clear();
 		void draw();
 		SSkelPtr getSSkelPtr();
-//		MRFModel mrfModel;
-//		MRF * mrfModel;
-		BayesNet * net;
 		QVector <Vertex> verticies;
 	private:
 		SSkelPtr & sskel;

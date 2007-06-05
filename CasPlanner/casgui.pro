@@ -48,8 +48,7 @@ HEADERS += modules/CommManager/commmanager.h \
            modules/GeometricTools/Transformations.h \
            modules/GeometricTools/utils.h \
            modules/GeometricTools/Vector2D.h \
-           modules/Voronoi/mapskeleton.h \
-           modules/Voronoi/mrfmodel.h \           
+           modules/Voronoi/mapskeleton.h \      
            modules/Voronoi/typedefs.h \                      
            modules/Voronoi/voronoidiagram.h \           
            modules/Controller/wheelchairproxy.h 
@@ -93,15 +92,13 @@ SOURCES += modules/CommManager/commmanager.cpp \
            modules/PathPlanner/searchspacenode.cpp \
            modules/PathPlanner/voronoipathplanner.cpp \
            modules/Misc/timer.cpp \
-           modules/Voronoi/mapskeleton.cpp \           
-           modules/Voronoi/mrfmodel.cpp \                      
+           modules/Voronoi/mapskeleton.cpp \                       
            modules/Voronoi/voronoidiagram.cpp \                      
            modules/GeometricTools/Vector2d.cpp 
            
 INCLUDEPATH += 	/usr/local/Trolltech/Qt-4.2.2/include/QtCore \
 				/usr/local/Trolltech/Qt-4.2.2/include/QtGui \
 				/usr/local/high/include \		
-				/usr/local/include/opencx \
 				/usr/lib/gtk-2.0/include \
 				/usr/include/atk-1.0 \
 				/usr/include/cairo \
@@ -130,11 +127,10 @@ INCLUDEPATH += 	/usr/local/Trolltech/Qt-4.2.2/include/QtCore \
 RESOURCES = resources/icons.qrc
 QT += opengl
 QMAKE_CFLAGS_RELEASE+= -g -O3 -o 
-QMAKE_CXXFLAGS_RELEASE+= -g -O3 -o -ffast-math -march=pentium-m -msse2 -mfpmath=sse
+QMAKE_CXXFLAGS_RELEASE+= -g -O3 -o -ffast-math -march=pentium-m -msse2 -mfpmath=sse $$system(pkg-config --cflags gthread-2.0 playerc++ playercore)
 #QMAKE_CFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse 
 #QMAKE_LFLAGS_RELEASE += -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
 LIBS += $$system(pkg-config --cflags --libs gthread-2.0 playerc++ playercore) -lCGAL
-LIBS +=  -lhigh -lpnl /usr/local/lib/libcxcore.a
 MOC_DIR = .tmp
 OBJECTS_DIR = .tmp
 RCC_DIR = .tmp

@@ -158,6 +158,7 @@ void MapViewer::setRobotsLocation()
 }
 void MapViewer::renderLaser()
 {
+	return ;
 	if(!playGround)
 	{
 		qDebug("WTFFFF !!!");

@@ -36,11 +36,6 @@ void MapManager::loadMap(QString name,float res,bool negate,Pose p)
 	return;	
 }	
 
-void MapManager::testModel()
-{
-	mapSkeleton.testModel();	
-}
-
 void MapManager::generateSkeleton()
 {
 // 	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/complex_5.poly");
