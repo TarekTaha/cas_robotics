@@ -1,0 +1,214 @@
+****************************************************************************
+*      
+* README.CasPlanner  - Tarek Taha - CasPlanner 0.1v                                                                          
+*
+****************************************************************************
+
+----------------------------------
+CasPlanner - multi-Robot task allocation and collaboration Platform
+----------------------------------
+
+This is a Robot Software platform that supports (ORCA and PlayerStage). It allows an easy 
+control of single/multiple Robots using a GUI interface. Some of the features that are
+partially supported for the time being and are specific for our application:
+   
+	- Map construction using ICP (Iterative Closest Point).
+	- Robot Localization annd Obstacle Avoidance using the corresponding drivers in PlayerStage and ORCA.
+	- Robot WayPoint Navigation. 
+   	- Path Planning and replanning using Modified A* with sampling ( http://www.tarektaha.com/research/download.php?view.20 ).
+   	- Task Allocation and Management.
+   	- Voronio Map Skeleton Extraction (in progress).
+   	- Reinforcement Learning in POMDP worlds (early Stages).
+
+At this stage, this software platform is very specific to our application and is not intended
+for general use but it can be adapoted to your own specific application with some modifications
+any recommendations or suggestions are welcomed.
+	- 
+
+  http://cas-robotics.sourceforge.net
+
+Dependencies
+------------
+   - PlayerStage 2.0.2 or greater, ORCA will be supported soon.
+   - QT4.2.x or greater.
+   - CGAL (Computational Geometry Algorithms Library) available from http://www.cgal.org/ 
+   - OpenGL library support.
+   - GLU or the equivalent FREE-GLU library.
+   
+   
+   
+Installation
+------------
+For most people, the following sequence should be enough unless you have a missing dependency:
+
+  	$ qmake casgui.pro or qmake-qt4 casgui.pro
+  	$ make
+ 
+
+Config File
+------------
+The configuration file is the only file you need to change to customise your world and environment.
+This file contains the following sections:
+	
+	- GUI 		 :defined some parameters related to GUI rendering.
+	- ROBOT 	 :defines a robot and it's parameters.
+	- Planner 	 :defines the sampling method parameters for Path Planning.
+	- Map  		 :defines the map parameters.
+	- Navigation :defines the path following/obstacle avoidance parameters.
+	- ForceField :defines the parameters for the force field Obstacle Avoidance Method.
+
+Description of the parameters used in each section and their values:
+
+	GUI:
+	- renderingMethod (String)
+	  - Default: "OpenGL"
+	  - OpenGl- openGL rendering 	
+	- renderingPeriod (integer)
+	  -	Default: 100
+	  - Period in msec for GUI rendering.
+	
+	ROBOT:
+  	- robotName (String)
+  	  - Default: "RobotX"
+  	  - The name to be used for identifying the Robot.
+  	- robotIp (String)
+  	  - Default: "127.0.0.1"
+  	  - The ip address of the Robot's server.
+  	- robotPort (integer)
+  	  - Default: 6665
+  	  - The port through which we can communicate to the robot's server
+  	- robotLength (float)
+  	  - Default: 1.2
+  	  - The length of the larges dimension of the Robot.
+  	- robotWidth (float)
+  	  - Default: 0.65
+  	  - The width of the Robot (smaller dimension)
+  	- robotCenter (tuple of 2 floats)
+  	  - Default: [-0.3 0]
+  	  - The center of Rotation of the Robot (in respect to the Geometric Center).
+  	- robotModel (string)
+  	  - Default: "diff"  
+  	  - The Robot's motion Model
+  	- robotMass (integer)
+  	  - Default: 50
+  	  - The robot's weight in Kg.
+  	- robotMI (float)
+  	  - Default: 10   
+  	  - The Robot's Moment of Inirtia.
+  	- activateControl (bool)
+  	  - Default : 0
+  	  - Specify if the Robot is in monitoring mood or controllable mood.
+  	- startConnected (bool)
+  	  - Default : 1
+  	  - Specifies if we should connect to robot immediately on startup.
+  	- lasers (integer tuple)
+  	  - Default: [0]  
+  	  - Defines the avaliable lasers through the server and their indicies.
+  	- position (integer tuple)
+  	  - Defualt: [0]
+  	  - Defines the available motor controls through the server and their indicies.
+  	- ptz (integer tuple)
+  	  - Default: [0]
+  	  - Defines the available pan/tilt units through the server and their indicies.
+  	- map (integer tuple)
+  	  - Default: [0]
+  	  - Defines the map interfaces available throught the server and their indicies.
+	- localizer (integer tuple)
+	  - Default: [0]
+	  - Defines the available localizers through the server and their indicies.
+	- vfh (integer tuple)
+	  - Default: [1]
+	  - Defines the available vfh interfaces through the server and their indicies.
+	  
+	Planner: (read my paper for detailed explanasion)
+	- bridge_len (float)
+	  - Default: 1.8
+	  - The bridge test length used for sampling
+	- bridge_res (float)
+	  - Default: 0.1
+	  - Sampling resoluion used for the bridge test.
+	- reg_grid (float)
+	  - Default: 0.2
+	  - Regular Sampling resolution
+	- obst_exp (float)
+	  - Default: 0.2
+	  - Obstacle expansion used for collision detection.
+	- conn_rad (float)
+	  - Default: 0.5
+	  - Connection radius of neighbouring nodes.
+	- obst_pen (float)
+	  - Default: 3
+	  - Obstacle Clearance penaltiy given while path planning.
+	- dist_goal (float)
+	  - Default: 0.3
+	  - How close should we reach the destination.
+
+	Map:
+	- source (string)
+	  - Default: "static-map"
+	  - Specifies the type of the map.
+	- mapname (string)
+	  - Default: ""
+	  - The full name of the map file.
+	- pixel_res (float)
+	  - Default: 0.05
+	  - The pixel resolution of the Map.
+	- negate (bool)
+	  - Default: 0
+	  - Color negation (black/white -> Occupied/Free).
+
+	Navigator:
+	- k_dist  (float)
+	  - Default: 0
+	  - control
+	- k_theta (float)
+	  - Default: 4.5
+	  - control
+	- safety_dist (float)
+	  - Default: 0.5
+	  - How close should we can come to obstacles.
+	- obst_avoid (string) 
+	  - Default: "FORCE_FIELD"
+	  - The obstacle avoidance method used ("FORCE_FIELD","VFH")
+  	- traversable_dist (float)
+  	  - Default: 3
+  	  - WayPoint distance.
+  	- local_dist  (float)
+  	  - Default: 2
+  	  - 
+	- reg_grid (float)
+	  - Default: 0.3
+	  - Regular Sampling resolution
+	- obst_exp (float)
+	  - Default: 0.2
+	  - Obstacle expansion used for collision detection.
+	- conn_rad (float)
+	  - Default: 0.7
+	  - Connection radius of neighbouring nodes.
+	- obst_pen (float)
+	  - Default: 3
+	  - Obstacle Clearance penaltiy given while path planning.
+	- dist_goal (float)
+	  - Default: 0.4
+	  - How close should we reach the destination.  	  
+  	- laser_pose (touple of 3 floats)
+  	  - Default: [0 0 0]
+  	  - The laser pose on the Robot.
+  	- linear_velocity (float)
+  	  - Default: 0.03
+  	  - The maximium allowed velocity.
+
+	ForceField: (To be added Later)
+
+NOTE: the current version supports modifying the configuration file through the GUI but it's
+still experimental, new versions will support loading/Saving and parsing configuration files
+directly from GUI without having to give it as a command parameter.
+  	
+Running
+------------ 
+	$ ./CasPlanner config-filename.cfg
+	
+
+
+
+

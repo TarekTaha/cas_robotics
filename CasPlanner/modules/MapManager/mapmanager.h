@@ -34,7 +34,6 @@ class MapManager : public Map, public QObject//public QThread
 		MapManager(QString name,float res,bool negate, Pose p);
 		void loadMap(QString name,float res,bool negate,Pose p);
 		void generateSkeleton();
-		void testModel();
 		virtual ~MapManager();
 		bool mapNegate,skeletonGenerated;
 		QString mapName;

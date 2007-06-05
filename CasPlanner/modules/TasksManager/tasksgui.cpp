@@ -974,7 +974,7 @@ void TasksGui::requestSnap()
 //}
 void TasksGui::testModel()
 {
-	playGround->mapManager->testModel();	
+
 }
 
 void TasksGui::generateSkeleton()
