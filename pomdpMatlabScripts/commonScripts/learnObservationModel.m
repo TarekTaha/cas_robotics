@@ -53,6 +53,7 @@ for i=1:length(fileTemp)
       obs{numObs}.obs   = fileTemp{i}(t{j}(2,1):t{j}(2,2));
       obs{numObs}.dest  = destIndx;
       obs{numObs}.pos   = str2num(fileTemp{i}(t{j}(1,1):t{j}(1,2)));         
+      %obs{numObs}.prevAction = 
   end
 end
 
@@ -80,6 +81,7 @@ obsProbs = zeros(pomdpModel.numSpatialStates*length(pomdpModel.destinations),len
 for i=1:size(obsProbs,1)
     uncertainty = 0;
     n = length(pomdpModel.observations) - length(find(obsSum(i,:)));
+    % Build Uncertainty and construct Observations with noise
     for j=1:length(pomdpModel.observations)
         if sum(obsSum(i,:)) ~= 0
             obsProbs(i,j) = obsSum(i,j)/sum(obsSum(i,:));
@@ -99,9 +101,12 @@ for i=1:size(obsProbs,1)
             obsProbs(i,j) = obsProbs(i,j) - obsProbs(i,j)*pomdpModel.observationsUncertainty(obsIndx)/100;
         end
     end
+    % Uniformly distribute Uncertainty over other Observations
     for j=1:length(pomdpModel.observations)
-        if obsProbs(i,j) == 0
+        if (obsProbs(i,j) == 0) && (sum(obsSum(i,:)) ~= 0)
             obsProbs(i,j) = uncertainty/n;
+        elseif (obsProbs(i,j) == 0) && (sum(obsSum(i,:)) == 0)
+            obsProbs(i,j) = 1/length(pomdpModel.observations); 
         end
     end
 end
