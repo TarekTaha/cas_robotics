@@ -88,14 +88,20 @@ for i=1:size(obsProbs,1)
         else
             obsProbs(i,j) = 0;
         end
+
         % Link the uncertainty to the observation
-        temp = pomdpModel.observations{j}(1:strfind(pomdpModel.observations{j},'-')-1);
+        if (pomdpModel.obsCrossFeature)
+            temp = pomdpModel.observations{j}(1:strfind(pomdpModel.observations{j},'-')-1);
+        else
+            temp = pomdpModel.observations{j};
+        end      
         indx = strfind(pomdpModel.obsStrings,temp);
         for k=1:length(indx)
             if ~isempty(indx{k})
                 obsIndx = k;
             end 
-        end          
+        end
+        
         uncertainty = uncertainty + obsProbs(i,j)*pomdpModel.observationsUncertainty(obsIndx)/100;
         if obsProbs(i,j) ~=0
             obsProbs(i,j) = obsProbs(i,j) - obsProbs(i,j)*pomdpModel.observationsUncertainty(obsIndx)/100;

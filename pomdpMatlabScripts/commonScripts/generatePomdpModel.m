@@ -5,11 +5,53 @@ function generatePomdpModel(pomdpModel)
 
 format long;
 
+% if ~exist('pomdpModel.obsCrossFeature')
+%     pomdpModel.obsCrossFeature = 0;
+% end
+% 
+% if ~exist('pomdpModel.destCrossFeature')
+%     pomdpModel.destCrossFeature = 0;
+% end
+
+% If the observations are unique to each spacial State, it's a way to
+% encapsulate location to the observation.
+if pomdpModel.obsCrossFeature
+    numObs = 0;
+    for i=1:pomdpModel.numSpatialStates
+        for j=1:length(pomdpModel.obsStrings)
+            numObs = numObs + 1;
+            pomdpModel.observations{numObs} = sprintf('%s-%d',pomdpModel.obsStrings{j},i);
+        end
+    end
+else
+    pomdpModel.observations = pomdpModel.obsStrings;
+end
+
+% Here we are building a model that is a cross product between states
+% representiong spaces in the environment and destinations that the user
+% wants to go to.
+if pomdpModel.destCrossFeature
+    pomdpModel.mapTopology.nnodes = pomdpModel.numSpatialStates*length(pomdpModel.destinations);
+    %pomdpModel.mapTopology.network = zeros(pomdpModel.mapTopology.nnodes,length(pomdpModel.actions)); 
+    tempMatrix = zeros(pomdpModel.mapTopology.nnodes,length(pomdpModel.actions));
+    
+    for i=0:(length(pomdpModel.destinations)-1)
+        for j=1:pomdpModel.numSpatialStates
+            tempMatrix(j+i*pomdpModel.numSpatialStates,:) = pomdpModel.mapTopology.network(j,:); 
+        end
+    end
+    
+    pomdpModel.mapTopology.network = tempMatrix;
+    clear tempMatrix;
+end
+
 fid = fopen(pomdpModel.outputFile, 'wb');
+
 % Write to File the top comments and warnings
 fprintf(fid,'# This POMDP Model is generated Using Tarek''s MATLAB Script');
 fprintf(fid,'\n# This script is still experimental and bugs might appear');
 fprintf(fid,'\n# Tarek Taha - Center of Autonomous Systems, UTS\n');
+
 % Specify Essential Parameters
 fprintf(fid,'\ndiscount: %f',pomdpModel.discount);
 fprintf(fid,'\nvalues: reward');
@@ -42,6 +84,7 @@ for i=1:length(pomdpModel.actions)
     % Find the number of reachable nodes (connected)
     % n = length(find(pomdpModel.mapTopology.network(j,:)));  
     n = length(pomdpModel.destinations);
+    
     % Uncertainty in the final state given this action is divided
     % equally to the connected neighbouring nodes
     % actionNoise = pomdpModel.actionsUncertainty(i)/(n-1)/100;    
@@ -66,7 +109,7 @@ for i=1:length(pomdpModel.actions)
         else
             dest  = floor(j/pomdpModel.numSpatialStates) + 1;
         end
-%         % Deterministic Case
+        % Deterministic Case
         if length(find(pomdpModel.actionsUncertainty)) == 0
             if (pomdpModel.mapTopology.network(j,i)==0)
                 fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %f',pomdpModel.actions{i},state,dest,state,dest,actionProb);
