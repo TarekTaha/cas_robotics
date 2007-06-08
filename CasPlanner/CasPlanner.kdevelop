@@ -1,14 +1,18 @@
 <?xml version = '1.0'?>
 <kdevelop>
   <general>
-    <author/>
-    <email>BlackCoder@localhost.localdomain</email>
+    <author>Tarek Taha</author>
+    <email>tataha@eng.uts.edu.au</email>
     <version>$VERSION$</version>
     <projectmanagement>KDevTrollProject</projectmanagement>
     <primarylanguage>C++</primarylanguage>
     <keywords>
       <keyword>Qt</keyword>
     </keywords>
+    <projectdirectory>.</projectdirectory>
+    <absoluteprojectpath>false</absoluteprojectpath>
+    <description></description>
+    <ignoreparts/>
   </general>
   <kdevfileview>
     <groups>
@@ -64,8 +68,21 @@
   </kdevdoctreeview>
   <kdevdebugger>
     <general>
-      <dbgshell/>
+      <dbgshell></dbgshell>
+      <programargs></programargs>
+      <gdbpath></gdbpath>
+      <configGdbScript></configGdbScript>
+      <runShellScript></runShellScript>
+      <runGdbScript></runGdbScript>
+      <breakonloadinglibs>true</breakonloadinglibs>
+      <separatetty>false</separatetty>
+      <floatingtoolbar>false</floatingtoolbar>
     </general>
+    <display>
+      <staticmembers>false</staticmembers>
+      <demanglenames>true</demanglenames>
+      <outputradix>10</outputradix>
+    </display>
   </kdevdebugger>
   <kdevfilecreate>
     <useglobaltypes>
@@ -80,7 +97,22 @@
     </general>
     <run>
       <directoryradio>executable</directoryradio>
+      <customdirectory>/</customdirectory>
+      <mainprogram></mainprogram>
+      <programargs></programargs>
+      <terminal>false</terminal>
+      <autocompile>true</autocompile>
+      <envvars/>
     </run>
+    <make>
+      <abortonerror>true</abortonerror>
+      <runmultiplejobs>false</runmultiplejobs>
+      <numberofjobs>1</numberofjobs>
+      <dontact>false</dontact>
+      <makebin></makebin>
+      <prio>0</prio>
+      <envvars/>
+    </make>
   </kdevtrollproject>
   <kdevcppsupport>
     <references/>
@@ -96,5 +128,24 @@
       <argumentsHintDelay>400</argumentsHintDelay>
       <headerCompletionDelay>250</headerCompletionDelay>
     </codecompletion>
+    <qt>
+      <used>false</used>
+      <version>3</version>
+      <root>/usr/lib/qt-3.3</root>
+    </qt>
+    <creategettersetter>
+      <prefixGet></prefixGet>
+      <prefixSet>set</prefixSet>
+      <prefixVariable>m_,_</prefixVariable>
+      <parameterName>theValue</parameterName>
+      <inlineGet>true</inlineGet>
+      <inlineSet>true</inlineSet>
+    </creategettersetter>
   </kdevcppsupport>
+  <cppsupportpart>
+    <filetemplates>
+      <interfacesuffix>.h</interfacesuffix>
+      <implementationsuffix>.cpp</implementationsuffix>
+    </filetemplates>
+  </cppsupportpart>
 </kdevelop>

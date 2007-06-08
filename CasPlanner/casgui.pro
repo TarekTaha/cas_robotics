@@ -1,6 +1,17 @@
 
 HEADERS += modules/CommManager/commmanager.h \
            modules/CommManager/comms.h \
+           modules/CommonTools/controlw.h \
+           modules/CommonTools/include.h \           
+           modules/CommonTools/myexpect.h \
+           modules/CommonTools/newmatap.h \
+           modules/CommonTools/newmatio.h \
+           modules/CommonTools/newmatnl.h \
+           modules/CommonTools/newmatrc.h \
+           modules/CommonTools/newmatrm.h \       
+           modules/CommonTools/newmat.h \
+           modules/CommonTools/precisio.h \
+           modules/CommonTools/solution.h \                  
            modules/Parser/configfile.h \
            modules/Navigator/controller.h \
            modules/Rendering/glrender.h \
@@ -54,6 +65,31 @@ HEADERS += modules/CommManager/commmanager.h \
            modules/Controller/wheelchairproxy.h 
            
 SOURCES += modules/CommManager/commmanager.cpp \
+           modules/CommonTools/bandmat.cpp \
+           modules/CommonTools/cholesky.cpp \
+           modules/CommonTools/evalue.cpp \
+           modules/CommonTools/fft.cpp \
+           modules/CommonTools/hholder.cpp \
+           modules/CommonTools/jacobi.cpp \
+           modules/CommonTools/myexcept.cpp \
+           modules/CommonTools/newfft.cpp \
+           modules/CommonTools/newmat1.cpp \
+           modules/CommonTools/newmat2.cpp \
+           modules/CommonTools/newmat3.cpp \
+           modules/CommonTools/newmat4.cpp \
+           modules/CommonTools/newmat5.cpp \
+           modules/CommonTools/newmat6.cpp \
+           modules/CommonTools/newmat7.cpp \
+           modules/CommonTools/newmat8.cpp \
+           modules/CommonTools/newmat9.cpp \
+           modules/CommonTools/newmatex.cpp \                                                                                                                                                                                
+           modules/CommonTools/newmatnl.cpp \
+           modules/CommonTools/newmatrm.cpp \
+           modules/CommonTools/nm_misc.cpp \
+           modules/CommonTools/solution.cpp \
+           modules/CommonTools/sort.cpp \
+           modules/CommonTools/submat.cpp \
+           modules/CommonTools/svd.cpp \
            modules/Parser/configfile.cc \
            modules/Navigator/controller.cpp \
            modules/Rendering/laserrender.cpp \
@@ -114,6 +150,7 @@ INCLUDEPATH += 	/usr/local/Trolltech/Qt-4.2.2/include/QtCore \
 				modules/GeometricTools \
 				modules/Controller \
 				modules/CommManager \
+	            modules/CommonTools/ \				
 				modules/MapManager \
 				modules/Navigator \
 				modules/Parser \
