@@ -1,0 +1,27 @@
+# Exercise : Human-Robot Interaction/Wheelchair (intention recognition)
+# A Template file that contains a set of tasks. A task is described by a
+# start location, intermediate locations and the final location. At each
+# location an observation from the user will be recorded, this observation
+# at the moment is only the joystick input that the user gave at that
+# location. This list of task will be used to generate the observation
+# model to be used in solving the POMDP problem.
+
+# <Location-1> <Observation-1> ... <Location-n><observation-n>
+4 Up 3 Up 2 Up 1 Nothing
+4 Down 5 Right 6 Up 7 Nothing
+4 Up 3 Up 2 Right 8 Nothing
+4 Up 3 Up 2 Right 8 Nothing
+4 Up 3 Up 2 Right 8 Up 9 Right 12 Right 15 Up 16 Nothing
+4 Up 3 Up 2 Right 8 Up 9 Right 12 Right 15 Up 16 Nothing
+4 Up 3 Up 2 Right 8 Up 9 Right 12 Right 15 Up 16 Nothing
+10 Down 9 Right 12 Right 15 Up 16 Nothing
+13 Down 12 Left 9 Down 8 Nothing
+13 Down 12 Left 9 Down 8 Left 2 Up 1 Nothing
+14 Up 15 Up 16 Noting
+11 Up 12 Right 15 Up 16 Nothing
+11 Up 12 Left 9 Down 8 Nothing
+1 Down 2 Down 3 Down 4 Down 5 Right 6 Up 7 Nothing
+7 Down 6 Left 5 Up 4 Nothing
+1 Down 2 Down 3 Down 4 Nothing
+8 Left 2 Down 3 Down 4 Nothing
+16 Down 15 Left 12 Left 9 Down 8 Left 2 Up 1 Nothing
