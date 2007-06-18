@@ -1,0 +1,735 @@
+# This POMDP Model is generated Using Tarek's MATLAB Script
+# This script is still experimental and bugs might appear
+# Tarek Taha - Center of Autonomous Systems, UTS
+
+discount: 0.950000
+values: reward
+
+states: s1d1 s2d1 s3d1 s4d1 s5d1 s6d1 s7d1 s8d1 s9d1 s10d1 s11d1 s12d1 s13d1 s14d1 s15d1 s16d1 s1d2 s2d2 s3d2 s4d2 s5d2 s6d2 s7d2 s8d2 s9d2 s10d2 s11d2 s12d2 s13d2 s14d2 s15d2 s16d2 s1d3 s2d3 s3d3 s4d3 s5d3 s6d3 s7d3 s8d3 s9d3 s10d3 s11d3 s12d3 s13d3 s14d3 s15d3 s16d3 s1d4 s2d4 s3d4 s4d4 s5d4 s6d4 s7d4 s8d4 s9d4 s10d4 s11d4 s12d4 s13d4 s14d4 s15d4 s16d4 
+
+actions: North South East West Stop
+
+observations: Up Down Right Left Nothing
+start: 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625
+
+# T: <action> : <start-state> : <end-state> %f
+T: * : * : * 0.0
+T: North : s1d1 : s1d1 1.000000
+T: North : s2d1 : s1d1 1.000000
+T: North : s3d1 : s2d1 1.000000
+T: North : s4d1 : s3d1 1.000000
+T: North : s5d1 : s4d1 1.000000
+T: North : s6d1 : s7d1 1.000000
+T: North : s7d1 : s7d1 1.000000
+T: North : s8d1 : s9d1 1.000000
+T: North : s9d1 : s10d1 1.000000
+T: North : s10d1 : s10d1 1.000000
+T: North : s11d1 : s12d1 1.000000
+T: North : s12d1 : s13d1 1.000000
+T: North : s13d1 : s13d1 1.000000
+T: North : s14d1 : s15d1 1.000000
+T: North : s15d1 : s16d1 1.000000
+T: North : s16d1 : s16d1 1.000000
+T: North : s1d2 : s1d2 1.000000
+T: North : s2d2 : s1d2 1.000000
+T: North : s3d2 : s2d2 1.000000
+T: North : s4d2 : s3d2 1.000000
+T: North : s5d2 : s4d2 1.000000
+T: North : s6d2 : s7d2 1.000000
+T: North : s7d2 : s7d2 1.000000
+T: North : s8d2 : s9d2 1.000000
+T: North : s9d2 : s10d2 1.000000
+T: North : s10d2 : s10d2 1.000000
+T: North : s11d2 : s12d2 1.000000
+T: North : s12d2 : s13d2 1.000000
+T: North : s13d2 : s13d2 1.000000
+T: North : s14d2 : s15d2 1.000000
+T: North : s15d2 : s16d2 1.000000
+T: North : s16d2 : s16d2 1.000000
+T: North : s1d3 : s1d3 1.000000
+T: North : s2d3 : s1d3 1.000000
+T: North : s3d3 : s2d3 1.000000
+T: North : s4d3 : s3d3 1.000000
+T: North : s5d3 : s4d3 1.000000
+T: North : s6d3 : s7d3 1.000000
+T: North : s7d3 : s7d3 1.000000
+T: North : s8d3 : s9d3 1.000000
+T: North : s9d3 : s10d3 1.000000
+T: North : s10d3 : s10d3 1.000000
+T: North : s11d3 : s12d3 1.000000
+T: North : s12d3 : s13d3 1.000000
+T: North : s13d3 : s13d3 1.000000
+T: North : s14d3 : s15d3 1.000000
+T: North : s15d3 : s16d3 1.000000
+T: North : s16d3 : s16d3 1.000000
+T: North : s1d4 : s1d4 1.000000
+T: North : s2d4 : s1d4 1.000000
+T: North : s3d4 : s2d4 1.000000
+T: North : s4d4 : s3d4 1.000000
+T: North : s5d4 : s4d4 1.000000
+T: North : s6d4 : s7d4 1.000000
+T: North : s7d4 : s7d4 1.000000
+T: North : s8d4 : s9d4 1.000000
+T: North : s9d4 : s10d4 1.000000
+T: North : s10d4 : s10d4 1.000000
+T: North : s11d4 : s12d4 1.000000
+T: North : s12d4 : s13d4 1.000000
+T: North : s13d4 : s13d4 1.000000
+T: North : s14d4 : s15d4 1.000000
+T: North : s15d4 : s16d4 1.000000
+T: North : s16d4 : s16d4 1.000000
+#############################################
+T: South : s1d1 : s2d1 1.000000
+T: South : s2d1 : s3d1 1.000000
+T: South : s3d1 : s4d1 1.000000
+T: South : s4d1 : s5d1 1.000000
+T: South : s5d1 : s5d1 1.000000
+T: South : s6d1 : s6d1 1.000000
+T: South : s7d1 : s6d1 1.000000
+T: South : s8d1 : s8d1 1.000000
+T: South : s9d1 : s8d1 1.000000
+T: South : s10d1 : s9d1 1.000000
+T: South : s11d1 : s11d1 1.000000
+T: South : s12d1 : s11d1 1.000000
+T: South : s13d1 : s12d1 1.000000
+T: South : s14d1 : s14d1 1.000000
+T: South : s15d1 : s14d1 1.000000
+T: South : s16d1 : s15d1 1.000000
+T: South : s1d2 : s2d2 1.000000
+T: South : s2d2 : s3d2 1.000000
+T: South : s3d2 : s4d2 1.000000
+T: South : s4d2 : s5d2 1.000000
+T: South : s5d2 : s5d2 1.000000
+T: South : s6d2 : s6d2 1.000000
+T: South : s7d2 : s6d2 1.000000
+T: South : s8d2 : s8d2 1.000000
+T: South : s9d2 : s8d2 1.000000
+T: South : s10d2 : s9d2 1.000000
+T: South : s11d2 : s11d2 1.000000
+T: South : s12d2 : s11d2 1.000000
+T: South : s13d2 : s12d2 1.000000
+T: South : s14d2 : s14d2 1.000000
+T: South : s15d2 : s14d2 1.000000
+T: South : s16d2 : s15d2 1.000000
+T: South : s1d3 : s2d3 1.000000
+T: South : s2d3 : s3d3 1.000000
+T: South : s3d3 : s4d3 1.000000
+T: South : s4d3 : s5d3 1.000000
+T: South : s5d3 : s5d3 1.000000
+T: South : s6d3 : s6d3 1.000000
+T: South : s7d3 : s6d3 1.000000
+T: South : s8d3 : s8d3 1.000000
+T: South : s9d3 : s8d3 1.000000
+T: South : s10d3 : s9d3 1.000000
+T: South : s11d3 : s11d3 1.000000
+T: South : s12d3 : s11d3 1.000000
+T: South : s13d3 : s12d3 1.000000
+T: South : s14d3 : s14d3 1.000000
+T: South : s15d3 : s14d3 1.000000
+T: South : s16d3 : s15d3 1.000000
+T: South : s1d4 : s2d4 1.000000
+T: South : s2d4 : s3d4 1.000000
+T: South : s3d4 : s4d4 1.000000
+T: South : s4d4 : s5d4 1.000000
+T: South : s5d4 : s5d4 1.000000
+T: South : s6d4 : s6d4 1.000000
+T: South : s7d4 : s6d4 1.000000
+T: South : s8d4 : s8d4 1.000000
+T: South : s9d4 : s8d4 1.000000
+T: South : s10d4 : s9d4 1.000000
+T: South : s11d4 : s11d4 1.000000
+T: South : s12d4 : s11d4 1.000000
+T: South : s13d4 : s12d4 1.000000
+T: South : s14d4 : s14d4 1.000000
+T: South : s15d4 : s14d4 1.000000
+T: South : s16d4 : s15d4 1.000000
+#############################################
+T: East : s1d1 : s1d1 1.000000
+T: East : s2d1 : s8d1 1.000000
+T: East : s3d1 : s3d1 1.000000
+T: East : s4d1 : s4d1 1.000000
+T: East : s5d1 : s6d1 1.000000
+T: East : s6d1 : s6d1 1.000000
+T: East : s7d1 : s7d1 1.000000
+T: East : s8d1 : s8d1 1.000000
+T: East : s9d1 : s12d1 1.000000
+T: East : s10d1 : s10d1 1.000000
+T: East : s11d1 : s11d1 1.000000
+T: East : s12d1 : s15d1 1.000000
+T: East : s13d1 : s13d1 1.000000
+T: East : s14d1 : s14d1 1.000000
+T: East : s15d1 : s15d1 1.000000
+T: East : s16d1 : s16d1 1.000000
+T: East : s1d2 : s1d2 1.000000
+T: East : s2d2 : s8d2 1.000000
+T: East : s3d2 : s3d2 1.000000
+T: East : s4d2 : s4d2 1.000000
+T: East : s5d2 : s6d2 1.000000
+T: East : s6d2 : s6d2 1.000000
+T: East : s7d2 : s7d2 1.000000
+T: East : s8d2 : s8d2 1.000000
+T: East : s9d2 : s12d2 1.000000
+T: East : s10d2 : s10d2 1.000000
+T: East : s11d2 : s11d2 1.000000
+T: East : s12d2 : s15d2 1.000000
+T: East : s13d2 : s13d2 1.000000
+T: East : s14d2 : s14d2 1.000000
+T: East : s15d2 : s15d2 1.000000
+T: East : s16d2 : s16d2 1.000000
+T: East : s1d3 : s1d3 1.000000
+T: East : s2d3 : s8d3 1.000000
+T: East : s3d3 : s3d3 1.000000
+T: East : s4d3 : s4d3 1.000000
+T: East : s5d3 : s6d3 1.000000
+T: East : s6d3 : s6d3 1.000000
+T: East : s7d3 : s7d3 1.000000
+T: East : s8d3 : s8d3 1.000000
+T: East : s9d3 : s12d3 1.000000
+T: East : s10d3 : s10d3 1.000000
+T: East : s11d3 : s11d3 1.000000
+T: East : s12d3 : s15d3 1.000000
+T: East : s13d3 : s13d3 1.000000
+T: East : s14d3 : s14d3 1.000000
+T: East : s15d3 : s15d3 1.000000
+T: East : s16d3 : s16d3 1.000000
+T: East : s1d4 : s1d4 1.000000
+T: East : s2d4 : s8d4 1.000000
+T: East : s3d4 : s3d4 1.000000
+T: East : s4d4 : s4d4 1.000000
+T: East : s5d4 : s6d4 1.000000
+T: East : s6d4 : s6d4 1.000000
+T: East : s7d4 : s7d4 1.000000
+T: East : s8d4 : s8d4 1.000000
+T: East : s9d4 : s12d4 1.000000
+T: East : s10d4 : s10d4 1.000000
+T: East : s11d4 : s11d4 1.000000
+T: East : s12d4 : s15d4 1.000000
+T: East : s13d4 : s13d4 1.000000
+T: East : s14d4 : s14d4 1.000000
+T: East : s15d4 : s15d4 1.000000
+T: East : s16d4 : s16d4 1.000000
+#############################################
+T: West : s1d1 : s1d1 1.000000
+T: West : s2d1 : s2d1 1.000000
+T: West : s3d1 : s3d1 1.000000
+T: West : s4d1 : s4d1 1.000000
+T: West : s5d1 : s5d1 1.000000
+T: West : s6d1 : s5d1 1.000000
+T: West : s7d1 : s7d1 1.000000
+T: West : s8d1 : s2d1 1.000000
+T: West : s9d1 : s9d1 1.000000
+T: West : s10d1 : s10d1 1.000000
+T: West : s11d1 : s11d1 1.000000
+T: West : s12d1 : s9d1 1.000000
+T: West : s13d1 : s13d1 1.000000
+T: West : s14d1 : s14d1 1.000000
+T: West : s15d1 : s12d1 1.000000
+T: West : s16d1 : s16d1 1.000000
+T: West : s1d2 : s1d2 1.000000
+T: West : s2d2 : s2d2 1.000000
+T: West : s3d2 : s3d2 1.000000
+T: West : s4d2 : s4d2 1.000000
+T: West : s5d2 : s5d2 1.000000
+T: West : s6d2 : s5d2 1.000000
+T: West : s7d2 : s7d2 1.000000
+T: West : s8d2 : s2d2 1.000000
+T: West : s9d2 : s9d2 1.000000
+T: West : s10d2 : s10d2 1.000000
+T: West : s11d2 : s11d2 1.000000
+T: West : s12d2 : s9d2 1.000000
+T: West : s13d2 : s13d2 1.000000
+T: West : s14d2 : s14d2 1.000000
+T: West : s15d2 : s12d2 1.000000
+T: West : s16d2 : s16d2 1.000000
+T: West : s1d3 : s1d3 1.000000
+T: West : s2d3 : s2d3 1.000000
+T: West : s3d3 : s3d3 1.000000
+T: West : s4d3 : s4d3 1.000000
+T: West : s5d3 : s5d3 1.000000
+T: West : s6d3 : s5d3 1.000000
+T: West : s7d3 : s7d3 1.000000
+T: West : s8d3 : s2d3 1.000000
+T: West : s9d3 : s9d3 1.000000
+T: West : s10d3 : s10d3 1.000000
+T: West : s11d3 : s11d3 1.000000
+T: West : s12d3 : s9d3 1.000000
+T: West : s13d3 : s13d3 1.000000
+T: West : s14d3 : s14d3 1.000000
+T: West : s15d3 : s12d3 1.000000
+T: West : s16d3 : s16d3 1.000000
+T: West : s1d4 : s1d4 1.000000
+T: West : s2d4 : s2d4 1.000000
+T: West : s3d4 : s3d4 1.000000
+T: West : s4d4 : s4d4 1.000000
+T: West : s5d4 : s5d4 1.000000
+T: West : s6d4 : s5d4 1.000000
+T: West : s7d4 : s7d4 1.000000
+T: West : s8d4 : s2d4 1.000000
+T: West : s9d4 : s9d4 1.000000
+T: West : s10d4 : s10d4 1.000000
+T: West : s11d4 : s11d4 1.000000
+T: West : s12d4 : s9d4 1.000000
+T: West : s13d4 : s13d4 1.000000
+T: West : s14d4 : s14d4 1.000000
+T: West : s15d4 : s12d4 1.000000
+T: West : s16d4 : s16d4 1.000000
+#############################################
+T: Stop : s1d1 : s1d1 1.000000
+T: Stop : s2d1 : s2d1 1.000000
+T: Stop : s3d1 : s3d1 1.000000
+T: Stop : s4d1 : s4d1 1.000000
+T: Stop : s5d1 : s5d1 1.000000
+T: Stop : s6d1 : s6d1 1.000000
+T: Stop : s7d1 : s7d1 1.000000
+T: Stop : s8d1 : s8d1 1.000000
+T: Stop : s9d1 : s9d1 1.000000
+T: Stop : s10d1 : s10d1 1.000000
+T: Stop : s11d1 : s11d1 1.000000
+T: Stop : s12d1 : s12d1 1.000000
+T: Stop : s13d1 : s13d1 1.000000
+T: Stop : s14d1 : s14d1 1.000000
+T: Stop : s15d1 : s15d1 1.000000
+T: Stop : s16d1 : s16d1 1.000000
+T: Stop : s1d2 : s1d2 1.000000
+T: Stop : s2d2 : s2d2 1.000000
+T: Stop : s3d2 : s3d2 1.000000
+T: Stop : s4d2 : s4d2 1.000000
+T: Stop : s5d2 : s5d2 1.000000
+T: Stop : s6d2 : s6d2 1.000000
+T: Stop : s7d2 : s7d2 1.000000
+T: Stop : s8d2 : s8d2 1.000000
+T: Stop : s9d2 : s9d2 1.000000
+T: Stop : s10d2 : s10d2 1.000000
+T: Stop : s11d2 : s11d2 1.000000
+T: Stop : s12d2 : s12d2 1.000000
+T: Stop : s13d2 : s13d2 1.000000
+T: Stop : s14d2 : s14d2 1.000000
+T: Stop : s15d2 : s15d2 1.000000
+T: Stop : s16d2 : s16d2 1.000000
+T: Stop : s1d3 : s1d3 1.000000
+T: Stop : s2d3 : s2d3 1.000000
+T: Stop : s3d3 : s3d3 1.000000
+T: Stop : s4d3 : s4d3 1.000000
+T: Stop : s5d3 : s5d3 1.000000
+T: Stop : s6d3 : s6d3 1.000000
+T: Stop : s7d3 : s7d3 1.000000
+T: Stop : s8d3 : s8d3 1.000000
+T: Stop : s9d3 : s9d3 1.000000
+T: Stop : s10d3 : s10d3 1.000000
+T: Stop : s11d3 : s11d3 1.000000
+T: Stop : s12d3 : s12d3 1.000000
+T: Stop : s13d3 : s13d3 1.000000
+T: Stop : s14d3 : s14d3 1.000000
+T: Stop : s15d3 : s15d3 1.000000
+T: Stop : s16d3 : s16d3 1.000000
+T: Stop : s1d4 : s1d4 1.000000
+T: Stop : s2d4 : s2d4 1.000000
+T: Stop : s3d4 : s3d4 1.000000
+T: Stop : s4d4 : s4d4 1.000000
+T: Stop : s5d4 : s5d4 1.000000
+T: Stop : s6d4 : s6d4 1.000000
+T: Stop : s7d4 : s7d4 1.000000
+T: Stop : s8d4 : s8d4 1.000000
+T: Stop : s9d4 : s9d4 1.000000
+T: Stop : s10d4 : s10d4 1.000000
+T: Stop : s11d4 : s11d4 1.000000
+T: Stop : s12d4 : s12d4 1.000000
+T: Stop : s13d4 : s13d4 1.000000
+T: Stop : s14d4 : s14d4 1.000000
+T: Stop : s15d4 : s15d4 1.000000
+T: Stop : s16d4 : s16d4 1.000000
+#############################################
+
+# O : <action> : <end-state> : <observation> %f
+O: * : * : * 0.0
+O: * : s1d1 : Up 0.05
+O: * : s1d1 : Down 0.05
+O: * : s1d1 : Right 0.05
+O: * : s1d1 : Left 0.05
+O: * : s1d1 : Nothing 0.8
+
+O: * : s2d1 : Up 0.9
+O: * : s2d1 : Down 0.025
+O: * : s2d1 : Right 0.025
+O: * : s2d1 : Left 0.025
+O: * : s2d1 : Nothing 0.025
+
+O: * : s3d1 : Up 0.9
+O: * : s3d1 : Down 0.025
+O: * : s3d1 : Right 0.025
+O: * : s3d1 : Left 0.025
+O: * : s3d1 : Nothing 0.025
+
+O: * : s4d1 : Up 0.9
+O: * : s4d1 : Down 0.025
+O: * : s4d1 : Right 0.025
+O: * : s4d1 : Left 0.025
+O: * : s4d1 : Nothing 0.025
+
+O: * : s5d1 : Up 0.2
+O: * : s5d1 : Down 0.2
+O: * : s5d1 : Right 0.2
+O: * : s5d1 : Left 0.2
+O: * : s5d1 : Nothing 0.2
+
+O: * : s6d1 : Up 0.2
+O: * : s6d1 : Down 0.2
+O: * : s6d1 : Right 0.2
+O: * : s6d1 : Left 0.2
+O: * : s6d1 : Nothing 0.2
+
+O: * : s7d1 : Up 0.2
+O: * : s7d1 : Down 0.2
+O: * : s7d1 : Right 0.2
+O: * : s7d1 : Left 0.2
+O: * : s7d1 : Nothing 0.2
+
+O: * : s8d1 : Up 0.025
+O: * : s8d1 : Down 0.025
+O: * : s8d1 : Right 0.025
+O: * : s8d1 : Left 0.9
+O: * : s8d1 : Nothing 0.025
+
+O: * : s9d1 : Up 0.0125
+O: * : s9d1 : Down 0.95
+O: * : s9d1 : Right 0.0125
+O: * : s9d1 : Left 0.0125
+O: * : s9d1 : Nothing 0.0125
+
+O: * : s10d1 : Up 0.2
+O: * : s10d1 : Down 0.2
+O: * : s10d1 : Right 0.2
+O: * : s10d1 : Left 0.2
+O: * : s10d1 : Nothing 0.2
+
+O: * : s11d1 : Up 0.2
+O: * : s11d1 : Down 0.2
+O: * : s11d1 : Right 0.2
+O: * : s11d1 : Left 0.2
+O: * : s11d1 : Nothing 0.2
+
+O: * : s12d1 : Up 0.025
+O: * : s12d1 : Down 0.025
+O: * : s12d1 : Right 0.025
+O: * : s12d1 : Left 0.9
+O: * : s12d1 : Nothing 0.025
+
+O: * : s13d1 : Up 0.0125
+O: * : s13d1 : Down 0.95
+O: * : s13d1 : Right 0.0125
+O: * : s13d1 : Left 0.0125
+O: * : s13d1 : Nothing 0.0125
+
+O: * : s14d1 : Up 0.2
+O: * : s14d1 : Down 0.2
+O: * : s14d1 : Right 0.2
+O: * : s14d1 : Left 0.2
+O: * : s14d1 : Nothing 0.2
+
+O: * : s15d1 : Up 0.025
+O: * : s15d1 : Down 0.025
+O: * : s15d1 : Right 0.025
+O: * : s15d1 : Left 0.9
+O: * : s15d1 : Nothing 0.025
+
+O: * : s16d1 : Up 0.0125
+O: * : s16d1 : Down 0.95
+O: * : s16d1 : Right 0.0125
+O: * : s16d1 : Left 0.0125
+O: * : s16d1 : Nothing 0.0125
+
+O: * : s1d2 : Up 0.0125
+O: * : s1d2 : Down 0.95
+O: * : s1d2 : Right 0.0125
+O: * : s1d2 : Left 0.0125
+O: * : s1d2 : Nothing 0.0125
+
+O: * : s2d2 : Up 0.0125
+O: * : s2d2 : Down 0.95
+O: * : s2d2 : Right 0.0125
+O: * : s2d2 : Left 0.0125
+O: * : s2d2 : Nothing 0.0125
+
+O: * : s3d2 : Up 0.0125
+O: * : s3d2 : Down 0.95
+O: * : s3d2 : Right 0.0125
+O: * : s3d2 : Left 0.0125
+O: * : s3d2 : Nothing 0.0125
+
+O: * : s4d2 : Up 0.0466667
+O: * : s4d2 : Down 0.38
+O: * : s4d2 : Right 0.0466667
+O: * : s4d2 : Left 0.0466667
+O: * : s4d2 : Nothing 0.48
+
+O: * : s5d2 : Up 0.3
+O: * : s5d2 : Down 0.0444444
+O: * : s5d2 : Right 0.566667
+O: * : s5d2 : Left 0.0444444
+O: * : s5d2 : Nothing 0.0444444
+
+O: * : s6d2 : Up 0.6
+O: * : s6d2 : Down 0.0333333
+O: * : s6d2 : Right 0.0333333
+O: * : s6d2 : Left 0.3
+O: * : s6d2 : Nothing 0.0333333
+
+O: * : s7d2 : Up 0.05
+O: * : s7d2 : Down 0.316667
+O: * : s7d2 : Right 0.05
+O: * : s7d2 : Left 0.05
+O: * : s7d2 : Nothing 0.533333
+
+O: * : s8d2 : Up 0.025
+O: * : s8d2 : Down 0.025
+O: * : s8d2 : Right 0.025
+O: * : s8d2 : Left 0.9
+O: * : s8d2 : Nothing 0.025
+
+O: * : s9d2 : Up 0.2
+O: * : s9d2 : Down 0.2
+O: * : s9d2 : Right 0.2
+O: * : s9d2 : Left 0.2
+O: * : s9d2 : Nothing 0.2
+
+O: * : s10d2 : Up 0.2
+O: * : s10d2 : Down 0.2
+O: * : s10d2 : Right 0.2
+O: * : s10d2 : Left 0.2
+O: * : s10d2 : Nothing 0.2
+
+O: * : s11d2 : Up 0.2
+O: * : s11d2 : Down 0.2
+O: * : s11d2 : Right 0.2
+O: * : s11d2 : Left 0.2
+O: * : s11d2 : Nothing 0.2
+
+O: * : s12d2 : Up 0.2
+O: * : s12d2 : Down 0.2
+O: * : s12d2 : Right 0.2
+O: * : s12d2 : Left 0.2
+O: * : s12d2 : Nothing 0.2
+
+O: * : s13d2 : Up 0.2
+O: * : s13d2 : Down 0.2
+O: * : s13d2 : Right 0.2
+O: * : s13d2 : Left 0.2
+O: * : s13d2 : Nothing 0.2
+
+O: * : s14d2 : Up 0.2
+O: * : s14d2 : Down 0.2
+O: * : s14d2 : Right 0.2
+O: * : s14d2 : Left 0.2
+O: * : s14d2 : Nothing 0.2
+
+O: * : s15d2 : Up 0.2
+O: * : s15d2 : Down 0.2
+O: * : s15d2 : Right 0.2
+O: * : s15d2 : Left 0.2
+O: * : s15d2 : Nothing 0.2
+
+O: * : s16d2 : Up 0.2
+O: * : s16d2 : Down 0.2
+O: * : s16d2 : Right 0.2
+O: * : s16d2 : Left 0.2
+O: * : s16d2 : Nothing 0.2
+
+O: * : s1d3 : Up 0.2
+O: * : s1d3 : Down 0.2
+O: * : s1d3 : Right 0.2
+O: * : s1d3 : Left 0.2
+O: * : s1d3 : Nothing 0.2
+
+O: * : s2d3 : Up 0.0375
+O: * : s2d3 : Down 0.0375
+O: * : s2d3 : Right 0.85
+O: * : s2d3 : Left 0.0375
+O: * : s2d3 : Nothing 0.0375
+
+O: * : s3d3 : Up 0.9
+O: * : s3d3 : Down 0.025
+O: * : s3d3 : Right 0.025
+O: * : s3d3 : Left 0.025
+O: * : s3d3 : Nothing 0.025
+
+O: * : s4d3 : Up 0.9
+O: * : s4d3 : Down 0.025
+O: * : s4d3 : Right 0.025
+O: * : s4d3 : Left 0.025
+O: * : s4d3 : Nothing 0.025
+
+O: * : s5d3 : Up 0.2
+O: * : s5d3 : Down 0.2
+O: * : s5d3 : Right 0.2
+O: * : s5d3 : Left 0.2
+O: * : s5d3 : Nothing 0.2
+
+O: * : s6d3 : Up 0.2
+O: * : s6d3 : Down 0.2
+O: * : s6d3 : Right 0.2
+O: * : s6d3 : Left 0.2
+O: * : s6d3 : Nothing 0.2
+
+O: * : s7d3 : Up 0.2
+O: * : s7d3 : Down 0.2
+O: * : s7d3 : Right 0.2
+O: * : s7d3 : Left 0.2
+O: * : s7d3 : Nothing 0.2
+
+O: * : s8d3 : Up 0.05
+O: * : s8d3 : Down 0.05
+O: * : s8d3 : Right 0.05
+O: * : s8d3 : Left 0.05
+O: * : s8d3 : Nothing 0.8
+
+O: * : s9d3 : Up 0.0125
+O: * : s9d3 : Down 0.95
+O: * : s9d3 : Right 0.0125
+O: * : s9d3 : Left 0.0125
+O: * : s9d3 : Nothing 0.0125
+
+O: * : s10d3 : Up 0.2
+O: * : s10d3 : Down 0.2
+O: * : s10d3 : Right 0.2
+O: * : s10d3 : Left 0.2
+O: * : s10d3 : Nothing 0.2
+
+O: * : s11d3 : Up 0.9
+O: * : s11d3 : Down 0.025
+O: * : s11d3 : Right 0.025
+O: * : s11d3 : Left 0.025
+O: * : s11d3 : Nothing 0.025
+
+O: * : s12d3 : Up 0.025
+O: * : s12d3 : Down 0.025
+O: * : s12d3 : Right 0.025
+O: * : s12d3 : Left 0.9
+O: * : s12d3 : Nothing 0.025
+
+O: * : s13d3 : Up 0.0125
+O: * : s13d3 : Down 0.95
+O: * : s13d3 : Right 0.0125
+O: * : s13d3 : Left 0.0125
+O: * : s13d3 : Nothing 0.0125
+
+O: * : s14d3 : Up 0.2
+O: * : s14d3 : Down 0.2
+O: * : s14d3 : Right 0.2
+O: * : s14d3 : Left 0.2
+O: * : s14d3 : Nothing 0.2
+
+O: * : s15d3 : Up 0.2
+O: * : s15d3 : Down 0.2
+O: * : s15d3 : Right 0.2
+O: * : s15d3 : Left 0.2
+O: * : s15d3 : Nothing 0.2
+
+O: * : s16d3 : Up 0.2
+O: * : s16d3 : Down 0.2
+O: * : s16d3 : Right 0.2
+O: * : s16d3 : Left 0.2
+O: * : s16d3 : Nothing 0.2
+
+O: * : s1d4 : Up 0.2
+O: * : s1d4 : Down 0.2
+O: * : s1d4 : Right 0.2
+O: * : s1d4 : Left 0.2
+O: * : s1d4 : Nothing 0.2
+
+O: * : s2d4 : Up 0.0375
+O: * : s2d4 : Down 0.0375
+O: * : s2d4 : Right 0.85
+O: * : s2d4 : Left 0.0375
+O: * : s2d4 : Nothing 0.0375
+
+O: * : s3d4 : Up 0.9
+O: * : s3d4 : Down 0.025
+O: * : s3d4 : Right 0.025
+O: * : s3d4 : Left 0.025
+O: * : s3d4 : Nothing 0.025
+
+O: * : s4d4 : Up 0.9
+O: * : s4d4 : Down 0.025
+O: * : s4d4 : Right 0.025
+O: * : s4d4 : Left 0.025
+O: * : s4d4 : Nothing 0.025
+
+O: * : s5d4 : Up 0.2
+O: * : s5d4 : Down 0.2
+O: * : s5d4 : Right 0.2
+O: * : s5d4 : Left 0.2
+O: * : s5d4 : Nothing 0.2
+
+O: * : s6d4 : Up 0.2
+O: * : s6d4 : Down 0.2
+O: * : s6d4 : Right 0.2
+O: * : s6d4 : Left 0.2
+O: * : s6d4 : Nothing 0.2
+
+O: * : s7d4 : Up 0.2
+O: * : s7d4 : Down 0.2
+O: * : s7d4 : Right 0.2
+O: * : s7d4 : Left 0.2
+O: * : s7d4 : Nothing 0.2
+
+O: * : s8d4 : Up 0.9
+O: * : s8d4 : Down 0.025
+O: * : s8d4 : Right 0.025
+O: * : s8d4 : Left 0.025
+O: * : s8d4 : Nothing 0.025
+
+O: * : s9d4 : Up 0.0375
+O: * : s9d4 : Down 0.0375
+O: * : s9d4 : Right 0.85
+O: * : s9d4 : Left 0.0375
+O: * : s9d4 : Nothing 0.0375
+
+O: * : s10d4 : Up 0.0125
+O: * : s10d4 : Down 0.95
+O: * : s10d4 : Right 0.0125
+O: * : s10d4 : Left 0.0125
+O: * : s10d4 : Nothing 0.0125
+
+O: * : s11d4 : Up 0.9
+O: * : s11d4 : Down 0.025
+O: * : s11d4 : Right 0.025
+O: * : s11d4 : Left 0.025
+O: * : s11d4 : Nothing 0.025
+
+O: * : s12d4 : Up 0.0375
+O: * : s12d4 : Down 0.0375
+O: * : s12d4 : Right 0.85
+O: * : s12d4 : Left 0.0375
+O: * : s12d4 : Nothing 0.0375
+
+O: * : s13d4 : Up 0.2
+O: * : s13d4 : Down 0.2
+O: * : s13d4 : Right 0.2
+O: * : s13d4 : Left 0.2
+O: * : s13d4 : Nothing 0.2
+
+O: * : s14d4 : Up 0.9
+O: * : s14d4 : Down 0.025
+O: * : s14d4 : Right 0.025
+O: * : s14d4 : Left 0.025
+O: * : s14d4 : Nothing 0.025
+
+O: * : s15d4 : Up 0.9
+O: * : s15d4 : Down 0.025
+O: * : s15d4 : Right 0.025
+O: * : s15d4 : Left 0.025
+O: * : s15d4 : Nothing 0.025
+
+O: * : s16d4 : Up 0.15
+O: * : s16d4 : Down 0.0611111
+O: * : s16d4 : Right 0.0611111
+O: * : s16d4 : Left 0.0611111
+O: * : s16d4 : Nothing 0.666667
+
+
+# R: <action> : <start-state> : <end-state> : <observation> %f
+R: * : * : * : * -1.0
+R: *    : *  : s1d1 : * 100
+R: *    : *  : s7d2 : * 100
+R: *    : *  : s8d3 : * 100
+R: *    : *  : s16d4 : * 100

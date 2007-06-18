@@ -38,7 +38,7 @@ for i=1:length(fileTemp)
   last = length(t);
   % Find the destination index from the set of given destinations
   dest = str2num(fileTemp{i}(t{last}(1,1):t{last}(1,2)));
-  indx = strfind(pomdpModel.destinations,sprintf('s%d',dest));
+  indx = strfind(pomdpModel.destinations,sprintf('s%dd',dest));
   for j=1:length(indx)
       if ~isempty(indx{j})
         destIndx = j;
@@ -60,10 +60,14 @@ end
 % build the frequency based probabilities 
 obsSum = zeros(pomdpModel.numSpatialStates*length(pomdpModel.destinations),length(pomdpModel.observations));
 for i=1:length(obs)
-    index = (obs{i}.dest-1)*pomdpModel.numSpatialStates + obs{i}.pos;
-    %indx = strfind(pomdpModel.observations,sprintf('%d-%s',obs{i}.pos,obs{i}.obs));
-    %indx = strfind(pomdpModel.observations,sprintf('%s-%d',obs{i}.obs,obs{i}.pos));
-    indx = strfind(pomdpModel.observations,obs{i}.obs);
+    index = (obs{i}.dest-1)*pomdpModel.numSpatialStates + obs{i}.pos;    
+    
+    if (pomdpModel.obsCrossFeature)
+        indx = strfind(pomdpModel.observations,sprintf('%s-%d',obs{i}.obs,obs{i}.pos));
+    else
+        indx = strfind(pomdpModel.observations,obs{i}.obs);
+    end
+
     for j=1:length(indx)
         if ~isempty(indx{j})
             obsIndx = j;
