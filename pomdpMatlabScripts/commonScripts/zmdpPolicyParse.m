@@ -6,73 +6,125 @@ function policy = zmdpPolicyParse(filename)
 % belief  : a (1,n) vector with the probability belief of states where n is
 % the number of states in the POMDP model. 
 
-file = textread(filename,'%s','delimiter','\n','whitespace',' \b\t','bufsize',8000000);
-
-% remove comments and empty lines (if they exist)
-k=0;
-for i=1:length(file)
-  comment=strfind(file{i},'#');
-  if ~isempty(comment)
-    file{i}(comment(1):end)=[];
-  end
-  if ~isempty(file{i})
-    k=k+1;
-    fileTemp{k}=file{i};
-  end
-%   if (mod(i,1000)==0)
-%       display(i);
-%   end
-end
-clear file;
+file = textread(filename,'%s','commentstyle','shell','delimiter','\n','whitespace',' \b\t','bufsize',1000000);
 
 % remove un-necessary info
 k=0;
-for i=1:length(fileTemp)
-  leftCurlyBracket =strfind(fileTemp{i},'{');
-  rightCurlyBracket=strfind(fileTemp{i},'}');
-  leftBracket =strfind(fileTemp{i},'[');
-  rightBracket=strfind(fileTemp{i},']'); 
-  policy = strfind(fileTemp{i},'policyType');
-  planes = strfind(fileTemp{i},'planes');
-  entries = strfind(fileTemp{i},'entries');
-  if isempty(leftCurlyBracket) && isempty(rightCurlyBracket) && isempty(leftBracket) && isempty(rightBracket) && isempty(planes) && isempty(policy)&& isempty(entries)
+fileTemp = cell(length(file),1);
+for i=1:length(file)
+  leftCurlyBracket =strfind(file{i},'{');
+  if isempty(leftCurlyBracket) && ~isempty(file{i})
     k=k+1;
-    file{k}=fileTemp{i};
+    fileTemp{k}=file{i};
   end
 end
+file = fileTemp;
 clear fileTemp;
 
+k=0;
+fileTemp = cell(length(file),1);
 for i=1:length(file)
+  rightCurlyBracket=strfind(file{i},'}');
+  if isempty(rightCurlyBracket)
+      k=k+1;
+      fileTemp{k}=file{i};
+  end
+end
+file = fileTemp;
+clear fileTemp;
+
+k=0;
+fileTemp = cell(length(file),1);
+for i=1:length(file)
+  leftBracket =strfind(file{i},'[');
+  if isempty(leftBracket)
+    k=k+1;
+    fileTemp{k}=file{i};
+  end
+end
+file = fileTemp;
+clear fileTemp;
+
+k=0;
+fileTemp = cell(length(file),1);
+for i=1:length(file)
+  rightBracket=strfind(file{i},']'); 
+  if isempty(rightBracket)
+    k=k+1;
+    fileTemp{k}=file{i};
+  end
+end
+file = fileTemp;
+clear fileTemp;
+
+k=0;
+fileTemp = cell(length(file),1);
+for i=1:length(file)
+  policy = strfind(file{i},'policyType');
+  if isempty(policy)
+    k=k+1;
+    fileTemp{k}=file{i};
+  end
+end
+file = fileTemp;
+clear fileTemp;
+
+k=0;
+fileTemp = cell(length(file),1);
+for i=1:length(file)
+  planes = strfind(file{i},'planes');
+  if isempty(planes)
+    k=k+1;
+    fileTemp{k}=file{i};
+  end
+end
+file = fileTemp;
+clear fileTemp;
+
+k=0;
+fileTemp = cell(length(file),1);
+for i=1:length(file)
+  entries = strfind(file{i},'entries');
+  if  isempty(entries)
+    k=k+1;
+    fileTemp{k}=file{i};
+  end
+end
+file = fileTemp;
+clear fileTemp;
+
+lines = file;
+for i=1:length(lines)
   % remove right Arrows
-  rightArrow =strfind(file{i},'=>');
+  rightArrow =strfind(lines{i},'=>');
   if ~isempty(rightArrow)
-      file{i}(rightArrow(1):rightArrow(1)+1)=[];
+      lines{i}(rightArrow(1):rightArrow(1)+1)=[];
   end 
   % remove the commas
-  comma =strfind(file{i},',');
+  comma =strfind(lines{i},',');
   s = length(comma);
   if ~isempty(comma)
       for j=0:(length(comma)-1)
-          file{i}((comma(j+1)-j):(comma(j+1)-j))=[];
+          lines{i}((comma(j+1)-j):(comma(j+1)-j))=[];
       end
   end
 end
 
-nrLines=length(file);
+nrLines = length(lines);
 k=1;
-policy.numPlanes = sscanf(file{k},'%*s %d');
+policy.numPlanes = sscanf(lines{k},'%*s %d');
 
 k=k+1;
 for i=1:policy.numPlanes
-    policy.planeActions(i) = sscanf(file{k},'%*s %d');
+    policy.planeActions(i) = sscanf(lines{k},'%*s %d');
     k=k+1;
-    [numEntries] = sscanf(file{k},'%*s %d');
+    [numEntries] = sscanf(lines{k},'%*s %d');
     k=k+1;
     for j=1:numEntries
-        x = sscanf(file{k},'%d %f');
+        x = sscanf(lines{k},'%d %f');
         policy.planeEntries{i,(x(1)+1)} = x(2);
         k=k+1;
     end
 end
-
+clear lines;
 end

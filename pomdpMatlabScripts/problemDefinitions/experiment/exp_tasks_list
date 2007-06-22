@@ -7,6 +7,11 @@
 # model to be used in solving the POMDP problem.
 
 # <Location-1> <Observation-1> ... <Location-n><observation-n>
+1 Down 2 Down 3 Down 4 Down 5 Right 6 Up 7 Nothing
+1 Down 2 Down 3 Down 4 Down 5 Right 6 Up 7 Nothing
+1 Down 2 Down 3 Down 4 Down 5 Right 6 Up 7 Nothing
+1 Down 2 Right 8 Nothing
+1 Down 2 Right 8 Up 9 Right 12 Right 15 Right 16 Nothing
 4 Up 3 Up 2 Up 1 Nothing
 4 Down 5 Right 6 Up 7 Nothing
 4 Up 3 Up 2 Right 8 Nothing
@@ -14,14 +19,36 @@
 4 Up 3 Up 2 Right 8 Up 9 Right 12 Right 15 Up 16 Nothing
 4 Up 3 Up 2 Right 8 Up 9 Right 12 Right 15 Up 16 Nothing
 4 Up 3 Up 2 Right 8 Up 9 Right 12 Right 15 Up 16 Nothing
+7 Down 6 Left 5 Up 4 Up 3 Up 2 Up 1 Nothing
+7 Down 6 Left 5 Up 4 Up 4 Up 3 Up 2 Right 8 Nothing
+7 Down 6 Left 5 Up 4 Up 4 Up 3 Up 2 Right 8 Nothing
+7 Down 6 Left 5 Up 4 Up 4 Up 3 Up 2 Right 8 Nothing
+7 Down 6 Left 5 Up 4 Up 4 Up 3 Up 2 Right 8 Up 9 Right 12 Right 15 Up 16 Nothing
+8 Up 9 Right 12 Right 15 Up 16 Nothing
+8 Up 9 Right 12 Right 15 Up 16 Nothing
+8 Left 2 Up 1 Nothing
 10 Down 9 Right 12 Right 15 Up 16 Nothing
+10 Down 9 Right 12 Right 15 Up 16 Nothing
+10 Down 9 Down 8 Nothing
+10 Down 9 Down 8 Left 2 Up 1 Nothing
+10 Down 9 Down 8 Left 2 Down 3 Down 4 Down 5 Right 6 Up 7 Nothing
+11 Up 12 Right 15 Up 16 Nothing
+11 Up 12 Left 9 Down 8 Left 2 Up 1 Nothing
+11 Up 12 Left 9 Down 8 Left 2 Up 1 Nothing
+11 Up 12 Left 9 Down 8 Nothing
+11 Up 12 Left 9 Down 8 Left 2 Down 3 Down 4 Down 5 Right 6 Up 7 Nothing
+13 Down 12 Right 15 Up 16 Nothing
+13 Down 12 Right 15 Up 16 Nothing
 13 Down 12 Left 9 Down 8 Nothing
 13 Down 12 Left 9 Down 8 Left 2 Up 1 Nothing
+13 Down 12 Left 9 Down 8 Left 2 Down 3 Down 4 Down 5 Right 6 Up 7 Nothing
 14 Up 15 Up 16 Noting
-11 Up 12 Right 15 Up 16 Nothing
-11 Up 12 Left 9 Down 8 Nothing
-1 Down 2 Down 3 Down 4 Down 5 Right 6 Up 7 Nothing
-7 Down 6 Left 5 Up 4 Nothing
-1 Down 2 Down 3 Down 4 Nothing
-8 Left 2 Down 3 Down 4 Nothing
+14 Up 15 Left 12 Left 9 Down 8 Nothing
+14 Up 15 Left 12 Left 9 Down 8 Left 2 Up 1 Nothing
+14 Up 15 Left 12 Left 9 Down 8 Left 2 Down 3 Down 4 Down 5 Right 6 Up 7 Nothing
+14 Up 15 Left 12 Left 9 Down 8 Left 2 Down 3 Down 4 Down 5 Right 6 Up 7 Nothing
 16 Down 15 Left 12 Left 9 Down 8 Left 2 Up 1 Nothing
+16 Down 15 Left 12 Left 9 Down 8 Nothing
+16 Down 15 Left 12 Left 9 Down 8 Nothing
+16 Down 15 Left 12 Left 9 Down 8 Left 2 Down 3 Down 4 Down 5 Right 6 Up 7 Nothing
+
