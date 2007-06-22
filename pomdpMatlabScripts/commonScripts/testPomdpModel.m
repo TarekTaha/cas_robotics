@@ -1,14 +1,16 @@
-function obsProbs = testPomdpModel(pomdpFileModelName,solutionFile,tasksFile)
+function testPomdpModel(pomdpFileModelName,solutionFile,tasksFile)
 % This function tests a PomdpModel given a set of tasks.
 
 file = textread(tasksFile,'%s','delimiter','\n','whitespace',' \b\t','bufsize',100000);
 k=0;
 % i know it's stupid this way but i will find a proper way later 
 obsStrings  = {'Up','Down','Right','Left','Nothing'};
-destStrings = {'s3d1','s7d2'};
+destStrings = {'s1d1','s7d2','s8d3','s16d4'};
 
 pomdp  = readPOMDP(pomdpFileModelName,0);
+display('POMDP Model File read.')
 policy = zmdpPolicyParse(solutionFile);
+display('Solution File Read');
 
 n = pomdp.nrStates;
 m = pomdp.nrStates/2;
@@ -58,6 +60,7 @@ for i=1:length(obs)
 %     if i==4
 %         keyboard
 %     end
+    display(sprintf('Task:%d',i));
     for j=1:size(obs{i}.obs,2)   
         % Take an Observation
         currentObs = strfind(obsStrings,obs{i}.obs{j});
@@ -81,9 +84,9 @@ for i=1:length(obs)
     end
     destIndx = floor(index/m) + 1;
     if destIndx == obs{i}.dest{1}
-        display(sprintf('Success in Task:%d Destination:%d',i,destIndx));
+        display(sprintf('\tSuccess in Task:%d Destination:%d',i,destIndx));
     else
-        display(sprintf('Failure in Task:%d Dest reached:%d Intended:%d ',i,destIndx,obs{i}.dest{1}));
+        display(sprintf('\tFailure in Task:%d Dest reached:%d Intended:%d ',i,destIndx,obs{i}.dest{1}));
     end
 end
 
