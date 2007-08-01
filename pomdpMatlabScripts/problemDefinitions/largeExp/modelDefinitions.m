@@ -8,7 +8,7 @@ pomdpModel.obsCrossFeature  = 0;
 pomdpModel.destCrossFeature = 1;
 
 % define the destinations
-pomdpModel.destinations = {'s1d1','s6d2','s26d3','s30d4'};
+pomdpModel.destinations = {'s1d1','s6d2','s26d3','s30d4','s31d5','s38d6'};
 pomdpModel.actions = {'North','South','East','West','Stop'};
 pomdpModel.obsStrings = {'Up','Down','Right','Left','Nothing'};
 
@@ -17,7 +17,7 @@ pomdpModel.obsStrings = {'Up','Down','Right','Left','Nothing'};
 pomdpModel.actionsUncertainty = [0,0,0,0,0];
 
 % Percentage Uncertainty in the Observations
-%pomdpModel.observationsUncertainty = [10,10,10,10,15];
+%pomdpModel.observationsUncertainty = [0,0,0,0,0];
 pomdpModel.observationsUncertainty = [10,5,15,10,20];
 
 % Construct the Graph network by defining the number of states and the

@@ -5,7 +5,7 @@ file = textread(tasksFile,'%s','delimiter','\n','whitespace',' \b\t','bufsize',1
 k=0;
 % i know it's stupid this way but i will find a proper way later 
 obsStrings  = {'Up','Down','Right','Left','Nothing'};
-destStrings = {'s1d1','s7d2','s8d3','s16d4'};
+destStrings = {'s1d1','s6d2','s26d3','s30d4','s31d5','s38d6'};
 
 pomdp  = readPOMDP(pomdpFileModelName,0);
 display('POMDP Model File read.')
@@ -13,7 +13,7 @@ policy = zmdpPolicyParse(solutionFile);
 display('Solution File Read');
 
 n = pomdp.nrStates;
-m = pomdp.nrStates/2;
+m = pomdp.nrStates/length(destStrings);
 
 %ignore comments
 for i=1:length(file)
@@ -43,6 +43,9 @@ for i=1:length(fileTemp)
             destIndx = j;
         end 
     end
+    if isempty(destIndx)
+        error('Unknown Destination !!!');
+    end
     % build the observation set from this task
     for j=1:length(t)
         numObs = numObs + 1;
@@ -51,7 +54,8 @@ for i=1:length(fileTemp)
         obs{i}.pos{numObs}   = str2num(fileTemp{i}(t{j}(1,1):t{j}(1,2))) + (destIndx-1)*m;         
     end
 end
-
+failure = 0;
+success = 0;
 for i=1:length(obs)
     % first state is assumed to be known
     currentBelief=zeros(1,n);
@@ -78,16 +82,19 @@ for i=1:length(obs)
         [value , mostProbableCurrentLocation] = max(updatedBelief);
         % See where this action will take us
         [value, index] = max(pomdp.transition(:,mostProbableCurrentLocation,action));
-        %index
+        %x = mod(index,49)
         currentBelief=zeros(1,n);
         currentBelief(index) = value;
     end
     destIndx = floor(index/m) + 1;
     if destIndx == obs{i}.dest{1}
         display(sprintf('\tSuccess in Task:%d Destination:%d',i,destIndx));
+        success = success + 1;
     else
         display(sprintf('\tFailure in Task:%d Dest reached:%d Intended:%d ',i,destIndx,obs{i}.dest{1}));
+        failure = failure +1 ;
     end
+    display(sprintf('Failure percentage = %f',failure/success));
 end
 
 end
