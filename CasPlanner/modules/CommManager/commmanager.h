@@ -1,7 +1,8 @@
 #ifndef COMMMANAGER_H
 #define COMMMANAGER_H
-#include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
+//#include <libplayerc++/playerc++.h>
+//#include <libplayercore/player.h>
+#include "playerinterface.h"
 
 class CommManager;
 class PlayerInterface;
@@ -10,7 +11,6 @@ class PlayGround;
 
 #include "comms.h"
 #include "interfaceprovider.h"
-#include "playerinterface.h"
 #include "robot.h"
 #include "statusbar.h"
 #include "playground.h"
@@ -54,5 +54,6 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
         Robot * robot;
        	PlayGround *playGround;
 };
+
 #endif
 

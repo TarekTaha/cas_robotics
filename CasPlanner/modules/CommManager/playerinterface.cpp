@@ -352,7 +352,10 @@ void PlayerInterface::run ()
 	    	vfh 	= new Position2dProxy(pc,vfhId);
 //	    	qDebug("\t\t - Vfh Started Successfully ID:%d",vfhId);
 			logMsg.append(QString("\n\t\t - Vfh Started Successfully ID:%1").arg(vfhId));	    	
-	    }	    
+	    }	   
+	    /* This is temp until the wheelchair interface is added.*/
+	    joyStickId = 3;
+    	joyStick = new Position2dProxy(pc,joyStickId);
     }
    catch (PlayerCc::PlayerError e)
   	{
@@ -411,6 +414,9 @@ void PlayerInterface::run ()
 	            odom_location.p.setX(drive->GetXPos());
 	            odom_location.p.setY(drive->GetYPos());
 	            odom_location.phi =  drive->GetYaw();
+	            joyAxes.setX(joyStick->GetXPos());
+	            joyAxes.setY(joyStick->GetYPos());
+	            cout<<"\n Current Location X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();
 				//cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<odom_location.phi;	            
 	        }
 			if(ptzEnabled)

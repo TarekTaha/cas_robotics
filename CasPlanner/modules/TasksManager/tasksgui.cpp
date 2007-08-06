@@ -98,14 +98,14 @@ void TasksControlPanel::runRandomTasks()
 			p = tasksGui->voronoiPlanner->path;
 			while(p)
 			{
-				for(int j=0; j<tasksGui->playGround->mapManager->mapSkeleton.verticies.size(); j++)
-				{
-					if((p->pose.p.x() == tasksGui->playGround->mapManager->mapSkeleton.verticies[j].location.x())&&
-					   (p->pose.p.y() == tasksGui->playGround->mapManager->mapSkeleton.verticies[j].location.y()))
-					   {
-					   		tasksGui->playGround->mapManager->mapSkeleton.verticies[j].prob = (++tasksGui->playGround->mapManager->mapSkeleton.verticies[j].visits)/double(++tasksGui->totalVisits); 
-					   }
-				}		
+//				for(int j=0; j<tasksGui->playGround->mapManager->mapSkeleton.verticies.size(); j++)
+//				{
+//					if((p->pose.p.x() == tasksGui->playGround->mapManager->mapSkeleton.verticies[j].location.x())&&
+//					   (p->pose.p.y() == tasksGui->playGround->mapManager->mapSkeleton.verticies[j].location.y()))
+//					   {
+//					   		tasksGui->playGround->mapManager->mapSkeleton.verticies[j].prob = (++tasksGui->playGround->mapManager->mapSkeleton.verticies[j].visits)/double(++tasksGui->totalVisits); 
+//					   }
+//				}		
 				p = p->next;
 			}
 		}	
@@ -217,10 +217,10 @@ void MapGL::config()
 
 }
 
-void MapGL::setSSkelPtr(SSkelPtr sskel)
-{
- 	this->sskel = sskel;
-}
+//void MapGL::setSSkelPtr(SSkelPtr sskel)
+//{
+// 	this->sskel = sskel;
+//}
 
 void MapGL::drawProbHisto(QPointF pos, double prob)
 {
@@ -281,76 +281,76 @@ void MapGL::drawProbHisto(QPointF pos, double prob)
 
 void MapGL::renderSkeleton()
 {
-  	const Halfedge_const_handle null_halfedge ;
-  	const Vertex_const_handle   null_vertex ;
-  		
-    if ( !this->sskel )
-      return ;
-
-	fflush(stdout);
-    int watchdog_limit = sskel->size_of_halfedges();
-
-	glPushMatrix();
-	//glLineWidth(2);
-	for ( Face_const_iterator fit = sskel->faces_begin(), efit = sskel->faces_end(); fit != efit; ++ fit)
-    {
-      	Halfedge_const_handle hstart = fit->halfedge();
-     	Halfedge_const_handle he     = hstart ;
-      	int watchdog = watchdog_limit ;
-      	do
-      	{
-        	if ( he == null_halfedge )
-          		break ;
-        	if ( he->is_bisector() )
-        	{
-	          	bool lVertexOK      = he->vertex() != null_vertex ;
-	          	bool lOppositeOK    = he->opposite() != null_halfedge ;
-	          	bool lOppVertexOK   = lOppositeOK && he->opposite()->vertex() != null_vertex ;
-	          	bool lVertexHeOK    = lVertexOK && he->vertex()->halfedge() != null_halfedge ;
-	          	bool lOppVertexHeOK = lOppVertexOK && he->opposite()->vertex()->halfedge() != null_halfedge ;
-          		if ( lVertexOK && lOppVertexOK && lVertexHeOK && lOppVertexHeOK )
-          		{
-			    	he->is_inner_bisector()? glColor4f(0,0,1,1) : glColor4f(1,0,0,1);
-					glBegin(GL_LINES);
-						//if(he->opposite()->vertex()->is_skeleton())
-						glVertex2f(he->opposite()->vertex()->point().x(),he->opposite()->vertex()->point().y());
-		    			glVertex2f(he->vertex()->point().x(),he->vertex()->point().y());
-					glEnd();
-//					if (firstTime)
-//					{
-//						std::cout<<"\nDrawing Line at Start X:"<<he->opposite()->vertex()->point().x()<<" Y:"<<he->opposite()->vertex()->point().y();
-//						std::cout<<" End X:"<<he->vertex()->point().x()<<" Y:"<<he->vertex()->point().y();
-//					}
-//					if(he->vertex()->is_skeleton())
-//					{
-//						glBegin(GL_POLYGON);
-//							glVertex2f(he->vertex()->point().x()- 0.1, he->vertex()->point().y()+0.1);
-//							glVertex2f(he->vertex()->point().x()+ 0.1, he->vertex()->point().y()+0.1);
-//							glVertex2f(he->vertex()->point().x()+ 0.1, he->vertex()->point().y()-0.1);
-//							glVertex2f(he->vertex()->point().x()- 0.1, he->vertex()->point().y()-0.1);
-//						glEnd();
-//					}
-//					if(he->opposite()->vertex()->is_skeleton())
-//					{
-//						glBegin(GL_POLYGON);
-//							glVertex2f(he->opposite()->vertex()->point().x()- 0.1, he->opposite()->vertex()->point().y()+0.1);
-//							glVertex2f(he->opposite()->vertex()->point().x()+ 0.1, he->opposite()->vertex()->point().y()+0.1);
-//							glVertex2f(he->opposite()->vertex()->point().x()+ 0.1, he->opposite()->vertex()->point().y()-0.1);
-//							glVertex2f(he->opposite()->vertex()->point().x()- 0.1, he->opposite()->vertex()->point().y()-0.1);
-//						glEnd();
-//					}				
-          		}	
-        	}
-        	he = he->next();
-      	}
-      	while ( -- watchdog > 0 && he != hstart ) ;
-    }
-    for(int i=0;i<tasksGui->playGround->mapManager->mapSkeleton.verticies.size();i++)
-    {
-		drawProbHisto(tasksGui->playGround->mapManager->mapSkeleton.verticies[i].location,tasksGui->playGround->mapManager->mapSkeleton.verticies[i].prob);    	
-    }
-	firstTime = false;
-    glPopMatrix();
+//  	const Halfedge_const_handle null_halfedge ;
+//  	const Vertex_const_handle   null_vertex ;
+//  		
+//    if ( !this->sskel )
+//      return ;
+//
+//	fflush(stdout);
+//    int watchdog_limit = sskel->size_of_halfedges();
+//
+//	glPushMatrix();
+//	//glLineWidth(2);
+//	for ( Face_const_iterator fit = sskel->faces_begin(), efit = sskel->faces_end(); fit != efit; ++ fit)
+//    {
+//      	Halfedge_const_handle hstart = fit->halfedge();
+//     	Halfedge_const_handle he     = hstart ;
+//      	int watchdog = watchdog_limit ;
+//      	do
+//      	{
+//        	if ( he == null_halfedge )
+//          		break ;
+//        	if ( he->is_bisector() )
+//        	{
+//	          	bool lVertexOK      = he->vertex() != null_vertex ;
+//	          	bool lOppositeOK    = he->opposite() != null_halfedge ;
+//	          	bool lOppVertexOK   = lOppositeOK && he->opposite()->vertex() != null_vertex ;
+//	          	bool lVertexHeOK    = lVertexOK && he->vertex()->halfedge() != null_halfedge ;
+//	          	bool lOppVertexHeOK = lOppVertexOK && he->opposite()->vertex()->halfedge() != null_halfedge ;
+//          		if ( lVertexOK && lOppVertexOK && lVertexHeOK && lOppVertexHeOK )
+//          		{
+//			    	he->is_inner_bisector()? glColor4f(0,0,1,1) : glColor4f(1,0,0,1);
+//					glBegin(GL_LINES);
+//						//if(he->opposite()->vertex()->is_skeleton())
+//						glVertex2f(he->opposite()->vertex()->point().x(),he->opposite()->vertex()->point().y());
+//		    			glVertex2f(he->vertex()->point().x(),he->vertex()->point().y());
+//					glEnd();
+////					if (firstTime)
+////					{
+////						std::cout<<"\nDrawing Line at Start X:"<<he->opposite()->vertex()->point().x()<<" Y:"<<he->opposite()->vertex()->point().y();
+////						std::cout<<" End X:"<<he->vertex()->point().x()<<" Y:"<<he->vertex()->point().y();
+////					}
+////					if(he->vertex()->is_skeleton())
+////					{
+////						glBegin(GL_POLYGON);
+////							glVertex2f(he->vertex()->point().x()- 0.1, he->vertex()->point().y()+0.1);
+////							glVertex2f(he->vertex()->point().x()+ 0.1, he->vertex()->point().y()+0.1);
+////							glVertex2f(he->vertex()->point().x()+ 0.1, he->vertex()->point().y()-0.1);
+////							glVertex2f(he->vertex()->point().x()- 0.1, he->vertex()->point().y()-0.1);
+////						glEnd();
+////					}
+////					if(he->opposite()->vertex()->is_skeleton())
+////					{
+////						glBegin(GL_POLYGON);
+////							glVertex2f(he->opposite()->vertex()->point().x()- 0.1, he->opposite()->vertex()->point().y()+0.1);
+////							glVertex2f(he->opposite()->vertex()->point().x()+ 0.1, he->opposite()->vertex()->point().y()+0.1);
+////							glVertex2f(he->opposite()->vertex()->point().x()+ 0.1, he->opposite()->vertex()->point().y()-0.1);
+////							glVertex2f(he->opposite()->vertex()->point().x()- 0.1, he->opposite()->vertex()->point().y()-0.1);
+////						glEnd();
+////					}				
+//          		}	
+//        	}
+//        	he = he->next();
+//      	}
+//      	while ( -- watchdog > 0 && he != hstart ) ;
+//    }
+//    for(int i=0;i<tasksGui->playGround->mapManager->mapSkeleton.verticies.size();i++)
+//    {
+//		drawProbHisto(tasksGui->playGround->mapManager->mapSkeleton.verticies[i].location,tasksGui->playGround->mapManager->mapSkeleton.verticies[i].prob);    	
+//    }
+//	firstTime = false;
+//    glPopMatrix();
 }
 
 void MapGL::renderPath()
@@ -452,9 +452,9 @@ void MapGL::paintGL()
 	renderPath();
 	if(tasksGui->skeletonGenerated && firstTime)
 	{
-		glNewList(skeletonList, GL_COMPILE);	
-			tasksGui->cvd->draw_diagram();
-			tasksGui->cvd->draw_sites();
+//		glNewList(skeletonList, GL_COMPILE);	
+////			tasksGui->cvd->draw_diagram();
+////			tasksGui->cvd->draw_sites();
 		glEndList();
 		glCallList(skeletonList);
 		firstTime = false;
@@ -612,7 +612,7 @@ TasksGui::TasksGui(QWidget *parent,PlayGround *playG):
     updateGeometry();
     setFocusPolicy(Qt::StrongFocus);
     config();
-	sskel = defs::SSkelPtr();
+//	sskel = defs::SSkelPtr();
 	loadTasks("/home/BlackCoder/workspace/CasPlanner/modules/TasksManager/tasks.txt");	
 }
 
@@ -636,29 +636,29 @@ int TasksGui::config()
 
 void TasksGui::loadTasks(string filename)
 {
- 	std::ifstream in(filename.c_str());
- 	tasks.clear();
- 	int row=0;
-	if ( in )
-    {
-    	while ( ! in.eof() )
-      	{ 
-          	double x1,x2,y1,y2 ;
-          	string name;
-          	//char name[20];
-          	in >> x1 >> y1 >> x2 >> y2>> name ;
-          	Task t(QPointF(x1,y1),QPointF(x2,y2),name.c_str());
-	        tasks.push_back(t);
-	        
-	        QListWidgetItem *newItem = new QListWidgetItem;
-	        newItem->setText(name.c_str());
-	        tasksControlPanel.tasksList.insertItem(row++, newItem);          	 
-      	}
-    }
-	else
-	{
-		std::cout<<"\n File Not Found";
-	}    
+// 	std::ifstream in(filename.c_str());
+// 	tasks.clear();
+// 	int row=0;
+//	if ( in )
+//    {
+//    	while ( ! in.eof() )
+//      	{ 
+//          	double x1,x2,y1,y2 ;
+//          	string name;
+//          	//char name[20];
+//          	in >> x1 >> y1 >> x2 >> y2>> name ;
+//          	Task t(QPointF(x1,y1),QPointF(x2,y2),name.c_str());
+//	        tasks.push_back(t);
+//	        
+//	        QListWidgetItem *newItem = new QListWidgetItem;
+//	        newItem->setText(name.c_str());
+//	        tasksControlPanel.tasksList.insertItem(row++, newItem);          	 
+//      	}
+//    }
+//	else
+//	{
+//		std::cout<<"\n File Not Found";
+//	}    
 //	for(int i=0; i<tasks.size();i++)
 //	{
 //		qDebug("Task %d: from [%f %f] to [%f %f] Name:%s ",i+1,tasks[i].getStart().x(),tasks[i].getStart().y(),
@@ -979,27 +979,27 @@ void TasksGui::testModel()
 
 void TasksGui::generateSkeleton()
 {
-	if(!playGround->mapManager->skeletonGenerated)
-	{
-		playGround->mapManager->generateSkeleton();
-		this->sskel = playGround->mapManager->sskel;
-		if (! this->sskel)
-		{
-			skeletonGenerated = false;		
-			qDebug("\nNo Skeleton Generated");
-			return;
-		}
-		else
-		{
-			skeletonGenerated = true;
-			mapGL.setSSkelPtr(playGround->mapManager->mapSkeleton.getSSkelPtr());
-			mapGL.paintGL();
-			if (voronoiPlanner)
-			{
-				delete voronoiPlanner;
-			}
-			voronoiPlanner = new VoronoiPathPlanner(this->sskel);
-			voronoiPlanner->buildSpace();
-		}
-	}
+//	if(!playGround->mapManager->skeletonGenerated)
+//	{
+//		playGround->mapManager->generateSkeleton();
+//		this->sskel = playGround->mapManager->sskel;
+//		if (! this->sskel)
+//		{
+//			skeletonGenerated = false;		
+//			qDebug("\nNo Skeleton Generated");
+//			return;
+//		}
+//		else
+//		{
+//			skeletonGenerated = true;
+//			mapGL.setSSkelPtr(playGround->mapManager->mapSkeleton.getSSkelPtr());
+//			mapGL.paintGL();
+//			if (voronoiPlanner)
+//			{
+//				delete voronoiPlanner;
+//			}
+//			voronoiPlanner = new VoronoiPathPlanner(this->sskel);
+//			voronoiPlanner->buildSpace();
+//		}
+//	}
 }

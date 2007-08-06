@@ -32,15 +32,15 @@
 #include "ogrender.h"
 #include "mapviewer.h"
 #include "task.h"
-#include "mapskeleton.h"
-#include "voronoidiagram.h"
+//#include "mapskeleton.h"
+//#include "voronoidiagram.h"
 
 class TasksGui;
 class TasksControlPanel;
 class QMessageBox;
 class SpeedRender;
 
-using namespace defs;
+//using namespace defs;
 using namespace CasPlanner;
 
 class TasksControlPanel: public QWidget
@@ -109,7 +109,7 @@ class MapGL: public QGLWidget
         void drawProbHisto(QPointF pos, double prob);
         void paintGL();
         void resizeGL(int w, int h);
-        void setSSkelPtr(SSkelPtr sskel);
+//        void setSSkelPtr(SSkelPtr sskel);
 		QSize sizeHint();
         void config();
         QSize setMinimumSizeHint();
@@ -117,7 +117,7 @@ class MapGL: public QGLWidget
 		void keyPressEvent(QKeyEvent *e);
     private:
 		TasksGui *tasksGui;
-		SSkelPtr  sskel;
+//		SSkelPtr  sskel;
 		float zoomFactor;
 		float xOffset, yOffset, zOffset;
 		float yaw, pitch;
@@ -147,8 +147,8 @@ class TasksGui :public QWidget
     	bool skeletonGenerated;
         int totalVisits;		    	    
     	PlayGround * playGround;
-		Virtual_Voronoi_diagram_2*      vvd;    
-		VoronoiDiagram *     cvd;	
+//		Virtual_Voronoi_diagram_2*      vvd;    
+//		VoronoiDiagram *     cvd;	
     public slots:
         void updateData();
         void provideSpeed(double &speed, double &turnRate);
@@ -162,7 +162,7 @@ class TasksGui :public QWidget
     private:
 		QTabWidget *tabContainer;
 		TasksControlPanel tasksControlPanel;
-		SSkelPtr  sskel;
+//		SSkelPtr  sskel;
         MapGL mapGL;
 //        MapViewer mapGL;
         double speed;
