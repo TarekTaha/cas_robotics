@@ -11,7 +11,7 @@
 #include <iostream>
 #include <QDataStream>
 
-#include "playerinterface.h"
+//#include "playerinterface.h"
 #include "utils.h"
 #include "map.h"
 #include "timer.h"
@@ -46,18 +46,6 @@ class DeviceType
   		QString driverName;
   		bool subscribed;
 };
-
-////Q_GUI_EXPORT 
-//QDataStream &operator<<(QDataStream & out , const DeviceType &dev)
-//{
-//	out<<dev.subscribed;
-//};
-//
-////Q_GUI_EXPORT 
-//QDataStream &operator>>(QDataStream & in , DeviceType &dev)
-//{
-//	in>>dev.subscribed;
-//};
 
 class Laser
 {
@@ -118,13 +106,14 @@ Q_OBJECT
        	QVector <DeviceType> *devices; 	
         bool ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized,emergencyStopped,
         	 velControl,vfhEnabled;
-        int positionId,ptzId,mapId,localizerId,vfhId;
+        int positionId,ptzId,mapId,localizerId,vfhId,joyStickId;
         QVector <Laser> lasers;
-        Position2dProxy *drive, *vfh;
+        Position2dProxy *drive, *vfh, *joyStick;
         MapProxy *map;
 		PtzProxy *ptz;
 		LocalizeProxy *localizer;
 		Pose location,goal,odom_location,vfhGoal;
+		QPointF joyAxes;
 		double pan,tilt,pose[3], pose_covar[3];
         LaserScan laserScan;
         double speed,turnRate,getspeed,getturnrate;

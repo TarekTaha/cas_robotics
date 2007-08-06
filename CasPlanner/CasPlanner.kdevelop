@@ -13,6 +13,7 @@
     <absoluteprojectpath>false</absoluteprojectpath>
     <description></description>
     <ignoreparts/>
+    <versioncontrol>kdevsubversion</versioncontrol>
   </general>
   <kdevfileview>
     <groups>
@@ -85,6 +86,7 @@
     </display>
   </kdevdebugger>
   <kdevfilecreate>
+    <filetypes/>
     <useglobaltypes>
       <type ext="ui" />
       <type ext="cpp" />
@@ -99,7 +101,7 @@
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
       <mainprogram></mainprogram>
-      <programargs></programargs>
+      <programargs>wheelchair.cfg</programargs>
       <terminal>false</terminal>
       <autocompile>true</autocompile>
       <envvars/>
@@ -129,9 +131,9 @@
       <headerCompletionDelay>250</headerCompletionDelay>
     </codecompletion>
     <qt>
-      <used>false</used>
-      <version>3</version>
-      <root>/usr/lib/qt-3.3</root>
+      <used>true</used>
+      <version>4</version>
+      <root>/usr/lib/qt4/</root>
     </qt>
     <creategettersetter>
       <prefixGet></prefixGet>
@@ -148,4 +150,15 @@
       <implementationsuffix>.cpp</implementationsuffix>
     </filetemplates>
   </cppsupportpart>
+  <kdevdocumentation>
+    <projectdoc>
+      <docsystem></docsystem>
+      <docurl></docurl>
+      <usermanualurl></usermanualurl>
+    </projectdoc>
+  </kdevdocumentation>
+  <ctagspart>
+    <customArguments></customArguments>
+    <customTagfilePath></customTagfilePath>
+  </ctagspart>
 </kdevelop>

@@ -4,7 +4,7 @@
 
 #include <CGAL/basic.h>
 #include <CGAL/iterator.h>
-#include <CGAL/Apollonius_graph_constructions_C2.h>
+//#include <CGAL/Apollonius_graph_constructions_C2.h>
 #include <CGAL/Hyperbola_segment_2.h>
 #include <CGAL/Hyperbola_ray_2.h>
 #include <CGAL/Hyperbola_2.h>

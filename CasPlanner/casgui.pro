@@ -3,7 +3,7 @@ HEADERS += modules/CommManager/commmanager.h \
            modules/CommManager/comms.h \
            modules/CommonTools/controlw.h \
            modules/CommonTools/include.h \           
-           modules/CommonTools/myexpect.h \
+           modules/CommonTools/myexcept.h \
            modules/CommonTools/newmatap.h \
            modules/CommonTools/newmatio.h \
            modules/CommonTools/newmatnl.h \
@@ -30,10 +30,6 @@ HEADERS += modules/CommManager/commmanager.h \
            modules/PlayGround/robotmanager.h \
            modules/Rendering/robotrender.h \
            modules/Sensors/sensors.h \
-           modules/TasksManager/hmm.h \           
-           modules/TasksManager/logprobs.h \           
-           modules/TasksManager/str2idmap.h \           
-           modules/TasksManager/tables.h \           
            modules/TasksManager/task.h \
            modules/TasksManager/tasksgui.h \
            modules/Rendering/speedrender.h \
@@ -59,9 +55,9 @@ HEADERS += modules/CommManager/commmanager.h \
            modules/GeometricTools/Transformations.h \
            modules/GeometricTools/utils.h \
            modules/GeometricTools/Vector2D.h \
-           modules/Voronoi/mapskeleton.h \      
-           modules/Voronoi/typedefs.h \                      
-           modules/Voronoi/voronoidiagram.h \           
+#           modules/Voronoi/mapskeleton.h \      
+#           modules/Voronoi/typedefs.h \                      
+#           modules/Voronoi/voronoidiagram.h \           
            modules/Controller/wheelchairproxy.h 
            
 SOURCES += modules/CommManager/commmanager.cpp \
@@ -106,9 +102,6 @@ SOURCES += modules/CommManager/commmanager.cpp \
            modules/PlayGround/robotmanager.cpp \
            modules/Rendering/robotrender.cpp \
            modules/Sensors/sensors.cpp \
-           modules/TasksManager/hmm.cpp \           
-           modules/TasksManager/logprobs.cpp \           
-           modules/TasksManager/tables.cpp \             
            modules/TasksManager/task.cpp \
            modules/TasksManager/tasksgui.cpp \
            modules/Rendering/speedrender.cpp \
@@ -128,8 +121,8 @@ SOURCES += modules/CommManager/commmanager.cpp \
            modules/PathPlanner/searchspacenode.cpp \
            modules/PathPlanner/voronoipathplanner.cpp \
            modules/Misc/timer.cpp \
-           modules/Voronoi/mapskeleton.cpp \                       
-           modules/Voronoi/voronoidiagram.cpp \                      
+#           modules/Voronoi/mapskeleton.cpp \                       
+#           modules/Voronoi/voronoidiagram.cpp \                      
            modules/GeometricTools/Vector2d.cpp 
            
 INCLUDEPATH += 	/usr/local/Trolltech/Qt-4.2.2/include/QtCore \
@@ -158,7 +151,7 @@ INCLUDEPATH += 	/usr/local/Trolltech/Qt-4.2.2/include/QtCore \
 				modules/PlayGround \
 				modules/Rendering \
 				modules/Sensors \
-				modules/Voronoi \
+#				modules/Voronoi \
 				modules/TasksManager \
 				gui
 RESOURCES = resources/icons.qrc
@@ -167,7 +160,7 @@ QMAKE_CFLAGS_RELEASE+= -g -O3 -o
 QMAKE_CXXFLAGS_RELEASE+= -g -O3 -o -ffast-math -march=pentium-m -msse2 -mfpmath=sse $$system(pkg-config --cflags gthread-2.0 playerc++ playercore)
 #QMAKE_CFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse 
 #QMAKE_LFLAGS_RELEASE += -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
-LIBS += $$system(pkg-config --cflags --libs gthread-2.0 playerc++ playercore) -lCGAL
+LIBS += $$system(pkg-config --cflags --libs gthread-2.0 playerc++ playercore) #-lCGAL
 MOC_DIR = .tmp
 OBJECTS_DIR = .tmp
 RCC_DIR = .tmp
@@ -179,4 +172,7 @@ CONFIG += 	release \
 			thread \
 			exceptions \
 			stl
+# CONFIG      += no_keywords # so Qt won't #define any non-all-caps `keywords'
+# INCLUDEPATH += . /usr/local/include/boost-1_33_1/
+# macx:LIBS   += /usr/lib/libboost_signals.a  # ...your exact paths may vary			
 TEMPLATE = app

@@ -13,7 +13,7 @@
 #define CASPLANNERVORONOIPATHPLANNER_H
 
 #include "astar.h"
-#include "mapskeleton.h"
+//#include "mapskeleton.h"
 
 namespace CasPlanner
 {
@@ -27,12 +27,12 @@ class VoronoiPathPlanner : public Astar
 {
 	private :
 		bool skelInitialize;
-		SSkelPtr & sskel;
+//		SSkelPtr & sskel;
 	public :
 		void freeResources();
 		void freePath();
 		void printNodeList ();
-		void setSkeleton(SSkelPtr & sskel); // Reads the map file and sets the attributes
+//		void setSkeleton(SSkelPtr & sskel); // Reads the map file and sets the attributes
 		void buildSpace();
 		void showConnections();
 		void saveSearchSpace();
@@ -40,7 +40,8 @@ class VoronoiPathPlanner : public Astar
 		bool saveSpace2File(const char *filename);
 		void setStart(Pose start);
 		void setEnd(Pose start);
-    	VoronoiPathPlanner(SSkelPtr & sskel);
+//    	VoronoiPathPlanner(SSkelPtr & sskel);
+		VoronoiPathPlanner();
    	 	~VoronoiPathPlanner();
 
 };

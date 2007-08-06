@@ -14,9 +14,9 @@
 namespace CasPlanner
 {
 
-VoronoiPathPlanner::VoronoiPathPlanner(SSkelPtr & sskel):sskel(sskel)
-{
-}
+//VoronoiPathPlanner::VoronoiPathPlanner(SSkelPtr & sskel):sskel(sskel)
+//{
+//}
 
 
 VoronoiPathPlanner :: ~VoronoiPathPlanner()
@@ -160,50 +160,50 @@ void VoronoiPathPlanner::showConnections()
 
 void VoronoiPathPlanner::buildSpace()
 {
-  	SearchSpaceNode *temp,*child;
-  	const Halfedge_const_handle null_halfedge ;
-  	const Vertex_const_handle   null_vertex ;
-    if ( !this->sskel )
-	{
-		qDebug("\n Skeleton not assigned YET !!!");
-		fflush(stdout);
-		return ;
-	}
-
-    int watchdog_limit = sskel->size_of_halfedges();
-    for ( Face_const_iterator fit = sskel->faces_begin(), efit = sskel->faces_end(); fit != efit ; ++ fit)
-	{
-    	Halfedge_const_handle hstart = fit->halfedge();
-     	Halfedge_const_handle he     = hstart ;
-      	int watchdog = watchdog_limit ;
-
-		do
-      	{
-        	if ( he == null_halfedge )
-          		break ;
-        	if ( he->is_bisector() )
-        	{
-          		bool lVertexOK      = he->vertex() != null_vertex ;
-          		bool lOppositeOK    = he->opposite() != null_halfedge ;
-          		bool lOppVertexOK   = lOppositeOK && he->opposite()->vertex() != null_vertex ;
-				bool lVertexHeOK    = lVertexOK && he->vertex()->halfedge() != null_halfedge ;
-          		bool lOppVertexHeOK = lOppVertexOK && he->opposite()->vertex()->halfedge() != null_halfedge ;
-
-          		if ( lVertexOK && lOppVertexOK && lVertexHeOK && lOppVertexHeOK )
-				{
-			    	//he->is_inner_bisector()? glColor4f(0,0,1,1) : glColor4f(1,0,0,1);
-			    	if(!(temp = nodeExists(QPointF(he->vertex()->point().x(),he->vertex()->point().y()))))
-			    		temp  = insertNode(QPointF(he->vertex()->point().x(),he->vertex()->point().y()));
-					if(!(child = nodeExists(QPointF(he->opposite()->vertex()->point().x(),he->opposite()->vertex()->point().y()))))
-						child = insertNode(QPointF(he->opposite()->vertex()->point().x(),he->opposite()->vertex()->point().y()));
-					temp->children.push_back(child);
-          		}
-        	}
-        	he = he->next();
-      	}
-		while ( -- watchdog > 0 && he != hstart ) ;
-    }
-    MAXNODES = 500;
+//  	SearchSpaceNode *temp,*child;
+//  	const Halfedge_const_handle null_halfedge ;
+//  	const Vertex_const_handle   null_vertex ;
+//    if ( !this->sskel )
+//	{
+//		qDebug("\n Skeleton not assigned YET !!!");
+//		fflush(stdout);
+//		return ;
+//	}
+//
+//    int watchdog_limit = sskel->size_of_halfedges();
+//    for ( Face_const_iterator fit = sskel->faces_begin(), efit = sskel->faces_end(); fit != efit ; ++ fit)
+//	{
+//    	Halfedge_const_handle hstart = fit->halfedge();
+//     	Halfedge_const_handle he     = hstart ;
+//      	int watchdog = watchdog_limit ;
+//
+//		do
+//      	{
+//        	if ( he == null_halfedge )
+//          		break ;
+//        	if ( he->is_bisector() )
+//        	{
+//          		bool lVertexOK      = he->vertex() != null_vertex ;
+//          		bool lOppositeOK    = he->opposite() != null_halfedge ;
+//          		bool lOppVertexOK   = lOppositeOK && he->opposite()->vertex() != null_vertex ;
+//				bool lVertexHeOK    = lVertexOK && he->vertex()->halfedge() != null_halfedge ;
+//          		bool lOppVertexHeOK = lOppVertexOK && he->opposite()->vertex()->halfedge() != null_halfedge ;
+//
+//          		if ( lVertexOK && lOppVertexOK && lVertexHeOK && lOppVertexHeOK )
+//				{
+//			    	//he->is_inner_bisector()? glColor4f(0,0,1,1) : glColor4f(1,0,0,1);
+//			    	if(!(temp = nodeExists(QPointF(he->vertex()->point().x(),he->vertex()->point().y()))))
+//			    		temp  = insertNode(QPointF(he->vertex()->point().x(),he->vertex()->point().y()));
+//					if(!(child = nodeExists(QPointF(he->opposite()->vertex()->point().x(),he->opposite()->vertex()->point().y()))))
+//						child = insertNode(QPointF(he->opposite()->vertex()->point().x(),he->opposite()->vertex()->point().y()));
+//					temp->children.push_back(child);
+//          		}
+//        	}
+//        	he = he->next();
+//      	}
+//		while ( -- watchdog > 0 && he != hstart ) ;
+//    }
+//    MAXNODES = 500;
 }
 
 
@@ -223,12 +223,12 @@ void VoronoiPathPlanner::saveSearchSpace()
 /*! Sets the converted QImage or the Laser Scan Map to
  * the Current Planner
  */
-void VoronoiPathPlanner :: setSkeleton(SSkelPtr & ssk)
-{
-	if(!ssk)
-		qDebug("Why the hell ur giving me an empty Skeleton ???");
-	this->sskel = ssk;
-	skelInitialize = true;
-};
+//void VoronoiPathPlanner :: setSkeleton(SSkelPtr & ssk)
+//{
+//	if(!ssk)
+//		qDebug("Why the hell ur giving me an empty Skeleton ???");
+//	this->sskel = ssk;
+//	skelInitialize = true;
+//};
 
 }
