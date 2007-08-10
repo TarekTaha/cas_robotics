@@ -32,6 +32,11 @@
 #include "ogrender.h"
 #include "mapviewer.h"
 #include "task.h"
+
+#include "Pomdp.h"
+using namespace std;
+using namespace zmdp;
+
 //#include "mapskeleton.h"
 //#include "voronoidiagram.h"
 

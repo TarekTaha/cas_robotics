@@ -974,7 +974,60 @@ void TasksGui::requestSnap()
 //}
 void TasksGui::testModel()
 {
+  const std::string pomdpFileName = "/home/BlackCoder/Desktop/paperexperiment.pomdp";
+  // read it in
+  zmdp::Pomdp p(pomdpFileName);
 
+  // print out stats
+  cout << "numStates = " << p.getBeliefSize() << endl;
+  cout << "numActions = " << p.getNumActions() << endl;
+  cout << "numObservations = " << p.getNumObservations() << endl;
+  cout << "discount = " << p.getDiscount() << endl;
+  cout << endl;
+
+//  int s, sp, a, o;
+//
+//  printf("R(s,a) matrix (%d x %d) =\n", p.R.size1(), p.R.size2());
+//  for (s=0; s < p.getBeliefSize(); s++) {
+//    for (a=0; a < p.getNumActions(); a++) {
+//      printf("%9.2f ", p.R(s,a));
+//    }
+//    cout << endl;
+//  }
+//  cout << endl;
+//
+//  for (a=0; a < p.getNumActions(); a++) {
+//    printf("T_%d(s,sp) matrix (%d x %d) =\n", a, p.T[a].size1(), p.T[a].size2());
+//    for (s=0; s < p.getBeliefSize(); s++) {
+//      for (sp=0; sp < p.getBeliefSize(); sp++) {
+//	printf("%5.3f ", p.T[a](s,sp));
+//      }
+//      cout << endl;
+//    }
+//    cout << endl;
+//  }
+//
+//  for (a=0; a < p.getNumActions(); a++) {
+//    printf("Ttr_%d(sp,s) matrix (%d x %d) =\n", a, p.Ttr[a].size1(), p.Ttr[a].size2());
+//    for (sp=0; sp < p.getBeliefSize(); sp++) {
+//      for (s=0; s < p.getBeliefSize(); s++) {
+//	printf("%5.3f ", p.Ttr[a](sp,s));
+//      }
+//      cout << endl;
+//    }
+//    cout << endl;
+//  }
+//
+//  for (a=0; a < p.getNumActions(); a++) {
+//    printf("O_%d(sp,o) matrix (%d x %d) =\n", a, p.O[a].size1(), p.O[a].size2());
+//    for (sp=0; sp < p.getBeliefSize(); sp++) {
+//      for (o=0; o < p.getNumObservations(); o++) {
+//	printf("%5.3f ", p.O[a](sp,o));
+//      }
+//      cout << endl;
+//    }
+//    cout << endl;
+//  }
 }
 
 void TasksGui::generateSkeleton()
