@@ -974,17 +974,72 @@ void TasksGui::requestSnap()
 //}
 void TasksGui::testModel()
 {
-  const std::string pomdpFileName = "/home/BlackCoder/Desktop/paperexperiment.pomdp";
-  // read it in
-  zmdp::Pomdp p(pomdpFileName);
+//  const std::string pomdpFileName = "/home/BlackCoder/Desktop/paperexperiment.pomdp";
+//  // read it in
+//  zmdp::Pomdp p(pomdpFileName);
+//
+//  // print out stats
+//  cout << "numStates = " << p.getBeliefSize() << endl;
+//  cout << "numActions = " << p.getNumActions() << endl;
+//  cout << "numObservations = " << p.getNumObservations() << endl;
+//  cout << "discount = " << p.getDiscount() << endl;
+//  cout << endl;
 
-  // print out stats
-  cout << "numStates = " << p.getBeliefSize() << endl;
-  cout << "numActions = " << p.getNumActions() << endl;
-  cout << "numObservations = " << p.getNumObservations() << endl;
-  cout << "discount = " << p.getDiscount() << endl;
-  cout << endl;
+  // seeds random number generator
+  MatrixUtils::init_matrix_utils();
 
+  ZMDPConfig* config = new ZMDPConfig();
+  config->readFromFile("/home/BlackCoder/Desktop/something.conf");
+  config->setString("policyOutputFile", "none");
+  BoundPairExec* em = new BoundPairExec();
+  printf("initializing\n");
+  
+  em->initReadFiles("/home/BlackCoder/Desktop/paperexperiment.pomdp","/home/BlackCoder/Desktop/out.policy", *config);
+
+  MDPExec* e = em;
+  printf("Number of Actions is:%d\n",em->mdp->getNumActions());
+//  belief_vector b(((Pomdp*)em->mdp)->getBeliefSize());
+	belief_vector b;
+    dvector initialBeliefD;
+    initialBeliefD.resize(((Pomdp*)em->mdp)->getBeliefSize());  
+  //belief_vector b = ((Pomdp*)em->mdp)->getInitialBelief();
+  initialBeliefD(3)=1;
+  copy(b, initialBeliefD);
+  for(int i=0; i < b.size();i++)
+  {
+  	printf("\nBelief%d=%f",i,b(i));
+  	fflush(stdout);
+  }
+  em->setBelief(b);
+  e->setToInitialState();
+  int NUM_TRIALS = 10, NUM_STEPS_PER_TRIAL = 5;
+  for (int i=0; i < NUM_TRIALS; i++) 
+  {
+    printf("new simulation run\n");
+    e->setToInitialState();
+    printf("  reset to initial belief\n");
+    for (int j=0; j < NUM_STEPS_PER_TRIAL; j++) 
+    {
+      printf("  step %d\n", j);
+      int a = e->chooseAction();
+      printf("    chose action %d\n", a);
+      //int o = e->getRandomOutcome(a);
+      int o = 0;
+      printf("    simulated seeing random observation %d\n", o);
+      e->advanceToNextState(a,o);
+      printf("    updated belief\n");
+      if (e->getStateIsTerminal())
+      {
+		printf("  [belief is terminal, ending trial]\n");
+		break;
+      } 
+      else if (j == NUM_STEPS_PER_TRIAL-1) 
+      {
+		printf("  [reached trial length limit of %d steps, ending trial]\n",
+	    NUM_STEPS_PER_TRIAL);
+      }
+    }
+  }
 //  int s, sp, a, o;
 //
 //  printf("R(s,a) matrix (%d x %d) =\n", p.R.size1(), p.R.size2());

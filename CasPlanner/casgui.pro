@@ -53,9 +53,7 @@ HEADERS += modules/CommManager/commmanager.h \
     modules/Misc/timer.h \
     modules/GeometricTools/Transformations.h \
     modules/GeometricTools/utils.h \
-    modules/GeometricTools/Vector2D.h \ # modules/Voronoi/mapskeleton.h \
-# modules/Voronoi/typedefs.h \
-# modules/Voronoi/voronoidiagram.h \
+    modules/GeometricTools/Vector2D.h \
     modules/Controller/wheelchairproxy.h \
     modules/PomdpCore/CassandraModel.h \
     modules/PomdpCore/CassandraParser.h \
@@ -76,7 +74,20 @@ HEADERS += modules/CommManager/commmanager.h \
     modules/PomdpCore/pomdp_spec.tab.hh \
     modules/PomdpCore/parse_err.h \
     modules/PomdpCore/parse_hash.h \
-    modules/PomdpCore/parse_constant.h
+    modules/PomdpCore/parse_constant.h \
+    modules/PomdpCore/BoundPairExec.h \
+    modules/PomdpCore/MDPExec.h \
+    modules/PomdpCore/MaxPlanesLowerBound.h \
+    modules/PomdpCore/BoundPairCore.h \
+    modules/PomdpCore/BoundPair.h \
+    modules/PomdpCore/IncrementalLowerBound.h \
+    modules/PomdpCore/MDPCache.h \
+    modules/PomdpCore/IncrementalUpperBound.h \
+    modules/PomdpCore/AbstractBound.h \
+    modules/PomdpCore/sla_mask.h \
+    modules/PomdpCore/BlindLBInitializer.h \
+    modules/PomdpCore/zmdpMainConfig.h \
+    modules/PomdpCore/embedFiles.h
 SOURCES += modules/CommManager/commmanager.cpp \
     modules/CommonTools/bandmat.cpp \
     modules/CommonTools/cholesky.cpp \
@@ -137,8 +148,7 @@ SOURCES += modules/CommManager/commmanager.cpp \
     modules/PathPlanner/searchspace.cpp \
     modules/PathPlanner/searchspacenode.cpp \
     modules/PathPlanner/voronoipathplanner.cpp \
-    modules/Misc/timer.cpp \ # modules/Voronoi/mapskeleton.cpp \
-# modules/Voronoi/voronoidiagram.cpp \
+    modules/Misc/timer.cpp \
     modules/GeometricTools/Vector2d.cpp \
     modules/PomdpCore/CassandraModel.cc \
     modules/PomdpCore/CassandraParser.cc \
@@ -153,7 +163,14 @@ SOURCES += modules/CommManager/commmanager.cpp \
     modules/PomdpCore/pomdp_spec.tab.cc \
     modules/PomdpCore/pomdp_spec.yy.cc \
     modules/PomdpCore/parse_err.c \
-    modules/PomdpCore/parse_hash.c
+    modules/PomdpCore/parse_hash.c \
+    modules/PomdpCore/BoundPairExec.cc \
+    modules/PomdpCore/MDPExec.cc \
+    modules/PomdpCore/MaxPlanesLowerBound.cc \
+    modules/PomdpCore/BoundPairCore.cc \
+    modules/PomdpCore/BoundPair.cc \
+    modules/PomdpCore/MDPCache.cc \
+    modules/PomdpCore/BlindLBInitializer.cc
 INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     /usr/local/Trolltech/Qt-4.2.2/include/QtGui \
     /usr/local/high/include \
@@ -179,7 +196,7 @@ INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     modules/PlanningManager \
     modules/PlayGround \
     modules/Rendering \
-    modules/Sensors \ # modules/Voronoi \
+    modules/Sensors \
     modules/TasksManager \
     gui \
     modules/PomdpCore
