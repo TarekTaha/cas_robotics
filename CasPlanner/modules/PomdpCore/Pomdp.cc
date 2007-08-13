@@ -37,7 +37,7 @@
 #include "Pomdp.h"
 #include "MatrixUtils.h"
 #include "slaMatrixUtils.h"
-//#include "MaxPlanesLowerBound.h"
+#include "MaxPlanesLowerBound.h"
 //#include "SawtoothUpperBound.h"
 //#include "FastParser.h"
 #include "CassandraParser.h"
@@ -113,8 +113,8 @@ double Pomdp::getReward(const belief_vector& b, int a)
 
 AbstractBound* Pomdp::newLowerBound(const ZMDPConfig* _config)
 {
-  //return new MaxPlanesLowerBound(this, _config);
-  return NULL;
+  return new MaxPlanesLowerBound(this, _config);
+//  return NULL;
 }
 
 AbstractBound* Pomdp::newUpperBound(const ZMDPConfig* _config)

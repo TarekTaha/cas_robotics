@@ -33,7 +33,12 @@
 #include "mapviewer.h"
 #include "task.h"
 
+#include "MatrixUtils.h"
+#include "BoundPairExec.h"
+#include "zmdpMainConfig.h"
+
 #include "Pomdp.h"
+
 using namespace std;
 using namespace zmdp;
 
