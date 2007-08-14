@@ -909,69 +909,6 @@ void TasksGui::requestSnap()
 
 }
 
-//void TasksGui::generateSkeleton()
-//{
-//    cvd = new VoronoiDiagram();
-//    vvd = cvd;	
-//    vvd->clear();
-//    int counter=0;
-//    if(playGround && playGround->mapManager)
-//    {
-//    	Map * map = playGround->mapManager->globalMap;
-//    	for(int i=0;i<map->width;i++)
-//    		for(int j =0;j<map->height;j++)
-//    		{
-//    			if(map->grid[i][j])
-//    			{
-//	    			QPointF pix(i,j);
-//	    			map->convertPix(&pix);
-//	    			Rep::Point_2 p(pix.x(),pix.y());    			
-//	    			vvd->insert(p);
-//					counter++;
-//    			}    			
-//    		}
-//			bool b = vvd->is_valid();
-//		    if ( b ) 
-//		    {
-//	      		qDebug("Voronoi diagram is valid. with:%d Points",counter);
-//	      		skeletonGenerated = true;
-//	    	} 
-//	    	else 
-//	    	{
-//	      		qDebug("Voronoi diagram is NOT valid.");
-//	      		skeletonGenerated = false;
-//	    	}    		
-//    }
-//	else
-//	{
-//		std::cout<<"\n Map not generated YET";
-//	}    
-////	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/test.pnts");
-////    if ( in )
-////    {
-////	    while (in >> p) 
-////	    {
-////	    	vvd->insert(p);
-////	      	counter++;
-////	    }
-////		qDebug("\n%d sites have been inserted...", counter);	
-////		bool b = vvd->is_valid();
-////	    if ( b ) 
-////	    {
-////      		qDebug("Voronoi diagram is valid.");
-////      		skeletonGenerated = true;
-////    	} 
-////    	else 
-////    	{
-////      		qDebug("Voronoi diagram is NOT valid.");
-////      		skeletonGenerated = false;
-////    	}
-////    }
-////	else
-////	{
-////		std::cout<<"\n File Not Found";
-////	}
-//}
 void TasksGui::testModel()
 {
 //  const std::string pomdpFileName = "/home/BlackCoder/Desktop/paperexperiment.pomdp";
@@ -996,50 +933,65 @@ void TasksGui::testModel()
   
   em->initReadFiles("/home/BlackCoder/Desktop/paperexperiment.pomdp","/home/BlackCoder/Desktop/out.policy", *config);
 
-  MDPExec* e = em;
+//  MDPExec* e = em;
   printf("Number of Actions is:%d\n",em->mdp->getNumActions());
 //  belief_vector b(((Pomdp*)em->mdp)->getBeliefSize());
-	belief_vector b;
-    dvector initialBeliefD;
-    initialBeliefD.resize(((Pomdp*)em->mdp)->getBeliefSize());  
+  belief_vector b;
+  dvector initialBeliefD;
+  initialBeliefD.resize(((Pomdp*)em->mdp)->getBeliefSize());  
   //belief_vector b = ((Pomdp*)em->mdp)->getInitialBelief();
-  initialBeliefD(3)=1;
-  copy(b, initialBeliefD);
-  for(int i=0; i < b.size();i++)
-  {
-  	printf("\nBelief%d=%f",i,b(i));
-  	fflush(stdout);
-  }
-  em->setBelief(b);
-  e->setToInitialState();
-  int NUM_TRIALS = 10, NUM_STEPS_PER_TRIAL = 5;
+//  initialBeliefD(5)=1;
+//  copy(b, initialBeliefD);
+//  for(int i=0; i < b.size();i++)
+//  {
+//  	if(b(i))
+//  	{
+//	  	printf("\nBelief%d=%f",i,b(i));
+//	  	fflush(stdout);
+//  	}
+//  }
+//  em->setBelief(b);
+
+//  printf("  reset to initial belief\n");
+    em->setToInitialState();
+//  belief_vector newB = em->currentState;
+//  for(int i=0; i < newB.size();i++)
+//  {
+//  	if(newB(i))
+//  	{
+//	  	printf("\nBelief%d=%f",i,newB(i));
+//	  	fflush(stdout);
+//  	}
+//  } 
+  int obs[]={2,2,2,2,2,2,2,2,2,2,2,2,2,0,4};
+  int NUM_TRIALS = 15 ;
   for (int i=0; i < NUM_TRIALS; i++) 
   {
-    printf("new simulation run\n");
-    e->setToInitialState();
-    printf("  reset to initial belief\n");
-    for (int j=0; j < NUM_STEPS_PER_TRIAL; j++) 
-    {
-      printf("  step %d\n", j);
-      int a = e->chooseAction();
-      printf("    chose action %d\n", a);
-      //int o = e->getRandomOutcome(a);
-      int o = 0;
-      printf("    simulated seeing random observation %d\n", o);
-      e->advanceToNextState(a,o);
-      printf("    updated belief\n");
-      if (e->getStateIsTerminal())
-      {
-		printf("  [belief is terminal, ending trial]\n");
-		break;
-      } 
-      else if (j == NUM_STEPS_PER_TRIAL-1) 
-      {
-		printf("  [reached trial length limit of %d steps, ending trial]\n",
-	    NUM_STEPS_PER_TRIAL);
-      }
+	    printf("  step %d\n", i);
+	    int a = em->chooseAction();
+	    printf("    chose action %d\n", a);
+	    int o = obs[i];//em->getRandomOutcome(a);
+	    em->advanceToNextState(a,o);
+	    printf("    updated belief\n");
+	    belief_vector newB = em->currentState;
+	    double max = 0;
+	    int index=0;
+		for(int j=0; j < newB.size();j++)
+		{
+			if(newB(j)&& newB(j)>max)
+			{
+				max=newB(j);
+				index=j;
+			}
+		}
+		printf("\nNew Belief: %d=%f",index,max);
+		fflush(stdout);
+		if (em->getStateIsTerminal())
+	    {
+			printf("  [belief is terminal, ending trial]\n");
+			break;
+	    } 
     }
-  }
 //  int s, sp, a, o;
 //
 //  printf("R(s,a) matrix (%d x %d) =\n", p.R.size1(), p.R.size2());
