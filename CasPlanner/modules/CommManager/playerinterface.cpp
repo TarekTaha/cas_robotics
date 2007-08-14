@@ -416,8 +416,8 @@ void PlayerInterface::run ()
 	            odom_location.phi =  drive->GetYaw();
 	            joyAxes.setX(joyStick->GetXPos());
 	            joyAxes.setY(joyStick->GetYPos());
-	            cout<<"\n Current Location X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();
-				//cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<odom_location.phi;	            
+//	            cout<<"\n Current Location X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();
+//				cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<odom_location.phi;	            
 	        }
 			if(ptzEnabled)
 			{

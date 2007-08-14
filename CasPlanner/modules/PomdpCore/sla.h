@@ -463,8 +463,8 @@ namespace sla {
 
   inline double kmatrix::operator()(unsigned int r, unsigned int c) const
   {
-    assert( 0 <= r < size1() );
-    assert( 0 <= c < size2() );
+    assert( r < size1() );
+    assert( c < size2() );
     // NOTE: also assumes the kmatrix has been canonicalized
 
     FOR_EACH (di, data) {
@@ -662,7 +662,7 @@ namespace sla {
   inline void copy_from_column(cvector& result, const cmatrix& A,
 			       unsigned int c)
   {
-    assert( 0 <= c && c < A.size2() );
+    assert( c < A.size2() );
 
     typeof(A.data.begin()) Ai, col_start, col_end;
     typeof(result.data.begin()) ri;
@@ -681,7 +681,7 @@ namespace sla {
   inline void copy_from_column(dvector& result, const cmatrix& A,
 			       unsigned int c)
   {
-    assert( 0 <= c && c < A.size2() );
+    assert( c < A.size2() );
     typeof(A.data.begin()) Ai, col_end;
 
     result.resize( A.size1() );
@@ -928,7 +928,7 @@ namespace sla {
 			   const cvector& x)
   {
     assert( A.size1() == x.size() );
-    assert( 0 <= c && c < A.size2() );
+    assert( c < A.size2() );
     result.resize( x.size() );
 
     emult_cc_internal( result,
@@ -965,7 +965,7 @@ namespace sla {
 			   unsigned int c, const dvector& x)
   {
     assert( A.size1() == x.size() );
-    assert( 0 <= c && c < A.size2() );
+    assert( c < A.size2() );
     result.resize( x.size() );
     emult_dc_internal( result, x,
 		       A.data.begin() + A.col_starts[c],
@@ -1048,7 +1048,7 @@ namespace sla {
 				  const cvector& x)
   {
     assert( A.size1() == x.size() );
-    assert( 0 <= c && c < A.size2() );
+    assert( c < A.size2() );
     return inner_prod_cvector_internal( A.data.begin() + A.col_starts[c],
 					A.data.begin() + A.col_starts[c+1],
 					x.data.begin(), x.data.end() );
