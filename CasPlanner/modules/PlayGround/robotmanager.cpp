@@ -67,20 +67,13 @@ int RobotManager::readRobotConfigs(ConfigFile *cf,int secId)
 {
 	QString logMsg;
 	robot = new Robot();
-	robot->readConfigs(cf,secId);
-	
+	robot->readConfigs(cf,secId);	
 	logMsg.append("\n-> Robot Configurations Read.");
 	logMsg.append("\n*********************************************************************");
 	logMsg.append(QString("\n\t\t Robot  name:\t%1").arg(robot->robotName));
 	logMsg.append(QString("\n\t\t Robot Ip is:\t%1:%2").arg(robot->robotIp).arg(robot->robotPort));
 	logMsg.append("\n*********************************************************************");
 	emit addMsg(0,INFO,logMsg);
-//    qDebug("-> Robot Configurations Read.");
-//    qDebug("*********************************************************************");
-//   	qDebug("\t\t Robot  name:\t%s", qPrintable(robotName));
-//    qDebug("\t\t Robot Ip is:\t%s:%d", qPrintable(robotIp),robotPort);
-////   	qDebug("\t\t Robot Radius:%f",robotRadius);
-//    qDebug("*********************************************************************");	
     return 1;
 }       
 

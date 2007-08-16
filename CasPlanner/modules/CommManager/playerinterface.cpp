@@ -18,6 +18,107 @@ PlayerInterface::PlayerInterface(QString host, int port):
 {
 }
 
+int PlayerInterface::getJoyStickGlobalDir()
+{
+	dataLock.lockForRead();
+	/* the -90 is because the Joystick's coodrinate is rotated 90 in a way that it's
+	 * Y-Axis coordinate aligns with the Robot's X-Axis */
+	Pose P(joyAxes.x(),joyAxes.y(),NORMALIZE(atan2(joyAxes.y(),joyAxes.x())-DTOR(90)));
+	dataLock.unlock();
+	P = Trans2Global(P,odom_location);
+	double angle = RTOD(P.phi), dirTolerance = 5;
+//	printf("  The Global Angle is:%f",angle);
+	if(angle < 0)
+		angle += 360;	
+	if( joyAxes.x() == 0 && joyAxes.y() == 0)
+	{
+		return Nothing;
+	}
+	else if( (360 - dirTolerance) <= angle || angle <= (0 + dirTolerance) ) // 0
+	{
+		return E;
+	}
+	else if( (0 + dirTolerance) < angle && angle < (90 - dirTolerance) )
+	{
+		return NE;
+	}
+	else if( (90 - dirTolerance) <= angle && angle <= (90 + dirTolerance) ) //90
+	{
+		return N;
+	}
+	else if( ( 90 + dirTolerance ) < angle && angle < (180-dirTolerance) )
+	{
+		return NW;
+	}
+	else if( (180 - dirTolerance) <= angle && angle <= (180 + dirTolerance) ) // 180
+	{
+		return W;
+	}
+	else if( (180 + dirTolerance) < angle && angle < (270 - dirTolerance) )
+	{
+		return SW;
+	}
+	else if( (270 - dirTolerance) <= angle && angle <= (270 + dirTolerance) ) //270
+	{
+		return S;
+	}
+	else if( (270 + dirTolerance) < angle && angle < ( 360 - dirTolerance) )
+	{
+		return SE;
+	}
+	return -1;
+}
+
+int PlayerInterface::getJoyStickDir()
+{
+	/* Be AWARE that the Joystick Coordinate Axis is not the same as the Robot's
+	 * Coordinate AXIS (The Robot's X-Axis is Forward, while The Joystick Forward
+	 * Direction is the Y-Axis) */
+	dataLock.lockForRead();
+	double x = joyAxes.x(), y = joyAxes.y();
+	dataLock.unlock();
+	double angle;
+	angle = RTOD(atan2(y,x));
+//	printf("\nThe Angle is:%f",angle);
+	if(x==0 && y==0)
+	{
+		return Nothing;
+	}
+	else if(x>0 && y>0)
+	{
+		return NE;
+	}
+	else if( x>0 && y<0)
+	{
+		return SE;
+	}
+	else if(x<0 && y>0)
+	{
+		return NW;
+	}
+	else if(x<0 && y<0)
+	{
+		return SW;
+	}
+	else if(x==0 && y>0)
+	{
+		return N;
+	}
+	else if(x==0 && y<0)
+	{
+		return S;
+	}
+	else if(x>0 && y==0)
+	{
+		return E;
+	}
+	else if(x<0 && y==0)
+	{
+		return W;
+	}
+	return -1;
+}
+
 QVector<DeviceType> * PlayerInterface::getDevices(QString host,int port )
 {
   	// Connect to the server
@@ -416,8 +517,11 @@ void PlayerInterface::run ()
 	            odom_location.phi =  drive->GetYaw();
 	            joyAxes.setX(joyStick->GetXPos());
 	            joyAxes.setY(joyStick->GetYPos());
+	            int dir = getJoyStickDir();
+	            int globalDir = getJoyStickGlobalDir();
+//	            printf("\nDirection=%d Global Dir=%d",dir,globalDir);
 //	            cout<<"\n Current Location X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();
-//				cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<odom_location.phi;	            
+//				cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<RTOD(odom_location.phi);	            
 	        }
 			if(ptzEnabled)
 			{

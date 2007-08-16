@@ -2,7 +2,6 @@
 #include "utils.h"
 MapManager::MapManager():
 globalMap(NULL)
-//mapSkeleton(sskel)
 {
 
 }
@@ -14,7 +13,6 @@ MapManager::~MapManager()
 
 MapManager::MapManager(QString name,float res,bool negate, Pose p):
 globalMap(NULL)
-//mapSkeleton(sskel)
 {
 	this->mapNegate = negate;
 	this->mapName = name;
@@ -38,24 +36,7 @@ void MapManager::loadMap(QString name,float res,bool negate,Pose p)
 
 void MapManager::generateSkeleton()
 {
-// 	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/complex_5.poly");
-//	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/map_polys.poly");
-// 	std::ifstream in("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/many_holes.poly");
-	QString s("/home/BlackCoder/workspace/CasPlanner/modules/Voronoi/alley_0.poly");
-//	mapSkeleton.loadMap(s);
-//	mapSkeleton.generateInnerSkeleton();
-//	if (! this->sskel)
-//	{
-//		skeletonGenerated = false;		
-//		qDebug("\nNo Skeleton Generated");
-//		return;
-//	}
-//	else
-//	{
-//		skeletonGenerated = true;
-////		std::cout<<"\n Number of Nodes=:"<<mapSkeleton.net->GetNumberOfNodes()<<" Verticies size=:"<<mapSkeleton.verticies.size();
-//		std::cout<<" Verticies size=:"<<mapSkeleton.verticies.size();
-//	}
+
 }
 	
 Map * MapManager::providePointCloud(LaserScan laserScan, double local_dist,Pose robotPose)

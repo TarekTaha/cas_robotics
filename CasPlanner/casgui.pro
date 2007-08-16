@@ -87,7 +87,8 @@ HEADERS += modules/CommManager/commmanager.h \
     modules/PomdpCore/sla_mask.h \
     modules/PomdpCore/BlindLBInitializer.h \
     modules/PomdpCore/zmdpMainConfig.h \
-    modules/PomdpCore/embedFiles.h
+    modules/PomdpCore/embedFiles.h \
+    modules/MapManager/mapskeleton.h
 SOURCES += modules/CommManager/commmanager.cpp \
     modules/CommonTools/bandmat.cpp \
     modules/CommonTools/cholesky.cpp \
@@ -170,7 +171,8 @@ SOURCES += modules/CommManager/commmanager.cpp \
     modules/PomdpCore/BoundPairCore.cc \
     modules/PomdpCore/BoundPair.cc \
     modules/PomdpCore/MDPCache.cc \
-    modules/PomdpCore/BlindLBInitializer.cc
+    modules/PomdpCore/BlindLBInitializer.cc \
+    modules/MapManager/mapskeleton.cpp
 INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     /usr/local/Trolltech/Qt-4.2.2/include/QtGui \
     /usr/local/high/include \
