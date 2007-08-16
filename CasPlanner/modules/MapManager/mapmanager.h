@@ -15,7 +15,7 @@
 #include <QFileDialog>
 
 #include "interfaceprovider.h"
-//#include "mapskeleton.h"
+#include "mapskeleton.h"
 
 //using namespace defs;
 /*! Changes different Map representations into an occupancy
@@ -39,9 +39,7 @@ class MapManager : public Map, public QObject//public QThread
 		QString mapName;
 		QImage image;
 		Map * globalMap;
-//		MapSkeleton mapSkeleton;		
-//		SSkelPtr  sskel;		
-		//MRFModel * mrfModel;
+		MapSkeleton mapSkeleton;		
 		Map * provideLaserOG(LaserScan laserScan,double local_dist,double pixel_res,Pose pose);
 		Map * providePointCloud(LaserScan laserScan, double loca_dist,Pose robotPose);
 		Map * provideMapOG  (QImage image,double pixel_res,bool negate,Pose p);

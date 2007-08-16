@@ -558,6 +558,7 @@ void Navigator::run()
 		// Get current Robot Location
 //		amcl_location = robotManager->commManager->getLocation();
 		amcl_location = robotManager->commManager->getOdomLocation();
+		printf("\nCurrent State is:%d",playGround->mapManager->mapSkeleton.getCurrentSpatialState(amcl_location));
 		EstimatedPos = amcl_location;
 		dataLock.lockForWrite();
 		robotManager->robot->setPose(amcl_location);

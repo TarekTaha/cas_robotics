@@ -8,11 +8,12 @@ class Map
         float mapRes;
         Pose global_pose;
         QByteArray rawData; 	// for OG-Maps
-        bool    ** grid;        // for Planners
+        bool    ** grid, **temp;        // for Planners
         QVector <QPointF> pointCloud;
         QPointF center;			// Axis Center of the Map
         Map(int width, int height,float mapRes,QPointF center,Pose p)
         {
+        	//printf("\n W:%d,H:%d,Res:%f",width,height,mapRes);
         	this->global_pose = p;
             this->width   = width;
             this->height  = height;
@@ -26,6 +27,35 @@ class Map
 				for(int j=0;j < height;j++)
 					grid[i][j] = false;
 			}
+        }
+        void scale(int newWidth,int newHeight)
+        {
+			this->temp = new bool * [newWidth];
+			for(int i=0; i < newWidth; i++)
+			{
+				temp[i] = new bool [newHeight];
+				for(int j=0;j < newHeight;j++)
+					temp[i][j] = false;
+			}        	
+			// copy the old data to the new scaled map
+			for(int i=0; i < this->width; i++)
+			{
+				for(int j=0;j < this->height;j++)
+				{
+					temp[i][j] = grid[i][j];
+				}
+			}
+			// remove the old copy
+			for (int i=0; i < this->width; i++)
+			{
+		    	delete  [] grid[i];
+			}
+			delete [] grid;		
+			// reassign the temp to the grid and change dimensions
+			grid = temp;
+			this->width  = newWidth;
+			this->height = newHeight;
+			printf("\n Map Scaled Properly!!!"); fflush(stdout);
         }
         Map(Pose p)
         {

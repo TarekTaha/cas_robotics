@@ -153,7 +153,8 @@ void MapViewer::setRobotsLocation()
 	robotsLocation.clear();
 	for(int i=0;i<playGround->robotPlatforms.size();i++)
 	{
-		robotsLocation.push_back(playGround->robotPlatforms[i]->commManager->getOdomLocation());
+		if(playGround->robotPlatforms[i]->commManager->connected)
+			robotsLocation.push_back(playGround->robotPlatforms[i]->commManager->getOdomLocation());
 	}
 }
 void MapViewer::renderLaser()
@@ -345,7 +346,8 @@ void MapViewer::loadTexture()
 	ratioW  = ((float) ogMap->width)/newWidth;
 	ratioH  = ((float) ogMap->height)/newHeight;
 //	qDebug("MW:%d MH:%d RatioW:%f RatioH:%f",newWidth,newHeight,ratioW,ratioH);
-	
+   	if (newWidth != ogMap->width && newHeight != ogMap->height)
+   		ogMap->scale(newWidth,newHeight);
     unsigned char imgData[ogMap->width*ogMap->height*4];
 	long int count=0;
     for(int i=0; i < ogMap->width; i++)
@@ -387,6 +389,7 @@ void MapViewer::loadTexture()
     glGenTextures(1, &texId);    
     glBindTexture(GL_TEXTURE_2D, texId); 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, newWidth, newHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledData);
+//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ogMap->width, ogMap->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);    
     
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);

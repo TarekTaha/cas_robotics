@@ -27,6 +27,8 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
         virtual LaserScan getLaserScan();
         virtual double getSpeed(); 
         virtual double getTurnRate();
+        virtual int    getJoyStickGlobalDir();
+        virtual int    getJoyStickDir();        
         virtual Pose   getLocation();
         virtual Pose   getOdomLocation();
         virtual void   gotoGoal(Pose);
@@ -39,6 +41,7 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
 	    virtual void   provideLocation(Pose & location);
 	    virtual bool   getLocalized();
 		virtual QVector<DeviceType> * getDevices(QString host,int port );
+		bool connected;
     public slots: 
         virtual void setSpeed(double speed, double turnRate); 
         virtual void setLocation(Pose location);

@@ -11,7 +11,6 @@
 #include <iostream>
 #include <QDataStream>
 
-//#include "playerinterface.h"
 #include "utils.h"
 #include "map.h"
 #include "timer.h"
@@ -21,6 +20,12 @@
 
 using namespace PlayerCc;
 using namespace std;
+
+// Directions
+enum {N,S,E,W,Nothing,NE,NW,SE,SW};
+
+// Observations
+enum {Up,Down,Right,Left,NoInput};
 
 class DeviceType
 {
@@ -95,6 +100,8 @@ Q_OBJECT
         void setLocation(Pose location);
         void emergencyStop();
         void emergencyRelease();
+        int  getJoyStickGlobalDir();
+        int  getJoyStickDir();
     signals:
         void newData(); 
         void addMsg(int,int,QString);
@@ -103,7 +110,7 @@ Q_OBJECT
         int playerPort; 
         PlayerClient *pc;
        	playerc_client_t *client;
-       	QVector <DeviceType> *devices; 	
+       	QVector <DeviceType> *devices;
         bool ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized,emergencyStopped,
         	 velControl,vfhEnabled;
         int positionId,ptzId,mapId,localizerId,vfhId,joyStickId;

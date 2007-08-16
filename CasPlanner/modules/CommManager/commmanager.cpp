@@ -1,6 +1,7 @@
 #include "commmanager.h"
 
 CommManager::CommManager(Robot *rob,PlayGround * playG):
+connected(false),
 Comms(),
 player(NULL),
 robot(rob),
@@ -36,7 +37,7 @@ void CommManager::emergencyStop()
 	if(player)
   		player->emergencyStop();
   	else
-  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));
+  		emit addMsg(0,ERROR,QString("\n1 Communication Interface Not started YET!!!"));
 //  		qDebug("Communication Interface Not started YET!!!");
 }
 
@@ -45,7 +46,7 @@ void CommManager::emergencyRelease()
 	if(player)	
   		player->emergencyRelease();
   	else
-  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));
+  		emit addMsg(0,ERROR,QString("\n2 Communication Interface Not started YET!!!"));
 //  		qDebug("Communication Interface Not started YET!!!");  		
 }
 
@@ -54,7 +55,7 @@ void CommManager::setSpeed(double i_speed, double i_turnRate)
 	if(player)	
   		player->setSpeed(i_speed, i_turnRate);
   	else
-  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  	
+  		emit addMsg(0,ERROR,QString("\n3 Communication Interface Not started YET!!!"));  	
 //  		qDebug("Communication Interface Not started YET!!!");  		
 }
 
@@ -63,7 +64,7 @@ void CommManager::gotoGoal(Pose goal)
 	if(player)	
 		player->gotoGoal(goal);
   	else
-  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  	
+  		emit addMsg(0,ERROR,QString("\n4 Communication Interface Not started YET!!!"));  	
 //  		qDebug("Communication Interface Not started YET!!!");		
 }
 
@@ -72,7 +73,7 @@ void CommManager::vfhGoto(Pose goal)
 	if(player)
 		player->vfhGoto(goal);
   	else
-  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  	
+  		emit addMsg(0,ERROR,QString("\n5 Communication Interface Not started YET!!!"));  	
 //  		qDebug("Communication Interface Not started YET!!!");		
 }
 
@@ -81,7 +82,7 @@ void CommManager::setLocation(Pose location)
 	if(player)
 		player->setLocation(location);
   	else
-  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  	
+  		emit addMsg(0,ERROR,QString("\n6 Communication Interface Not started YET!!!"));  	
 //  		qDebug("Communication Interface Not started YET!!!");		
 }
 
@@ -90,7 +91,7 @@ void CommManager::setPtz(double p, double t)
 	if(player)
 		player->setPtz(p,t);
   	else
-  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  	
+  		emit addMsg(0,ERROR,QString("\n7 Communication Interface Not started YET!!!"));  	
 //  		qDebug("Communication Interface Not started YET!!!");		
 }
 void CommManager::setSpeed(double i_speed)
@@ -98,7 +99,7 @@ void CommManager::setSpeed(double i_speed)
 	if(player)
   		player->setSpeed(i_speed);
   	else
-  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  	
+  		emit addMsg(0,ERROR,QString("\n8 Communication Interface Not started YET!!!"));  	
 //  		qDebug("Communication Interface Not started YET!!!");  		
 }
 
@@ -107,7 +108,7 @@ void CommManager::setTurnRate(double i_turnRate)
 	if(player)
   		player->setTurnRate(i_turnRate);
   	else
-  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  	
+  		emit addMsg(0,ERROR,QString("\n9 Communication Interface Not started YET!!!"));  	
 //  		qDebug("Communication Interface Not started YET!!!");  		
 }
 
@@ -117,7 +118,7 @@ double CommManager::getSpeed()
   		return player->getSpeed();
   	else
   	{
-  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));  		
+  		emit addMsg(0,ERROR,QString("\n10 Communication Interface Not started YET!!!"));  		
 //  		qDebug("Communication Interface Not started YET!!!");
   		return 0;
   	}  		
@@ -130,11 +131,33 @@ double CommManager::getTurnRate()
   	else
   	{
 //  		qDebug("Communication Interface Not started YET!!!");
-  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));
+  		emit addMsg(0,ERROR,QString("\n11 Communication Interface Not started YET!!!"));
   		return 0;
   	}  		
 }
 
+int  CommManager::getJoyStickGlobalDir()
+{
+	if(player)
+  		return player->getJoyStickGlobalDir();
+  	else
+  	{
+//  		qDebug("Communication Interface Not started YET!!!");
+  		emit addMsg(0,ERROR,QString("\n12 Communication Interface Not started YET!!!"));
+  		return 0;
+  	}  		
+}
+int	 CommManager::getJoyStickDir()
+{
+	if(player)
+  		return player->getJoyStickDir();
+  	else
+  	{
+//  		qDebug("Communication Interface Not started YET!!!");
+  		emit addMsg(0,ERROR,QString("\n13 Communication Interface Not started YET!!!"));
+  		return 0;
+  	}  		
+}
 Pose CommManager::getLocation()
 {
 	if(player)
@@ -142,7 +165,7 @@ Pose CommManager::getLocation()
   	else
   	{
 //  		qDebug("Communication Interface Not started YET!!!");
-  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));
+  		emit addMsg(0,ERROR,QString("\n14 Communication Interface Not started YET!!!"));
   		return Pose(0,0,0);
   	}  		
 }
@@ -154,7 +177,7 @@ Pose CommManager::getOdomLocation()
   	else
   	{
 //  		qDebug("Communication Interface Not started YET!!!");
-  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));
+  		emit addMsg(0,ERROR,QString("\n15 Communication Interface Not started YET!!!"));
   		return Pose(0,0,0);
   	}  		
 }
@@ -166,7 +189,7 @@ bool CommManager::getLocalized()
   	else
   	{
 //  		qDebug("Communication Interface Not started YET!!!");
-  		emit addMsg(0,ERROR,QString("\nCommunication Interface Not started YET!!!"));
+  		emit addMsg(0,ERROR,QString("\n16 Communication Interface Not started YET!!!"));
   		return false;
   	}		
 }
@@ -324,6 +347,7 @@ int CommManager::start()
 //    qDebug("-> Communication Manager Started."); fflush(stdout);
 	logMsg.append(QString("\n-> Communication Manager Started."));    
     emit addMsg(0,INFO,logMsg);  	
+    connected = true;
     return 1;
 }
 
@@ -333,7 +357,8 @@ int CommManager::stop()
 	{
 		player->quit();
 		usleep(100000);
-	}	
+	}
+	connected = false;
   	return 1;
 }
 
