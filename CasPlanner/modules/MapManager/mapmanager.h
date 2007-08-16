@@ -29,7 +29,7 @@
 class MapManager : public Map, public QObject//public QThread
 {
 	//Q_OBJECT
-	public:
+	public: 
 		MapManager();
 		MapManager(QString name,float res,bool negate, Pose p);
 		void loadMap(QString name,float res,bool negate,Pose p);

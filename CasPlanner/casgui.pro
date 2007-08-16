@@ -121,6 +121,7 @@ SOURCES += modules/CommManager/commmanager.cpp \
     gui/main.cpp \
     gui/mainwindow.cpp \
     modules/Rendering/mapviewer.cpp \
+    modules/MapManager/map.cpp \
     modules/MapManager/mapmanager.cpp \
     gui/navigationtab.cpp \
     modules/Navigator/navigator.cpp \
