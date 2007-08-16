@@ -49977,3 +49977,1257 @@ playertcp.cc:681 warning : failed to write to client 0
 playertcp.cc:319 closing connection to client 0 on port 6666
 playertcp.cc:389 warning : other error on client 0
 playertcp.cc:319 closing connection to client 0 on port 6667
+configfile.cc:159 error   : unable to open world file cas : No such file or directory
+server.cc:144 error   : failed to load config file cas
+plugins.cc:94 PLAYERPATH: /home/BlackCoder/psg/lib
+
+plugins.cc:114 trying to load /home/BlackCoder/psg/lib/libstageplugin...
+plugins.cc:123 failed to load /home/BlackCoder/psg/lib/libstageplugin (error /home/BlackCoder/psg/lib/libstageplugin.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:147 trying to load /home/BlackCoder/workspace/CasPlanner/StageSim/./libstageplugin...
+plugins.cc:151 failed (/home/BlackCoder/workspace/CasPlanner/StageSim/./libstageplugin.so: cannot open shared object file: No such file or directory)
+
+plugins.cc:161 trying to load /usr/local/lib/libstageplugin...
+plugins.cc:164 success
+plugins.cc:190 invoking player_driver_init()...
+plugins.cc:208 success
+playertcp.cc:249 accepted client 0 on port 6665, fd 14
+amcl.cc:503 setup
+amcl_laser.cc:157 AMCL loading map from map:0...
+amcl_laser.cc:174 AMCL loading map from map:0...Done
+amcl_laser.cc:258 Done
+amcl_laser.cc:131 laser geometry: 0.030000,0.000000,0.000000
+amcl.cc:521 running
+linuxjoy.cc:326 error   : unable to open joystick [/dev/js0]; No such file or directory
+playertcp.cc:1013 warning : subscription failed for device 4:3
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 25:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 25:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:0
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 4:1
+message.cc:384 warning : tried to push onto a full message queue
+driver.cc:163 error   : tried to push 1/1 from 6:0
+playertcp.cc:319 closing connection to client 0 on port 6665
+amcl.cc:534 shutting down
+amcl.cc:547 shutdown done

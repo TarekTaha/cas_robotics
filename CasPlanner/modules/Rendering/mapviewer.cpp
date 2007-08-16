@@ -346,7 +346,7 @@ void MapViewer::loadTexture()
 	ratioW  = ((float) ogMap->width)/newWidth;
 	ratioH  = ((float) ogMap->height)/newHeight;
 //	qDebug("MW:%d MH:%d RatioW:%f RatioH:%f",newWidth,newHeight,ratioW,ratioH);
-   	if (newWidth != ogMap->width && newHeight != ogMap->height)
+   	if (newWidth != ogMap->width || newHeight != ogMap->height)
    		ogMap->scale(newWidth,newHeight);
     unsigned char imgData[ogMap->width*ogMap->height*4];
 	long int count=0;
@@ -371,25 +371,31 @@ void MapViewer::loadTexture()
 		    }
 		}
     }
-	unsigned char * scaledData;
-   	if (newWidth != ogMap->width && newHeight != ogMap->height)
-   	{
-      	scaledData = new unsigned char[newWidth * newHeight * 4];
-      	if (gluScaleImage(GL_RGBA, ogMap->width, ogMap->height,
-                        GL_UNSIGNED_BYTE, imgData, newWidth, 
-                        newHeight, GL_UNSIGNED_BYTE, scaledData) != 0)
-      	{
-         	delete[] scaledData;
-         	return;
-      	}
-   	}
-   	else
-   		scaledData = imgData;
+    /* 
+     * Not necessary anymore as i am doing the scaling myself
+     * in a much more efficient way (I think :) )
+     */
+//	unsigned char * scaledData;
+//   	if (newWidth != ogMap->width && newHeight != ogMap->height)
+//   	{
+//      	scaledData = new unsigned char[newWidth * newHeight * 4];
+//      	if (gluScaleImage(GL_RGBA, ogMap->width, ogMap->height,
+//                        GL_UNSIGNED_BYTE, imgData, newWidth, 
+//                        newHeight, GL_UNSIGNED_BYTE, scaledData) != 0)
+//      	{
+//         	delete[] scaledData;
+//         	return;
+//      	}
+//   	}
+//   	else
+//   		scaledData = imgData;
+    printf("\n MapViewer W=%d, H=%d",ogMap->width,ogMap->height);
+    fflush(stdout);
+
     glEnable(GL_TEXTURE_2D);       /* Enable Texture Mapping */    
     glGenTextures(1, &texId);    
     glBindTexture(GL_TEXTURE_2D, texId); 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, newWidth, newHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, scaledData);
-//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ogMap->width, ogMap->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);    
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ogMap->width, ogMap->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);    
     
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
@@ -415,15 +421,17 @@ void MapViewer::renderMap()
     //glColor4f(1,1,1,0.8);
 	// Define Coordinate System
     glBegin(GL_QUADS);
-	    glTexCoord2f(1,float(newHeight)/float(newWidth));			glVertex2f(newWidth*ogMap->mapRes,newHeight*ogMap->mapRes);
-	    glTexCoord2f(1,0.0);		glVertex2f(newWidth*ogMap->mapRes,0.0);
-	    glTexCoord2f(0.0,0.0);		glVertex2f(0.0,0.0);
-	    glTexCoord2f(0.0,float(newHeight)/float(newWidth));    	glVertex2f(0.0,newHeight*ogMap->mapRes);
-//    
-//	    glTexCoord2f(ratioW,ratioH);	glVertex2f(newWidth*ogMap->mapRes,newHeight*ogMap->mapRes);
-//	    glTexCoord2f(ratioW,0.0);		glVertex2f(newWidth*ogMap->mapRes,0.0);
-//	    glTexCoord2f(0.0,0.0);			glVertex2f(0.0,0.0);
-//	    glTexCoord2f(0.0,ratioH);    	glVertex2f(0.0,newHeight*ogMap->mapRes);
+//	    glTexCoord2f(1,float(newHeight)/float(newWidth));			glVertex2f(newWidth*ogMap->mapRes,newHeight*ogMap->mapRes);
+//	    glTexCoord2f(1,0.0);		glVertex2f(newWidth*ogMap->mapRes,0.0);
+//	    glTexCoord2f(0.0,0.0);		glVertex2f(0.0,0.0);
+//	    glTexCoord2f(0.0,float(newHeight)/float(newWidth));    		glVertex2f(0.0,newHeight*ogMap->mapRes);
+//
+		ratioH = 1;
+		ratioW = float(newHeight)/float(newWidth);  
+		glTexCoord2f(0.0,0.0);  glVertex2f(0.0,0.0);
+		glTexCoord2f(1.0,0.0);  glVertex2f(newWidth*ogMap->mapRes,0.0);
+		glTexCoord2f(1.0,1.0);  glVertex2f(newWidth*ogMap->mapRes,newHeight*ogMap->mapRes);
+		glTexCoord2f(0.0,1.0);  glVertex2f(0.0,newHeight*ogMap->mapRes);
     glEnd();
 
     // Surrounding BOX
