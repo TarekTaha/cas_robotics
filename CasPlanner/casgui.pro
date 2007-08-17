@@ -88,7 +88,8 @@ HEADERS += modules/CommManager/commmanager.h \
     modules/PomdpCore/BlindLBInitializer.h \
     modules/PomdpCore/zmdpMainConfig.h \
     modules/PomdpCore/embedFiles.h \
-    modules/MapManager/mapskeleton.h
+    modules/MapManager/mapskeleton.h \
+    modules/HumanRobotInterface/IntentionRecognizer.h
 SOURCES += modules/CommManager/commmanager.cpp \
     modules/CommonTools/bandmat.cpp \
     modules/CommonTools/cholesky.cpp \
@@ -121,7 +122,6 @@ SOURCES += modules/CommManager/commmanager.cpp \
     gui/main.cpp \
     gui/mainwindow.cpp \
     modules/Rendering/mapviewer.cpp \
-    modules/MapManager/map.cpp \
     modules/MapManager/mapmanager.cpp \
     gui/navigationtab.cpp \
     modules/Navigator/navigator.cpp \
@@ -173,7 +173,9 @@ SOURCES += modules/CommManager/commmanager.cpp \
     modules/PomdpCore/BoundPair.cc \
     modules/PomdpCore/MDPCache.cc \
     modules/PomdpCore/BlindLBInitializer.cc \
-    modules/MapManager/mapskeleton.cpp
+    modules/MapManager/mapskeleton.cpp \
+    modules/MapManager/map.cpp \
+    modules/HumanRobotInterface/IntentionRecognizer.cpp
 INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     /usr/local/Trolltech/Qt-4.2.2/include/QtGui \
     /usr/local/high/include \
@@ -202,7 +204,8 @@ INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     modules/Sensors \
     modules/TasksManager \
     gui \
-    modules/PomdpCore
+    modules/PomdpCore \
+    modules/HumanRobotInterface
 RESOURCES = resources/icons.qrc
 QT += opengl
 QMAKE_CFLAGS_RELEASE += -g \

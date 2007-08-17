@@ -50,6 +50,10 @@ class Vertex
 			location.setX(x);
 			location.setY(y);
 		};
+		QPointF getLocation()
+		{
+			return this->location;
+		};
 		bool operator==(const Vertex& v) const
 	  	{
 	    	return ((this->location.x()== v.location.x()) && (this->location.y()==v.location.y()) && 
@@ -68,7 +72,6 @@ class MapSkeleton
 		int  getCurrentSpatialState(Pose p);
 		void clear();
 		void draw();
-	private:
 		QVector <Vertex> verticies;
 };
 

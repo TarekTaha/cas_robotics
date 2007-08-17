@@ -69,6 +69,7 @@ class LaserScan
 		LaserScan(){};		
 		~LaserScan(){};
 };
+
 class PlayerInterface: public QThread 
 {
 Q_OBJECT    
