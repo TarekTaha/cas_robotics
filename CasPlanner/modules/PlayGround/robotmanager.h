@@ -11,11 +11,14 @@
 #include "configfile.h"
 #include "robot.h"
 #include "playground.h"
+#include "IntentionRecognizer.h"
+
 class Navigator;
 class NavContainer;
 class PlanningManager;
 class MapViewer;
 class PlayGround;
+class IntentionRecognizer;
 
 enum{FORCE_FIELD,VFH,CONFIG_SPACE,NO_AVOID};
 
@@ -40,6 +43,7 @@ class RobotManager : public QObject//public CommManager, public PlanningManager 
 		CommManager     *commManager;
 		PlanningManager *planningManager;
 		Navigator       *navigator;
+		IntentionRecognizer *intentionRecognizer;
 		Robot           *robot;
 		bool notPaused,notFollowing;
 	public 

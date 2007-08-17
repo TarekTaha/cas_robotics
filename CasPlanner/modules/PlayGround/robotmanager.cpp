@@ -1,9 +1,11 @@
 #include <robotmanager.h>
 
 RobotManager::RobotManager():
+playGround(NULL),		
 commManager(NULL),
 planningManager(NULL),
 navigator(NULL),
+intentionRecognizer(NULL),
 robot(NULL),
 notPaused(true),
 notFollowing(true)
@@ -30,13 +32,14 @@ RobotManager::~RobotManager()
  *  4- Initialize the Path Planning solver with the specified parameters.
  */
 RobotManager::RobotManager(PlayGround *playG,ConfigFile *cf,int secId):
+playGround(playG),		
 commManager(NULL),
 planningManager(NULL),
 navigator(NULL),
+intentionRecognizer(NULL),
 robot(NULL),
 notPaused(true),
-notFollowing(true),
-playGround(playG)
+notFollowing(true)
 {
 	connect(playGround,SIGNAL(mapUpdated(Map *)),this,SLOT(updateMap(Map *)));
 	connect(this,SIGNAL(addMsg(int,int,QString)),playGround,SLOT(addMsg(int,int,QString)));	
@@ -55,6 +58,9 @@ playGround(playG)
 			readPlannerConfigs(cf); 
 	    }
 	}
+	intentionRecognizer = new IntentionRecognizer(this->playGround,this);
+	intentionRecognizer->runRecognition = true;
+	intentionRecognizer->start();
 }
 
 void RobotManager::updateMap(Map * mapData)

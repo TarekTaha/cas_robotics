@@ -48,6 +48,9 @@ Q_OBJECT
 		void renderPaths();
 		void renderSearchTree();
 		void renderExpandedTree();
+		void renderSpatialStates();
+		void renderDestIndicators();
+		void drawProbHisto(QPointF pos, double prob);
 		void setRobotsLocation();
 		void displayGrid();
 		void showIndicators();

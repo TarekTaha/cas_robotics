@@ -26,7 +26,7 @@ int PlayerInterface::getJoyStickGlobalDir()
 	Pose P(joyAxes.x(),joyAxes.y(),NORMALIZE(atan2(joyAxes.y(),joyAxes.x())-DTOR(90)));
 	dataLock.unlock();
 	P = Trans2Global(P,odom_location);
-	double angle = RTOD(P.phi), dirTolerance = 5;
+	double angle = RTOD(P.phi), dirTolerance = 45;//45 degrees means that we will get only N,S,E,W
 //	printf("  The Global Angle is:%f",angle);
 	if(angle < 0)
 		angle += 360;	
@@ -517,8 +517,8 @@ void PlayerInterface::run ()
 	            odom_location.phi =  drive->GetYaw();
 	            joyAxes.setX(joyStick->GetXPos());
 	            joyAxes.setY(joyStick->GetYPos());
-	            int dir = getJoyStickDir();
-	            int globalDir = getJoyStickGlobalDir();
+//	            int dir = getJoyStickDir();
+//	            int globalDir = getJoyStickGlobalDir();
 //	            printf("\nDirection=%d Global Dir=%d",dir,globalDir);
 //	            cout<<"\n Current Location X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();
 //				cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<RTOD(odom_location.phi);	            

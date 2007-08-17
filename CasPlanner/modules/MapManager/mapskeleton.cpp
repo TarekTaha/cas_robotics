@@ -67,7 +67,7 @@ void MapSkeleton::clear()
 int MapSkeleton::getCurrentSpatialState(Pose P)
 {
 	double dist,closest = Dist(P.p,verticies[0].location);
-	int stateIndex,i;
+	int stateIndex=0,i;
 	for(i=0; i < verticies.size(); i++)
 	{
 		if((dist=Dist(P.p,verticies[i].location))<closest)
@@ -76,7 +76,7 @@ int MapSkeleton::getCurrentSpatialState(Pose P)
 			stateIndex = i;
 		}
 	}
-	return i;
+	return stateIndex;
 }
 
 void MapSkeleton::generateInnerSkeleton()

@@ -17,7 +17,12 @@ Map::Map(int width, int height,float mapRes,QPointF center,Pose p)
 			grid[i][j] = false;
 	}
 }
-
+/* 
+ * When rendering in OpenGL, the image dimensions should be a power of 2
+ * and since in many cases our map is not, we have to scale the image to the
+ * closest power of 2 , center the original in the new scaled space and fill
+ * the rest of the space with empty.
+ */
 void Map::scale(int newWidth,int newHeight)
 {
 	this->temp = new bool * [newWidth];
@@ -31,8 +36,8 @@ void Map::scale(int newWidth,int newHeight)
 //	assert(newWidth < this->width || newHeight < this->height);
 	int startIndexI =  (int)((newWidth -this->width)/2.0);
 	int startIndexJ =  (int)((newHeight-this->height)/2.0);
-	printf("\n Old Scale W=%d H=%d, New W=%d H=%d",this->width,this->height,newWidth,newHeight);
-	printf("\n Start Index I=%d,J=%d",startIndexI,startIndexJ);
+//	printf("\n Old Scale W=%d H=%d, New W=%d H=%d",this->width,this->height,newWidth,newHeight);
+//	printf("\n Start Index I=%d,J=%d",startIndexI,startIndexJ);
 	int i=0,j=0,oldI=0,oldJ=0;
 	for( i = startIndexI; i < (newWidth - startIndexI); i++)
 	{
@@ -44,7 +49,7 @@ void Map::scale(int newWidth,int newHeight)
 		}
 		oldI++;
 	}
-	printf("\nI=%d,J=%d oldI=%d,oldJ=%d",i,j,oldI,oldJ);
+//	printf("\nI=%d,J=%d oldI=%d,oldJ=%d",i,j,oldI,oldJ);
 	// remove the old copy
 	for (int i=0; i < this->width; i++)
 	{
@@ -55,7 +60,7 @@ void Map::scale(int newWidth,int newHeight)
 	grid = temp;
 	this->width  = newWidth;
 	this->height = newHeight;
-	printf("\n Map Scaled Properly!!!"); fflush(stdout);
+//	printf("\n Map Scaled Properly!!!"); fflush(stdout);
 }
 
 Map::Map(Pose p)

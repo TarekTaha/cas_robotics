@@ -5,7 +5,7 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
  step(1),
  playGround(playG),
  navControlPanel(navCo),
- zoomFactor(10),
+ zoomFactor(15.5),
  xOffset(0),
  yOffset(0),
  zOffset(0),
@@ -203,6 +203,29 @@ void MapViewer::renderLaser()
 	}
 }
 
+void MapViewer::renderSpatialStates()
+{
+	if(!playGround->mapManager)
+		return;
+	// This is not the general Case now and i might need to change it
+	Pose l = playGround->robotPlatforms[0]->commManager->getOdomLocation();
+	for(int i=0; i < playGround->mapManager->mapSkeleton.verticies.size() ;i++)
+	{
+	    glPushMatrix();
+	    glTranslated(playGround->mapManager->mapSkeleton.verticies[i].location.x(),playGround->mapManager->mapSkeleton.verticies[i].location.y(),0);
+	    glShadeModel(GL_FLAT);
+	    if(i==playGround->mapManager->mapSkeleton.getCurrentSpatialState(l))
+	    	glColor4f(1,0,0,0.5);
+	    else if (i == playGround->robotPlatforms[0]->intentionRecognizer->nextState)
+	    	glColor4f(0,0,1,1);
+	    else
+	    	glColor4f(0.33,0.33,0.33,0.5);
+		glRectf(-0.2f,0.2f, 0.2f, -0.2f);
+		glPopMatrix();
+	}
+
+}
+
 void MapViewer::renderSearchTree()
 {
 	for(int i=0;i<1;i++)
@@ -389,9 +412,6 @@ void MapViewer::loadTexture()
 //   	}
 //   	else
 //   		scaledData = imgData;
-    printf("\n MapViewer W=%d, H=%d",ogMap->width,ogMap->height);
-    fflush(stdout);
-
     glEnable(GL_TEXTURE_2D);       /* Enable Texture Mapping */    
     glGenTextures(1, &texId);    
     glBindTexture(GL_TEXTURE_2D, texId); 
@@ -497,6 +517,75 @@ void MapViewer::displayGrid()
     glPopMatrix();	
 }
 
+void MapViewer::renderDestIndicators()
+{
+	if(!playGround->mapManager)
+		return;
+	// This is not the general Case now and i might need to change it
+	Pose l = playGround->robotPlatforms[0]->commManager->getOdomLocation();
+	for(int i=0; i < playGround->robotPlatforms[0]->intentionRecognizer->numDestinations ;i++)
+	{
+		drawProbHisto(QPointF(i+1,12),playGround->robotPlatforms[0]->intentionRecognizer->destBelief[i]);
+	}	
+}
+
+void MapViewer::drawProbHisto(QPointF pos, double prob)
+{
+	QString str = QString("%1 \%").arg((int)(prob*100));  
+	if(prob==0)
+		return;
+	glPushMatrix();
+	glTranslatef(pos.x(),pos.y(),0.0f);
+    glColor4f(0,0,0,1);
+ 	renderText(0 ,0 + 0.2, prob + 0.2, str);
+	glScalef(1/12.0, 1/12.0, prob);
+  	//glRotatef(rotqube,0.0f,1.0f,0.0f);	// Rotate The cube around the Y axis
+  	//glRotatef(rotqube,1.0f,1.0f,1.0f);
+  	glBegin(GL_QUADS);		// Draw The Cube Using quads  
+	
+ 		//glColor3f(1.0f,0.0f,1.0f);	// Color Violet
+		glColor4f(0.0f,1.0f,0.0f,1.0f); 		
+	    
+//	    glColor3f(0.0f,1.0f,0.0f);	// Color Blue
+	    glVertex3f( 1.0f, 1.0f,-0.0f);	// Top Right Of The Quad (Top)
+	    glVertex3f(-1.0f, 1.0f,-0.0f);	// Top Left Of The Quad (Top)
+	    glVertex3f(-1.0f, 1.0f, 1.0f);	// Bottom Left Of The Quad (Top)
+	    glVertex3f( 1.0f, 1.0f, 1.0f);	// Bottom Right Of The Quad (Top)
+	    
+//	    glColor3f(1.0f,0.5f,0.0f);	// Color Orange
+	    glVertex3f( 1.0f,-1.0f, 1.0f);	// Top Right Of The Quad (Bottom)
+	    glVertex3f(-1.0f,-1.0f, 1.0f);	// Top Left Of The Quad (Bottom)
+	    glVertex3f(-1.0f,-1.0f,-0.0f);	// Bottom Left Of The Quad (Bottom)
+	    glVertex3f( 1.0f,-1.0f,-0.0f);	// Bottom Right Of The Quad (Bottom)
+	    
+//	    glColor3f(1.0f,0.0f,0.0f);	// Color Red	
+	    glVertex3f( 1.0f, 1.0f, 1.0f);	// Top Right Of The Quad (Front)
+	    glVertex3f(-1.0f, 1.0f, 1.0f);	// Top Left Of The Quad (Front)
+	    glVertex3f(-1.0f,-1.0f, 1.0f);	// Bottom Left Of The Quad (Front)
+	    glVertex3f( 1.0f,-1.0f, 1.0f);	// Bottom Right Of The Quad (Front)
+	    
+//	    glColor3f(1.0f,1.0f,0.0f);	// Color Yellow
+	    glVertex3f( 1.0f,-1.0f,-0.0f);	// Top Right Of The Quad (Back)
+	    glVertex3f(-1.0f,-1.0f,-0.0f);	// Top Left Of The Quad (Back)
+	    glVertex3f(-1.0f, 1.0f,-0.0f);	// Bottom Left Of The Quad (Back)
+	    glVertex3f( 1.0f, 1.0f,-0.0f);	// Bottom Right Of The Quad (Back)
+	    
+//	    glColor3f(0.0f,0.0f,1.0f);	// Color Blue
+	    glVertex3f(-1.0f, 1.0f, 1.0f);	// Top Right Of The Quad (Left)
+	    glVertex3f(-1.0f, 1.0f,-0.0f);	// Top Left Of The Quad (Left)
+	    glVertex3f(-1.0f,-1.0f,-0.0f);	// Bottom Left Of The Quad (Left)
+	    glVertex3f(-1.0f,-1.0f, 1.0f);	// Bottom Right Of The Quad (Left)
+	    
+//	    glColor3f(1.0f,0.0f,1.0f);	// Color Violet
+	    glVertex3f( 1.0f, 1.0f,-0.0f);	// Top Right Of The Quad (Right)
+	    glVertex3f( 1.0f, 1.0f, 1.0f);	// Top Left Of The Quad (Right)
+	    glVertex3f( 1.0f,-1.0f, 1.0f);	// Bottom Left Of The Quad (Right)
+	    glVertex3f( 1.0f,-1.0f,-0.0f);	// Bottom Right Of The Quad (Right)
+  	glEnd();			// End Drawing The Cube
+	glPopMatrix();  	
+	return;
+}
+
 void MapViewer::showIndicators()
 {
 	//if(!hideGoals)
@@ -595,6 +684,8 @@ void MapViewer::paintGL()
 		setRobotsLocation();	
 	    renderLaser();    
 	    renderPaths();    
+	    renderSpatialStates();
+	    renderDestIndicators();
 	//  renderSearchTree();
 	//	renderExpandedTree();	
 		if(!mainMapBuilt)

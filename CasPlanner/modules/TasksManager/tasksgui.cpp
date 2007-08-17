@@ -217,11 +217,6 @@ void MapGL::config()
 
 }
 
-//void MapGL::setSSkelPtr(SSkelPtr sskel)
-//{
-// 	this->sskel = sskel;
-//}
-
 void MapGL::drawProbHisto(QPointF pos, double prob)
 {
 	QString str = QString("%1 \%").arg((int)(prob*100));  
