@@ -3,36 +3,36 @@
 MapSkeleton::MapSkeleton()
 {
 	verticies.resize(49);
-	verticies[0].setLocation(-13.64,5.68);
-	verticies[1].setLocation(-13.7,1.53);
+	verticies[0].setLocation(-13.65,5.68);
+	verticies[1].setLocation(-13.65,1.53);
 	verticies[2].setLocation(-13.65,-1.4);
-	verticies[3].setLocation(-13.75,-4.4);
+	verticies[3].setLocation(-13.65,-4.48);
 	verticies[4].setLocation(-15.16,-4.48);
-	verticies[5].setLocation(-15.11,-6.8);
-	verticies[6].setLocation(-12.43,-4.44);
-	verticies[7].setLocation(-12.43,-6.46);
+	verticies[5].setLocation(-15.11,-6.32);
+	verticies[6].setLocation(-12.43,-4.48);
+	verticies[7].setLocation(-12.43,-6.32);
 	verticies[8].setLocation(-9.85,-4.48);
-	verticies[9].setLocation(-9.9,-6.41);
-	verticies[10].setLocation(-8.48,-4.44);
-	verticies[11].setLocation(-7.17,-4.44);
+	verticies[9].setLocation(-9.9,-6.32);
+	verticies[10].setLocation(-8.48,-4.48);
+	verticies[11].setLocation(-7.17,-4.48);
 	verticies[12].setLocation(-7.17,-6.32);
-	verticies[13].setLocation(-5.52,-4.25);
-	verticies[14].setLocation(-4.63,-4.39);
-	verticies[15].setLocation(-4.58,-6.36);
-	verticies[16].setLocation(-1.95,-4.39);
-	verticies[17].setLocation(-1.9,-6.36);
-	verticies[18].setLocation(0.64,-4.44);
-	verticies[19].setLocation(0.78,-6.46);
-	verticies[20].setLocation(1.72,-4.4);
-	verticies[21].setLocation(3.27,-4.4);
-	verticies[22].setLocation(3.36,-7.12);
-	verticies[23].setLocation(4.96,-4.44);
+	verticies[13].setLocation(-5.52,-4.48);
+	verticies[14].setLocation(-4.63,-4.48);
+	verticies[15].setLocation(-4.58,-6.32);
+	verticies[16].setLocation(-1.95,-4.48);
+	verticies[17].setLocation(-1.9,-6.32);
+	verticies[18].setLocation(0.64,-4.48);
+	verticies[19].setLocation(0.78,-6.32);
+	verticies[20].setLocation(1.72,-4.48);
+	verticies[21].setLocation(3.27,-4.48);
+	verticies[22].setLocation(3.36,-6.32);
+	verticies[23].setLocation(4.96,-4.48);
 	verticies[24].setLocation(9.42,-4.53);
 	verticies[25].setLocation(9.61,-1.62);
-	verticies[26].setLocation(4.87,-1.34);
-	verticies[27].setLocation(5,1.48);
-	verticies[28].setLocation(5.1,3.7);
-	verticies[29].setLocation(5,7.36);
+	verticies[26].setLocation(4.96,-1.34);
+	verticies[27].setLocation(4.96,1.48);
+	verticies[28].setLocation(4.96,3.7);
+	verticies[29].setLocation(4.96,7.36);
 	verticies[30].setLocation(8.62,3.51);
 	verticies[31].setLocation(8.44,6.23);
 	verticies[32].setLocation(8.34,7.74);
@@ -51,7 +51,14 @@ MapSkeleton::MapSkeleton()
 	verticies[45].setLocation(-5.52,1.48);
 	verticies[46].setLocation(-5.33,-1.43);
 	verticies[47].setLocation(-8.67,1.53);
-	verticies[48].setLocation(-8.72,-1.2);	
+	verticies[48].setLocation(-8.72,-1.2);
+	/* Specify which verticies are considered destinations */	
+	destIndexes.push_back(0);
+	destIndexes.push_back(5);
+	destIndexes.push_back(25);
+	destIndexes.push_back(29);
+	destIndexes.push_back(30);
+	destIndexes.push_back(37);
 }
 
 MapSkeleton::~MapSkeleton()

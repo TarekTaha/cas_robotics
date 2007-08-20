@@ -159,7 +159,6 @@ void MapViewer::setRobotsLocation()
 }
 void MapViewer::renderLaser()
 {
-	return ;
 	if(!playGround)
 	{
 		qDebug("WTFFFF !!!");
@@ -167,6 +166,8 @@ void MapViewer::renderLaser()
 	}
 	for(int i=0;i<playGround->robotPlatforms.size();i++)
 	{
+		if(!playGround->robotPlatforms[i]->commManager->connected)
+			continue;		
 	    LaserScan laserScan = playGround->robotPlatforms[i]->commManager->getLaserScan();
 	    //Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;
 	    Pose loc = robotsLocation[i];
@@ -521,11 +522,21 @@ void MapViewer::renderDestIndicators()
 {
 	if(!playGround->mapManager)
 		return;
+		
 	// This is not the general Case now and i might need to change it
 	Pose l = playGround->robotPlatforms[0]->commManager->getOdomLocation();
 	for(int i=0; i < playGround->robotPlatforms[0]->intentionRecognizer->numDestinations ;i++)
 	{
-		drawProbHisto(QPointF(i+1,12),playGround->robotPlatforms[0]->intentionRecognizer->destBelief[i]);
+		int r;
+		r = playGround->mapManager->mapSkeleton.destIndexes[i];
+//		printf("\n	Belief=%f",playGround->robotPlatforms[0]->intentionRecognizer->destBelief[i]);		
+//		drawProbHisto(playGround->mapManager->mapSkeleton.verticies[r].location, playGround->robotPlatforms[0]->intentionRecognizer->destBelief[i]);
+		glPushMatrix();
+			glTranslatef(i,12,0.0f);
+			glColor4f(1.0f,0.5f,0.0f,1.0f);
+			glScalef(1/4.0f,2*playGround->robotPlatforms[0]->intentionRecognizer->destBelief[i], 0.0f);
+			glRectf(-1.0f,1.0f, 1.0f, -1.0f);
+		glPopMatrix();
 	}	
 }
 
@@ -536,8 +547,8 @@ void MapViewer::drawProbHisto(QPointF pos, double prob)
 		return;
 	glPushMatrix();
 	glTranslatef(pos.x(),pos.y(),0.0f);
-    glColor4f(0,0,0,1);
- 	renderText(0 ,0 + 0.2, prob + 0.2, str);
+//  glColor4f(1.0f,0.5f,0.0f,1.0f);
+// 	renderText(0 ,0 + 0.2, prob+ 0.2, str);
 	glScalef(1/12.0, 1/12.0, prob);
   	//glRotatef(rotqube,0.0f,1.0f,0.0f);	// Rotate The cube around the Y axis
   	//glRotatef(rotqube,1.0f,1.0f,1.0f);
@@ -655,6 +666,7 @@ void MapViewer::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//    glBlendFunc(GL_DST_COLOR, GL_ZERO);
     glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 //    glDisable(GL_DEPTH_TEST);
@@ -682,12 +694,12 @@ void MapViewer::paintGL()
 		showIndicators();
 	    renderRobot();	    
 		setRobotsLocation();	
-	    renderLaser();    
+//	    renderLaser();    
 	    renderPaths();    
 	    renderSpatialStates();
 	    renderDestIndicators();
-	//  renderSearchTree();
-	//	renderExpandedTree();	
+//	  	renderSearchTree();
+//		renderExpandedTree();	
 		if(!mainMapBuilt)
 		{
 			loadTexture();

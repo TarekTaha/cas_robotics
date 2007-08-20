@@ -21,6 +21,7 @@
 using namespace std;
 using namespace zmdp;
 
+
 class IntentionRecognizer: public QThread
 {
 public:
@@ -41,6 +42,7 @@ private:
 	BoundPairExec* em;
 	PlayGround * playGround;
 	RobotManager * robotManager;
+	QReadWriteLock dataLock; 
 };
 
 #endif /*INTENTIONRECOGNIZER_H_*/
