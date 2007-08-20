@@ -73,6 +73,7 @@ class MapSkeleton
 		void clear();
 		void draw();
 		QVector <Vertex> verticies;
+		QVector <int> destIndexes; 
 };
 
 #endif /*MAPSKELETON_H_*/

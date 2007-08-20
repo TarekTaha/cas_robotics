@@ -117,6 +117,12 @@ define dynamicRobot pioneer2dx
 dynamicRobot
 (
   color "red"
-   name "robot2"
+   name "robot2b"
    pose [5.85 -2.66 180]
+)
+dynamicRobot
+(
+  color "green"
+   name "robot2a"
+   pose [5.85 0 180]
 )
