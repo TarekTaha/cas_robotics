@@ -4,8 +4,8 @@ TabContainer::TabContainer(QWidget *parent,PlayGround *playG)
     : QTabWidget(parent),
       playGround(playG)
 {
-    tasksGui = new TasksGui(parent,playGround);
-    addTab(tasksGui, "Tasks Manager");
+//    tasksGui = new TasksGui(parent,playGround);
+//    addTab(tasksGui, "Tasks Manager");
     	
     navCon = 	new NavContainer(parent,playGround);
    	addTab(navCon, "Navigation Panel");

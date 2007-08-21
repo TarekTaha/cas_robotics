@@ -16,6 +16,7 @@
 #include "MatrixUtils.h"
 #include "BoundPairExec.h"
 #include "zmdpMainConfig.h"
+#include "activityLogger.h"
 
 #include "Pomdp.h"
 using namespace std;
@@ -25,10 +26,10 @@ using namespace zmdp;
 class IntentionRecognizer: public QThread
 {
 public:
-	IntentionRecognizer();
 	~IntentionRecognizer();
 	void InitializePOMDP();
 	IntentionRecognizer(PlayGround * playG,RobotManager *robotManager);
+	void followActionToNextState();
 	void run();
 	bool runRecognition;
 	bool beliefInitialized;
@@ -37,6 +38,9 @@ public:
 	int numStates;
 	QVector <double> destBelief;	
 private:
+	Pose location,goToState,oldGoToState;
+	ActivityLogger activityLogger;
+	int  o,a,spatialState,oldSpatialState;
 	string pomdpFileName, policyFileName;
 	ZMDPConfig* config;
 	BoundPairExec* em;

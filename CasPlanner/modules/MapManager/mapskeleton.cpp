@@ -2,7 +2,9 @@
 
 MapSkeleton::MapSkeleton()
 {
-	verticies.resize(49);
+	numStates = 49;
+	numDestinations = 6;
+	verticies.resize(numStates);
 	verticies[0].setLocation(-13.65,5.68);
 	verticies[1].setLocation(-13.65,1.53);
 	verticies[2].setLocation(-13.65,-1.4);

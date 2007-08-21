@@ -70,6 +70,8 @@ class MapSkeleton
 		bool convertGridToLineWithVoronoi(float minThreshold, float maxThreshold, bool filterByCellValue, float valueToSet);
 		void generateInnerSkeleton();
 		int  getCurrentSpatialState(Pose p);
+		int numStates;
+		int numDestinations;
 		void clear();
 		void draw();
 		QVector <Vertex> verticies;

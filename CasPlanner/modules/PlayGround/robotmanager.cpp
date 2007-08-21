@@ -15,7 +15,6 @@ notFollowing(true)
 
 RobotManager::~RobotManager()
 {
-	// Empty Destructor
 	if(commManager)
 		delete commManager;
 	if(navigator)
@@ -58,9 +57,6 @@ notFollowing(true)
 			readPlannerConfigs(cf); 
 	    }
 	}
-	intentionRecognizer = new IntentionRecognizer(this->playGround,this);
-	intentionRecognizer->runRecognition = true;
-	intentionRecognizer->start();
 }
 
 void RobotManager::updateMap(Map * mapData)
@@ -109,6 +105,7 @@ int RobotManager::start()
 	startComms();
 	startPlanner();
 	startNavigator();
+	startIntentionRecognizer();
     return 1;
 }
 
@@ -120,6 +117,7 @@ int RobotManager::stop()
 int RobotManager::startComms()
 {
     commManager->start();
+    startIntentionRecognizer();
 	return 1;
 }
 
@@ -133,6 +131,14 @@ int RobotManager::startNavigator()
 {
     navigator->start();
     return 1;
+}
+
+int RobotManager::startIntentionRecognizer()
+{
+	intentionRecognizer = new IntentionRecognizer(this->playGround,this);
+	intentionRecognizer->runRecognition = true;
+	intentionRecognizer->start();
+	return 1;
 }
 
 

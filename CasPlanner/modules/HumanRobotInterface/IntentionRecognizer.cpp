@@ -1,25 +1,25 @@
 #include "IntentionRecognizer.h"
 
-IntentionRecognizer::IntentionRecognizer():
-runRecognition(false),
-beliefInitialized(false),
-numDestinations(6),
-numStates(49),
-destBelief(numDestinations,0)
-{
-	InitializePOMDP();
-}
-
 IntentionRecognizer::IntentionRecognizer(PlayGround * playG, RobotManager *rManager):
 runRecognition(false),
 beliefInitialized(false),
-numDestinations(6),
-numStates(49),
 destBelief(numDestinations,0),
+goToState(-1,-1,-1),
+oldGoToState(0,0,0),
+o(4),
+a(4),
+spatialState(-1),
+oldSpatialState(-2),
 playGround(playG),
 robotManager(rManager)
 {
-	InitializePOMDP();	
+	InitializePOMDP();
+	if (!playGround)
+	{
+		perror("\nIR: PlayGround Not Passed Correctly");
+	}
+	numStates = playGround->mapManager->mapSkeleton.numStates;
+	numDestinations = playGround->mapManager->mapSkeleton.numDestinations;
 }
 
 IntentionRecognizer::~IntentionRecognizer()
@@ -40,21 +40,70 @@ void IntentionRecognizer::InitializePOMDP()
   em->initReadFiles(pomdpFileName,policyFileName, *config);	
 }
 
+void IntentionRecognizer::followActionToNextState()
+{
+    /* 
+     * Find where the currtent action will take us from the Transition Matrix
+     * stored in the POMDP model.
+     */ 
+    double maxTrans = 0;
+	for (int sp=0; sp < ((Pomdp*)em->mdp)->getBeliefSize(); sp++) 
+    {
+    	if(((Pomdp*)em->mdp)->T[a](spatialState,sp) > maxTrans)
+    	{
+//			printf("Index=%d %5.3f ",sp,((Pomdp*)em->mdp)->T[a](spatialState,sp));
+			maxTrans = ((Pomdp*)em->mdp)->T[a](spatialState,sp);
+			nextState = sp;
+    	}
+    }
+	goToState.p.setX(playGround->mapManager->mapSkeleton.verticies[nextState].location.x());
+	goToState.p.setY(playGround->mapManager->mapSkeleton.verticies[nextState].location.y());
+	/* 
+	 * Set Final Orientation to the direction of Motion 
+	 */
+	switch(a)
+	{
+		case 0:
+			goToState.phi = DTOR(90);
+			break;
+		case 1:
+			goToState.phi = DTOR(270);
+			break;
+		case 2:
+			goToState.phi = DTOR(0);
+			break;
+		case 3:
+			goToState.phi = DTOR(180);
+			break;
+		case 4:
+			goToState.phi = DTOR(0);
+			break;
+		default:
+			goToState.phi = DTOR(0);
+	}
+	if( (oldGoToState!=goToState && o!=4) || !beliefInitialized)
+	{
+		printf("\n Going to State:%d",nextState);
+		printf("\noldGoto X=%f, Y=%f, GoTo X=%f, Y=%f Action=%d Obs=%d",oldGoToState.p.x(),oldGoToState.p.y(),goToState.p.x(),goToState.p.y(),a,o);
+		robotManager->commManager->vfhGoto(goToState);
+		oldGoToState= goToState;
+	}	
+}
+
 void IntentionRecognizer::run()
 {
-	Pose location,goToState(-1,-1,-1),oldGoToState(0,0,0);
-	int  o=4,a=4,spatialState=-1,oldSpatialState=-2, sp;
+//	bool startState = true;
 	while(runRecognition)
 	{
 		msleep(50);
 		if(!robotManager->commManager)
 		{
-			qDebug("\t - (IR): Communication Manager Not Initialized");
+//			qDebug("\t - (IR): Communication Manager Not Initialized");
 			continue;
 		}
 		if(!robotManager->commManager->connected)
 		{
-			qDebug("\t - (IR): Your not Connected to the Robot, Connect First");
+//			qDebug("\t - (IR): Your not Connected to the Robot, Connect First");
 			continue;		
 		}
 		
@@ -84,9 +133,10 @@ void IntentionRecognizer::run()
 		  	}
 		  	copy(b, initialBeliefD);
 		  	em->setBelief(b);		
-		  	beliefInitialized = true;
 		  	/* Chose Initial Action */
 		  	a = em->chooseAction();
+		  	followActionToNextState();
+		  	beliefInitialized = true;
 		}
 //		printf("\nJoyStick Global Direction=%d Current Location X=%f, Y=%f CurrentState=%d",robotManager->commManager->getJoyStickGlobalDir(),location.p.x(),location.p.y(),spatialState);   
 		/* Take observations and update Beliefs only in discrete states*/
@@ -101,13 +151,21 @@ void IntentionRecognizer::run()
 		     */
 		    if(o==4)
 		    {
-//		    	printf("\nWaiting For a Directional Observation");
 		    	continue;
 		    }
+//		    if(startState)
+//		    {
+//			  	a = em->chooseAction();
+//			  	followActionToNextState();		
+//			  	startState = false;    	
+//			  	continue;
+//		    }
+		    
 		    oldSpatialState = spatialState;
 		    em->advanceToNextState(a,o);
 		    belief_vector newB = em->currentState;
-
+			activityLogger.addState(spatialState,o);
+			
 		    QVector<double> max(numDestinations,0.0);
 		    int index=0;
 			for(unsigned int j=0; j < newB.size();j++)
@@ -121,60 +179,16 @@ void IntentionRecognizer::run()
 					printf("\n Belief is now Updated to Dest:%d State %d with %f",index,j,destBelief[index]);
 				}
 			}
-			fflush(stdout);
+
+		  	a = em->chooseAction();			
+			followActionToNextState();
 			if (em->getStateIsTerminal())
 		    {
 				printf("  [belief is terminal, ending trial]\n");
+				activityLogger.startNewTask();
 				break;
 		    }
-		    a = em->chooseAction();
 		    printf("\n New Chosen Action is:%d",a);
-		    /* 
-		     * Find where the currtent action will take us from the Transition Matrix
-		     * stored in the POMDP model.
-		     */ 
-		    double maxTrans = 0;
-	    	for (sp=0; sp < ((Pomdp*)em->mdp)->getBeliefSize(); sp++) 
-		    {
-		    	if(((Pomdp*)em->mdp)->T[a](spatialState,sp) > maxTrans)
-		    	{
-//					printf("Index=%d %5.3f ",sp,((Pomdp*)em->mdp)->T[a](spatialState,sp));
-					maxTrans = ((Pomdp*)em->mdp)->T[a](spatialState,sp);
-					nextState = sp;
-		    	}
-		    }
-			goToState.p.setX(playGround->mapManager->mapSkeleton.verticies[nextState].location.x());
-			goToState.p.setY(playGround->mapManager->mapSkeleton.verticies[nextState].location.y());
-			/* 
-			 * Set Final Orientation to the direction of Motion 
-			 */
-			switch(a)
-			{
-				case 0:
-					goToState.phi = DTOR(90);
-					break;
-				case 1:
-					goToState.phi = DTOR(270);
-					break;
-				case 2:
-					goToState.phi = DTOR(0);
-					break;
-				case 3:
-					goToState.phi = DTOR(180);
-					break;
-				case 4:
-					goToState.phi = DTOR(0);
-					break;
-				default:
-					goToState.phi = DTOR(0);
-			}
-			if(oldGoToState!=goToState && o!=4)
-			{
-				printf("\n Going to State:%d",nextState);
-	 			printf("\noldGoto X=%f, Y=%f, GoTo X=%f, Y=%f Action=%d Obs=%d",oldGoToState.p.x(),oldGoToState.p.y(),goToState.p.x(),goToState.p.y(),a,o);
-				robotManager->commManager->vfhGoto(goToState);
-				oldGoToState= goToState;
-			}
 		}
 	}	
 }

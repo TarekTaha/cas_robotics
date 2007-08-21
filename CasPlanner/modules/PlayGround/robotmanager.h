@@ -38,7 +38,7 @@ class RobotManager : public QObject//public CommManager, public PlanningManager 
 		int startPlanner();
 		int startNavigator();
 		int startComms();
-		int renderingMethod;
+		int startIntentionRecognizer();
 		PlayGround 		*playGround;
 		CommManager     *commManager;
 		PlanningManager *planningManager;

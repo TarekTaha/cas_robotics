@@ -204,29 +204,6 @@ void MapViewer::renderLaser()
 	}
 }
 
-void MapViewer::renderSpatialStates()
-{
-	if(!playGround->mapManager)
-		return;
-	// This is not the general Case now and i might need to change it
-	Pose l = playGround->robotPlatforms[0]->commManager->getOdomLocation();
-	for(int i=0; i < playGround->mapManager->mapSkeleton.verticies.size() ;i++)
-	{
-	    glPushMatrix();
-	    glTranslated(playGround->mapManager->mapSkeleton.verticies[i].location.x(),playGround->mapManager->mapSkeleton.verticies[i].location.y(),0);
-	    glShadeModel(GL_FLAT);
-	    if(i==playGround->mapManager->mapSkeleton.getCurrentSpatialState(l))
-	    	glColor4f(1,0,0,0.5);
-	    else if (i == playGround->robotPlatforms[0]->intentionRecognizer->nextState)
-	    	glColor4f(0,0,1,1);
-	    else
-	    	glColor4f(0.33,0.33,0.33,0.5);
-		glRectf(-0.2f,0.2f, 0.2f, -0.2f);
-		glPopMatrix();
-	}
-
-}
-
 void MapViewer::renderSearchTree()
 {
 	for(int i=0;i<1;i++)
@@ -518,9 +495,43 @@ void MapViewer::displayGrid()
     glPopMatrix();	
 }
 
+void MapViewer::renderSpatialStates()
+{
+	if(!playGround->mapManager || !playGround->robotPlatforms[0]->intentionRecognizer||!playGround->robotPlatforms[0]->commManager)
+		return;
+	// This is not the general Case now and i might need to change it
+	Pose l = playGround->robotPlatforms[0]->commManager->getOdomLocation();
+	for(int i=0; i < playGround->mapManager->mapSkeleton.verticies.size() ;i++)
+	{
+	    glPushMatrix();
+	    glTranslated(playGround->mapManager->mapSkeleton.verticies[i].location.x(),playGround->mapManager->mapSkeleton.verticies[i].location.y(),0);
+	    glShadeModel(GL_FLAT);
+	    if(i==playGround->mapManager->mapSkeleton.getCurrentSpatialState(l))
+	    	glColor4f(1,0,0,0.5);
+	    else if (i == playGround->robotPlatforms[0]->intentionRecognizer->nextState)
+	    	glColor4f(0,0,1,1);
+	    else
+	    	glColor4f(0.33,0.33,0.33,0.5);
+		glRectf(-0.2f,0.2f, 0.2f, -0.2f);
+		
+		if( playGround->mapManager->mapSkeleton.destIndexes.indexOf((i%playGround->mapManager->mapSkeleton.numStates))!=-1 )
+		{
+			glColor4f(1.0,0.33,0.33,0.5);
+			glBegin(GL_LINE);
+				glVertex2f(-0.2f, 0.2f);
+				glVertex2f( 0.2f,-0.2f);
+				glVertex2f(-0.2f,-0.2f);
+				glVertex2f( 0.2f, 0.2f);
+			glEnd();
+		}
+		glPopMatrix();
+	}
+
+}
+
 void MapViewer::renderDestIndicators()
 {
-	if(!playGround->mapManager)
+	if(!playGround->mapManager || !playGround->robotPlatforms[0]->intentionRecognizer ||!playGround->robotPlatforms[0]->commManager)
 		return;
 		
 	// This is not the general Case now and i might need to change it
