@@ -33,7 +33,7 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     logButton->setPalette(palette);    
     
     // Window Layout
-    setMinimumSize(QSize(900,700)); 
+    setMinimumSize(QSize(900,800)); 
     QHBoxLayout *layout = new QHBoxLayout, *layout2 = new QHBoxLayout; 
     layout->addWidget(tabcontainer,1); 
     layout2->addWidget(logButton);
@@ -59,7 +59,6 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
 void MainWindow::logData()
 {
 	QApplication::beep();
-    //qDebug("Am not sure , but i might be Logging :)"); 
     return;
 }
 

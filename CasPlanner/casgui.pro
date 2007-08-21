@@ -89,7 +89,8 @@ HEADERS += modules/CommManager/commmanager.h \
     modules/PomdpCore/zmdpMainConfig.h \
     modules/PomdpCore/embedFiles.h \
     modules/MapManager/mapskeleton.h \
-    modules/HumanRobotInterface/IntentionRecognizer.h
+    modules/HumanRobotInterface/IntentionRecognizer.h \
+    modules/HumanRobotInterface/activityLogger.h
 SOURCES += modules/CommManager/commmanager.cpp \
     modules/CommonTools/bandmat.cpp \
     modules/CommonTools/cholesky.cpp \
@@ -175,7 +176,8 @@ SOURCES += modules/CommManager/commmanager.cpp \
     modules/PomdpCore/BlindLBInitializer.cc \
     modules/MapManager/mapskeleton.cpp \
     modules/MapManager/map.cpp \
-    modules/HumanRobotInterface/IntentionRecognizer.cpp
+    modules/HumanRobotInterface/IntentionRecognizer.cpp \
+    modules/HumanRobotInterface/activityLogger.cpp
 INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     /usr/local/Trolltech/Qt-4.2.2/include/QtGui \
     /usr/local/high/include \
