@@ -6,8 +6,8 @@ beliefInitialized(false),
 destBelief(numDestinations,0),
 goToState(-1,-1,-1),
 oldGoToState(0,0,0),
-o(4),
-a(4),
+observation(4),
+action(4),
 spatialState(-1),
 oldSpatialState(-2),
 playGround(playG),
@@ -49,45 +49,50 @@ void IntentionRecognizer::followActionToNextState()
     double maxTrans = 0;
 	for (int sp=0; sp < ((Pomdp*)em->mdp)->getBeliefSize(); sp++) 
     {
-    	if(((Pomdp*)em->mdp)->T[a](spatialState,sp) > maxTrans)
+    	if(((Pomdp*)em->mdp)->T[action](spatialState,sp) > maxTrans)
     	{
-//			printf("Index=%d %5.3f ",sp,((Pomdp*)em->mdp)->T[a](spatialState,sp));
-			maxTrans = ((Pomdp*)em->mdp)->T[a](spatialState,sp);
+//			printf("Index=%d %5.3f ",sp,((Pomdp*)em->mdp)->T[action](spatialState,sp));
+			maxTrans = ((Pomdp*)em->mdp)->T[action](spatialState,sp);
 			nextState = sp;
     	}
+    }
+    if(maxTrans==0)
+    {
+    	printf("\nIR: This action is not applicable to this state."); fflush(stdout);
+    	return;
     }
 	goToState.p.setX(playGround->mapManager->mapSkeleton.verticies[nextState].location.x());
 	goToState.p.setY(playGround->mapManager->mapSkeleton.verticies[nextState].location.y());
 	/* 
 	 * Set Final Orientation to the direction of Motion 
 	 */
-	switch(a)
+	switch(action)
 	{
-		case 0:
+		case North:
 			goToState.phi = DTOR(90);
 			break;
-		case 1:
+		case South:
 			goToState.phi = DTOR(270);
 			break;
-		case 2:
+		case East:
 			goToState.phi = DTOR(0);
 			break;
-		case 3:
+		case West:
 			goToState.phi = DTOR(180);
 			break;
-		case 4:
+		case Nothing:
 			goToState.phi = DTOR(0);
 			break;
 		default:
 			goToState.phi = DTOR(0);
 	}
-	if( (oldGoToState!=goToState && o!=4) || !beliefInitialized)
+	if( (oldGoToState!=goToState && observation!=NoInput) || !beliefInitialized)
 	{
 		printf("\n Going to State:%d",nextState);
-		printf("\noldGoto X=%f, Y=%f, GoTo X=%f, Y=%f Action=%d Obs=%d",oldGoToState.p.x(),oldGoToState.p.y(),goToState.p.x(),goToState.p.y(),a,o);
+		printf("\noldGoto X=%f, Y=%f, GoTo X=%f, Y=%f Action=%d Obs=%d",oldGoToState.p.x(),oldGoToState.p.y(),goToState.p.x(),goToState.p.y(),action,observation);
 		robotManager->commManager->vfhGoto(goToState);
 		oldGoToState= goToState;
-	}	
+	}
 }
 
 void IntentionRecognizer::run()
@@ -109,7 +114,7 @@ void IntentionRecognizer::run()
 		
 		location = robotManager->commManager->getOdomLocation();
 		spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(location);
-		o = robotManager->commManager->getJoyStickGlobalDir();
+		observation = robotManager->commManager->getJoyStickGlobalDir();
 				
 		if(!beliefInitialized)
 		{
@@ -134,7 +139,7 @@ void IntentionRecognizer::run()
 		  	copy(b, initialBeliefD);
 		  	em->setBelief(b);		
 		  	/* Chose Initial Action */
-		  	a = em->chooseAction();
+		  	action = em->chooseAction();
 		  	followActionToNextState();
 		  	beliefInitialized = true;
 		}
@@ -142,29 +147,29 @@ void IntentionRecognizer::run()
 		/* Take observations and update Beliefs only in discrete states*/
 		if(oldSpatialState != spatialState)
 		{
-			/* We are now in a new State so Save it as visited */
+			/* We are now in action new State so Save it as visited */
 		    // Get an Observation
-		    o = robotManager->commManager->getJoyStickGlobalDir();
+		    observation = robotManager->commManager->getJoyStickGlobalDir();
 		    /* 
 		     * Get an observation and if it's directional(not NoInput) then don't
 		     * take any more observations from this state.
 		     */
-		    if(o==4)
+		    if(observation==NoInput)
 		    {
 		    	continue;
 		    }
 //		    if(startState)
 //		    {
-//			  	a = em->chooseAction();
+//			  	action = em->chooseAction();
 //			  	followActionToNextState();		
 //			  	startState = false;    	
 //			  	continue;
 //		    }
 		    
 		    oldSpatialState = spatialState;
-		    em->advanceToNextState(a,o);
+		    em->advanceToNextState(action,observation);
 		    belief_vector newB = em->currentState;
-			activityLogger.addState(spatialState,o);
+			activityLogger.addState(spatialState,observation);
 			
 		    QVector<double> max(numDestinations,0.0);
 		    int index=0;
@@ -180,7 +185,7 @@ void IntentionRecognizer::run()
 				}
 			}
 
-		  	a = em->chooseAction();			
+		  	action = em->chooseAction();			
 			followActionToNextState();
 			if (em->getStateIsTerminal())
 		    {
@@ -188,7 +193,7 @@ void IntentionRecognizer::run()
 				activityLogger.startNewTask();
 				break;
 		    }
-		    printf("\n New Chosen Action is:%d",a);
+		    printf("\n New Chosen Action is:%d",action);
 		}
 	}	
 }

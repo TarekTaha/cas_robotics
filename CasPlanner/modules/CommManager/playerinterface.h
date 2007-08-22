@@ -21,11 +21,10 @@
 using namespace PlayerCc;
 using namespace std;
 
-// Directions
-enum {N,S,E,W,Nothing,NE,NW,SE,SW};
-
-// Observations
+//Observations
 enum {Up,Down,Right,Left,NoInput};
+//Actions- Global Directions
+enum {North,South,East,West,Nothing,NE,NW,SE,SW};
 
 class DeviceType
 {
