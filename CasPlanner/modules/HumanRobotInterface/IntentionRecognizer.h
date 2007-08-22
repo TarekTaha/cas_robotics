@@ -22,7 +22,6 @@
 using namespace std;
 using namespace zmdp;
 
-
 class IntentionRecognizer: public QThread
 {
 public:
@@ -37,10 +36,10 @@ public:
 	int numDestinations;
 	int numStates;
 	QVector <double> destBelief;	
-private:
 	Pose location,goToState,oldGoToState;
 	ActivityLogger activityLogger;
-	int  o,a,spatialState,oldSpatialState;
+	int  observation,action,spatialState,oldSpatialState;
+private:
 	string pomdpFileName, policyFileName;
 	ZMDPConfig* config;
 	BoundPairExec* em;

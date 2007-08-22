@@ -27,7 +27,6 @@ int PlayerInterface::getJoyStickGlobalDir()
 	dataLock.unlock();
 	P = Trans2Global(P,odom_location);
 	double angle = RTOD(P.phi), dirTolerance = 45;//45 degrees means that we will get only N,S,E,W
-//	printf("  The Global Angle is:%f",angle);
 	if(angle < 0)
 		angle += 360;	
 	if( joyAxes.x() == 0 && joyAxes.y() == 0)
@@ -36,7 +35,7 @@ int PlayerInterface::getJoyStickGlobalDir()
 	}
 	else if( (360 - dirTolerance) <= angle || angle <= (0 + dirTolerance) ) // 0
 	{
-		return E;
+		return East;
 	}
 	else if( (0 + dirTolerance) < angle && angle < (90 - dirTolerance) )
 	{
@@ -44,7 +43,7 @@ int PlayerInterface::getJoyStickGlobalDir()
 	}
 	else if( (90 - dirTolerance) <= angle && angle <= (90 + dirTolerance) ) //90
 	{
-		return N;
+		return North;
 	}
 	else if( ( 90 + dirTolerance ) < angle && angle < (180-dirTolerance) )
 	{
@@ -52,7 +51,7 @@ int PlayerInterface::getJoyStickGlobalDir()
 	}
 	else if( (180 - dirTolerance) <= angle && angle <= (180 + dirTolerance) ) // 180
 	{
-		return W;
+		return West;
 	}
 	else if( (180 + dirTolerance) < angle && angle < (270 - dirTolerance) )
 	{
@@ -60,7 +59,7 @@ int PlayerInterface::getJoyStickGlobalDir()
 	}
 	else if( (270 - dirTolerance) <= angle && angle <= (270 + dirTolerance) ) //270
 	{
-		return S;
+		return South;
 	}
 	else if( (270 + dirTolerance) < angle && angle < ( 360 - dirTolerance) )
 	{
@@ -71,9 +70,11 @@ int PlayerInterface::getJoyStickGlobalDir()
 
 int PlayerInterface::getJoyStickDir()
 {
-	/* Be AWARE that the Joystick Coordinate Axis is not the same as the Robot's
+	/* 
+	 * Be AWARE that the Joystick Coordinate Axis is not the same as the Robot's
 	 * Coordinate AXIS (The Robot's X-Axis is Forward, while The Joystick Forward
-	 * Direction is the Y-Axis) */
+	 * Direction is the Y-Axis) 
+	 */
 	dataLock.lockForRead();
 	double x = joyAxes.x(), y = joyAxes.y();
 	dataLock.unlock();
@@ -82,7 +83,7 @@ int PlayerInterface::getJoyStickDir()
 //	printf("\nThe Angle is:%f",angle);
 	if(x==0 && y==0)
 	{
-		return Nothing;
+		return NoInput;
 	}
 	else if(x>0 && y>0)
 	{
@@ -102,19 +103,19 @@ int PlayerInterface::getJoyStickDir()
 	}
 	else if(x==0 && y>0)
 	{
-		return N;
+		return Up;
 	}
 	else if(x==0 && y<0)
 	{
-		return S;
+		return Down;
 	}
 	else if(x>0 && y==0)
 	{
-		return E;
+		return Right;
 	}
 	else if(x<0 && y==0)
 	{
-		return W;
+		return Left;
 	}
 	return -1;
 }

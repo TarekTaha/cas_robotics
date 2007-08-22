@@ -495,6 +495,93 @@ void MapViewer::displayGrid()
     glPopMatrix();	
 }
 
+void drawCircle(float radius)
+{
+   glBegin(GL_LINE_LOOP);
+	   for (int i=0; i < 360; i++)
+	   {
+	      float degInRad = DTOR(i);
+	      glVertex2f(cos(degInRad)*radius,sin(degInRad)*radius);
+	   }
+   glEnd();
+}
+
+void MapViewer::renderObservation()
+{
+	if(!playGround->mapManager || !playGround->robotPlatforms[0]->intentionRecognizer||!playGround->robotPlatforms[0]->commManager)
+		return;
+	glPushMatrix();
+		glTranslatef(-0.7,0.8,0.0);
+		glScalef(1/15.0, 1/15.0, 1.0);
+		drawCircle(1.0);
+		int obs = playGround->robotPlatforms[0]->intentionRecognizer->observation;
+		glLineWidth(2);
+		switch (obs)
+		{
+			case 0:
+   				glBegin(GL_LINES);			
+					glVertex2f( 0.0, 0.0);
+					glVertex2f( 0.0, 1.0);
+				glEnd();	
+				glBegin(GL_TRIANGLE_FAN);
+					glVertex2f(-0.2, 0.8);
+					glVertex2f( 0.0, 1.0);
+					glVertex2f( 0.2, 0.8);			
+					glVertex2f(-0.2, 0.8);
+				glEnd();
+				break;
+			case 1:
+				glLineWidth(2);			
+   				glBegin(GL_LINES);	
+					glVertex2f( 0.0, 0.0);
+					glVertex2f( 0.0,-1.0);
+   				glEnd();
+				glBegin(GL_TRIANGLE_FAN);
+					glVertex2f( 0.2,-0.8);
+					glVertex2f( 0.0,-1.0);
+					glVertex2f(-0.2,-0.8);
+					glVertex2f( 0.2,-0.8);			
+				glEnd();									
+				break;
+			case 2:
+				glLineWidth(2);			
+			   	glBegin(GL_LINES);
+					glVertex2f( 0.0, 0.0);
+					glVertex2f( 1.0, 0.0);			   	
+			   	glEnd();	
+				glBegin(GL_TRIANGLE_FAN);
+					glVertex2f( 0.8, 0.2);
+					glVertex2f( 1.0, 0.0);
+					glVertex2f( 0.8,-0.2);			
+					glVertex2f( 0.8,-0.2);
+				glEnd();																	
+				break;
+			case 3:
+				glLineWidth(2);			
+   				glBegin(GL_LINES);
+					glVertex2f( 0.0, 0.0);
+					glVertex2f(-1.0, 0.0);   					
+   				glEnd();
+				glBegin(GL_TRIANGLE_FAN);
+					glVertex2f(-0.8, 0.2);
+					glVertex2f(-1.0,-0.0);
+					glVertex2f(-0.8,-0.2);
+					glVertex2f(-0.8, 0.2);			
+				glEnd();																	
+				break;
+			default:
+				drawCircle(0.2);				
+		}
+	glLineWidth(1);		
+	glPopMatrix();
+}
+
+void MapViewer::renderAction()
+{
+	if(!playGround->mapManager || !playGround->robotPlatforms[0]->intentionRecognizer||!playGround->robotPlatforms[0]->commManager)
+		return;	
+}
+
 void MapViewer::renderSpatialStates()
 {
 	if(!playGround->mapManager || !playGround->robotPlatforms[0]->intentionRecognizer||!playGround->robotPlatforms[0]->commManager)
@@ -534,19 +621,18 @@ void MapViewer::renderDestIndicators()
 	if(!playGround->mapManager || !playGround->robotPlatforms[0]->intentionRecognizer ||!playGround->robotPlatforms[0]->commManager)
 		return;
 		
-	// This is not the general Case now and i might need to change it
+//	This is not the general Case now and i might need to change it
 	Pose l = playGround->robotPlatforms[0]->commManager->getOdomLocation();
 	for(int i=0; i < playGround->robotPlatforms[0]->intentionRecognizer->numDestinations ;i++)
 	{
 		int r;
 		r = playGround->mapManager->mapSkeleton.destIndexes[i];
-//		printf("\n	Belief=%f",playGround->robotPlatforms[0]->intentionRecognizer->destBelief[i]);		
 //		drawProbHisto(playGround->mapManager->mapSkeleton.verticies[r].location, playGround->robotPlatforms[0]->intentionRecognizer->destBelief[i]);
 		glPushMatrix();
-			glTranslatef(i,12,0.0f);
+			glTranslatef(-0.5,0.9 - i*0.05 ,0.0);
 			glColor4f(1.0f,0.5f,0.0f,1.0f);
-			glScalef(1/4.0f,2*playGround->robotPlatforms[0]->intentionRecognizer->destBelief[i], 0.0f);
-			glRectf(-1.0f,1.0f, 1.0f, -1.0f);
+			glScalef(playGround->robotPlatforms[0]->intentionRecognizer->destBelief[i]*4.0f,1.0f, 1.0f);
+			glRectf(0.0,0.025f, 0.025f, 0.0f);
 		glPopMatrix();
 	}	
 }
@@ -685,7 +771,9 @@ void MapViewer::paintGL()
 //    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 //    glEnable(GL_LINE_SMOOTH);
 //    glEnable(GL_POLYGON_SMOOTH);
-
+	
+	renderObservation();
+	renderDestIndicators();	
    	glPushMatrix();
     glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
     glColor4f(1,1,1,1);
@@ -700,15 +788,16 @@ void MapViewer::paintGL()
     glGetIntegerv(GL_VIEWPORT,viewport);
 
 	if(this->ogMap)
-	{ 
+	{
 		displayGrid();
 		showIndicators();
 	    renderRobot();	    
 		setRobotsLocation();	
 //	    renderLaser();    
-	    renderPaths();    
+//	    renderPaths();    
 	    renderSpatialStates();
-	    renderDestIndicators();
+//	    renderObservation();
+//	    renderAction();
 //	  	renderSearchTree();
 //		renderExpandedTree();	
 		if(!mainMapBuilt)
