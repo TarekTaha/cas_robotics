@@ -528,7 +528,7 @@ void PathPlanner :: setMap(Map * map_in)
 	}
 	this->map = map_in;
 	MAXNODES = MaxLong;//map->height*map->width*map->width*map->height;
-	//qDebug("W_in:%d H_in:%d",map->width,map->height);
+//	qDebug("W_in:%d H_in:%d",map->width,map->height);
 	map_initialized = true;	
 //	qDebug("MAP SET"); fflush(stdout);	
 };

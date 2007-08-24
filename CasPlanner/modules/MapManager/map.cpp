@@ -14,7 +14,7 @@ Map::Map(int width, int height,float mapRes,QPointF center,Pose p)
 	{
 		grid[i] = new bool [height];
 		for(int j=0;j < height;j++)
-			grid[i][j] = false;
+			grid[i][j] = true;
 	}
 }
 /* 
@@ -30,7 +30,7 @@ void Map::scale(int newWidth,int newHeight)
 	{
 		temp[i] = new bool [newHeight];
 		for(int j=0;j < newHeight;j++)
-			temp[i][j] = false;
+			temp[i][j] = true;
 	}
 	// copy the old data to the new scaled map and center it
 //	assert(newWidth < this->width || newHeight < this->height);
@@ -60,6 +60,8 @@ void Map::scale(int newWidth,int newHeight)
 	grid = temp;
 	this->width  = newWidth;
 	this->height = newHeight;
+	center.setX(newWidth/2.0f);
+	center.setY(newHeight/2.0f);
 //	printf("\n Map Scaled Properly!!!"); fflush(stdout);
 }
 

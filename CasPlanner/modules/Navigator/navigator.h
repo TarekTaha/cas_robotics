@@ -28,6 +28,8 @@ class RobotManager;
 class PlayGround;
 using namespace CasPlanner;
 
+enum {GPS,AMCL};
+
 class Navigator : public Controller
 {
 	Q_OBJECT
@@ -67,7 +69,7 @@ class Navigator : public Controller
 		void renderMapPatch(Map*);
 		void addMsg(int,int,QString);
 	protected:
-		Pose	old_amcl,amcl_location,EstimatedPos,laser_pose;
+		Pose	old_amcl,currentPose,EstimatedPos,laser_pose;
 		double 	angle,prev_angle,theta,error_orientation,
 				displacement,wdem,distance,distance_to_next,
 				minR,minL,minAhead,avoidance_distance_left,
@@ -80,7 +82,7 @@ class Navigator : public Controller
 		ForceField *FF;
 		QPointF	begin,tracking_point,ni,SegmentStart,SegmentEnd;
 		bool	log,position_found,end_reached,segment_navigated,stop_navigating,pause;
-		int		platform,direction,path2Draw,obstAvoidAlgo;
+		int		platform,direction,path2Draw,obstAvoidAlgo,localizer;
 		Node * local_path,* global_path,*last,*first,*path2Follow;
 		PlanningManager *local_planner,*global_planner;
 		MapManager mapManager;
