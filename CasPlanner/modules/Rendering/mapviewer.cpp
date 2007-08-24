@@ -121,7 +121,7 @@ void MapViewer::renderPaths()
 		{
 			Node * path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;
 	    	glColor4f(RGB[3][0],RGB[3][1],RGB[3][2],1);
-	    	//glLineWidth(2);
+	    	glLineWidth(2);
 		    glBegin(GL_LINE_STRIP);
 			while(path && path->next)
 			{
@@ -129,6 +129,7 @@ void MapViewer::renderPaths()
 				path = path->next;
 			}
 		    glEnd();
+		    glLineWidth(1);
 		    wayPoint = playGround->robotPlatforms[i]->navigator->wayPoint;
 		    // Draw Way Point
 		    if(wayPoint.p.x()==0 && wayPoint.p.y()==0)
@@ -794,7 +795,7 @@ void MapViewer::paintGL()
 	    renderRobot();	    
 		setRobotsLocation();	
 //	    renderLaser();    
-//	    renderPaths();    
+	    renderPaths();    
 	    renderSpatialStates();
 //	    renderObservation();
 //	    renderAction();

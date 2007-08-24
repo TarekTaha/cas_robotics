@@ -29,14 +29,15 @@ public:
 	void InitializePOMDP();
 	IntentionRecognizer(PlayGround * playG,RobotManager *robotManager);
 	void followActionToNextState();
+	void navigateToWayPoint(Pose start,Pose dest);
 	void run();
 	bool runRecognition;
-	bool beliefInitialized;
+	bool useNavigator,beliefInitialized;
 	int nextState;
 	int numDestinations;
 	int numStates;
 	QVector <double> destBelief;	
-	Pose location,goToState,oldGoToState;
+	Pose currentState,location,goToState,oldGoToState;
 	ActivityLogger activityLogger;
 	int  observation,action,spatialState,oldSpatialState;
 private:
@@ -45,7 +46,8 @@ private:
 	BoundPairExec* em;
 	PlayGround * playGround;
 	RobotManager * robotManager;
-	QReadWriteLock dataLock; 
+	QReadWriteLock dataLock;
+	Node * path;	 
 };
 
 #endif /*INTENTIONRECOGNIZER_H_*/

@@ -117,7 +117,7 @@ int RobotManager::stop()
 int RobotManager::startComms()
 {
     commManager->start();
-    startIntentionRecognizer();
+//    startIntentionRecognizer();
 	return 1;
 }
 

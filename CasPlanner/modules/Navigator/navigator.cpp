@@ -149,8 +149,10 @@ localPath(NULL),
 playGround(playG),
 robotManager(r),
 local_planner(NULL),
-global_planner(r->planningManager)
+global_planner(r->planningManager),
+pause(false)
 {
+	localizer = GPS;
    	connect(this, SIGNAL(addMsg(int,int,QString)), playGround,SLOT(addMsg(int,int,QString)));
 }
 
@@ -242,6 +244,7 @@ int Navigator::readConfigs( ConfigFile *cf)
 	logMsg.append(QString("\n\t\t\t Safet Distance :%1").arg(safety_dist));
 	logMsg.append(QString("\n\t\t\t Tracking Distance :%1").arg(tracking_dist));
 	logMsg.append("\n-> Robot Navigator Started.");		
+	localizer = GPS;
 //    	qDebug("-> Starting Robot Navigator."); 	
 //		qDebug("\tNavigation Parameters:"); 
 //		qDebug("\t\t\t Obstacle Avoidance:\t%s", qPrintable(obst_avoid)); 
@@ -465,9 +468,6 @@ bool Navigator::inLaserSpace(LaserScan laserScan,Pose robotLocation,QPointF wayP
 	return true;
 }
 
-/*!
- * This is the Navigation Thread's main, where the control and the path following takes place.
- */
 bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
 {
 	Node *temp;
@@ -498,6 +498,9 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
  	return retval;
 }
 
+/*!
+ * This is the Navigation Thread's main, where the control and the path following takes place.
+ */ 
 void Navigator::run()
 {
 	QVector <Robot *> availableRobots;
@@ -527,18 +530,22 @@ void Navigator::run()
 	path2Draw = GLOBALPATH;
 	redraw_timer.restart();
 	control_timer.restart();
-	Pose initial_pos;
-	initial_pos.p.setX(global_path->pose.p.x());
-	initial_pos.p.setY(global_path->pose.p.y());	
-	initial_pos.phi = global_path->pose.phi;	
+	
 	//Set our Initial Location Estimation
-	robotManager->commManager->setLocation(initial_pos);
-	sleep(1);
-	while(!robotManager->commManager->getLocalized())
+	if(localizer == AMCL)
 	{
-		loc = robotManager->commManager->getLocation();
-		qDebug("NO Accurate Estimation yet, best current is: x:%f y:%f phi:%f",loc.p.x(),loc.p.y(),RTOD(loc.phi));
-		usleep(300000);
+		Pose initial_pos;
+		initial_pos.p.setX(global_path->pose.p.x());
+		initial_pos.p.setY(global_path->pose.p.y());	
+		initial_pos.phi = global_path->pose.phi;			
+		robotManager->commManager->setLocation(initial_pos);
+		sleep(1);
+		while(!robotManager->commManager->getLocalized())
+		{
+			loc = robotManager->commManager->getLocation();
+			qDebug("NO Accurate Estimation yet, best current is: x:%f y:%f phi:%f",loc.p.x(),loc.p.y(),RTOD(loc.phi));
+			usleep(300000);
+		}
 	}
 	/**********************         Start by the Global Path     ************************/
 	path2Follow = global_path;
@@ -555,32 +562,33 @@ void Navigator::run()
 		delta_t = delta_timer.secElapsed();
 		delta_timer.restart();
 		usleep(30000);
+		printf("\n Debug Location 1"); fflush(stdout);
 		// Get current Robot Location
-//		amcl_location = robotManager->commManager->getLocation();
-		amcl_location = robotManager->commManager->getOdomLocation();
-		printf("\nCurrent State is:%d",playGround->mapManager->mapSkeleton.getCurrentSpatialState(amcl_location));
-		EstimatedPos = amcl_location;
+		if(localizer == AMCL)
+			currentPose = robotManager->commManager->getLocation();
+		else
+			currentPose = robotManager->commManager->getOdomLocation();
+
+		EstimatedPos = currentPose;
+		speed    =  robotManager->commManager->getSpeed();
+		turnRate =  robotManager->commManager->getTurnRate();
+		
+		// Updating the current Robot Info			
 		dataLock.lockForWrite();
-		robotManager->robot->setPose(amcl_location);
-		dataLock.unlock();
-		trail.push_back(amcl_location.p);
-//		for testing reasons only
-		if (robotManager->robot->robotName=="Dynamic Obstacle")
-			continue;
-		speed    = robotManager->commManager->getSpeed();
-		turnRate =  robotManager->commManager->getTurnRate();		
-		// Updating the current Robot Info 
-		dataLock.lockForWrite();
-		robotManager->robot->setSpeed(speed);
-		robotManager->robot->setTurnRate(turnRate);
+			robotManager->robot->setPose(currentPose);
+			robotManager->robot->setSpeed(speed);
+			robotManager->robot->setTurnRate(turnRate);			
 		dataLock.unlock();
 		
-		laserScan = robotManager->commManager->getLaserScan();
-//		cout<<"\n Current Location X:"<<amcl_location.p.x()<<" Y:"<<amcl_location.p.y()<<" Theta:"<<amcl_location.phi;
+		trail.push_back(currentPose.p);
+		
+		printf("\n Debug Location 2"); fflush(stdout);		
+//		laserScan = robotManager->commManager->getLaserScan();
+//		cout<<"\n Current Location X:"<<currentPose.p.x()<<" Y:"<<currentPose.p.y()<<" Theta:"<<currentPose.phi;
 		/* If this location is new, then use it. Otherwise
 		 * estimate the location based on the last reading.
 		 */
-//		if(old_amcl != amcl_location)
+//		if(old_amcl != currentPose)
 //		{
 //			// Recording the last time Data changed
 //			last_time = amcl_timer.secElapsed();
@@ -588,9 +596,9 @@ void Navigator::run()
 //			// resetting the timer
 //			amcl_timer.restart(); 
 //			// Override the Estimated Location with the AMCL hypothesis
-//			old_amcl.p.setX(amcl_location.p.x()); EstimatedPos.p.setX(amcl_location.p.x());
-//			old_amcl.p.setY(amcl_location.p.y()); EstimatedPos.p.setY(amcl_location.p.y());
-//			old_amcl.phi = EstimatedPos.phi = amcl_location.phi;
+//			old_amcl.p.setX(currentPose.p.x()); EstimatedPos.p.setX(currentPose.p.x());
+//			old_amcl.p.setY(currentPose.p.y()); EstimatedPos.p.setY(currentPose.p.y());
+//			old_amcl.phi = EstimatedPos.phi = currentPose.phi;
 //		}
 //		else
 //		{
@@ -617,7 +625,7 @@ void Navigator::run()
 //		}
 		//first = ClosestPathSeg(EstimatedPos.p,path2Follow);
 		//qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);		
-		fflush(stdout);
+		printf("\n Debug Location 3"); fflush(stdout);
 		first = closestPathSeg(EstimatedPos.p,global_path);
 		if(!first)
 		{
@@ -648,12 +656,14 @@ void Navigator::run()
 				}
 			}
 		}
-		last  = first->next;	ni = first->pose.p;
+		last  = first->next;	
+		ni = first->pose.p;
 		SegmentStart.setX(ni.x());	SegmentStart.setY(ni.y());
-		ni = last->pose.p;  SegmentEnd.setX(ni.x());  SegmentEnd.setY(ni.y());	
+		ni = last->pose.p;
+		SegmentEnd.setX(ni.x());  SegmentEnd.setY(ni.y());	
 		direction = -1;
 		angle = atan2(SegmentEnd.y() - SegmentStart.y(),SegmentEnd.x() - SegmentStart.x());
-
+		printf("\n Debug Location 4"); fflush(stdout);
 		/* If we chose to follow a virtual point on the path then calculate that point
 		 * It will not be used most of the time, but it adds accuracy in control for
 		 * long line paths.
@@ -666,7 +676,7 @@ void Navigator::run()
 		distance = Dist(SegmentEnd,tracking_point);
 		Line l(SegmentStart,SegmentEnd);
 		displacement = Dist2Seg(l,tracking_point);
-
+		printf("\n Debug Location 5"); fflush(stdout);
 		//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
 		//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
 		/* If we are too close to obstacles then let the local planner takes control
@@ -793,22 +803,22 @@ void Navigator::run()
 //		 		qDebug("Local Planning took %dms",local_planning_time.elapsed());	
 //			}
 //		}
- 		if (redraw_timer.msecElapsed()>100)
- 		{
-//			if(this->mapPatch)
-//				delete mapPatch;
-//			mapPatch = mapManager.provideLaserOG(laserScan,2.0,0.05,EstimatedPos);	
-//			 	emit glRender();
-		 	redraw_timer.restart();	
-		}
+// 		if (redraw_timer.msecElapsed()>100)
+// 		{
+////			if(this->mapPatch)
+////				delete mapPatch;
+////			mapPatch = mapManager.provideLaserOG(laserScan,2.0,0.05,EstimatedPos);	
+////			 	emit glRender();
+//		 	redraw_timer.restart();	
+//		}
 		/* Get the control Action to be applied, in this case it's a
 		 * simple linear control. It's accurate enough for traversing 
 		 * the generated paths.
 		 */
-//		Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
-		Pose goal;
-		if(!getGoal(laserScan,goal))
-		{
+		Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
+//		Pose goal;
+//		if(!getGoal(laserScan,goal))
+//		{
 //			robotManager->commManager->setSpeed(0);
 //			robotManager->commManager->setTurnRate(0);			
 //			robotManager->planningManager->setStart(robotManager->robot->robotLocation);
@@ -816,13 +826,13 @@ void Navigator::run()
 //			robotManager->planningManager->updateMap(laserScan,local_dist,robotManager->robot->robotLocation);
 //			robotManager->planningManager->findPath(METRIC);
 //			continue;
-		}
-		else
-		{
+//		}
+//		else
+//		{
 			wayPoint = goal;
-		}
+//		}
 //		emit setWayPoint(&goal);
-
+		printf("\n Debug Location 6"); fflush(stdout);
 		QTime ff_time;
 		if(!pause)
 		{
@@ -840,22 +850,21 @@ void Navigator::run()
 					ff_time.restart();
 					//qDebug("================================= FORCE FIELD STARTS ===============================");
 					qDebug("Current Robot      --->>> Turn Rate:%lf and Speed is:%lf Delta Time:%lf",turnRate,speed,delta_t);
-				 	qDebug("Current Robot Pose --->>> x:%f y:%f phi:%f",amcl_location.p.x(),amcl_location.p.y(),RTOD(amcl_location.phi));
+				 	qDebug("Current Robot Pose --->>> x:%f y:%f phi:%f",currentPose.p.x(),currentPose.p.y(),RTOD(currentPose.phi));
 				 	control_timer.restart();
-					action = FF->GenerateField(amcl_location,laserScan,wayPoint,speed,turnRate,availableRobots,delta_t);
+					action = FF->GenerateField(currentPose,laserScan,wayPoint,speed,turnRate,availableRobots,delta_t);
 //					qDebug("Force Field Returned     --->>> Speed is:%f TurnRate is:%f  time to calculate FF is:%dms Loop Delta_t:%fsec",action.speed,action.turnRate,ff_time.elapsed(),delta_t);	
 					robotManager->commManager->setSpeed(action.speed);						
 					robotManager->commManager->setTurnRate(action.turnRate);		
 					control_timer.restart();				
-					//qDebug("================================= FORCE FIELD ENDS  ===============================\n");					
+					//qDebug("================================= FORCE FIELD ENDS  ===============================\n");		
 					break;		
 				case CONFIG_SPACE:
 					break;
 				case NO_AVOID:
-					// Linear Controller 
-					cntrl = getAction(EstimatedPos.phi,angle,displacement,path2Follow->direction,linear_velocity);
-					qDebug("Control Action Linear:%f Angular:%f",path2Follow->direction*cntrl.linear_velocity,
-					cntrl.angular_velocity);
+//					// Linear Controller 
+					cntrl = getAction(EstimatedPos.phi,angle,displacement,first->direction,linear_velocity);
+					qDebug("Control Action Linear:%f Angular:%f",first->direction*cntrl.linear_velocity,cntrl.angular_velocity);fflush(stdout);					
 					/* Angular Velocity Thrusholded, just trying not to
 					 * exceed the accepted limits. Or setting up a safe 
 					 * turn speed.
@@ -864,15 +873,16 @@ void Navigator::run()
 						cntrl.angular_velocity =  0.2;
 					if(cntrl.angular_velocity <  -0.2)
 						cntrl.angular_velocity = -0.2;
-					if(log)
-						fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),amcl_location.p.x(), amcl_location.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.secElapsed(),last_time);			
+//					if(log)
+//						fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),currentPose.p.x(), currentPose.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.secElapsed(),last_time);			
 					//Normal Linear Follower
-					robotManager->commManager->setSpeed(path2Follow->direction*cntrl.linear_velocity);
+					qDebug("Speed is:%f TurnRate is:%f",first->direction*cntrl.linear_velocity,cntrl.angular_velocity); fflush(stdout);					
+					robotManager->commManager->setSpeed(first->direction*cntrl.linear_velocity);
 					robotManager->commManager->setTurnRate(cntrl.angular_velocity);							
 					break;
 				case VFH:
 					// Vector Field Histogram
-//					qDebug("Sending to VFH goto X:%f Y:%f Phi%f",goal.p.x(),goal.p.y(),goal.phi);
+					qDebug("Sending to VFH goto X:%f Y:%f Phi%f",goal.p.x(),goal.p.y(),goal.phi);
 					robotManager->commManager->vfhGoto(wayPoint);	
 					break;		
 				default:
@@ -885,11 +895,14 @@ void Navigator::run()
 			robotManager->commManager->setTurnRate(0);
 		}
 		loc = EstimatedPos;
+		printf("\n Debug Location 7"); fflush(stdout);
 	}
+	printf("\n Debug Location 8"); fflush(stdout);
 	robotManager->commManager->setSpeed(0);
 	robotManager->commManager->setTurnRate(0);
 	//local_planner->pathPlanner->freeResources();
 	qDebug("Thread Loop Terminated Normally !!!");
+	this->quit();
 	return;
 }
 

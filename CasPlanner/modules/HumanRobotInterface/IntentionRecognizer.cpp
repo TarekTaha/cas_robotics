@@ -2,6 +2,7 @@
 
 IntentionRecognizer::IntentionRecognizer(PlayGround * playG, RobotManager *rManager):
 runRecognition(false),
+useNavigator(true),
 beliefInitialized(false),
 destBelief(numDestinations,0),
 goToState(-1,-1,-1),
@@ -11,7 +12,8 @@ action(4),
 spatialState(-1),
 oldSpatialState(-2),
 playGround(playG),
-robotManager(rManager)
+robotManager(rManager),
+path(NULL)
 {
 	InitializePOMDP();
 	if (!playGround)
@@ -40,6 +42,38 @@ void IntentionRecognizer::InitializePOMDP()
   em->initReadFiles(pomdpFileName,policyFileName, *config);	
 }
 
+void IntentionRecognizer::navigateToWayPoint(Pose startLoc,Pose destLoc)
+{
+	robotManager->planningManager->setStart(startLoc);
+	robotManager->planningManager->setEnd(destLoc);
+	path = robotManager->planningManager->findPath(METRIC);	
+	
+	robotManager->navigator->setPause(false);
+	
+
+		
+	robotManager->navigator->setObstAvoidAlgo(NO_AVOID);
+	
+	printf("\n---IR:Commanded the Navigator");fflush(stdout);
+	if(path)
+	{
+		if(!robotManager->navigator->isRunning())
+		{
+			printf("\n---IR:Starting The Navigator");fflush(stdout);
+			robotManager->navigator->setPath(path);
+			robotManager->navigator->start();
+		}
+		else
+		{
+			robotManager->navigator->StopNavigating();
+			msleep(200); // Wait until the Thread Terminates
+			printf("\n---IR:Giving New Path to Navigator");fflush(stdout);			
+			robotManager->navigator->setPath(path);
+			robotManager->navigator->start();						
+		}
+	}
+}
+
 void IntentionRecognizer::followActionToNextState()
 {
     /* 
@@ -61,8 +95,13 @@ void IntentionRecognizer::followActionToNextState()
     	printf("\nIR: This action is not applicable to this state."); fflush(stdout);
     	return;
     }
+    
 	goToState.p.setX(playGround->mapManager->mapSkeleton.verticies[nextState].location.x());
 	goToState.p.setY(playGround->mapManager->mapSkeleton.verticies[nextState].location.y());
+	
+	currentState.p.setX(playGround->mapManager->mapSkeleton.verticies[spatialState].location.x());
+	currentState.p.setY(playGround->mapManager->mapSkeleton.verticies[spatialState].location.y());
+
 	/* 
 	 * Set Final Orientation to the direction of Motion 
 	 */
@@ -90,7 +129,11 @@ void IntentionRecognizer::followActionToNextState()
 	{
 		printf("\n Going to State:%d",nextState);
 		printf("\noldGoto X=%f, Y=%f, GoTo X=%f, Y=%f Action=%d Obs=%d",oldGoToState.p.x(),oldGoToState.p.y(),goToState.p.x(),goToState.p.y(),action,observation);
-		robotManager->commManager->vfhGoto(goToState);
+		if(!useNavigator)
+			robotManager->commManager->vfhGoto(goToState);
+		else
+			navigateToWayPoint(currentState,goToState);
+			
 		oldGoToState= goToState;
 	}
 }
