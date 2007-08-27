@@ -15,6 +15,7 @@
 #include "map.h"
 #include "timer.h"
 #include "statusbar.h"
+#include "wheelchairproxy.h"
 
 #define MAX_LASERS 4
 
@@ -76,6 +77,7 @@ Q_OBJECT
         PlayerInterface(QString playerHost, int playerPort);
         void stop();
         void run();
+        void checkForWheelChair();
         void enableControl(int driveId);
         void setLasers(QVector<Laser> lasers); 
 		void enablePtz(int ptzId);
@@ -91,7 +93,7 @@ Q_OBJECT
         bool getLocalized();
         Pose getLocation();
         Pose getOdomLocation();
-        QVector<DeviceType> * getDevices(QString,int);
+        QVector<DeviceType> * getDevices();
         void gotoGoal(Pose);
         void vfhGoto(Pose);
         void setSpeed(double speed);
@@ -107,6 +109,7 @@ Q_OBJECT
         void addMsg(int,int,QString);
     private:
         QString playerHost; 
+        QString logMsg;
         int playerPort; 
         PlayerClient *pc;
        	playerc_client_t *client;
@@ -116,6 +119,7 @@ Q_OBJECT
         int positionId,ptzId,mapId,localizerId,vfhId,joyStickId;
         QVector <Laser> lasers;
         Position2dProxy *drive, *vfh, *joyStick;
+        WheelChairProxy *wheelChairCommander;
         MapProxy *map;
 		PtzProxy *ptz;
 		LocalizeProxy *localizer;

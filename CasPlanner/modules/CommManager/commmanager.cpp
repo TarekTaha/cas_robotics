@@ -1,8 +1,8 @@
 #include "commmanager.h"
 
 CommManager::CommManager(Robot *rob,PlayGround * playG):
-connected(false),
 Comms(),
+connected(false),
 player(NULL),
 robot(rob),
 playGround(playG)
@@ -21,7 +21,7 @@ CommManager::~CommManager()
 {
 }
 
-QVector <DeviceType> * CommManager::getDevices(QString host,int port)
+QVector <DeviceType> * CommManager::getDevices()
 {
 	if(!player)
 	{
@@ -29,7 +29,7 @@ QVector <DeviceType> * CommManager::getDevices(QString host,int port)
 //		fflush(stdout);
 		return NULL;
 	}
-	return player->getDevices(host,port);
+	return player->getDevices();
 }
 
 void CommManager::emergencyStop()
@@ -214,7 +214,7 @@ Map CommManager::provideMap()
 LaserScan CommManager::getLaserScan()
 {
 	if(player)
-  		return player->getLaserScan();  		
+  		return player->getLaserScan();
 }
 
 int CommManager::readConfigs( ConfigFile *cf,int secId)

@@ -20,10 +20,10 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     playGround->setNavContainer(tabcontainer->navCon);
     
     // Buttons
-    QVBoxLayout *vLayout = new QVBoxLayout;
-    QPushButton *emergStop = new QPushButton(" STOP ROBOT ");  
-    QPushButton *connRobot = new QPushButton(" Connect to Robot ");
-    QPushButton *logButton = new QPushButton(" Show Loggs");    
+    QVBoxLayout *vLayout 		 = new QVBoxLayout;
+    QPushButton *emergStop 		 = new QPushButton(" STOP ROBOT ");  
+    QPushButton *connRobot 		 = new QPushButton(" Connect to Robot ");
+    QPushButton *logButton 		 = new QPushButton(" Show Loggs");    
     QPalette palette = emergStop->palette();
     palette.setColor(QPalette::Button, Qt::red);
     emergStop->setPalette(palette); 
@@ -48,6 +48,7 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     connect(emergStop, SIGNAL(pressed()), playGround, SLOT(stopRobots()));
     connect(connRobot, SIGNAL(pressed()), playGround, SLOT(startRobotsComm()));
     connect(logButton, SIGNAL(clicked()), playGround->statusLogger, SLOT(showLog())); 
+    
 
     statusBar()->showMessage("Welcome to CAS Navigation System ...", 20000); 
     statusBar()->showMessage("Initialization Done.");

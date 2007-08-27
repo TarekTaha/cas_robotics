@@ -562,7 +562,7 @@ void Navigator::run()
 		delta_t = delta_timer.secElapsed();
 		delta_timer.restart();
 		usleep(30000);
-		printf("\n Debug Location 1"); fflush(stdout);
+//		printf("\n Debug Location 1"); fflush(stdout);
 		// Get current Robot Location
 		if(localizer == AMCL)
 			currentPose = robotManager->commManager->getLocation();
@@ -582,7 +582,7 @@ void Navigator::run()
 		
 		trail.push_back(currentPose.p);
 		
-		printf("\n Debug Location 2"); fflush(stdout);		
+//		printf("\n Debug Location 2"); fflush(stdout);		
 //		laserScan = robotManager->commManager->getLaserScan();
 //		cout<<"\n Current Location X:"<<currentPose.p.x()<<" Y:"<<currentPose.p.y()<<" Theta:"<<currentPose.phi;
 		/* If this location is new, then use it. Otherwise
@@ -625,7 +625,7 @@ void Navigator::run()
 //		}
 		//first = ClosestPathSeg(EstimatedPos.p,path2Follow);
 		//qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);		
-		printf("\n Debug Location 3"); fflush(stdout);
+//		printf("\n Debug Location 3"); fflush(stdout);
 		first = closestPathSeg(EstimatedPos.p,global_path);
 		if(!first)
 		{
@@ -663,7 +663,7 @@ void Navigator::run()
 		SegmentEnd.setX(ni.x());  SegmentEnd.setY(ni.y());	
 		direction = -1;
 		angle = atan2(SegmentEnd.y() - SegmentStart.y(),SegmentEnd.x() - SegmentStart.x());
-		printf("\n Debug Location 4"); fflush(stdout);
+//		printf("\n Debug Location 4"); fflush(stdout);
 		/* If we chose to follow a virtual point on the path then calculate that point
 		 * It will not be used most of the time, but it adds accuracy in control for
 		 * long line paths.
@@ -676,7 +676,7 @@ void Navigator::run()
 		distance = Dist(SegmentEnd,tracking_point);
 		Line l(SegmentStart,SegmentEnd);
 		displacement = Dist2Seg(l,tracking_point);
-		printf("\n Debug Location 5"); fflush(stdout);
+//		printf("\n Debug Location 5"); fflush(stdout);
 		//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
 		//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
 		/* If we are too close to obstacles then let the local planner takes control
@@ -832,7 +832,7 @@ void Navigator::run()
 			wayPoint = goal;
 //		}
 //		emit setWayPoint(&goal);
-		printf("\n Debug Location 6"); fflush(stdout);
+//		printf("\n Debug Location 6"); fflush(stdout);
 		QTime ff_time;
 		if(!pause)
 		{
@@ -895,9 +895,8 @@ void Navigator::run()
 			robotManager->commManager->setTurnRate(0);
 		}
 		loc = EstimatedPos;
-		printf("\n Debug Location 7"); fflush(stdout);
+//		printf("\n Debug Location 7"); fflush(stdout);
 	}
-	printf("\n Debug Location 8"); fflush(stdout);
 	robotManager->commManager->setSpeed(0);
 	robotManager->commManager->setTurnRate(0);
 	//local_planner->pathPlanner->freeResources();

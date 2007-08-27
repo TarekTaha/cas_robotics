@@ -14,10 +14,6 @@
 //#include "robotrender.h"
 #include "map.h"
 
-#include <Inventor/nodes/SoBaseColor.h>
-#include <Inventor/nodes/SoCone.h>
-#include <Inventor/nodes/SoSeparator.h>
-
 //class RobotRender;
 class PlayGround;
 class NavControlPanel;

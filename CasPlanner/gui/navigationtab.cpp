@@ -55,6 +55,7 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
 	generateSpaceBtn("Generate Space"), 
 	pathFollowBtn("Path Follow"),
 	captureImage("Capture Image"),
+	intentionRecognitionBtn("Start IRecognition"),
 	robotsGB("Select your Robot"),
 	currRobot(NULL),
 	robotInitialization(true),
@@ -160,6 +161,7 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
     actionLayout->addWidget(&pathPlanBtn);
     actionLayout->addWidget(&generateSpaceBtn); 
     actionLayout->addWidget(&pathFollowBtn); 
+    actionLayout->addWidget(&intentionRecognitionBtn);
     actionGB.setLayout(actionLayout); 
     connect(&bridgeTestResSB,  SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
     connect(&bridgeSegLenSB,   SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
@@ -173,13 +175,26 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
     connect(&noavoidRadBtn,    SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));            
 	connect(&pathPlanBtn,      SIGNAL(pressed()),this, SLOT(pathPlan()));
 	connect(&generateSpaceBtn, SIGNAL(pressed()),this, SLOT(generateSpace()));
-	connect(&captureImage,       SIGNAL(pressed()),this, SLOT(save()));	
+	connect(&captureImage,     SIGNAL(pressed()),this, SLOT(save()));	
 	connect(&pathFollowBtn,    SIGNAL(pressed()),this, SLOT(pathFollow()));
 	connect(&pauseBtn,         SIGNAL(pressed()),this, SLOT(setNavigation()));	
+	connect(&intentionRecognitionBtn, SIGNAL(pressed()),this, SLOT(startIntentionRecognition()));
 
     if(availableRobots.size()>0)
     	availableRobots[0]->setChecked(true);
     robotsGB.setLayout(robotsL); 	
+}
+
+void NavControlPanel::startIntentionRecognition()
+{
+	if(this->currRobot)
+	{
+		currRobot->startIntentionRecognizer();
+	}
+	else
+	{
+		qDebug("No Robot Selected");
+	}	
 }
 
 void NavControlPanel::pathTraversed()

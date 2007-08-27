@@ -44,6 +44,7 @@ Q_OBJECT
 		void setStart(Pose);
 		void setEnd(Pose);
 		void setMap(Map * map);
+		void startIntentionRecognition();
     private:
 		NavContainer *navContainer;
 		PlayGround * playGround;
@@ -79,6 +80,7 @@ Q_OBJECT
 		QPushButton generateSpaceBtn;
 		QPushButton pathFollowBtn;
 		QPushButton captureImage;
+		QPushButton intentionRecognitionBtn;
 
 		//Pointers to the currently selected Robot
 		QGroupBox robotsGB;
