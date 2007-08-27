@@ -105,7 +105,6 @@ int RobotManager::start()
 	startComms();
 	startPlanner();
 	startNavigator();
-	startIntentionRecognizer();
     return 1;
 }
 
@@ -117,7 +116,6 @@ int RobotManager::stop()
 int RobotManager::startComms()
 {
     commManager->start();
-//    startIntentionRecognizer();
 	return 1;
 }
 

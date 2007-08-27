@@ -4,7 +4,7 @@ IntentionRecognizer::IntentionRecognizer(PlayGround * playG, RobotManager *rMana
 runRecognition(false),
 useNavigator(true),
 beliefInitialized(false),
-destBelief(numDestinations,0),
+destBelief(playG->mapManager->mapSkeleton.numDestinations,0),
 goToState(-1,-1,-1),
 oldGoToState(0,0,0),
 observation(4),
@@ -138,6 +138,31 @@ void IntentionRecognizer::followActionToNextState()
 	}
 }
 
+void IntentionRecognizer::resetBelief()
+{
+  	belief_vector b;
+  	initialBeliefD.resize(((Pomdp*)em->mdp)->getBeliefSize());
+  	/*
+  	 * Distribute belief Evenly accross destinations
+  	 */ 
+  	for(int i=0;i < numDestinations;i++)
+  	{
+  		destBelief[i] = initialBeliefD((numStates*i) + spatialState) = 1/float(numDestinations);
+  	}
+  	copy(b, initialBeliefD);
+  	em->setBelief(b);
+}
+
+bool IntentionRecognizer::currentStateIsDestination()
+{
+	for(int i=0; i<playGround->mapManager->mapSkeleton.destIndexes.size();i++)
+	{
+		if(spatialState == playGround->mapManager->mapSkeleton.destIndexes[i] )
+			return true;
+	}
+	return false;
+}
+
 void IntentionRecognizer::run()
 {
 //	bool startState = true;
@@ -158,7 +183,6 @@ void IntentionRecognizer::run()
 		location = robotManager->commManager->getOdomLocation();
 		spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(location);
 		observation = robotManager->commManager->getJoyStickGlobalDir();
-				
 		if(!beliefInitialized)
 		{
 			/*
@@ -169,21 +193,12 @@ void IntentionRecognizer::run()
 			sleep(1);
 			location = robotManager->commManager->getOdomLocation();
 			spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(location);			
-		  	belief_vector b;
-		  	dvector initialBeliefD;
-		  	initialBeliefD.resize(((Pomdp*)em->mdp)->getBeliefSize());
-		  	/*
-		  	 * Distribute belief Evenly accross destinations
-		  	 */ 
-		  	for(int i=0;i < numDestinations;i++)
-		  	{
-		  		destBelief[i] = initialBeliefD((numStates*i) + spatialState) = 1/float(numDestinations);
-		  	}
-		  	copy(b, initialBeliefD);
-		  	em->setBelief(b);		
+			
+			resetBelief();
+//		  	em->setToInitialState();
 		  	/* Chose Initial Action */
-		  	action = em->chooseAction();
-		  	followActionToNextState();
+//		  	action = em->chooseAction();
+//		  	followActionToNextState();
 		  	beliefInitialized = true;
 		}
 //		printf("\nJoyStick Global Direction=%d Current Location X=%f, Y=%f CurrentState=%d",robotManager->commManager->getJoyStickGlobalDir(),location.p.x(),location.p.y(),spatialState);   
@@ -201,14 +216,14 @@ void IntentionRecognizer::run()
 		    {
 		    	continue;
 		    }
-//		    if(startState)
-//		    {
-//			  	action = em->chooseAction();
-//			  	followActionToNextState();		
-//			  	startState = false;    	
-//			  	continue;
-//		    }
-		    
+
+			if (currentStateIsDestination())//em->getStateIsTerminal())
+		    {
+		    	resetBelief();
+				printf("\n[belief is terminal, Resetting Belief\n");
+				activityLogger.startNewTask();
+		    }
+
 		    oldSpatialState = spatialState;
 		    em->advanceToNextState(action,observation);
 		    belief_vector newB = em->currentState;
@@ -230,12 +245,7 @@ void IntentionRecognizer::run()
 
 		  	action = em->chooseAction();			
 			followActionToNextState();
-			if (em->getStateIsTerminal())
-		    {
-				printf("  [belief is terminal, ending trial]\n");
-				activityLogger.startNewTask();
-				break;
-		    }
+			
 		    printf("\n New Chosen Action is:%d",action);
 		}
 	}	

@@ -177,7 +177,8 @@ SOURCES += modules/CommManager/commmanager.cpp \
     modules/MapManager/mapskeleton.cpp \
     modules/MapManager/map.cpp \
     modules/HumanRobotInterface/IntentionRecognizer.cpp \
-    modules/HumanRobotInterface/activityLogger.cpp
+    modules/HumanRobotInterface/activityLogger.cpp \
+    modules/Controller/wheelchairproxy.cpp
 INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     /usr/local/Trolltech/Qt-4.2.2/include/QtGui \
     /usr/local/high/include \

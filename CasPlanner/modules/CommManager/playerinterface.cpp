@@ -13,8 +13,9 @@ PlayerInterface::PlayerInterface(QString host, int port):
     emergencyStopped(false),
     velControl(true),
     positionId(0), 
-    drive(0),
-    localizer(0)
+    drive(NULL),
+    wheelChairCommander(NULL),
+    localizer(NULL)
 {
 }
 
@@ -120,7 +121,27 @@ int PlayerInterface::getJoyStickDir()
 	return -1;
 }
 
-QVector<DeviceType> * PlayerInterface::getDevices(QString host,int port )
+void PlayerInterface::checkForWheelChair()
+{
+	QVector<DeviceType> * dev = getDevices();
+	for(int i=0;i< dev->size(); i++)
+	{
+		if((*dev)[i].driverName == "WheelchairDriver")
+		{
+			if (wheelChairCommander)
+				delete wheelChairCommander;
+			wheelChairCommander = new WheelChairProxy(pc,0);
+		  	printf("\n Turning ON WheelChair"); fflush(stdout);
+		  	wheelChairCommander->setPower(ON);
+		  	wheelChairCommander->setMode(AUTO);
+		  	wheelChairCommander->soundHorn(1000); // for a second
+		  	printf("\n WheelChair is on"); fflush(stdout);			
+		  	logMsg.append(QString("\n\t\t - Wheelchair Driver Engaged"));
+		}
+	}
+}
+
+QVector<DeviceType> * PlayerInterface::getDevices()
 {
   	// Connect to the server
   	dataLock.lockForWrite();
@@ -129,7 +150,7 @@ QVector<DeviceType> * PlayerInterface::getDevices(QString host,int port )
   	else
   		devices = new QVector<DeviceType>;
   	//printf("Connecting to [%s:%d]\n", qPrintable(host), port);
-  	client = playerc_client_create(NULL, qPrintable(host), port);
+  	client = playerc_client_create(NULL, qPrintable(this->playerHost), this->playerPort);
   	if (playerc_client_connect(client) != 0)
   	{
     	printf("%s", playerc_error_str());
@@ -390,7 +411,6 @@ Map PlayerInterface::provideMap()
 
 void PlayerInterface::run ()
 {
-	QString logMsg;
 	logMsg.append("\n/********************************************************************/");
 	logMsg.append("\nConnecting to Robot Server::");
 	logMsg.append(QString("\n\t Connecting to %1:%2 ...").arg(qPrintable(playerHost)).arg(playerPort));
@@ -412,6 +432,7 @@ void PlayerInterface::run ()
 			{
 			    delete drive;
 			}
+			checkForWheelChair();
 	        drive = new Position2dProxy(pc,positionId);
 //	   		qDebug("\t\t - Motor Control Interface Engaged Successfully, ID:%d",positionId);
 			logMsg.append(QString("\n\t\t - Motor Control Interface Engaged Successfully, ID:%1").arg(positionId));	   		 

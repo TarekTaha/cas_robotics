@@ -31,6 +31,8 @@ public:
 	void followActionToNextState();
 	void navigateToWayPoint(Pose start,Pose dest);
 	void run();
+	void resetBelief();
+	bool currentStateIsDestination();
 	bool runRecognition;
 	bool useNavigator,beliefInitialized;
 	int nextState;
@@ -41,6 +43,7 @@ public:
 	ActivityLogger activityLogger;
 	int  observation,action,spatialState,oldSpatialState;
 private:
+	dvector initialBeliefD;
 	string pomdpFileName, policyFileName;
 	ZMDPConfig* config;
 	BoundPairExec* em;
