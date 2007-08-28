@@ -305,7 +305,6 @@ int CommManager::start()
   	//Enable Robot Control ?
   	if(activateControl)
   	{
-//   	  	qDebug("\t\t\t 	- Position/Drive Contrl.");
    	  	logMsg.append("\n\t\t 	- Position/Drive Contrl."); 
     	player->enableControl(positionControlId);
   	}

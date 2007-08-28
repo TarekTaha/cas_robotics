@@ -68,7 +68,7 @@ void MapViewer::initializeGL()
     //glDepthFunc(GL_LEQUAL);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
    	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    //renderText(0,0,0,"");
+//    renderText(0,0,0,"");
     glFlush();
     mapList = glGenLists(1);
 }
@@ -316,8 +316,9 @@ void MapViewer::renderRobot()
 			glVertex2f(playGround->robotPlatforms[i]->robot->local_edge_points[m].x(),playGround->robotPlatforms[i]->robot->local_edge_points[m].y());
 		}
 		glEnd();
+        glColor4f(0,0,0,1);
         QFont font40; font40.setPointSize(10);
-//	    renderText(1.6,0,0, qPrintable(playGround->robotPlatforms[i]->robot->robotName),font40);
+	    renderText(1.6,0,0, qPrintable(playGround->robotPlatforms[i]->robot->robotName),font40);
 	    glBegin(GL_LINE_LOOP);
 			glColor4f(0,0,1,0.5);
 		    glVertex3f(1.3, 0.15,0);
@@ -479,7 +480,7 @@ void MapViewer::displayGrid()
 			    glVertex3f(i,0,0);
 			    glVertex3f(i-1,-0.5,0);
 		    glEnd();
-//		    renderText(i,-1,0, "X");
+//		    renderText(i,-1,1, "X");
 		 }
 		 //Y-axis indicator
 	    int j = int((ogMap->height*ogMap->mapRes)/2.0 + 2);
@@ -490,7 +491,7 @@ void MapViewer::displayGrid()
 			    glVertex3f(0,j,0);
 			    glVertex3f(0.5,j-1,0);
 		    glEnd();
-//		    renderText(1,j,0, "Y");
+//		    renderText(1,j,1, "Y");
 		 }
     }
     glPopMatrix();	
@@ -724,8 +725,8 @@ void MapViewer::showIndicators()
 			    glEnd();
 		    }
 		    glColor4f(0,0,0,0.8);
-	        QFont font40; font40.setPointSize(14);
-	        //renderText(0.2,0,0,QString("Start"), font40);
+//	        QFont font40; font40.setPointSize(14);
+//	        renderText(0.2,0,0,QString("Start"), font40);
 			glPopMatrix();
 	    }
 	    if(end_initialized)
@@ -753,8 +754,8 @@ void MapViewer::showIndicators()
 			    glEnd();
 		    }
 		    glColor4f(0,0,0,0.8);
-	        QFont font40; font40.setPointSize(14);
-	        //renderText(0.2,0,0,QString("End"), font40);
+//	        QFont font40; font40.setPointSize(14);
+//	        renderText(0.2,0,0,QString("End"), font40);
 			glPopMatrix();
 	    }
 	}	

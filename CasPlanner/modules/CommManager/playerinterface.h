@@ -75,6 +75,7 @@ class PlayerInterface: public QThread
 Q_OBJECT    
     public:
         PlayerInterface(QString playerHost, int playerPort);
+        ~PlayerInterface();
         void stop();
         void run();
         void checkForWheelChair();
@@ -102,6 +103,8 @@ Q_OBJECT
         void setLocation(Pose location);
         void emergencyStop();
         void emergencyRelease();
+        void connectDevices();
+        void clearResources();
         int  getJoyStickGlobalDir();
         int  getJoyStickDir();
     signals:
@@ -123,6 +126,7 @@ Q_OBJECT
         MapProxy *map;
 		PtzProxy *ptz;
 		LocalizeProxy *localizer;
+		SpeechProxy *speechP;
 		Pose location,goal,odom_location,vfhGoal;
 		QPointF joyAxes;
 		double pan,tilt,pose[3], pose_covar[3];
