@@ -110,6 +110,10 @@ int RobotManager::start()
 
 int RobotManager::stop()
 {
+	if(navigator)
+		navigator->StopNavigating();
+	if(commManager)
+		commManager->emergencyStop();
 	return 1;
 }
 

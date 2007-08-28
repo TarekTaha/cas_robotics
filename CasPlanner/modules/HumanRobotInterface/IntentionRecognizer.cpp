@@ -2,7 +2,7 @@
 
 IntentionRecognizer::IntentionRecognizer(PlayGround * playG, RobotManager *rManager):
 runRecognition(false),
-useNavigator(true),
+useNavigator(false),
 beliefInitialized(false),
 destBelief(playG->mapManager->mapSkeleton.numDestinations,0),
 goToState(-1,-1,-1),
@@ -99,9 +99,9 @@ void IntentionRecognizer::followActionToNextState()
 	goToState.p.setX(playGround->mapManager->mapSkeleton.verticies[nextState].location.x());
 	goToState.p.setY(playGround->mapManager->mapSkeleton.verticies[nextState].location.y());
 	
-	currentState.p.setX(playGround->mapManager->mapSkeleton.verticies[spatialState].location.x());
-	currentState.p.setY(playGround->mapManager->mapSkeleton.verticies[spatialState].location.y());
-
+//	currentState.p.setX(l.x());
+//	currentState.p.setY(currentPose.y());
+//	currentState.phi = currentPose.phi();
 	/* 
 	 * Set Final Orientation to the direction of Motion 
 	 */
@@ -132,7 +132,7 @@ void IntentionRecognizer::followActionToNextState()
 		if(!useNavigator)
 			robotManager->commManager->vfhGoto(goToState);
 		else
-			navigateToWayPoint(currentState,goToState);
+			navigateToWayPoint(currentPose,goToState);
 			
 		oldGoToState= goToState;
 	}
@@ -180,8 +180,8 @@ void IntentionRecognizer::run()
 			continue;		
 		}
 		
-		location = robotManager->commManager->getOdomLocation();
-		spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(location);
+		currentPose = robotManager->commManager->getOdomLocation();
+		spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(currentPose);
 		observation = robotManager->commManager->getJoyStickGlobalDir();
 		if(!beliefInitialized)
 		{
@@ -191,8 +191,8 @@ void IntentionRecognizer::run()
 			 *  request the odom correctly.
 			 */
 			sleep(1);
-			location = robotManager->commManager->getOdomLocation();
-			spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(location);			
+			currentPose = robotManager->commManager->getOdomLocation();
+			spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(currentPose);			
 			
 			resetBelief();
 //		  	em->setToInitialState();

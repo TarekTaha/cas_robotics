@@ -13,10 +13,20 @@ PlayerInterface::PlayerInterface(QString host, int port):
     emergencyStopped(false),
     velControl(true),
     positionId(0), 
-    drive(NULL),
+	drive(NULL),
+	vfh(NULL),
+	joyStick(NULL),
     wheelChairCommander(NULL),
-    localizer(NULL)
+    map(NULL),
+	ptz(NULL),
+	localizer(NULL),
+	speechP(NULL)  
 {
+}
+
+PlayerInterface::~PlayerInterface()
+{
+	clearResources();
 }
 
 int PlayerInterface::getJoyStickGlobalDir()
@@ -149,31 +159,27 @@ QVector<DeviceType> * PlayerInterface::getDevices()
   		devices->clear();
   	else
   		devices = new QVector<DeviceType>;
-  	//printf("Connecting to [%s:%d]\n", qPrintable(host), port);
-  	client = playerc_client_create(NULL, qPrintable(this->playerHost), this->playerPort);
-  	if (playerc_client_connect(client) != 0)
+  	if(!pc)
   	{
-    	printf("%s", playerc_error_str());
-    	return NULL;
-  	}	
-  	// Get the available devices.
-  	if (playerc_client_get_devlist(client) != 0)
-  	{
-    	printf("%s", playerc_error_str());
-    	return devices;
+  		perror("\n Please Connect to the Robot First");
+  		return NULL;
   	}
+  	typedef std::list <playerc_device_info_t>  devList; 
   	DeviceType device;
-  	for (int i = 0; i < client->devinfo_count; i++)
+  	devList m_devList= pc->GetDeviceList();
+  	for(devList::iterator iter = m_devList.begin(); iter != m_devList.end(); iter++)
   	{
-    	device.setAddress(client->devinfos[i].addr);
-    	device.setName(strdup(client->devinfos[i].drivername));
-		switch(client->devinfos[i].addr.interf)
+  		device.setAddress(iter->addr);
+    	device.setName(strdup(iter->drivername));
+		switch(iter->addr.interf)
 		{
 			case PLAYER_LASER_CODE :
 				for(int j=0;j<lasers.size();j++)
 				{
-					if(lasers[j].lp && (client->devinfos[i].addr.index == j))
+					if(lasers[j].lp && (iter->addr.index == j))
 						device.subscribed = true;
+					else
+						device.subscribed = false;
 				}
 				break;
 			case PLAYER_MAP_CODE :
@@ -181,24 +187,30 @@ QVector<DeviceType> * PlayerInterface::getDevices()
 					device.subscribed = true;
 				break;				
 			case PLAYER_POSITION2D_CODE:
-				if(this->drive && (client->devinfos[i].addr.index == 0))
+				if(this->drive && (iter->addr.index == 0))
 					device.subscribed = true;
-				else if((this->vfh && (client->devinfos[i].addr.index == 1)))
+				else if((this->vfh && (iter->addr.index == 1)))
 					device.subscribed = true;
+				else
+						device.subscribed = false;					
 				break;		
 			case PLAYER_LOCALIZE_CODE:
 				if(this->localizer)
-					device.subscribed = true;	
+					device.subscribed = true;
+				else
+					device.subscribed = false;					
 				break;		
 			case PLAYER_PTZ_CODE:
 				if(this->ptz)
-					device.subscribed = true;	
+					device.subscribed = true;
+				else
+					device.subscribed = false;						
 				break;						
 			default:
 				device.subscribed = false;
 		}
 		devices->push_back(device);
-  	}  	
+  	}
   	dataLock.unlock();
   	return devices;
 }
@@ -409,174 +421,188 @@ Map PlayerInterface::provideMap()
     return retval;
 }
 
+void PlayerInterface::clearResources()
+{
+	if(drive)
+		delete drive;
+	if(vfh)
+		delete vfh;
+	if(joyStick)
+		delete joyStick;
+	if(wheelChairCommander)
+		delete wheelChairCommander;
+	if(map)
+		delete map;
+	if(ptz)
+		delete ptz;
+	if(localizer)
+		delete localizer;
+	if(pc)
+		delete pc;	
+}
+
+void PlayerInterface::connectDevices()
+{
+    if(pc)
+    {
+		clearResources();
+    }
+    pc = new PlayerClient(qPrintable(playerHost),playerPort);
+    /* TODO: Proper check for the successfullness of the proxy creation
+     */
+    if(ctrEnabled)
+    {
+		if(drive)
+		{
+		    delete drive;
+		}
+		checkForWheelChair();
+        drive = new Position2dProxy(pc,positionId);
+		logMsg.append(QString("\n\t\t - Motor Control Interface Engaged Successfully, ID:%1").arg(positionId));	   		 
+    }
+    for(int i=0; i < lasers.size(); i++)
+    {
+    	player_pose_t 	lp_pose;
+    	lp_pose.px = 0;
+    	lp_pose.py = 0;
+    	lp_pose.pa = 0;
+    	lasers[i].lp = new LaserProxy(pc,lasers[i].index);
+    	//lp_pose = lasers[i].lp->GetPose();
+    	lasers[i].pose.p.setX(lp_pose.px);
+    	lasers[i].pose.p.setY(lp_pose.py);	    	
+    	lasers[i].pose.phi = lp_pose.pa;
+    	//qDebug("Laser Pose X:%f Y:%f Phi:%f",lasers[i].pose.p.x(),lasers[i].pose.p.y(),lasers[i].pose.phi);	    	
+		logMsg.append(QString("\n\t\t - Laser interface:%1 Interface Added Successfully").arg(lasers[i].index));  
+    }
+    if(mapEnabled)
+    {
+    	map = new MapProxy(pc,mapId);
+		logMsg.append(QString("\n\t\t - Map Interface Engaged Successfully, ID:%1").arg(mapId));			
+    }
+    if(ptzEnabled)
+    {
+		ptz = new PtzProxy(pc, ptzId); 
+		logMsg.append(QString("\n\t\t - Pan Tilt unit initialized Successfully ID:%1").arg(ptzId));			
+    }
+    if(localizerEnabled)
+    {
+    	localizer 	= new LocalizeProxy(pc,0);
+		logMsg.append(QString("\n\t\t - Localizer Started Successfully ID:%1").arg(0));	    	
+    }
+    if(vfhEnabled)
+    {
+    	vfh 	= new Position2dProxy(pc,vfhId);
+		logMsg.append(QString("\n\t\t - Vfh Started Successfully ID:%1").arg(vfhId));	    	
+    }	   
+    /* This is temp until the wheelchair interface is added.*/
+    joyStickId = 3;
+	joyStick = new Position2dProxy(pc,joyStickId);
+//	speechP  = new SpeechProxy(pc,0);
+//	speechP->Say("I am ready Mate");
+	sleep(1);
+	logMsg.append(QString("\n\t Testing Player Server for Data Read:"));  	
+	logMsg.append(QString("\n\t\t - Test Passed, You can read Data from Player Server Now"));
+	logMsg.append(QString("\n\t\t - Connection Established"));
+	logMsg.append(QString("\n/********************************************************************/"));	
+    emit addMsg(0,INFO,logMsg);
+	
+}
 void PlayerInterface::run ()
 {
 	logMsg.append("\n/********************************************************************/");
 	logMsg.append("\nConnecting to Robot Server::");
 	logMsg.append(QString("\n\t Connecting to %1:%2 ...").arg(qPrintable(playerHost)).arg(playerPort));
-//    qDebug("/********************************************************************/"); 	
-//    qDebug("Connecting to Robot Server::");
-//    qDebug("\t Connecting to %s:%d ...",qPrintable(playerHost), playerPort);
-    if(pc)
-    {
-		delete pc; 
-    }
     try
     {
-	    pc = new PlayerClient(qPrintable(playerHost),playerPort);
-	    /* TODO: Proper check for the successfullness of the proxy creation
-	     */
-	    if(ctrEnabled)
+    	connectDevices();
+		Timer timer;
+	    while(true)
 	    {
-			if(drive)
-			{
-			    delete drive;
-			}
-			checkForWheelChair();
-	        drive = new Position2dProxy(pc,positionId);
-//	   		qDebug("\t\t - Motor Control Interface Engaged Successfully, ID:%d",positionId);
-			logMsg.append(QString("\n\t\t - Motor Control Interface Engaged Successfully, ID:%1").arg(positionId));	   		 
+	    	//qDebug("Loop Time is:%f QTimer:%d",timer.elapsed(),tt.elapsed()); fflush(stdout);
+	    	timer.restart();
+	    	// Read Only if new Data is Available
+			//pc->ReadIfWaiting();
+			pc->Read();		
+	    	if(!emergencyStopped)
+	    	{
+			    for(int laser_indx=0; laser_indx < lasers.size(); laser_indx++)
+			    {
+			    	if (laserScan.points.size())
+			    		laserScan.points.clear();
+			    	laserScan.laserPose.p.setX(lasers[laser_indx].pose.p.x());
+			    	laserScan.laserPose.p.setY(lasers[laser_indx].pose.p.y());		    	
+			    	laserScan.laserPose.phi =  lasers[laser_indx].pose.phi;		    	
+			        for(uint i=0; i< lasers[laser_indx].lp->GetCount(); i++)
+			        {
+				    	laserScan.points.push_back(QPointF(lasers[laser_indx].lp->GetPoint(i).px, lasers[laser_indx].lp->GetPoint(i).py));    
+					}
+			  	} 
+		        if(ctrEnabled)
+		        {
+		        	player_pose_t ps;
+		        	if(velControl)
+		        	{
+			            drive->SetSpeed(speed,turnRate);
+		        	}
+		        	else
+		        	{
+		        		vfh->GoTo(vfhGoal.p.x(),vfhGoal.p.y(),vfhGoal.phi);	        		
+		        	}
+		            getspeed = drive->GetXSpeed();
+	//	            getturnrate = drive->GetYSpeed();
+		            getturnrate = drive->GetYawSpeed();	            
+		            ps = drive->GetPose();
+		            odom_location.p.setX(drive->GetXPos());
+		            odom_location.p.setY(drive->GetYPos());
+		            odom_location.phi =  drive->GetYaw();
+		            joyAxes.setX(joyStick->GetXPos());
+		            joyAxes.setY(joyStick->GetYPos());
+	//	            int dir = getJoyStickDir();
+	//	            int globalDir = getJoyStickGlobalDir();
+	//	            printf("\nDirection=%d Global Dir=%d",dir,globalDir);
+	//	            cout<<"\n Current Location X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();
+	//				cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<RTOD(odom_location.phi);	            
+		        }
+				if(ptzEnabled)
+				{
+			    	ptz->SetCam(pan,tilt, 1);
+				}
+				if(mapEnabled)
+				{
+	//				map->GetMap();
+				    //qDebug("Map width %d, height %d resolution %f",map->width,map->height,map->resolution);
+				}
+			    if(localizer)
+			    {
+				    location.p.setX(localizer->GetHypoth(0).mean.px);
+				    location.p.setY(localizer->GetHypoth(0).mean.py);
+				    location.phi =  localizer->GetHypoth(0).mean.pa;
+				    if(localizer->GetHypoth(0).alpha>=0.9)
+				    	localized = true;
+				    else
+				    	localized = false;
+			    }			
+	    	}
+		    else
+		    {
+		        qDebug("	--->>> Stopping Robot NOW <<<---");
+				if(ctrEnabled)
+		       	{
+		        	drive->SetSpeed(0,0);
+		        }
+		        pc->Stop();
+		        qDebug("	--->>> Robot Stopped <<<---");
+		        // temporary fix, needs more thinking once i finalize things
+		        emergencyStopped = true;
+		    }
+	    	emit newData();
 	    }
-	    for(int i=0; i < lasers.size(); i++)
-	    {
-	    	player_pose_t 	lp_pose;
-	    	lp_pose.px = 0;
-	    	lp_pose.py = 0;
-	    	lp_pose.pa = 0;
-	    	lasers[i].lp = new LaserProxy(pc,lasers[i].index);
-	    	//lp_pose = lasers[i].lp->GetPose();
-	    	lasers[i].pose.p.setX(lp_pose.px);
-	    	lasers[i].pose.p.setY(lp_pose.py);	    	
-	    	lasers[i].pose.phi = lp_pose.pa;
-	    	//qDebug("Laser Pose X:%f Y:%f Phi:%f",lasers[i].pose.p.x(),lasers[i].pose.p.y(),lasers[i].pose.phi);	    	
-//       		qDebug("\t\t - Laser interface:%d Interface Added Successfully",lasers[i].index);
-			logMsg.append(QString("\n\t\t - Laser interface:%1 Interface Added Successfully").arg(lasers[i].index));  
-	    }
-	    if(mapEnabled)
-	    {
-	    	map = new MapProxy(pc,mapId);
-//			qDebug("\t\t - Map Interface Engaged Successfully, ID:%d",cc);
-			logMsg.append(QString("\n\t\t - Map Interface Engaged Successfully, ID:%1").arg(mapId));			
-	    }
-	    if(ptzEnabled)
-	    {
-			ptz = new PtzProxy(pc, ptzId); 
-//			qDebug("\t\t - Pan Tilt unit initialized Successfully ID:%d",ptzId);
-			logMsg.append(QString("\n\t\t - Pan Tilt unit initialized Successfully ID:%1").arg(ptzId));			
-	    }
-	    if(localizerEnabled)
-	    {
-	    	localizer 	= new LocalizeProxy(pc,0);
-//	    	qDebug("\t\t - Localizer Started Successfully ID:%d",0);
-			logMsg.append(QString("\n\t\t - Localizer Started Successfully ID:%1").arg(0));	    	
-	    }
-	    if(vfhEnabled)
-	    {
-	    	vfh 	= new Position2dProxy(pc,vfhId);
-//	    	qDebug("\t\t - Vfh Started Successfully ID:%d",vfhId);
-			logMsg.append(QString("\n\t\t - Vfh Started Successfully ID:%1").arg(vfhId));	    	
-	    }	   
-	    /* This is temp until the wheelchair interface is added.*/
-	    joyStickId = 3;
-    	joyStick = new Position2dProxy(pc,joyStickId);
     }
-   catch (PlayerCc::PlayerError e)
+	catch (PlayerCc::PlayerError e)
   	{
     	std::cerr << e << std::endl;
+    	clearResources();
+    	this->quit();
     	return;
   	}
-	logMsg.append(QString("\n\t Testing Player Server for Data Read:"));  	
-	logMsg.append(QString("\n\t\t - Test Passed, You can read Data from Player Server Now"));
-	logMsg.append(QString("\n\t\t - Connection Established"));
-	logMsg.append(QString("\n/********************************************************************/"));	
-//    qDebug("\t Testing Player Server for Data Read:");    
-//    qDebug("\t\t - Test Passed, You can read Data from Player Server Now");    
-//    qDebug("\t\t - Connection Established"); 
-//    qDebug("/********************************************************************/");
-    emit addMsg(0,INFO,logMsg);
-//    long int cnt=0;
-	Timer timer;
-    while(true)
-    {
-    	//qDebug("Loop Time is:%f QTimer:%d",timer.elapsed(),tt.elapsed()); fflush(stdout);
-    	timer.restart();
-    	// Read Only if new Data is Available
-		//pc->ReadIfWaiting();
-		pc->Read();		
-    	if(!emergencyStopped)
-    	{
-		    for(int laser_indx=0; laser_indx < lasers.size(); laser_indx++)
-		    {
-		    	if (laserScan.points.size())
-		    		laserScan.points.clear();
-		    	laserScan.laserPose.p.setX(lasers[laser_indx].pose.p.x());
-		    	laserScan.laserPose.p.setY(lasers[laser_indx].pose.p.y());		    	
-		    	laserScan.laserPose.phi =  lasers[laser_indx].pose.phi;		    	
-		        for(uint i=0; i< lasers[laser_indx].lp->GetCount(); i++)
-		        {
-			    	laserScan.points.push_back(QPointF(lasers[laser_indx].lp->GetPoint(i).px, lasers[laser_indx].lp->GetPoint(i).py));    
-				}
-		  	} 
-	        if(ctrEnabled)
-	        {
-	        	player_pose_t ps;
-	        	if(velControl)
-	        	{
-		            drive->SetSpeed(speed,turnRate);
-	        	}
-	        	else
-	        	{
-//	        		drive->GoTo(goal.p.x(),goal.p.y(),goal.phi);
-//					qDebug("VFH recieved a goto X:%f Y:%f Phi%f",vfhGoal.p.x(),vfhGoal.p.y(),vfhGoal.phi);
-	        		vfh->GoTo(vfhGoal.p.x(),vfhGoal.p.y(),vfhGoal.phi);	        		
-	        	}
-	            getspeed = drive->GetXSpeed();
-//	            getturnrate = drive->GetYSpeed();
-	            getturnrate = drive->GetYawSpeed();	            
-	            ps = drive->GetPose();
-	            odom_location.p.setX(drive->GetXPos());
-	            odom_location.p.setY(drive->GetYPos());
-	            odom_location.phi =  drive->GetYaw();
-	            joyAxes.setX(joyStick->GetXPos());
-	            joyAxes.setY(joyStick->GetYPos());
-//	            int dir = getJoyStickDir();
-//	            int globalDir = getJoyStickGlobalDir();
-//	            printf("\nDirection=%d Global Dir=%d",dir,globalDir);
-//	            cout<<"\n Current Location X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();
-//				cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<RTOD(odom_location.phi);	            
-	        }
-			if(ptzEnabled)
-			{
-		    	ptz->SetCam(pan,tilt, 1);
-			}
-			if(mapEnabled)
-			{
-//				map->GetMap();
-			    //qDebug("Map width %d, height %d resolution %f",map->width,map->height,map->resolution);
-			}
-		    if(localizer)
-		    {
-			    location.p.setX(localizer->GetHypoth(0).mean.px);
-			    location.p.setY(localizer->GetHypoth(0).mean.py);
-			    location.phi =  localizer->GetHypoth(0).mean.pa;
-			    if(localizer->GetHypoth(0).alpha>=0.9)
-			    	localized = true;
-			    else
-			    	localized = false;
-		    }			
-    	}
-	    else
-	    {
-	        qDebug("	--->>> Stopping Robot NOW <<<---");
-			if(ctrEnabled)
-	       	{
-	        	drive->SetSpeed(0,0);
-	        }
-	        qDebug("	--->>> Robot Stopped <<<---");
-	        // temporary fix, needs more thinking once i finalize things
-	        emergencyStopped = false;
-	    }
-    	emit newData();
-    }
-
 }

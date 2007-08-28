@@ -39,7 +39,7 @@ public:
 	int numDestinations;
 	int numStates;
 	QVector <double> destBelief;	
-	Pose currentState,location,goToState,oldGoToState;
+	Pose currentState,currentPose,goToState,oldGoToState;
 	ActivityLogger activityLogger;
 	int  observation,action,spatialState,oldSpatialState;
 private:
