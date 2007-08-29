@@ -1,35 +1,34 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<?fileVersion 3.0.0?>
-
+<?xml version="1.0"?>
+<?fileVersion 3.1.0?>
 <ManagedProjectBuildInfo>
-<project id="WheelChairDriver 2.0.cdt.managedbuild.target.gnu.exe.1921108632" name="Executable (Gnu)" projectType="cdt.managedbuild.target.gnu.exe">
-<configuration artifactExtension="so" artifactName="WheelChairDriver" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.exe.debug.300273806" name="Debug" parent="cdt.managedbuild.config.gnu.exe.debug">
-<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.1009490785" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
-<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.875404340" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1545431724" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
-<option id="gnu.cpp.compiler.option.other.other.617177763" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 `pkg-config --cflags playerc++ playercore`" valueType="string"/>
-<option id="gnu.cpp.compiler.option.include.paths.597506452" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="&quot;/home/BlackCoder/workspace/WheelChairDriver 2.0/clientcpp&quot;"/>
-</option>
-</tool>
-<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.490663631" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1654467841" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
-<option id="gnu.cpp.link.option.shared.600233450" superClass="gnu.cpp.link.option.shared" value="true" valueType="boolean"/>
-<option id="gnu.cpp.link.option.nostart.814052113" superClass="gnu.cpp.link.option.nostart" value="true" valueType="boolean"/>
-</tool>
-<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1844877448" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug"/>
-<macros/>
-</toolChain>
-</configuration>
-<configuration artifactName="WheelChairDriver2.0" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.exe.release.1577037591" name="Release" parent="cdt.managedbuild.config.gnu.exe.release">
-<toolChain id="cdt.managedbuild.toolchain.gnu.exe.release.1567924243" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.exe.release">
-<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.2091624212" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.871758639" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release"/>
-<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.746675884" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
-<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.2147287079" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release"/>
-<tool id="cdt.managedbuild.tool.gnu.assembler.exe.release.454795470" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.release"/>
-</toolChain>
-</configuration>
-<macros/>
-</project>
+  <project id="WheelChairDriver 2.0.cdt.managedbuild.target.gnu.exe.1921108632" name="Executable (Gnu)" projectType="cdt.managedbuild.target.gnu.exe">
+    <configuration id="cdt.managedbuild.config.gnu.exe.debug.300273806" name="Debug" description="" parent="cdt.managedbuild.config.gnu.exe.debug" artifactName="WheelChairDriver" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" artifactExtension="so" cleanCommand="rm -rf">
+      <toolChain superClass="cdt.managedbuild.toolchain.gnu.exe.debug" id="cdt.managedbuild.toolchain.gnu.exe.debug.1009490785" name="GCC Tool Chain">
+        <tool superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug" id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.875404340" name="GCC C Compiler"/>
+        <tool superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug" id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.1545431724" name="GCC C++ Compiler">
+          <option superClass="gnu.cpp.compiler.option.other.other" id="gnu.cpp.compiler.option.other.other.617177763" value="-c -fmessage-length=0 `pkg-config --cflags playerc++ playercore`" valueType="string"/>
+          <option superClass="gnu.cpp.compiler.option.include.paths" id="gnu.cpp.compiler.option.include.paths.597506452" valueType="includePath">
+            <listOptionValue value="&quot;/home/BlackCoder/workspace/WheelChairDriver 2.0/clientcpp&quot;" builtIn="false"/>
+          </option>
+        </tool>
+        <tool superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug" id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.490663631" name="GCC C Linker"/>
+        <tool superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug" id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1654467841" name="GCC C++ Linker">
+          <option superClass="gnu.cpp.link.option.shared" id="gnu.cpp.link.option.shared.600233450" value="true" valueType="boolean"/>
+          <option superClass="gnu.cpp.link.option.nostart" id="gnu.cpp.link.option.nostart.814052113" value="true" valueType="boolean"/>
+        </tool>
+        <tool superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug" id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1844877448" name="GCC Assembler"/>
+        <macros/>
+      </toolChain>
+    </configuration>
+    <configuration id="cdt.managedbuild.config.gnu.exe.release.1577037591" name="Release" description="" parent="cdt.managedbuild.config.gnu.exe.release" artifactName="WheelChairDriver2.0" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" cleanCommand="rm -rf">
+      <toolChain superClass="cdt.managedbuild.toolchain.gnu.exe.release" id="cdt.managedbuild.toolchain.gnu.exe.release.1567924243" name="GCC Tool Chain">
+        <tool superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release" id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.2091624212" name="GCC C Compiler"/>
+        <tool superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release" id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.871758639" name="GCC C++ Compiler"/>
+        <tool superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release" id="cdt.managedbuild.tool.gnu.c.linker.exe.release.746675884" name="GCC C Linker"/>
+        <tool superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release" id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.2147287079" name="GCC C++ Linker"/>
+        <tool superClass="cdt.managedbuild.tool.gnu.assembler.exe.release" id="cdt.managedbuild.tool.gnu.assembler.exe.release.454795470" name="GCC Assembler"/>
+      </toolChain>
+    </configuration>
+    <macros/>
+  </project>
 </ManagedProjectBuildInfo>

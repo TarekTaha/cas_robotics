@@ -77,7 +77,7 @@ int main()
 					switch (event.key.keysym.sym)
 					{
 						case SDLK_h:	 
-							WCp.SoundHorn(HORN_SLEEP);       
+							WCp.SoundHorn(100);       
 							break;
 						case SDLK_MINUS: 
 							WCp.DecrementGear(3);	

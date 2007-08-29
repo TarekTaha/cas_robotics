@@ -39,13 +39,6 @@
 #define SHRD_DEFAULT_RATE B115200
 #define SLEEP_TIME_USEC 100000
 
-// Global variables, used to solve the problem of two interfaces
-// sharing a common serial port
-SerialCom * SharedSerial;
-int WheelChair_subscriptions;
-bool Shared_Serial_Initialised;
-pthread_mutex_t sslock;
-
 #endif
 
 

@@ -52,6 +52,7 @@
 #include <signal.h>
 #include <iostream>
 #include "defs.h"
+#include "wheelchair.h"
 //#define UNLOCK 	pthread_mutex_unlock(&sslock);
 //#define LOCK    pthread_mutex_lock(&sslock);
 #define UNLOCK 	//this->Unlock()
@@ -169,22 +170,18 @@ class WheelchairDriver : public Driver
 	    virtual int ProcessMessage(MessageQueue * resp_queue, 
 	                               player_msghdr * hdr, 
 	                               void * data);
-				int WheelChair_Unit_Reset(void);
-//   	virtual int Subscribe(player_devaddr_t id);
-//    	virtual int Unsubscribe(player_devaddr_t id);
+   		virtual int Subscribe(player_devaddr_t id);
+    	virtual int Unsubscribe(player_devaddr_t id);
 		WheelchairDriver(ConfigFile* cf, int section); 
     private:	
     	virtual void Main();
 		int  HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr,void * data);
 		int  HandleCommands(player_msghdr *hdr,void * data);
 	 	void RefreshData();     //refreshs and sends data    
-		int  ComputeTickDiff(int from, int to); 
 		void UpdateOdom(int ltics, int rtics);  // Updates the Odometry 
-		int  GetReading(char Channel);          // Gets reading from wheelchair control unit
-		int  WCControl(int WCcmd, bool param);  // Enables communication with the control unit through serial port
-   		void UpdateMotors(double xspeed, double yawspeed); // Updates the speed and orientation of the motors
 	// Position interface
 	private: 	
+		WheelChair *wheelChair;
 	  	player_devaddr_t position_addr;
 	  	// Odometric position (meters,meters,radians)
   	    player_position2d_data_t posdata;
@@ -193,25 +190,18 @@ class WheelchairDriver : public Driver
 		player_wheelchair_data_t * wheelchair_data;
 	public :        
 		FILE *file;
-		int x,y;
 		struct timeval last_time,last_position_update;
-		float PoseX,PoseY,PoseTheta; // The Geometrical Position
-		char Left_Encoder_Port[MAX_FILENAME_SIZE];
-		char Right_Encoder_Port[MAX_FILENAME_SIZE];
+		float PoseX,PoseY,PoseTheta; // The Geometrical Position;
 		int mode,power; // Holds the status of the power and the control mode
 		int joyx,joyy;  // Holds the value of the X and Y josystick coordinates
-		int Rate, opaque_subscriptions, position_subscriptions;
-		unsigned char MoveMode;
+		int opaque_subscriptions, position_subscriptions;
+	 	int last_pos_subscrcount, last_opaque_subscrcount;		
 		int first_ltics,first_rtics,last_ltics, last_rtics;
 		double vint,vdem,vset,vact,vdiff,kvp,kvi,kvd,vact_last,vdem_last; // Liner Velocity Control Parameters.
 		double wint,wdem,wset,wact,wdiff,kwp,kwi,kwd,wact_last,wdem_last; // Angular Velocity Control Parameters.
 		struct timeval lasttime;
-		WheelEncoder * LeftEncoder, * RightEncoder;
-		char Serial_Port[MAX_FILENAME_SIZE];
-		int  Serial_Rate;
-	 	SerialCom * Control_Unit_Serial;
-		bool log,debug;
-		double oldxspeed,oldyaw, last_theta;
+		bool log,debug,driverInitialized;
+		double last_theta;
 	// Velocity Control Thread Stuff
 	private:	
 		static void * Run_Velocity_Control(void *driver);
@@ -273,52 +263,25 @@ void * WheelchairDriver::Run_Velocity_Control (void *driver)
 
 void  WheelchairDriver :: Velocity_Controller(void)
 {
-	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED,NULL); // Synchronously cancelable thread.
+	// Synchronously cancelable thread.
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED,NULL); 
+	int x=0,y=0;	
 	while (1)
 	{
-		pthread_testcancel(); // Thread cancellation point.
-		x=(LeftEncoder->GetTicks()-first_ltics)*-1;  //Left Motor goes counter clock wise
-		y=(RightEncoder->GetTicks()-first_rtics);
+		// Thread cancellation point.
+		pthread_testcancel(); 
+		x = (wheelChair->getLeftTicks() - first_ltics)*-1;  //Left Motor goes counter clock wise
+		y = (wheelChair->getRightTicks()- first_rtics);
 		UpdateOdom(x,y);				
 		vset =  kvp*(vdem_last - vact) + kvi*vint + kvd*vdiff;
 		wset =  kwp*(wdem_last - wact) + kwi*wint + kwd*wdiff;
 		if (vdem_last == 0) vset=0;
 		if (wdem_last == 0) wset=0;
-		UpdateMotors(vset,wset);
+		wheelChair->driveMotors(vset,wset);
 		usleep(10000);
 	}
 	pthread_exit(NULL);
 }
-
-int WheelchairDriver :: WheelChair_Unit_Reset()
-{
-	unsigned int retbyte;
-
-	if (Control_Unit_Serial->SendCommand("O0000") != 0) //Reset output and wait response
-	{
-		PLAYER_ERROR("\n	-->Failed to find Wheelchair Interface Unit");
-		return -1;
-	}
-	else 
-		puts("\n- Wheelchair Interface Unit Found and Reseted.");
-	Control_Unit_Serial->ReadByte(&retbyte);
-	if (Control_Unit_Serial->SendCommand("L0800") != 0) //Set fwd/rev to 2.5v
-	{       
-		PLAYER_ERROR("\n	-->Failed to set fwd/rev voltage to 2.5V");
-		return -1;
-	}
-	else
-		puts("		+ Forward/Reverse Voltage was successfully set to 2.5V");
-
-	if (Control_Unit_Serial->SendCommand("L1800") != 0) //Set left/right to 2.5v
-	{       
-		PLAYER_ERROR("\n	-->Failed to set l/r voltage to 2.5V");
-		return -1;
-	}
-	else
-		puts("		+ Left/Right Voltage was successfully set to 2.5V");
-	return 0;
-};
 
 WheelchairDriver::WheelchairDriver(ConfigFile* cf, int section)  : Driver(cf, section)
 {
@@ -345,137 +308,143 @@ WheelchairDriver::WheelchairDriver(ConfigFile* cf, int section)  : Driver(cf, se
 	    	return;
 	  	}
   	}
-	LeftEncoder = NULL; RightEncoder = NULL;
-	strncpy(Left_Encoder_Port ,cf->ReadString(section, "Left_Encoder_Port", ENCL_DEFAULT_PORT), sizeof(Left_Encoder_Port));
-	strncpy(Right_Encoder_Port,cf->ReadString(section, "Right_Encoder_Port", ENCR_DEFAULT_PORT), sizeof(Right_Encoder_Port));
-	strncpy(this->Serial_Port, cf->ReadString(section, "Serial_Port", SHRD_DEFAULT_PORT), sizeof(Serial_Port));
-	this->Rate =		cf->ReadInt(section, "Encoder_Baud_Rate", ENC_DEFAULT_RATE);
-	this->Serial_Rate = cf->ReadInt(section, "Serial_Baud_Rate", SHRD_DEFAULT_RATE);
+	
 	this->PoseX=		cf->ReadFloat(section,"geom_pose_x",0);
 	this->PoseY=		cf->ReadFloat(section,"geom_pose_y",0);
 	this->PoseTheta=	cf->ReadFloat(section,"geom_pose_theta",0);
 	debug = 			cf->ReadInt(section, "debug",0);
 	log =   			cf->ReadInt(section, "log",0);
+	// Create an instance of the Wheelchair and initialize it
+	wheelChair = new WheelChair(cf,section);
 	return;
 }
 
 int WheelchairDriver::Setup()
 {
 	printf("\n- Setting UP WheelChair Plugin Driver.");
-	LeftEncoder  = new WheelEncoder(Left_Encoder_Port, Rate);
-	RightEncoder = new WheelEncoder(Right_Encoder_Port, Rate);
-	Control_Unit_Serial = new SerialCom(Serial_Port,Serial_Rate);	
-	first_ltics=LeftEncoder->GetTicks();
-	first_rtics=RightEncoder->GetTicks();
+	if(wheelChair)
+	{
+		first_ltics= wheelChair->getLeftTicks();
+		first_rtics= wheelChair->getRightTicks();
+	}
+	else
+	{
+		cout<<"\nWheelChair Not Initialized Yet !!!";
+		exit(1);
+	}
 	last_ltics=0;
 	last_rtics=0;
 	gettimeofday(&lasttime,NULL);
 	gettimeofday(&last_position_update,NULL);
 	this->posdata.pos.px = this->posdata.pos.py = this->posdata.pos.pa=0;
 	opaque_subscriptions = position_subscriptions = 0;
-	x = y = 0;
-  	oldxspeed = oldyaw=0;
+	driverInitialized = false;
 	vint=vdem=vset=vact=vdiff=vact_last=vdem_last=0; // Liner   Velocity Control Parameters Reset
 	wint=wdem=wset=wact=wdiff=wact_last=wdem_last=0; // Angular Velocity Control Parameters Reset
 	kvp=0.5; kvi=2; kvd=0.02;
 	kwp=0.8; kwi=3; kwd=0.015;
-	WheelChair_Unit_Reset();
 	if(log)
         	file=fopen("odomlog.txt","wb");
 	Start_Velocity_Thread();
-	WCControl(POWER,ON);
-	WCControl(SETMODE,AUTO);
-	cout <<"\n--->> WheelChair's Power is turned ON, Mode is AUTONOMOUS\n";
-	fflush(stdout);
   	StartThread();
 	return(0);
 }
 
 int WheelchairDriver::Shutdown()
 {
-	puts("\n- Shutting Down WheelChair Driver");
-	//WheelChair_Unit_Reset();
-	puts("- Shared Serial Port is De-Initialized by Control Driver");
-	unsigned int retbyte;
-	//Resetting Motor and Joystick Voltages//
-	Control_Unit_Serial->Write("O0000\r", 6);
-	Control_Unit_Serial->ReadByte(&retbyte);
-	Control_Unit_Serial->ReadByte(&retbyte);
-	Control_Unit_Serial->Write("L0800\r", 6);
-	Control_Unit_Serial->ReadByte(&retbyte);
-	Control_Unit_Serial->ReadByte(&retbyte);
-	Control_Unit_Serial->Write("L1800\r", 6);
-	Control_Unit_Serial->ReadByte(&retbyte);
-	Control_Unit_Serial->ReadByte(&retbyte);
 	vint=vdem=vset=vact=vdiff=vact_last=vdem_last=0; // Liner   Velocity Control Parameters Reset
 	wint=wdem=wset=wact=wdiff=wact_last=wdem_last=0; // Angular Velocity Control Parameters Reset
-	WCControl(POWER,OFF);	
-	cout <<"\n--->> WheelChair's Power is turned OFF\n";
-	delete Control_Unit_Serial;
-	delete LeftEncoder;
-	delete RightEncoder;
-	Control_Unit_Serial=NULL;
-	LeftEncoder=NULL;
-	RightEncoder=NULL;
 	if(log)
 		fclose(file);
 	// Stop and join the driver thread
-	fflush(stdout);	
 	StopThread();
 	Stop_Velocity_Thread();
 	return(0);
 }
 
-//int WheelchairDriver::Subscribe(player_devaddr_t addr)
-//{
-//	int retval;
-//  	// do the subscription
-// 	if((retval = Driver::Subscribe(addr)) == 0)
-//  	{
-//    	// also increment the appropriate subscription counter
-//    	if(Device::MatchDeviceAddress(addr, this->position_addr))
-//    	{
-//  		  	cout<<"\n Subscribing to position Device"; fflush(stdout);
-//      		this->position_subscriptions++;
-//    	}
-//    	else 
-//    	if(Device::MatchDeviceAddress(addr, this->opaque_addr))
-//  		{
-//  		  	cout<<"\n Subscribing to Opaque Device"; fflush(stdout);  			
-//      		this->opaque_subscriptions++;
-//  		}
-//  	}
-//  	return(retval);
-//}
+int WheelchairDriver::Subscribe(player_devaddr_t addr)
+{
+	int retval;
+  	// do the subscription
+ 	if((retval = Driver::Subscribe(addr)) == 0)
+  	{	
+    	// also increment the appropriate subscription counter
+    	if(Device::MatchDeviceAddress(addr, this->position_addr))
+    	{
+  		  	cout<<"\n Subscribing to position Device"; fflush(stdout);    		  	
+      		this->position_subscriptions++;
+      		if ((position_subscriptions == 1) && !driverInitialized)
+      		{
+      			driverInitialized = true;
+				wheelChair->sendCommand(POWER,ON);
+				wheelChair->sendCommand(SETMODE,AUTO);	
+				cout <<"\n--->> WheelChair's Power is turned ON, Mode is AUTONOMOUS";
+				fflush(stdout);      			
+      		}
+    	}
+    	else 
+    	if(Device::MatchDeviceAddress(addr, this->opaque_addr))
+  		{
+  		cout<<"\n Subscribing to Opaque Device"; fflush(stdout);
+		last_opaque_subscrcount = this->opaque_subscriptions;	  		  	  			
+      		this->opaque_subscriptions++;
+      		if ((opaque_subscriptions == 1) && !driverInitialized)
+      		{
+      			driverInitialized = true;
+				wheelChair->sendCommand(POWER,ON);
+				wheelChair->sendCommand(SETMODE,AUTO);	
+				cout <<"\n--->> WheelChair's Power is turned ON, Mode is AUTONOMOUS";
+				fflush(stdout);      			
+      		}      		
+  		}
+  	}
+  	return(retval);
+}
 
-//int WheelchairDriver::Unsubscribe(player_devaddr_t addr)
-//{
-//	int retval;
-//
-//  	// do the unsubscription
-//  	if((retval = Driver::Unsubscribe(addr)) == 0)
-//  	{
-//	    // also decrement the appropriate subscription counter
-//	    if(Device::MatchDeviceAddress(addr, this->position_addr))
-//	    {
-//	    	this->position_subscriptions--;
-//	      	assert(this->position_subscriptions >= 0);
-//	    }
-//	    else if(Device::MatchDeviceAddress(addr, this->opaque_addr))
-//	    {
-//	      	this->opaque_subscriptions--;
-//	      	assert(this->opaque_subscriptions >= 0);
-//	    }
-//  	}
-//
-//  return(retval);
-//};
+int WheelchairDriver::Unsubscribe(player_devaddr_t addr)
+{
+	int retval;
+
+  	// do the unsubscription
+  	if((retval = Driver::Unsubscribe(addr)) == 0)
+  	{
+	    // also decrement the appropriate subscription counter
+	    if(Device::MatchDeviceAddress(addr, this->position_addr))
+	    {
+	    	this->position_subscriptions--;
+	    	cout<<"\n UnSubscribing from a position Device, Subscriptions Left:\n"<<position_subscriptions; fflush(stdout);
+	      	assert(this->position_subscriptions >= 0);
+      		if ((position_subscriptions == 0) && (opaque_subscriptions == 0))
+      		{
+      			driverInitialized = false;
+				wheelChair->sendCommand(SETMODE,MANUAL);      			
+				wheelChair->sendCommand(POWER,OFF);
+				cout <<"\n--->> WheelChair's Power is turned OFF, Mode is MANUAL\n";
+				fflush(stdout);      			
+      		}   	      	
+	    }
+	    else if(Device::MatchDeviceAddress(addr, this->opaque_addr))
+	    {
+	      	this->opaque_subscriptions--;
+			cout<<"\n UnSubscribing from an opaque Device, Subscriptions Left:\n"<<opaque_subscriptions; fflush(stdout);	      	
+	      	assert(this->opaque_subscriptions >= 0);
+      		if ((position_subscriptions == 0) && (opaque_subscriptions == 0))
+      		{
+      			driverInitialized = false;
+				wheelChair->sendCommand(SETMODE,MANUAL);      			
+				wheelChair->sendCommand(POWER,OFF);
+				cout <<"\n--->> WheelChair's Power is turned OFF, Mode is MANUAL\n";
+      		}	      	
+	    }
+  	}
+
+  return(retval);
+};
 
 // this function will be run in a separate thread
 void WheelchairDriver::Main()
 {
 	struct timespec sleeptime;
- 	int last_pos_subscrcount=0,last_opaque_subscrcount=0;
  	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED,NULL); // Synchronously cancelable thread.
 	while(1) 
 	{
@@ -484,21 +453,9 @@ void WheelchairDriver::Main()
 	    sleeptime.tv_nsec = 1000000L;
 	    nanosleep(&sleeptime, NULL);		
 	    // Thread cancellation point.
-		pthread_testcancel();  
-		
-		// we want to enable the motors if the first client just subscribed to the position device, 
-		// and we want to stop and disable the motors if the last client unsubscribed.
-	    this->Lock();
-	    if((!last_opaque_subscrcount && this->opaque_subscriptions) || (!last_pos_subscrcount && this->position_subscriptions))
-	    	WCControl(POWER,ON);
-	    else if((last_opaque_subscrcount && !(this->opaque_subscriptions)) || (last_pos_subscrcount && !(this->position_subscriptions)))
-	      	WCControl(POWER,OFF);
-	    last_opaque_subscrcount = this->opaque_subscriptions;
-	    last_pos_subscrcount = this->position_subscriptions;
-	    this->Unlock();		
-	    
+		pthread_testcancel();
 	    this->ProcessMessages();		
-//		usleep(100000);        // repeat frequency (default to 100 Hz)
+		usleep(20000);        // repeat frequency (default to 100 Hz)
 		RefreshData();         // Update posdata
 	}
 	pthread_exit(NULL);
@@ -510,7 +467,7 @@ int WheelchairDriver::ProcessMessage(MessageQueue * resp_queue, player_msghdr * 
   // Look for configuration requests
   if(hdr->type == PLAYER_MSGTYPE_REQ)
   {
-  	cout<<"\n Wheelchair Driver Got a Req"; fflush(stdout);
+  	cout<<"\n Wheelchair Driver Got a Req->"; fflush(stdout);
     return(this->HandleConfigs(resp_queue,hdr,data));
   }
   else if(hdr->type == PLAYER_MSGTYPE_CMD)
@@ -572,7 +529,7 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 		{
 			case PLAYER_POSITION2D_REQ_GET_GEOM:  
 				/* Return the robot geometry. */
-			  	cout<<"\n\t -Got GEOM Req"; fflush(stdout);
+			  	cout<<" Got GEOM Req"; fflush(stdout);
 			    if(hdr->size != 0)
 			    {
 			      PLAYER_WARN("Arg get robot geom is wrong size; ignoring");
@@ -591,7 +548,7 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 			    return(0);
 				break;
 			case PLAYER_POSITION2D_REQ_SET_ODOM: 
-			  	cout<<"\n\t -Got Set Odom Req"; fflush(stdout);
+			  	cout<<" Got Set Odom Req"; fflush(stdout);
 			    if(hdr->size != sizeof(player_position2d_set_odom_req_t))
 			    {
 			      PLAYER_WARN("Arg to odometry set requests wrong size; ignoring");
@@ -602,12 +559,12 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 			    this->posdata.pos.px = (int)rint(set_odom_req->pose.px);
 				this->posdata.pos.py = (int)rint(set_odom_req->pose.py);
 		  		this->posdata.pos.pa = (int)rint(set_odom_req->pose.pa);
-				printf("\n Set Odom request Recieved X=%.3f y=%.3f theta=%.3f",this->posdata.pos.px,this->posdata.pos.py,this->posdata.pos.pa);
+				printf(" Set Odom request Recieved X=%.3f y=%.3f theta=%.3f",this->posdata.pos.px,this->posdata.pos.py,this->posdata.pos.pa);
 			    this->Publish(this->position_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_POSITION2D_REQ_SET_ODOM);
 			    return(0);
 				break;
 			case PLAYER_POSITION2D_REQ_RESET_ODOM:
-			  	cout<<"\n\t -Got Reset Odom";	fflush(stdout);
+			  	cout<<" Got Reset Odom";	fflush(stdout);
 		    	/* reset position to 0,0,0: no args */
 			    if(hdr->size != 0)
 			    {
@@ -625,7 +582,7 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 			     *   1 = enable motors
 			     *   0 = disable motors (default)
 			     */
-			  	cout<<"\n\t -Got Motor Power Req"; fflush(stdout);     
+			  	cout<<" Got Motor Power Req"; fflush(stdout);     
 			    if(hdr->size != sizeof(player_position2d_power_config_t))
 			    {
 			      PLAYER_WARN("Arg to motor state change request wrong size; ignoring");
@@ -633,36 +590,30 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 			    }
 			    player_position2d_power_config_t* power_config;
 			    power_config = (player_position2d_power_config_t*)data;
-				unsigned int retbyte;
+//				unsigned int retbyte;
 				if (power_config->state == 0)
 				{
-					LOCK;
-					Control_Unit_Serial->Write("O0000\r", 6);
-					Control_Unit_Serial->ReadByte(&retbyte);
-					Control_Unit_Serial->ReadByte(&retbyte);
-//					WCControl(POWER,OFF);
-					UNLOCK;
+//					Control_Unit_Serial->Write("O0000\r", 6);
+//					Control_Unit_Serial->ReadByte(&retbyte);
+//					Control_Unit_Serial->ReadByte(&retbyte);
 				}
 				else
 				{
-					LOCK;
-					Control_Unit_Serial->Write("O0000\r", 6);
-					Control_Unit_Serial->ReadByte(&retbyte);
-					Control_Unit_Serial->ReadByte(&retbyte);
-					Control_Unit_Serial->Write("L0800\r", 6);
-					Control_Unit_Serial->ReadByte(&retbyte);
-					Control_Unit_Serial->ReadByte(&retbyte);
-					Control_Unit_Serial->Write("L1800\r", 6);
-					Control_Unit_Serial->ReadByte(&retbyte);
-					Control_Unit_Serial->ReadByte(&retbyte);
-//					WCControl(POWER,ON);
-					UNLOCK;
+//					Control_Unit_Serial->Write("O0000\r", 6);
+//					Control_Unit_Serial->ReadByte(&retbyte);
+//					Control_Unit_Serial->ReadByte(&retbyte);
+//					Control_Unit_Serial->Write("L0800\r", 6);
+//					Control_Unit_Serial->ReadByte(&retbyte);
+//					Control_Unit_Serial->ReadByte(&retbyte);
+//					Control_Unit_Serial->Write("L1800\r", 6);
+//					Control_Unit_Serial->ReadByte(&retbyte);
+//					Control_Unit_Serial->ReadByte(&retbyte);
 				}
 				this->Publish(this->position_addr, resp_queue, PLAYER_MSGTYPE_RESP_ACK, PLAYER_POSITION2D_REQ_MOTOR_POWER);
 		    	return(0);
 		        break;
 			default:
-			  	cout<<"\n\t -Get Unknown Req"; fflush(stdout);
+			  	cout<<" Get Unknown Req"; fflush(stdout);
 				return -1;
 		}
     }
@@ -678,328 +629,78 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
    	    config = ((player_wheelchair_config_t*)&mData.data);
 	  	uint size ;
 	 	size = sizeof(mData) - sizeof(mData.data) + mData.data_count;	    
-	  	cout<<"\n\t - Opaque Interface Req";	fflush(stdout);
+	  	cout<<" Opaque Interface Req->";	fflush(stdout);
 	    switch(config->request)
 	    {
 	     	case PLAYER_WHEELCHAIR_GET_JOYX_REQ:
-			  	cout<<"\n\t - Got JOYX Request Req"; fflush(stdout);     				
-				this->joyx = GetReading('A');
+			  	cout<<" Got JOYX Request Req"; fflush(stdout);     				
+				this->joyx = wheelChair->getReading('A');
 			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
 			    			  reinterpret_cast<void*>(&mData), size, NULL);    
 				return 0;
 	     	case PLAYER_WHEELCHAIR_GET_JOYY_REQ:
-			  	cout<<"\n\t - Got JOYY Req"; fflush(stdout);     				
-				this->joyy = GetReading('B');
+			  	cout<<" Got JOYY Req"; fflush(stdout);     				
+				this->joyy = wheelChair->getReading('B');
 			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
 			    			  reinterpret_cast<void*>(&mData), size, NULL);    
 				return 0;	
 			case PLAYER_WHEELCHAIR_GET_MODE_REQ:
-			  	cout<<"\n\t - Got GET Mode Req"; fflush(stdout);     				
+			  	cout<<" Got GET Mode Req"; fflush(stdout);     				
 				int mm;
-				if( (mm = WCControl(GETMODE,0))!=-1 )
+				if( (mm = wheelChair->sendCommand(GETMODE,0))!=-1 )
 					this->mode = mm ;
 			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
 			    			  reinterpret_cast<void*>(&mData), size, NULL);    
 				return 0;
 	    	case PLAYER_WHEELCHAIR_SET_MODE_REQ:
-			  	cout<<"\n\t - Got Set Mode Req"; fflush(stdout);     				
-				if (WCControl(SETMODE, (bool)config->value)!=-1)
+			  	cout<<" Got Set Mode Req"; fflush(stdout);     				
+				if (wheelChair->sendCommand(SETMODE, (bool)config->value)!=-1)
 					this->mode = (bool)config->value;
 			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ);    
 			    return 0;
 	    	case PLAYER_WHEELCHAIR_SOUND_HORN_REQ:
-			  	cout<<"\n\t - Got Sound Horn Req"; fflush(stdout);     				
-				WCControl(HORN, config->value);
-			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
-			    			  reinterpret_cast<void*>(&mData), size, NULL);    
+			  	cout<<" Got Sound Horn Req"; fflush(stdout);     				
+				wheelChair->sendCommand(HORN, config->value);
+			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ);    
 				return 0;
 	    	case PLAYER_WHEELCHAIR_INC_GEAR_REQ:
-			  	cout<<"\n\t - Got Increment Gear Req"; fflush(stdout);     				
+			  	cout<<" Got Increment Gear Req"; fflush(stdout);     				
 				for(int i=0;i<config->value;i++)
 				{
-					WCControl(GEAR,INCREMENT);
+					wheelChair->sendCommand(GEAR,INCREMENT);
 					usleep(LATCHDELAY);
 				}
 			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ);				return 0;
 	    	case PLAYER_WHEELCHAIR_DEC_GEAR_REQ:
-			  	cout<<"\n\t - Got Decrement Gear Req"; fflush(stdout);     				
+			  	cout<<" Got Decrement Gear Req"; fflush(stdout);     				
 				for(int i=0;i<config->value;i++)
 				{
-					WCControl(GEAR,DECREMENT);
+					wheelChair->sendCommand(GEAR,DECREMENT);
 					usleep(LATCHDELAY);
 				}
 			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ);    				return 0;
 	     	case PLAYER_WHEELCHAIR_GET_POWER_REQ:
-			  	cout<<"\n\t - Got Get Power Req"; fflush(stdout);     				
-				this->power = ((GetReading('A') + GetReading('E')) > 1500)?ON:OFF;
+			  	cout<<" Got Get Power Req"; fflush(stdout);     				
+				this->power = ((wheelChair->getReading('A') + wheelChair->getReading('E')) > 1500)?ON:OFF;
 			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
 			    			  reinterpret_cast<void*>(&mData), size, NULL);    
-			  	cout<<"\n\t - ACK reply SENT"; fflush(stdout);     							    			  
+			  	cout<<" ACK reply SENT"; fflush(stdout);     							    			  
 				return 0;
 			case PLAYER_WHEELCHAIR_SET_POWER_REQ:
-			  	cout<<"\n\t - Got Set Power Req"; fflush(stdout);     				
-				WCControl(POWER, config->value);
+			  	cout<<" Got Set Power Req"; fflush(stdout);     				
+				wheelChair->sendCommand(POWER, config->value);
 			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ);    
-			  	cout<<"\n\t - ACK reply SENT"; fflush(stdout);     							    			  
+			  	cout<<" ACK reply SENT"; fflush(stdout);     							    			  
 				return 0;
 				break;
 			default:
-			  	cout<<"\n\t - Got UNKNOWN Req"; fflush(stdout);     							
+			  	cout<<" Got UNKNOWN Req"; fflush(stdout);     							
 				return -1;				
 		}
     }
 	return -1;
 }
 
-int WheelchairDriver::WCControl(int WCcmd, bool param) 
-{
-	static unsigned char status;
-	char cmd[7];
-	unsigned int retbyte, retbyte2;
-	bool power = false;
-	switch (WCcmd) 
-	{
-		case POWER:  
-				LOCK;
-				if ((GetReading('A') + GetReading('E')) > 1500)
-				{ 
-					power = true;
-					this->power=ON;
-				}
-				else
-					this->power=OFF;
-				printf("\n	+-->Processing Power Request ");
-				if ((param && !power) || (!param && power)) 
-				{
-					printf("\n	+-->Trying to toggle the power");
-					// Toggle wheelchair power on
-					if (Control_Unit_Serial->SendCommand("O0008") != 0) 
-					{
-						PLAYER_ERROR("Failed to set power\n");
-						Control_Unit_Serial->SendCommand("O0000");
-						return -1;
-					}
-					usleep(SLEEP);
-					if (Control_Unit_Serial->SendCommand("O0000") != 0)
-					{
-						PLAYER_ERROR("Failed to set power\n");
-						return -1;
-					}
-				}
-				UNLOCK;
-			break;
-		
-		case SETMODE:
-				LOCK;
-				sprintf(cmd, "U8\r");
-				Control_Unit_Serial->Write(cmd, 3);
-				printf("\n	+-->Processing Set Mode Request !!!");
-				Control_Unit_Serial->ReadByte(&retbyte);
-				if ((char)retbyte != 'U') 
-				{
-					printf("\nReturned: .%c.\n",(char)retbyte);
-					PLAYER_ERROR("Failed to read auto/man status from Wheelchair Interface Unit\n");
-					return -1;
-				}
-				Control_Unit_Serial->ReadByte(&retbyte);
-				Control_Unit_Serial->ReadByte(&retbyte2);
-				Control_Unit_Serial->ReadByte(&retbyte);
-				Control_Unit_Serial->ReadByte(&retbyte);
-				Control_Unit_Serial->ReadByte(&retbyte);
-				
-				if (((char)retbyte2 == '0' && param) || ((char)retbyte2 != '0' && !param)) 
-				{
-					// we need to toggle the mode
-					if (Control_Unit_Serial->SendCommand("O0020") != 0) 
-					{	
-						PLAYER_ERROR("Failed to set mode\n");
-						Control_Unit_Serial->SendCommand("O0000");
-						return -1;
-					}
-					usleep(LATCHDELAY);
-					if (Control_Unit_Serial->SendCommand("O0000") != 0) 
-					{
-						PLAYER_ERROR("Failed to set mode\n");
-						return -1;
-					}
-				}
-				UNLOCK;
-				break;
-		case GEAR:   
-				LOCK;
-				printf("\n	+-->Processing Gear Request /");
-				if (param) 
-				{
-					printf(" Going one Gear UP");
-					// Gear up
-					status |= 0x02;
-					sprintf(cmd,"O00%02X", status);
-					if(Control_Unit_Serial->SendCommand(cmd)!=0) 
-					{
-						PLAYER_ERROR("Failed to increment gear\n");
-						return -1;
-					}
-					usleep(SLEEP);
-					usleep(SLEEP);
-					usleep(SLEEP);
-					status &= ~0x02;
-					sprintf(cmd,"O00%02X", status);
-					if(Control_Unit_Serial->SendCommand(cmd)!=0) 
-					{
-						PLAYER_ERROR("Failed to increment gear\n");
-						return -1;
-					}
-				}
-				else 
-				{
-					// Gear down
-					printf(" Going one Gear Down");
-					status |= 0x01;
-					sprintf(cmd,"O00%02X", status);
-					if(Control_Unit_Serial->SendCommand(cmd)!=0) 
-					{
-						PLAYER_ERROR("Failed to decrement gear\n");
-						return -1;
-					}
-					usleep(SLEEP);
-					usleep(SLEEP);
-					usleep(SLEEP);
-					status &= ~0x01;
-					sprintf(cmd,"O00%02X", status);
-					if(Control_Unit_Serial->SendCommand(cmd)!=0) 
-					{
-						PLAYER_ERROR("Failed to decrement gear\n");
-						return -1;
-					}
-				}
-				UNLOCK;
-				break;
-		
-		case HORN:   
-				LOCK;
-				printf("\n	+-->Processing Horn Request !!!");
-				if (param) 
-				{
-					// Turn horn on
-					status |= 0x04;
-					sprintf(cmd,"O00%02X", status);
-					if(Control_Unit_Serial->SendCommand(cmd)!=0) 
-					{
-						PLAYER_ERROR("Failed to enable horn\n");
-						return -1;
-					}
-				}
-			 	else 
-				{
-					// Turn horn off
-					status &= ~0x04;
-					sprintf(cmd,"O00%02X", status);
-					if(Control_Unit_Serial->SendCommand(cmd)!=0) 
-					{
-						PLAYER_ERROR("Failed to enable horn\n");
-						return -1;
-					}
-				}
-				UNLOCK;
-			break;
-		case GETMODE:
-				LOCK;
-				printf("\n	+-->Processing Get Mode Request ->");
-				sprintf(cmd, "U8\r");
-				Control_Unit_Serial->Write(cmd, 3);
-				Control_Unit_Serial->ReadByte(&retbyte);
-				if ((char)retbyte != 'U') 
-				{
-					PLAYER_ERROR("\n	-->Failed to read auto/man status from Wheelchair Interface Unit\n");
-					return -1;
-				}
-				Control_Unit_Serial->ReadByte(&retbyte);
-				Control_Unit_Serial->ReadByte(&retbyte2);
-				Control_Unit_Serial->ReadByte(&retbyte);
-				Control_Unit_Serial->ReadByte(&retbyte);
-				Control_Unit_Serial->ReadByte(&retbyte);
-				
-				if ((char)retbyte2 == '0')
-				{
-					printf("Control is  Manual");
-					return (int) MANUAL;
-				}
-				else
-				{
-					printf("Control is  Automatic");
-					return (int) AUTO;	
-				}	
-				UNLOCK;		
-			break;
-		default:
-			PLAYER_ERROR("Unknown command\n");
-			return -1;
-	}
-	return 0;
-	
-};
-
-int WheelchairDriver::GetReading(char Channel) 
-{
-	int Count = 0;
-	unsigned int temp;
-	int ret;
-	unsigned int Position = 0;
-		LOCK;
-		Control_Unit_Serial->WriteByte(0x55);
-		Control_Unit_Serial->WriteByte(Channel);
-		Control_Unit_Serial->WriteByte(13);
-
-		temp = 0;
-		ret = Control_Unit_Serial->ReadByte(&temp); 
-		if (ret > 0) Count++; 
-		if (ret < 0) fprintf(stderr,"Wheelchair: error reading data (%d - %s)\n",errno,strerror(errno));
-		if (temp != 0x55)			
-			return -1;
-
-		temp = 0;
-		ret = Control_Unit_Serial->ReadByte(&temp); 
-		if (ret > 0) Count++; 
-		if (ret < 0) fprintf(stderr,"Wheelchair: error reading data (%d - %s)\n",errno,strerror(errno));
-		if ((char)temp != Channel)			
-			return -1;
-		
-		temp = 0;
-		ret = Control_Unit_Serial->ReadByte(&temp);
-		if (ret > 0) Count++;
-		if (ret < 0) fprintf(stderr,"Wheelchair: error reading data (%d - %s)\n",errno,strerror(errno));
-		temp -= 48;
-		if (temp > 9)
-			temp -= 7; 
-		temp = temp << 8;
-		Position = temp;
-	
-		temp = 0;
-		ret = Control_Unit_Serial->ReadByte(&temp); 
-		if (ret > 0) Count++; 
-		if (ret < 0) fprintf(stderr,"Wheelchair: error reading data (%d - %s)\n",errno,strerror(errno));
-		temp -= 48;
-		if (temp > 9)
-			temp -= 7; 
-		temp = temp << 4;
-		Position |= temp;
-	
-		temp = 0;
-		ret = Control_Unit_Serial->ReadByte(&temp); 
-		if (ret > 0) Count++; 
-		if (ret < 0) fprintf(stderr,"Wheelchair: error reading data (%d - %s)\n",errno,strerror(errno));
-		temp -= 48;
-		if (temp > 9)
-			temp -= 7;
-		Position |= temp;
-	
-		ret = Control_Unit_Serial->ReadByte(&temp); 
-		UNLOCK;
-	if (Count == 5)
-		return Position;
-	else
-		return -1;
-};
 
 void WheelchairDriver::UpdateOdom(int ltics, int rtics) 
 {
@@ -1036,14 +737,14 @@ void WheelchairDriver::UpdateOdom(int ltics, int rtics)
 	wdem_last = wdem;
 	this->Unlock();
 	/***************************************************************************/
-	cout<<"\n Vdem:"<<vdem<<" Vset:"<<vset<<" Wdem:"<<wdem<<" Wset:"<<wset;
-	cout<<"\n Vact:"<<vact<<" Vdiff:"<<vdiff<<" Wact:"<<wact<<" Wdiff:"<<wdiff<<" Time Diff is:"<<timediff;
-	fflush(stdout);
-	if(wdem*wact <0)
-	{
-		cout<<"\nMost Probably SOmething is Wrong !!!";
-		sleep(1);
-	}
+//	cout<<"\n Vdem:"<<vdem<<" Vset:"<<vset<<" Wdem:"<<wdem<<" Wset:"<<wset;
+//	cout<<"\n Vact:"<<vact<<" Vdiff:"<<vdiff<<" Wact:"<<wact<<" Wdiff:"<<wdiff<<" Time Diff is:"<<timediff;
+//	fflush(stdout);
+//	if(wdem*wact <0 || vdem*vact<0)
+//	{
+//		cout<<"\n	--->>> Most Probably SOmething is Wrong !!!";
+//		//sleep(3);
+//	}
  	mid_d = sum / 2.0;                                       //  Distance travelled by mid point
 	if ( diff==0 )//If we are moving straight, a specail case is needed cause our formula will crash since denomenator will be 0
 	{
@@ -1092,64 +793,4 @@ void WheelchairDriver::RefreshData()
     Publish(this->position_addr, NULL,PLAYER_MSGTYPE_DATA, PLAYER_POSITION2D_DATA_STATE,(void*)&posdata, sizeof(posdata), NULL);
 
 	last_position_update = now;
-}
-/*!
- * Gear one (1) curve fitting voltage function, it goes upto 0.33 m/sec only
- */
-void WheelchairDriver::UpdateMotors(double xspeed, double yawspeed) 
-{
-	double yawval, xval;
-	char cmd[7];
-	if ((xspeed != oldxspeed) || (yawspeed != oldyaw)) 
-	{
-		oldxspeed = xspeed;
-		oldyaw = yawspeed;
-		xval= -14217*xspeed*xspeed*xspeed-1875.5*xspeed*xspeed + 5652.2*xspeed + 1948.7; //trying to save computational time but avoiding pow math function
-		yawval   = 183.44*yawspeed*yawspeed*yawspeed - 19.158*yawspeed*yawspeed - 1147.5*yawspeed + 2019.6;
-
-		// Boundary Checking, Joystick Blocks if voltage limits are exceeded
-		//cout<<"\nXval:"<<xval<<" Yawval:"<<yawval;
-		if (xval > 3200.0) 
-			xval=3200.0;
-		else if (xval < 850.0) 
-			xval= 850.0;
-	
-		if(xspeed>0.33)	
-		{
-			xval=3200.0;
-		}
-		else if(xspeed < -0.2)
-		{
-			xval= 850.0;
-		}	
-		else if (xspeed == 0.0) 
-		{
-			xval=1987.0;
-		}
-		
-		if (yawval > 3200.0   ) 
-		{
-			yawval   = 3200.0;
-		}
-		else if (yawval <  850.0 ) 
-		{
-			yawval   = 850.0;
-		}
-		else if (yawspeed == 0.0 ) 
-		{
-			yawval = 1994.0;
-		}
-			
-		sprintf(cmd, "L1%03X", (int)yawval);
-		Control_Unit_Serial->SendCommand(cmd);
-		sprintf(cmd, "L0%03X", (int)xval);
-		Control_Unit_Serial->SendCommand(cmd);
-		//if( debug)
-			printf("\n-->Motors Updated with XSpeed=%.2f Yspeed=%.2f Xval=%.2f Yval=%.2f",xspeed,yawspeed,xval,yawval);
-		fflush(stdout);
-	}
-	fflush(stdout);
 };
-
-
-

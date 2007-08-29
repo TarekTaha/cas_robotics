@@ -1,6 +1,6 @@
-#Tue Aug 15 17:31:40 EST 2006
+#Wed Aug 29 15:30:57 GMT+10:00 2007
+environment/buildEnvironmentLibrary/cdt.managedbuild.config.gnu.exe.debug.300273806=<?xml version\="1.0"?>\n<environment>\n  <variable name\="LIBRARY_PATH" value\="/usr/local/lib\:" operation\="replace"/>\n</environment>
+environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.exe.debug.300273806=<?xml version\="1.0"?>\n<environment>\n  <variable name\="CPLUS_INCLUDE_PATH" value\="" operation\="remove"/>\n  <variable name\="CPATH" value\="/usr/local/include/player-2.0/\:/usr/local/include\:/usr/include\:" operation\="replace"/>\n  <variable name\="C_INCLUDE_PATH" operation\="remove"/>\n</environment>
 eclipse.preferences.version=1
-environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.exe.debug.300273806=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment>\n<variable name\="CPATH" operation\="replace" value\="/home/BlackCoder/psg/include/player-2.0\:/home/BlackCoder/psg/include\:/usr/local/include\:"/>\n<variable name\="CPLUS_INCLUDE_PATH" operation\="remove" value\=""/>\n</environment>\n
-environment/buildEnvironmentLibrary/cdt.managedbuild.config.gnu.exe.debug.300273806=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment>\n<variable name\="LIBRARY_PATH" operation\="replace" value\="/home/BlackCoder/psg/lib\:"/>\n</environment>\n
-environment/project=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment/>\n
 environment/project/cdt.managedbuild.config.gnu.exe.debug.300273806=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment/>\n
+environment/project=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment/>\n
