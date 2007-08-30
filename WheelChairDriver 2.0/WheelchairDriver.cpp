@@ -190,7 +190,7 @@ class WheelchairDriver : public Driver
 		player_wheelchair_data_t * wheelchair_data;
 	public :        
 		FILE *file;
-		struct timeval last_time,last_position_update;
+		struct timeval last_time,last_position_update,stall_time;
 		float PoseX,PoseY,PoseTheta; // The Geometrical Position;
 		int mode,power; // Holds the status of the power and the control mode
 		int joyx,joyy;  // Holds the value of the X and Y josystick coordinates
@@ -199,8 +199,9 @@ class WheelchairDriver : public Driver
 		int first_ltics,first_rtics,last_ltics, last_rtics;
 		double vint,vdem,vset,vact,vdiff,kvp,kvi,kvd,vact_last,vdem_last; // Liner Velocity Control Parameters.
 		double wint,wdem,wset,wact,wdiff,kwp,kwi,kwd,wact_last,wdem_last; // Angular Velocity Control Parameters.
+		double vdem_new,wdem_new;
 		struct timeval lasttime;
-		bool log,debug,driverInitialized;
+		bool log,debug,driverInitialized,stall;
 		double last_theta;
 	// Velocity Control Thread Stuff
 	private:	
@@ -263,6 +264,8 @@ void * WheelchairDriver::Run_Velocity_Control (void *driver)
 
 void  WheelchairDriver :: Velocity_Controller(void)
 {
+	struct timeval currtime;
+	double timediff;	
 	// Synchronously cancelable thread.
 	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED,NULL); 
 	int x=0,y=0;	
@@ -270,11 +273,47 @@ void  WheelchairDriver :: Velocity_Controller(void)
 	{
 		// Thread cancellation point.
 		pthread_testcancel(); 
-		x = (wheelChair->getLeftTicks() - first_ltics)*-1;  //Left Motor goes counter clock wise
-		y = (wheelChair->getRightTicks()- first_rtics);
+		x = wheelChair->getLeftTicks();  
+		y = wheelChair->getRightTicks();
+//		printf("\n Xticks:%d Yticks:%d",x,y);
 		UpdateOdom(x,y);				
 		vset =  kvp*(vdem_last - vact) + kvi*vint + kvd*vdiff;
 		wset =  kwp*(wdem_last - wact) + kwi*wint + kwd*wdiff;
+		if((vdem!=0 && vact ==0) || (wdem!=0 && wact==0))
+		{
+			if(!stall)
+			{
+				gettimeofday(&stall_time,NULL);
+				stall = true;
+			}
+			gettimeofday(&currtime,NULL);
+			timediff = (currtime.tv_sec + currtime.tv_usec/1e6) - (stall_time.tv_sec + stall_time.tv_usec/1e6);
+			if(timediff > 0.3) // no responce for more than 300 msec
+			{			
+				printf("\n Stall DETECTED!!!");
+				posdata.stall = 1; 
+				wheelChair->sendCommand(POWER,OFF);
+				usleep(200000);
+				wheelChair->sendCommand(POWER,ON);
+				usleep(200000);
+				wheelChair->driveMotors(0,0);
+				usleep(700000);
+				posdata.stall = 0; 
+				// Reset the velocity Control
+				vdem_last=0;
+				wdem_last=0;
+				vint=vdiff=vact_last=0;
+				wint=wdiff=wact_last=0;				
+				gettimeofday(&currtime,NULL);
+				stall = false;
+				continue;
+			}
+		}
+		else
+		{
+			stall= false;
+			posdata.stall = 0; 
+		}
 		if (vdem_last == 0) vset=0;
 		if (wdem_last == 0) wset=0;
 		wheelChair->driveMotors(vset,wset);
@@ -332,6 +371,7 @@ int WheelchairDriver::Setup()
 		cout<<"\nWheelChair Not Initialized Yet !!!";
 		exit(1);
 	}
+	stall = false;
 	last_ltics=0;
 	last_rtics=0;
 	gettimeofday(&lasttime,NULL);
@@ -377,8 +417,9 @@ int WheelchairDriver::Subscribe(player_devaddr_t addr)
       		{
       			driverInitialized = true;
 				wheelChair->sendCommand(POWER,ON);
-				wheelChair->sendCommand(SETMODE,AUTO);	
-				cout <<"\n--->> WheelChair's Power is turned ON, Mode is AUTONOMOUS";
+				wheelChair->sendCommand(SETMODE,AUTO);
+				wheelChair->driveMotors(0.0f,0.0f);	
+				cout <<"\n--->> WheelChair's Power is turned ON, Mode is AUTONOMOUS\n";
 				fflush(stdout);      			
       		}
     	}
@@ -393,7 +434,7 @@ int WheelchairDriver::Subscribe(player_devaddr_t addr)
       			driverInitialized = true;
 				wheelChair->sendCommand(POWER,ON);
 				wheelChair->sendCommand(SETMODE,AUTO);	
-				cout <<"\n--->> WheelChair's Power is turned ON, Mode is AUTONOMOUS";
+				cout <<"\n--->> WheelChair's Power is turned ON, Mode is AUTONOMOUS\n";
 				fflush(stdout);      			
       		}      		
   		}
@@ -482,7 +523,6 @@ int WheelchairDriver::ProcessMessage(MessageQueue * resp_queue, player_msghdr * 
 int WheelchairDriver::HandleCommands(player_msghdr *hdr,void * data)
 {
 	int retval = -1;
-  	double vdem_new,wdem_new;
   	if(Message::MatchMessage(hdr,
                            PLAYER_MSGTYPE_CMD,
                            PLAYER_POSITION2D_CMD_VEL,
@@ -707,11 +747,34 @@ void WheelchairDriver::UpdateOdom(int ltics, int rtics)
 	double delta_left, delta_right, theta, mid_d,sum,diff,circular_r,left_speed,right_speed,rotational_speed;
 	struct timeval currtime;
 	double timediff;
+	int delta_ticksr,delta_ticksl;
+	
 	gettimeofday(&currtime,NULL);
 	timediff = (currtime.tv_sec + currtime.tv_usec/1e6) - (last_time.tv_sec + last_time.tv_usec/1e6);
 	last_time = currtime;
-	delta_left = (ltics - last_ltics) * M_PER_TICK;    //  Distance travelled by left  wheel since last reading
-	delta_right =(rtics - last_rtics) * M_PER_TICK;    //  Distance travelled by Right wheel since last reading
+	delta_ticksl = (ltics - last_ltics);
+	delta_ticksr = (rtics - last_rtics);
+	// Detect an OverFlow of Encoder Buffer
+	if (delta_ticksl>1e6)
+	{
+		if(ltics<1e6)
+			delta_ticksl = ltics + (MAX_ENCODER_VALUE - last_ltics);
+		else
+			delta_ticksl = last_ltics + (MAX_ENCODER_VALUE - ltics);
+	}
+
+	delta_ticksl*=-1;	//Left Motor goes counter clock wise
+
+	if (delta_ticksr>1e6)
+	{
+		if(rtics<1e6)
+			delta_ticksr = rtics + (MAX_ENCODER_VALUE - last_rtics);
+		else
+			delta_ticksr = last_rtics + (MAX_ENCODER_VALUE - rtics);
+	}
+//	printf("\n DeltaR:%d DeltaL:%d",delta_ticksr,delta_ticksl);
+	delta_left  = delta_ticksl* M_PER_TICK;    //  Distance travelled by left  wheel since last reading
+	delta_right = delta_ticksr* M_PER_TICK;    //  Distance travelled by Right wheel since last reading
 	left_speed = delta_left /timediff;
 	right_speed= delta_right/timediff;
 	sum= delta_right + delta_left;

@@ -21,6 +21,7 @@
 #define MANUAL 0
 #define INCREMENT 1  
 #define DECREMENT 0
+
 /******************* DATA STARTS******************************/
 typedef struct player_wheelchair_data
 {

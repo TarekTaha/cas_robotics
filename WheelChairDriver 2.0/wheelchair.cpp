@@ -323,7 +323,7 @@ int WheelChair::getReading(char Channel)
 };
 
 /*!
- * Gear one (1) curve fitting voltage function, it goes upto 0.33 m/sec only
+ * Gear one (1) curve fitting voltage function, it applies to speeds between [-0.2 0.33] m/sec only
  */
 void WheelChair::driveMotors(double xspeed, double yawspeed) 
 {
@@ -333,47 +333,54 @@ void WheelChair::driveMotors(double xspeed, double yawspeed)
 	{
 		oldxspeed = xspeed;
 		oldyaw = yawspeed;
-		xval= -14217*xspeed*xspeed*xspeed-1875.5*xspeed*xspeed + 5652.2*xspeed + 1948.7; //trying to save computational time but avoiding pow math function
-		yawval   = 183.44*yawspeed*yawspeed*yawspeed - 19.158*yawspeed*yawspeed - 1147.5*yawspeed + 2019.6;
-
 		// Boundary Checking, Joystick Blocks if voltage limits are exceeded
-		//cout<<"\nXval:"<<xval<<" Yawval:"<<yawval;
-		if (xval > 3200.0) 
-			xval=3200.0;
-		else if (xval < 850.0) 
-			xval= 850.0;
-	
-		if(xspeed>0.33)	
+		if(xspeed > 0.33)	
 		{
-			xval=3200.0;
+			xval = 2800.0;
 		}
 		else if(xspeed < -0.2)
 		{
-			xval= 850.0;
-		}	
+			xval = 850.0;
+		}
 		else if (xspeed == 0.0) 
 		{
-			xval=1987.0;
+			xval = 1987.0;
 		}
-		
-		if (yawval > 3200.0   ) 
+		else
 		{
-			yawval   = 3200.0;
+			//trying to save computational time by avoiding pow math function			
+			xval = -14217*xspeed*xspeed*xspeed-1875.5*xspeed*xspeed + 5652.2*xspeed + 1948.7; 
+			if (xval > 2800.0) 
+				xval=2800.0;
+			else if (xval < 850.0) 
+				xval= 850.0;
 		}
-		else if (yawval <  850.0 ) 
+		if(yawspeed < -1.7)	
 		{
-			yawval   = 850.0;
+			yawval = 2800.0;
 		}
 		else if (yawspeed == 0.0 ) 
 		{
 			yawval = 1994.0;
+		}	
+		else
+		{
+			//trying to save computational time by avoiding pow math function
+			yawval   = 183.44*yawspeed*yawspeed*yawspeed - 19.158*yawspeed*yawspeed - 1147.5*yawspeed + 2019.6;		
+			if (yawval > 2800.0   ) 
+			{
+				yawval   = 2800.0;
+			}
+			else if (yawval <  850.0 ) 
+			{
+				yawval   = 850.0;
+			}
 		}
-		
 		sprintf(cmd, "L1%03X", (int)yawval);
 		controlUnit->SendCommand(cmd);
 		sprintf(cmd, "L0%03X", (int)xval);
 		controlUnit->SendCommand(cmd);
-//		printf("\n Xval=%.3f Yval=%.3f",xval,yawval);
+//		printf("\n Xspeed=%.3f Xval=%.3f Yspeed=%.3f Yval=%.3f",xspeed,xval,yawspeed,yawval);
 		fflush(stdout);
 	}
 };
