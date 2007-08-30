@@ -4,6 +4,8 @@
 #include "SerialCom.h"
 #include <errno.h>
 
+#define MAX_ENCODER_VALUE 16777216
+
 class WheelEncoder
 {
 	public:

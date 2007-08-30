@@ -116,11 +116,11 @@ int main()
 							changed=1;	
 							break;
 						case SDLK_UP:   
-							dirFR = 0.2;	
+							dirFR = 0.4;	
 							changed=1;	
 							break;
 						case SDLK_DOWN: 
-							dirFR = -0.2;	
+							dirFR = -0.4;	
 							changed=1;	
 							break;
 						case SDLK_w:    
