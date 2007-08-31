@@ -196,7 +196,7 @@ class WheelchairDriver : public Driver
 		int joyx,joyy;  // Holds the value of the X and Y josystick coordinates
 		int opaque_subscriptions, position_subscriptions;
 	 	int last_pos_subscrcount, last_opaque_subscrcount;		
-		int first_ltics,first_rtics,last_ltics, last_rtics;
+		int last_ltics, last_rtics;
 		double vint,vdem,vset,vact,vdiff,kvp,kvi,kvd,vact_last,vdem_last; // Liner Velocity Control Parameters.
 		double wint,wdem,wset,wact,wdiff,kwp,kwi,kwd,wact_last,wdem_last; // Angular Velocity Control Parameters.
 		double vdem_new,wdem_new;
@@ -245,6 +245,9 @@ void WheelchairDriver::Stop_Velocity_Thread(void)
 	pthread_cancel(velocity_thread_id);
   	if(pthread_join(velocity_thread_id,&dummy))
     	perror("WheelchairDriver::Stop_Velocity_Thread:pthread_join()");
+    if(wheelChair)
+    	delete wheelChair;
+    printf("\n Velocity Control Thread Terminated !!!");
 };
 
 void * WheelchairDriver::Run_Velocity_Control (void *driver)
@@ -288,13 +291,14 @@ void  WheelchairDriver :: Velocity_Controller(void)
 			}
 			gettimeofday(&currtime,NULL);
 			timediff = (currtime.tv_sec + currtime.tv_usec/1e6) - (stall_time.tv_sec + stall_time.tv_usec/1e6);
-			if(timediff > 0.3) // no responce for more than 300 msec
+			if(timediff > 1.0) // no responce for more than 1 sec
 			{			
 				printf("\n Stall DETECTED!!!");
 				posdata.stall = 1; 
 				wheelChair->sendCommand(POWER,OFF);
 				usleep(200000);
 				wheelChair->sendCommand(POWER,ON);
+				wheelChair->sendCommand(SETMODE,AUTO);
 				usleep(200000);
 				wheelChair->driveMotors(0,0);
 				usleep(700000);
@@ -361,12 +365,7 @@ WheelchairDriver::WheelchairDriver(ConfigFile* cf, int section)  : Driver(cf, se
 int WheelchairDriver::Setup()
 {
 	printf("\n- Setting UP WheelChair Plugin Driver.");
-	if(wheelChair)
-	{
-		first_ltics= wheelChair->getLeftTicks();
-		first_rtics= wheelChair->getRightTicks();
-	}
-	else
+	if(!wheelChair)
 	{
 		cout<<"\nWheelChair Not Initialized Yet !!!";
 		exit(1);
@@ -397,8 +396,8 @@ int WheelchairDriver::Shutdown()
 	if(log)
 		fclose(file);
 	// Stop and join the driver thread
-	StopThread();
 	Stop_Velocity_Thread();
+	StopThread();
 	return(0);
 }
 
@@ -458,6 +457,7 @@ int WheelchairDriver::Unsubscribe(player_devaddr_t addr)
       		if ((position_subscriptions == 0) && (opaque_subscriptions == 0))
       		{
       			driverInitialized = false;
+      			wheelChair->driveMotors(0.0f,0.0f);
 				wheelChair->sendCommand(SETMODE,MANUAL);      			
 				wheelChair->sendCommand(POWER,OFF);
 				cout <<"\n--->> WheelChair's Power is turned OFF, Mode is MANUAL\n";

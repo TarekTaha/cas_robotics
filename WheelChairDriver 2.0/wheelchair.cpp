@@ -41,7 +41,8 @@ WheelChair::~WheelChair()
 	controlUnit->ReadByte(&retbyte);
 	controlUnit->Write("L1800\r", 6);
 	controlUnit->ReadByte(&retbyte);
-	controlUnit->ReadByte(&retbyte);	
+	controlUnit->ReadByte(&retbyte);
+	driveMotors(0.0f,0.0f);	
 	sendCommand(POWER,OFF);	
 	cout <<"\n--->> WheelChair's Power is turned OFF\n";
 	fflush(stdout);		
