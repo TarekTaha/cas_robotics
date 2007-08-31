@@ -136,6 +136,16 @@ double CommManager::getTurnRate()
   	}  		
 }
 
+int CommManager::getLocalizerType()
+{
+	if(player)
+  		return player->getLocalizerType();
+  	else
+  	{
+  		emit addMsg(0,ERROR,QString("\n12 Communication Interface Not started YET!!!"));
+  		return 0;
+  	}	
+}
 int  CommManager::getJoyStickGlobalDir()
 {
 	if(player)
@@ -158,6 +168,9 @@ int	 CommManager::getJoyStickDir()
   		return 0;
   	}  		
 }
+/* 
+ * Determines what localizer is available and send the location
+ */
 Pose CommManager::getLocation()
 {
 	if(player)
@@ -169,7 +182,23 @@ Pose CommManager::getLocation()
   		return Pose(0,0,0);
   	}  		
 }
-
+/*
+ * Sends the latest AMCL localizer's location
+ */
+Pose CommManager::getAmclLocation()
+{
+	if(player)
+  		return player->getAmclLocation();
+  	else
+  	{
+//  		qDebug("Communication Interface Not started YET!!!");
+  		emit addMsg(0,ERROR,QString("\n14 Communication Interface Not started YET!!!"));
+  		return Pose(0,0,0);
+  	}  		
+}
+/*
+ * Sends the Latest ODOM location reported by the underlying Positiong interface
+ */
 Pose CommManager::getOdomLocation()
 {
 	if(player)
@@ -181,7 +210,9 @@ Pose CommManager::getOdomLocation()
   		return Pose(0,0,0);
   	}  		
 }
-
+/* 
+ * Tells you if the AMCL was able to localize the robot with hight accuracy or not
+ */
 bool CommManager::getLocalized()
 {
 	if(player)
@@ -193,7 +224,9 @@ bool CommManager::getLocalized()
   		return false;
   	}		
 }
-
+/*
+ * Sends Back the Robot's current Speed and turn Rate
+ */
 void CommManager::provideSpeed(double &speed, double &turnRate)
 {
      speed    = getSpeed();

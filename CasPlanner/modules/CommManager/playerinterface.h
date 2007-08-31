@@ -26,7 +26,8 @@ using namespace std;
 enum {Up,Down,Right,Left,NoInput};
 //Actions- Global Directions
 enum {North,South,East,West,Nothing,NE,NW,SE,SW};
-
+//Localizer in Use
+enum {GPS,AMCL,ODOM};
 class DeviceType
 {
 	public:
@@ -92,7 +93,8 @@ Q_OBJECT
         double getSpeed(); 
         double getTurnRate();
         bool getLocalized();
-        Pose getLocation();
+        Pose getLocation();        
+        Pose getAmclLocation();
         Pose getOdomLocation();
         QVector<DeviceType> * getDevices();
         void gotoGoal(Pose);
@@ -105,6 +107,7 @@ Q_OBJECT
         void emergencyRelease();
         void connectDevices();
         void clearResources();
+		int  getLocalizerType();        
         int  getJoyStickGlobalDir();
         int  getJoyStickDir();
     signals:
@@ -114,6 +117,7 @@ Q_OBJECT
         QString playerHost; 
         QString logMsg;
         int playerPort; 
+        int localizerType;
         PlayerClient *pc;
        	playerc_client_t *client;
        	QVector <DeviceType> *devices;
@@ -127,7 +131,7 @@ Q_OBJECT
 		PtzProxy *ptz;
 		LocalizeProxy *localizer;
 		SpeechProxy *speechP;
-		Pose location,goal,odom_location,vfhGoal;
+		Pose amclLocation,goal,odomLocation,vfhGoal;
 		QPointF joyAxes;
 		double pan,tilt,pose[3], pose_covar[3];
         LaserScan laserScan;

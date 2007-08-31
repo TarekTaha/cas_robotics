@@ -28,8 +28,10 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
         virtual double getSpeed(); 
         virtual double getTurnRate();
         virtual int    getJoyStickGlobalDir();
-        virtual int    getJoyStickDir();        
-        virtual Pose   getLocation();
+        virtual int    getLocalizerType();
+        virtual int    getJoyStickDir(); 
+        virtual Pose   getLocation();               
+        virtual Pose   getAmclLocation();
         virtual Pose   getOdomLocation();
         virtual void   gotoGoal(Pose);
         virtual void   vfhGoto(Pose);

@@ -155,7 +155,7 @@ void MapViewer::setRobotsLocation()
 	for(int i=0;i<playGround->robotPlatforms.size();i++)
 	{
 		if(playGround->robotPlatforms[i]->commManager->connected)
-			robotsLocation.push_back(playGround->robotPlatforms[i]->commManager->getOdomLocation());
+			robotsLocation.push_back(playGround->robotPlatforms[i]->commManager->getLocation());
 	}
 }
 void MapViewer::renderLaser()
@@ -270,6 +270,8 @@ void MapViewer::renderRobot()
 	}
 	for(int i=0;i<playGround->robotPlatforms.size();i++)
 	{
+		if(!playGround->robotPlatforms[i]->commManager->connected)
+			continue;
 	    Pose loc = robotsLocation[i];
 //	    qDebug("Robot Location is X:%f Y:%f Phi:%f",robotsLocation[i].p.x(),robotsLocation[i].p.y(),
 //	    	   robotsLocation[i].phi);
@@ -589,7 +591,8 @@ void MapViewer::renderSpatialStates()
 	if(!playGround->mapManager || !playGround->robotPlatforms[0]->intentionRecognizer||!playGround->robotPlatforms[0]->commManager)
 		return;
 	// This is not the general Case now and i might need to change it
-	Pose l = playGround->robotPlatforms[0]->commManager->getOdomLocation();
+//	Pose l = playGround->robotPlatforms[0]->commManager->getOdomLocation();
+	Pose l = playGround->robotPlatforms[0]->commManager->getLocation();
 	for(int i=0; i < playGround->mapManager->mapSkeleton.verticies.size() ;i++)
 	{
 	    glPushMatrix();
@@ -624,7 +627,8 @@ void MapViewer::renderDestIndicators()
 		return;
 		
 //	This is not the general Case now and i might need to change it
-	Pose l = playGround->robotPlatforms[0]->commManager->getOdomLocation();
+//	Pose l = playGround->robotPlatforms[0]->commManager->getOdomLocation();
+	Pose l = playGround->robotPlatforms[0]->commManager->getLocation();
 	for(int i=0; i < playGround->robotPlatforms[0]->intentionRecognizer->numDestinations ;i++)
 	{
 		int r;

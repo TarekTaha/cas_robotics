@@ -152,7 +152,6 @@ local_planner(NULL),
 global_planner(r->planningManager),
 pause(false)
 {
-	localizer = GPS;
    	connect(this, SIGNAL(addMsg(int,int,QString)), playGround,SLOT(addMsg(int,int,QString)));
 }
 
@@ -217,7 +216,7 @@ int Navigator::readConfigs( ConfigFile *cf)
 			obst_pen     = 	  cf->ReadFloat (i, "obst_pen", 3);
 			local_dist   = 	  cf->ReadFloat (i, "local_dist", 2);	
 			traversable_dist= cf->ReadFloat (i, "traversable_dist", 2);
-			linear_velocity = cf->ReadFloat (i, "linear_velocity", 0.1);
+			linear_velocity = cf->ReadFloat (i, "linear_velocity", 0.2);
 			int cnt =	 			cf->GetTupleCount(i,"laser_pose");
 			if (cnt != 3)
 			{
@@ -244,7 +243,6 @@ int Navigator::readConfigs( ConfigFile *cf)
 	logMsg.append(QString("\n\t\t\t Safet Distance :%1").arg(safety_dist));
 	logMsg.append(QString("\n\t\t\t Tracking Distance :%1").arg(tracking_dist));
 	logMsg.append("\n-> Robot Navigator Started.");		
-	localizer = GPS;
 //    	qDebug("-> Starting Robot Navigator."); 	
 //		qDebug("\tNavigation Parameters:"); 
 //		qDebug("\t\t\t Obstacle Avoidance:\t%s", qPrintable(obst_avoid)); 
@@ -531,8 +529,8 @@ void Navigator::run()
 	redraw_timer.restart();
 	control_timer.restart();
 	
-	//Set our Initial Location Estimation
-	if(localizer == AMCL)
+	//Set our Initial Location Estimation in case AMCL is used
+	if(robotManager->commManager->getLocalizerType() == AMCL)
 	{
 		Pose initial_pos;
 		initial_pos.p.setX(global_path->pose.p.x());
@@ -564,11 +562,8 @@ void Navigator::run()
 		usleep(30000);
 //		printf("\n Debug Location 1"); fflush(stdout);
 		// Get current Robot Location
-		if(localizer == AMCL)
-			currentPose = robotManager->commManager->getLocation();
-		else
-			currentPose = robotManager->commManager->getOdomLocation();
-
+		currentPose = robotManager->commManager->getLocation();
+		
 		EstimatedPos = currentPose;
 		speed    =  robotManager->commManager->getSpeed();
 		turnRate =  robotManager->commManager->getTurnRate();

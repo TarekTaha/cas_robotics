@@ -28,8 +28,6 @@ class RobotManager;
 class PlayGround;
 using namespace CasPlanner;
 
-enum {GPS,AMCL};
-
 class Navigator : public Controller
 {
 	Q_OBJECT
@@ -82,7 +80,7 @@ class Navigator : public Controller
 		ForceField *FF;
 		QPointF	begin,tracking_point,ni,SegmentStart,SegmentEnd;
 		bool	log,position_found,end_reached,segment_navigated,stop_navigating,pause;
-		int		platform,direction,path2Draw,obstAvoidAlgo,localizer;
+		int		platform,direction,path2Draw,obstAvoidAlgo;
 		Node * local_path,* global_path,*last,*first,*path2Follow;
 		PlanningManager *local_planner,*global_planner;
 		MapManager mapManager;
