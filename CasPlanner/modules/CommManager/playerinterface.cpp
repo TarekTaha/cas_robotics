@@ -12,6 +12,7 @@ PlayerInterface::PlayerInterface(QString host, int port):
     localized(false),
     emergencyStopped(false),
     velControl(true),
+    vfhEnabled(false),
     positionId(0), 
 	drive(NULL),
 	vfh(NULL),
@@ -20,7 +21,9 @@ PlayerInterface::PlayerInterface(QString host, int port):
     map(NULL),
 	ptz(NULL),
 	localizer(NULL),
-	speechP(NULL)  
+	speechP(NULL),
+	speed(0),
+	turnRate(0)
 {
 }
 
@@ -36,7 +39,10 @@ int PlayerInterface::getJoyStickGlobalDir()
 	 * Y-Axis coordinate aligns with the Robot's X-Axis */
 	Pose P(joyAxes.x(),joyAxes.y(),NORMALIZE(atan2(joyAxes.y(),joyAxes.x())-DTOR(90)));
 	dataLock.unlock();
-	P = Trans2Global(P,odom_location);
+	if (localizerType == ODOM)
+		P = Trans2Global(P,odomLocation);
+	else
+		P = Trans2Global(P,amclLocation);	
 	double angle = RTOD(P.phi), dirTolerance = 45;//45 degrees means that we will get only N,S,E,W
 	if(angle < 0)
 		angle += 360;	
@@ -144,7 +150,7 @@ void PlayerInterface::checkForWheelChair()
 		  	printf("\n Turning ON WheelChair"); fflush(stdout);
 		  	wheelChairCommander->setPower(ON);
 		  	wheelChairCommander->setMode(AUTO);
-		  	wheelChairCommander->soundHorn(1000); // for a second
+		  	wheelChairCommander->soundHorn(1000);
 		  	printf("\n WheelChair is on"); fflush(stdout);			
 		  	logMsg.append(QString("\n\t\t - Wheelchair Driver Engaged"));
 		}
@@ -166,6 +172,7 @@ QVector<DeviceType> * PlayerInterface::getDevices()
   	}
   	typedef std::list <playerc_device_info_t>  devList; 
   	DeviceType device;
+  	pc->RequestDeviceList();
   	devList m_devList= pc->GetDeviceList();
   	for(devList::iterator iter = m_devList.begin(); iter != m_devList.end(); iter++)
   	{
@@ -240,6 +247,14 @@ void PlayerInterface::setPtz( double in_pan, double in_tilt)
     tilt = in_tilt; 
 }
 
+int PlayerInterface::getLocalizerType()
+{
+    dataLock.lockForRead();
+    int retval = localizerType; 
+    dataLock.unlock(); 
+    return retval; 	
+}
+
 void PlayerInterface::setSpeed(double i_speed, double i_turnRate)
 {
     dataLock.lockForWrite();
@@ -289,15 +304,15 @@ void PlayerInterface::setLocation(Pose loc)
 	//cout << "\n Default Pose given to the Localizer X="<<path->location.x()<<" Y="<<path->location.y()<<" Theta="<<path->angle;
 	//cout << "\n Tracking Distance="<<tracking_distance<<" Kd="<<kd<<" KTheta="<<kt;
 	//Set Covariance Matrix
-	pose_covar[0]=1;
-	pose_covar[1]=1;
-	pose_covar[2]=DTOR(60);
+	pose_covar[0]=0.5*0.5;
+	pose_covar[1]=0.5*0.5;
+	pose_covar[2]=(M_PI/6.0)*(M_PI/6.0);
 	if(localizer)
 	{
 		localizer->SetPose(pose,pose_covar);	
-		this->location.p.setX(loc.p.x());
-		this->location.p.setY(loc.p.y());
-		this->location.phi = loc.phi;
+		this->amclLocation.p.setX(loc.p.x());
+		this->amclLocation.p.setY(loc.p.y());
+		this->amclLocation.phi = loc.phi;
 	}
 }
 
@@ -363,7 +378,19 @@ bool PlayerInterface::getLocalized()
 Pose PlayerInterface::getLocation()
 {
     dataLock.lockForRead();
-    Pose retval = location; 
+    Pose retval;
+    if(localizerType == AMCL)
+    	retval = amclLocation;
+   	else if(localizerType == ODOM) 
+   		retval = odomLocation;
+    dataLock.unlock(); 
+    return retval; 		
+}
+
+Pose PlayerInterface::getAmclLocation()
+{
+    dataLock.lockForRead();
+    Pose retval = amclLocation; 
     dataLock.unlock(); 
     return retval; 	
 }
@@ -371,7 +398,7 @@ Pose PlayerInterface::getLocation()
 Pose PlayerInterface::getOdomLocation()
 {
     dataLock.lockForRead();
-    Pose retval = odom_location; 
+    Pose retval = odomLocation; 
     dataLock.unlock(); 
     return retval; 	
 }
@@ -486,8 +513,14 @@ void PlayerInterface::connectDevices()
     }
     if(localizerEnabled)
     {
-    	localizer 	= new LocalizeProxy(pc,0);
+    	localizer 	  = new LocalizeProxy(pc,0);
+    	localizerType = AMCL; 
 		logMsg.append(QString("\n\t\t - Localizer Started Successfully ID:%1").arg(0));	    	
+    }
+    else
+    {
+    	// no localizer so just set odom as default
+    	localizerType = ODOM;
     }
     if(vfhEnabled)
     {
@@ -542,19 +575,21 @@ void PlayerInterface::run ()
 		        	player_pose_t ps;
 		        	if(velControl)
 		        	{
+//		        		cout<<"\n WTF SPEED"; fflush(stdout);
 			            drive->SetSpeed(speed,turnRate);
 		        	}
 		        	else
 		        	{
+//		        		cout<<"\n WTF GOTO"; fflush(stdout);
 		        		vfh->GoTo(vfhGoal.p.x(),vfhGoal.p.y(),vfhGoal.phi);	        		
 		        	}
 		            getspeed = drive->GetXSpeed();
 	//	            getturnrate = drive->GetYSpeed();
 		            getturnrate = drive->GetYawSpeed();	            
 		            ps = drive->GetPose();
-		            odom_location.p.setX(drive->GetXPos());
-		            odom_location.p.setY(drive->GetYPos());
-		            odom_location.phi =  drive->GetYaw();
+		            odomLocation.p.setX(drive->GetXPos());
+		            odomLocation.p.setY(drive->GetYPos());
+		            odomLocation.phi =  drive->GetYaw();
 		            joyAxes.setX(joyStick->GetXPos());
 		            joyAxes.setY(joyStick->GetYPos());
 	//	            int dir = getJoyStickDir();
@@ -574,9 +609,9 @@ void PlayerInterface::run ()
 				}
 			    if(localizer)
 			    {
-				    location.p.setX(localizer->GetHypoth(0).mean.px);
-				    location.p.setY(localizer->GetHypoth(0).mean.py);
-				    location.phi =  localizer->GetHypoth(0).mean.pa;
+				    amclLocation.p.setX(localizer->GetHypoth(0).mean.px);
+				    amclLocation.p.setY(localizer->GetHypoth(0).mean.py);
+				    amclLocation.phi =  localizer->GetHypoth(0).mean.pa;
 				    if(localizer->GetHypoth(0).alpha>=0.9)
 				    	localized = true;
 				    else

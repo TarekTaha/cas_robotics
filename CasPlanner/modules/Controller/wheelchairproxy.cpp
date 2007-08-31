@@ -118,7 +118,7 @@ int WheelChairProxy::soundHorn()
 int WheelChairProxy::soundHorn(unsigned int duration)
 {
 	scoped_lock_t lock(mPc->mMutex);		
-	config->value = duration; // 100ms
+	config->value = duration;
 	config->request = PLAYER_WHEELCHAIR_SOUND_HORN_REQ;	
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
                              reinterpret_cast<void*>(&mData),reinterpret_cast<void*>(&mData),size) < 0)	
