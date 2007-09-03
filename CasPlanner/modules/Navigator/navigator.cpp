@@ -148,9 +148,9 @@ globalPath(NULL),
 localPath(NULL),
 playGround(playG),
 robotManager(r),
+pause(false),
 local_planner(NULL),
-global_planner(r->planningManager),
-pause(false)
+global_planner(r->planningManager)
 {
    	connect(this, SIGNAL(addMsg(int,int,QString)), playGround,SLOT(addMsg(int,int,QString)));
 }
@@ -552,7 +552,7 @@ void Navigator::run()
 	// Reset Times
 	last_time=0; delta_t=0;	velocity=0;
 	end_reached = false;stop_navigating = false;
-	double speed,turnRate;
+	double speed,turnRate,y1,s1;
 	LaserScan laserScan;
 	trail.clear();
 	while(!end_reached && !stop_navigating)
@@ -670,7 +670,10 @@ void Navigator::run()
 		// Distance to the path Segment
 		distance = Dist(SegmentEnd,tracking_point);
 		Line l(SegmentStart,SegmentEnd);
-		displacement = Dist2Seg(l,tracking_point);
+//		displacement = Dist2Seg(l,tracking_point);
+		displacement =  distance;
+		y1 = Dist2Seg(l,tracking_point);
+		s1 = distance*distance- y1*y1;
 //		printf("\n Debug Location 5"); fflush(stdout);
 		//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
 		//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
@@ -858,16 +861,17 @@ void Navigator::run()
 					break;
 				case NO_AVOID:
 //					// Linear Controller 
-					cntrl = getAction(EstimatedPos.phi,angle,displacement,first->direction,linear_velocity);
+//					cntrl = getAction(EstimatedPos.phi,angle,displacement,first->direction,linear_velocity);
+					cntrl = getAction(EstimatedPos.phi,angle,first->direction,linear_velocity,y1,s1);
 					qDebug("Control Action Linear:%f Angular:%f",first->direction*cntrl.linear_velocity,cntrl.angular_velocity);fflush(stdout);					
 					/* Angular Velocity Thrusholded, just trying not to
 					 * exceed the accepted limits. Or setting up a safe 
 					 * turn speed.
 					 */
-					if(cntrl.angular_velocity >   0.2)
-						cntrl.angular_velocity =  0.2;
-					if(cntrl.angular_velocity <  -0.2)
-						cntrl.angular_velocity = -0.2;
+//					if(cntrl.angular_velocity >   0.2)
+//						cntrl.angular_velocity =  0.2;
+//					if(cntrl.angular_velocity <  -0.2)
+//						cntrl.angular_velocity = -0.2;
 //					if(log)
 //						fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),currentPose.p.x(), currentPose.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.secElapsed(),last_time);			
 					//Normal Linear Follower
