@@ -15,6 +15,8 @@ class Controller: public QThread
 	public:
 		double k_dist,k_theta,safety_dist,tracking_dist,linear_velocity;
 		ControlAction getAction(double angle_current,double angle_ref,double displacement,int direction,double speed);
+		ControlAction getAction(double angle_current,double angle_ref,int direction,double v,double y1,double s1);
+		double deltaFunction(double y1,double v);
 		Controller();
 		~Controller();	
 };

@@ -88,7 +88,7 @@ Obstacle
 (
   localization "gps"
   localization_origin [ 0 0 0 ]
-  pose [-1.33 0.85 180]
+  pose [-1.8 -1.3 180]
   name "StaticObstacle"
 )
 # extend the wheelchair definition from wheelchair.inc
@@ -97,7 +97,7 @@ wheelchair
   localization "gps"
   localization_origin [ 0 0 0 ]
    name "robot"
-   pose [-3.83 -1.43 0]
+   pose [13.2 0.0 180]
    sick_laser
 	(
 		pose [0.030 0.000 0.000 ]
@@ -118,11 +118,11 @@ dynamicRobot
 (
   color "red"
    name "robot2b"
-   pose [5.85 -2.66 180]
+   pose [4 -7.4 180]
 )
 dynamicRobot
 (
   color "green"
    name "robot2a"
-   pose [5.85 0 180]
+   pose [14.2 6.3 180]
 )
