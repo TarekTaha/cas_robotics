@@ -13,7 +13,7 @@ class Robot
 {
 	public :
 		double robotLength,robotWidth,obstacleRadius,robotMass,robotMI,robotRadius,
-			   robotSpeed,robotTurnRate;
+			   robotSpeed,robotTurnRate,expansionRadius,narrowestPathDist,safetyTolerance, startx,starty;			   
 		int robotPort;
 		//! Motion model
 		QString robotModel,robotName,robotIp;

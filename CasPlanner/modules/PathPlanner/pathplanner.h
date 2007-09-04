@@ -9,7 +9,7 @@ class PathPlanner : public Astar
 {
 	public :
 		bool map_initialized;
-		double  obstacle_radius,bridge_length,bridge_res,reg_grid,conn_radius,obst_dist;
+		double  obstacle_radius,bridge_length,bridge_res,regGridDist,reg_grid_conn_rad,obst_dist,bridge_conn_rad;
 	public :
 		void   setExpRad(double);
 		void   setBridgeLen(double);
@@ -35,7 +35,7 @@ class PathPlanner : public Astar
 		bool   readSpaceFromFile(const char *filename);
 		bool   saveSpace2File(const char *filename);
 		PathPlanner(Robot *,double dG,double bridge_len,
-					double bridge_res,double reg_grid,double obst_exp,double conn_rad,double obst_pen);
+					double bridge_res,double regGridDist,double obst_exp,double reg_grid_conn_rad,double obst_pen,double bridge_conn_rad);
 		PathPlanner();
 		~PathPlanner();
 };

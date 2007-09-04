@@ -19,6 +19,11 @@ playGround(playG)
 
 CommManager::~CommManager()
 {
+	if(connected)
+	{
+		setSpeed(0);
+		setTurnRate(0);
+	}	
 }
 
 QVector <DeviceType> * CommManager::getDevices()

@@ -157,7 +157,7 @@ global_planner(r->planningManager)
 
 Navigator::~Navigator()
 {
-	
+
 }
 
 void Navigator::setupLocalPlanner()
@@ -172,7 +172,8 @@ void Navigator::setupLocalPlanner()
 											  reg_grid,
 											  obst_exp,
 											  conn_rad,
-											  obst_pen
+											  obst_pen,
+											  bridge_conn_rad
 										   );					   
 	}
 }
@@ -673,7 +674,7 @@ void Navigator::run()
 //		displacement = Dist2Seg(l,tracking_point);
 		displacement =  distance;
 		y1 = Dist2Seg(l,tracking_point);
-		s1 = distance*distance- y1*y1;
+		s1 = (distance*distance- y1*y1);
 //		printf("\n Debug Location 5"); fflush(stdout);
 		//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
 		//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);

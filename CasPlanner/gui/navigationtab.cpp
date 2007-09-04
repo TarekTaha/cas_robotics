@@ -79,7 +79,7 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
     hlayout->addWidget(&robotsGB,1);
     hlayout->addWidget(&planningGB,1);
     hlayout->addWidget(&parametersGB,1);
-    hlayout->addWidget(&obstavoidGB,1);    
+//    hlayout->addWidget(&obstavoidGB,1);    
     hlayout->addWidget(&actionGB,1); 
     this->setLayout(hlayout);
     QVBoxLayout *showLayout = new QVBoxLayout; 
@@ -212,6 +212,16 @@ void NavControlPanel::pathTraversed()
 
 void NavControlPanel::pathFollow()
 {
+	if(!currRobot->commManager)
+	{
+		qDebug("\t NavTab: Communication Manager Not Initialized");
+		return;
+	}
+	if(!currRobot->commManager->connected)
+	{
+		qDebug("\t NavTab: Your not Connected to the Robot, Connect First");
+		return;		
+	}
 	if(currRobot->notFollowing)
 	{
 		if(currRobot->navigator->isRunning())
@@ -318,8 +328,8 @@ void NavControlPanel::updateRobotSetting()
 	obstExpRadSB.setValue(currRobot->planningManager->pathPlanner->obstacle_radius);	
 	bridgeTestResSB.setValue(currRobot->planningManager->pathPlanner->bridge_res);
 	bridgeSegLenSB.setValue(currRobot->planningManager->pathPlanner->bridge_length);
-	regGridResSB.setValue(currRobot->planningManager->pathPlanner->reg_grid);	
-	nodeConRadSB.setValue(currRobot->planningManager->pathPlanner->conn_radius);
+	regGridResSB.setValue(currRobot->planningManager->pathPlanner->regGridDist);	
+	nodeConRadSB.setValue(currRobot->planningManager->pathPlanner->reg_grid_conn_rad);
 	obstPenRadSB.setValue(currRobot->planningManager->pathPlanner->obst_dist);
 	
     connect(&bridgeTest, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setBridgeTest( int ))); 

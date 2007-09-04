@@ -16,7 +16,7 @@ Q_OBJECT
 public:
 	MainWindow(QWidget *parent=0); 
 	MainWindow(QStringList strings, QWidget *parent=0); 
-	~MainWindow(); 
+	~MainWindow();
     public slots:
 		void logData();
 		void commStart(); 

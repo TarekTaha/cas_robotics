@@ -12,7 +12,8 @@ PlanningManager::PlanningManager(RobotManager *robMan,
 								 double reg_grid,
 								 double obst_exp,
 								 double conn_rad,
-								 double obst_pen
+								 double obst_pen,
+								 double bridge_conn_rad
 									  )
 {
 	this->pixel_res  = pixel_res;
@@ -20,9 +21,10 @@ PlanningManager::PlanningManager(RobotManager *robMan,
 	this->bridge_res = bridge_res;
 	this->reg_grid = reg_grid;
 	this->obst_exp = obst_exp;
-	this->conn_rad = conn_rad;
+	this->reg_grid_conn_rad = conn_rad;
 	this->obst_pen = obst_pen;
 	this->dist_goal = dist_goal;
+	this->bridge_conn_rad = bridge_conn_rad;
 	this->pathPlanner = NULL;
 	this->robotManager = robMan;
 	this->connNodesEnabled  = true;
@@ -250,9 +252,10 @@ int PlanningManager::readConfigs( ConfigFile *cf)
 		   	bridge_res = 			cf->ReadFloat(i, "bridge_res",0.5);
 		   	reg_grid =				cf->ReadFloat(i, "reg_grid",0.5);
 		   	obst_exp = 				cf->ReadFloat(i, "obst_exp",0.2);
-		   	conn_rad =				cf->ReadFloat(i, "conn_rad",0.8);
+		   	reg_grid_conn_rad =		cf->ReadFloat(i, "reg_grid_conn_rad",0.8);
 		   	obst_pen = 				cf->ReadFloat(i, "obst_pen",3);
 		   	dist_goal = 			cf->ReadFloat(i, "dist_goal",0.2);   	
+		   	bridge_conn_rad =       cf->ReadFloat(i, "bridge_conn_rad",0.5);
 	    }
 	    if(sectionName == "Map")
 	    {
@@ -276,9 +279,10 @@ int PlanningManager::setupPlanner()
 		logMsg.append(QString("\n\t\t\t Distance to Goal = %1").arg(dist_goal));
 		logMsg.append(QString("\n\t\t\t Bridge Test Lenght = %1").arg(bridge_len));
 		logMsg.append(QString("\n\t\t\t Bridge Test Res = %1").arg(bridge_res));
+		logMsg.append(QString("\n\t\t\t Bridge Conn Rad = %1").arg(bridge_conn_rad));
 		logMsg.append(QString("\n\t\t\t Reg Grid Res  = %1").arg(reg_grid));
 		logMsg.append(QString("\n\t\t\t Obstacle Expansion Radius = %1").arg(obst_exp));
-		logMsg.append(QString("\n\t\t\t Connection Radius = %1").arg(conn_rad));
+		logMsg.append(QString("\n\t\t\t Connection Radius = %1").arg(reg_grid_conn_rad));
 		logMsg.append(QString("\n\t\t\t Obstacle Penalty = %1").arg(obst_pen));
 																	
 //		qDebug("-> Starting Planner."); 
@@ -297,8 +301,9 @@ int PlanningManager::setupPlanner()
 									  bridge_res,
 									  reg_grid,
 									  obst_exp,
-									  conn_rad,
-									  obst_pen);
+									  reg_grid_conn_rad,
+									  obst_pen,
+									  bridge_conn_rad);
 //		qDebug("->Planner Started.");
 		logMsg.append("\n->Planner Started.");	
 		emit addMsg(0,INFO,logMsg);	

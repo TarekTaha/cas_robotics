@@ -2,7 +2,7 @@
 
 IntentionRecognizer::IntentionRecognizer(PlayGround * playG, RobotManager *rManager):
 runRecognition(false),
-useNavigator(false),
+useNavigator(true),
 beliefInitialized(false),
 destBelief(playG->mapManager->mapSkeleton.numDestinations,0),
 goToState(-1,-1,-1),
@@ -179,8 +179,12 @@ void IntentionRecognizer::run()
 //			qDebug("\t - (IR): Your not Connected to the Robot, Connect First");
 			continue;		
 		}
-		
-		currentPose = robotManager->commManager->getOdomLocation();
+		while(!robotManager->commManager->getLocalized())
+		{
+			currentPose = robotManager->commManager->getLocation();
+			qDebug("NO Accurate Estimation yet, best current is: x:%f y:%f phi:%f",currentPose.p.x(),currentPose.p.y(),RTOD(currentPose.phi));
+			usleep(300000);
+		}
 		spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(currentPose);
 		observation = robotManager->commManager->getJoyStickGlobalDir();
 		if(!beliefInitialized)

@@ -29,6 +29,7 @@ PlayerInterface::PlayerInterface(QString host, int port):
 
 PlayerInterface::~PlayerInterface()
 {
+	setSpeed(0,0);
 	clearResources();
 }
 
@@ -528,8 +529,8 @@ void PlayerInterface::connectDevices()
 		logMsg.append(QString("\n\t\t - Vfh Started Successfully ID:%1").arg(vfhId));	    	
     }	   
     /* This is temp until the wheelchair interface is added.*/
-    joyStickId = 3;
-	joyStick = new Position2dProxy(pc,joyStickId);
+//  joyStickId = 3;
+//	joyStick = new Position2dProxy(pc,joyStickId);
 //	speechP  = new SpeechProxy(pc,0);
 //	speechP->Say("I am ready Mate");
 	sleep(1);
@@ -590,8 +591,11 @@ void PlayerInterface::run ()
 		            odomLocation.p.setX(drive->GetXPos());
 		            odomLocation.p.setY(drive->GetYPos());
 		            odomLocation.phi =  drive->GetYaw();
-		            joyAxes.setX(joyStick->GetXPos());
-		            joyAxes.setY(joyStick->GetYPos());
+		            if(joyStick)
+		            {
+			            joyAxes.setX(joyStick->GetXPos());
+			            joyAxes.setY(joyStick->GetYPos());
+		            }
 	//	            int dir = getJoyStickDir();
 	//	            int globalDir = getJoyStickGlobalDir();
 	//	            printf("\nDirection=%d Global Dir=%d",dir,globalDir);

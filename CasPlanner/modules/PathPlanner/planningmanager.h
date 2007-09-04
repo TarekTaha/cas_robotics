@@ -22,7 +22,7 @@ class PlanningManager : public QObject
         Q_OBJECT
         public:
             PlanningManager(RobotManager *);
-            PlanningManager(RobotManager *,double,double,double,double,double,double,double,double);
+            PlanningManager(RobotManager *,double,double,double,double,double,double,double,double,double);
             ~PlanningManager();
             void setRobotManager(RobotManager *);
             int readConfigs(ConfigFile *cf);
@@ -55,7 +55,7 @@ class PlanningManager : public QObject
 		    void addMsg(int,int, QString);
 		    void updateMap(Map* map);
         protected:
-            double pixel_res,dist_goal,bridge_len,bridge_res,reg_grid,obst_exp,conn_rad,obst_pen;
+            double pixel_res,dist_goal,bridge_len,bridge_res,reg_grid,obst_exp,reg_grid_conn_rad,obst_pen,bridge_conn_rad;
             RobotManager *robotManager;
             bool bridgeTestEnabled,connNodesEnabled,regGridEnabled,obstPenEnabled,expObstEnabled,showTreeEnabled,negate;
             QPointF rotation_center;
