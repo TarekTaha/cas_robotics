@@ -74,7 +74,7 @@ class Navigator : public Controller
 				avoidance_distance_right,avoidance_distance_ahead,speed,estimate_x,
 				estimate_y,estimate_theta,velocity,delta_t,last_time;
 		double robot_length, robot_width,pixel_res,dist_goal,local_dist,traversable_dist,
-			   bridge_len, bridge_res, reg_grid, obst_exp, conn_rad, obst_pen;
+			   bridge_len, bridge_res, reg_grid, obst_exp, conn_rad, obst_pen, bridge_conn_rad;
 		QString robot_model;
 		QPointF rotation_center;
 		ForceField *FF;

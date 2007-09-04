@@ -52,6 +52,8 @@ Q_OBJECT
 		void setRobotsLocation();
 		void displayGrid();
 		void showIndicators();
+		void drawCircle(float radius);		
+		void drawCircle(QPointF center,float radius);		
 		GLuint makeObject();
 		QImage captureMap();
         virtual void setProvider(MapProvider *provider);

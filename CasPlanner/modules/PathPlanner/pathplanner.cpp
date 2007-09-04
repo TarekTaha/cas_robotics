@@ -16,15 +16,16 @@ PathPlanner :: PathPlanner()
 };
 
 PathPlanner::PathPlanner(Robot *rob,double dG,double bridge_len,
-			double bridge_r,double reg_g,double obst_exp,double conn_rad,double obst_pen):
+			double bridge_r,double reg_g,double obst_exp,double conn_rad,double obst_pen,double bridge_conn_rad_in):
 			Astar(rob,dG),
 			map_initialized(false),
 			obstacle_radius(obst_exp),
 			bridge_length(bridge_len),
 			bridge_res(bridge_r),
-			reg_grid(reg_g),
-			conn_radius(conn_rad),
-			obst_dist(obst_pen)
+			regGridDist(reg_g),
+			reg_grid_conn_rad(conn_rad),
+			obst_dist(obst_pen),
+			bridge_conn_rad(bridge_conn_rad_in)
 {
 //	qDebug("Planner Initialized");
 };
@@ -69,12 +70,12 @@ void   PathPlanner ::setBridgeRes(double a)
 
 void   PathPlanner ::setRegGrid(double a)
 {
-	reg_grid = a;
+	regGridDist = a;
 }
 
 void   PathPlanner ::setConRad(double a)
 {
-	conn_radius = a;
+	reg_grid_conn_rad = a;
 }
 
 void   PathPlanner ::setObstDist(double a)
@@ -159,6 +160,7 @@ void PathPlanner::expandObstacles()
 bool PathPlanner::readSpaceFromFile(const char *filename)
 {
   	double locationx,locationy,obstacle_cost;
+  	int type;
   	SearchSpaceNode *temp;
   	assert(filename != NULL);
   	filename = strdup(filename);
@@ -171,7 +173,7 @@ bool PathPlanner::readSpaceFromFile(const char *filename)
   	}
   	while (!feof(file))
   	{
-  		fscanf(file,"%lf %lf %lf\n",&locationx,&locationy,&obstacle_cost);
+  		fscanf(file,"%lf %lf %lf %d\n",&locationx,&locationy,&obstacle_cost,&type);
 		if (search_space == NULL ) // Constructing the ROOT NODE
 		{
 			temp = new SearchSpaceNode;
@@ -180,6 +182,7 @@ bool PathPlanner::readSpaceFromFile(const char *filename)
 			temp->obstacle_cost = obstacle_cost;
 			temp->parent   = NULL;
 			temp->next     = NULL;
+			temp->type     = type;
 			search_space = temp;
 		}
 		else
@@ -190,6 +193,7 @@ bool PathPlanner::readSpaceFromFile(const char *filename)
 			temp->obstacle_cost = obstacle_cost;
 			temp->parent = NULL; 
 			temp->next   = search_space;
+			temp->type     = type;
 			search_space = temp;
 		}
   	}
@@ -211,7 +215,7 @@ bool PathPlanner::saveSpace2File(const char *filename)
   	SearchSpaceNode *temp=search_space;
   	while (temp)
   	{
-  		fprintf(file,"%f %f %f\n",temp->location.x(),temp->location.y(),temp->obstacle_cost);
+  		fprintf(file,"%f %f %f %d\n",temp->location.x(),temp->location.y(),temp->obstacle_cost,temp->type);
 		temp = temp->next;
   	}
   	fclose(file);
@@ -241,6 +245,7 @@ void PathPlanner::generateRegularGrid()
 					this->convertPix(&temp->location);
 					temp->parent   = NULL;
 					temp->next     = NULL;
+					temp->type     = RegGridNode;
 					search_space = temp;
 				}
 				else
@@ -248,13 +253,14 @@ void PathPlanner::generateRegularGrid()
 					p.setX(i);
 					p.setY(j);
 					this->convertPix(&p);
-					if (checkShortestDistance(p.x(),p.y(),reg_grid))
+					if (checkShortestDistance(p.x(),p.y(),regGridDist))
 					{
 						temp = new SearchSpaceNode;
 						temp->location.setX(p.x());
 						temp->location.setY(p.y());
 						temp->parent = NULL; 
 						temp->next   = search_space;
+						temp->type     = RegGridNode;						
 						search_space = temp;
 					}
 				}
@@ -309,6 +315,7 @@ void PathPlanner::bridgeTest()
 							temp->location.setY(p.y());
 							temp->parent   = NULL;
 							temp->next     = NULL;
+							temp->type     = BridgeNode;							
 							search_space = temp;
 						}
 						else
@@ -320,6 +327,7 @@ void PathPlanner::bridgeTest()
 								temp->location.setY(p.y());
 								temp->parent = NULL;
 								temp->next   = search_space;
+								temp->type     = BridgeNode;									
 								search_space = temp;
 							}
 						}
@@ -411,20 +419,29 @@ void PathPlanner::connectNodes()
 	if (!search_space) // Do nothing if Search Space is not Yet Created
 		return;
 	temp = search_space;
+//	cout<<"\n RegGrid Conn:"<<reg_grid_conn_rad<<" Bridge Conn:"<<bridge_conn_rad;
 	while (temp!=NULL)
 	{
 		S = search_space;
 		while (S!=NULL)
 		{
 			distance = Dist(S->location,temp->location);
-			//qDebug("Distance =:%f and Con Radius=%f",distance,conn_radius);
-			if (distance <= conn_radius && distance !=0)
+			double testDist;
+			if(!(S->type==RegGridNode && temp->type==RegGridNode))
+			{
+				testDist = bridge_conn_rad;
+			}
+			else
+			{
+				testDist = reg_grid_conn_rad;
+			}
+			
+			if (distance <= testDist && distance !=0)
 			{
 				angle = atan2(S->location.y() - temp->location.y() ,S->location.x() - temp->location.x());
-				if(!inObstacle(temp->location,angle))
+				if(!inObstacle(temp->location,angle) && !inObstacle(S->location,angle))
 				{
 					temp->children.push_back(S);
-//					qDebug("Child ADDED");
 				}
 			}
 			S = S->next;
@@ -443,7 +460,7 @@ bool PathPlanner::checkShortestDistance(double x,double y,double neigbhour_dista
 	while (S!=NULL)
 	{
 		distance = sqrt(pow(S->location.x() - x,2)+pow(S->location.y() - y,2));
-		if (distance < shortest_distance)
+		if (distance <= shortest_distance)
 			shortest_distance = distance;
 		S = S->next;
 	}

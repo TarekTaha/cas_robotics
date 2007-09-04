@@ -58,8 +58,8 @@ int Astar :: inObstacle(QPointF P, double theta)
 		det_point.setY((robot->check_points[i].x()*sin(theta) + robot->check_points[i].y()*cos(theta) + P.y()));
 		
 		this->convert2Pix(&det_point);
-		m = (int)det_point.x();
-		n = (int)det_point.y();
+		m = (int)(round(det_point.x()));
+		n = (int)(round(det_point.y()));
 		if (m <= 0 || n <= 0 || m >=map->width || n >=this->map->height)
 			return 1;
 		if (this->map->grid[m][n])
@@ -347,6 +347,7 @@ bool Astar :: goalReached (Node *n)
 	}
 	return 0;
 };
+
 Node *Astar :: makeChildrenNodes(Node *parent)
 {
 	QPointF P; 
@@ -442,11 +443,11 @@ Node *Astar :: makeChildrenNodes(Node *parent)
 				if (discrete_angle < end_angle)
 					discrete_angle = end_angle;
 			}
-//			if (inObstacle(temp->children[i]->location,discrete_angle))
-//			{
-//				collides= true;
-//				break;
-//			}
+			if (inObstacle(temp->children[i]->location,discrete_angle))
+			{
+				collides= true;
+				break;
+			}
 		}
 		if (!collides) // if after discretization the child still doens't collide then add it
 		{

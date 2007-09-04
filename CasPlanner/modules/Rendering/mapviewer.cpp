@@ -217,6 +217,7 @@ void MapViewer::renderSearchTree()
 	    glColor3f(1,0,0);
 		while(temp)
 		{
+			glColor3f(1,0,0);
 			for(int j=0;j<temp->children.size();j++)
 			{
 				//qDebug("J is:%d",j); fflush(stdout);
@@ -318,7 +319,7 @@ void MapViewer::renderRobot()
 			glVertex2f(playGround->robotPlatforms[i]->robot->local_edge_points[m].x(),playGround->robotPlatforms[i]->robot->local_edge_points[m].y());
 		}
 		glEnd();
-        glColor4f(0,0,0,1);
+        glColor4f(1,1,1,1);
         QFont font40; font40.setPointSize(10);
 	    renderText(1.6,0,0, qPrintable(playGround->robotPlatforms[i]->robot->robotName),font40);
 	    glBegin(GL_LINE_LOOP);
@@ -333,6 +334,12 @@ void MapViewer::renderRobot()
 		    glVertex3f(0,0,0);
 		    glVertex3f(1.5,0,0);
 	    glEnd();
+
+		glColor4f(0,1,0,1);
+		for (int k=0;k<playGround->robotPlatforms[i]->robot->check_points.size();k++)
+		{
+			drawCircle(playGround->robotPlatforms[i]->robot->check_points[k],playGround->robotPlatforms[i]->robot->expansionRadius);
+		}
 
 	    glPopMatrix();
 	}
@@ -499,13 +506,24 @@ void MapViewer::displayGrid()
     glPopMatrix();	
 }
 
-void drawCircle(float radius)
+void MapViewer::drawCircle(float radius)
 {
-   glBegin(GL_LINE_LOOP);
+   glBegin(GL_POLYGON);
 	   for (int i=0; i < 360; i++)
 	   {
 	      float degInRad = DTOR(i);
 	      glVertex2f(cos(degInRad)*radius,sin(degInRad)*radius);
+	   }
+   glEnd();
+}
+
+void MapViewer::drawCircle(QPointF center,float radius)
+{
+   glBegin(GL_POLYGON);
+	   for (int i=0; i < 360; i++)
+	   {
+	      float degInRad = DTOR(i);
+	      glVertex2f(cos(degInRad)*radius+center.x(),sin(degInRad)*radius+center.y());
 	   }
    glEnd();
 }
@@ -804,8 +822,8 @@ void MapViewer::paintGL()
 	    renderSpatialStates();
 //	    renderObservation();
 //	    renderAction();
-//	  	renderSearchTree();
-//		renderExpandedTree();	
+	  	renderSearchTree();
+		renderExpandedTree();	
 		if(!mainMapBuilt)
 		{
 			loadTexture();
