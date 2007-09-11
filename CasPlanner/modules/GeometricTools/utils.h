@@ -391,22 +391,22 @@ public :
 
 inline double anglediff(double alfa, double beta) 
 {
-	double diff;
-  	diff = beta - alfa;
-  	if (diff > M_PI)
-  	{
-    	diff -= 2 * M_PI;
-  	}
-  	else if (diff < -M_PI) 
-  	{
-    	diff += 2 * M_PI;
-  	}
 //	double diff;
-//	if( alfa < 0 ) alfa+= 2*M_PI; 	if( alfa > 2*M_PI) alfa-= 2*M_PI;
-//	if( beta < 0 ) beta+= 2*M_PI;	if( beta > 2*M_PI) beta-= 2*M_PI;		
-//	diff = alfa - beta;
-//	if ( diff >  M_PI) diff=( 2*M_PI  - diff);
-//	if ( diff < -M_PI) diff=(-2*M_PI - diff);
+//  	diff = beta - alfa;
+//  	if (diff > M_PI)
+//  	{
+//    	diff -= 2 * M_PI;
+//  	}
+//  	else if (diff < -M_PI) 
+//  	{
+//    	diff += 2 * M_PI;
+//  	}	
+	double diff;
+	if( alfa < 0 ) alfa+= 2*M_PI; 	if( alfa > 2*M_PI) alfa-= 2*M_PI;
+	if( beta < 0 ) beta+= 2*M_PI;	if( beta > 2*M_PI) beta-= 2*M_PI;		
+	diff = alfa - beta;
+	if ( diff >  M_PI) diff=( 2*M_PI  - diff);
+	if ( diff < -M_PI) diff=(-2*M_PI - diff);
 	return Abs(diff);
 };
 

@@ -246,7 +246,7 @@ void MapViewer::renderExpandedTree()
 		QPointF child;
 		tree =  playGround->robotPlatforms[i]->planningManager->pathPlanner->tree;
 	    glPushMatrix();
-	    glColor3f(1,0,0);
+	    glColor3f(0,1,0);
 		for(unsigned int k=0;k<tree.size();k++)
 		{
 			for(int j=0;j<tree[k].children.size();j++)
@@ -820,8 +820,8 @@ void MapViewer::paintGL()
 //	    renderLaser();    
 	    renderPaths();    
 	    renderSpatialStates();
-//	    renderObservation();
-//	    renderAction();
+	    renderObservation();
+	    renderAction();
 	  	renderSearchTree();
 		renderExpandedTree();	
 		if(!mainMapBuilt)
@@ -918,6 +918,7 @@ void MapViewer::setShowPatchBorders(int state)
 }
 void MapViewer::mouseDoubleClickEvent(QMouseEvent *me)
 {
+	updateMap(playGround->robotPlatforms[0]->planningManager->pathPlanner->map);	
 	QPointF p(me->x(),me->y());
 	//qDebug("Mouse Double click x: %f y: %f",p.x(),p.y());
     p = getOGLPos(p.x(),p.y());

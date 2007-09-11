@@ -317,16 +317,19 @@ double Astar::hCost(Node *n)
 	//h = 0;
 	if (n->parent != NULL) // Adding the Angle cost, we have to uniform the angle representation to the +ve rep or we well get a non sense result
 	{
-		angle_cost = anglediff(n->pose.phi,n->parent->pose.phi); // in radians
+		double a,b;
+		a = n->pose.phi;
+		b = n->parent->pose.phi;
+		angle_cost = anglediff(a,b); // in radians
 		delta_d = Dist(n->pose.p,n->parent->pose.p);
 	}
 	obstacle_penalty = n->nearest_obstacle;
 	if(n->direction == BACKWARD)
-		reverse_penalty = delta_d;
-	else
-		reverse_penalty = 0;
+		reverse_penalty = delta_d*3.0f;
+	
 	// 0.555 is the AXLE Length 
-	return ( h*(1 + reverse_penalty ) + 0.555 * angle_cost + obstacle_penalty*delta_d);
+//	return ( h*(1 + reverse_penalty ) + 0.555 * angle_cost + obstacle_penalty*delta_d);
+	return ( 1 + reverse_penalty )*( h + delta_d + 0.555 * angle_cost + obstacle_penalty*delta_d );
 };
 
 bool Astar :: goalReached (Node *n) 
@@ -381,6 +384,14 @@ Node *Astar :: makeChildrenNodes(Node *parent)
 	//qDebug("WHAT??? %d x=%f y=%f",temp->children.size(),P.x(),P.y());
 	for (int i=0;i<temp->children.size();i++) 
 	{
+		/* 
+		 * Check what what as the Robot's direction of motion and see
+		 * if we it's easier to go forward or backwards to the child
+		 */
+		if (parent->direction == FORWARD)
+			robot_angle = parent->pose.phi;
+		else
+			robot_angle = parent->pose.phi + M_PI;		
 		// What will be our orientation when we go to this child node ?
 		angle = ATAN2(temp->children[i]->location,P);
 		// How much it differs from our current orientations ?
@@ -397,17 +408,12 @@ Node *Astar :: makeChildrenNodes(Node *parent)
 		}
 		collides = FALSE;
 		/* Discreatize the turning space and check for collison
-		 * 1- Angle stored in the node is the direction of the PATH
+		 * 1- Angle stored in the node is the direction of the PATH (NOT THE ROBOT)
 		 * 2- If we were moving Forward then the Robot direction is the same as the Path
 		 * 3- If we were moving BackWard then the Robot direction is Path + M_PI
 		 * 4- Determine what will the Robot orientation will be at this step
 		 * 5- Check for collision detection with a certain resolution
 		 */
-
-		if (parent->direction == FORWARD)
-			robot_angle = parent->pose.phi;
-		else
-			robot_angle = parent->pose.phi + M_PI;
 		if (direction == FORWARD)
 			child_angle = angle;
 		else
@@ -427,8 +433,14 @@ Node *Astar :: makeChildrenNodes(Node *parent)
 		}
     	discrete_angle =  start_angle;
 		//cout<<"\n Start is"<<RTOD(start_angle)<<" End angle="<<RTOD(end_angle);
+//		angle_difference = anglediff(start_angle,end_angle);
 		for (int s=0 ; s <= ceil(angle_difference/angle_resolution); s++)
 		{
+			if (inObstacle(temp->children[i]->location,discrete_angle))
+			{
+				collides= true;
+				break;
+			}
 			if(Abs(start_angle - end_angle) >= DTOR(180))
 			{
 				discrete_angle += angle_resolution;
@@ -442,11 +454,6 @@ Node *Astar :: makeChildrenNodes(Node *parent)
 				discrete_angle -= angle_resolution;
 				if (discrete_angle < end_angle)
 					discrete_angle = end_angle;
-			}
-			if (inObstacle(temp->children[i]->location,discrete_angle))
-			{
-				collides= true;
-				break;
 			}
 		}
 		if (!collides) // if after discretization the child still doens't collide then add it

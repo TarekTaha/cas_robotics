@@ -8,11 +8,17 @@ Controller::~Controller()
 {
 }
 
+double Controller::deltaFunctionPrime(double y1, double v)
+{	
+//	const double thetaA = M_PI/4.0f;
+//	return (-cos(v)*thetaA*tanh(y1) -sin(v)*thetaA*(1-tanh(y1)*tanh(y1)));
+	return 0;
+}
+
 double Controller::deltaFunction(double y1,double v)
 {
 	const double thetaA = M_PI/4.0f;
 	return -sin(v)*thetaA*tanh(y1);
-	       
 }
 
 /*
@@ -30,8 +36,10 @@ ControlAction Controller::getAction(double angle_current,double angle_ref,int di
 	double orientation_error = angle_current - angle_ref;
 	if ( orientation_error >  M_PI) orientation_error= (-2*M_PI + orientation_error);
 	if ( orientation_error < -M_PI) orientation_error= ( 2*M_PI + orientation_error);	
+
 	cntrl.linear_velocity  = v * cos(orientation_error) + k1*s1;
-	cntrl.angular_velocity = 0 -lambda*y1*v*(sin(orientation_error) - sin(deltaFunction(y1,v)))/(orientation_error - deltaFunction(y1,v)) - k2*(orientation_error - deltaFunction(y1,v));
+	cntrl.angular_velocity = deltaFunctionPrime(y1,v) -lambda*y1*v*(sin(orientation_error) - sin(deltaFunction(y1,v)))/(orientation_error - deltaFunction(y1,v)) - k2*(orientation_error - deltaFunction(y1,v));
+//	qDebug("\nControl Action Linear:%f Angular:%f Theta Error=%f",cntrl.linear_velocity,cntrl.angular_velocity,RTOD(orientation_error));fflush(stdout);	
 	return cntrl;
 }
 
@@ -51,10 +59,10 @@ ControlAction Controller::getAction(double angle_current,double angle_ref,double
 	cntrl.angular_velocity = (-k_dist*speed*displacement - k_theta*speed*orientation_error);
 	if (Abs(orientation_error)>DTOR(15))
 	{
-		cntrl.linear_velocity  = 0;
-		cntrl.angular_velocity *= 2;
+//		cntrl.linear_velocity  = 0;
+		cntrl.angular_velocity *= 4;
 	}
-	else
+//	else
 		cntrl.linear_velocity = speed;
 	//qDebug("Ori-Err=[%.3f] Dist-Err=[%.3f] Wdem=[%.3f]",RTOD(orientation_error),displacement,cntrl.angular_velocity);
 	return cntrl;

@@ -378,7 +378,7 @@ int CommManager::start()
  			player->quit();
  			usleep(100000);
  		}
-    	player->start();	  	
+    	player->start(QThread::HighestPriority);	  	
     	connected = true;
   	}
 //    qDebug("-> Communication Manager Started."); fflush(stdout);

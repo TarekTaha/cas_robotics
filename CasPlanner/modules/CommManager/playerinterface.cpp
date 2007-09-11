@@ -25,6 +25,12 @@ PlayerInterface::PlayerInterface(QString host, int port):
 	speed(0),
 	turnRate(0)
 {
+	connect(this,SIGNAL(terminated()),this,SLOT(terminateMissions()));
+}
+
+void PlayerInterface::terminateMissions()
+{
+	qDebug("\n\nTERMINTED!!!!\n\n"); fflush(stdout);
 }
 
 PlayerInterface::~PlayerInterface()

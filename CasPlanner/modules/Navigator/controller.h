@@ -17,6 +17,7 @@ class Controller: public QThread
 		ControlAction getAction(double angle_current,double angle_ref,double displacement,int direction,double speed);
 		ControlAction getAction(double angle_current,double angle_ref,int direction,double v,double y1,double s1);
 		double deltaFunction(double y1,double v);
+		double deltaFunctionPrime(double y1, double v);
 		Controller();
 		~Controller();	
 };
