@@ -357,6 +357,9 @@ WheelchairDriver::WheelchairDriver(ConfigFile* cf, int section)  : Driver(cf, se
 	this->PoseTheta=	cf->ReadFloat(section,"geom_pose_theta",0);
 	debug = 			cf->ReadInt(section, "debug",0);
 	log =   			cf->ReadInt(section, "log",0);
+	this->posdata.pos.px = 0;
+	this->posdata.pos.py = 0;
+	this->posdata.pos.pa = 0;	
 	// Create an instance of the Wheelchair and initialize it
 	wheelChair = new WheelChair(cf,section);
 	return;
@@ -371,8 +374,8 @@ int WheelchairDriver::Setup()
 		exit(1);
 	}
 	stall = false;
-	last_ltics=0;
-	last_rtics=0;
+	last_ltics = wheelChair->getLeftTicks();  
+	last_rtics = wheelChair->getRightTicks();
 	gettimeofday(&lasttime,NULL);
 	gettimeofday(&last_position_update,NULL);
 	this->posdata.pos.px = this->posdata.pos.py = this->posdata.pos.pa=0;
@@ -581,8 +584,8 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 			    geom.pose.px = 0.3;
 			    geom.pose.py = 0.0;
 			    geom.pose.pa = 0.0;
-			    geom.size.sl = 1.2;
-			    geom.size.sw = 0.65;
+			    geom.size.sl = 0.9;
+			    geom.size.sw = 0.7;
 			    this->Publish(this->position_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK,PLAYER_POSITION2D_REQ_GET_GEOM,
 			    			  (void*)&geom, sizeof(geom), NULL);
 			    return(0);
