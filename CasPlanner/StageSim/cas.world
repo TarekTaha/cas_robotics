@@ -100,7 +100,7 @@ wheelchair
    pose [13.2 0.0 180]
    sick_laser
 	(
-		pose [0.030 0.000 0.000 ]
+		pose [0.30 0.000 0.000 ]
 	)
 )
 

@@ -392,20 +392,21 @@ Node * Navigator::closestPathSeg(QPointF location,Node * all_path)
 	{
 		Line l(all_path->pose.p,all_path->next->pose.p);
 		dist = Dist2Seg(l,location);
-		if(dist < shortest)
+//		qDebug("\nDist is %f\n",dist); fflush(stdout);
+		if(dist <= shortest)
 		{
 			shortest = dist;
 			nearest = all_path;
 		}
 		all_path = all_path->next;
 	}
-	if (shortest <= 0.02)
-	{
-		if(nearest->next)
-			if(nearest->next->next)
-				nearest = nearest->next;
-	}
-//	qDebug("No not here"); fflush(stdout);	
+//	if (shortest <= 0.02)
+//	{
+//		if(nearest->next)
+//			if(nearest->next->next)
+//				nearest = nearest->next;
+//	}
+//	qDebug("\nShortest is %f\n",shortest); fflush(stdout);	
 	return nearest;
 }
 
@@ -622,7 +623,16 @@ void Navigator::run()
 		//first = ClosestPathSeg(EstimatedPos.p,path2Follow);
 		//qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);		
 //		printf("\n Debug Location 3"); fflush(stdout);
-		first = closestPathSeg(EstimatedPos.p,global_path);
+
+		/* If we chose to follow a virtual point on the path then calculate that point
+		 * It will not be used most of the time, but it adds accuracy in control for
+		 * long line paths.
+		 */
+		//qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",speed,EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
+		tracking_point.setX(EstimatedPos.p.x() + tracking_dist*cos(EstimatedPos.phi) - 0*sin(EstimatedPos.phi));
+		tracking_point.setY(EstimatedPos.p.y() + tracking_dist*sin(EstimatedPos.phi) + 0*cos(EstimatedPos.phi)); 
+
+		first = closestPathSeg(tracking_point,global_path);
 		if(!first)
 		{
 			qDebug("Path Doesn't contain any segment to follow !!!");
@@ -659,14 +669,6 @@ void Navigator::run()
 		SegmentEnd.setX(ni.x());  SegmentEnd.setY(ni.y());	
 		direction = -1;
 		angle = atan2(SegmentEnd.y() - SegmentStart.y(),SegmentEnd.x() - SegmentStart.x());
-//		printf("\n Debug Location 4"); fflush(stdout);
-		/* If we chose to follow a virtual point on the path then calculate that point
-		 * It will not be used most of the time, but it adds accuracy in control for
-		 * long line paths.
-		 */
-		//qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",speed,EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
-		tracking_point.setX(EstimatedPos.p.x() + tracking_dist*cos(EstimatedPos.phi) - 0*sin(EstimatedPos.phi));
-		tracking_point.setY(EstimatedPos.p.y() + tracking_dist*sin(EstimatedPos.phi) + 0*cos(EstimatedPos.phi)); 
 
 		// Distance to the path Segment
 		distance = Dist(SegmentEnd,tracking_point);
@@ -674,8 +676,9 @@ void Navigator::run()
 //		displacement = Dist2Seg(l,tracking_point);
 		displacement =  distance;
 		y1 = Dist2Seg(l,tracking_point);
-		s1 = (distance*distance- y1*y1);
-//		printf("\n Debug Location 5"); fflush(stdout);
+		assert (distance < y1);
+		s1 = sqrt(distance*distance- y1*y1);
+//		printf("\n y1=%f s1=%f",y1,s1); fflush(stdout);
 		//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
 		//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
 		/* If we are too close to obstacles then let the local planner takes control
@@ -864,7 +867,6 @@ void Navigator::run()
 //					// Linear Controller 
 //					cntrl = getAction(EstimatedPos.phi,angle,displacement,first->direction,linear_velocity);
 					cntrl = getAction(EstimatedPos.phi,angle,first->direction,linear_velocity,y1,s1);
-					qDebug("Control Action Linear:%f Angular:%f",first->direction*cntrl.linear_velocity,cntrl.angular_velocity);fflush(stdout);					
 					/* Angular Velocity Thrusholded, just trying not to
 					 * exceed the accepted limits. Or setting up a safe 
 					 * turn speed.
@@ -876,13 +878,13 @@ void Navigator::run()
 //					if(log)
 //						fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),currentPose.p.x(), currentPose.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.secElapsed(),last_time);			
 					//Normal Linear Follower
-					qDebug("Speed is:%f TurnRate is:%f",first->direction*cntrl.linear_velocity,cntrl.angular_velocity); fflush(stdout);					
+//					qDebug("\nSpeed is:%f TurnRate is:%f",first->direction*cntrl.linear_velocity,cntrl.angular_velocity); fflush(stdout);					
 					robotManager->commManager->setSpeed(first->direction*cntrl.linear_velocity);
 					robotManager->commManager->setTurnRate(cntrl.angular_velocity);							
 					break;
 				case VFH:
 					// Vector Field Histogram
-					qDebug("Sending to VFH goto X:%f Y:%f Phi%f",goal.p.x(),goal.p.y(),goal.phi);
+					qDebug("\nSending to VFH goto X:%f Y:%f Phi%f",goal.p.x(),goal.p.y(),goal.phi);
 					robotManager->commManager->vfhGoto(wayPoint);	
 					break;		
 				default:

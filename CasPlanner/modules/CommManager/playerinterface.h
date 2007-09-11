@@ -110,6 +110,8 @@ Q_OBJECT
 		int  getLocalizerType();        
         int  getJoyStickGlobalDir();
         int  getJoyStickDir();
+    public slots:
+     	void terminateMissions();
     signals:
         void newData(); 
         void addMsg(int,int,QString);

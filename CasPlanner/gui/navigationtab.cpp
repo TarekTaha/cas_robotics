@@ -219,8 +219,20 @@ void NavControlPanel::pathFollow()
 	}
 	if(!currRobot->commManager->connected)
 	{
-		qDebug("\t NavTab: Your not Connected to the Robot, Connect First");
-		return;		
+		QMessageBox msgBox(QMessageBox::Warning,QString("Warning"),QString("Your not Connected to the Robot, do you want me to connect?"),QMessageBox::Ok|QMessageBox::Cancel,this,Qt::Dialog);
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		switch (msgBox.exec()) 
+		{
+		case QMessageBox::Yes:
+			currRobot->startComms();
+		    break;
+		case QMessageBox::No:
+		    return;
+		   break;
+		default:
+		    return;
+		    break;
+		}			
 	}
 	if(currRobot->notFollowing)
 	{

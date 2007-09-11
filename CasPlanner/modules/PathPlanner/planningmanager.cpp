@@ -193,6 +193,8 @@ void PlanningManager::generateSpace()
 	{
 		qDebug("Loading Space From file ...");
 		pathPlanner->readSpaceFromFile(filename);
+		if(expObstEnabled)
+			pathPlanner->expandObstacles();
 		if(connNodesEnabled)
 			pathPlanner->connectNodes();	
 		qDebug("File loading took:%f sec",timer.elapsed()/double(1000.00));

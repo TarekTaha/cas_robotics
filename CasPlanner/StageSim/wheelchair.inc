@@ -2,7 +2,7 @@
 define wheelchair position
 (
   # actual size
-  size    [1.2 0.6]
+  size    [0.9 0.6]
   origin  [0.3 0 0] # the wheelchairs's center of rotation is offset from its center of area / I considered it to be 30 cm from the mid Axes
   #origin   [0 0 0]
   velocity [0 0 0]    # Initial Robot Velocity
@@ -26,10 +26,10 @@ define wheelchair position
   #body shape
   polygons 1
   polygon[0].points 4
-  polygon[0].point[0] [ 0.8 -0.3 ]
+  polygon[0].point[0] [ 0.5 -0.3 ]
   polygon[0].point[1] [-0.4 -0.3 ]
   polygon[0].point[2] [-0.4  0.3 ]
-  polygon[0].point[3] [ 0.8  0.3 ]
+  polygon[0].point[3] [ 0.5  0.3 ]
 
   # uncomment this line if you want to model real pioneers with SICK
   # lasers, where the laser is taller than the robot

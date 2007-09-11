@@ -40,7 +40,7 @@ void Robot::setCheckPoints(double obst_r)
 	 * for more information
 	 */ 
 	narrowestPathDist = 21*0.047;
-	safetyTolerance=0;
+	safetyTolerance = 0.05;
 	if(narrowestPathDist < 2*robotWidth)
 	{
 		expansionRadius = (narrowestPathDist - safetyTolerance)/2.0f;
@@ -73,14 +73,14 @@ void Robot::setCheckPoints(double obst_r)
 	// Create a Matrix of the points to check for collision detection
 //	internal_radius = this->obstacleRadius/sqrt(2);
 
-	points_per_height = (int)(ceil(l/(double)(2*expansionRadius)));
+	points_per_height = 2;//(int)(ceil(l/(double)(2*expansionRadius)));
 	points_per_width  = (int)(ceil(w/(double)(2*expansionRadius)));
 	n = points_per_height*points_per_width;
 	cout<<"\nPer H ="<<points_per_height<<" Per W="<<points_per_width<<" Total ="<<n;
 	cout<<"\n Obstacle Radius="<<expansionRadius; fflush(stdout);
 
 	// The location of the current edges at each NODE
-	i = startx + sqrt(expansionRadius*expansionRadius - pow(w/2.0f,2));
+	i = startx + sqrt(expansionRadius*expansionRadius - pow(w/2.0f,2) - safetyTolerance);
 	for(int r =0; r < points_per_height ; r++ )
 	{
 		j=(starty + expansionRadius);
@@ -105,7 +105,7 @@ void Robot::setCheckPoints(double obst_r)
 		{
 			// Alow overlap in this case, this is the last center
 			i = (l + startx - expansionRadius);
-			i = l + startx - sqrt(expansionRadius*expansionRadius - pow(w/2.0f,2));
+			i = l + startx - sqrt(expansionRadius*expansionRadius - pow(w/2.0f,2) - safetyTolerance);
 		}
 		else
 			i += (2*expansionRadius);
