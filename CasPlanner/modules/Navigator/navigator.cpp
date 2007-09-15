@@ -456,13 +456,10 @@ bool Navigator::inLaserSpace(LaserScan laserScan,Pose robotLocation,QPointF wayP
 	{
 		laserScan.points[i] = Trans2Global(laserScan.points[i],laserScan.laserPose);
 		ang = ATAN2(laserScan.points[i],laserScan.laserPose.p);
-		if(RTOD(abs(anglediff(angle,ang))) < 0.5)
+		if(RTOD(fabs(anglediffs(angle,ang))) <= 0.5f)
 		{
 			if(Dist(laserScan.laserPose.p,laserScan.points[i]) < Dist(laserScan.laserPose.p,wayPoint))
-			{
-//				break;
 				return false;
-			}
 		}
 	}
 	return true;
@@ -473,28 +470,39 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
 	Node *temp;
 	bool retval = false;
 	Pose robotLocation = robotManager->robot->robotLocation;
-	double angle=0;
+	double angleToWayPoint,prev_angle=0,angle=0, longestDist=0.2,d,maxAllowedTurn=60;
 	temp = closestPathNode(robotLocation.p,global_path);
 	temp = global_path;
- 	while(temp && (Dist(robotLocation.p,temp->pose.p) < traversable_dist))
+ 	while(temp)
  	{
- 		if(temp->next)
-			angle = ATAN2(temp->next->pose.p,temp->pose.p); 		
- 		if (inLaserSpace(laserScan,robotLocation,temp->pose.p) && (Dist(robotLocation.p,temp->pose.p) > 0.2) )
+		prev_angle = angle;
+		if(temp->next)
+	 		angle = ATAN2(temp->next->pose.p,temp->pose.p);
+	 	else
+	 		angle = prev_angle;
+ 		d = Dist(robotLocation.p,temp->pose.p);
+ 		angleToWayPoint = ATAN2(temp->pose.p,robotLocation.p);
+ 		if( d > traversable_dist || d < longestDist || anglediff(angleToWayPoint,prev_angle)>DTOR(120))
  		{
+ 			temp= temp->next;
+ 			continue;
+ 		}
+ 		if (inLaserSpace(laserScan,robotLocation,temp->pose.p))
+ 		{
+ 			/* 
+ 			 * if we are turning to much starting from this segment
+ 			 * then take the last acceptable goal as the new waypoint.
+ 			 */
+ 			if(fabs(anglediffs(angle,prev_angle)) > DTOR(maxAllowedTurn))
+ 				break;
+			d= longestDist;
  			goal.p = temp->pose.p;
- 			goal.phi = angle;
+ 			goal.phi = prev_angle;
  			retval = true;
  		}
- 		// if this is the last node then take it anyways
- 		else if((Dist(robotLocation.p,temp->pose.p) < 0.2) && !temp->next )
- 		{
- 			goal.p = temp->pose.p;
- 			goal.phi = angle; 			
- 			retval = true; 			
- 		}
- 		temp= temp->next;
+ 		 temp= temp->next;
  	}
+// 	printf("\n longest Visible waypoint Along the Path=%f",longestDist);
  	return retval;
 }
 
@@ -534,17 +542,25 @@ void Navigator::run()
 	//Set our Initial Location Estimation in case AMCL is used
 	if(robotManager->commManager->getLocalizerType() == AMCL)
 	{
-		Pose initial_pos;
-		initial_pos.p.setX(global_path->pose.p.x());
-		initial_pos.p.setY(global_path->pose.p.y());	
-		initial_pos.phi = global_path->pose.phi;			
-		robotManager->commManager->setLocation(initial_pos);
-		sleep(1);
-		while(!robotManager->commManager->getLocalized())
+		if(!robotManager->commManager->getLocalized())
 		{
-			loc = robotManager->commManager->getLocation();
-			qDebug("NO Accurate Estimation yet, best current is: x:%f y:%f phi:%f",loc.p.x(),loc.p.y(),RTOD(loc.phi));
-			usleep(300000);
+			Pose initial_pos;
+			initial_pos.p.setX(global_path->pose.p.x());
+			initial_pos.p.setY(global_path->pose.p.y());	
+			initial_pos.phi = global_path->pose.phi;
+			robotManager->commManager->setLocation(initial_pos);
+			sleep(1);
+			/*
+			 * Wait until it localizes accurately (It doesn't work all the time)!!!
+			 * and you might have to manually provide an accurate estimate to get
+			 * out of this loop.
+			 */
+			while(!robotManager->commManager->getLocalized())
+			{
+				loc = robotManager->commManager->getLocation();
+				qDebug("NO Accurate Estimation yet, best current is: x:%f y:%f phi:%f",loc.p.x(),loc.p.y(),RTOD(loc.phi));
+				usleep(300000);
+			}
 		}
 	}
 	/**********************         Start by the Global Path     ************************/
@@ -676,8 +692,8 @@ void Navigator::run()
 //		displacement = Dist2Seg(l,tracking_point);
 		displacement =  distance;
 		y1 = Dist2Seg(l,tracking_point);
-		assert (distance < y1);
-		s1 = sqrt(distance*distance- y1*y1);
+//		assert (distance > y1);
+//		s1 = sqrt(distance*distance- y1*y1);
 //		printf("\n y1=%f s1=%f",y1,s1); fflush(stdout);
 		//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
 		//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
@@ -817,8 +833,9 @@ void Navigator::run()
 		 * simple linear control. It's accurate enough for traversing 
 		 * the generated paths.
 		 */
-		Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
+//		Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
 //		Pose goal;
+//		laserScan = robotManager->commManager->getLaserScan();
 //		if(!getGoal(laserScan,goal))
 //		{
 //			robotManager->commManager->setSpeed(0);
@@ -831,11 +848,12 @@ void Navigator::run()
 //		}
 //		else
 //		{
-			wayPoint = goal;
+//			wayPoint = goal;
 //		}
 //		emit setWayPoint(&goal);
 //		printf("\n Debug Location 6"); fflush(stdout);
 		QTime ff_time;
+		Pose goal;
 		if(!pause)
 		{
 			switch(obstAvoidAlgo)		 
@@ -883,8 +901,17 @@ void Navigator::run()
 					robotManager->commManager->setTurnRate(cntrl.angular_velocity);							
 					break;
 				case VFH:
+
+					laserScan = robotManager->commManager->getLaserScan();
+					if(!getGoal(laserScan,goal))
+					{
+						goal.p.setX(SegmentEnd.x());
+						goal.p.setY(SegmentEnd.y());
+						goal.phi= angle;
+					}
+					wayPoint = goal;	
 					// Vector Field Histogram
-					qDebug("\nSending to VFH goto X:%f Y:%f Phi%f",goal.p.x(),goal.p.y(),goal.phi);
+					qDebug("\nSending to VFH goto X:%f Y:%f Phi:%f",goal.p.x(),goal.p.y(),RTOD(goal.phi));
 					robotManager->commManager->vfhGoto(wayPoint);	
 					break;		
 				default:
@@ -902,7 +929,7 @@ void Navigator::run()
 	robotManager->commManager->setSpeed(0);
 	robotManager->commManager->setTurnRate(0);
 	//local_planner->pathPlanner->freeResources();
-	qDebug("Thread Loop Terminated Normally !!!");
+	qDebug("\nNavigator: Thread Loop Terminated Normally !!!");
 	this->quit();
 	return;
 }

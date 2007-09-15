@@ -50,7 +50,9 @@ private:
 	PlayGround * playGround;
 	RobotManager * robotManager;
 	QReadWriteLock dataLock;
-	Node * path;	 
+	Node * path;
+	FILE *file;
+	FILE *odom;
 };
 
 #endif /*INTENTIONRECOGNIZER_H_*/

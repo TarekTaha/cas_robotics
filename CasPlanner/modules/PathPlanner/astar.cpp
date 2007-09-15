@@ -320,16 +320,16 @@ double Astar::hCost(Node *n)
 		double a,b;
 		a = n->pose.phi;
 		b = n->parent->pose.phi;
-		angle_cost = anglediff(a,b); // in radians
+		angle_cost = fabs(anglediffs(a,b)); // in radians
 		delta_d = Dist(n->pose.p,n->parent->pose.p);
 	}
 	obstacle_penalty = n->nearest_obstacle;
 	if(n->direction == BACKWARD)
-		reverse_penalty = delta_d*3.0f;
+		reverse_penalty = delta_d;
 	
 	// 0.555 is the AXLE Length 
 //	return ( h*(1 + reverse_penalty ) + 0.555 * angle_cost + obstacle_penalty*delta_d);
-	return ( 1 + reverse_penalty )*( h + delta_d + 0.555 * angle_cost + obstacle_penalty*delta_d );
+	return ( 1 + reverse_penalty )*( h + delta_d + 0.555 * angle_cost + 0.555*angle_cost*obstacle_penalty*delta_d );
 };
 
 bool Astar :: goalReached (Node *n) 
@@ -397,7 +397,7 @@ Node *Astar :: makeChildrenNodes(Node *parent)
 		// How much it differs from our current orientations ?
 		angle_difference = anglediff(angle,parent->pose.phi);
 		// Are we gonna turn too much ? if yes then why not go backwards ?
-		if (angle_difference > DTOR(90))
+		if (angle_difference > DTOR(120))
 		{
 			//cout<<"\n Angle difference ="<<RTOD(angle_difference)<<" parent angle="<<RTOD(parent->angle)<<" destination angle="<<RTOD(angle);
 			direction = parent->direction * -1;

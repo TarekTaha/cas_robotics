@@ -141,9 +141,9 @@ void MapViewer::renderPaths()
 			    glShadeModel(GL_FLAT);
 			    glBegin(GL_TRIANGLE_FAN);
 					glColor4f(1,0,0,1);
-				    glVertex3f(-0.2,0.15,0);
-				    glVertex3f(0.1,0,0);
-				    glVertex3f(-0.2,-0.15,0);
+				    glVertex3f(0,0.1,0);
+				    glVertex3f(0.3,0,0);
+				    glVertex3f(0,-0.1,0);
 			    glEnd();
 			glPopMatrix();
 		}
@@ -508,7 +508,7 @@ void MapViewer::displayGrid()
 
 void MapViewer::drawCircle(float radius)
 {
-   glBegin(GL_POLYGON);
+   glBegin(GL_LINES);
 	   for (int i=0; i < 360; i++)
 	   {
 	      float degInRad = DTOR(i);
@@ -519,7 +519,7 @@ void MapViewer::drawCircle(float radius)
 
 void MapViewer::drawCircle(QPointF center,float radius)
 {
-   glBegin(GL_POLYGON);
+   glBegin(GL_LINES);
 	   for (int i=0; i < 360; i++)
 	   {
 	      float degInRad = DTOR(i);
@@ -609,7 +609,6 @@ void MapViewer::renderSpatialStates()
 	if(!playGround->mapManager || !playGround->robotPlatforms[0]->intentionRecognizer||!playGround->robotPlatforms[0]->commManager)
 		return;
 	// This is not the general Case now and i might need to change it
-//	Pose l = playGround->robotPlatforms[0]->commManager->getOdomLocation();
 	Pose l = playGround->robotPlatforms[0]->commManager->getLocation();
 	for(int i=0; i < playGround->mapManager->mapSkeleton.verticies.size() ;i++)
 	{
@@ -815,15 +814,15 @@ void MapViewer::paintGL()
 	{
 		displayGrid();
 		showIndicators();
+		renderPaths();
 	    renderRobot();	    
 		setRobotsLocation();	
-//	    renderLaser();    
-	    renderPaths();    
+//	    renderLaser();      
 	    renderSpatialStates();
 	    renderObservation();
 	    renderAction();
-	  	renderSearchTree();
-		renderExpandedTree();	
+//	  	renderSearchTree();
+//		renderExpandedTree();	
 		if(!mainMapBuilt)
 		{
 			loadTexture();
@@ -918,7 +917,7 @@ void MapViewer::setShowPatchBorders(int state)
 }
 void MapViewer::mouseDoubleClickEvent(QMouseEvent *me)
 {
-	updateMap(playGround->robotPlatforms[0]->planningManager->pathPlanner->map);	
+//	updateMap(playGround->robotPlatforms[0]->planningManager->pathPlanner->map);	
 	QPointF p(me->x(),me->y());
 	//qDebug("Mouse Double click x: %f y: %f",p.x(),p.y());
     p = getOGLPos(p.x(),p.y());

@@ -63,7 +63,14 @@ void CommManager::setSpeed(double i_speed, double i_turnRate)
   		emit addMsg(0,ERROR,QString("\n3 Communication Interface Not started YET!!!"));  	
 //  		qDebug("Communication Interface Not started YET!!!");  		
 }
-
+void CommManager::setOdometry(Pose odom)
+{
+	if(player)
+  		player->setOdometry(odom);
+  	else
+  		emit addMsg(0,ERROR,QString("\n3 Communication Interface Not started YET!!!"));  	
+//  		qDebug("Communication Interface Not started YET!!!");  		
+}
 void CommManager::gotoGoal(Pose goal)
 {
 	if(player)	

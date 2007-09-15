@@ -26,7 +26,9 @@ path(NULL)
 
 IntentionRecognizer::~IntentionRecognizer()
 {
-	
+	activityLogger.logFile.close();
+	fclose(file);
+	fclose(odom);
 }
 
 void IntentionRecognizer::InitializePOMDP()
@@ -47,12 +49,9 @@ void IntentionRecognizer::navigateToWayPoint(Pose startLoc,Pose destLoc)
 	robotManager->planningManager->setStart(startLoc);
 	robotManager->planningManager->setEnd(destLoc);
 	path = robotManager->planningManager->findPath(METRIC);	
-	
-	robotManager->navigator->setPause(false);
-	
 
-		
-	robotManager->navigator->setObstAvoidAlgo(NO_AVOID);
+	robotManager->navigator->setPause(false);
+	robotManager->navigator->setObstAvoidAlgo(VFH);
 	
 	printf("\n---IR:Commanded the Navigator");fflush(stdout);
 	if(path)
@@ -72,6 +71,19 @@ void IntentionRecognizer::navigateToWayPoint(Pose startLoc,Pose destLoc)
 			robotManager->navigator->start();						
 		}
 	}
+	else
+	{
+		printf("\n---IR:Path not Found, attempting to use local navigator VFH");fflush(stdout);
+		if(robotManager->navigator->isRunning())
+		{
+			printf("\n---IR:Stopping Previous Navigator.");fflush(stdout);			
+			robotManager->navigator->StopNavigating();
+			msleep(200); // Wait until the Thread Terminates
+			robotManager->navigator->quit();
+		}
+		robotManager->navigator->start();
+		robotManager->commManager->vfhGoto(destLoc);
+	}
 }
 
 void IntentionRecognizer::followActionToNextState()
@@ -90,6 +102,7 @@ void IntentionRecognizer::followActionToNextState()
 			nextState = sp;
     	}
     }
+    fprintf(file,"%d\n",nextState);
     if(maxTrans==0)
     {
     	printf("\nIR: This action is not applicable to this state."); fflush(stdout);
@@ -165,27 +178,32 @@ bool IntentionRecognizer::currentStateIsDestination()
 
 void IntentionRecognizer::run()
 {
-//	bool startState = true;
+	file=fopen("irLog.txt","wb");
+	odom=fopen("odom.txt","wb");
+	fprintf(file,"# Values: State, Observation, Belief Dest1 ...n, Action, Next State\n");	
+	fprintf(odom,"# Values: X, Y, Theta, Spatial State \n");
 	while(runRecognition)
 	{
 		msleep(50);
 		if(!robotManager->commManager)
 		{
-//			qDebug("\t - (IR): Communication Manager Not Initialized");
+			qDebug("\t - (IR): Communication Manager Not Initialized");
 			continue;
 		}
 		if(!robotManager->commManager->connected)
 		{
-//			qDebug("\t - (IR): Your not Connected to the Robot, Connect First");
+			qDebug("\t - (IR): Your not Connected to the Robot, Connect First");
 			continue;		
 		}
 		while(!robotManager->commManager->getLocalized())
 		{
 			currentPose = robotManager->commManager->getLocation();
-			qDebug("NO Accurate Estimation yet, best current is: x:%f y:%f phi:%f",currentPose.p.x(),currentPose.p.y(),RTOD(currentPose.phi));
+			qDebug("\n---IR:NO Accurate Estimation yet, best current is: x:%f y:%f phi:%f",currentPose.p.x(),currentPose.p.y(),RTOD(currentPose.phi));
 			usleep(300000);
 		}
+		currentPose = robotManager->commManager->getLocation();
 		spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(currentPose);
+		fprintf(odom,"%.3f %.3f %.3f %d\n",currentPose.p.x(),currentPose.p.y(),currentPose.phi,spatialState);
 		observation = robotManager->commManager->getJoyStickGlobalDir();
 		if(!beliefInitialized)
 		{
@@ -195,7 +213,7 @@ void IntentionRecognizer::run()
 			 *  request the odom correctly.
 			 */
 			sleep(1);
-			currentPose = robotManager->commManager->getOdomLocation();
+			currentPose = robotManager->commManager->getLocation();
 			spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(currentPose);			
 			
 			resetBelief();
@@ -231,25 +249,30 @@ void IntentionRecognizer::run()
 		    oldSpatialState = spatialState;
 		    em->advanceToNextState(action,observation);
 		    belief_vector newB = em->currentState;
+		    
 			activityLogger.addState(spatialState,observation);
+			fprintf(file,"%d %d ",spatialState,observation);
 			
 		    QVector<double> max(numDestinations,0.0);
 		    int index=0;
 			for(unsigned int j=0; j < newB.size();j++)
 			{
 				index = (int)(j/numStates);
-				if( newB(j) && (newB(j) > max[index]) )
+				if( newB(j))//&& (newB(j) > max[index]) )
 				{
 					dataLock.lockForWrite();
-						destBelief[index] = max[index] = newB(j);
+						destBelief[index] = max[index] = (newB(j) + max[index]);
 					dataLock.unlock();
-					printf("\n Belief is now Updated to Dest:%d State %d with %f",index,j,destBelief[index]);
 				}
 			}
-
-		  	action = em->chooseAction();			
+			for(int i=0;i<numDestinations;i++)
+			{			
+				printf("\n Belief is now Updated to Dest:%d with %f",i,destBelief[i]);				
+				fprintf(file,"%.5f ",destBelief[i]);
+			}
+		  	action = em->chooseAction();
+			fprintf(file,"%d ",action);		  				
 			followActionToNextState();
-			
 		    printf("\n New Chosen Action is:%d",action);
 		}
 	}	
