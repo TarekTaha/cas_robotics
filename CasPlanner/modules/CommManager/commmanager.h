@@ -37,7 +37,8 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
         virtual void   vfhGoto(Pose);
         virtual void   setSpeed(double speed);
         virtual void   setPtz(double pan, double tilt);
-        virtual void   setTurnRate(double turnRate); 
+        virtual void   setTurnRate(double turnRate);
+        virtual void   setOdometry(Pose odom);
 	    virtual Map    provideMap(); 
 	    virtual void   provideSpeed(double &speed, double &turnRate);
 	    virtual void   provideLocation(Pose & location);

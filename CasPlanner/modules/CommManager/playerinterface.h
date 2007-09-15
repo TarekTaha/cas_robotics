@@ -102,6 +102,7 @@ Q_OBJECT
         void setSpeed(double speed);
         void setTurnRate(double turnRate); 
         void setSpeed(double speed, double turnRate); 
+		void setOdometry(Pose odom);
         void setLocation(Pose location);
         void emergencyStop();
         void emergencyRelease();
@@ -110,6 +111,7 @@ Q_OBJECT
 		int  getLocalizerType();        
         int  getJoyStickGlobalDir();
         int  getJoyStickDir();
+		Pose localizeToPosition(Pose localizerWayPoint);    
     public slots:
      	void terminateMissions();
     signals:

@@ -287,6 +287,14 @@ void PlayerInterface::setTurnRate(double i_turnRate)
     dataLock.unlock();
 }
 
+void PlayerInterface::setOdometry(Pose odom)
+{
+	if(this->drive)
+	{
+		drive->SetOdometry(odom.p.x(),odom.p.y(),odom.phi);
+	}
+}
+ 
 void PlayerInterface::gotoGoal(Pose goal)
 {
     dataLock.lockForWrite();
@@ -295,11 +303,42 @@ void PlayerInterface::gotoGoal(Pose goal)
     dataLock.unlock();
 }
 
+Pose PlayerInterface::localizeToPosition(Pose localizerWayPoint)
+{
+	Pose odomWayPoint;
+	double offset_x, offset_y, offset_a;
+  	double lx_rot, ly_rot;
+
+  	offset_a = anglediffs(this->odomLocation.phi,this->amclLocation.phi);
+  	lx_rot = this->amclLocation.p.x() * cos(offset_a) - this->amclLocation.p.y() * sin(offset_a);
+  	ly_rot = this->amclLocation.p.x() * sin(offset_a) + this->amclLocation.p.y() * cos(offset_a);
+
+  	offset_x = this->odomLocation.p.x() - lx_rot;
+  	offset_y = this->odomLocation.p.y() - ly_rot;
+
+  	odomWayPoint.p.setX(localizerWayPoint.p.x() * cos(offset_a) - localizerWayPoint.p.y() * sin(offset_a) + offset_x);
+  	odomWayPoint.p.setY(localizerWayPoint.p.x() * sin(offset_a) + localizerWayPoint.p.y() * cos(offset_a) + offset_y);
+  	odomWayPoint.phi = localizerWayPoint.phi + offset_a;
+  	return odomWayPoint;
+}
+
 void PlayerInterface::vfhGoto(Pose goal)
 {
     dataLock.lockForWrite();
 	velControl = false;
-	this->vfhGoal = goal;
+	/*
+	 * In case we are localizing Globally then the waypoint should be
+	 * translated from the global frame to the frame of the underlying
+	 * Position driver.
+	 */
+	if(this->localizerType==AMCL)
+	{
+		this->vfhGoal = localizeToPosition(goal);		
+	}
+	else
+	{
+		this->vfhGoal = goal;
+	}
     dataLock.unlock();
 }
 
@@ -388,7 +427,7 @@ Pose PlayerInterface::getLocation()
     Pose retval;
     if(localizerType == AMCL)
     	retval = amclLocation;
-   	else if(localizerType == ODOM) 
+   	else
    		retval = odomLocation;
     dataLock.unlock(); 
     return retval; 		
@@ -482,6 +521,8 @@ void PlayerInterface::connectDevices()
 		clearResources();
     }
     pc = new PlayerClient(qPrintable(playerHost),playerPort);
+    pc->SetDataMode(PLAYER_DATAMODE_PULL);
+	pc->SetReplaceRule(true,-1,-1,-1);
     /* TODO: Proper check for the successfullness of the proxy creation
      */
     if(ctrEnabled)
@@ -527,7 +568,9 @@ void PlayerInterface::connectDevices()
     else
     {
     	// no localizer so just set odom as default
+    	logMsg.append(QString("\n\t\t - Odom is Used for Localization"));
     	localizerType = ODOM;
+    	localized = true;
     }
     if(vfhEnabled)
     {
@@ -535,8 +578,8 @@ void PlayerInterface::connectDevices()
 		logMsg.append(QString("\n\t\t - Vfh Started Successfully ID:%1").arg(vfhId));	    	
     }	   
     /* This is temp until the wheelchair interface is added.*/
-//  joyStickId = 3;
-//	joyStick = new Position2dProxy(pc,joyStickId);
+    joyStickId = 3;
+	joyStick = new Position2dProxy(pc,joyStickId);
 //	speechP  = new SpeechProxy(pc,0);
 //	speechP->Say("I am ready Mate");
 	sleep(1);
@@ -562,6 +605,8 @@ void PlayerInterface::run ()
 	    	timer.restart();
 	    	// Read Only if new Data is Available
 			//pc->ReadIfWaiting();
+//			if(!pc->Peek(50))
+//				continue;
 			pc->Read();		
 	    	if(!emergencyStopped)
 	    	{
@@ -582,16 +627,13 @@ void PlayerInterface::run ()
 		        	player_pose_t ps;
 		        	if(velControl)
 		        	{
-//		        		cout<<"\n WTF SPEED"; fflush(stdout);
 			            drive->SetSpeed(speed,turnRate);
 		        	}
 		        	else
 		        	{
-//		        		cout<<"\n WTF GOTO"; fflush(stdout);
 		        		vfh->GoTo(vfhGoal.p.x(),vfhGoal.p.y(),vfhGoal.phi);	        		
 		        	}
 		            getspeed = drive->GetXSpeed();
-	//	            getturnrate = drive->GetYSpeed();
 		            getturnrate = drive->GetYawSpeed();	            
 		            ps = drive->GetPose();
 		            odomLocation.p.setX(drive->GetXPos());
