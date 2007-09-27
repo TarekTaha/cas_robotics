@@ -8,7 +8,7 @@ pomdpModel.obsCrossFeature  = 0;
 pomdpModel.destCrossFeature = 1;
 
 % define the destinations
-pomdpModel.destinations = {'s1d1','s6d2','s26d3','s30d4','s31d5','s38d6'};
+pomdpModel.destinations = {'s1d1','s6d2','s26d3','s30d4','s31d5','s38d6','s44d7'};
 pomdpModel.actions = {'North','South','East','West','Stop'};
 pomdpModel.obsStrings = {'Up','Down','Right','Left','Nothing'};
 

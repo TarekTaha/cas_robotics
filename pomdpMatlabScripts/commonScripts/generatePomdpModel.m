@@ -74,7 +74,7 @@ end
 startBelief = 1.0/pomdpModel.mapTopology.nnodes;
 fprintf(fid,'\nstart:');
 for i=1:pomdpModel.mapTopology.nnodes
-    fprintf(fid,' %f',startBelief);
+    fprintf(fid,' %.12f',startBelief);
 end
 
 % Build the Translation probabilities
@@ -112,9 +112,9 @@ for i=1:length(pomdpModel.actions)
         % Deterministic Case
         if length(find(pomdpModel.actionsUncertainty)) == 0
             if (pomdpModel.mapTopology.network(j,i)==0)
-                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %f',pomdpModel.actions{i},state,dest,state,dest,actionProb);
+                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %.8f',pomdpModel.actions{i},state,dest,state,dest,actionProb);
             else
-                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %f',pomdpModel.actions{i},state,dest,pomdpModel.mapTopology.network(j,i),dest,actionProb);
+                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %.8f',pomdpModel.actions{i},state,dest,pomdpModel.mapTopology.network(j,i),dest,actionProb);
             end
             continue;
         end
@@ -122,13 +122,13 @@ for i=1:length(pomdpModel.actions)
         for k=1:n
             % Undefined action to this state
             if (pomdpModel.mapTopology.network(j,i)==0)
-                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %f',pomdpModel.actions{i},state,dest,state,k,1/n);
+                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %.8f',pomdpModel.actions{i},state,dest,state,k,1/n);
                 continue;
             end
             if k==dest
-                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %f',pomdpModel.actions{i},state,dest,pomdpModel.mapTopology.network(j,i),k,actionProb);
+                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %.8f',pomdpModel.actions{i},state,dest,pomdpModel.mapTopology.network(j,i),k,actionProb);
             else
-                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %f',pomdpModel.actions{i},state,dest,pomdpModel.mapTopology.network(j,i),k,actionNoise);
+                fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %.8f',pomdpModel.actions{i},state,dest,pomdpModel.mapTopology.network(j,i),k,actionNoise);
             end
         end
         fprintf(fid,'\n');
@@ -158,7 +158,7 @@ for i=1:size(obsProbs,1)
     end
     for j=1:length(pomdpModel.observations)
         obsProb = obsProbs(i,j);
-        fprintf(fid,'\nO: * : s%dd%d : %s %g',state,dest,pomdpModel.observations{j},obsProb);
+        fprintf(fid,'\nO: * : s%dd%d : %s %.8f',state,dest,pomdpModel.observations{j},obsProb);
     end
     fprintf(fid,'\n');
 end
