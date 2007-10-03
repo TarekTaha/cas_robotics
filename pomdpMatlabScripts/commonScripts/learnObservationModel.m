@@ -45,7 +45,7 @@ for i=1:length(fileTemp)
       end 
   end
   if ~exist('destIndx')
-      error(sprintf('Undefined Destination !!!'));
+      error('Undefined Destination !!!');
   end
   % build the observation set from this task
   for j=1:length(t)
