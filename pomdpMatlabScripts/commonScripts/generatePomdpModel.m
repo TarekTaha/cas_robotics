@@ -88,7 +88,7 @@ for i=1:length(pomdpModel.actions)
     % Uncertainty in the final state given this action is divided
     % equally to the connected neighbouring nodes
     % actionNoise = pomdpModel.actionsUncertainty(i)/(n-1)/100;    
-    if length(find(pomdpModel.actionsUncertainty)) ~=0
+    if ~isempty(find(pomdpModel.actionsUncertainty, 1))
         actionProb = (100 - pomdpModel.actionsUncertainty(i))/100;
         actionNoise = pomdpModel.actionsUncertainty(i)/(n-1)/100;
     else
@@ -110,7 +110,7 @@ for i=1:length(pomdpModel.actions)
             dest  = floor(j/pomdpModel.numSpatialStates) + 1;
         end
         % Deterministic Case
-        if length(find(pomdpModel.actionsUncertainty)) == 0
+        if isempty(find(pomdpModel.actionsUncertainty, 1))
             if (pomdpModel.mapTopology.network(j,i)==0)
                 fprintf(fid,'\nT: %s : s%dd%d : s%dd%d %.8f',pomdpModel.actions{i},state,dest,state,dest,actionProb);
             else
@@ -164,8 +164,115 @@ for i=1:size(obsProbs,1)
 end
 
 % Build Reward Function
+% read the file and save in buffer
+
+% Get preferred routes from the training data and reward them
+file = textread(pomdpModel.obsDataFile,'%s','delimiter','\n','whitespace',' \b\t','bufsize',100000);
+k=0;
+
+%ignore comments
+for i=1:length(file)
+  comment=strfind(file{i},'#');
+  if ~isempty(comment)
+    file{i}(comment(1):end)=[];
+  end
+  if ~isempty(file{i})
+    k=k+1;
+    fileTemp{k}=file{i};
+  end
+end
+clear file;
+
+% read tasks (sequence of observations and locations)
+num=0;
+numendLocations = 0;
+for i=1:length(fileTemp)  
+  pat='(\d)+\s*(\S+)\s*';
+  [s,f,t]=regexp(fileTemp{i},pat); 
+  last = length(t);
+  % Find the destination index from the set of given destinations
+  dest = str2num(fileTemp{i}(t{last}(1,1):t{last}(1,2)));
+  indx = strfind(pomdpModel.destinations,sprintf('s%dd',dest));
+  for j=1:length(indx)
+      if ~isempty(indx{j})
+        destIndx = j;
+      end 
+  end
+  if ~exist('destIndx')
+      error('Undefined Destination !!!');
+  end
+  % build the observation set from this task
+  
+  for j=1:length(t)
+      if j==1
+          continue;
+      end
+      num = num + 1;
+      reward{num}.prevAction = fileTemp{i}(t{j-1}(2,1):t{j-1}(2,2));
+      reward{num}.obs        = fileTemp{i}(t{j}(2,1):t{j}(2,2));
+      reward{num}.start      = sprintf('s%dd%d',str2num(fileTemp{i}(t{j-1}(1,1):t{j-1}(1,2))),destIndx);
+      reward{num}.end        = sprintf('s%dd%d',str2num(fileTemp{i}(t{j}(1,1):t{j}(1,2))),destIndx);
+      reward{num}.dest       = destIndx;
+      reward{num}.reward     = 0;
+      reward{num}.visited    = 0;
+      reward{num}.totalVisited = 0;
+  end
+end
+
+% Sum the individual reward points for each state/destination pair
+s = 0;
+for i=1:length(reward)
+    if reward{i}.visited
+        continue;
+    end
+    s = s+1;
+    rewardSum{s}.reward = 0;
+    rewardSum{s}.visited = 0;    
+    for j=i:length(reward)
+        if strcmp(reward{i}.start,reward{j}.start) && strcmp(reward{i}.end,reward{j}.end)
+            rewardSum{s}.obs        = reward{i}.obs;
+            rewardSum{s}.start      = reward{i}.start;
+            rewardSum{s}.end        = reward{i}.end;        
+            rewardSum{s}.reward = rewardSum{s}.reward + 10;
+            reward{j}.visited = 1;
+        end
+    end
+end
+
+% Calculate the Reward total at each step (used for normalization later on)
+s = 0;
+for i=1:length(rewardSum)
+    if rewardSum{i}.visited
+        continue;
+    end
+    s = s+1;
+    total{s}.reward = 0;
+    for j=i:length(rewardSum)
+        if strcmp(rewardSum{i}.start,rewardSum{j}.start)
+            total{s}.reward = total{s}.reward + rewardSum{j}.reward;
+            total{s}.start = rewardSum{j}.start;
+            rewardSum{j}.visited = 1;
+        end
+    end
+end
+
+% Normalize the total reward at each step to 10 and divide it to the rest
+% of alternative routes according to frequncy.
+% Print the rewards to the file
+normalizeTo = 10;
 fprintf(fid,'\n\n# R: <action> : <start-state> : <end-state> : <observation> %%f');
 fprintf(fid,'\nR: * : * : * : * -1.0');
+
+for i=1:length(rewardSum)
+    for j=1:length(total)
+        if strcmp(rewardSum{i}.start,total{j}.start)
+            result= normalizeTo*rewardSum{i}.reward/total{j}.reward;
+            fprintf(fid,'\nR: * : %-5s : %-5s : %-8s %-2.3f ',rewardSum{i}.start,rewardSum{i}.end,rewardSum{i}.obs,result);
+            break;
+        end
+    end
+end
+
 for i=1:length(pomdpModel.destinations)
     fprintf(fid,'\nR: *    : *  : %s : * 100',pomdpModel.destinations{i});
 end
