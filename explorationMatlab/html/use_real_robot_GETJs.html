@@ -1,0 +1,154 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>get_robot_joint_state</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2007-10-03">
+      <meta name="m-file" content="use_real_robot_GETJs"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>get_robot_joint_state</h1>
+         <introduction>
+            <p><b>Description:</b>  This function is for finding out the current joint state
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Function Call</a></li>
+               <li><a href="#2">Variables</a></li>
+               <li><a href="#3">Establish Comms</a></li>
+               <li><a href="#4">Get the Jointstate and save to global Q</a></li>
+            </ul>
+         </div>
+         <h2>Function Call<a name="1"></a></h2>
+         <div>
+            <ul>
+               <li><b>Inputs:</b> Null
+               </li>
+               <li><b>Returns:</b> Null
+               </li>
+            </ul>
+         </div><pre class="codeinput"><span class="keyword">function</span> use_real_robot_GETJs()
+</pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> Q
+</pre><h2>Establish Comms<a name="3"></a></h2><pre class="codeinput">rob_h=actxserver(<span class="string">'EyeInHand.DensoCommand'</span>);
+<span class="comment">%make sure comms up are up to speed</span>
+waitcounter=0;
+</pre><h2>Get the Jointstate and save to global Q<a name="4"></a></h2><pre class="codeinput"><span class="keyword">try</span> <span class="keyword">while</span> size(rob_h.JointState,2)~=6
+        pause(0.2);
+        <span class="keyword">if</span> waitcounter&gt;25 <span class="comment">%5 secs</span>
+            error(<span class="string">'exGUI - move function: You say you are trying to use a real robot, but I cant talk to it, I need its actaul current pose - make sure it is on, in auto mode, motor is on and program is running'</span>)
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    Q=rob_h.JointState*pi/180;
+<span class="keyword">catch</span>;
+    display(<span class="string">'an error has occured when retrieving the jointstate'</span>);
+<span class="keyword">end</span>
+
+rob_h.release;
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% get_robot_joint_state
+%
+% *Description:*  This function is for finding out the current joint state
+
+%% Function Call
+%
+% * *Inputs:* Null
+% * *Returns:* Null
+
+function use_real_robot_GETJs()
+
+%% Variables
+global Q
+
+%% Establish Comms
+rob_h=actxserver('EyeInHand.DensoCommand');
+%make sure comms up are up to speed
+waitcounter=0;
+
+%% Get the Jointstate and save to global Q
+try while size(rob_h.JointState,2)~=6
+        pause(0.2);
+        if waitcounter>25 %5 secs
+            error('exGUI - move function: You say you are trying to use a real robot, but I cant talk to it, I need its actaul current pose - make sure it is on, in auto mode, motor is on and program is running')
+        end    
+    end
+    Q=rob_h.JointState*pi/180;
+catch;
+    display('an error has occured when retrieving the jointstate');
+end
+
+rob_h.release;
+
+##### SOURCE END #####
+-->
+   </body>
+</html>

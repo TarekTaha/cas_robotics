@@ -1,0 +1,52 @@
+<html>
+<head>
+<H1>Exploration Matlab Code</H1>
+<H2> &copy Gavin Paul 2007</h2>
+</head>
+<table border="1" width="100%">
+<tr><th width="15%">File (function)</th><th width="30%">Calls</th><th width="30%">Called By</th><th width="25%">Globals Used</th></tr>
+<tr><td>Classifier (No HTML file)</td>
+<td></td><td> exGUI</td><td></td></tr><tr><td><a href="GetImpLevInfo.html">GetImpLevInfo</a></td>
+<td></td><td> calknownweight calobstacleweight calunknownweight check_FF check_path_for_col exGUI getweighted_addinfo NBV NBV_beta pathplanner setupworkspace threeDMedianFilt</td><td>workspace; robot_maxreach;</td></tr><tr><td><a href="NBV.html">NBV</a></td>
+<td> GetImpLevInfo calunknownweight check_path_for_col getweighted_addinfo nbv_volume order_bestviews pathplanner streamOnto_mine_manystarts</td><td> exGUI</td><td>r; workspace; bestviews; Q; optimise;</td></tr><tr><td><a href="NBV_beta.html">NBV_beta</a></td>
+<td> GetImpLevInfo calunknownweight check_path_for_col getweighted_addinfo nbv_volume order_bestviews pathplanner</td><td> exGUI</td><td>r; workspace; bestviews; optimise; scan;</td></tr><tr><td><a href="allOff.html">allOff</a></td>
+<td></td><td> exGUI</td><td></td></tr><tr><td><a href="calc_elip.html">calc_elip</a></td>
+<td></td><td> plotdenso setuprobot</td><td></td></tr><tr><td><a href="calculate_NBV_overallweight.html">calculate_NBV_overallweight</a></td>
+<td></td><td> order_bestviews</td><td>bestviews; optimise; Q;</td></tr><tr><td><a href="calknownweight.html">calknownweight</a></td>
+<td> GetImpLevInfo</td><td> exGUI explore</td><td>workspace;</td></tr><tr><td><a href="calobstacleweight.html">calobstacleweight</a></td>
+<td> GetImpLevInfo</td><td> explore</td><td>workspace;</td></tr><tr><td><a href="calunknownweight.html">calunknownweight</a></td>
+<td> GetImpLevInfo</td><td> exGUI explore NBV NBV_beta order_bestviews</td><td>workspace;</td></tr><tr><td><a href="check_FF.html">check_FF</a></td>
+<td> GetImpLevInfo</td><td> check_path_for_col demopath pathplanner plotdenso streamOnto_mine_manystarts</td><td></td></tr><tr><td><a href="check_path_for_col.html">check_path_for_col</a></td>
+<td> GetImpLevInfo check_FF joint_softlimit_check</td><td> NBV_beta order_bestviews pathplanner</td><td>r; densoobj;</td></tr><tr><td><a href="deg2rad.html">deg2rad</a></td>
+<td></td><td> rob_object</td><td></td></tr><tr><td><a href="demopath.html">demopath</a></td>
+<td> check_FF pathplanner plotdenso</td><td> movetonewQ</td><td>r; Q; densoobj; workspace;</td></tr><tr><td><a href="dijkstra_new.html">dijkstra_new</a></td>
+<td></td><td></td><td></td></tr><tr><td><a href="dist_pt2tr.html">dist_pt2tr</a></td>
+<td></td><td> streamOnto_mine_manystarts</td><td></td></tr><tr><td><a href="doscan.html">doscan</a></td>
+<td> nbv_volume</td><td> exGUI explore</td><td>workspace; Q;</td></tr><tr><td><a href="exGUI.html">exGUI</a></td>
+<td> Classifier GetImpLevInfo NBV NBV_beta allOff calknownweight calunknownweight doscan explore getchosenview movetonewQ order_bestviews organise_data pathplanner plot_planes plotdenso remove_self_scanning setupoptimisation setuprobot setupscanner setupworkspace surface_making_simple use_real_robot_GETJs use_real_robot_SCAN</td><td></td><td>line_h; guiglobal; workspace; robot_maxreach; optimise; scan; bestviews; Q; plane; densoobj;</td></tr><tr><td><a href="explore.html">explore</a></td>
+<td> calknownweight calobstacleweight calunknownweight doscan movetonewQ organise_data use_real_robot_SCAN</td><td> exGUI</td><td>workspace; scan; bestviews; Q; robot_maxreach;</td></tr><tr><td><a href="getchosenview.html">getchosenview</a></td>
+<td></td><td> exGUI</td><td>scan;</td></tr><tr><td><a href="getweighted_addinfo.html">getweighted_addinfo</a></td>
+<td> GetImpLevInfo</td><td> NBV NBV_beta order_bestviews</td><td>workspace;</td></tr><tr><td><a href="joint_softlimit_check.html">joint_softlimit_check</a></td>
+<td></td><td> check_path_for_col</td><td></td></tr><tr><td><a href="movetonewQ.html">movetonewQ</a></td>
+<td> demopath pathplanner plotdenso use_real_robot_GETJs use_real_robot_MOVE</td><td> exGUI explore</td><td>r; Q; guiglobal;</td></tr><tr><td><a href="myhandler.html">myhandler</a></td>
+<td></td><td></td><td>PoseData; RangeData; IntensityData; PointData;</td></tr><tr><td><a href="nbv_volume.html">nbv_volume</a></td>
+<td> plot_planes remove_self_scanning</td><td> doscan NBV NBV_beta order_bestviews</td><td>scan; workspace;</td></tr><tr><td><a href="order_bestviews.html">order_bestviews</a></td>
+<td> calculate_NBV_overallweight calunknownweight check_path_for_col getweighted_addinfo nbv_volume</td><td> exGUI NBV NBV_beta</td><td>bestviews; workspace;</td></tr><tr><td><a href="organise_data.html">organise_data</a></td>
+<td> remove_self_scanning surface_making_simple threeDMedianFilt</td><td> exGUI explore</td><td>workspace; scan; Q; PointData; RangeData; plane;</td></tr><tr><td><a href="pathplanner.html">pathplanner</a></td>
+<td> GetImpLevInfo check_FF check_path_for_col streamOnto_mine_manystarts</td><td> demopath exGUI movetonewQ NBV NBV_beta</td><td>r; Q; optimise; workspace; densoobj;</td></tr><tr><td><a href="plot_planes.html">plot_planes</a></td>
+<td></td><td> exGUI nbv_volume</td><td></td></tr><tr><td><a href="plotdenso.html">plotdenso</a></td>
+<td> calc_elip check_FF</td><td> demopath exGUI movetonewQ</td><td>densoobj;</td></tr><tr><td><a href="putIntoVoxels.html">putIntoVoxels</a></td>
+<td></td><td></td><td>workspace;</td></tr><tr><td><a href="remove_self_scanning.html">remove_self_scanning</a></td>
+<td></td><td> exGUI nbv_volume organise_data</td><td>r; Q; densoobj;</td></tr><tr><td><a href="rob_object.html">rob_object</a></td>
+<td> deg2rad</td><td></td><td></td></tr><tr><td><a href="rotateFigure.html">rotateFigure</a></td>
+<td></td><td></td><td></td></tr><tr><td><a href="setupoptimisation.html">setupoptimisation</a></td>
+<td></td><td> exGUI</td><td>optimise;</td></tr><tr><td><a href="setuprobot.html">setuprobot</a></td>
+<td> calc_elip</td><td> exGUI</td><td>Q; r; densoobj; robot_maxreach;</td></tr><tr><td><a href="setupscanner.html">setupscanner</a></td>
+<td></td><td> exGUI</td><td>scan; r; Q;</td></tr><tr><td><a href="setupworkspace.html">setupworkspace</a></td>
+<td> GetImpLevInfo</td><td> exGUI</td><td>workspace; Q; guiglobal;</td></tr><tr><td><a href="streamOnto_mine_manystarts.html">streamOnto_mine_manystarts</a></td>
+<td> check_FF dist_pt2tr</td><td> NBV pathplanner</td><td></td></tr><tr><td><a href="surface_making_simple.html">surface_making_simple</a></td>
+<td></td><td> exGUI organise_data</td><td>plane;</td></tr><tr><td><a href="threeDMedianFilt.html">threeDMedianFilt</a></td>
+<td> GetImpLevInfo</td><td> organise_data</td><td>workspace;</td></tr><tr><td><a href="use_real_robot_GETJs.html">use_real_robot_GETJs</a></td>
+<td></td><td> exGUI movetonewQ</td><td>Q;</td></tr><tr><td><a href="use_real_robot_MOVE.html">use_real_robot_MOVE</a></td>
+<td></td><td> movetonewQ</td><td>Q; robot_maxreach;</td></tr><tr><td><a href="use_real_robot_SCAN.html">use_real_robot_SCAN</a></td>
+<td></td><td> exGUI explore</td><td>scan; Q; PointData; IntensityData; robot_maxreach;</td></tr></body></html>

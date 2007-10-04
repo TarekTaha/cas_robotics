@@ -1,0 +1,505 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>streamOnto_mine_manystarts</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2007-10-03">
+      <meta name="m-file" content="streamOnto_mine_manystarts"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>streamOnto_mine_manystarts</h1>
+         <introduction>
+            <p><b>Description:</b> based on streamOnto - given a start q it will try and get to the given point, it may use various start positions
+            </p><pre> [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(ROBOT, pt)
+ [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(ROBOT, pt, q)
+ [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(ROBOT, pt, q, targetNormal, q, quickver, ZpointAT)</pre><p>Returns the joint coordinates corresponding to the end-effector at pt Note that the inverse kinematic solution is generally
+               not unique, and depends on the initial guess Q (which defaults to 0). Also returns whether solution is valis and which method
+               used and the dist_val to the required tr
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Function Call</a></li>
+               <li><a href="#2">Variables</a></li>
+               <li><a href="#3">Do the least squared optimisation function using q passed in</a></li>
+               <li><a href="#4">Check the optimisation results, change start to all Zeros if necessary</a></li>
+               <li><a href="#5">If quickver we are only doing the quick version</a></li>
+               <li><a href="#6">Extended find (2 extra starting qs)</a></li>
+               <li><a href="#7">EMBEDDED FUNCTION: Run iteratively changing delta q (dq)</a></li>
+               <li><a href="#8">Error Vector (being minimised) in embedded cost calc function</a></li>
+               <li><a href="#9">FUNCTION: checks pose validity, if valid but dist&gt;min, return distance</a></li>
+               <li><a href="#10">FUNCTION: Check dist:desiredTarget/ztopointAt-&gt;actualTarget/actualZ2pnt@</a></li>
+            </ul>
+         </div>
+         <h2>Function Call<a name="1"></a></h2>
+         <p><b>Inputs:</b> robot (structure) This holds the robot object pt (1*3 double) cartitian point where we want end effector targetNormal (1*3
+            double) the desired target normal at the point q (1*6 double) radians - The joint config starting guess quickver (binary)
+            Whether to try more than q and all 0 for start joint configs. Possibly Less acurate but quicker ZpointAT (1*3 double) where
+            the Z axis same as blast stream <b>Returns:</b> qt (1*6 double) radians - The recommended joint config solutionvalid (binary) whether the returned qt gives a valid solution
+            within optimisation parameters used_sol (1-&gt;4 int) which solution for starting q was used targetdist (structure) Distance
+            between desired &amp; actual target dist_val (double) Distance between desired &amp; actual pt in space
+         </p><pre class="codeinput"><span class="keyword">function</span> [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(robot, pt, targetNormal, q, quickver, ZpointAT)
+</pre><h2>Variables<a name="2"></a></h2>
+         <p><img vspace="5" hspace="5" src="streamOnto_mine_manystarts_eq832385.png"> </p><pre class="codeinput">    <span class="keyword">global</span> optimise densoobj workspace;
+
+    <span class="comment">%default is true, unless proven otherwise</span>
+    solutionvalid=true;
+
+    <span class="keyword">if</span> size(pt, 1) == 1
+        pt = pt(:); <span class="comment">% make sure pt is a column vector</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">% make sure targetNormal is a column vector (unit)</span>
+    targetNormal = targetNormal(:)/ norm(targetNormal);
+
+    <span class="comment">%used in the cost weight many times, this is so it dosen't have to be recalculated</span>
+    desired_targ=pt+targetNormal;
+
+    numlinks = robot.n;
+    Links = robot.link;
+    t = robot.base;
+    qlimits=robot.qlim;
+
+    <span class="comment">%if we don't specifiy where to point with z axis then use the 3rd targetnormal</span>
+    <span class="keyword">if</span> nargin &lt; 6
+        <span class="comment">%add on the Z target</span>
+        <span class="keyword">if</span> targetNormal(3)&gt;0;  ZpointAT=[pt(1:2);pt(3)+1];
+        <span class="keyword">elseif</span> targetNormal(3)&lt;0; ZpointAT=[pt(1:2);pt(3)-1]; <span class="keyword">end</span>
+        <span class="keyword">if</span> nargin&lt;5; quickver=false; <span class="keyword">end</span>
+    <span class="keyword">else</span>
+        ZpointAT=pt+ZpointAT(:)/norm(ZpointAT);
+    <span class="keyword">end</span>
+
+    <span class="comment">%make sure the q is correct</span>
+    <span class="keyword">if</span> nargin &lt; 3
+        q = zeros(numlinks, 1);
+    <span class="keyword">else</span>
+        q = q(:);
+    <span class="keyword">end</span>
+    q_input=q; <span class="comment">%save the input q (or made up q) for later</span>
+
+    options = optimset(<span class="string">'Display'</span>, <span class="string">'off'</span>, <span class="string">'Largescale'</span>, <span class="string">'off'</span>, <span class="string">'TolFun'</span>, optimise.stol,<span class="string">'MaxFunEvals'</span>, optimise.iLimit);
+
+    xGuess = zeros(size(q));lb = []; ub = [];
+</pre><h2>Do the least squared optimisation function using q passed in<a name="3"></a></h2><pre class="codeinput">    [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
+
+    <span class="comment">% Update the configuration</span>
+    qt = q + dq; all_qts(1).val=qt;
+
+    <span class="comment">%if there is a collision or out of joint limit then no distance is returned</span>
+    dist=[inf,inf,inf,inf];
+</pre><h2>Check the optimisation results, change start to all Zeros if necessary<a name="4"></a></h2><pre class="codeinput">    [valid,dist(1),targetdist(1).val]=check_newQ(qt,qlimits,pt,t,Links,numlinks,desired_targ,ZpointAT);
+    <span class="keyword">if</span> valid; used_sol=1; dist_val= dist(1); qt=qt'; <span class="keyword">return</span>;
+    <span class="keyword">else</span>
+        <span class="comment">%check if current q =0, otherwise try getting a solution with q=0</span>
+        <span class="keyword">if</span> ~isempty(find(q(1:3)~=0, 1))
+            q = zeros(numlinks, 1);
+            [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
+            qt = q + dq; all_qts(2).val=qt;
+            [valid,dist(2),targetdist(2).val]=check_newQ(qt,qlimits,pt,t,Links,numlinks,desired_targ,ZpointAT);
+            <span class="keyword">if</span> valid; used_sol=2; dist_val= dist(2); qt=qt'; <span class="keyword">return</span>; <span class="keyword">end</span>
+        <span class="keyword">end</span>
+</pre><h2>If quickver we are only doing the quick version<a name="5"></a></h2><pre class="codeinput">        <span class="comment">%only using 1/2 num of starts so quit here even if no result found</span>
+        <span class="keyword">if</span> quickver
+            [dist_val,used_sol]=min(dist);
+            <span class="keyword">if</span> dist_val==inf; solutionvalid=false; used_sol=0; qt=qt';<span class="keyword">return</span>;
+            <span class="keyword">else</span> qt=all_qts(used_sol).val; solutionvalid=-1; qt=qt';<span class="keyword">return</span>;
+            <span class="keyword">end</span>;
+        <span class="keyword">end</span>
+</pre><h2>Extended find (2 extra starting qs)<a name="6"></a></h2><pre class="codeinput">        <span class="comment">%Try a guess which starts at 90' off the current Q, this might find a solution</span>
+        q=q_input+((sqrt(q_input.^2)~=q_input)*2-1)*pi;
+        [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
+        qt = q + dq; all_qts(3).val=qt;
+        [valid,dist(3),targetdist(3).val]=check_newQ(qt,qlimits,pt,t,Links,numlinks,desired_targ,ZpointAT);
+        <span class="keyword">if</span> valid; used_sol=3; dist_val= dist(3); qt=qt'; <span class="keyword">return</span>; <span class="keyword">end</span>
+
+        <span class="comment">%Try randomly guessing a starting point</span>
+        q=[0;0;0;0;0;0];
+        <span class="keyword">for</span> i=1:size(qlimits,1);  q(i)=rand()*(-qlimits(i,1)+qlimits(i,2))+qlimits(i,1); <span class="keyword">end</span>
+        [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
+        qt = q + dq; all_qts(4).val=qt;
+        [valid,dist(4),targetdist(4).val]=check_newQ(qt,qlimits,pt,t,Links,numlinks,desired_targ,ZpointAT);
+        <span class="keyword">if</span> valid; used_sol=4; dist_val= dist(4); qt=qt'; <span class="keyword">return</span>;  <span class="keyword">end</span>
+
+        [dist_val,used_sol]=min(dist);
+        <span class="keyword">if</span> dist_val==inf
+            <span class="comment">%if we haven't left the function yet then the solution is not valid</span>
+            solutionvalid=false;
+            used_sol=0; qt=qt';<span class="keyword">return</span>;
+        <span class="keyword">else</span> qt=all_qts(used_sol).val;
+            solutionvalid=-1;
+            qt=qt';<span class="keyword">return</span>;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+</pre><h2>EMBEDDED FUNCTION: Run iteratively changing delta q (dq)<a name="7"></a></h2>
+         <p><img vspace="5" hspace="5" src="streamOnto_mine_manystarts_eq761574.png"> </p><pre class="codeinput"><span class="comment">% \end{arrary}$$</span>
+    <span class="keyword">function</span> [e]=costComponents(dq)
+        tr=t;
+        q_temp=q+dq;
+        Jlimitresult=[0,0,0,0,0,0];
+        result_row=[1,1,1,1,1,1];
+        <span class="keyword">for</span> i=1:numlinks;
+            tr = tr * Links{i}(q_temp(i));
+            <span class="keyword">if</span> q_temp(i)&lt;qlimits(i,1); Jlimitresult(i)=qlimits(i,1)-q_temp(i);
+            <span class="keyword">elseif</span> q_temp(i)&gt;qlimits(i,2); Jlimitresult(i)=q_temp(i)-qlimits(i,2);
+            <span class="keyword">end</span>
+
+            tempresult=check_FF(tr,densoobj(i+1).ellipse,workspace.indexedobsticles);
+            result_row(i)=tempresult;
+        <span class="keyword">end</span>
+
+        <span class="comment">%this normalises the vectors so their total length is 1 then adds it to actual pos</span>
+        actual_targ=sum(unit(tr(1:3,1:3)),2)+tr(1:3,4);
+</pre><h2>Error Vector (being minimised) in embedded cost calc function<a name="8"></a></h2>
+         <p><img vspace="5" hspace="5" src="streamOnto_mine_manystarts_eq23349393.png"> </p><pre class="codeinput">        e = [exp(4*(sqrt((desired_targ(1)-actual_targ(1))^2+<span class="keyword">...</span>
+                         (desired_targ(2)-actual_targ(2))^2+<span class="keyword">...</span>
+                         (desired_targ(3)-actual_targ(3))^2) - optimise.maxtargetdis));
+             exp(4*(sqrt((ZpointAT(1)-(tr(1,3)+tr(1,4)))^2+<span class="keyword">...</span>
+                         (ZpointAT(2)-(tr(2,3)+tr(2,4)))^2+<span class="keyword">...</span>
+                         (ZpointAT(3)-(tr(3,3)+tr(3,4)))^2) - optimise.maxtargetdis));
+             exp(10*(dist_pt2tr(pt,tr) - optimise.minAccepDis));
+             exp(5*(abs(q_temp(5)) - optimise.maxDeflectionError))/100;
+             exp(5*sum(Jlimitresult))-1;
+             exp(5*(6-sum(result_row)))-1];
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2>FUNCTION: checks pose validity, if valid but dist&gt;min, return distance<a name="9"></a></h2><pre class="codeinput"><span class="keyword">function</span> [valid,dist,targetdist]=check_newQ(qt,qlimits,pt,t,Links,numlinks,desired_targ,ZpointAT)
+    <span class="keyword">global</span> optimise densoobj workspace;
+    <span class="comment">%returns infinite distance by default</span>
+    dist=inf;
+    <span class="comment">%returns infite target distances by default</span>
+    targetdist=[inf,inf];
+    <span class="comment">%it is not valid byb default so we can return at anytime and return invalid</span>
+    valid=false;
+    <span class="comment">%this is the base transform of robot</span>
+    tr=t;
+    <span class="keyword">for</span> i=1:numlinks;
+        tr = tr * Links{i}(qt(i));
+        <span class="keyword">if</span> qt(i)&lt;qlimits(i,1) || qt(i)&gt;qlimits(i,2); <span class="keyword">return</span>; <span class="keyword">end</span>;
+        <span class="keyword">if</span> ~check_FF(tr,densoobj(i+1).ellipse,workspace.indexedobsticles); <span class="keyword">return</span>; <span class="keyword">end</span>;
+    <span class="keyword">end</span>
+
+    <span class="comment">% Check distance</span>
+    dist=dist_pt2tr(pt,tr);
+
+    <span class="comment">%check distance to the target points</span>
+    targetdist=dist2targetpoint(tr,desired_targ,ZpointAT);
+
+    <span class="comment">%if it is allowable then it is valid and change this to return</span>
+    <span class="keyword">if</span> (dist&gt;optimise.minAccepDis) || (~isempty(find(targetdist&gt;optimise.maxtargetdis, 1)))
+        <span class="keyword">return</span>;
+    <span class="keyword">else</span>
+        <span class="comment">%if we get to here it is valid</span>
+        valid=true;
+    <span class="keyword">end</span>;
+<span class="keyword">end</span>
+</pre><h2>FUNCTION: Check dist:desiredTarget/ztopointAt-&gt;actualTarget/actualZ2pnt@<a name="10"></a></h2><pre class="codeinput"><span class="keyword">function</span> [targetdist]=dist2targetpoint(tr,desired_targ,ZpointAT)
+
+    actual_targ=sum(unit(tr(1:3,1:3)),2)+tr(1:3,4);
+    targetdist(1)=sqrt((desired_targ(1)-actual_targ(1))^2+(desired_targ(2)-actual_targ(2))^2+(desired_targ(3)-actual_targ(3))^2);
+    targetdist(2)=dist_pt2tr(ZpointAT,tr);
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% streamOnto_mine_manystarts
+%
+% *Description:* based on streamOnto - given a start q it will try and get to the given
+% point, it may use various start positions 
+%
+%   [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(ROBOT, pt)
+%   [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(ROBOT, pt, q)
+%   [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(ROBOT, pt, q, targetNormal, q, quickver, ZpointAT)
+%
+% Returns the joint coordinates corresponding to the end-effector at pt
+% Note that the inverse kinematic solution is generally not unique, and 
+% depends on the initial guess Q (which defaults to 0).
+% Also returns whether solution is valis and which method used and the
+% dist_val to the required tr
+
+
+%% Function Call
+% 
+% *Inputs:* robot (structure) This holds the robot object
+% pt (1*3 double) cartitian point where we want end effector
+% targetNormal (1*3 double) the desired target normal at the point
+% q (1*6 double) radians - The joint config starting guess 
+% quickver (binary) Whether to try more than q and all 0 for start joint
+% configs. Possibly Less acurate but quicker
+% ZpointAT (1*3 double) where the Z axis same as blast stream 
+% *Returns:* qt (1*6 double) radians - The recommended joint config
+% solutionvalid (binary) whether the returned qt gives a valid solution
+% within optimisation parameters
+% used_sol (1->4 int) which solution for starting q was used
+% targetdist (structure) Distance between desired & actual target
+% dist_val (double) Distance between desired & actual pt in space
+
+function [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(robot, pt, targetNormal, q, quickver, ZpointAT)
+
+%% Variables
+% $$ \begin{array}{lc}
+% \mbox{desired\_target...} & P_{dt} \\
+% \mbox{targetNormal...} & V_{tn} \\
+% \mbox{ZpointAT...} & P_{z}
+% \end{array}$$
+    global optimise densoobj workspace;
+
+    %default is true, unless proven otherwise
+    solutionvalid=true;
+    
+    if size(pt, 1) == 1
+        pt = pt(:); % make sure pt is a column vector
+    end
+
+    % make sure targetNormal is a column vector (unit)
+    targetNormal = targetNormal(:)/ norm(targetNormal);
+  
+    %used in the cost weight many times, this is so it dosen't have to be recalculated 
+    desired_targ=pt+targetNormal;
+
+    numlinks = robot.n;
+    Links = robot.link; 
+    t = robot.base;
+    qlimits=robot.qlim; 
+    
+    %if we don't specifiy where to point with z axis then use the 3rd targetnormal
+    if nargin < 6
+        %add on the Z target
+        if targetNormal(3)>0;  ZpointAT=[pt(1:2);pt(3)+1];
+        elseif targetNormal(3)<0; ZpointAT=[pt(1:2);pt(3)-1]; end        
+        if nargin<5; quickver=false; end
+    else
+        ZpointAT=pt+ZpointAT(:)/norm(ZpointAT);
+    end
+
+    %make sure the q is correct
+    if nargin < 3
+        q = zeros(numlinks, 1);
+    else
+        q = q(:);
+    end
+    q_input=q; %save the input q (or made up q) for later
+
+    options = optimset('Display', 'off', 'Largescale', 'off', 'TolFun', optimise.stol,'MaxFunEvals', optimise.iLimit);
+
+    xGuess = zeros(size(q));lb = []; ub = [];
+    
+%% Do the least squared optimisation function using q passed in       
+    [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
+
+    % Update the configuration
+    qt = q + dq; all_qts(1).val=qt;
+    
+    %if there is a collision or out of joint limit then no distance is returned
+    dist=[inf,inf,inf,inf];    
+    
+%% Check the optimisation results, change start to all Zeros if necessary
+    [valid,dist(1),targetdist(1).val]=check_newQ(qt,qlimits,pt,t,Links,numlinks,desired_targ,ZpointAT); 
+    if valid; used_sol=1; dist_val= dist(1); qt=qt'; return;
+    else
+        %check if current q =0, otherwise try getting a solution with q=0
+        if ~isempty(find(q(1:3)~=0, 1))
+            q = zeros(numlinks, 1);
+            [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
+            qt = q + dq; all_qts(2).val=qt;
+            [valid,dist(2),targetdist(2).val]=check_newQ(qt,qlimits,pt,t,Links,numlinks,desired_targ,ZpointAT); 
+            if valid; used_sol=2; dist_val= dist(2); qt=qt'; return; end
+        end
+        
+%% If quickver we are only doing the quick version 
+        %only using 1/2 num of starts so quit here even if no result found
+        if quickver
+            [dist_val,used_sol]=min(dist);
+            if dist_val==inf; solutionvalid=false; used_sol=0; qt=qt';return;
+            else qt=all_qts(used_sol).val; solutionvalid=-1; qt=qt';return;
+            end;
+        end
+            
+%% Extended find (2 extra starting qs)    
+        %Try a guess which starts at 90' off the current Q, this might find a solution 
+        q=q_input+((sqrt(q_input.^2)~=q_input)*2-1)*pi;
+        [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
+        qt = q + dq; all_qts(3).val=qt;
+        [valid,dist(3),targetdist(3).val]=check_newQ(qt,qlimits,pt,t,Links,numlinks,desired_targ,ZpointAT);
+        if valid; used_sol=3; dist_val= dist(3); qt=qt'; return; end
+
+        %Try randomly guessing a starting point
+        q=[0;0;0;0;0;0];
+        for i=1:size(qlimits,1);  q(i)=rand()*(-qlimits(i,1)+qlimits(i,2))+qlimits(i,1); end
+        [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
+        qt = q + dq; all_qts(4).val=qt;
+        [valid,dist(4),targetdist(4).val]=check_newQ(qt,qlimits,pt,t,Links,numlinks,desired_targ,ZpointAT);
+        if valid; used_sol=4; dist_val= dist(4); qt=qt'; return;  end
+        
+        [dist_val,used_sol]=min(dist);
+        if dist_val==inf
+            %if we haven't left the function yet then the solution is not valid
+            solutionvalid=false;    
+            used_sol=0; qt=qt';return;
+        else qt=all_qts(used_sol).val;
+            solutionvalid=-1;
+            qt=qt';return;
+        end
+    end
+        
+%% EMBEDDED FUNCTION: Run iteratively changing delta q (dq)
+% $$ \begin{array}{lc}
+% q_{temp}=q+\delta q\\
+% \mbox{actual\_targ...} & P_{at}\\
+% \mbox{actual\_zpointed\_at...} & P_{az}
+% \end{array}$$
+
+% \end{arrary}$$
+    function [e]=costComponents(dq)
+        tr=t;
+        q_temp=q+dq;
+        Jlimitresult=[0,0,0,0,0,0];
+        result_row=[1,1,1,1,1,1];
+        for i=1:numlinks; 
+            tr = tr * Links{i}(q_temp(i));
+            if q_temp(i)<qlimits(i,1); Jlimitresult(i)=qlimits(i,1)-q_temp(i);
+            elseif q_temp(i)>qlimits(i,2); Jlimitresult(i)=q_temp(i)-qlimits(i,2);
+            end
+            
+            tempresult=check_FF(tr,densoobj(i+1).ellipse,workspace.indexedobsticles);                
+            result_row(i)=tempresult;
+        end
+
+        %this normalises the vectors so their total length is 1 then adds it to actual pos
+        actual_targ=sum(unit(tr(1:3,1:3)),2)+tr(1:3,4);
+
+%% Error Vector (being minimised) in embedded cost calc function
+% $$e=\left( \begin{array}{c}
+% e^{4( \sqrt{(P_{dt,x}-P_{at,x})^2+(P_{dt,y}-P_{at,y})^2+(P_{dt,z}-P_{at,z})^2}-C_{maxtargetdis})}\\
+% e^{4( \sqrt{(P_{z,x}-P_{az,x})^2+(P_{z,y}-P_{az,y})^2+(P_{z,z}-P_{az,z})^2}-C_{maxtargetdis})}\\
+% e^{10( dist_pt2tr(pt,tr)-C_{minAccepDis})}\\
+% \frac{e^{5( |Q_{5th}|-C_{maxDeflectionError})}}{100}\\
+% e^{5\times \sum{Jlimitresult}}-1\\
+% e^{5(6-\sum{result\_row}}-1\\
+% \end{array} \right)$$
+        e = [exp(4*(sqrt((desired_targ(1)-actual_targ(1))^2+...
+                         (desired_targ(2)-actual_targ(2))^2+...
+                         (desired_targ(3)-actual_targ(3))^2) - optimise.maxtargetdis));
+             exp(4*(sqrt((ZpointAT(1)-(tr(1,3)+tr(1,4)))^2+...
+                         (ZpointAT(2)-(tr(2,3)+tr(2,4)))^2+...
+                         (ZpointAT(3)-(tr(3,3)+tr(3,4)))^2) - optimise.maxtargetdis));                         
+             exp(10*(dist_pt2tr(pt,tr) - optimise.minAccepDis));
+             exp(5*(abs(q_temp(5)) - optimise.maxDeflectionError))/100;
+             exp(5*sum(Jlimitresult))-1;
+             exp(5*(6-sum(result_row)))-1];
+    end
+end
+
+
+%% FUNCTION: checks pose validity, if valid but dist>min, return distance 
+function [valid,dist,targetdist]=check_newQ(qt,qlimits,pt,t,Links,numlinks,desired_targ,ZpointAT)
+    global optimise densoobj workspace;
+    %returns infinite distance by default
+    dist=inf;
+    %returns infite target distances by default
+    targetdist=[inf,inf];
+    %it is not valid byb default so we can return at anytime and return invalid
+    valid=false;
+    %this is the base transform of robot
+    tr=t;
+    for i=1:numlinks; 
+        tr = tr * Links{i}(qt(i));
+        if qt(i)<qlimits(i,1) || qt(i)>qlimits(i,2); return; end;
+        if ~check_FF(tr,densoobj(i+1).ellipse,workspace.indexedobsticles); return; end;                      
+    end
+    
+    % Check distance
+    dist=dist_pt2tr(pt,tr);
+
+    %check distance to the target points
+    targetdist=dist2targetpoint(tr,desired_targ,ZpointAT);
+    
+    %if it is allowable then it is valid and change this to return
+    if (dist>optimise.minAccepDis) || (~isempty(find(targetdist>optimise.maxtargetdis, 1))) 
+        return; 
+    else
+        %if we get to here it is valid
+        valid=true;
+    end;       
+end
+
+%% FUNCTION: Check dist:desiredTarget/ztopointAt->actualTarget/actualZ2pnt@
+function [targetdist]=dist2targetpoint(tr,desired_targ,ZpointAT)
+
+    actual_targ=sum(unit(tr(1:3,1:3)),2)+tr(1:3,4);
+    targetdist(1)=sqrt((desired_targ(1)-actual_targ(1))^2+(desired_targ(2)-actual_targ(2))^2+(desired_targ(3)-actual_targ(3))^2);
+    targetdist(2)=dist_pt2tr(ZpointAT,tr);
+
+end
+##### SOURCE END #####
+-->
+   </body>
+</html>
