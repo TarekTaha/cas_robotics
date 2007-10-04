@@ -1,0 +1,153 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>getweighted_addinfo</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2007-10-03">
+      <meta name="m-file" content="getweighted_addinfo"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>getweighted_addinfo</h1>
+         <introduction>
+            <p><b>Description:</b>  this function will consider the different areas of interest that have been concluded to be addinfo and will end up at a
+               weighted value
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Function Call</a></li>
+               <li><a href="#2">Variables</a></li>
+               <li><a href="#3">If points passed</a></li>
+               <li><a href="#4">Multiply by the dot weights</a></li>
+            </ul>
+         </div>
+         <h2>Function Call<a name="1"></a></h2>
+         <div>
+            <ul>
+               <li><b>Inputs:</b> addinfo (3*many double) group of point we want to know weight of
+               </li>
+               <li><b>Returns:</b> weighted_addinfo (double) weighted info value
+               </li>
+            </ul>
+         </div><pre class="codeinput"><span class="keyword">function</span> weighted_addinfo=getweighted_addinfo(addinfo)
+</pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> workspace
+weighted_addinfo=0;
+</pre><h2>If points passed<a name="3"></a></h2><pre class="codeinput"><span class="keyword">if</span> ~isempty(addinfo)
+    <span class="comment">%Get level info</span>
+    [level1,level2,level3]=GetImpLevInfo(addinfo);
+</pre><h2>Multiply by the dot weights<a name="4"></a></h2>
+         <p><img vspace="5" hspace="5" src="getweighted_addinfo_eq11051909.png"> </p><pre class="codeinput">    weighted_addinfo=length(level1)*workspace.dotweight(1)+<span class="keyword">...</span>
+                     length(level2)*workspace.dotweight(2)+<span class="keyword">...</span>
+                     length(level3)*workspace.dotweight(3);
+<span class="keyword">end</span>
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% getweighted_addinfo
+%
+% *Description:*  this function will consider the different areas of interest
+% that have been concluded to be addinfo and will end up at a weighted
+% value
+
+%% Function Call
+%
+% * *Inputs:* 
+% addinfo (3*many double) group of point we want to know weight of
+% * *Returns:* 
+% weighted_addinfo (double) weighted info value
+
+function weighted_addinfo=getweighted_addinfo(addinfo)
+
+%% Variables
+global workspace
+weighted_addinfo=0;
+
+%% If points passed
+if ~isempty(addinfo)
+    %Get level info    
+    [level1,level2,level3]=GetImpLevInfo(addinfo);
+%% Multiply by the dot weights    
+% $$\begin{array}{c}
+% P_{level1}:=(x_j,y_j,z_j)_{j=1,...,m_{u1}} \\ 
+% P_{level2}:=(x_j,y_j,z_j)_{j=1,...,m_{u2}} \\
+% P_{level3}:=(x_j,y_j,z_j)_{j=1,...,m_{u3}} \\\\
+% weighted\_addinfo= C_{dotweight1} \times m_{u1} +
+%                    C_{dotweight2} \times m_{u2} +
+%                    C_{dotweight2} \times m_{u3}
+% \end{array}$$  
+
+    weighted_addinfo=length(level1)*workspace.dotweight(1)+...
+                     length(level2)*workspace.dotweight(2)+...
+                     length(level3)*workspace.dotweight(3);
+end
+##### SOURCE END #####
+-->
+   </body>
+</html>

@@ -1,0 +1,197 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>remove_self_scaning</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2007-10-03">
+      <meta name="m-file" content="remove_self_scanning"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>remove_self_scaning</h1>
+         <introduction>
+            <p><b>Description:</b>  pass into this function a group of 3D points and pass in the newQ to remove scanning point from place where the arm is located.
+               Links higher up the arm have a larger force field than their actual force part force field to account for errors in the data
+               which may result in obstacles where there aren't actually any Lower down (links  1,2) are larger and hence have a smaller
+               removal force field. We then pass back the points that are only outside of these joints force fields
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Function Call</a></li>
+               <li><a href="#2">Variables</a></li>
+               <li><a href="#3">Go through each link of robot (1-&gt;n)</a></li>
+               <li><a href="#4">For the first 2 links: Get points outside this ellipse</a></li>
+               <li><a href="#5">For the remaining n-2 links: Get point outside this ellipse</a></li>
+            </ul>
+         </div>
+         <h2>Function Call<a name="1"></a></h2>
+         <div>
+            <ul>
+               <li><b>Inputs:</b> points (3*m double) holds the points in space newQ (6*1 double) holds the joint angles in radians
+               </li>
+               <li><b>Returns:</b> points (3*m double) holds the remaining points in space
+               </li>
+            </ul>
+         </div><pre class="codeinput"><span class="keyword">function</span> points = remove_self_scanning(points,newQ)
+</pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> r Q densoobj
+
+<span class="comment">% if we haven't been passed the joints then</span>
+<span class="keyword">if</span> nargin&lt;2
+    newQ=Q;
+<span class="keyword">end</span>
+
+n = r.n;
+L = r.link;
+t = r.base;
+</pre><h2>Go through each link of robot (1-&gt;n)<a name="3"></a></h2><pre class="codeinput"><span class="keyword">for</span> i=1:n
+    t = t * L{i}(newQ(i));
+    <span class="comment">% Translate points to the elispe coordinate frame (IE leave the elispes</span>
+    <span class="comment">% where they were to start off with and translate the world around them</span>
+    translated_points=[points(:,1)-t(1,4) points(:,2)-t(2,4) points(:,3)-t(3,4)];
+    translated_points=(t(1:3,1:3)'*translated_points')';
+</pre><h2>For the first 2 links: Get points outside this ellipse<a name="4"></a></h2>
+         <p><img vspace="5" hspace="5" src="remove_self_scanning_eq1431883.png"> </p><pre class="codeinput">    <span class="keyword">if</span> n&lt;3
+        points=points((((translated_points(:,1)-densoobj(i+1).ellipse.center(1)).^2)/densoobj(i+1).ellipse.params(1)^2+<span class="keyword">...</span>
+                       ((translated_points(:,2)-densoobj(i+1).ellipse.center(2)).^2)/densoobj(i+1).ellipse.params(2)^2+<span class="keyword">...</span>
+                       ((translated_points(:,3)-densoobj(i+1).ellipse.center(3)).^2)/densoobj(i+1).ellipse.params(3)^2&gt;1.5),:);
+</pre><h2>For the remaining n-2 links: Get point outside this ellipse<a name="5"></a></h2>
+         <p><img vspace="5" hspace="5" src="remove_self_scanning_eq1431884.png"> </p><pre class="codeinput">    <span class="keyword">else</span>
+       points=points((((translated_points(:,1)-densoobj(i+1).ellipse.center(1)).^2)/densoobj(i+1).ellipse.params(1)^2+<span class="keyword">...</span>
+                      ((translated_points(:,2)-densoobj(i+1).ellipse.center(2)).^2)/densoobj(i+1).ellipse.params(2)^2+<span class="keyword">...</span>
+                      ((translated_points(:,3)-densoobj(i+1).ellipse.center(3)).^2)/densoobj(i+1).ellipse.params(3)^2&gt;2.5),:);
+   <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% remove_self_scaning
+%
+% *Description:*  pass into this function a group of 3D points and pass in
+% the newQ to remove scanning point from place where the arm is located.
+% Links higher up the arm have a larger force field than their actual force
+% part force field to account for errors in the data which may result in
+% obstacles where there aren't actually any Lower down (links  1,2) are
+% larger and hence have a smaller removal force field. We then pass back
+% the points that are only outside of these joints force fields 
+
+%% Function Call
+% 
+% * *Inputs:* points (3*m double) holds the points in space
+% newQ (6*1 double) holds the joint angles in radians
+% * *Returns:* points (3*m double) holds the remaining points in space
+
+function points = remove_self_scanning(points,newQ)
+
+%% Variables
+global r Q densoobj
+
+% if we haven't been passed the joints then 
+if nargin<2
+    newQ=Q;
+end
+
+n = r.n;
+L = r.link;
+t = r.base;
+
+%% Go through each link of robot (1->n)
+for i=1:n
+    t = t * L{i}(newQ(i));
+    % Translate points to the elispe coordinate frame (IE leave the elispes
+    % where they were to start off with and translate the world around them
+    translated_points=[points(:,1)-t(1,4) points(:,2)-t(2,4) points(:,3)-t(3,4)];
+    translated_points=(t(1:3,1:3)'*translated_points')';
+
+%% For the first 2 links: Get points outside this ellipse
+% $$ \begin{array}{c}
+% points_{remaining}=\forall [X,Y,Z] :: \\\\
+% \frac{(X-center_x)^2}{a^2}+\frac{(Y-center_y)^2}{b^2}+\frac{(Z-center_z)^2}{c^2}>1.5 
+% \end{array}$$
+
+    if n<3 
+        points=points((((translated_points(:,1)-densoobj(i+1).ellipse.center(1)).^2)/densoobj(i+1).ellipse.params(1)^2+...
+                       ((translated_points(:,2)-densoobj(i+1).ellipse.center(2)).^2)/densoobj(i+1).ellipse.params(2)^2+...
+                       ((translated_points(:,3)-densoobj(i+1).ellipse.center(3)).^2)/densoobj(i+1).ellipse.params(3)^2>1.5),:);
+   
+%% For the remaining n-2 links: Get point outside this ellipse
+% $$ \begin{array}{c}
+% points_{remaining}=\forall [X,Y,Z] :: \\\\
+% \frac{(X-center_x)^2}{a^2}+\frac{(Y-center_y)^2}{b^2}+\frac{(Z-center_z)^2}{c^2}>2.5 
+% \end{array}$$
+    else
+       points=points((((translated_points(:,1)-densoobj(i+1).ellipse.center(1)).^2)/densoobj(i+1).ellipse.params(1)^2+...
+                      ((translated_points(:,2)-densoobj(i+1).ellipse.center(2)).^2)/densoobj(i+1).ellipse.params(2)^2+...
+                      ((translated_points(:,3)-densoobj(i+1).ellipse.center(3)).^2)/densoobj(i+1).ellipse.params(3)^2>2.5),:);
+   end
+end
+##### SOURCE END #####
+-->
+   </body>
+</html>

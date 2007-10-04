@@ -1,0 +1,187 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>calculate_NBV_overallweight</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2007-10-03">
+      <meta name="m-file" content="calculate_NBV_overallweight"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>calculate_NBV_overallweight</h1>
+         <introduction>
+            <p><b>Description:</b> This function calculates the overal weighting of a certain view using a formula for joint weight and additional info
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Function Call</a></li>
+               <li><a href="#2">Variables</a></li>
+               <li><a href="#3">JOINT MOVE WEIGHT</a></li>
+               <li><a href="#4">ADDINFO WEIGHT</a></li>
+               <li><a href="#5">OVERALL WEIGHT</a></li>
+            </ul>
+         </div>
+         <h2>Function Call<a name="1"></a></h2>
+         <div>
+            <ul>
+               <li><b>Inputs:</b> cur_view (int) describes which of the bestviews we are interested in caculating
+               </li>
+               <li><b>Returns:</b> Null
+               </li>
+            </ul>
+         </div><pre class="codeinput"><span class="keyword">function</span> calculate_NBV_overallweight(cur_view)
+</pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> bestviews optimise Q
+</pre><h2>JOINT MOVE WEIGHT<a name="3"></a></h2>
+         <p><img vspace="5" hspace="5" src="calculate_NBV_overallweight_eq558949.png"> </p><pre class="codeinput"><span class="comment">%This will give you the joint difference weighted between 0-1 of the bestview</span>
+<span class="comment">%joint verses the current joint so if each joint had to move pi (max</span>
+<span class="comment">%pos) to get to the new position then each one should get a 1 and hence</span>
+<span class="comment">%we want MINIMISE THIS</span>
+bestviews(cur_view).jointmoveweight=<span class="keyword">...</span>
+        optimise.jointmoveweight*<span class="keyword">...</span>
+        exp(-1*<span class="keyword">...</span>
+            sum(<span class="keyword">...</span>
+                abs((Q-bestviews(cur_view).Q))<span class="keyword">...</span>
+                )<span class="keyword">...</span>
+            /length(Q)<span class="keyword">...</span>
+           );
+</pre><h2>ADDINFO WEIGHT<a name="4"></a></h2>
+         <p><img vspace="5" hspace="5" src="calculate_NBV_overallweight_eq43770.png"> </p><pre class="codeinput"><span class="comment">%then we want to see the added value of this new scan, what percentage</span>
+<span class="comment">%WE WANT TO MAXIMISE THIS, however these are not going to be very</span>
+<span class="comment">%different, like 0.0211, or 0.212 even though it has many more points</span>
+<span class="comment">%than the other, you should delete the average of the additional info</span>
+    bestviews(cur_view).addinfoweight=<span class="keyword">...</span>
+        optimise.addinfoweight*<span class="keyword">...</span>
+        (bestviews(cur_view).addinfo);
+</pre><h2>OVERALL WEIGHT<a name="5"></a></h2>
+         <p><img vspace="5" hspace="5" src="calculate_NBV_overallweight_eq34463.png"> </p><pre class="codeinput"><span class="comment">%this is the sum which we which to maximise, very low joint values</span>
+<span class="comment">%changes will make this value high</span>
+    bestviews(cur_view).overall=<span class="keyword">...</span>
+        bestviews(cur_view).addinfoweight+<span class="keyword">...</span>
+        bestviews(cur_view).jointmoveweight;
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% calculate_NBV_overallweight
+%
+% *Description:* This function calculates the overal weighting of a certain
+% view using a formula for joint weight and additional info
+
+%% Function Call
+%
+% * *Inputs:* cur_view (int) describes which of the bestviews we are
+% interested in caculating
+% * *Returns:* Null
+
+function calculate_NBV_overallweight(cur_view)
+
+%% Variables
+global bestviews optimise Q
+
+%% JOINT MOVE WEIGHT
+% $$W_{jointmove}= C_{jointmoveweight}\times e^{-
+% \frac{\displaystyle\sum_{i=1}^n |Q_{(current,i)}-Q_{(nbv,i)}|}{6}} $$
+
+%This will give you the joint difference weighted between 0-1 of the bestview
+%joint verses the current joint so if each joint had to move pi (max
+%pos) to get to the new position then each one should get a 1 and hence
+%we want MINIMISE THIS
+bestviews(cur_view).jointmoveweight=...
+        optimise.jointmoveweight*...
+        exp(-1*...
+            sum(...
+                abs((Q-bestviews(cur_view).Q))...
+                )...
+            /length(Q)...
+           );
+
+%% ADDINFO WEIGHT
+% $$W_{addinfo}= C_{addinfoweight}\times addinfo$$
+
+%then we want to see the added value of this new scan, what percentage
+%WE WANT TO MAXIMISE THIS, however these are not going to be very
+%different, like 0.0211, or 0.212 even though it has many more points
+%than the other, you should delete the average of the additional info
+    bestviews(cur_view).addinfoweight=...
+        optimise.addinfoweight*...
+        (bestviews(cur_view).addinfo);
+
+%% OVERALL WEIGHT
+% $$W_{overall}= W_{addinfo} + W_{jointmove}$$
+
+%this is the sum which we which to maximise, very low joint values
+%changes will make this value high 
+    bestviews(cur_view).overall=...
+        bestviews(cur_view).addinfoweight+...
+        bestviews(cur_view).jointmoveweight;
+
+##### SOURCE END #####
+-->
+   </body>
+</html>

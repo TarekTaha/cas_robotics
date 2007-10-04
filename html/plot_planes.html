@@ -1,0 +1,210 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>plot_planes</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2007-10-03">
+      <meta name="m-file" content="plot_planes"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>plot_planes</h1>
+         <introduction>
+            <p><b>Description:</b>  this is a slightly modified version ofthe plot planes from the the surface growing work, it gets a structure of planes passed
+               to it and the size mew and then makes planes out of the points where the plane intersects with a sphere translated to the
+               center of the plane
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Function Call</a></li>
+               <li><a href="#2">Variables</a></li>
+               <li><a href="#3">Go throuh each plane and fit in shifted sphere</a></li>
+               <li><a href="#4">Find which points on sphere correspond to where plane crosses</a></li>
+            </ul>
+         </div>
+         <h2>Function Call<a name="1"></a></h2>
+         <div>
+            <ul>
+               <li><b>Inputs:</b>   plane (struct) planes structure with equations and home points   mew (double) radius of the planes
+               </li>
+               <li><b>Returns:</b> Null
+               </li>
+            </ul>
+         </div><pre class="codeinput"><span class="keyword">function</span> plot_handles=plot_planes(plane,mew)
+</pre><h2>Variables<a name="2"></a></h2><pre class="codeinput">plane_sphere_threshold=.01;
+
+<span class="comment">%start with a normal sphere described by 20 points</span>
+[base_x,base_y,base_z]=sphere(30);
+<span class="comment">%make the radium mew</span>
+base_x=base_x*mew;
+base_y=base_y*mew;
+base_z=base_z*mew;
+<span class="comment">%for each plane</span>
+plot_handles=zeros([length(plane),1]);
+hold <span class="string">on</span>;
+</pre><h2>Go throuh each plane and fit in shifted sphere<a name="3"></a></h2>
+         <p><img vspace="5" hspace="5" src="plot_planes_eq2303396.png"> </p><pre class="codeinput"><span class="keyword">for</span> i=1:length(plane)
+    <span class="comment">%Set a sphere to have a center at home point</span>
+    locuspts_x=base_x+plane(i).home_point(1);
+    locuspts_y=base_y+plane(i).home_point(2);
+    locuspts_z=base_z+plane(i).home_point(3);
+</pre><h2>Find which points on sphere correspond to where plane crosses<a name="4"></a></h2>
+         <p><img vspace="5" hspace="5" src="plot_planes_eq3286603.png"> </p><pre class="codeinput">    pts_to_check=plane(i).equ(1)*locuspts_x+<span class="keyword">...</span>
+                 plane(i).equ(2)*locuspts_y+<span class="keyword">...</span>
+                 plane(i).equ(3)*locuspts_z+<span class="keyword">...</span>
+                 plane(i).equ(4);
+     <span class="comment">%points that are within 0.1 are considered on the plane</span>
+     pts_to_plot=find(abs(pts_to_check)&lt;plane_sphere_threshold);
+     <span class="keyword">if</span> length(pts_to_plot)&gt;0
+
+     <span class="comment">%fill in the points which are considered to describe the plane.</span>
+     <span class="comment">%From some angle this will appear as a circle, but it is a circle</span>
+     <span class="comment">%rotated to fit on the plane</span>
+        plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),<span class="string">'b'</span>);
+     <span class="keyword">else</span>
+         pts_to_plot=find(abs(pts_to_check)&lt;plane_sphere_threshold*5);
+         plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),<span class="string">'b'</span>);
+     <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% plot_planes
+%
+% *Description:*  this is a slightly modified version ofthe plot planes from the the
+% surface growing work, it gets a structure of planes passed to it and the
+% size mew and then makes planes out of the points where the plane
+% intersects with a sphere translated to the center of the plane
+
+%% Function Call
+% 
+% * *Inputs:* 
+%   plane (struct) planes structure with equations and home points
+%   mew (double) radius of the planes
+% * *Returns:* Null
+
+function plot_handles=plot_planes(plane,mew)
+
+%% Variables
+plane_sphere_threshold=.01;
+
+%start with a normal sphere described by 20 points
+[base_x,base_y,base_z]=sphere(30);
+%make the radium mew
+base_x=base_x*mew;
+base_y=base_y*mew;
+base_z=base_z*mew;
+%for each plane
+plot_handles=zeros([length(plane),1]);
+hold on;
+
+%% Go throuh each plane and fit in shifted sphere
+% $$ \begin{array}{l}
+% \forall i\\
+% P_{sphere}:=
+% (x-p_{(home_i,x)})^2+(y-p_{(home_i,y)})^2+(z-p_{(home_i,z)})^2=\mu^2\\
+% P_{(locus,{x,y,z})}=[x,y,z] \mbox{of above sphere function}
+% \end{array}$$
+
+for i=1:length(plane)
+    %Set a sphere to have a center at home point
+    locuspts_x=base_x+plane(i).home_point(1);
+    locuspts_y=base_y+plane(i).home_point(2);
+    locuspts_z=base_z+plane(i).home_point(3);
+
+%% Find which points on sphere correspond to where plane crosses
+% $$ \begin{array}{l}
+% P_{to\_check}=A_i*P_{(locus,x)}+B_i*P_{(locus,y)}+C_i*P_{(locus,z)}+D_i\\\\
+% \mbox{find points within C of plane... } P_{close}=\\
+% find(|P_{to\_check}|<C{plane\_sphere\_threshold})
+% \end{array}$$
+
+    pts_to_check=plane(i).equ(1)*locuspts_x+...
+                 plane(i).equ(2)*locuspts_y+...
+                 plane(i).equ(3)*locuspts_z+...
+                 plane(i).equ(4);
+     %points that are within 0.1 are considered on the plane
+     pts_to_plot=find(abs(pts_to_check)<plane_sphere_threshold);
+     if length(pts_to_plot)>0
+
+     %fill in the points which are considered to describe the plane.
+     %From some angle this will appear as a circle, but it is a circle
+     %rotated to fit on the plane
+        plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'b');        
+     else
+         pts_to_plot=find(abs(pts_to_check)<plane_sphere_threshold*5);
+         plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'b');        
+     end
+end
+
+##### SOURCE END #####
+-->
+   </body>
+</html>
