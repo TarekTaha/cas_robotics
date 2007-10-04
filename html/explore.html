@@ -1,0 +1,304 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>explore</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2007-10-03">
+      <meta name="m-file" content="explore"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>explore</h1>
+         <introduction>
+            <p><b>Description:</b>  This function alows: * 1) Virtual world: for a selection of where to explore of uses a selected bestview that has been precalculated
+               then works out gained knowledge and add it to the map * 2) Real World: Move the robot to desired NBV or chosen place then
+               add points to memory, * <i>Note:</i> All needs to be setup correctly including workspace, the scan parameters, robot (r) and Q and parameters robot_maxreach and
+               the exGUI
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Function Call</a></li>
+               <li><a href="#2">Variables</a></li>
+               <li><a href="#3">Selection of Scan Pose and direction</a></li>
+               <li><a href="#4">Calculate what was known previously</a></li>
+               <li><a href="#5">Do the Scan _imaginary_</a></li>
+               <li><a href="#6">Do the Scan _real_</a></li>
+               <li><a href="#7">Display results</a></li>
+            </ul>
+         </div>
+         <h2>Function Call<a name="1"></a></h2>
+         <div>
+            <ul>
+               <li><b>Inputs:</b> h (struct double) handles of the GUI, useNBV (bin) whether or not the best view is to be used selection (int) if useNBV,
+                  which view to use
+               </li>
+               <li><b>Returns:</b> Null
+               </li>
+            </ul>
+         </div><pre class="codeinput"><span class="keyword">function</span> explore(h,useNBV,selection)
+</pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> workspace scan bestviews r Q robot_maxreach
+</pre><h2>Selection of Scan Pose and direction<a name="3"></a></h2><pre class="codeinput"><span class="comment">% this is either using a calculated NBV or choose our own</span>
+<span class="keyword">if</span> true(useNBV)
+    scan.origin=bestviews(selection).scanorigin;
+    scan.chosenview=bestviews(selection).chosenview;
+    <span class="comment">% Make it so that the last angle is 0</span>
+    newQ=[bestviews(selection).Q(1:5),0];
+    <span class="comment">%display('final angle has been change to 0 so we can get the largest scan')</span>
+<span class="keyword">else</span>
+    <span class="comment">%Assume the first scan is from the (only) or at least first known point</span>
+    <span class="keyword">if</span> get(h.start_with_default_poses_checkbox,<span class="string">'value'</span>) &amp;&amp; scan.tries&lt;=size(robot_maxreach.default_Q,1)-1
+        newQ=robot_maxreach.default_Q(scan.tries+1,:);
+        set(h.dialog_text,<span class="string">'String'</span>,strcat(<span class="string">'Using default vals, now taking scan NO.'</span>,num2str(scan.tries+1)));
+        tr=fkine(r,Q);
+        scan.origin=[tr(1,4),tr(2,4),tr(3,4)];
+    <span class="keyword">else</span>
+        error(<span class="string">'You have asked for not a NBV scan and there are no more default poses'</span>);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2>Calculate what was known previously<a name="4"></a></h2><pre class="codeinput">previously_known=calknownweight();
+</pre><h2>Do the Scan _imaginary_<a name="5"></a></h2><pre class="codeinput"><span class="keyword">if</span> (get(h.useRealRobot_checkbox,<span class="string">'Value'</span>)==0)
+    <span class="keyword">if</span> movetonewQ(h,newQ*180/pi)~=true
+        error(<span class="string">'No path could be found for the end position even if it is valid'</span>)
+    <span class="keyword">end</span>
+    doscan(newQ);
+</pre><h2>Do the Scan _real_<a name="6"></a></h2><pre class="codeinput"><span class="keyword">else</span>
+    <span class="comment">% Change newQ so if scanning on the downside (+ angles) -&gt; start from max place and goes to the center,</span>
+    <span class="comment">% Alternately,it goes to +30', and then scan to the max negative possible</span>
+    qlimits=r.qlim;
+    minimum_alpha=qlimits(5,1)*0.9;
+    <span class="comment">%determine the maximum angle</span>
+    <span class="keyword">if</span> newQ(3)&gt;scan.alpha_limited_condition
+        maximum_alpha=scan.alpha_limited;
+    <span class="keyword">else</span>
+        maximum_alpha=scan.alpha;
+    <span class="keyword">end</span>
+    <span class="comment">%determine where to start and where to tilt through too</span>
+    <span class="keyword">if</span> scan.chosenview(3)&gt;0
+        newQ(5)=min(maximum_alpha,newQ(5)+scan.alpha/2);
+        tilt_scan_range=minimum_alpha-newQ(5);
+    <span class="keyword">else</span>
+        newQ(5)=max(minimum_alpha,newQ(5)-scan.alpha/2);
+        tilt_scan_range=maximum_alpha-newQ(5);
+    <span class="keyword">end</span>
+
+    <span class="comment">%try and move to newQ</span>
+    <span class="keyword">if</span> movetonewQ(h,newQ*180/pi)~=true
+        error(<span class="string">'No path could be found for the end position even if it is valid'</span>)
+    <span class="keyword">end</span>
+
+    <span class="comment">%take a scan through determined tilt_scan_range</span>
+    use_real_robot_SCAN(tilt_scan_range*180/pi);
+
+    <span class="comment">%this sort out the points that we have got from a scan</span>
+    organise_data(tilt_scan_range);
+<span class="keyword">end</span>
+</pre><h2>Display results<a name="7"></a></h2><pre class="codeinput"><span class="comment">% print results this exploration step details</span>
+display(strcat(<span class="string">'The scan origin is ('</span>,num2str(scan.origin),<span class="string">'), [with 0=+ &amp; 1=-] pose is (abc)  ('</span>,num2str(scan.chosenview),<span class="keyword">...</span>
+               <span class="string">'), and this is try:'</span>,num2str(scan.tries)));
+
+scan.ALLorigin=[scan.ALLorigin;scan.origin];
+
+<span class="comment">% Calculate the WEIGHTED known/unknown/obstacle knowledge</span>
+unknownweight=calunknownweight();
+knownweight=calknownweight();
+obstacleweight=calobstacleweight();
+
+<span class="comment">% Print out the details of WEIGHTED known/unknown/obstacle knowledge</span>
+display(strcat(<span class="string">'New freespace knowledge:'</span>,num2str(knownweight-previously_known),<span class="keyword">...</span>
+               <span class="string">', Weighted Total Known Free:'</span>,num2str(knownweight), <span class="string">', Weighted Obsticles:'</span>,num2str(obstacleweight),<span class="keyword">...</span>
+               <span class="string">' Remaining Weighted Unknown withing workspace:'</span>,num2str(unknownweight)));
+
+<span class="comment">% Set GUI to show size of known + obstacle knowledge out of total knowledge</span>
+set(h.total_info_text,<span class="string">'String'</span>,num2str(size(workspace.knowncoords,1)+size(workspace.indexedobsticles,1)));
+set(h.total_text,<span class="string">'String'</span>,num2str(size(workspace.unknowncoords,1)));
+drawnow;
+
+<span class="comment">%increment the number of tries</span>
+scan.tries=scan.tries+1;
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% explore
+%
+% *Description:*  This function alows: 
+% * 1) Virtual world: for a selection of where to explore of uses a selected bestview that
+% has been precalculated then works out gained knowledge and add it to the
+% map
+% * 2) Real World: Move the robot to desired NBV or chosen place then add
+% points to memory,
+% * _Note:_ All needs to be setup correctly including workspace, the scan
+% parameters, robot (r) and Q and parameters robot_maxreach and the exGUI 
+
+%% Function Call
+%
+% * *Inputs:* 
+% h (struct double) handles of the GUI,
+% useNBV (bin) whether or not the best view is to be used
+% selection (int) if useNBV, which view to use
+% * *Returns:* Null
+
+function explore(h,useNBV,selection)
+
+%% Variables
+global workspace scan bestviews r Q robot_maxreach
+
+%% Selection of Scan Pose and direction
+
+% this is either using a calculated NBV or choose our own
+if true(useNBV)
+    scan.origin=bestviews(selection).scanorigin;
+    scan.chosenview=bestviews(selection).chosenview;
+    % Make it so that the last angle is 0
+    newQ=[bestviews(selection).Q(1:5),0];
+    %display('final angle has been change to 0 so we can get the largest scan')
+else
+    %Assume the first scan is from the (only) or at least first known point 
+    if get(h.start_with_default_poses_checkbox,'value') && scan.tries<=size(robot_maxreach.default_Q,1)-1
+        newQ=robot_maxreach.default_Q(scan.tries+1,:);       
+        set(h.dialog_text,'String',strcat('Using default vals, now taking scan NO.',num2str(scan.tries+1)));
+        tr=fkine(r,Q);
+        scan.origin=[tr(1,4),tr(2,4),tr(3,4)];
+    else 
+        error('You have asked for not a NBV scan and there are no more default poses');
+    end
+end
+
+%% Calculate what was known previously
+previously_known=calknownweight();
+
+%% Do the Scan _imaginary_
+if (get(h.useRealRobot_checkbox,'Value')==0)
+    if movetonewQ(h,newQ*180/pi)~=true
+        error('No path could be found for the end position even if it is valid')
+    end
+    doscan(newQ);
+
+%% Do the Scan _real_
+else
+    % Change newQ so if scanning on the downside (+ angles) -> start from max place and goes to the center, 
+    % Alternately,it goes to +30', and then scan to the max negative possible
+    qlimits=r.qlim;
+    minimum_alpha=qlimits(5,1)*0.9;
+    %determine the maximum angle
+    if newQ(3)>scan.alpha_limited_condition
+        maximum_alpha=scan.alpha_limited;
+    else 
+        maximum_alpha=scan.alpha;
+    end    
+    %determine where to start and where to tilt through too
+    if scan.chosenview(3)>0
+        newQ(5)=min(maximum_alpha,newQ(5)+scan.alpha/2);
+        tilt_scan_range=minimum_alpha-newQ(5);
+    else
+        newQ(5)=max(minimum_alpha,newQ(5)-scan.alpha/2);
+        tilt_scan_range=maximum_alpha-newQ(5);
+    end
+    
+    %try and move to newQ
+    if movetonewQ(h,newQ*180/pi)~=true
+        error('No path could be found for the end position even if it is valid')
+    end
+    
+    %take a scan through determined tilt_scan_range
+    use_real_robot_SCAN(tilt_scan_range*180/pi);
+        
+    %this sort out the points that we have got from a scan
+    organise_data(tilt_scan_range);
+end
+
+%% Display results
+
+% print results this exploration step details
+display(strcat('The scan origin is (',num2str(scan.origin),'), [with 0=+ & 1=-] pose is (abc)  (',num2str(scan.chosenview),...
+               '), and this is try:',num2str(scan.tries)));
+
+scan.ALLorigin=[scan.ALLorigin;scan.origin];
+
+% Calculate the WEIGHTED known/unknown/obstacle knowledge
+unknownweight=calunknownweight();
+knownweight=calknownweight();
+obstacleweight=calobstacleweight();
+
+% Print out the details of WEIGHTED known/unknown/obstacle knowledge
+display(strcat('New freespace knowledge:',num2str(knownweight-previously_known),...
+               ', Weighted Total Known Free:',num2str(knownweight), ', Weighted Obsticles:',num2str(obstacleweight),...
+               ' Remaining Weighted Unknown withing workspace:',num2str(unknownweight)));
+
+% Set GUI to show size of known + obstacle knowledge out of total knowledge  
+set(h.total_info_text,'String',num2str(size(workspace.knowncoords,1)+size(workspace.indexedobsticles,1)));
+set(h.total_text,'String',num2str(size(workspace.unknowncoords,1)));
+drawnow;
+
+%increment the number of tries
+scan.tries=scan.tries+1;
+##### SOURCE END #####
+-->
+   </body>
+</html>

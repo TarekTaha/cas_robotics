@@ -1,0 +1,283 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>movetonewQ</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2007-10-03">
+      <meta name="m-file" content="movetonewQ"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>movetonewQ</h1>
+         <introduction>
+            <p><b>Description:</b> either passed or got from the GUI, updates the GUI move to new Q function for GUI plotting and sending commands requires
+               exGUI to run. Special Note: newQ IS IN DEGREES!!
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Function Call</a></li>
+               <li><a href="#2">Variables</a></li>
+               <li><a href="#3">Check if we only want to go to the exact destination</a></li>
+               <li><a href="#4">Get the latest Q from the robot if we are using it</a></li>
+               <li><a href="#5">Check if we are already at destination or very close (rounding error)</a></li>
+               <li><a href="#6">Do path planning</a></li>
+               <li><a href="#7">If there is a path then do the actual move(and plot) else do nothing</a></li>
+            </ul>
+         </div>
+         <h2>Function Call<a name="1"></a></h2>
+         <div>
+            <ul>
+               <li><b>Inputs:</b> handles (array double) GUI variables newQ(1*6 double) newQ in degrees
+               </li>
+               <li><b>Returns:</b> pathfound (binary) if a path was found or not
+               </li>
+            </ul>
+         </div><pre class="codeinput"><span class="keyword">function</span> pathfound=movetonewQ(handles,newQ)
+</pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> r Q guiglobal;
+
+<span class="comment">% check we have got passed a newQ otherwise use from the GUI</span>
+<span class="keyword">if</span> nargin&lt;2
+    <span class="comment">%get the desired destination from the GUI</span>
+    newQ(1)=str2double(get(handles.move_to_J1_edit,<span class="string">'String'</span>));
+    newQ(2)=str2double(get(handles.move_to_J2_edit,<span class="string">'String'</span>));
+    newQ(3)=str2double(get(handles.move_to_J3_edit,<span class="string">'String'</span>));
+    newQ(4)=str2double(get(handles.move_to_J4_edit,<span class="string">'String'</span>));
+    newQ(5)=str2double(get(handles.move_to_J5_edit,<span class="string">'String'</span>));
+    newQ(6)=str2double(get(handles.move_to_J6_edit,<span class="string">'String'</span>));
+    <span class="keyword">if</span> find(isnan(newQ))&gt;0
+        error(<span class="string">'Some values you are requesting to move to are not valid - all must be numbers'</span>)
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">%change to rads</span>
+newQ=newQ*pi/180;
+</pre><h2>Check if we only want to go to the exact destination<a name="3"></a></h2><pre class="codeinput"><span class="keyword">if</span> get(handles.exact_joints_only_checkbox,<span class="string">'Value'</span>)
+    tryalternate=false;
+<span class="keyword">else</span>
+    tryalternate=true;
+<span class="keyword">end</span>
+</pre><h2>Get the latest Q from the robot if we are using it<a name="4"></a></h2><pre class="codeinput"><span class="keyword">if</span> 	get(handles.useRealRobot_checkbox,<span class="string">'Value'</span>)
+    use_real_robot_GETJs();
+<span class="keyword">end</span>
+</pre><h2>Check if we are already at destination or very close (rounding error)<a name="5"></a></h2><pre class="codeinput"><span class="comment">%check if we are already at the destination and return if we are</span>
+<span class="comment">%eps is a very small value and if there is less than this angular distance</span>
+<span class="comment">%we disregard this and say it is at the same place</span>
+<span class="keyword">if</span> isempty(find(abs(Q-(newQ*pi/180))&gt;eps, 1));
+    <span class="comment">%since we are already at the correct path</span>
+    set(handles.dialog_text,<span class="string">'String'</span>,<span class="string">'Already at destination'</span>);drawnow;
+    <span class="keyword">if</span> get(handles.show_robot_checkbox,<span class="string">'Value'</span>);
+        plotdenso(r, newQ, guiglobal.checkFF, guiglobal.plot_ellipse);
+    <span class="keyword">end</span>
+    <span class="keyword">return</span>
+<span class="keyword">end</span>
+</pre><h2>Do path planning<a name="6"></a></h2><pre class="codeinput"><span class="keyword">try</span> <span class="comment">%set(handles.dialog_text,'String','Calculating Path......');drawnow;</span>
+    [pathfound,all_steps]=pathplanner(newQ,guiglobal.plotpath,tryalternate);
+<span class="keyword">catch</span>; keyboard
+<span class="keyword">end</span>
+
+<span class="comment">%if it is an error returned means that the end is not valid</span>
+<span class="keyword">if</span> pathfound==-1
+    set(handles.dialog_text,<span class="string">'String'</span>,<span class="string">'Impossible Path - Collision avoided! Ignoring command!'</span>);
+    error(<span class="string">'It is not safe/possible to move here'</span>);
+<span class="keyword">end</span>
+</pre><h2>If there is a path then do the actual move(and plot) else do nothing<a name="7"></a></h2><pre class="codeinput"><span class="keyword">if</span> pathfound &amp;&amp; size(all_steps,1)&gt;0
+    <span class="comment">%if animate has been selected it will go through each step of the path</span>
+    <span class="keyword">if</span> get(handles.animate_move_checkbox,<span class="string">'Value'</span>)
+        set(handles.dialog_text,<span class="string">'String'</span>,<span class="string">'Path found - animating....'</span>);
+        demopath(all_steps);
+    <span class="keyword">end</span>
+    <span class="comment">%plot the end effector in place</span>
+    <span class="keyword">if</span> get(handles.show_robot_checkbox,<span class="string">'Value'</span>);
+        plotdenso(r, all_steps(end,:), guiglobal.checkFF, guiglobal.plot_ellipse);
+    <span class="keyword">end</span>
+    set(handles.dialog_text,<span class="string">'String'</span>,<span class="string">'Path found - animation updated'</span>);
+    <span class="comment">%If using real robot try and move it</span>
+    <span class="keyword">if</span> get(handles.useRealRobot_checkbox,<span class="string">'Value'</span>)
+        <span class="keyword">try</span> use_real_robot_MOVE(all_steps);
+            set(handles.dialog_text,<span class="string">'String'</span>,<span class="string">'Actual robot movement complete'</span>);
+        <span class="keyword">catch</span> set(handles.dialog_text,<span class="string">'String'</span>,<span class="string">'Error: Did not complete movement - Emergency Stop Probably Hit'</span>);
+            error(<span class="string">'Did not complete movement'</span>);
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    <span class="comment">%set overall Q to be the last step in path</span>
+    Q=all_steps(end,:);
+<span class="keyword">else</span> <span class="comment">%no path found, update GUI accordingly</span>
+    <span class="keyword">if</span> get(handles.show_robot_checkbox,<span class="string">'Value'</span>);
+        plotdenso(r, Q, guiglobal.checkFF, guiglobal.plot_ellipse);
+    <span class="keyword">end</span>
+    set(handles.dialog_text,<span class="string">'String'</span>,<span class="string">'End valid but no path found'</span>);
+<span class="keyword">end</span>
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% movetonewQ
+%
+% *Description:* either passed or got from the GUI, updates the GUI
+% move to new Q function for GUI plotting and sending commands
+% requires exGUI to run.
+% Special Note: newQ IS IN DEGREES!!
+
+%% Function Call
+%
+% * *Inputs:* handles (array double) GUI variables
+% newQ(1*6 double) newQ in degrees
+% * *Returns:* pathfound (binary) if a path was found or not
+
+function pathfound=movetonewQ(handles,newQ)
+
+%% Variables
+global r Q guiglobal;
+
+% check we have got passed a newQ otherwise use from the GUI
+if nargin<2
+    %get the desired destination from the GUI
+    newQ(1)=str2double(get(handles.move_to_J1_edit,'String'));
+    newQ(2)=str2double(get(handles.move_to_J2_edit,'String'));
+    newQ(3)=str2double(get(handles.move_to_J3_edit,'String'));
+    newQ(4)=str2double(get(handles.move_to_J4_edit,'String'));
+    newQ(5)=str2double(get(handles.move_to_J5_edit,'String'));
+    newQ(6)=str2double(get(handles.move_to_J6_edit,'String'));
+    if find(isnan(newQ))>0
+        error('Some values you are requesting to move to are not valid - all must be numbers')
+    end
+end
+
+%change to rads
+newQ=newQ*pi/180;
+
+%% Check if we only want to go to the exact destination
+if get(handles.exact_joints_only_checkbox,'Value')
+    tryalternate=false;
+else
+    tryalternate=true;
+end
+
+%% Get the latest Q from the robot if we are using it
+if 	get(handles.useRealRobot_checkbox,'Value')
+    use_real_robot_GETJs();
+end
+
+%% Check if we are already at destination or very close (rounding error)
+%check if we are already at the destination and return if we are
+%eps is a very small value and if there is less than this angular distance
+%we disregard this and say it is at the same place
+if isempty(find(abs(Q-(newQ*pi/180))>eps, 1));
+    %since we are already at the correct path
+    set(handles.dialog_text,'String','Already at destination');drawnow;
+    if get(handles.show_robot_checkbox,'Value');
+        plotdenso(r, newQ, guiglobal.checkFF, guiglobal.plot_ellipse);
+    end
+    return
+end
+
+%% Do path planning
+try %set(handles.dialog_text,'String','Calculating Path......');drawnow;
+    [pathfound,all_steps]=pathplanner(newQ,guiglobal.plotpath,tryalternate);
+catch; keyboard
+end
+
+%if it is an error returned means that the end is not valid
+if pathfound==-1
+    set(handles.dialog_text,'String','Impossible Path - Collision avoided! Ignoring command!');
+    error('It is not safe/possible to move here');
+end
+
+%% If there is a path then do the actual move(and plot) else do nothing
+if pathfound && size(all_steps,1)>0
+    %if animate has been selected it will go through each step of the path
+    if get(handles.animate_move_checkbox,'Value')
+        set(handles.dialog_text,'String','Path found - animating....');
+        demopath(all_steps);       
+    end
+    %plot the end effector in place
+    if get(handles.show_robot_checkbox,'Value');
+        plotdenso(r, all_steps(end,:), guiglobal.checkFF, guiglobal.plot_ellipse);
+    end
+    set(handles.dialog_text,'String','Path found - animation updated');
+    %If using real robot try and move it
+    if get(handles.useRealRobot_checkbox,'Value')
+        try use_real_robot_MOVE(all_steps); 
+            set(handles.dialog_text,'String','Actual robot movement complete');
+        catch set(handles.dialog_text,'String','Error: Did not complete movement - Emergency Stop Probably Hit');
+            error('Did not complete movement');
+        end
+    end
+    %set overall Q to be the last step in path
+    Q=all_steps(end,:);
+else %no path found, update GUI accordingly
+    if get(handles.show_robot_checkbox,'Value');
+        plotdenso(r, Q, guiglobal.checkFF, guiglobal.plot_ellipse);
+    end
+    set(handles.dialog_text,'String','End valid but no path found');
+end
+##### SOURCE END #####
+-->
+   </body>
+</html>
