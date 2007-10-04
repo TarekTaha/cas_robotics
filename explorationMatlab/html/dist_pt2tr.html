@@ -1,0 +1,138 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>dist_pt2tr</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2007-10-03">
+      <meta name="m-file" content="dist_pt2tr"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>dist_pt2tr</h1>
+         <introduction>
+            <p><b>Description:</b>  Function for find the distance from a point to a transform
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Function Call</a></li>
+               <li><a href="#2">Given an end effector transform</a></li>
+               <li><a href="#3">Calculate distance (dist) from pt to tr</a></li>
+            </ul>
+         </div>
+         <h2>Function Call<a name="1"></a></h2>
+         <div>
+            <ul>
+               <li><b>Inputs:</b> pt (3*1 double) x,y,z cartesian point tr (4*4 double) transform of an arm
+               </li>
+               <li><b>Returns:</b> dist (double) distance from pt to tr
+               </li>
+            </ul>
+         </div><pre class="codeinput"><span class="keyword">function</span> dist=dist_pt2tr(pt,tr)
+</pre><h2>Given an end effector transform<a name="2"></a></h2>
+         <p><img vspace="5" hspace="5" src="dist_pt2tr_eq599940.png"> </p>
+         <h2>Calculate distance (dist) from pt to tr<a name="3"></a></h2>
+         <p><img vspace="5" hspace="5" src="dist_pt2tr_eq66331.png"> </p><pre class="codeinput">dist=sqrt((pt(1)-tr(1,4))^2+<span class="keyword">...</span>
+          (pt(2)-tr(2,4))^2+<span class="keyword">...</span>
+          (pt(3)-tr(3,4))^2);
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% dist_pt2tr
+%
+% *Description:*  Function for find the distance from a point to a
+% transform
+
+%% Function Call
+% 
+% * *Inputs:* 
+% pt (3*1 double) x,y,z cartesian point
+% tr (4*4 double) transform of an arm
+% * *Returns:* 
+% dist (double) distance from pt to tr
+
+function dist=dist_pt2tr(pt,tr)
+
+%% Given an end effector transform
+% $$tr=\begin{array}{cccc} 
+% n_x & o_x & a_x & P_x \\ 
+% n_y & o_y & a_y & P_y \\
+% n_z & o_z & a_z & P_z \\
+% 0&0&0&1\end{array}$$
+
+%% Calculate distance (dist) from pt to tr
+% $$dist=\sqrt{(pt_x-P_x)^2+(pt_y-P_y)^2 + (pt_z-P_z)^2}$$
+dist=sqrt((pt(1)-tr(1,4))^2+...
+          (pt(2)-tr(2,4))^2+...
+          (pt(3)-tr(3,4))^2);
+
+##### SOURCE END #####
+-->
+   </body>
+</html>

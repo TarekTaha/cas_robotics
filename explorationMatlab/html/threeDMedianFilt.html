@@ -1,0 +1,261 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>threeDMedianFilt</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2007-10-03">
+      <meta name="m-file" content="threeDMedianFilt"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>threeDMedianFilt</h1>
+         <introduction>
+            <p><b>Description:</b>  Filters the unknown points which are in level 1 where there is an unknown  point completely surrounded by known points which
+               are not obstacles
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Function Call</a></li>
+               <li><a href="#2">Variables</a></li>
+               <li><a href="#3">Calculate set of points (P) in level 1 for 3 different possibilities</a></li>
+               <li><a href="#4">If there are any points</a></li>
+               <li><a href="#5">Go through each point &amp; check if there are NO surrounding unknown pnts</a></li>
+               <li><a href="#6">Add filtered out unknown points to either obstacles or known free</a></li>
+               <li><a href="#7">Additional Future work to remove unknown points in ellipses on a path</a></li>
+            </ul>
+         </div>
+         <h2>Function Call<a name="1"></a></h2>
+         <div>
+            <ul>
+               <li><b>Inputs:</b> Null
+               </li>
+               <li><b>Returns:</b> Null
+               </li>
+            </ul>
+         </div><pre class="codeinput"><span class="keyword">function</span> threeDMedianFilt()
+keyboard
+</pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> workspace
+OBtofilterout=[];
+KNtofilterout=[];
+</pre><h2>Calculate set of points (P) in level 1 for 3 different possibilities<a name="3"></a></h2>
+         <p><img vspace="5" hspace="5" src="threeDMedianFilt_eq832611.png"> </p><pre class="codeinput">a=round(workspace.unknowncoords(workspace.lev1unknown,:)/workspace.inc_size);
+b=round(workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:)/workspace.inc_size);
+c=round(workspace.indexedobsticles(GetImpLevInfo(workspace.indexedobsticles),:)/workspace.inc_size);
+[nothing,index]=setdiff(a,[b;c],<span class="string">'rows'</span>);
+</pre><h2>If there are any points<a name="4"></a></h2><pre class="codeinput"><span class="keyword">if</span> ~isempty(index)
+    <span class="comment">%unknown point which need to be median filtered</span>
+    P2chk=workspace.unknowncoords(workspace.lev1unknown(index),:);
+    P2chkIndx=round(P2chk/workspace.inc_size);
+    display(strcat(<span class="string">'Initial num of unnknown points in level 1:'</span>,num2str(size(P2chkIndx,1))));
+</pre><h2>Go through each point &amp; check if there are NO surrounding unknown pnts<a name="5"></a></h2><pre class="codeinput">    <span class="keyword">for</span> i=1:size(P2chkIndx,1)
+        <span class="comment">%currently all point around must not be unknown (if you change this</span>
+        <span class="comment">%to allow some points to be unknown it will potentially start a</span>
+        <span class="comment">%chain reaction which will eventually turn all points into known</span>
+        <span class="keyword">if</span> length(find((P2chkIndx(i,1)-1==P2chkIndx(:,1) | P2chkIndx(i,1)==P2chkIndx(:,1) | P2chkIndx(i,1)+1==P2chkIndx(:,1)) &amp;<span class="keyword">...</span>
+                       (P2chkIndx(i,2)-1==P2chkIndx(:,2) | P2chkIndx(i,2)==P2chkIndx(:,2) | P2chkIndx(i,2)+1==P2chkIndx(:,2)) &amp;<span class="keyword">...</span>
+                       (P2chkIndx(i,3)-1==P2chkIndx(:,3) | P2chkIndx(i,3)==P2chkIndx(:,3) | P2chkIndx(i,3)+1==P2chkIndx(:,3))))==1
+            <span class="comment">%if any surrounding are obstacles, assume its an obsacle otherise assume its free</span>
+            <span class="keyword">if</span> ~isempty(find((P2chkIndx(i,1)-1==c(:,1) | P2chkIndx(i,1)==c(:,1) | P2chkIndx(i,1)+1==c(:,1)) &amp;<span class="keyword">...</span>
+                            (P2chkIndx(i,2)-1==c(:,2) | P2chkIndx(i,2)==c(:,2) | P2chkIndx(i,2)+1==c(:,2)) &amp;<span class="keyword">...</span>
+                            (P2chkIndx(i,3)-1==c(:,3) | P2chkIndx(i,3)==c(:,3) | P2chkIndx(i,3)+1==c(:,3)), 1))
+               OBtofilterout=[OBtofilterout;i];
+            <span class="keyword">else</span>
+               KNtofilterout=[KNtofilterout;i];
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    display(strcat(<span class="string">'Num Points to be added to KNOWN list after median filtering:'</span>,num2str(size(KNtofilterout,1))));
+    display(strcat(<span class="string">'Num Points to be added to OBSTACLE list after median filtering:'</span>,num2str(size(OBtofilterout,1))));
+<span class="keyword">end</span>
+</pre><h2>Add filtered out unknown points to either obstacles or known free<a name="6"></a></h2><pre class="codeinput">workspace.knowncoords=[workspace.knowncoords;workspace.unknowncoords(workspace.lev1unknown(index(KNtofilterout)),:)];
+workspace.obsticlepoints=[workspace.obsticlepoints;workspace.unknowncoords(workspace.lev1unknown(index(OBtofilterout)),:)];
+</pre><h2>Additional Future work to remove unknown points in ellipses on a path<a name="7"></a></h2><pre class="codeinput"><span class="comment">% %robot parameters</span>
+<span class="comment">% n = r.n;</span>
+<span class="comment">% L = r.link;</span>
+<span class="comment">% t = r.base;</span>
+<span class="comment">%</span>
+<span class="comment">% %% check each step for unknown points</span>
+<span class="comment">%</span>
+<span class="comment">% for i=1:size(all_steps,1)</span>
+<span class="comment">%     t = r.base;</span>
+<span class="comment">%     for piece=1:n</span>
+<span class="comment">%         t = t * L{piece}(all_steps(i,piece));</span>
+<span class="comment">%        translated_points=[P2chk(:,1)-t(1,4) P2chk(:,2)-t(2,4) P2chk(:,3)-t(3,4)];</span>
+<span class="comment">%        translated_points=translated_points*t(1:3,1:3);</span>
+<span class="comment">%</span>
+<span class="comment">%         KNtofilterout=[KNtofilterout;...</span>
+<span class="comment">%             find(((translated_points(:,1)-densoobj(piece+1).ellipse.center(1)).^2)/densoobj(piece+1).ellipse.params(1)^2+...</span>
+<span class="comment">%                  ((translated_points(:,2)-densoobj(piece+1).ellipse.center(2)).^2)/densoobj(piece+1).ellipse.params(2)^2+...</span>
+<span class="comment">%                  ((translated_points(:,3)-densoobj(piece+1).ellipse.center(3)).^2)/densoobj(piece+1).ellipse.params(3)^2&lt;=1)];</span>
+<span class="comment">%              find(((translated_points(:,1)-densoobj(piece+1).ellipse.center(1)).^2)/densoobj(piece+1).ellipse.params(1)^2+...</span>
+<span class="comment">%                  ((translated_points(:,2)-densoobj(piece+1).ellipse.center(2)).^2)/densoobj(piece+1).ellipse.params(2)^2+...</span>
+<span class="comment">%                  ((translated_points(:,3)-densoobj(piece+1).ellipse.center(3)).^2)/densoobj(piece+1).ellipse.params(3)^2&lt;=1)</span>
+<span class="comment">%     end</span>
+<span class="comment">% end</span>
+<span class="comment">%</span>
+<span class="comment">% size(KNtofilterout,1)</span>
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% threeDMedianFilt
+%
+% *Description:*  Filters the unknown points which are in level 1 where
+% there is an unknown  point completely surrounded by known points which
+% are not obstacles 
+
+%% Function Call
+%
+% * *Inputs:* Null
+% * *Returns:* Null
+
+function threeDMedianFilt()
+keyboard
+%% Variables
+global workspace
+OBtofilterout=[];
+KNtofilterout=[];
+    
+%% Calculate set of points (P) in level 1 for 3 different possibilities
+% $$ \begin{array}{lll}
+% P_{a}=P_{unknown}, & P_{b}=P_{knownfree}, & P_{b}=P_{obstacle} \\\\
+% & P_{total}=P_{a}+P_{b}+P_{c}
+% \end{array} $$
+a=round(workspace.unknowncoords(workspace.lev1unknown,:)/workspace.inc_size);
+b=round(workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:)/workspace.inc_size);
+c=round(workspace.indexedobsticles(GetImpLevInfo(workspace.indexedobsticles),:)/workspace.inc_size);
+[nothing,index]=setdiff(a,[b;c],'rows');
+
+%% If there are any points
+if ~isempty(index)
+    %unknown point which need to be median filtered
+    P2chk=workspace.unknowncoords(workspace.lev1unknown(index),:);
+    P2chkIndx=round(P2chk/workspace.inc_size);
+    display(strcat('Initial num of unnknown points in level 1:',num2str(size(P2chkIndx,1))));
+
+  
+%% Go through each point & check if there are NO surrounding unknown pnts
+    for i=1:size(P2chkIndx,1)
+        %currently all point around must not be unknown (if you change this
+        %to allow some points to be unknown it will potentially start a
+        %chain reaction which will eventually turn all points into known
+        if length(find((P2chkIndx(i,1)-1==P2chkIndx(:,1) | P2chkIndx(i,1)==P2chkIndx(:,1) | P2chkIndx(i,1)+1==P2chkIndx(:,1)) &...
+                       (P2chkIndx(i,2)-1==P2chkIndx(:,2) | P2chkIndx(i,2)==P2chkIndx(:,2) | P2chkIndx(i,2)+1==P2chkIndx(:,2)) &...
+                       (P2chkIndx(i,3)-1==P2chkIndx(:,3) | P2chkIndx(i,3)==P2chkIndx(:,3) | P2chkIndx(i,3)+1==P2chkIndx(:,3))))==1
+            %if any surrounding are obstacles, assume its an obsacle otherise assume its free
+            if ~isempty(find((P2chkIndx(i,1)-1==c(:,1) | P2chkIndx(i,1)==c(:,1) | P2chkIndx(i,1)+1==c(:,1)) &...
+                            (P2chkIndx(i,2)-1==c(:,2) | P2chkIndx(i,2)==c(:,2) | P2chkIndx(i,2)+1==c(:,2)) &...
+                            (P2chkIndx(i,3)-1==c(:,3) | P2chkIndx(i,3)==c(:,3) | P2chkIndx(i,3)+1==c(:,3)), 1))
+               OBtofilterout=[OBtofilterout;i];  
+            else
+               KNtofilterout=[KNtofilterout;i];  
+            end
+        end
+    end
+
+    display(strcat('Num Points to be added to KNOWN list after median filtering:',num2str(size(KNtofilterout,1))));
+    display(strcat('Num Points to be added to OBSTACLE list after median filtering:',num2str(size(OBtofilterout,1))));
+end
+
+%% Add filtered out unknown points to either obstacles or known free
+workspace.knowncoords=[workspace.knowncoords;workspace.unknowncoords(workspace.lev1unknown(index(KNtofilterout)),:)];
+workspace.obsticlepoints=[workspace.obsticlepoints;workspace.unknowncoords(workspace.lev1unknown(index(OBtofilterout)),:)];
+
+%% Additional Future work to remove unknown points in ellipses on a path
+
+% %robot parameters
+% n = r.n;
+% L = r.link;
+% t = r.base;
+% 
+% %% check each step for unknown points
+% 
+% for i=1:size(all_steps,1)
+%     t = r.base;
+%     for piece=1:n        
+%         t = t * L{piece}(all_steps(i,piece));
+%        translated_points=[P2chk(:,1)-t(1,4) P2chk(:,2)-t(2,4) P2chk(:,3)-t(3,4)];
+%        translated_points=translated_points*t(1:3,1:3);
+% 
+%         KNtofilterout=[KNtofilterout;...        
+%             find(((translated_points(:,1)-densoobj(piece+1).ellipse.center(1)).^2)/densoobj(piece+1).ellipse.params(1)^2+...
+%                  ((translated_points(:,2)-densoobj(piece+1).ellipse.center(2)).^2)/densoobj(piece+1).ellipse.params(2)^2+...
+%                  ((translated_points(:,3)-densoobj(piece+1).ellipse.center(3)).^2)/densoobj(piece+1).ellipse.params(3)^2<=1)];
+%              find(((translated_points(:,1)-densoobj(piece+1).ellipse.center(1)).^2)/densoobj(piece+1).ellipse.params(1)^2+...
+%                  ((translated_points(:,2)-densoobj(piece+1).ellipse.center(2)).^2)/densoobj(piece+1).ellipse.params(2)^2+...
+%                  ((translated_points(:,3)-densoobj(piece+1).ellipse.center(3)).^2)/densoobj(piece+1).ellipse.params(3)^2<=1)
+%     end
+% end
+% 
+% size(KNtofilterout,1)
+##### SOURCE END #####
+-->
+   </body>
+</html>
