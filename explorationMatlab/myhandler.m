@@ -5,9 +5,11 @@
 
 %% Function Call
 %
-% * *Inputs:* 
-% varargin (variable) data returned by C++ com object
-% * *Returns:* Null
+% *Inputs:* 
+%
+% _varargin_ (variable) data returned by C++ com object
+%
+% *Returns:* NULL
 
 function myhandler(varargin)
 

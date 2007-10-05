@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>get_robot_joint_state</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="use_real_robot_GETJs"><style>
 
 body {
@@ -86,14 +86,10 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> Null
-               </li>
-               <li><b>Returns:</b> Null
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> use_real_robot_GETJs()
+         <p><b>Inputs:</b>  NULL
+         </p>
+         <p><b>Returns:</b>  NULL
+         </p><pre class="codeinput"><span class="keyword">function</span> use_real_robot_GETJs()
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> Q
 </pre><h2>Establish Comms<a name="3"></a></h2><pre class="codeinput">rob_h=actxserver(<span class="string">'EyeInHand.DensoCommand'</span>);
 <span class="comment">%make sure comms up are up to speed</span>
@@ -121,8 +117,9 @@ rob_h.release;
 
 %% Function Call
 %
-% * *Inputs:* Null
-% * *Returns:* Null
+% *Inputs:*  NULL
+% 
+% *Returns:*  NULL
 
 function use_real_robot_GETJs()
 

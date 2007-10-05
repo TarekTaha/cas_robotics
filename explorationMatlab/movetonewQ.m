@@ -7,9 +7,15 @@
 
 %% Function Call
 %
-% * *Inputs:* handles (array double) GUI variables
-% newQ(1*6 double) newQ in degrees
-% * *Returns:* pathfound (binary) if a path was found or not
+% *Inputs:* 
+%
+% _handles_ (array double) GUI variables
+%
+% _newQ_(1*6 double) newQ in degrees
+%
+% *Returns:* 
+%
+% _pathfound_ (binary) if a path was found or not
 
 function pathfound=movetonewQ(handles,newQ)
 

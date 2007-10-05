@@ -10,13 +10,18 @@
 
 %% Function Call
 %
-% * *Inputs:* 
-% vals (3*many double) point which we want to know which level they are
+% *Inputs:*
+%
+% _vals_ (3*many double) point which we want to know which level they are
 % inside
-% * *Returns:*
-%  * level1 (1*many double) index of points in level1
-%  * level2 (1*many double) index of points in level2
-%  * level3 (1*many double) index of points in level3
+%
+% *Returns:*
+%
+% _level1_ (1*many double) index of points in level1
+%
+% _level2_ (1*many double) index of points in level2
+%
+% _level3_ (1*many double) index of points in level3
 
 function [level1,level2,level3]=GetImpLevInfo(vals)
 

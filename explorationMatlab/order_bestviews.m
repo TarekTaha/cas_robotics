@@ -5,10 +5,12 @@
 
 %% Function Call
 %
-% * *Inputs:* 
-% redo_nbv_vol (bin) wether or not to redo the nbv volume and pose checking
+% *Inputs:* 
+%
+% _redo_nbv_vol_ (binary) wether or not to redo the nbv volume and pose checking
 % for each on the bestviews
-% * *Returns:* Null
+%
+% *Returns:* NULL
 
 function order_bestviews(redo_nbv_vol)
 

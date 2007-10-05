@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>plot_planes</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="plot_planes"><style>
 
 body {
@@ -88,14 +88,13 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b>   plane (struct) planes structure with equations and home points   mew (double) radius of the planes
-               </li>
-               <li><b>Returns:</b> Null
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> plot_handles=plot_planes(plane,mew)
+         <p><b>Inputs:</b></p>
+         <p><i>plane</i> (struct) planes structure with equations and home points
+         </p>
+         <p><i>mew</i> (double) radius of the planes
+         </p>
+         <p><b>Returns:</b> NULL
+         </p><pre class="codeinput"><span class="keyword">function</span> plot_handles=plot_planes(plane,mew)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput">plane_sphere_threshold=.01;
 
 <span class="comment">%start with a normal sphere described by 20 points</span>
@@ -145,10 +144,13 @@ hold <span class="string">on</span>;
 
 %% Function Call
 % 
-% * *Inputs:* 
-%   plane (struct) planes structure with equations and home points
-%   mew (double) radius of the planes
-% * *Returns:* Null
+% *Inputs:* 
+%
+% _plane_ (struct) planes structure with equations and home points
+%
+% _mew_ (double) radius of the planes
+%
+% *Returns:* NULL
 
 function plot_handles=plot_planes(plane,mew)
 

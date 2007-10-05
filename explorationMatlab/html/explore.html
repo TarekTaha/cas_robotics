@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>explore</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="explore"><style>
 
 body {
@@ -92,15 +92,15 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> h (struct double) handles of the GUI, useNBV (bin) whether or not the best view is to be used selection (int) if useNBV,
-                  which view to use
-               </li>
-               <li><b>Returns:</b> Null
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> explore(h,useNBV,selection)
+         <p><b>Inputs:</b></p>
+         <p><i>h</i> (struct double) handles of the GUI,
+         </p>
+         <p><i>useNBV</i> (bin) whether or not the best view is to be used
+         </p>
+         <p><i>selection</i> (int) if useNBV, which view to use
+         </p>
+         <p><b>Returns:</b> NULL
+         </p><pre class="codeinput"><span class="keyword">function</span> explore(h,useNBV,selection)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> workspace scan bestviews r Q robot_maxreach
 </pre><h2>Selection of Scan Pose and direction<a name="3"></a></h2><pre class="codeinput"><span class="comment">% this is either using a calculated NBV or choose our own</span>
 <span class="keyword">if</span> true(useNBV)
@@ -198,11 +198,15 @@ scan.tries=scan.tries+1;
 
 %% Function Call
 %
-% * *Inputs:* 
-% h (struct double) handles of the GUI,
-% useNBV (bin) whether or not the best view is to be used
-% selection (int) if useNBV, which view to use
-% * *Returns:* Null
+% *Inputs:* 
+%
+% _h_ (struct double) handles of the GUI,
+%
+% _useNBV_ (bin) whether or not the best view is to be used
+%
+% _selection_ (int) if useNBV, which view to use
+%
+% *Returns:* NULL
 
 function explore(h,useNBV,selection)
 

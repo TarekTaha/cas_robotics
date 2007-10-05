@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>movetonewQ</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="movetonewQ"><style>
 
 body {
@@ -90,14 +90,14 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> handles (array double) GUI variables newQ(1*6 double) newQ in degrees
-               </li>
-               <li><b>Returns:</b> pathfound (binary) if a path was found or not
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> pathfound=movetonewQ(handles,newQ)
+         <p><b>Inputs:</b></p>
+         <p><i>handles</i> (array double) GUI variables
+         </p>
+         <p><i>newQ</i>(1*6 double) newQ in degrees
+         </p>
+         <p><b>Returns:</b></p>
+         <p><i>pathfound</i> (binary) if a path was found or not
+         </p><pre class="codeinput"><span class="keyword">function</span> pathfound=movetonewQ(handles,newQ)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> r Q guiglobal;
 
 <span class="comment">% check we have got passed a newQ otherwise use from the GUI</span>
@@ -186,9 +186,15 @@ newQ=newQ*pi/180;
 
 %% Function Call
 %
-% * *Inputs:* handles (array double) GUI variables
-% newQ(1*6 double) newQ in degrees
-% * *Returns:* pathfound (binary) if a path was found or not
+% *Inputs:* 
+%
+% _handles_ (array double) GUI variables
+%
+% _newQ_(1*6 double) newQ in degrees
+%
+% *Returns:* 
+%
+% _pathfound_ (binary) if a path was found or not
 
 function pathfound=movetonewQ(handles,newQ)
 

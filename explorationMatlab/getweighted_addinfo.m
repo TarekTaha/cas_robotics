@@ -6,10 +6,13 @@
 
 %% Function Call
 %
-% * *Inputs:* 
-% addinfo (3*many double) group of point we want to know weight of
-% * *Returns:* 
-% weighted_addinfo (double) weighted info value
+% *Inputs:* 
+%
+% _addinfo_ (3*many double) group of point we want to know weight of
+%
+% *Returns:* 
+%
+% _weighted_addinfo_ (double) weighted info value
 
 function weighted_addinfo=getweighted_addinfo(addinfo)
 

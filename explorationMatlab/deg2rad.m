@@ -4,8 +4,13 @@
 
 %% Function Call
 % 
-% * *Inputs:* D (double) angle in degrees
-% * *Returns:* R (double) radians
+% *Inputs:* 
+%
+% _D_ (double) angle in degrees
+%
+% *Returns:* 
+%
+% _R_ (double) radians
 
 function R=deg2rad(D)
 

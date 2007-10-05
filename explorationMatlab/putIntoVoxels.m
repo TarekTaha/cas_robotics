@@ -5,8 +5,13 @@
 
 %% Function Call
 % 
-% *Inputs:* points (3 x many cartesian matrix)
-% *Returns:* points (3x many cartesian matrix)
+% *Inputs:* 
+%
+% _points_ (3 x many cartesian matrix)
+%
+% *Returns:* 
+%
+% _points_ (3x many cartesian matrix)
 
 function points=putIntoVoxels(points)
 

@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>plotdenso</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="plotdenso"><style>
 
 body {
@@ -88,15 +88,17 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b>  r (object) robot object - want to pass not use global??  Q (1*6 double) radians, current joint configuration  checkFF(binary)
-                  whether or not to recheck the forcefields as we plot plot_ellipse(binary) wether or not to show the ellipses as well as robot
-               </li>
-               <li><b>Returns:</b> Null
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> plotdenso(r, Q, checkFF, plot_ellipse)
+         <p><b>Inputs:</b></p>
+         <p><i>r</i> (object) robot object - want to pass not use global??
+         </p>
+         <p><i>Q</i> (1*6 double) radians, current joint configuration
+         </p>
+         <p><i>checkFF</i>(binary) whether or not to recheck the forcefields as we plot
+         </p>
+         <p><i>plot_ellipse</i>(binary) wether or not to show the ellipses as well as robot
+         </p>
+         <p><b>Returns:</b> NULL
+         </p><pre class="codeinput"><span class="keyword">function</span> plotdenso(r, Q, checkFF, plot_ellipse)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> densoobj
 
 <span class="keyword">if</span> ~isfield(densoobj,<span class="string">'M'</span>) || ~isfield(densoobj,<span class="string">'F'</span>)
@@ -202,12 +204,17 @@ t = r.base;
 
 %% Function Call
 % 
-% * *Inputs:* 
-%  r (object) robot object - want to pass not use global??
-%  Q (1*6 double) radians, current joint configuration 
-%  checkFF(binary) whether or not to recheck the forcefields as we plot
-% plot_ellipse(binary) wether or not to show the ellipses as well as robot
-% * *Returns:* Null
+% *Inputs:* 
+%
+% _r_ (object) robot object - want to pass not use global??
+%
+% _Q_ (1*6 double) radians, current joint configuration 
+%
+% _checkFF_(binary) whether or not to recheck the forcefields as we plot
+%
+% _plot_ellipse_(binary) wether or not to show the ellipses as well as robot
+%
+% *Returns:* NULL
 
 function plotdenso(r, Q, checkFF, plot_ellipse)
 

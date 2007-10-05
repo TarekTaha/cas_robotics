@@ -9,8 +9,11 @@
 
 %% Function Call
 % 
-% * *Inputs:* all_steps (6*m double) these are the joint configs radians
-% * *Returns:* Null
+% *Inputs:* 
+%
+% _all_steps_ (6*m double) these are the joint configs radians
+%
+% *Returns:* NULL
 
 function demopath(all_steps)
 

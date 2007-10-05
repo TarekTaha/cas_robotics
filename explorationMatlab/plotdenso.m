@@ -5,12 +5,17 @@
 
 %% Function Call
 % 
-% * *Inputs:* 
-%  r (object) robot object - want to pass not use global??
-%  Q (1*6 double) radians, current joint configuration 
-%  checkFF(binary) whether or not to recheck the forcefields as we plot
-% plot_ellipse(binary) wether or not to show the ellipses as well as robot
-% * *Returns:* Null
+% *Inputs:* 
+%
+% _r_ (object) robot object - want to pass not use global??
+%
+% _Q_ (1*6 double) radians, current joint configuration 
+%
+% _checkFF_(binary) whether or not to recheck the forcefields as we plot
+%
+% _plot_ellipse_(binary) wether or not to show the ellipses as well as robot
+%
+% *Returns:* NULL
 
 function plotdenso(r, Q, checkFF, plot_ellipse)
 

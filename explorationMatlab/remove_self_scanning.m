@@ -10,9 +10,15 @@
 
 %% Function Call
 % 
-% * *Inputs:* points (3*m double) holds the points in space
-% newQ (6*1 double) holds the joint angles in radians
-% * *Returns:* points (3*m double) holds the remaining points in space
+% *Inputs:* 
+%
+% _points_ (3*m double) holds the points in space
+%
+% _newQ_ (6*1 double) holds the joint angles in radians
+%
+% *Returns:* 
+%
+% _points_ (3*m double) holds the remaining points in space
 
 function points = remove_self_scanning(points,newQ)
 

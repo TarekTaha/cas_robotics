@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>putIntoVoxels</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="putIntoVoxels"><style>
 
 body {
@@ -85,7 +85,11 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <p><b>Inputs:</b> points (3 x many cartesian matrix) <b>Returns:</b> points (3x many cartesian matrix)
+         <p><b>Inputs:</b></p>
+         <p><i>points</i> (3 x many cartesian matrix)
+         </p>
+         <p><b>Returns:</b></p>
+         <p><i>points</i> (3x many cartesian matrix)
          </p><pre class="codeinput"><span class="keyword">function</span> points=putIntoVoxels(points)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> workspace
 </pre><h2>The rounding function<a name="3"></a></h2>
@@ -103,8 +107,13 @@ points=(round(points./workspace.inc_size))*workspace.inc_size;
 
 %% Function Call
 % 
-% *Inputs:* points (3 x many cartesian matrix)
-% *Returns:* points (3x many cartesian matrix)
+% *Inputs:* 
+%
+% _points_ (3 x many cartesian matrix)
+%
+% *Returns:* 
+%
+% _points_ (3x many cartesian matrix)
 
 function points=putIntoVoxels(points)
 

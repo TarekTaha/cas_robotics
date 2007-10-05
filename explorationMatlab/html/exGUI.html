@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>exGUI</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="exGUI"><style>
 
 body {
@@ -96,14 +96,12 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> varargin (unknown) values passed in
-               </li>
-               <li><b>Returns:</b> varargout (unknown) values returned
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> varargout = exGUI(varargin)
+         <p><b>Inputs:</b></p>
+         <p><i>varargin</i> (unknown) values passed in
+         </p>
+         <p><b>Returns:</b></p>
+         <p><i>varargout</i> (unknown) values returned
+         </p><pre class="codeinput"><span class="keyword">function</span> varargout = exGUI(varargin)
 </pre><h2>Variables: Setup GUI<a name="2"></a></h2><pre class="codeinput">gui_Singleton = 1;
 gui_State = struct(<span class="string">'gui_Name'</span>,       mfilename, <span class="keyword">...</span>
                    <span class="string">'gui_Singleton'</span>,  gui_Singleton, <span class="keyword">...</span>
@@ -245,6 +243,15 @@ do_clear(handles);
 
 <span class="comment">% this is the do_clear function sets up most stuff</span>
 <span class="keyword">function</span> do_clear(handles)
+
+<span class="comment">%sets up the surface map object and then this is used for scanning</span>
+<span class="keyword">try</span> <span class="keyword">global</span> robmap_h;
+robmap_h=actxserver(<span class="string">'EyeInHand.SurfaceMap'</span>);
+robmap_h.registerevent(@myhandler);
+<span class="keyword">catch</span>
+    display(<span class="string">'Unable to connect to EyeInHand'</span>)
+<span class="keyword">end</span>
+
 <span class="comment">%reset the cube direction pointer</span>
 set(gcf,<span class="string">'CurrentAxes'</span>,handles.axes5);
 axis <span class="string">equal</span>;axis <span class="string">off</span>;
@@ -297,7 +304,7 @@ set(handles.dialog_text,<span class="string">'String'</span>,<span class="string
          <p>--- Executes on button press in go_pushbutton.</p><pre class="codeinput"><span class="keyword">function</span> go_pushbutton_Callback(hObject, eventdata, handles)<span class="comment">%#ok&lt;DEFNU&gt;</span>
 
 <span class="comment">%%%CHOOSE THE CURRENT TEST CASE</span>
-current_test_case=3;
+current_test_case=2;
 show_new_info_details=false;
 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
 
@@ -360,7 +367,7 @@ set(gcf,<span class="string">'CurrentAxes'</span>,handles.axes3)
     <span class="keyword">end</span>
 </pre><h2>TEST 2 - Non points -using algorithm<a name="8"></a></h2><pre class="codeinput"><span class="keyword">elseif</span> current_test_case&gt;1
     <span class="comment">%now go through and get NBV and then use them to explore</span>
-    <span class="keyword">for</span> stepcount=stepcount+1:10;
+    <span class="keyword">for</span> stepcount=stepcount+1:5;
         <span class="comment">%which exploration method to use</span>
         <span class="keyword">if</span> current_test_case==2;NBV_beta();
         <span class="keyword">elseif</span> current_test_case==3; NBV();
@@ -637,7 +644,21 @@ set(handles.move_to_J6_edit,<span class="string">'String'</span>,num2str(actual_
 <span class="keyword">function</span> alloff_pushbutton_Callback(hObject, eventdata, handles)<span class="comment">%#ok&lt;DEFNU&gt;</span>
 allOff()
 </pre><h2>Plotting and display simple functions<a name="11"></a></h2>
-         <p>--- Executes on button press in plot_planes_checkbox.</p><pre class="codeinput"><span class="keyword">function</span> plot_planes_checkbox_Callback(hObject, eventdata, handles)<span class="comment">%#ok&lt;DEFNU&gt;</span>
+         <p>--- Executes on button press in plotmesh_pushbutton.</p><pre class="codeinput"><span class="keyword">function</span> plotmesh_pushbutton_Callback(hObject, eventdata, handles)
+<span class="keyword">global</span> r Q robmap_h
+figure(2)
+aabb = [-2, -1, 0; 2, 0.6, 2];
+<span class="comment">%aabb = [-20, -10, -20; 20, 60, 20];</span>
+hMesh = robmap_h.Mesh(aabb);
+f = hMesh.FaceData;
+v = hMesh.VertexData;
+trisurf(f, v(:,1), v(:,2), v(:,3), <span class="string">'FaceColor'</span>, <span class="string">'None'</span>);
+hold <span class="string">on</span>;
+plotdenso(r,Q)
+set(gcf,<span class="string">'CurrentAxes'</span>,handles.axes3);
+
+<span class="comment">% --- Executes on button press in plot_planes_checkbox.</span>
+<span class="keyword">function</span> plot_planes_checkbox_Callback(hObject, eventdata, handles)<span class="comment">%#ok&lt;DEFNU&gt;</span>
 <span class="keyword">global</span> plane guiglobal
 temp_mew=str2double(get(handles.temp_mew_edit,<span class="string">'String'</span>));
 
@@ -903,8 +924,13 @@ usewhitebg = 1;
 
 %% Function Call
 %
-% * *Inputs:* varargin (unknown) values passed in
-% * *Returns:* varargout (unknown) values returned
+% *Inputs:* 
+%
+% _varargin_ (unknown) values passed in
+%
+% *Returns:* 
+% 
+% _varargout_ (unknown) values returned
 
 function varargout = exGUI(varargin)
 
@@ -1056,6 +1082,15 @@ do_clear(handles);
 
 % this is the do_clear function sets up most stuff
 function do_clear(handles)
+
+%sets up the surface map object and then this is used for scanning
+try global robmap_h;
+robmap_h=actxserver('EyeInHand.SurfaceMap');
+robmap_h.registerevent(@myhandler);
+catch
+    display('Unable to connect to EyeInHand')
+end
+
 %reset the cube direction pointer
 set(gcf,'CurrentAxes',handles.axes5);
 axis equal;axis off;
@@ -1111,7 +1146,7 @@ set(handles.dialog_text,'String','Setup Complete: Lets Explore');
 function go_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 
 %%%CHOOSE THE CURRENT TEST CASE
-current_test_case=3;
+current_test_case=2;
 show_new_info_details=false;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1180,7 +1215,7 @@ if current_test_case==1
 %% TEST 2 - Non points -using algorithm
 elseif current_test_case>1
     %now go through and get NBV and then use them to explore
-    for stepcount=stepcount+1:10;
+    for stepcount=stepcount+1:5;
         %which exploration method to use
         if current_test_case==2;NBV_beta();
         elseif current_test_case==3; NBV();
@@ -1465,6 +1500,20 @@ function alloff_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 allOff()
 
 %% Plotting and display simple functions
+% REPLACE_WITH_DASH_DASH- Executes on button press in plotmesh_pushbutton.
+function plotmesh_pushbutton_Callback(hObject, eventdata, handles)
+global r Q robmap_h
+figure(2)
+aabb = [-2, -1, 0; 2, 0.6, 2];
+%aabb = [-20, -10, -20; 20, 60, 20];
+hMesh = robmap_h.Mesh(aabb);
+f = hMesh.FaceData;
+v = hMesh.VertexData;
+trisurf(f, v(:,1), v(:,2), v(:,3), 'FaceColor', 'None');
+hold on;
+plotdenso(r,Q)
+set(gcf,'CurrentAxes',handles.axes3);
+
 % REPLACE_WITH_DASH_DASH- Executes on button press in plot_planes_checkbox.
 function plot_planes_checkbox_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 global plane guiglobal 
@@ -1719,6 +1768,11 @@ function temp_mew_edit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+
+
+
 
 ##### SOURCE END #####
 -->

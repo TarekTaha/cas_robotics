@@ -5,11 +5,15 @@
 
 %% Function Call
 % 
-% * *Inputs:* 
-% PointData (3*many double) x,y,z cartesian points
-% mew (double) size of the surfaces
-% DISPON (binary) whether to show the output or not
-% * *Returns:* Null
+% *Inputs:* 
+%
+% _PointData_ (3*many double) x,y,z cartesian points
+%
+% _mew_ (double) size of the surfaces
+%
+% _DISPON_ (binary) whether to show the output or not
+%
+% *Returns:* NULL
 
 function surface_making_simple(PointData,mew,DISPON)
 

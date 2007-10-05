@@ -15,21 +15,33 @@
 
 
 %% Function Call
-% * *Inputs:* 
-% * robot (structure) This holds the robot object
-% * pt (1*3 double) cartitian point where we want end effector <br>
-% * targetNormal (1*3 double) the desired target normal at the point
-% * q (1*6 double) radians - The joint config starting guess 
-% * quickver (binary) Whether to try more than q and all 0 for start joint
+% *Inputs:* 
+%
+% _robot_ (structure) This holds the robot object
+%
+% _pt_ (1*3 double) cartitian point where we want end effector <br>
+%
+% _targetNormal_ (1*3 double) the desired target normal at the point
+%
+% _q_ (1*6 double) radians - The joint config starting guess 
+%
+% _quickver_ (binary) Whether to try more than q and all 0 for start joint
 % configs. Possibly Less acurate but quicker 
-% * ZpointAT (1*3 double) where the Z axis same as blast stream 
-% * *Returns:* 
-% * qt (1*6 double) radians - The recommended joint config
-% * solutionvalid (binary) whether the returned qt gives a valid solution
+%
+% _ZpointAT_ (1*3 double) where the Z axis same as blast stream 
+%
+% *Returns:*
+%
+% _qt_ (1*6 double) radians - The recommended joint config
+%
+% _solutionvalid_ (binary) whether the returned qt gives a valid solution
 % within optimisation parameters
-% * used_sol (1->4 int) which solution for starting q was used
-% * targetdist (structure) Distance between desired & actual target
-% * dist_val (double) Distance between desired & actual pt in space
+%
+% _used_sol_ (1->4 int) which solution for starting q was used
+%
+% _targetdist_ (structure) Distance between desired & actual target
+%
+% _dist_val_ (double) Distance between desired & actual pt in space
 
 function [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(robot, pt, targetNormal, q, quickver, ZpointAT)
 

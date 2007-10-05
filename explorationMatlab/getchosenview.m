@@ -8,8 +8,11 @@
 
 %% Function Call
 %
-% * *Inputs:* h (array double) the handles to the GUI
-% * *Returns:* Null
+% *Inputs:* 
+%
+% _h_ (array double) the handles to the GUI
+%
+% *Returns:* NULL
 
 function getchosenview(h)
 

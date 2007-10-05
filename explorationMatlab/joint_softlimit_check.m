@@ -6,8 +6,13 @@
 
 %% Function Call
 %
-% * *Inputs:* all_steps (6*m double) these are the joint configs radians
-% * *Returns:* result (bin) =1 if ok, =0 if NOT ok
+% *Inputs:* 
+%
+% _all_steps_ (6*m double) these are the joint configs radians
+%
+% *Returns:* 
+% 
+% _result_ (bin) =1 if ok, =0 if NOT ok
 
 function result=joint_softlimit_check(all_steps)
 

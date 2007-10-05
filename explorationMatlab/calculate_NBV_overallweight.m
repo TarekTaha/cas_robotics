@@ -5,9 +5,12 @@
 
 %% Function Call
 %
-% * *Inputs:* cur_view (int) describes which of the bestviews we are
+% *Inputs:* 
+% 
+% _cur_view_ (int) describes which of the bestviews we are
 % interested in caculating
-% * *Returns:* Null
+%
+% *Returns:* NULL
 
 function calculate_NBV_overallweight(cur_view)
 

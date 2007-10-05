@@ -7,8 +7,13 @@
 
 %% Function Call
 %
-% * *Inputs:* varargin (unknown) values passed in
-% * *Returns:* varargout (unknown) values returned
+% *Inputs:* 
+%
+% _varargin_ (unknown) values passed in
+%
+% *Returns:* 
+% 
+% _varargout_ (unknown) values returned
 
 function varargout = exGUI(varargin)
 
@@ -160,6 +165,15 @@ do_clear(handles);
 
 % this is the do_clear function sets up most stuff
 function do_clear(handles)
+
+%sets up the surface map object and then this is used for scanning
+try global robmap_h;
+robmap_h=actxserver('EyeInHand.SurfaceMap');
+robmap_h.registerevent(@myhandler);
+catch
+    display('Unable to connect to EyeInHand')
+end
+
 %reset the cube direction pointer
 set(gcf,'CurrentAxes',handles.axes5);
 axis equal;axis off;
@@ -215,7 +229,7 @@ set(handles.dialog_text,'String','Setup Complete: Lets Explore');
 function go_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 
 %%%CHOOSE THE CURRENT TEST CASE
-current_test_case=3;
+current_test_case=2;
 show_new_info_details=false;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -284,7 +298,7 @@ if current_test_case==1
 %% TEST 2 - Non points -using algorithm
 elseif current_test_case>1
     %now go through and get NBV and then use them to explore
-    for stepcount=stepcount+1:10;
+    for stepcount=stepcount+1:5;
         %which exploration method to use
         if current_test_case==2;NBV_beta();
         elseif current_test_case==3; NBV();
@@ -569,6 +583,20 @@ function alloff_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 allOff()
 
 %% Plotting and display simple functions
+% --- Executes on button press in plotmesh_pushbutton.
+function plotmesh_pushbutton_Callback(hObject, eventdata, handles)
+global r Q robmap_h
+figure(2)
+aabb = [-2, -1, 0; 2, 0.6, 2];
+%aabb = [-20, -10, -20; 20, 60, 20];
+hMesh = robmap_h.Mesh(aabb);
+f = hMesh.FaceData;
+v = hMesh.VertexData;
+trisurf(f, v(:,1), v(:,2), v(:,3), 'FaceColor', 'None');
+hold on;
+plotdenso(r,Q)
+set(gcf,'CurrentAxes',handles.axes3);
+
 % --- Executes on button press in plot_planes_checkbox.
 function plot_planes_checkbox_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 global plane guiglobal 
@@ -823,3 +851,8 @@ function temp_mew_edit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+
+
+

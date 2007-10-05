@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>calunknownweight</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="calunknownweight"><style>
 
 body {
@@ -90,14 +90,11 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> Null
-               </li>
-               <li><b>Returns:</b> unknownweight (double) weight of the points that are unknown
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> unknownweight = calunknownweight()
+         <p><b>Inputs:</b> NULL
+         </p>
+         <p><b>Returns:</b></p>
+         <p><i>unknownweight</i> (double) weight of the points that are unknown
+         </p><pre class="codeinput"><span class="keyword">function</span> unknownweight = calunknownweight()
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> workspace
 </pre><h2>Total points in the environment<a name="3"></a></h2>
          <p><img vspace="5" hspace="5" src="calunknownweight_eq22909.png"> </p>
@@ -142,8 +139,11 @@ unknownweight=(size(level1_un,1)-size(level1_kn,1)-size(level1_ob,1))*workspace.
 
 %% Function Call
 % 
-% * *Inputs:* Null
-% * *Returns:* unknownweight (double) weight of the points that are unknown
+% *Inputs:* NULL
+% 
+% *Returns:* 
+% 
+% _unknownweight_ (double) weight of the points that are unknown
 
 function unknownweight = calunknownweight()
 

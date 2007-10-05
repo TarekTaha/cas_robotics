@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>dist_pt2tr</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="dist_pt2tr"><style>
 
 body {
@@ -85,14 +85,14 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> pt (3*1 double) x,y,z cartesian point tr (4*4 double) transform of an arm
-               </li>
-               <li><b>Returns:</b> dist (double) distance from pt to tr
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> dist=dist_pt2tr(pt,tr)
+         <p><b>Inputs:</b></p>
+         <p><i>pt</i> (3*1 double) x,y,z cartesian point
+         </p>
+         <p><i>tr</i> (4*4 double) transform of an arm
+         </p>
+         <p><b>Returns:</b></p>
+         <p><i>dist</i> (double) distance from pt to tr
+         </p><pre class="codeinput"><span class="keyword">function</span> dist=dist_pt2tr(pt,tr)
 </pre><h2>Given an end effector transform<a name="2"></a></h2>
          <p><img vspace="5" hspace="5" src="dist_pt2tr_eq599940.png"> </p>
          <h2>Calculate distance (dist) from pt to tr<a name="3"></a></h2>
@@ -111,11 +111,15 @@ p.footer {
 
 %% Function Call
 % 
-% * *Inputs:* 
-% pt (3*1 double) x,y,z cartesian point
-% tr (4*4 double) transform of an arm
-% * *Returns:* 
-% dist (double) distance from pt to tr
+% *Inputs:* 
+%
+% _pt_ (3*1 double) x,y,z cartesian point
+%
+% _tr_ (4*4 double) transform of an arm
+%
+% *Returns:* 
+%
+% _dist_ (double) distance from pt to tr
 
 function dist=dist_pt2tr(pt,tr)
 

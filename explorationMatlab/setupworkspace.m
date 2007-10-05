@@ -6,8 +6,11 @@
 
 %% Function Call
 % 
-% *Inputs:* showunknownpnts (bin) whether or not to display unknown points
-% *Returns:* Null
+% *Inputs:* 
+%
+% _showunknownpnts_ (bin) whether or not to display unknown points
+%
+% *Returns:* NULL
 function setupworkspace(showunknownpnts)
 
 %% Variables

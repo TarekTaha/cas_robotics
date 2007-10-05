@@ -1,0 +1,1220 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>Classifier</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2007-10-05">
+      <meta name="m-file" content="Classifier"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">WHEN USING STEVENS/GAVINS MATLAB LASER DATA COLLECTION</a></li>
+               <li><a href="#2">INPUT ARG CHECKS</a></li>
+               <li><a href="#3">WHEN USING MY GET LASER DATA OR PLY FILES</a></li>
+               <li><a href="#4">TURNS PLOTTING ON OR OFF</a></li>
+               <li><a href="#5">Change data from Stevens format to my format</a></li>
+               <li><a href="#6">PLOT THE LASER DATA</a></li>
+               <li><a href="#7">FIND ALL FLAT SURFACES IN THE LASER DATA</a></li>
+               <li><a href="#8">TEST FOR LINES</a></li>
+               <li><a href="#9">INITIALISE VARIABLE - THIS ONES' USED IN THE LOOP</a></li>
+               <li><a href="#10">LOOP TO TEST ALL LINES</a></li>
+               <li><a href="#11">FIND PERPINDICULAR RAYS</a></li>
+               <li><a href="#12">THIS SECTION ROTATES THE TEST LINE TO BE HORIZONTAL</a></li>
+               <li><a href="#13">MANIPULATE DATA TO GIVE BEST CHANCE FOR CLASSIFICATION</a></li>
+               <li><a href="#14">POLY FITS TO LINES</a></li>
+               <li><a href="#15">CALCULATE THE REQUIRED RESIDUALS FOR THE POLYs BEING TESTED</a></li>
+               <li><a href="#16">GUESSER</a></li>
+               <li><a href="#17">DEAL WITH NO CLASSIFIED SURFACES BY SPLITTING THEM AND RE-CLASSIFING</a></li>
+               <li><a href="#18">END OF TEST ALL LINES LOOP</a></li>
+            </ul>
+         </div>
+         <h2>WHEN USING STEVENS/GAVINS MATLAB LASER DATA COLLECTION<a name="1"></a></h2><pre class="codeinput"><span class="comment">%function Classifier(PointData, IntensityData, Scan_to_Class)</span>
+<span class="keyword">function</span> [found_lines] = Classifier(PointData, IntensityData, Scan_to_Class)
+</pre><h2>INPUT ARG CHECKS<a name="2"></a></h2><pre class="codeinput"><span class="keyword">if</span> nargin&lt;3
+    <span class="comment">%You Should pass the classifier which scan you wish to classify. Instead classifying first only</span>
+    Scan_to_Class=1;
+<span class="keyword">end</span>
+</pre><h2>WHEN USING MY GET LASER DATA OR PLY FILES<a name="3"></a></h2>
+         <p>function Classifier() global scans_cart global found_lines</p>
+         <h2>TURNS PLOTTING ON OR OFF<a name="4"></a></h2><pre class="codeinput">dont_plot = 1; <span class="comment">% 0 to plot</span>
+wait_for_clicks = 1;<span class="comment">% 0 to make classifier wait for mouse clicks to continue</span>
+</pre><h2>Change data from Stevens format to my format<a name="5"></a></h2><pre class="codeinput">    <span class="comment">%range</span>
+    scans_cart.rangeX = PointData(Scan_to_Class,:,2)'*1000;
+    scans_cart.rangeY = PointData(Scan_to_Class,:,3)'*1000;
+    scans_cart.rangeZ = PointData(Scan_to_Class,:,1)'*1000;
+    <span class="comment">%intenstiy</span>
+    [size_data rubbish ] = size(IntensityData);
+    angle = size_data * 0.351 * 2;
+    theta = ((-angle/2)/180)*pi():(0.352*2/180)*pi():((+angle/2)/180)*pi();
+    scans_cart.intensityX(Scan_to_Class,:) = sin(theta(Scan_to_Class)) * IntensityData(Scan_to_Class,:);
+    scans_cart.intensityY(Scan_to_Class,:) = cos(theta(Scan_to_Class)) * IntensityData(Scan_to_Class,:);
+    scans_cart.intensityX = scans_cart.intensityX(Scan_to_Class,:)';
+    scans_cart.intensityY = scans_cart.intensityY(Scan_to_Class,:)';
+</pre><h2>PLOT THE LASER DATA<a name="6"></a></h2><pre class="codeinput"><span class="keyword">if</span> dont_plot == 0
+    colordef <span class="string">black</span>;
+    figure(1);
+    <span class="comment">%set(1,'name','Point Cloud','Position', [ 570 530 600 400 ]);</span>
+    <span class="comment">%hold off;</span>
+    <span class="comment">%scatter3(scans_cart.rangeX,scans_cart.rangeY, scans_cart.rangeZ, '.', 'markeredgecolor', [0.75 0.75 0.75]);</span>
+    plot3(scans_cart.rangeX,scans_cart.rangeY, scans_cart.rangeZ, <span class="string">'.'</span>, <span class="string">'linestyle'</span>,<span class="string">'none'</span>, <span class="string">'markersize'</span>,1, <span class="string">'markeredgecolor'</span>, [0.75 0.75 0.75]);
+    view(0,0)
+    hold <span class="string">on</span>;
+    <span class="comment">%axis equal;</span>
+    <span class="comment">%axis ([ -1000 700 1250 1750 -700 700 ])</span>
+<span class="keyword">end</span>
+</pre><h2>FIND ALL FLAT SURFACES IN THE LASER DATA<a name="7"></a></h2><pre class="codeinput">    <span class="comment">% Initalise variables</span>
+    theta_between_rays = 0.351 * pi/180; <span class="comment">%angle between laser rays;</span>
+    line_segment_smoothing_threshold = 0.5; <span class="comment">%allows adjacent lines to be joined if there gradients are similar</span>
+    line_join_dist_threshold = 25; <span class="comment">%allows adjacent lines to be joined if they are located near each other</span>
+    min_number_of_points_for_a_line = 8; <span class="comment">%min number of points that are needed for a line to regester</span>
+    [number_of_points rubbish] = size(scans_cart.rangeX); <span class="comment">%number of range points and intensity points. number of rays used is double this</span>
+
+    found_lines.line_start_end_points = []; <span class="comment">%list of the start and end ray numbers for all lines</span>
+    found_lines.line_start_end_points_smoothed = []; <span class="comment">%list of the start and end ray numbers for all smoothed lines</span>
+    found_lines.found_lines_gradients = []; <span class="comment">% list of the gradients of the found lines</span>
+    found_lines.number_of_lines_smoothed = 0;
+</pre><h2>TEST FOR LINES<a name="8"></a></h2><pre class="codeinput">    <span class="comment">% This function creats a poly fit of x number of points and sees if the</span>
+    <span class="comment">% next point lies on that line</span>
+    max_points_on_line = 50; <span class="comment">%roughly limits number of points to this number - could be upto +30%</span>
+    number_of_lines = 0;
+    line_ended = 1;
+    number_of_points_on_line = 2;
+
+<span class="comment">% ---------------------------------------</span>
+<span class="comment">%     %SPEED BOOST This makes the lines a little less acurate but speed up the classifier</span>
+<span class="comment">%     on_line_threshold = 20; %allows noisey points to be considered to be on the line</span>
+<span class="comment">%     line_parameters = polyfit(scans_cart.rangeX(3-number_of_points_on_line:3),scans_cart.rangeY(3-number_of_points_on_line:3),1);</span>
+<span class="comment">%     for i = 3:number_of_points</span>
+<span class="comment">%         if mod(i,10) == 0 %This makes the lines a little less acurate but speed up the classifier</span>
+<span class="comment">%             line_parameters = polyfit(scans_cart.rangeX(i-number_of_points_on_line:i),scans_cart.rangeY(i-number_of_points_on_line:i),1);</span>
+<span class="comment">%         end</span>
+
+    <span class="comment">%SLOWER BUT MORE ACCURATE</span>
+    on_line_threshold = 10; <span class="comment">%allows noisey points to be considered to be on the line</span>
+    <span class="keyword">for</span> i = 3:number_of_points
+        	 line_parameters = polyfit(scans_cart.rangeX(i-number_of_points_on_line:i),scans_cart.rangeY(i-number_of_points_on_line:i),1);
+ <span class="comment">% ---------------------------------------</span>
+
+        d(i-1) = scans_cart.rangeY(i) - (line_parameters(1)*scans_cart.rangeX(i) + line_parameters(2));
+        <span class="keyword">if</span> abs(d(i-1)) &lt;= on_line_threshold &amp; number_of_points_on_line &lt; max_points_on_line
+            <span class="keyword">if</span> (line_ended == 1)
+                found_lines.line_start_end_points = [found_lines.line_start_end_points ; i-2 , 0]; <span class="comment">% line START point</span>
+                number_of_lines = number_of_lines+1;
+            <span class="keyword">end</span>
+            line_ended = 0;
+            number_of_points_on_line = number_of_points_on_line + 1;
+        <span class="keyword">else</span>
+            <span class="keyword">if</span> line_ended == 0
+                found_lines.line_start_end_points(end,2) = i-2; <span class="comment">% line END point</span>
+                number_of_points_on_line = 2;
+            <span class="keyword">end</span>
+            line_ended = 1;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> (line_ended == 0) &amp; (number_of_points_on_line &gt;= min_number_of_points_for_a_line)
+        found_lines.line_start_end_points(end,2) = i; <span class="comment">% line END point</span>
+    <span class="keyword">else</span>
+        number_of_lines = number_of_lines - 1; <span class="comment">%last row is not a true line</span>
+    <span class="keyword">end</span>
+
+<span class="comment">%plots originals start/end point markers</span>
+<span class="comment">% if dont_plot == 0</span>
+<span class="comment">%   for i = 1:number_of_lines</span>
+<span class="comment">%     plot(scans_cart.rangeX(found_lines.line_start_end_points(i,1)),scans_cart.rangeY(found_lines.line_start_end_points(i,1)),'xy','markersize',15)</span>
+<span class="comment">%     plot(scans_cart.rangeX(found_lines.line_start_end_points(i,2)),scans_cart.rangeY(found_lines.line_start_end_points(i,2)),'xy','markersize',15)</span>
+<span class="comment">%   end</span>
+<span class="comment">% end</span>
+
+    <span class="comment">%Smooths out detected lines</span>
+    <span class="keyword">for</span> i = 1:number_of_lines
+        clear <span class="string">lines</span>;
+        line_parameters = polyfit(scans_cart.rangeX(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)),scans_cart.rangeY(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)),1);
+        lines(1,:) = scans_cart.rangeX(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)); <span class="comment">% fitted line X values</span>
+        lines(2,:) = line_parameters(1)*scans_cart.rangeX(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)) + line_parameters(2); <span class="comment">% fitted line Y values</span>
+        gradient_fit_line(i) = (lines(2,1)-lines(2,end))/(lines(1,1)- lines(1,end));
+    <span class="keyword">end</span>
+    gradient_fit_line(end+1) = 10000; <span class="comment">% used for termination</span>
+
+    found_lines.number_of_lines_smoothed = 1;
+    temp_counter = 0;
+    <span class="keyword">for</span> i = 1:number_of_lines-1
+        gradient_test = abs(gradient_fit_line(i) - gradient_fit_line(i+1));
+        point_proximity_test = (( (scans_cart.rangeX(found_lines.line_start_end_points(i,2))-scans_cart.rangeX(found_lines.line_start_end_points(i+1,1)))^2 + (scans_cart.rangeY(found_lines.line_start_end_points(i,2))-scans_cart.rangeY(found_lines.line_start_end_points(i+1,1)))^2 )^(1/2));
+        size_of_line_test = found_lines.line_start_end_points(i,2) - found_lines.line_start_end_points(i-temp_counter,1);
+        <span class="keyword">if</span> gradient_test &lt;= line_segment_smoothing_threshold &amp;  point_proximity_test &lt;= line_join_dist_threshold  &amp; size_of_line_test &lt; max_points_on_line
+            temp_counter = temp_counter + 1;
+        <span class="keyword">else</span>
+            <span class="keyword">if</span> abs((found_lines.line_start_end_points(i-temp_counter,1)) - (found_lines.line_start_end_points(i,2))) &gt;= min_number_of_points_for_a_line
+                found_lines.line_start_end_points_smoothed(found_lines.number_of_lines_smoothed,1) = found_lines.line_start_end_points(i-temp_counter,1);
+                found_lines.line_start_end_points_smoothed(found_lines.number_of_lines_smoothed,2) = found_lines.line_start_end_points(i,2);
+                found_lines.number_of_lines_smoothed = found_lines.number_of_lines_smoothed + 1;
+                temp_counter = 0;
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    found_lines.number_of_lines_smoothed = found_lines.number_of_lines_smoothed-1;
+
+    <span class="comment">%Draws on detected lines and SHOULD check for any none valid lines (lines that go through the lasers (0,0)</span>
+    <span class="keyword">for</span> i = 1:found_lines.number_of_lines_smoothed
+        clear <span class="string">lines</span>;
+        line_parameters = polyfit(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)),1);
+        lines(1,:) = scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)); <span class="comment">% fitted line X values</span>
+        lines(2,:) = line_parameters(1)*scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)) + line_parameters(2); <span class="comment">% fitted line Y values</span>
+        lines(3,:) = scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2));
+        found_lines.found_lines_gradients = [found_lines.found_lines_gradients; line_parameters(1)];
+        <span class="comment">%waitforbuttonpress();</span>
+<span class="comment">%         if line_parameters(2) &gt;= on_line_threshold</span>
+
+<span class="comment">% plots found lines</span>
+<span class="keyword">if</span> dont_plot == 0
+    figure(1);
+    line(i) = plot3(lines(1,:),lines(2,:),lines(3,:),<span class="string">'c'</span>,<span class="string">'linestyle'</span>,<span class="string">'-'</span>);
+<span class="comment">%     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(i,1)),scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(i,2)),'oc','markerfacecolor','c','markersize',1.5);</span>
+<span class="comment">%     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(i,2)),scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(i,2)),'oc','markerfacecolor','c','markersize',1.5);</span>
+<span class="keyword">end</span>
+
+<span class="comment">% no idea what this shit does?!?!?!?</span>
+<span class="comment">%         else</span>
+<span class="comment">%             if i == size(found_lines.line_start_end_points_smoothed,1)</span>
+<span class="comment">%                 found_lines.line_start_end_points_smoothed = found_lines.line_start_end_points_smoothed(1:i-1,:);</span>
+<span class="comment">%                 found_lines.found_lines_gradients = found_lines.found_lines_gradients(1:i-1,:);</span>
+<span class="comment">%             else</span>
+<span class="comment">%                 found_lines.line_start_end_points_smoothed = [found_lines.line_start_end_points_smoothed(1:i-1,:) ; found_lines.line_start_end_points_smoothed(i+1:end,:)];</span>
+<span class="comment">%                 found_lines.found_lines_gradients = [found_lines.found_lines_gradients(1:i-1,:); found_lines.found_lines_gradients(i+1:end,:)];</span>
+<span class="comment">%             end</span>
+<span class="comment">%         end</span>
+    <span class="keyword">end</span>
+</pre><h2>INITIALISE VARIABLE - THIS ONES' USED IN THE LOOP<a name="9"></a></h2><pre class="codeinput">    found_lines.perpindicular_intersecting_ray_numbers = [];
+    found_lines.would_be_perp_ray = [];
+    found_lines.classifier_output = [];
+    i=0; <span class="comment">% used for the index in the following loop</span>
+</pre><h2>LOOP TO TEST ALL LINES<a name="10"></a></h2><pre class="codeinput"><span class="comment">%for i = 1:found_lines.number_of_lines_smoothed % THE OLD LOOPER</span>
+<span class="keyword">while</span> (i&lt;size(found_lines.line_start_end_points_smoothed,1))
+    i = i+1;
+</pre><h2>FIND PERPINDICULAR RAYS<a name="11"></a></h2><pre class="codeinput">    found_lines.perpindicular_intersecting_ray_numbers(i,1) = 0;
+    <span class="comment">% test to find if intersection of any rays is perpindicularof to the test line</span>
+    <span class="keyword">for</span> j = found_lines.line_start_end_points_smoothed(i,1):1:found_lines.line_start_end_points_smoothed(i,2)
+         ray_grads(j) = (scans_cart.rangeY(j)/scans_cart.rangeX(j)); <span class="comment">%tan(pi()/2 + ((number_of_points/2)-j)*theta_between_rays);</span>
+        <span class="comment">% test if a perpindicular ray exists on the test line</span>
+        <span class="keyword">if</span> abs(1+(ray_grads(j)*found_lines.found_lines_gradients(i))) &lt;= 0.1 <span class="comment">%ray within a few degrees of being perpindicular</span>
+            found_lines.perpindicular_intersecting_ray_numbers(i,1) = j;
+            <span class="keyword">break</span>;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">% finds the would be perpindicular ray</span>
+    found_lines.would_be_perp_ray(i,1) = 0;
+    necessary_gradient = (-1/found_lines.found_lines_gradients(i));
+    necessary_ray_angle = pi()/2 - (pi()/2 + atan(necessary_gradient));<span class="comment">% +CW from -x</span>
+    <span class="keyword">if</span> necessary_ray_angle &lt;=0
+        necessary_ray_angle = pi()+necessary_ray_angle;
+    <span class="keyword">end</span>
+    <span class="keyword">for</span> j = 1:number_of_points
+        ray_angle(j) =  j*theta_between_rays*2 + abs(atan((scans_cart.rangeY(1)/scans_cart.rangeX(1)))); <span class="comment">%only every second ray is for range</span>
+        <span class="keyword">if</span> abs(ray_angle(j) - necessary_ray_angle) &lt;= 0.01
+        	found_lines.would_be_perp_ray(i,1) = j;<span class="comment">%-3;</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">%finds out what side of the line segment the would be perp ray is</span>
+    <span class="keyword">if</span> found_lines.would_be_perp_ray(i,1) &lt; found_lines.line_start_end_points_smoothed(i,1)
+        found_lines.perpindicular_intersecting_ray_numbers(i,1) = -10; <span class="comment">% indicates perp ray is to the low side</span>
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> found_lines.would_be_perp_ray(i,1) &gt; found_lines.line_start_end_points_smoothed(i,2)
+        found_lines.perpindicular_intersecting_ray_numbers(i,1) = -20; <span class="comment">% indicates perp ray is to the high side</span>
+    <span class="keyword">end</span>
+
+<span class="comment">%plot perp lines</span>
+<span class="comment">%if dont_plot == 0</span>
+<span class="comment">%   figure(1)</span>
+<span class="comment">%   plotx = -500:500;</span>
+<span class="comment">%   plot(plotx,plotx*necessary_gradient,'y');</span>
+<span class="comment">%   plot(scans_cart.rangeX(found_lines.would_be_perp_ray(i,1)),scans_cart.rangeY(found_lines.would_be_perp_ray(i,1)),'.b','markersize',20)</span>
+<span class="comment">% end</span>
+</pre><h2>THIS SECTION ROTATES THE TEST LINE TO BE HORIZONTAL<a name="12"></a></h2><pre class="codeinput">    rotation_angle = -atan(found_lines.found_lines_gradients(i));
+    data_range_to_classify =  [found_lines.line_start_end_points_smoothed(i,1)+2, found_lines.line_start_end_points_smoothed(i,2)-2];
+    rotated_scan.rangeX = scans_cart.rangeX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle) - scans_cart.rangeY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle);
+    rotated_scan.rangeY = scans_cart.rangeX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle) + scans_cart.rangeY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle);
+    rotated_scan.intensityX = scans_cart.intensityX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle) - scans_cart.intensityY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle);
+    rotated_scan.intensityY = scans_cart.intensityX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle) + scans_cart.intensityY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle);
+</pre><h2>MANIPULATE DATA TO GIVE BEST CHANCE FOR CLASSIFICATION<a name="13"></a></h2>
+         <p>Manipulation is done based on where on the line the perpindicular ray intersects, if it does intersect Options are --&gt; Leave
+            as is - Mirror - Mirror + empty region
+         </p><pre class="codeinput">    rotated_scan.rangeXM = 0; <span class="comment">% this is used to hold the manipulated data</span>
+    rotated_scan.rangeYM = 0;
+    rotated_scan.intensityXM = 0;
+    rotated_scan.intensityYM = 0;
+    <span class="comment">% intialise variables</span>
+    size_data = data_range_to_classify(1,2) - data_range_to_classify(1,1) + 1;
+    scan_split_point = found_lines.perpindicular_intersecting_ray_numbers(i) - 4; <span class="comment">% the four adjsuts as both edges of the line are trimmed by 2 points to remove noise</span>
+
+    <span class="comment">% due to tolerances it is possilbe for teh perp ray to be on the edge</span>
+    <span class="comment">% or just off the edge of the line</span>
+    <span class="keyword">if</span> scan_split_point &gt; data_range_to_classify(1,2)
+        scan_split_point = data_range_to_classify(1,2);
+    <span class="keyword">end</span>
+
+    <span class="comment">%determines the type of data manipulation required</span>
+    type_of_interaction = 3;<span class="comment">% default - do nothing</span>
+    <span class="comment">% perp ray on the high side - mirror the low</span>
+    <span class="keyword">if</span> ((data_range_to_classify(1,2) - scan_split_point) &lt;= size_data*0.3) &amp; scan_split_point &gt;= 0
+        scan_split_point = found_lines.perpindicular_intersecting_ray_numbers(i) - 4; <span class="comment">% the four adjsuts as both edges of the line are trimmed by 2 points to remove noise</span>
+        type_of_interaction = 1; <span class="comment">% perp ray on the high side - mirror the low</span>
+    <span class="keyword">end</span>
+    <span class="comment">% perp ray on the low side - mirror the high</span>
+    <span class="keyword">if</span> ((scan_split_point - data_range_to_classify(1,1)) &lt;= size_data*0.3) &amp; scan_split_point  &gt;= 0
+        scan_split_point = found_lines.perpindicular_intersecting_ray_numbers(i) - 4; <span class="comment">% the four adjsuts as both edges of the line are trimmed by 2 points to remove noise</span>
+        type_of_interaction = 2;<span class="comment">% perp ray on the low side - mirror the high</span>
+    <span class="keyword">end</span>
+    <span class="comment">% perp ray in the middle - do nothing</span>
+    <span class="keyword">if</span> abs((data_range_to_classify(1,2) - data_range_to_classify(1,1))/2 - scan_split_point) &lt;= 3 &amp; scan_split_point  &gt;= 0 &amp; mean(rotated_scan.intensityY) &gt; 1500
+    	scan_split_point = found_lines.perpindicular_intersecting_ray_numbers(i) - 4; <span class="comment">% the four adjsuts as both edges of the line are trimmed by 2 points to remove noise</span>
+        type_of_interaction = 3;<span class="comment">% perp ray in the middle - do nothing</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">% perp ray off to the low side - mirror the high</span>
+    <span class="keyword">if</span>  scan_split_point  == -14
+        scan_split_point = data_range_to_classify(1,2)-2; <span class="comment">% this sets the split point to the lower limit of the scan range</span>
+        <span class="comment">%type_of_interaction = 2; %Does the best it can without doing anything special</span>
+        type_of_interaction = 5;<span class="comment">% perp ray not on line but off to low side</span>
+    <span class="keyword">end</span>
+    <span class="comment">% perp ray off to the high side - mirror the low</span>
+    <span class="keyword">if</span>  scan_split_point  == -24
+        scan_split_point = data_range_to_classify(1,2)-2; <span class="comment">% this sets the split point to the upper limit of the scan range</span>
+        <span class="comment">%type_of_interaction = 1; %Does the best it can without doing anything special</span>
+        type_of_interaction = 4;<span class="comment">% perp ray not on line but off to high side</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">% does the manipulation</span>
+    <span class="keyword">switch</span> (type_of_interaction)
+        <span class="keyword">case</span>(1)  <span class="comment">% perp ray on the high ray side - mirror the low</span>
+            <span class="comment">% writes orignal data from far low to SP as is</span>
+            rotated_scan.rangeYM = rotated_scan.rangeY;
+            <span class="comment">% takes data from the far low and writes it far high up to SP</span>
+            <span class="keyword">for</span> k = (scan_split_point - (data_range_to_classify(1,1)-3))+1:((scan_split_point - (data_range_to_classify(1,1)-3))*2)-1
+            	rotated_scan.rangeYM(k) = rotated_scan.rangeY(end-k+(scan_split_point-(data_range_to_classify(1,1)-3)));
+            <span class="keyword">end</span>
+            <span class="comment">% the magnitude of X doesn't matter, but, the spacing between the</span>
+            <span class="comment">% points must be the same post mirroring</span>
+
+            rotated_scan.rangeXM = rotated_scan.rangeX;
+            <span class="keyword">for</span> k = (scan_split_point - (data_range_to_classify(1,1)-3))+1:((scan_split_point - (data_range_to_classify(1,1)-3))*2)-1
+                add_this_to_mirrored_X = rotated_scan.rangeX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3))+1) - rotated_scan.rangeX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3)));
+                rotated_scan.rangeXM(k) = rotated_scan.rangeXM(k-1) + add_this_to_mirrored_X;
+            <span class="keyword">end</span>
+
+            <span class="comment">% writes orignal data from far low to SP as is</span>
+            rotated_scan.intensityYM = rotated_scan.intensityY;
+            <span class="comment">% takes data from the far low and writes it far high up to SP</span>
+            <span class="keyword">for</span> k = (scan_split_point - (data_range_to_classify(1,1)-3))+1:((scan_split_point - (data_range_to_classify(1,1)-3))*2)-1
+            	rotated_scan.intensityYM(k) = rotated_scan.intensityY(end-k+(scan_split_point-(data_range_to_classify(1,1)-3)));
+            <span class="keyword">end</span>
+            <span class="comment">% the magnitude of X doesn't matter, but, the spacing between the</span>
+            <span class="comment">% points must be the same post mirroring</span>
+
+            rotated_scan.intensityXM = rotated_scan.intensityX;
+            <span class="keyword">for</span> k = (scan_split_point - (data_range_to_classify(1,1)-3))+1:((scan_split_point - (data_range_to_classify(1,1)-3))*2)-1
+                add_this_to_mirrored_X = rotated_scan.intensityX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3))+1) - rotated_scan.intensityX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3)));
+                rotated_scan.intensityXM(k) = rotated_scan.intensityXM(k-1) + add_this_to_mirrored_X;
+            <span class="keyword">end</span>
+
+        <span class="keyword">case</span>(2) <span class="comment">% perp ray on the low side - mirror the high</span>
+            <span class="comment">% takes data from the far high and writes it far low down to SP</span>
+            <span class="keyword">for</span> k = 1:(data_range_to_classify(1,2))-scan_split_point
+                rotated_scan.rangeYM(k,1) = rotated_scan.rangeY(end-k+1);
+            <span class="keyword">end</span>
+            <span class="comment">% writes orignal data from SP to far high as is</span>
+            rotated_scan.rangeYM = [rotated_scan.rangeYM; rotated_scan.rangeY(scan_split_point-(data_range_to_classify(1,1))+2+1:end)];
+
+            <span class="comment">% the magnitude of X doesn't matter, but, the spacing between the</span>
+            <span class="comment">% points must be the same post mirroring</span>
+            rotated_scan.rangeXM((data_range_to_classify(1,2)-2)-scan_split_point+1:((data_range_to_classify(1,2)-2)-scan_split_point)*2+3,1) = rotated_scan.rangeX(scan_split_point-(data_range_to_classify(1,1))+1:end);
+            <span class="keyword">for</span> k = 1:(data_range_to_classify(1,2))-scan_split_point
+                add_this_to_mirrored_X = rotated_scan.rangeXM(k+1+(data_range_to_classify(1,2)-2)-scan_split_point) - rotated_scan.rangeXM(k+(data_range_to_classify(1,2)-2)-scan_split_point);
+                rotated_scan.rangeXM((data_range_to_classify(1,2))-scan_split_point-k+1,1) = rotated_scan.rangeXM((data_range_to_classify(1,2))-scan_split_point-k+2) - add_this_to_mirrored_X;
+            <span class="keyword">end</span>
+
+            <span class="comment">% takes data from the far high and writes it far low down to SP</span>
+            <span class="keyword">for</span> k = 1:(data_range_to_classify(1,2))-scan_split_point
+                rotated_scan.intensityYM(k,1) = rotated_scan.intensityY(end-k+1);
+            <span class="keyword">end</span>
+            <span class="comment">% writes orignal data from SP to far high as is</span>
+            rotated_scan.intensityYM = [rotated_scan.intensityYM; rotated_scan.intensityY(scan_split_point-(data_range_to_classify(1,1))+2+1:end)];
+
+            <span class="comment">% the magnitude of X doesn't matter, but, the spacing between the</span>
+            <span class="comment">% points must be the same post mirroring</span>
+            rotated_scan.intensityXM((data_range_to_classify(1,2)-2)-scan_split_point+1:((data_range_to_classify(1,2)-2)-scan_split_point)*2+3,1) = rotated_scan.intensityX(scan_split_point-(data_range_to_classify(1,1))+1:end);
+            <span class="keyword">for</span> k = 1:(data_range_to_classify(1,2))-scan_split_point
+                add_this_to_mirrored_X = rotated_scan.intensityXM(k+1+(data_range_to_classify(1,2)-2)-scan_split_point) - rotated_scan.intensityXM(k+(data_range_to_classify(1,2)-2)-scan_split_point);
+                rotated_scan.intensityXM((data_range_to_classify(1,2))-scan_split_point-k+1,1) = rotated_scan.intensityXM((data_range_to_classify(1,2))-scan_split_point-k+2) - add_this_to_mirrored_X;
+            <span class="keyword">end</span>
+
+        <span class="keyword">case</span>(3) <span class="comment">% perp ray in the middle - do nothing</span>
+            rotated_scan.rangeXM = rotated_scan.rangeX; <span class="comment">% this is used to hold the manipulated data</span>
+            rotated_scan.rangeYM = rotated_scan.rangeY;
+            rotated_scan.intensityXM = rotated_scan.intensityX;
+            rotated_scan.intensityYM = rotated_scan.intensityY;
+
+        <span class="keyword">case</span>(4) <span class="comment">% perp ray not on line but off to high side</span>
+
+            <span class="comment">% writes orignal data from far low to SP as is</span>
+            rotated_scan.rangeYM = rotated_scan.rangeY;
+            <span class="comment">% puts in fake centre points</span>
+            num_fake_points_to_add = found_lines.would_be_perp_ray(i) - (data_range_to_classify(1,2)-2);
+            rotated_scan.rangeYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = mean(rotated_scan.rangeYM);
+            <span class="comment">% takes data from the far low and writes it far high up to SP</span>
+            <span class="keyword">for</span> k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+            	rotated_scan.rangeYM(k) = rotated_scan.rangeY(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add);
+            <span class="keyword">end</span>
+            <span class="comment">% the magnitude of X doesn't matter, but, the spacing between the</span>
+            <span class="comment">% points must be the same post mirroring</span>
+            rotated_scan.rangeXM = rotated_scan.rangeX;
+            rotated_scan.rangeXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
+            <span class="keyword">for</span> k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+                rotated_scan.rangeXM(k) = rotated_scan.rangeXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
+            <span class="keyword">end</span>
+
+            <span class="comment">% writes orignal data from far low to SP as is</span>
+            rotated_scan.intensityYM = rotated_scan.intensityY;
+            <span class="comment">% puts in fake centre points</span>
+            rotated_scan.intensityYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = 1600;
+            <span class="comment">% takes data from the far low and writes it far high up to SP</span>
+            <span class="keyword">for</span> k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+            	rotated_scan.intensityYM(k) = rotated_scan.intensityY(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add);
+            <span class="keyword">end</span>
+            <span class="comment">% the magnitude of X doesn't matter, but, the spacing between the</span>
+            <span class="comment">% points must be the same post mirroring</span>
+            rotated_scan.intensityXM = rotated_scan.intensityX;
+            rotated_scan.intensityXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
+            <span class="keyword">for</span> k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+                rotated_scan.intensityXM(k) = rotated_scan.intensityXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
+            <span class="keyword">end</span>
+
+        <span class="keyword">case</span>(5) <span class="comment">% perp ray not on line but off to low side</span>
+
+            <span class="comment">% reverses order of data so I can reuse MOST of the code from case(4)</span>
+            rotated_scan.rangeXFlipped = [];
+            rotated_scan.rangeYFlipped = [];
+            rotated_scan.intensityXFlipped = [];
+            rotated_scan.intensityYFlipped = [];
+            rotated_scan.rangeXFlipped(1:end,1) = rotated_scan.rangeX(end:-1:1,1);
+            rotated_scan.rangeYFlipped(1:end,1) = rotated_scan.rangeY(end:-1:1,1);
+            rotated_scan.intensityXFlipped(1:end,1) = rotated_scan.intensityX(end:-1:1,1);
+            rotated_scan.intensityYFlipped(1:end,1) = rotated_scan.intensityY(end:-1:1,1);
+
+            <span class="comment">% writes orignal data from far low to SP as is</span>
+            rotated_scan.rangeYM = rotated_scan.rangeYFlipped;
+            <span class="comment">% puts in fake centre points - DIFFERENT FROM CASE 4</span>
+            num_fake_points_to_add = (data_range_to_classify(1,1)+2)-found_lines.would_be_perp_ray(i);
+            rotated_scan.rangeYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = mean(rotated_scan.rangeYM);
+            <span class="comment">% takes data from the far low and writes it far high up to SP</span>
+            <span class="keyword">for</span> k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+            	rotated_scan.rangeYM(k) = rotated_scan.rangeYFlipped(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add);
+            <span class="keyword">end</span>
+            <span class="comment">% the magnitude of X doesn't matter, but, the spacing between the</span>
+            <span class="comment">% points must be the same post mirroring</span>
+            rotated_scan.rangeXM = rotated_scan.rangeXFlipped;
+            rotated_scan.rangeXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
+            <span class="keyword">for</span> k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+                rotated_scan.rangeXM(k) = rotated_scan.rangeXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
+            <span class="keyword">end</span>
+
+            <span class="comment">% writes orignal data from far low to SP as is</span>
+            rotated_scan.intensityYM = rotated_scan.intensityYFlipped;
+            <span class="comment">% puts in fake centre point</span>
+            rotated_scan.intensityYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = 1600;
+            <span class="comment">% takes data from the far low and writes it far high up to SP</span>
+            <span class="keyword">for</span> k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+            	rotated_scan.intensityYM(k) = rotated_scan.intensityYFlipped(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add);
+            <span class="keyword">end</span>
+            <span class="comment">% the magnitude of X doesn't matter, but, the spacing between the</span>
+            <span class="comment">% points must be the same post mirroring</span>
+            rotated_scan.intensityXM = rotated_scan.intensityXFlipped;
+            rotated_scan.intensityXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
+            <span class="keyword">for</span> k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+                rotated_scan.intensityXM(k) = rotated_scan.intensityXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
+            <span class="keyword">end</span>
+    <span class="keyword">end</span>
+</pre><h2>POLY FITS TO LINES<a name="14"></a></h2><pre class="codeinput">    <span class="comment">% initalise variables</span>
+    order = 2; <span class="comment">%the order of the poly fits</span>
+
+    <span class="comment">%poly fit for the range data</span>
+    polyfit_coefs_range = polyfit(rotated_scan.rangeXM(:), rotated_scan.rangeYM(:), order);
+    fitted_line_vals_range = [polyval(polyfit_coefs_range, rotated_scan.rangeXM(:)) , rotated_scan.rangeXM(:)];
+    [rubbish fitted_line_vals_width] = size(fitted_line_vals_range);
+
+    <span class="comment">%poly fit for the intensity data</span>
+    polyfit_coefs_intensity = polyfit(rotated_scan.intensityXM(:), rotated_scan.intensityYM(:), order);
+    fitted_line_vals_intensity = [polyval(polyfit_coefs_intensity, rotated_scan.intensityXM(:)) , rotated_scan.intensityXM(:)];
+
+<span class="comment">% plots the actual data and poly fits for the found line</span>
+<span class="comment">% if dont_plot == 0</span>
+<span class="comment">% 	 figure(10+i);</span>
+<span class="comment">%    hold on;</span>
+<span class="comment">%    %laser data</span>
+<span class="comment">%    plot(rotated_scan.rangeXM,rotated_scan.rangeYM)</span>
+<span class="comment">%    plot(rotated_scan.intensityXM,rotated_scan.intensityYM)</span>
+<span class="comment">%    %poly fit</span>
+<span class="comment">%    plot(rotated_scan.rangeXM(:), fitted_line_vals_range(:,1), 'color', 'r')</span>
+<span class="comment">%    plot(rotated_scan.intensityXM(:), fitted_line_vals_intensity(:,1), 'color', 'r')</span>
+<span class="comment">%    plot(rotated_scan.intensityX,rotated_scan.intensityY,'b')</span>
+<span class="comment">% end</span>
+</pre><h2>CALCULATE THE REQUIRED RESIDUALS FOR THE POLYs BEING TESTED<a name="15"></a></h2><pre class="codeinput">    [rubbish size_fitted_line_vals] = size(fitted_line_vals_intensity);
+    residual_range = [ rotated_scan.rangeYM(:) - fitted_line_vals_range(:,1)];
+    residual_intensity = [ rotated_scan.intensityYM(:) - fitted_line_vals_intensity(:,1)];
+    [rubbish size_residual] = size(residual_range);
+    mse_range = mse(residual_range(:));
+    mse_intensity = mse(residual_intensity(:));
+    [mse_size rubbish] = size(mse_range);
+
+<span class="comment">%plots the residuals and puts up message box with MSE's in it</span>
+<span class="comment">% if dont_plot == 0</span>
+<span class="comment">%    figure(20+i);</span>
+<span class="comment">%    hold on;</span>
+<span class="comment">%    plot(residual_range(:),'r');</span>
+<span class="comment">%    plot(residual_intensity(:));</span>
+<span class="comment">%    axis([0 60 -700 400])</span>
+<span class="comment">%    message = ['MSE Range:', int2str(mse_range),'   MSE Intensity:',int2str(mse_intensity)];</span>
+<span class="comment">%    msgbox(message,int2str(i));</span>
+<span class="comment">% end</span>
+</pre><h2>GUESSER<a name="16"></a></h2><pre class="codeinput">    <span class="keyword">if</span> mean(mse_range) &gt;= 1 &amp; mean(mse_range) &lt; 40 &amp; mean(mse_intensity) &gt; 6000 &amp; mean(mse_intensity) &lt; 100000
+        guess = 1;
+    <span class="keyword">elseif</span> mean(mse_range) &gt; 48 &amp; mean(mse_range) &lt; 250 &amp; mean(mse_intensity) &gt; 1200 &amp; mean(mse_intensity) &lt; 5000
+        guess = 2;
+    <span class="keyword">elseif</span> mean(mse_range) &gt; 2 &amp; mean(mse_range) &lt; 40 &amp; mean(mse_intensity) &gt; 200 &amp; mean(mse_intensity) &lt; 2000
+        guess = 3;
+    <span class="keyword">else</span>
+        guess = 4;
+    <span class="keyword">end</span>
+
+    <span class="comment">%for user output</span>
+    <span class="keyword">switch</span> (guess)
+        <span class="keyword">case</span> 1
+            output = <span class="string">'Grey Metal '</span>;
+            output_color = [.35 .35 .35]; <span class="comment">% GREY</span>
+        <span class="keyword">case</span> 2
+            output = <span class="string">'Shiny Metal'</span>;
+            output_color = [.8 .8 .8]; <span class="comment">% Silver</span>
+        <span class="keyword">case</span> 3
+            output = <span class="string">'Cloth/Wood'</span>; <span class="comment">% OR RED OR WHITE --- JUST CLOTH or WOOD!!!</span>
+            output_color = [1 0 0]; <span class="comment">% RED</span>
+        <span class="keyword">case</span> 4
+            output = <span class="string">'Do not know'</span>;
+            output_color = [1 1 1]; <span class="comment">% WHITE</span>
+    <span class="keyword">end</span>
+<span class="comment">% %make every 20th line blue</span>
+<span class="comment">% if mod(Scan_to_Class,20) == 0</span>
+<span class="comment">%     output_color = [0 1 1] %CYAN</span>
+<span class="comment">% end</span>
+
+<span class="comment">%creates colour coded figure as user output</span>
+<span class="keyword">if</span> dont_plot == 0
+    figure(30)
+    display_info = [<span class="string">'Line #'</span> , int2str(i), <span class="string">' - '</span>, output];
+    set(30,<span class="string">'name'</span>,display_info,<span class="string">'Position'</span>,[ 700 370 350 50 ]);
+    plot(1,1,<span class="string">'o'</span>,<span class="string">'MarkerEdgeColor'</span>,<span class="string">'k'</span>,<span class="string">'MarkerFaceColor'</span>,output_color,<span class="string">'MarkerSize'</span>,10000);
+    set(line(i),<span class="string">'color'</span>,output_color,<span class="string">'linewidth'</span>,5);
+    <span class="keyword">if</span> output_color == [1 1 1]
+        delete(line(i)); <span class="comment">%delets the line from memory</span>
+        <span class="comment">%set(line(i),'color',output_color,'linestyle','none'); %hides the line</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+    <span class="comment">% puts the result in an accessible place</span>
+    found_lines.classifier_output(i,1)= guess;
+</pre><h2>DEAL WITH NO CLASSIFIED SURFACES BY SPLITTING THEM AND RE-CLASSIFING<a name="17"></a></h2><pre class="codeinput">    <span class="keyword">if</span> found_lines.classifier_output(i,1) == 4
+        <span class="keyword">if</span> (found_lines.line_start_end_points_smoothed(i,2)-found_lines.line_start_end_points_smoothed(i,1))/2 &gt; min_number_of_points_for_a_line
+            <span class="keyword">if</span> wait_for_clicks == 0
+                waitforbuttonpress()
+            <span class="keyword">end</span>
+            found_lines.line_start_end_points_smoothed(end+1,1) = found_lines.line_start_end_points_smoothed(i,1);
+            found_lines.line_start_end_points_smoothed(end,2) = floor(found_lines.line_start_end_points_smoothed(i,1)+((found_lines.line_start_end_points_smoothed(i,2)-found_lines.line_start_end_points_smoothed(i,1))/2));
+            found_lines.line_start_end_points_smoothed(end+1,2) = found_lines.line_start_end_points_smoothed(i,2);
+            found_lines.line_start_end_points_smoothed(end,1) = floor(found_lines.line_start_end_points_smoothed(i,2)-((found_lines.line_start_end_points_smoothed(i,2)-found_lines.line_start_end_points_smoothed(i,1))/2))+1;
+            found_lines.line_start_end_points_smoothed(i,1) = -found_lines.line_start_end_points_smoothed(i,1);
+            found_lines.line_start_end_points_smoothed(i,2) = -found_lines.line_start_end_points_smoothed(i,2);
+            found_lines.found_lines_gradients(end+1,1) = found_lines.found_lines_gradients(i,1);
+            found_lines.found_lines_gradients(end+1,1) = found_lines.found_lines_gradients(i,1);
+<span class="comment">%draws first of the split lines on</span>
+<span class="keyword">if</span> dont_plot == 0
+    figure(1);
+    temp_i = length(found_lines.line_start_end_points_smoothed)-1;
+    clear <span class="string">lines</span>;
+    line_parameters = polyfit(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)),1);
+    lines(1,:) = scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)); <span class="comment">% fitted line X values</span>
+    lines(2,:) = line_parameters(1)*scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)) + line_parameters(2); <span class="comment">% fitted line Y values</span>
+    lines(3,:) = scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2));
+    line(temp_i) = plot3(lines(1,:),lines(2,:),lines(3,:),<span class="string">'b'</span>,<span class="string">'linestyle'</span>,<span class="string">'-'</span>);
+    <span class="comment">%otherside of split</span>
+    temp_i = length(found_lines.line_start_end_points_smoothed);
+    clear <span class="string">lines</span>;
+    line_parameters = polyfit(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)),1);
+    lines(1,:) = scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)); <span class="comment">% fitted line X values</span>
+    lines(2,:) = line_parameters(1)*scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)) + line_parameters(2); <span class="comment">% fitted line Y values</span>
+    lines(3,:) = scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2));
+    line(temp_i) = plot3(lines(1,:),lines(2,:),lines(3,:),<span class="string">'b'</span>,<span class="string">'linestyle'</span>,<span class="string">'-'</span>);
+    <span class="comment">%plots split points</span>
+<span class="comment">%     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(end,1)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(end,1)),scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(end,1)),'oc','markerfacecolor','b','markersize',1.5);</span>
+<span class="comment">%     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(end-1,1)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(end-1,1)),scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(end-1,1)),'oc','markerfacecolor','b','markersize',1.5);</span>
+<span class="comment">%     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(end,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(end,2)),scans_cart.rangeX(found_lines.line_start_end_points_smoothed(end,2)),'oc','markerfacecolor','b','markersize',1.5);</span>
+
+<span class="keyword">end</span>
+       <span class="keyword">end</span>
+    <span class="keyword">end</span>
+</pre><h2>END OF TEST ALL LINES LOOP<a name="18"></a></h2><pre class="codeinput">    <span class="keyword">if</span> wait_for_clicks == 0
+        waitforbuttonpress()
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">%finsihed = 1</span>
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% WHEN USING STEVENS/GAVINS MATLAB LASER DATA COLLECTION
+%function Classifier(PointData, IntensityData, Scan_to_Class)
+function [found_lines] = Classifier(PointData, IntensityData, Scan_to_Class)
+
+%% INPUT ARG CHECKS
+if nargin<3
+    %You Should pass the classifier which scan you wish to classify. Instead classifying first only
+    Scan_to_Class=1;
+end
+
+%% WHEN USING MY GET LASER DATA OR PLY FILES
+% function Classifier() 
+% global scans_cart
+% global found_lines
+
+%% TURNS PLOTTING ON OR OFF
+dont_plot = 1; % 0 to plot
+wait_for_clicks = 1;% 0 to make classifier wait for mouse clicks to continue
+
+%% Change data from Stevens format to my format
+    %range
+    scans_cart.rangeX = PointData(Scan_to_Class,:,2)'*1000;
+    scans_cart.rangeY = PointData(Scan_to_Class,:,3)'*1000;
+    scans_cart.rangeZ = PointData(Scan_to_Class,:,1)'*1000;
+    %intenstiy
+    [size_data rubbish ] = size(IntensityData);
+    angle = size_data * 0.351 * 2;
+    theta = ((-angle/2)/180)*pi():(0.352*2/180)*pi():((+angle/2)/180)*pi();
+    scans_cart.intensityX(Scan_to_Class,:) = sin(theta(Scan_to_Class)) * IntensityData(Scan_to_Class,:);
+    scans_cart.intensityY(Scan_to_Class,:) = cos(theta(Scan_to_Class)) * IntensityData(Scan_to_Class,:);
+    scans_cart.intensityX = scans_cart.intensityX(Scan_to_Class,:)';
+    scans_cart.intensityY = scans_cart.intensityY(Scan_to_Class,:)';
+
+%% PLOT THE LASER DATA
+if dont_plot == 0
+    colordef black;
+    figure(1);
+    %set(1,'name','Point Cloud','Position', [ 570 530 600 400 ]);
+    %hold off;
+    %scatter3(scans_cart.rangeX,scans_cart.rangeY, scans_cart.rangeZ, '.', 'markeredgecolor', [0.75 0.75 0.75]);
+    plot3(scans_cart.rangeX,scans_cart.rangeY, scans_cart.rangeZ, '.', 'linestyle','none', 'markersize',1, 'markeredgecolor', [0.75 0.75 0.75]);    
+    view(0,0)
+    hold on;
+    %axis equal;
+    %axis ([ -1000 700 1250 1750 -700 700 ])
+end
+
+%% FIND ALL FLAT SURFACES IN THE LASER DATA
+    % Initalise variables
+    theta_between_rays = 0.351 * pi/180; %angle between laser rays;
+    line_segment_smoothing_threshold = 0.5; %allows adjacent lines to be joined if there gradients are similar 
+    line_join_dist_threshold = 25; %allows adjacent lines to be joined if they are located near each other 
+    min_number_of_points_for_a_line = 8; %min number of points that are needed for a line to regester
+    [number_of_points rubbish] = size(scans_cart.rangeX); %number of range points and intensity points. number of rays used is double this
+    
+    found_lines.line_start_end_points = []; %list of the start and end ray numbers for all lines
+    found_lines.line_start_end_points_smoothed = []; %list of the start and end ray numbers for all smoothed lines 
+    found_lines.found_lines_gradients = []; % list of the gradients of the found lines
+    found_lines.number_of_lines_smoothed = 0;
+    
+%% TEST FOR LINES
+    % This function creats a poly fit of x number of points and sees if the
+    % next point lies on that line
+    max_points_on_line = 50; %roughly limits number of points to this number - could be upto +30%
+    number_of_lines = 0;
+    line_ended = 1;
+    number_of_points_on_line = 2;
+
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+%     %SPEED BOOST This makes the lines a little less acurate but speed up the classifier
+%     on_line_threshold = 20; %allows noisey points to be considered to be on the line 
+%     line_parameters = polyfit(scans_cart.rangeX(3-number_of_points_on_line:3),scans_cart.rangeY(3-number_of_points_on_line:3),1);
+%     for i = 3:number_of_points
+%         if mod(i,10) == 0 %This makes the lines a little less acurate but speed up the classifier
+%             line_parameters = polyfit(scans_cart.rangeX(i-number_of_points_on_line:i),scans_cart.rangeY(i-number_of_points_on_line:i),1);
+%         end
+    
+    %SLOWER BUT MORE ACCURATE        
+    on_line_threshold = 10; %allows noisey points to be considered to be on the line 
+    for i = 3:number_of_points
+        	 line_parameters = polyfit(scans_cart.rangeX(i-number_of_points_on_line:i),scans_cart.rangeY(i-number_of_points_on_line:i),1);
+ % REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+ 
+        d(i-1) = scans_cart.rangeY(i) - (line_parameters(1)*scans_cart.rangeX(i) + line_parameters(2));
+        if abs(d(i-1)) <= on_line_threshold & number_of_points_on_line < max_points_on_line
+            if (line_ended == 1) 
+                found_lines.line_start_end_points = [found_lines.line_start_end_points ; i-2 , 0]; % line START point
+                number_of_lines = number_of_lines+1;
+            end
+            line_ended = 0;   
+            number_of_points_on_line = number_of_points_on_line + 1;
+        else
+            if line_ended == 0
+                found_lines.line_start_end_points(end,2) = i-2; % line END point
+                number_of_points_on_line = 2;
+            end
+            line_ended = 1;
+        end
+    end
+    if (line_ended == 0) & (number_of_points_on_line >= min_number_of_points_for_a_line)
+        found_lines.line_start_end_points(end,2) = i; % line END point
+    else
+        number_of_lines = number_of_lines - 1; %last row is not a true line
+    end
+
+%plots originals start/end point markers
+% if dont_plot == 0
+%   for i = 1:number_of_lines
+%     plot(scans_cart.rangeX(found_lines.line_start_end_points(i,1)),scans_cart.rangeY(found_lines.line_start_end_points(i,1)),'xy','markersize',15)
+%     plot(scans_cart.rangeX(found_lines.line_start_end_points(i,2)),scans_cart.rangeY(found_lines.line_start_end_points(i,2)),'xy','markersize',15)
+%   end
+% end
+
+    %Smooths out detected lines
+    for i = 1:number_of_lines
+        clear lines;
+        line_parameters = polyfit(scans_cart.rangeX(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)),scans_cart.rangeY(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)),1);
+        lines(1,:) = scans_cart.rangeX(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)); % fitted line X values
+        lines(2,:) = line_parameters(1)*scans_cart.rangeX(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)) + line_parameters(2); % fitted line Y values
+        gradient_fit_line(i) = (lines(2,1)-lines(2,end))/(lines(1,1)- lines(1,end));
+    end
+    gradient_fit_line(end+1) = 10000; % used for termination
+
+    found_lines.number_of_lines_smoothed = 1;
+    temp_counter = 0;
+    for i = 1:number_of_lines-1
+        gradient_test = abs(gradient_fit_line(i) - gradient_fit_line(i+1));
+        point_proximity_test = (( (scans_cart.rangeX(found_lines.line_start_end_points(i,2))-scans_cart.rangeX(found_lines.line_start_end_points(i+1,1)))^2 + (scans_cart.rangeY(found_lines.line_start_end_points(i,2))-scans_cart.rangeY(found_lines.line_start_end_points(i+1,1)))^2 )^(1/2));
+        size_of_line_test = found_lines.line_start_end_points(i,2) - found_lines.line_start_end_points(i-temp_counter,1);
+        if gradient_test <= line_segment_smoothing_threshold &  point_proximity_test <= line_join_dist_threshold  & size_of_line_test < max_points_on_line
+            temp_counter = temp_counter + 1;
+        else
+            if abs((found_lines.line_start_end_points(i-temp_counter,1)) - (found_lines.line_start_end_points(i,2))) >= min_number_of_points_for_a_line
+                found_lines.line_start_end_points_smoothed(found_lines.number_of_lines_smoothed,1) = found_lines.line_start_end_points(i-temp_counter,1);
+                found_lines.line_start_end_points_smoothed(found_lines.number_of_lines_smoothed,2) = found_lines.line_start_end_points(i,2);
+                found_lines.number_of_lines_smoothed = found_lines.number_of_lines_smoothed + 1;
+                temp_counter = 0;
+            end
+        end
+    end
+    found_lines.number_of_lines_smoothed = found_lines.number_of_lines_smoothed-1;
+
+    %Draws on detected lines and SHOULD check for any none valid lines (lines that go through the lasers (0,0)
+    for i = 1:found_lines.number_of_lines_smoothed
+        clear lines;
+        line_parameters = polyfit(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)),1);
+        lines(1,:) = scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)); % fitted line X values
+        lines(2,:) = line_parameters(1)*scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)) + line_parameters(2); % fitted line Y values
+        lines(3,:) = scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2));
+        found_lines.found_lines_gradients = [found_lines.found_lines_gradients; line_parameters(1)];
+        %waitforbuttonpress();    
+%         if line_parameters(2) >= on_line_threshold
+
+% plots found lines
+if dont_plot == 0
+    figure(1);
+    line(i) = plot3(lines(1,:),lines(2,:),lines(3,:),'c','linestyle','-');
+%     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(i,1)),scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(i,2)),'oc','markerfacecolor','c','markersize',1.5);
+%     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(i,2)),scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(i,2)),'oc','markerfacecolor','c','markersize',1.5);
+end
+
+% no idea what this shit does?!?!?!?
+%         else
+%             if i == size(found_lines.line_start_end_points_smoothed,1)
+%                 found_lines.line_start_end_points_smoothed = found_lines.line_start_end_points_smoothed(1:i-1,:);
+%                 found_lines.found_lines_gradients = found_lines.found_lines_gradients(1:i-1,:);
+%             else
+%                 found_lines.line_start_end_points_smoothed = [found_lines.line_start_end_points_smoothed(1:i-1,:) ; found_lines.line_start_end_points_smoothed(i+1:end,:)];
+%                 found_lines.found_lines_gradients = [found_lines.found_lines_gradients(1:i-1,:); found_lines.found_lines_gradients(i+1:end,:)];
+%             end
+%         end  
+    end
+
+%%  INITIALISE VARIABLE - THIS ONES' USED IN THE LOOP
+    found_lines.perpindicular_intersecting_ray_numbers = [];
+    found_lines.would_be_perp_ray = [];
+    found_lines.classifier_output = [];
+    i=0; % used for the index in the following loop
+    
+%% LOOP TO TEST ALL LINES
+%for i = 1:found_lines.number_of_lines_smoothed % THE OLD LOOPER
+while (i<size(found_lines.line_start_end_points_smoothed,1))
+    i = i+1;
+
+%% FIND PERPINDICULAR RAYS
+    found_lines.perpindicular_intersecting_ray_numbers(i,1) = 0;
+    % test to find if intersection of any rays is perpindicularof to the test line  
+    for j = found_lines.line_start_end_points_smoothed(i,1):1:found_lines.line_start_end_points_smoothed(i,2)
+         ray_grads(j) = (scans_cart.rangeY(j)/scans_cart.rangeX(j)); %tan(pi()/2 + ((number_of_points/2)-j)*theta_between_rays);
+        % test if a perpindicular ray exists on the test line
+        if abs(1+(ray_grads(j)*found_lines.found_lines_gradients(i))) <= 0.1 %ray within a few degrees of being perpindicular
+            found_lines.perpindicular_intersecting_ray_numbers(i,1) = j;
+            break;
+        end
+    end
+
+    % finds the would be perpindicular ray
+    found_lines.would_be_perp_ray(i,1) = 0;
+    necessary_gradient = (-1/found_lines.found_lines_gradients(i)); 
+    necessary_ray_angle = pi()/2 - (pi()/2 + atan(necessary_gradient));% +CW from -x
+    if necessary_ray_angle <=0
+        necessary_ray_angle = pi()+necessary_ray_angle;
+    end
+    for j = 1:number_of_points
+        ray_angle(j) =  j*theta_between_rays*2 + abs(atan((scans_cart.rangeY(1)/scans_cart.rangeX(1)))); %only every second ray is for range
+        if abs(ray_angle(j) - necessary_ray_angle) <= 0.01
+        	found_lines.would_be_perp_ray(i,1) = j;%-3; 
+        end
+    end
+    
+    %finds out what side of the line segment the would be perp ray is
+    if found_lines.would_be_perp_ray(i,1) < found_lines.line_start_end_points_smoothed(i,1)
+        found_lines.perpindicular_intersecting_ray_numbers(i,1) = -10; % indicates perp ray is to the low side
+    end
+    if found_lines.would_be_perp_ray(i,1) > found_lines.line_start_end_points_smoothed(i,2)
+        found_lines.perpindicular_intersecting_ray_numbers(i,1) = -20; % indicates perp ray is to the high side
+    end
+
+%plot perp lines  
+%if dont_plot == 0
+%   figure(1)
+%   plotx = -500:500;
+%   plot(plotx,plotx*necessary_gradient,'y');
+%   plot(scans_cart.rangeX(found_lines.would_be_perp_ray(i,1)),scans_cart.rangeY(found_lines.would_be_perp_ray(i,1)),'.b','markersize',20)  
+% end
+
+%% THIS SECTION ROTATES THE TEST LINE TO BE HORIZONTAL
+    rotation_angle = -atan(found_lines.found_lines_gradients(i));
+    data_range_to_classify =  [found_lines.line_start_end_points_smoothed(i,1)+2, found_lines.line_start_end_points_smoothed(i,2)-2];
+    rotated_scan.rangeX = scans_cart.rangeX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle) - scans_cart.rangeY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle);
+    rotated_scan.rangeY = scans_cart.rangeX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle) + scans_cart.rangeY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle);
+    rotated_scan.intensityX = scans_cart.intensityX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle) - scans_cart.intensityY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle);
+    rotated_scan.intensityY = scans_cart.intensityX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle) + scans_cart.intensityY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle);
+    
+%% MANIPULATE DATA TO GIVE BEST CHANCE FOR CLASSIFICATION
+% Manipulation is done based on where on the line the perpindicular ray
+% intersects, if it does intersect
+% Options are REPLACE_WITH_DASH_DASH> Leave as is - Mirror - Mirror + empty region
+    rotated_scan.rangeXM = 0; % this is used to hold the manipulated data
+    rotated_scan.rangeYM = 0;
+    rotated_scan.intensityXM = 0;
+    rotated_scan.intensityYM = 0;
+    % intialise variables
+    size_data = data_range_to_classify(1,2) - data_range_to_classify(1,1) + 1;
+    scan_split_point = found_lines.perpindicular_intersecting_ray_numbers(i) - 4; % the four adjsuts as both edges of the line are trimmed by 2 points to remove noise
+
+    % due to tolerances it is possilbe for teh perp ray to be on the edge
+    % or just off the edge of the line
+    if scan_split_point > data_range_to_classify(1,2)
+        scan_split_point = data_range_to_classify(1,2);
+    end
+
+    %determines the type of data manipulation required     
+    type_of_interaction = 3;% default - do nothing
+    % perp ray on the high side - mirror the low
+    if ((data_range_to_classify(1,2) - scan_split_point) <= size_data*0.3) & scan_split_point >= 0
+        scan_split_point = found_lines.perpindicular_intersecting_ray_numbers(i) - 4; % the four adjsuts as both edges of the line are trimmed by 2 points to remove noise
+        type_of_interaction = 1; % perp ray on the high side - mirror the low
+    end
+    % perp ray on the low side - mirror the high
+    if ((scan_split_point - data_range_to_classify(1,1)) <= size_data*0.3) & scan_split_point  >= 0
+        scan_split_point = found_lines.perpindicular_intersecting_ray_numbers(i) - 4; % the four adjsuts as both edges of the line are trimmed by 2 points to remove noise
+        type_of_interaction = 2;% perp ray on the low side - mirror the high
+    end
+    % perp ray in the middle - do nothing
+    if abs((data_range_to_classify(1,2) - data_range_to_classify(1,1))/2 - scan_split_point) <= 3 & scan_split_point  >= 0 & mean(rotated_scan.intensityY) > 1500
+    	scan_split_point = found_lines.perpindicular_intersecting_ray_numbers(i) - 4; % the four adjsuts as both edges of the line are trimmed by 2 points to remove noise
+        type_of_interaction = 3;% perp ray in the middle - do nothing
+    end    
+    
+    % perp ray off to the low side - mirror the high
+    if  scan_split_point  == -14
+        scan_split_point = data_range_to_classify(1,2)-2; % this sets the split point to the lower limit of the scan range
+        %type_of_interaction = 2; %Does the best it can without doing anything special
+        type_of_interaction = 5;% perp ray not on line but off to low side   
+    end
+    % perp ray off to the high side - mirror the low
+    if  scan_split_point  == -24
+        scan_split_point = data_range_to_classify(1,2)-2; % this sets the split point to the upper limit of the scan range
+        %type_of_interaction = 1; %Does the best it can without doing anything special
+        type_of_interaction = 4;% perp ray not on line but off to high side
+    end
+       
+    % does the manipulation
+    switch (type_of_interaction)
+        case(1)  % perp ray on the high ray side - mirror the low 
+            % writes orignal data from far low to SP as is
+            rotated_scan.rangeYM = rotated_scan.rangeY;
+            % takes data from the far low and writes it far high up to SP
+            for k = (scan_split_point - (data_range_to_classify(1,1)-3))+1:((scan_split_point - (data_range_to_classify(1,1)-3))*2)-1
+            	rotated_scan.rangeYM(k) = rotated_scan.rangeY(end-k+(scan_split_point-(data_range_to_classify(1,1)-3))); 
+            end
+            % the magnitude of X doesn't matter, but, the spacing between the
+            % points must be the same post mirroring
+            
+            rotated_scan.rangeXM = rotated_scan.rangeX;
+            for k = (scan_split_point - (data_range_to_classify(1,1)-3))+1:((scan_split_point - (data_range_to_classify(1,1)-3))*2)-1
+                add_this_to_mirrored_X = rotated_scan.rangeX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3))+1) - rotated_scan.rangeX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3)));
+                rotated_scan.rangeXM(k) = rotated_scan.rangeXM(k-1) + add_this_to_mirrored_X;
+            end
+            
+            % writes orignal data from far low to SP as is
+            rotated_scan.intensityYM = rotated_scan.intensityY;
+            % takes data from the far low and writes it far high up to SP
+            for k = (scan_split_point - (data_range_to_classify(1,1)-3))+1:((scan_split_point - (data_range_to_classify(1,1)-3))*2)-1
+            	rotated_scan.intensityYM(k) = rotated_scan.intensityY(end-k+(scan_split_point-(data_range_to_classify(1,1)-3))); 
+            end
+            % the magnitude of X doesn't matter, but, the spacing between the
+            % points must be the same post mirroring
+            
+            rotated_scan.intensityXM = rotated_scan.intensityX;
+            for k = (scan_split_point - (data_range_to_classify(1,1)-3))+1:((scan_split_point - (data_range_to_classify(1,1)-3))*2)-1
+                add_this_to_mirrored_X = rotated_scan.intensityX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3))+1) - rotated_scan.intensityX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3)));
+                rotated_scan.intensityXM(k) = rotated_scan.intensityXM(k-1) + add_this_to_mirrored_X;
+            end
+            
+        case(2) % perp ray on the low side - mirror the high    
+            % takes data from the far high and writes it far low down to SP
+            for k = 1:(data_range_to_classify(1,2))-scan_split_point
+                rotated_scan.rangeYM(k,1) = rotated_scan.rangeY(end-k+1);
+            end
+            % writes orignal data from SP to far high as is
+            rotated_scan.rangeYM = [rotated_scan.rangeYM; rotated_scan.rangeY(scan_split_point-(data_range_to_classify(1,1))+2+1:end)];
+           
+            % the magnitude of X doesn't matter, but, the spacing between the
+            % points must be the same post mirroring
+            rotated_scan.rangeXM((data_range_to_classify(1,2)-2)-scan_split_point+1:((data_range_to_classify(1,2)-2)-scan_split_point)*2+3,1) = rotated_scan.rangeX(scan_split_point-(data_range_to_classify(1,1))+1:end);
+            for k = 1:(data_range_to_classify(1,2))-scan_split_point
+                add_this_to_mirrored_X = rotated_scan.rangeXM(k+1+(data_range_to_classify(1,2)-2)-scan_split_point) - rotated_scan.rangeXM(k+(data_range_to_classify(1,2)-2)-scan_split_point);
+                rotated_scan.rangeXM((data_range_to_classify(1,2))-scan_split_point-k+1,1) = rotated_scan.rangeXM((data_range_to_classify(1,2))-scan_split_point-k+2) - add_this_to_mirrored_X;
+            end
+          
+            % takes data from the far high and writes it far low down to SP
+            for k = 1:(data_range_to_classify(1,2))-scan_split_point
+                rotated_scan.intensityYM(k,1) = rotated_scan.intensityY(end-k+1);
+            end
+            % writes orignal data from SP to far high as is
+            rotated_scan.intensityYM = [rotated_scan.intensityYM; rotated_scan.intensityY(scan_split_point-(data_range_to_classify(1,1))+2+1:end)];
+           
+            % the magnitude of X doesn't matter, but, the spacing between the
+            % points must be the same post mirroring
+            rotated_scan.intensityXM((data_range_to_classify(1,2)-2)-scan_split_point+1:((data_range_to_classify(1,2)-2)-scan_split_point)*2+3,1) = rotated_scan.intensityX(scan_split_point-(data_range_to_classify(1,1))+1:end);
+            for k = 1:(data_range_to_classify(1,2))-scan_split_point
+                add_this_to_mirrored_X = rotated_scan.intensityXM(k+1+(data_range_to_classify(1,2)-2)-scan_split_point) - rotated_scan.intensityXM(k+(data_range_to_classify(1,2)-2)-scan_split_point);
+                rotated_scan.intensityXM((data_range_to_classify(1,2))-scan_split_point-k+1,1) = rotated_scan.intensityXM((data_range_to_classify(1,2))-scan_split_point-k+2) - add_this_to_mirrored_X;
+            end
+            
+        case(3) % perp ray in the middle - do nothing
+            rotated_scan.rangeXM = rotated_scan.rangeX; % this is used to hold the manipulated data
+            rotated_scan.rangeYM = rotated_scan.rangeY;
+            rotated_scan.intensityXM = rotated_scan.intensityX;
+            rotated_scan.intensityYM = rotated_scan.intensityY;
+
+        case(4) % perp ray not on line but off to high side
+           
+            % writes orignal data from far low to SP as is
+            rotated_scan.rangeYM = rotated_scan.rangeY;
+            % puts in fake centre points
+            num_fake_points_to_add = found_lines.would_be_perp_ray(i) - (data_range_to_classify(1,2)-2);
+            rotated_scan.rangeYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = mean(rotated_scan.rangeYM);
+            % takes data from the far low and writes it far high up to SP
+            for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+            	rotated_scan.rangeYM(k) = rotated_scan.rangeY(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add); 
+            end
+            % the magnitude of X doesn't matter, but, the spacing between the
+            % points must be the same post mirroring
+            rotated_scan.rangeXM = rotated_scan.rangeX;
+            rotated_scan.rangeXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
+            for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+                rotated_scan.rangeXM(k) = rotated_scan.rangeXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
+            end
+            
+            % writes orignal data from far low to SP as is
+            rotated_scan.intensityYM = rotated_scan.intensityY;
+            % puts in fake centre points
+            rotated_scan.intensityYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = 1600;
+            % takes data from the far low and writes it far high up to SP
+            for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+            	rotated_scan.intensityYM(k) = rotated_scan.intensityY(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add); 
+            end
+            % the magnitude of X doesn't matter, but, the spacing between the
+            % points must be the same post mirroring
+            rotated_scan.intensityXM = rotated_scan.intensityX;
+            rotated_scan.intensityXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
+            for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+                rotated_scan.intensityXM(k) = rotated_scan.intensityXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
+            end
+            
+        case(5) % perp ray not on line but off to low side
+            
+            % reverses order of data so I can reuse MOST of the code from case(4)
+            rotated_scan.rangeXFlipped = [];
+            rotated_scan.rangeYFlipped = [];
+            rotated_scan.intensityXFlipped = [];
+            rotated_scan.intensityYFlipped = [];
+            rotated_scan.rangeXFlipped(1:end,1) = rotated_scan.rangeX(end:-1:1,1);
+            rotated_scan.rangeYFlipped(1:end,1) = rotated_scan.rangeY(end:-1:1,1);
+            rotated_scan.intensityXFlipped(1:end,1) = rotated_scan.intensityX(end:-1:1,1);
+            rotated_scan.intensityYFlipped(1:end,1) = rotated_scan.intensityY(end:-1:1,1);
+            
+            % writes orignal data from far low to SP as is
+            rotated_scan.rangeYM = rotated_scan.rangeYFlipped;
+            % puts in fake centre points - DIFFERENT FROM CASE 4
+            num_fake_points_to_add = (data_range_to_classify(1,1)+2)-found_lines.would_be_perp_ray(i);
+            rotated_scan.rangeYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = mean(rotated_scan.rangeYM);
+            % takes data from the far low and writes it far high up to SP
+            for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+            	rotated_scan.rangeYM(k) = rotated_scan.rangeYFlipped(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add); 
+            end
+            % the magnitude of X doesn't matter, but, the spacing between the
+            % points must be the same post mirroring
+            rotated_scan.rangeXM = rotated_scan.rangeXFlipped;
+            rotated_scan.rangeXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
+            for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+                rotated_scan.rangeXM(k) = rotated_scan.rangeXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
+            end
+            
+            % writes orignal data from far low to SP as is
+            rotated_scan.intensityYM = rotated_scan.intensityYFlipped;
+            % puts in fake centre point
+            rotated_scan.intensityYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = 1600;
+            % takes data from the far low and writes it far high up to SP
+            for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+            	rotated_scan.intensityYM(k) = rotated_scan.intensityYFlipped(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add); 
+            end
+            % the magnitude of X doesn't matter, but, the spacing between the
+            % points must be the same post mirroring
+            rotated_scan.intensityXM = rotated_scan.intensityXFlipped;
+            rotated_scan.intensityXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
+            for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
+                rotated_scan.intensityXM(k) = rotated_scan.intensityXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
+            end
+    end
+
+%% POLY FITS TO LINES
+    % initalise variables
+    order = 2; %the order of the poly fits
+    
+    %poly fit for the range data
+    polyfit_coefs_range = polyfit(rotated_scan.rangeXM(:), rotated_scan.rangeYM(:), order);
+    fitted_line_vals_range = [polyval(polyfit_coefs_range, rotated_scan.rangeXM(:)) , rotated_scan.rangeXM(:)];
+    [rubbish fitted_line_vals_width] = size(fitted_line_vals_range);
+
+    %poly fit for the intensity data
+    polyfit_coefs_intensity = polyfit(rotated_scan.intensityXM(:), rotated_scan.intensityYM(:), order);
+    fitted_line_vals_intensity = [polyval(polyfit_coefs_intensity, rotated_scan.intensityXM(:)) , rotated_scan.intensityXM(:)];
+
+% plots the actual data and poly fits for the found line
+% if dont_plot == 0
+% 	 figure(10+i); 
+%    hold on;
+%    %laser data
+%    plot(rotated_scan.rangeXM,rotated_scan.rangeYM)
+%    plot(rotated_scan.intensityXM,rotated_scan.intensityYM)
+%    %poly fit
+%    plot(rotated_scan.rangeXM(:), fitted_line_vals_range(:,1), 'color', 'r')
+%    plot(rotated_scan.intensityXM(:), fitted_line_vals_intensity(:,1), 'color', 'r')
+%    plot(rotated_scan.intensityX,rotated_scan.intensityY,'b')
+% end
+
+%% CALCULATE THE REQUIRED RESIDUALS FOR THE POLYs BEING TESTED
+
+    [rubbish size_fitted_line_vals] = size(fitted_line_vals_intensity);
+    residual_range = [ rotated_scan.rangeYM(:) - fitted_line_vals_range(:,1)];
+    residual_intensity = [ rotated_scan.intensityYM(:) - fitted_line_vals_intensity(:,1)];
+    [rubbish size_residual] = size(residual_range);
+    mse_range = mse(residual_range(:));
+    mse_intensity = mse(residual_intensity(:));
+    [mse_size rubbish] = size(mse_range);
+    
+%plots the residuals and puts up message box with MSE's in it
+% if dont_plot == 0
+%    figure(20+i); 
+%    hold on;
+%    plot(residual_range(:),'r');
+%    plot(residual_intensity(:));
+%    axis([0 60 -700 400])
+%    message = ['MSE Range:', int2str(mse_range),'   MSE Intensity:',int2str(mse_intensity)];
+%    msgbox(message,int2str(i));
+% end  
+
+%% GUESSER
+    if mean(mse_range) >= 1 & mean(mse_range) < 40 & mean(mse_intensity) > 6000 & mean(mse_intensity) < 100000
+        guess = 1; 
+    elseif mean(mse_range) > 48 & mean(mse_range) < 250 & mean(mse_intensity) > 1200 & mean(mse_intensity) < 5000
+        guess = 2;
+    elseif mean(mse_range) > 2 & mean(mse_range) < 40 & mean(mse_intensity) > 200 & mean(mse_intensity) < 2000
+        guess = 3;
+    else
+        guess = 4;
+    end
+    
+    %for user output
+    switch (guess)
+        case 1
+            output = 'Grey Metal ';
+            output_color = [.35 .35 .35]; % GREY
+        case 2
+            output = 'Shiny Metal';
+            output_color = [.8 .8 .8]; % Silver
+        case 3
+            output = 'Cloth/Wood'; % OR RED OR WHITE REPLACE_WITH_DASH_DASH- JUST CLOTH or WOOD!!!
+            output_color = [1 0 0]; % RED
+        case 4
+            output = 'Do not know';
+            output_color = [1 1 1]; % WHITE 
+    end 
+% %make every 20th line blue
+% if mod(Scan_to_Class,20) == 0
+%     output_color = [0 1 1] %CYAN
+% end
+    
+%creates colour coded figure as user output
+if dont_plot == 0
+    figure(30)
+    display_info = ['Line #' , int2str(i), ' - ', output];
+    set(30,'name',display_info,'Position',[ 700 370 350 50 ]);
+    plot(1,1,'o','MarkerEdgeColor','k','MarkerFaceColor',output_color,'MarkerSize',10000);
+    set(line(i),'color',output_color,'linewidth',5);
+    if output_color == [1 1 1]
+        delete(line(i)); %delets the line from memory
+        %set(line(i),'color',output_color,'linestyle','none'); %hides the line
+    end
+end
+
+    % puts the result in an accessible place
+    found_lines.classifier_output(i,1)= guess;
+
+%% DEAL WITH NO CLASSIFIED SURFACES BY SPLITTING THEM AND RE-CLASSIFING
+    if found_lines.classifier_output(i,1) == 4    
+        if (found_lines.line_start_end_points_smoothed(i,2)-found_lines.line_start_end_points_smoothed(i,1))/2 > min_number_of_points_for_a_line
+            if wait_for_clicks == 0
+                waitforbuttonpress()
+            end
+            found_lines.line_start_end_points_smoothed(end+1,1) = found_lines.line_start_end_points_smoothed(i,1);
+            found_lines.line_start_end_points_smoothed(end,2) = floor(found_lines.line_start_end_points_smoothed(i,1)+((found_lines.line_start_end_points_smoothed(i,2)-found_lines.line_start_end_points_smoothed(i,1))/2));
+            found_lines.line_start_end_points_smoothed(end+1,2) = found_lines.line_start_end_points_smoothed(i,2);
+            found_lines.line_start_end_points_smoothed(end,1) = floor(found_lines.line_start_end_points_smoothed(i,2)-((found_lines.line_start_end_points_smoothed(i,2)-found_lines.line_start_end_points_smoothed(i,1))/2))+1;
+            found_lines.line_start_end_points_smoothed(i,1) = -found_lines.line_start_end_points_smoothed(i,1);
+            found_lines.line_start_end_points_smoothed(i,2) = -found_lines.line_start_end_points_smoothed(i,2);
+            found_lines.found_lines_gradients(end+1,1) = found_lines.found_lines_gradients(i,1);
+            found_lines.found_lines_gradients(end+1,1) = found_lines.found_lines_gradients(i,1);
+%draws first of the split lines on
+if dont_plot == 0
+    figure(1);
+    temp_i = length(found_lines.line_start_end_points_smoothed)-1;
+    clear lines;
+    line_parameters = polyfit(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)),1);
+    lines(1,:) = scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)); % fitted line X values
+    lines(2,:) = line_parameters(1)*scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)) + line_parameters(2); % fitted line Y values
+    lines(3,:) = scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2));
+    line(temp_i) = plot3(lines(1,:),lines(2,:),lines(3,:),'b','linestyle','-');
+    %otherside of split
+    temp_i = length(found_lines.line_start_end_points_smoothed);
+    clear lines;
+    line_parameters = polyfit(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)),1);
+    lines(1,:) = scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)); % fitted line X values
+    lines(2,:) = line_parameters(1)*scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)) + line_parameters(2); % fitted line Y values
+    lines(3,:) = scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2));
+    line(temp_i) = plot3(lines(1,:),lines(2,:),lines(3,:),'b','linestyle','-');
+    %plots split points
+%     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(end,1)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(end,1)),scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(end,1)),'oc','markerfacecolor','b','markersize',1.5);
+%     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(end-1,1)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(end-1,1)),scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(end-1,1)),'oc','markerfacecolor','b','markersize',1.5);
+%     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(end,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(end,2)),scans_cart.rangeX(found_lines.line_start_end_points_smoothed(end,2)),'oc','markerfacecolor','b','markersize',1.5);
+
+end
+       end
+    end
+
+%% END OF TEST ALL LINES LOOP
+    if wait_for_clicks == 0
+        waitforbuttonpress()
+    end
+end
+    
+%finsihed = 1
+##### SOURCE END #####
+-->
+   </body>
+</html>

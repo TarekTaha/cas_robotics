@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>use_real_robot_MOVE</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="use_real_robot_MOVE"><style>
 
 body {
@@ -93,14 +93,11 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> all_steps (many*6 double) radians the steps that the arm must move through on its path
-               </li>
-               <li><b>Returns:</b> Null
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> use_real_robot_MOVE(all_steps)
+         <p><b>Inputs:</b></p>
+         <p><i>all_steps</i> (many*6 double) radians the steps that the arm must move through on its path
+         </p>
+         <p><b>Returns:</b> NULL
+         </p><pre class="codeinput"><span class="keyword">function</span> use_real_robot_MOVE(all_steps)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> Q robot_maxreach
 <span class="keyword">if</span> size(Q,2)~=6
     error(<span class="string">'Q - Joints have not been defined properly, should be a global'</span>);
@@ -211,9 +208,12 @@ display(strcat(<span class="string">'Current Joint State is:'</span>,num2str(rob
 
 %% Function Call
 %
-% * *Inputs:* all_steps (many*6 double) radians the steps that the arm must
+% *Inputs:* 
+%
+% _all_steps_ (many*6 double) radians the steps that the arm must
 % move through on its path
-% * *Returns:* Null
+%
+% *Returns:* NULL
 
 function use_real_robot_MOVE(all_steps)
 

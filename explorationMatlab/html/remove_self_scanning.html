@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>remove_self_scaning</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="remove_self_scanning"><style>
 
 body {
@@ -90,14 +90,14 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> points (3*m double) holds the points in space newQ (6*1 double) holds the joint angles in radians
-               </li>
-               <li><b>Returns:</b> points (3*m double) holds the remaining points in space
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> points = remove_self_scanning(points,newQ)
+         <p><b>Inputs:</b></p>
+         <p><i>points</i> (3*m double) holds the points in space
+         </p>
+         <p><i>newQ</i> (6*1 double) holds the joint angles in radians
+         </p>
+         <p><b>Returns:</b></p>
+         <p><i>points</i> (3*m double) holds the remaining points in space
+         </p><pre class="codeinput"><span class="keyword">function</span> points = remove_self_scanning(points,newQ)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> r Q densoobj
 
 <span class="comment">% if we haven't been passed the joints then</span>
@@ -143,9 +143,15 @@ t = r.base;
 
 %% Function Call
 % 
-% * *Inputs:* points (3*m double) holds the points in space
-% newQ (6*1 double) holds the joint angles in radians
-% * *Returns:* points (3*m double) holds the remaining points in space
+% *Inputs:* 
+%
+% _points_ (3*m double) holds the points in space
+%
+% _newQ_ (6*1 double) holds the joint angles in radians
+%
+% *Returns:* 
+%
+% _points_ (3*m double) holds the remaining points in space
 
 function points = remove_self_scanning(points,newQ)
 

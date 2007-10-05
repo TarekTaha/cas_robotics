@@ -15,9 +15,15 @@
 
 %% Function Call
 %
-% * *Inputs:* tr (4*4 double) transform in space position and orientation
-% newQ (1*6 double) the proposed newQ
-% * *Returns:* points (3*many double) point in space that will be seen at this tr
+% *Inputs:* 
+%
+% _tr_ (4*4 double) transform in space position and orientation
+%
+% _newQ_ (1*6 double) the proposed newQ
+%
+% *Returns:* 
+%
+% _points_ (3*many double) point in space that will be seen at this tr
 
 function points=nbv_volume(tr,newQ)
 

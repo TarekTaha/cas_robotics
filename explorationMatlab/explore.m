@@ -11,11 +11,15 @@
 
 %% Function Call
 %
-% * *Inputs:* 
-% h (struct double) handles of the GUI,
-% useNBV (bin) whether or not the best view is to be used
-% selection (int) if useNBV, which view to use
-% * *Returns:* Null
+% *Inputs:* 
+%
+% _h_ (struct double) handles of the GUI,
+%
+% _useNBV_ (bin) whether or not the best view is to be used
+%
+% _selection_ (int) if useNBV, which view to use
+%
+% *Returns:* NULL
 
 function explore(h,useNBV,selection)
 

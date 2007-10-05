@@ -4,9 +4,11 @@
 
 %% Function Call
 %
-% * *Inputs:* 
-% newQ (6*1 double) joints where we are so as to remove self scanning
-% * *Returns:* Null
+% *Inputs:* 
+%
+% _newQ_ (6*1 double) joints where we are so as to remove self scanning
+%
+% *Returns:* NULL
 
 function doscan(newQ)
 

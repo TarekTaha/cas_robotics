@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>nbv_volume</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="nbv_volume"><style>
 
 body {
@@ -99,14 +99,14 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> tr (4*4 double) transform in space position and orientation newQ (1*6 double) the proposed newQ
-               </li>
-               <li><b>Returns:</b> points (3*many double) point in space that will be seen at this tr
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> points=nbv_volume(tr,newQ)
+         <p><b>Inputs:</b></p>
+         <p><i>tr</i> (4*4 double) transform in space position and orientation
+         </p>
+         <p><i>newQ</i> (1*6 double) the proposed newQ
+         </p>
+         <p><b>Returns:</b></p>
+         <p><i>points</i> (3*many double) point in space that will be seen at this tr
+         </p><pre class="codeinput"><span class="keyword">function</span> points=nbv_volume(tr,newQ)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> scan workspace
 
 <span class="keyword">if</span> ~isfield(scan,<span class="string">'basescan'</span>)
@@ -491,9 +491,15 @@ result=vec*rot;
 
 %% Function Call
 %
-% * *Inputs:* tr (4*4 double) transform in space position and orientation
-% newQ (1*6 double) the proposed newQ
-% * *Returns:* points (3*many double) point in space that will be seen at this tr
+% *Inputs:* 
+%
+% _tr_ (4*4 double) transform in space position and orientation
+%
+% _newQ_ (1*6 double) the proposed newQ
+%
+% *Returns:* 
+%
+% _points_ (3*many double) point in space that will be seen at this tr
 
 function points=nbv_volume(tr,newQ)
 
