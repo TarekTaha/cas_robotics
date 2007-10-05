@@ -73,7 +73,7 @@ workspace.indexedobsticles_equ=[];
 %*level 1* is where the robot can move
 workspace.impLev(1).x=[-1.1,1.2];
 workspace.impLev(1).y=[-1.2,1.2];
-workspace.impLev(1).z=[2*workspace.inc_size,1.5];
+workspace.impLev(1).z=[workspace.inc_size,1.5];
 %*level 2* is where the robot can blast but not move
 workspace.impLev(2).x=[-1.4,1.5];
 workspace.impLev(2).y=[-1.4,1.5];
@@ -106,9 +106,9 @@ points=[];
 uiwait(msgbox('Adding a floor layer only'));
 tempx=[];tempy=[]; 
 tempInc=workspace.inc_size;
-for i=-.65:tempInc:.65
-    tempx=[tempx;i*ones(length(-.65:tempInc:.65),1)];
-    tempy=[tempy;(-.65:tempInc:.65)'];
+for i=-.65:tempInc:.75
+    tempx=[tempx;i*ones(length(-.65:tempInc:.75),1)];
+    tempy=[tempy;(-.65:tempInc:.75)'];
 end
 tempz=workspace.impLev(1).z(1)*ones([size(tempx,1),1]);
 points=[points;[tempx,tempy,tempz]];
@@ -117,7 +117,7 @@ points=[points;[tempx,tempy,tempz]];
 level1=GetImpLevInfo(points);
 points=points(level1,:);
 workspace.obsticlepoints=points;
-workspace.indexedobsticles=unique(floor(workspace.obsticlepoints/tempInc)*(tempInc),'rows');
+workspace.indexedobsticles=unique(round(workspace.obsticlepoints/tempInc)*(tempInc),'rows');
 
 % Could also load up freespace variable 
 % a=load('workspace.mat');

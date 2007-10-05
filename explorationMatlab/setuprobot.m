@@ -19,7 +19,7 @@ global Q r densoobj robot_maxreach;
 Q=[0,-75,165,0,30,0]*pi/180;
 % Default poses - add additional ones as needed
 default_Q=[Q;[0,-88*pi/180,140*pi/180,0,-15*pi/180,0]];
-default_Q=[default_Q;[0,-88*pi/180,110*pi/180,0,-15*pi/180,0]];
+default_Q=[default_Q;[0,-88*pi/180,98*pi/180,0,-15*pi/180,0]];
 robot_maxreach.default_Q=default_Q;
 
 %this is the robot object you wish to use

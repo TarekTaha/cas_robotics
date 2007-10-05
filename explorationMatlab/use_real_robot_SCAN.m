@@ -67,7 +67,7 @@ while attemptingscan
     pause(0.05);
     robscan_h.Start(tilt_scan_range);
     
-    pause(0.2);
+    pause(0.5);
     
     %if not started their must be a problem or if no data has started to be returned
     if(robscan_h.Started==0 && get(robscan_h,'Completed')==0)   
@@ -81,14 +81,20 @@ while attemptingscan
             pause(0.2);
         end
     elseif isempty(PointData)
-        display('Waiting for laser to complete before retrying');
+        display('Currently not data coming back: waiting for laser to complete before retrying');
         while get(robscan_h,'Completed')==0
-            pause(0.5);display('.');
-            %checks that there still really is no data coming back
-            if ~isempty(PointData); attemptingscan=0; break; end
+            pause(0.5);display('.'); 
+            %break out if we get some data back
+            if ~isempty(PointData); break; end
         end
-        release_scanner(robscan_h);
-        error('No Data coming back ... Giving up');             
+        %checks that there still really is no data coming back
+        if ~isempty(PointData); 
+            display('Data came back eventually');
+            attemptingscan=0; 
+        else
+            release_scanner(robscan_h);
+            error('No Data coming back ... Giving up');             
+        end        
     else
         %it has started so we have no need to retry this breaks out of loop
         attemptingscan=0;

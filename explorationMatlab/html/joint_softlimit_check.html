@@ -94,7 +94,7 @@ p.footer {
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="comment">% Result is intially set to true</span>
 result=true;
 </pre><h2>Check all_steps<a name="3"></a></h2>
-         <p><img vspace="5" hspace="5" src="joint_softlimit_check_eq778511.png"> </p><pre class="codeinput"><span class="keyword">if</span> ~isempty(find(all_steps(:,3)*180/pi&lt;-7/3*all_steps(:,2)*180/pi-130,1))
+         <p><img vspace="5" hspace="5" src="joint_softlimit_check_eq2303460.png"> </p><pre class="codeinput"><span class="keyword">if</span> ~isempty(find(all_steps(:,3)*180/pi&lt;-7/3*all_steps(:,2)*180/pi-130,1))
     result=false;
 <span class="keyword">end</span>
 </pre><p class="footer"><br>
@@ -126,9 +126,10 @@ function result=joint_softlimit_check(all_steps)
 result=true;
 
 %% Check all_steps
-% $$ \begin{array}{cc}
+% $$ \begin{array}{rl}
 % \forall Q \in all\_steps: &
-% Q\times\frac{180}{\pi}\le \frac{-7}{3} (Q\times\frac{180}{\pi}) -130
+% Q\times\frac{180}{\pi}\le \frac{-7}{3} (Q\times\frac{180}{\pi}) -130 \\
+% \rightarrow & \mbox{ELSE exceeds soft limit(return 0)}
 % \end{array}$$
 if ~isempty(find(all_steps(:,3)*180/pi<-7/3*all_steps(:,2)*180/pi-130,1))
     result=false;

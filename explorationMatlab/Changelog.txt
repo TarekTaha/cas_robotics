@@ -1086,3 +1086,38 @@ end
 %     %this function handles the data coming back from the laser object
 %     robscan_h.registerevent(@myhandler);
 - The NBV doesn't work properly since it can't estimate how much new knowledge it is back to front, I think the inverse kinematics still works properly
+----ON THE ROBOT
+- Fixed up a logic error in scan function where if no data was there straight away it would still give an error because it was breaking to the correct possition, new code is
+%checks that there still really is no data coming back
+        if ~isempty(PointData); 
+            display('Data came back eventually');
+            attemptingscan=0; 
+        else
+            release_scanner(robscan_h);
+            error('No Data coming back ... Giving up');             
+        end    
+- In use_real_robot_MOVE changed the soft limit check from being hard coded to calling the function written specifically for this purpose
+%% Check that no steps exceed soft limits
+if ~joint_softlimit_check(all_steps)
+- When we check path for collision we intially had result to be 1 however if we return out because of asoft motion error it will still allow this path so change it to add result =0
+if ~joint_softlimit_check(all_steps)
+    result=0;
+    return;
+end
+- Changed the 3rd default scan position so that it could see the beam
+default_Q=[default_Q;[0,-88*pi/180,98*pi/180,0,-15*pi/180,0]];
+- Added this so we can exit out of the main look exploiration when there is an error
+if want_to_continue==0; error('User chose to exit');end
+- Made a new funtion to do the releasing because it wasn't releasing the stopdrivejointabs properly in the use_real_robot_MOVE
+%% FUNCTION release the robot object
+function releaserobot(rob_h)
+
+    pause(0.1);
+    rob_h.Type='StopDriveJointAbs';
+    rob_h.Start;
+    rob_h.WaitUntilCompleted(0.5,0)
+    rob_h.release;
+- commented this out for the time being since it isn't useful
+%threeDMedianFilt();
+- Changed the size of the base platform to be 1 cube size up not 2
+workspace.impLev(1).z=[workspace.inc_size,1.5];

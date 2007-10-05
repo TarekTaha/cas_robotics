@@ -89,7 +89,7 @@ p.footer {
                <li><a href="#5">Check if all joints are the same as what we want them to be within 1degree</a></li>
                <li><a href="#6">Move to an absolute joint reference if there is no path, otherwise</a></li>
                <li><a href="#7">Drive the arm through the sequence of poses in all_steps</a></li>
-               <li><a href="#8">Release movement object</a></li>
+               <li><a href="#8">FUNCTION release the robot object</a></li>
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
@@ -110,9 +110,8 @@ p.footer {
 <span class="keyword">else</span>
     tempQ=all_steps(end,:)*180/pi;
 <span class="keyword">end</span>
-</pre><h2>Check that no steps exceed soft limits<a name="3"></a></h2>
-         <p><img vspace="5" hspace="5" src="use_real_robot_MOVE_eq2685037.png"> </p><pre class="codeinput"><span class="keyword">if</span> ~isempty(find(all_steps(:,3)*180/pi&lt;-7/3*all_steps(:,2)*180/pi-130,1))
-    display(<span class="string">'there is a possible bad position in the joint steps'</span>)
+</pre><h2>Check that no steps exceed soft limits<a name="3"></a></h2><pre class="codeinput"><span class="keyword">if</span> ~joint_softlimit_check(all_steps)
+    display(<span class="string">'there is a possible bad position in the joint steps, this shouldnt be planned, giving you control'</span>)
     keyboard
 <span class="keyword">end</span>
 </pre><h2>Setup robot movement object<a name="4"></a></h2><pre class="codeinput">rob_h=actxserver(<span class="string">'EyeInHand.DensoCommand'</span>);
@@ -146,6 +145,8 @@ display(strcat(<span class="string">'Current Joint State is:'</span>,num2str(rob
         rob_h.Start;
         <span class="comment">% want it to wait until it has finished getting to the next posiiotn before scanning</span>
         rob_h.WaitUntilCompleted(30,0);
+        <span class="comment">% simply release the object</span>
+        rob_h.release;
 </pre><h2>Drive the arm through the sequence of poses in all_steps<a name="7"></a></h2><pre class="codeinput">    <span class="keyword">else</span>
         rob_h.Type=<span class="string">'DriveJointAbs'</span>;
         <span class="keyword">for</span> pathpnt=1:size(all_steps,1)
@@ -170,7 +171,7 @@ display(strcat(<span class="string">'Current Joint State is:'</span>,num2str(rob
                 <span class="keyword">if</span> waitcoutner==50 <span class="comment">%about 10 seconds</span>
                     button = questdlg(<span class="string">'Did you press the emergency stop?'</span>,<span class="string">'Running Slow'</span>);
                     <span class="keyword">if</span> strcmp(button,<span class="string">'Yes'</span>)
-                        rob_h.release;
+                        releaserobot(rob_h)
                         error(<span class="string">'emergency stop pressed - exiting'</span>);
                     <span class="keyword">else</span>
                         rob_h.Params=current_step_DEG;
@@ -178,19 +179,23 @@ display(strcat(<span class="string">'Current Joint State is:'</span>,num2str(rob
                     <span class="keyword">end</span>
                 <span class="keyword">elseif</span> waitcoutner&gt;100 <span class="comment">%about 20 seconds we have reissued the command and still no action</span>
                     keyboard
-                    rob_h.release;
+                    releaserobot(rob_h)
                     error(<span class="string">'Problem issuing commands to drive the robot'</span>);
                 <span class="keyword">end</span>
                 <span class="comment">%display(strcat('Joint state is currently:', num2str(rob_h.JointState)));</span>
             <span class="keyword">end</span>
         <span class="keyword">end</span>
-        pause(0.1);
-        rob_h.Type=<span class="string">'StopDriveJointAbs'</span>;
-        rob_h.Start;
-        rob_h.WaitUntilCompleted(0.5,0)
+        <span class="comment">%% Release movement object</span>
+        releaserobot(rob_h)
     <span class="keyword">end</span>
 <span class="keyword">end</span>
-</pre><h2>Release movement object<a name="8"></a></h2><pre class="codeinput">rob_h.release;
+</pre><h2>FUNCTION release the robot object<a name="8"></a></h2><pre class="codeinput"><span class="keyword">function</span> releaserobot(rob_h)
+
+    pause(0.1);
+    rob_h.Type=<span class="string">'StopDriveJointAbs'</span>;
+    rob_h.Start;
+    rob_h.WaitUntilCompleted(0.5,0)
+    rob_h.release;
 </pre><p class="footer"><br>
             Published with MATLAB&reg; 7.4<br></p>
       </div>
@@ -232,15 +237,8 @@ else
 end
 
 %% Check that no steps exceed soft limits
-% $$\begin{array}{l}
-% \forall (n)\\
-% if(all\_steps_{n(3)}\times \frac{180}{\pi} < - \frac{7}{3} \times all\_steps_{n(2)}\times
-% \frac{180}{\pi} -130) \\
-% \rightarrow \mbox{exceeds soft limit}
-% \end{array}$$
-
-if ~isempty(find(all_steps(:,3)*180/pi<-7/3*all_steps(:,2)*180/pi-130,1))
-    display('there is a possible bad position in the joint steps')
+if ~joint_softlimit_check(all_steps)
+    display('there is a possible bad position in the joint steps, this shouldnt be planned, giving you control')
     keyboard
 end
     
@@ -280,6 +278,8 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
         rob_h.Start;
         % want it to wait until it has finished getting to the next posiiotn before scanning
         rob_h.WaitUntilCompleted(30,0);
+        % simply release the object
+        rob_h.release;
 
 %% Drive the arm through the sequence of poses in all_steps
     else
@@ -306,7 +306,7 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
                 if waitcoutner==50 %about 10 seconds                    
                     button = questdlg('Did you press the emergency stop?','Running Slow');
                     if strcmp(button,'Yes')
-                        rob_h.release;
+                        releaserobot(rob_h)
                         error('emergency stop pressed - exiting');                    
                     else
                         rob_h.Params=current_step_DEG;
@@ -314,21 +314,26 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
                     end
                 elseif waitcoutner>100 %about 20 seconds we have reissued the command and still no action
                     keyboard
-                    rob_h.release;
+                    releaserobot(rob_h)
                     error('Problem issuing commands to drive the robot');                    
                 end
                 %display(strcat('Joint state is currently:', num2str(rob_h.JointState)));                
             end
         end
-        pause(0.1);
-        rob_h.Type='StopDriveJointAbs';
-        rob_h.Start;
-        rob_h.WaitUntilCompleted(0.5,0)
+        %% Release movement object
+        releaserobot(rob_h)
     end    
 end
 
-%% Release movement object
-rob_h.release;
+%% FUNCTION release the robot object
+function releaserobot(rob_h)
+
+    pause(0.1);
+    rob_h.Type='StopDriveJointAbs';
+    rob_h.Start;
+    rob_h.WaitUntilCompleted(0.5,0)
+    rob_h.release;
+
 ##### SOURCE END #####
 -->
    </body>

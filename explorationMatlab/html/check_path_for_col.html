@@ -115,6 +115,7 @@ t = r.base;
 <span class="comment">% Initially set result</span>
 result=1;
 </pre><h2>Check the soft motion limits of the arm<a name="3"></a></h2><pre class="codeinput"><span class="keyword">if</span> ~joint_softlimit_check(all_steps)
+    result=0;
     <span class="keyword">return</span>;
 <span class="keyword">end</span>
 </pre><h2>Go through each step and check for collsions<a name="4"></a></h2>
@@ -179,6 +180,7 @@ result=1;
 
 %% Check the soft motion limits of the arm
 if ~joint_softlimit_check(all_steps)
+    result=0;
     return;
 end
 

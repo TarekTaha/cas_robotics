@@ -22,9 +22,10 @@ function result=joint_softlimit_check(all_steps)
 result=true;
 
 %% Check all_steps
-% $$ \begin{array}{cc}
+% $$ \begin{array}{rl}
 % \forall Q \in all\_steps: &
-% Q\times\frac{180}{\pi}\le \frac{-7}{3} (Q\times\frac{180}{\pi}) -130
+% Q\times\frac{180}{\pi}\le \frac{-7}{3} (Q\times\frac{180}{\pi}) -130 \\
+% \rightarrow & \mbox{ELSE exceeds soft limit(return 0)}
 % \end{array}$$
 if ~isempty(find(all_steps(:,3)*180/pi<-7/3*all_steps(:,2)*180/pi-130,1))
     result=false;
