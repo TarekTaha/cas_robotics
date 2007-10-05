@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>demopath</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="demopath"><style>
 
 body {
@@ -89,14 +89,11 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> all_steps (6*m double) these are the joint configs radians
-               </li>
-               <li><b>Returns:</b> Null
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> demopath(all_steps)
+         <p><b>Inputs:</b></p>
+         <p><i>all_steps</i> (6*m double) these are the joint configs radians
+         </p>
+         <p><b>Returns:</b> NULL
+         </p><pre class="codeinput"><span class="keyword">function</span> demopath(all_steps)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> r Q densoobj workspace
 
 <span class="keyword">if</span> size(r,1)&lt;1
@@ -247,8 +244,11 @@ p.footer {
 
 %% Function Call
 % 
-% * *Inputs:* all_steps (6*m double) these are the joint configs radians
-% * *Returns:* Null
+% *Inputs:* 
+%
+% _all_steps_ (6*m double) these are the joint configs radians
+%
+% *Returns:* NULL
 
 function demopath(all_steps)
 

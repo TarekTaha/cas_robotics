@@ -6,8 +6,9 @@
 
 %% Function Call
 % 
-% *Inputs:* Null
-% *Returns:* Null
+% *Inputs:* NULL
+%
+% *Returns:* NULL
 
 function setupscanner()
 
@@ -48,12 +49,6 @@ scan.alpha_limited=30*pi/180;
 %want how many points per cube at the max range?
 % so we don't use have to use all data to 
 scan.numpntsInCube=1; % this can be anything greater than 0, a value of 0.5 would mean 1 point in every 2 cubes at the max scan value
-
-%this is how many tilts we actually want to use a ratio of 1:this num
-%THIS IS NOT INCLUDED CURRENTLY, NEED TO DO WORK TO INCLUDE IT
-display('grep to see if this variable is used since I just commented it out');
-keyboard
-% scan.tiltstouse=2;
 
 % we don't want to have to do the scan projection everytime so we will load
 % it, however if any of the parameters (alpha theta) change then it will be

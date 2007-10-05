@@ -7,11 +7,16 @@
 
 %% Function Call
 % 
-% *Inputs:* figHandle (double) handle for a figure to be rotated
-% degrees (double) num of degrees to be rotated through
-% fname (string) the name that will be concaternated at the begining of all
+% *Inputs:* 
+% 
+% _figHandle_ (double) handle for a figure to be rotated
+%
+% _degrees_ (double) num of degrees to be rotated through
+%
+% _fname_ (string) the name that will be concaternated at the begining of all
 % of the picture files
-% *Returns:* Null
+%
+% *Returns:* NULL
 
 function rotateFigure(figHandle, degrees, fname)
 

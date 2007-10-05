@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>setupworkspace</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="setupworkspace"><style>
 
 body {
@@ -88,7 +88,10 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <p><b>Inputs:</b> showunknownpnts (bin) whether or not to display unknown points <b>Returns:</b> Null
+         <p><b>Inputs:</b></p>
+         <p><i>showunknownpnts</i> (bin) whether or not to display unknown points
+         </p>
+         <p><b>Returns:</b> NULL
          </p><pre class="codeinput"><span class="keyword">function</span> setupworkspace(showunknownpnts)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="comment">%Declare global variables</span>
 <span class="keyword">global</span> workspace r Q guiglobal;
@@ -260,8 +263,11 @@ drawnow
 
 %% Function Call
 % 
-% *Inputs:* showunknownpnts (bin) whether or not to display unknown points
-% *Returns:* Null
+% *Inputs:* 
+%
+% _showunknownpnts_ (bin) whether or not to display unknown points
+%
+% *Returns:* NULL
 function setupworkspace(showunknownpnts)
 
 %% Variables

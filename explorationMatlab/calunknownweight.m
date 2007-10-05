@@ -6,8 +6,11 @@
 
 %% Function Call
 % 
-% * *Inputs:* Null
-% * *Returns:* unknownweight (double) weight of the points that are unknown
+% *Inputs:* NULL
+% 
+% *Returns:* 
+% 
+% _unknownweight_ (double) weight of the points that are unknown
 
 function unknownweight = calunknownweight()
 

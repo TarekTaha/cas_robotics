@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>organise_data</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="organise_data"><style>
 
 body {
@@ -103,14 +103,11 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> tilt_scan_range (double) radians - the new scan.alpha used to determine ration of points to use
-               </li>
-               <li><b>Returns:</b> Null
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> organise_data(tilt_scan_range)
+         <p><b>Inputs:</b></p>
+         <p><i>tilt_scan_range</i> (double) radians - the new scan.alpha used to determine ration of points to use
+         </p>
+         <p><b>Returns:</b> NULL
+         </p><pre class="codeinput"><span class="keyword">function</span> organise_data(tilt_scan_range)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> workspace scan r Q PointData RangeData
 starttime=clock;
 <span class="comment">% Number of points we want in the cube for ray casting</span>
@@ -294,10 +291,12 @@ workspace.knowncoords=setdiff(unique([workspace.knowncoords;points],<span class=
 
 %% Function Call
 %
-% * *Inputs:* 
-% tilt_scan_range (double) radians - the new scan.alpha used to determine
+% *Inputs:* 
+%
+% _tilt_scan_range_ (double) radians - the new scan.alpha used to determine
 % ration of points to use 
-% * *Returns:* Null
+%
+% *Returns:* NULL
 function organise_data(tilt_scan_range)
 
 %% Variables

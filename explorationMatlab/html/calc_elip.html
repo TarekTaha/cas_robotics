@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>calc_elip</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="calc_elip"><style>
 
 body {
@@ -87,14 +87,18 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> piece= the current peice that is being plotted current_shape = (verts) the vertices of the triangles of the shape being plotted
-               </li>
-               <li><b>Returns:</b> {x,y,z} = Cartesian points describing ellispe params = the parameters a,b,c of elispoid center = center of ellipse
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> [x,y,z,params,center]=calc_elip(piece,current_shape)
+         <p><b>Inputs:</b></p>
+         <p><i>piece</i>= the current peice that is being plotted
+         </p>
+         <p><i>current_shape</i> = (verts) the vertices of the triangles of the shape being plotted
+         </p>
+         <p><b>Returns:</b></p>
+         <p><i>{x,y,z}</i> = Cartesian points describing ellispe
+         </p>
+         <p><i>params</i> = the parameters a,b,c of elispoid
+         </p>
+         <p><i>center</i> = center of ellipse
+         </p><pre class="codeinput"><span class="keyword">function</span> [x,y,z,params,center]=calc_elip(piece,current_shape)
 </pre><h2>Variables<a name="2"></a></h2>
          <p><img vspace="5" hspace="5" src="calc_elip_eq45853.png"> </p><pre class="codeinput"><span class="comment">%center of elipsoid</span>
 center=(max(current_shape)+min(current_shape))/2;
@@ -134,13 +138,20 @@ alternate=0; <span class="comment">%intial_params=params;</span>
 
 %% Function Call
 % 
-% * *Inputs:* 
-% piece= the current peice that is being plotted
-% current_shape = (verts) the vertices of the triangles of the shape being plotted
-% * *Returns:* 
-% {x,y,z} = Cartesian points describing ellispe
-% params = the parameters a,b,c of elispoid
-% center = center of ellipse
+% *Inputs:* 
+%
+% _piece_= the current peice that is being plotted
+%
+% _current_shape_ = (verts) the vertices of the triangles of the shape being plotted
+%
+% *Returns:* 
+%
+% _{x,y,z}_ = Cartesian points describing ellispe
+%
+% _params_ = the parameters a,b,c of elispoid
+%
+% _center_ = center of ellipse
+
 function [x,y,z,params,center]=calc_elip(piece,current_shape)
 
 %% Variables

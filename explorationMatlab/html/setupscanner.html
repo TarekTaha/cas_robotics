@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>setupscanner</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="setupscanner"><style>
 
 body {
@@ -85,7 +85,9 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <p><b>Inputs:</b> Null <b>Returns:</b> Null
+         <p><b>Inputs:</b> NULL
+         </p>
+         <p><b>Returns:</b> NULL
          </p><pre class="codeinput"><span class="keyword">function</span> setupscanner()
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> scan r Q
 
@@ -124,12 +126,6 @@ scan.alpha_limited=30*pi/180;
 <span class="comment">% so we don't use have to use all data to</span>
 scan.numpntsInCube=1; <span class="comment">% this can be anything greater than 0, a value of 0.5 would mean 1 point in every 2 cubes at the max scan value</span>
 
-<span class="comment">%this is how many tilts we actually want to use a ratio of 1:this num</span>
-<span class="comment">%THIS IS NOT INCLUDED CURRENTLY, NEED TO DO WORK TO INCLUDE IT</span>
-display(<span class="string">'grep to see if this variable is used since I just commented it out'</span>);
-keyboard
-<span class="comment">% scan.tiltstouse=2;</span>
-
 <span class="comment">% we don't want to have to do the scan projection everytime so we will load</span>
 <span class="comment">% it, however if any of the parameters (alpha theta) change then it will be</span>
 <span class="comment">% incorrect. Also variables from workspace global var are used too</span>
@@ -155,8 +151,9 @@ scan.done_bestviews_orfailed=[inf, inf, inf, inf, inf, inf];
 
 %% Function Call
 % 
-% *Inputs:* Null
-% *Returns:* Null
+% *Inputs:* NULL
+%
+% *Returns:* NULL
 
 function setupscanner()
 
@@ -197,12 +194,6 @@ scan.alpha_limited=30*pi/180;
 %want how many points per cube at the max range?
 % so we don't use have to use all data to 
 scan.numpntsInCube=1; % this can be anything greater than 0, a value of 0.5 would mean 1 point in every 2 cubes at the max scan value
-
-%this is how many tilts we actually want to use a ratio of 1:this num
-%THIS IS NOT INCLUDED CURRENTLY, NEED TO DO WORK TO INCLUDE IT
-display('grep to see if this variable is used since I just commented it out');
-keyboard
-% scan.tiltstouse=2;
 
 % we don't want to have to do the scan projection everytime so we will load
 % it, however if any of the parameters (alpha theta) change then it will be

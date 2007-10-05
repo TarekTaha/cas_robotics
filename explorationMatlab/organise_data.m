@@ -8,10 +8,12 @@
 
 %% Function Call
 %
-% * *Inputs:* 
-% tilt_scan_range (double) radians - the new scan.alpha used to determine
+% *Inputs:* 
+%
+% _tilt_scan_range_ (double) radians - the new scan.alpha used to determine
 % ration of points to use 
-% * *Returns:* Null
+%
+% *Returns:* NULL
 function organise_data(tilt_scan_range)
 
 %% Variables

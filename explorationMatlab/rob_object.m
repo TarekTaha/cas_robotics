@@ -7,8 +7,9 @@
 
 %% Function Call
 % 
-% * *Inputs:* Null
-% * *Returns:* Null
+% *Inputs:* NULL
+%
+% *Returns:* NULL
 
 function r=rob_object()
 

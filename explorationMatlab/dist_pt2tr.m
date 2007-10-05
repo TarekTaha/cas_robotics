@@ -5,11 +5,15 @@
 
 %% Function Call
 % 
-% * *Inputs:* 
-% pt (3*1 double) x,y,z cartesian point
-% tr (4*4 double) transform of an arm
-% * *Returns:* 
-% dist (double) distance from pt to tr
+% *Inputs:* 
+%
+% _pt_ (3*1 double) x,y,z cartesian point
+%
+% _tr_ (4*4 double) transform of an arm
+%
+% *Returns:* 
+%
+% _dist_ (double) distance from pt to tr
 
 function dist=dist_pt2tr(pt,tr)
 

@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>joint_softlimit_check</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="joint_softlimit_check"><style>
 
 body {
@@ -85,14 +85,12 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> all_steps (6*m double) these are the joint configs radians
-               </li>
-               <li><b>Returns:</b> result (bin) =1 if ok, =0 if NOT ok
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> result=joint_softlimit_check(all_steps)
+         <p><b>Inputs:</b></p>
+         <p><i>all_steps</i> (6*m double) these are the joint configs radians
+         </p>
+         <p><b>Returns:</b></p>
+         <p><i>result</i> (bin) =1 if ok, =0 if NOT ok
+         </p><pre class="codeinput"><span class="keyword">function</span> result=joint_softlimit_check(all_steps)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="comment">% Result is intially set to true</span>
 result=true;
 </pre><h2>Check all_steps<a name="3"></a></h2>
@@ -112,8 +110,13 @@ result=true;
 
 %% Function Call
 %
-% * *Inputs:* all_steps (6*m double) these are the joint configs radians
-% * *Returns:* result (bin) =1 if ok, =0 if NOT ok
+% *Inputs:* 
+%
+% _all_steps_ (6*m double) these are the joint configs radians
+%
+% *Returns:* 
+% 
+% _result_ (bin) =1 if ok, =0 if NOT ok
 
 function result=joint_softlimit_check(all_steps)
 

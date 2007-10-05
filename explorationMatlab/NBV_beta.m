@@ -6,8 +6,9 @@
 
 %% Function Call
 %
-% * *Inputs:* Null
-% * *Returns:* Null
+% *Inputs:* NULL
+%
+% *Returns:* NULL
 
 function NBV_beta()
 

@@ -6,10 +6,12 @@
 
 %% Function Call
 %
-% * *Inputs:* 
-% deg2scan (double) degrees - the number of degrees to tilt the scan
+% *Inputs:* 
+%
+% _deg2scan_ (double) degrees - the number of degrees to tilt the scan
 % through
-% * *Returns:* Null
+%
+% *Returns:* NULL
 
 function use_real_robot_SCAN(deg2scan)
 
@@ -18,7 +20,7 @@ function use_real_robot_SCAN(deg2scan)
 display('Clearing all global scan variables before starting a new scan');
 clear global PoseData RangeData IntensityData PointData;
 
-global scan Q PointData IntensityData robot_maxreach;
+global scan Q PointData IntensityData robot_maxreach robmap_h;
 
 if size(Q,2)~=6
     error('Q - Joints have not been defined properly, should be a global');
@@ -44,11 +46,9 @@ end
 attemptingscan=4; %used to set how many times we try before giving up
 
 while attemptingscan
-    robscan_h=actxserver('EyeInHand.ScannerCommand');
-
-    %this function handles the data coming back from the laser object
-    robscan_h.registerevent(@myhandler);
-
+    %give it an initial pose for base position)
+    robscan_h=robmap_h.ScannerCommand(eye(4));
+    
     robscan_h.Type='TiltingRangeScan';
     robscan_h.TiltSpeed=robot_maxreach.scan_speed;
     

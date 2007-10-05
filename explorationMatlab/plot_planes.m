@@ -7,10 +7,13 @@
 
 %% Function Call
 % 
-% * *Inputs:* 
-%   plane (struct) planes structure with equations and home points
-%   mew (double) radius of the planes
-% * *Returns:* Null
+% *Inputs:* 
+%
+% _plane_ (struct) planes structure with equations and home points
+%
+% _mew_ (double) radius of the planes
+%
+% *Returns:* NULL
 
 function plot_handles=plot_planes(plane,mew)
 

@@ -5,16 +5,25 @@
 
 %% Function Call
 % 
-% * *Inputs:* 
-%   newQ (1*6 double) radians - The new joint configuration that want to be in
-%   tryalternate (binary) If you want to try and get another possible joint configuration
-%   check_arm_perms (binary)  If you want to check each of the joints 1-3 perms for a solution
-%   useMiddleQ2 (binary) If you want to try and put a second point in from middleQ to end if there is no direct path
-%   numofPPiterations (int) This is how many times you want to go through the middleQ paths
-%   disON (binary) If you want to see the print outs of the working
-% * *Returns:* 
-%   pathfound =0 (no path), -1 (not valid newQ), 1 (path found)
-%   all_steps = 6 collums of joints * many steps
+% *Inputs:* 
+%
+% _newQ_ (1*6 double) radians - The new joint configuration that want to be in
+%
+% _tryalternate_ (binary) If you want to try and get another possible joint configuration
+%
+% _check_arm_perms_ (binary)  If you want to check each of the joints 1-3 perms for a solution
+%
+% _useMiddleQ2_ (binary) If you want to try and put a second point in from middleQ to end if there is no direct path
+%
+% _numofPPiterations_ (int) This is how many times you want to go through the middleQ paths
+%
+% _disON_ (binary) If you want to see the print outs of the working
+%
+% *Returns:* 
+%
+% _pathfound_ =0 (no path), -1 (not valid newQ), 1 (path found)
+%
+% _all_steps_ = 6 collums of joints * many steps
 
 function [pathfound,all_steps] = pathplanner(newQ,tryalternate,check_arm_perms,useMiddleQ2,numofPPiterations,disON)
 

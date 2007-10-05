@@ -7,9 +7,15 @@
 
 %% Function Call
 %
-% * *Inputs:* all_steps (6*m double) these are the joint configs,
-% points (3*m double) all points we are trying to avoid
-% * *Returns:* result (bin) =1 if ok, =0 if NOT ok
+% *Inputs:* 
+%
+% _all_steps_ (6*m double) these are the joint configs,
+%
+% _points_ (3*m double) all points we are trying to avoid
+%
+% *Returns:* 
+%
+% _result_ (bin) =1 if ok, =0 if NOT ok
 
 function result = check_path_for_col(all_steps,points)
 

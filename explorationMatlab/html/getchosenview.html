@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>getchosenview</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="getchosenview"><style>
 
 body {
@@ -88,14 +88,11 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> h (array double) the handles to the GUI
-               </li>
-               <li><b>Returns:</b> Null
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> getchosenview(h)
+         <p><b>Inputs:</b></p>
+         <p><i>h</i> (array double) the handles to the GUI
+         </p>
+         <p><b>Returns:</b> NULL
+         </p><pre class="codeinput"><span class="keyword">function</span> getchosenview(h)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> scan
 thetrueone=0;
 currentvalue=false;
@@ -138,8 +135,11 @@ scan.chosenview=vector;
 
 %% Function Call
 %
-% * *Inputs:* h (array double) the handles to the GUI
-% * *Returns:* Null
+% *Inputs:* 
+%
+% _h_ (array double) the handles to the GUI
+%
+% *Returns:* NULL
 
 function getchosenview(h)
 

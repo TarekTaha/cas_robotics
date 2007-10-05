@@ -10,10 +10,17 @@
 
 %% Function Call
 % 
-% * *Inputs:* t (4*4 double) this is the transform of the arm,
-% ellipse_vals (struct) holds the center and parameters of the ellipse
-% points (3*m double) holds the points in space
-% * *Returns:* result (bin) =1 if ok, =0 if NOT ok
+% *Inputs:* 
+%
+% _t_ (4*4 double) this is the transform of the arm,
+%
+% _ellipse_vals_ (struct) holds the center and parameters of the ellipse
+%
+% _points_ (3*m double) holds the points in space
+%
+% *Returns:* 
+%
+% _result_ (bin) =1 if ok, =0 if NOT ok
 
 function result = check_FF(t,ellipse_vals,points)
 

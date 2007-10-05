@@ -6,13 +6,20 @@
 
 %% Function Call
 % 
-% * *Inputs:* 
-% piece= the current peice that is being plotted
-% current_shape = (verts) the vertices of the triangles of the shape being plotted
-% * *Returns:* 
-% {x,y,z} = Cartesian points describing ellispe
-% params = the parameters a,b,c of elispoid
-% center = center of ellipse
+% *Inputs:* 
+%
+% _piece_= the current peice that is being plotted
+%
+% _current_shape_ = (verts) the vertices of the triangles of the shape being plotted
+%
+% *Returns:* 
+%
+% _{x,y,z}_ = Cartesian points describing ellispe
+%
+% _params_ = the parameters a,b,c of elispoid
+%
+% _center_ = center of ellipse
+
 function [x,y,z,params,center]=calc_elip(piece,current_shape)
 
 %% Variables

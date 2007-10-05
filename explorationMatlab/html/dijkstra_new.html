@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>dijkstra_new</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="dijkstra_new"><style>
 
 body {
@@ -86,15 +86,20 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> n: the number of nodes in the network; s: source node index; d: destination node index;
-               </li>
-               <li><b>Returns:</b> path: the list of nodes in the path from source to destination, totalCost: the total cost of the path farthestNode: the farthest
-                  node to reach for each node after performing the routing
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> [path, totalCost] = dijkstra_new(n, netCostMatrix, s, d)
+         <p><b>Inputs:</b></p>
+         <p><i>n</i> (int) the number of nodes in the network;
+         </p>
+         <p><i>s</i> source node index;
+         </p>
+         <p><i>d</i> destination node index;
+         </p>
+         <p><b>Returns:</b></p>
+         <p><i>path</i> the list of nodes in the path from source to destination,
+         </p>
+         <p><i>totalCost</i> the total cost of the path
+         </p>
+         <p><i>farthestNode</i> the farthest node to reach for each node after performing the routing
+         </p><pre class="codeinput"><span class="keyword">function</span> [path, totalCost] = dijkstra_new(n, netCostMatrix, s, d)
 </pre><h2>Set all the nodes intially to un-visited;<a name="2"></a></h2><pre class="codeinput">visited(1:n) = 0;
 
 distance(1:n) = inf;    <span class="comment">% it stores the shortest distance between each node and the source node;</span>
@@ -146,14 +151,21 @@ totalCost = distance(d);
 
 %% Function Call
 % 
-% * *Inputs:* 
-% n: the number of nodes in the network;
-% s: source node index;
-% d: destination node index;
-% * *Returns:* 
-% path: the list of nodes in the path from source to destination, 
-% totalCost: the total cost of the path
-% farthestNode: the farthest node to reach for each node after performing the routing
+% *Inputs:* 
+%
+% _n_ (int) the number of nodes in the network;
+%
+% _s_ source node index;
+%
+% _d_ destination node index;
+%
+% *Returns:* 
+%
+% _path_ the list of nodes in the path from source to destination, 
+%
+% _totalCost_ the total cost of the path
+%
+% _farthestNode_ the farthest node to reach for each node after performing the routing
 
 function [path, totalCost] = dijkstra_new(n, netCostMatrix, s, d)
 

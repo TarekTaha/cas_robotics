@@ -5,14 +5,21 @@
 
 %% Function Call
 % 
-% * *Inputs:* 
-% n: the number of nodes in the network;
-% s: source node index;
-% d: destination node index;
-% * *Returns:* 
-% path: the list of nodes in the path from source to destination, 
-% totalCost: the total cost of the path
-% farthestNode: the farthest node to reach for each node after performing the routing
+% *Inputs:* 
+%
+% _n_ (int) the number of nodes in the network;
+%
+% _s_ source node index;
+%
+% _d_ destination node index;
+%
+% *Returns:* 
+%
+% _path_ the list of nodes in the path from source to destination, 
+%
+% _totalCost_ the total cost of the path
+%
+% _farthestNode_ the farthest node to reach for each node after performing the routing
 
 function [path, totalCost] = dijkstra_new(n, netCostMatrix, s, d)
 

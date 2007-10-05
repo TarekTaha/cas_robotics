@@ -10,9 +10,12 @@
 
 %% Function Call
 %
-% * *Inputs:* all_steps (many*6 double) radians the steps that the arm must
+% *Inputs:* 
+%
+% _all_steps_ (many*6 double) radians the steps that the arm must
 % move through on its path
-% * *Returns:* Null
+%
+% *Returns:* NULL
 
 function use_real_robot_MOVE(all_steps)
 

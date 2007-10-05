@@ -1,7 +1,14 @@
+
+function makeindex()
 clear all;
-cd ..
 a=dir;
 numMfiles=1;
+
+%publish options
+publish_options.format='html';
+publish_options.evalCode=false;
+publish_options.outputDir='./html';
+
 for i=1:size(a,1)
     [b,c]=strtok(a(i).name,'.');
     if strcmp(c(2:end),'m')
@@ -10,7 +17,11 @@ for i=1:size(a,1)
         mfilenames(numMfiles).calls=[];
         mfilenames(numMfiles).globals=[];
         
-        [result,output]=system(strcat('f:\bin\GnuWin32\bin\grep -H "',char(mfilenames(numMfiles).val),'(" *.m'));
+        [result,output]=system(strcat('grep -H "',char(mfilenames(numMfiles).val),'(" *.m'));
+%         if result~=0
+%             [result,output]=system(strcat('f:\bin\GnuWin32\bin\grep -H "',char(mfilenames(numMfiles).val),'(" *.m'));
+%         end
+        
         while (result==0 && size(output,2)>0)
             [templine,output]=strtok(output,char(10));
             calledbyfile =strtrim(strtok(templine,'.'));
@@ -19,9 +30,12 @@ for i=1:size(a,1)
                 mfilenames(numMfiles).calledby=[mfilenames(numMfiles).calledby,' ',calledbyfile];
             end
         end
-%         if numMfiles==18 keyboard;end
         
-        [result,output]=system(['f:\bin\GnuWin32\bin\grep -H -w "global" ',mfilenames(numMfiles).val,'.m']);
+        [result,output]=system(['grep -H -w "global" ',mfilenames(numMfiles).val,'.m']);
+%         if result~=0
+%             [result,output]=system(['f:\bin\GnuWin32\bin\grep -H -w "global" ',mfilenames(numMfiles).val,'.m']);
+%         end
+
         while (result==0 && size(output,2)>0)
             [templine,output]=strtok(output,char(10));            
             [preceeding,globalvars]=strtok(templine,char(32));
@@ -41,7 +55,10 @@ for i=1:size(a,1)
                 end
             end
         end
-            
+
+        %Publish file to HTML directory
+        publish([mfilenames(numMfiles).val,'.m'],publish_options);
+        
         numMfiles=numMfiles+1;
     end
 end
@@ -83,3 +100,4 @@ end
 
 fprintf(fid,'%s','</body></html>');
 fclose(fid);
+

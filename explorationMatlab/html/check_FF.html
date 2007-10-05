@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>check_FF</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="check_FF"><style>
 
 body {
@@ -90,15 +90,16 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> t (4*4 double) this is the transform of the arm, ellipse_vals (struct) holds the center and parameters of the ellipse points
-                  (3*m double) holds the points in space
-               </li>
-               <li><b>Returns:</b> result (bin) =1 if ok, =0 if NOT ok
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> result = check_FF(t,ellipse_vals,points)
+         <p><b>Inputs:</b></p>
+         <p><i>t</i> (4*4 double) this is the transform of the arm,
+         </p>
+         <p><i>ellipse_vals</i> (struct) holds the center and parameters of the ellipse
+         </p>
+         <p><i>points</i> (3*m double) holds the points in space
+         </p>
+         <p><b>Returns:</b></p>
+         <p><i>result</i> (bin) =1 if ok, =0 if NOT ok
+         </p><pre class="codeinput"><span class="keyword">function</span> result = check_FF(t,ellipse_vals,points)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">if</span> nargin&lt;3
     <span class="comment">%import point from somewhere</span>
     <span class="keyword">global</span> workspace
@@ -143,10 +144,17 @@ result=1;
 
 %% Function Call
 % 
-% * *Inputs:* t (4*4 double) this is the transform of the arm,
-% ellipse_vals (struct) holds the center and parameters of the ellipse
-% points (3*m double) holds the points in space
-% * *Returns:* result (bin) =1 if ok, =0 if NOT ok
+% *Inputs:* 
+%
+% _t_ (4*4 double) this is the transform of the arm,
+%
+% _ellipse_vals_ (struct) holds the center and parameters of the ellipse
+%
+% _points_ (3*m double) holds the points in space
+%
+% *Returns:* 
+%
+% _result_ (bin) =1 if ok, =0 if NOT ok
 
 function result = check_FF(t,ellipse_vals,points)
 

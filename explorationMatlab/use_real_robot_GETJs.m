@@ -4,8 +4,9 @@
 
 %% Function Call
 %
-% * *Inputs:* Null
-% * *Returns:* Null
+% *Inputs:*  NULL
+% 
+% *Returns:*  NULL
 
 function use_real_robot_GETJs()
 

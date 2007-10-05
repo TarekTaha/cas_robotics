@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>order_bestviews</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="order_bestviews"><style>
 
 body {
@@ -90,14 +90,11 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> redo_nbv_vol (bin) wether or not to redo the nbv volume and pose checking for each on the bestviews
-               </li>
-               <li><b>Returns:</b> Null
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> order_bestviews(redo_nbv_vol)
+         <p><b>Inputs:</b></p>
+         <p><i>redo_nbv_vol</i> (binary) wether or not to redo the nbv volume and pose checking for each on the bestviews
+         </p>
+         <p><b>Returns:</b> NULL
+         </p><pre class="codeinput"><span class="keyword">function</span> order_bestviews(redo_nbv_vol)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> bestviews workspace
 
 <span class="keyword">if</span> nargin==0
@@ -160,10 +157,12 @@ bestviews=temp_bestviews;
 
 %% Function Call
 %
-% * *Inputs:* 
-% redo_nbv_vol (bin) wether or not to redo the nbv volume and pose checking
+% *Inputs:* 
+%
+% _redo_nbv_vol_ (binary) wether or not to redo the nbv volume and pose checking
 % for each on the bestviews
-% * *Returns:* Null
+%
+% *Returns:* NULL
 
 function order_bestviews(redo_nbv_vol)
 

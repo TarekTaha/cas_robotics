@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>check_path_for_col</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="check_path_for_col"><style>
 
 body {
@@ -87,14 +87,14 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> all_steps (6*m double) these are the joint configs, points (3*m double) all points we are trying to avoid
-               </li>
-               <li><b>Returns:</b> result (bin) =1 if ok, =0 if NOT ok
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> result = check_path_for_col(all_steps,points)
+         <p><b>Inputs:</b></p>
+         <p><i>all_steps</i> (6*m double) these are the joint configs,
+         </p>
+         <p><i>points</i> (3*m double) all points we are trying to avoid
+         </p>
+         <p><b>Returns:</b></p>
+         <p><i>result</i> (bin) =1 if ok, =0 if NOT ok
+         </p><pre class="codeinput"><span class="keyword">function</span> result = check_path_for_col(all_steps,points)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> r densoobj
 
 <span class="keyword">if</span> nargin&lt;2
@@ -143,9 +143,15 @@ result=1;
 
 %% Function Call
 %
-% * *Inputs:* all_steps (6*m double) these are the joint configs,
-% points (3*m double) all points we are trying to avoid
-% * *Returns:* result (bin) =1 if ok, =0 if NOT ok
+% *Inputs:* 
+%
+% _all_steps_ (6*m double) these are the joint configs,
+%
+% _points_ (3*m double) all points we are trying to avoid
+%
+% *Returns:* 
+%
+% _result_ (bin) =1 if ok, =0 if NOT ok
 
 function result = check_path_for_col(all_steps,points)
 

@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>rotateFigure</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="rotateFigure"><style>
 
 body {
@@ -87,8 +87,14 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <p><b>Inputs:</b> figHandle (double) handle for a figure to be rotated degrees (double) num of degrees to be rotated through fname (string)
-            the name that will be concaternated at the begining of all of the picture files <b>Returns:</b> Null
+         <p><b>Inputs:</b></p>
+         <p><i>figHandle</i> (double) handle for a figure to be rotated
+         </p>
+         <p><i>degrees</i> (double) num of degrees to be rotated through
+         </p>
+         <p><i>fname</i> (string) the name that will be concaternated at the begining of all of the picture files
+         </p>
+         <p><b>Returns:</b> NULL
          </p><pre class="codeinput"><span class="keyword">function</span> rotateFigure(figHandle, degrees, fname)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput">nFrames = ceil(degrees/4);
 </pre><h2>Get a grip on figure<a name="3"></a></h2><pre class="codeinput">figure(figHandle);
@@ -114,11 +120,16 @@ p.footer {
 
 %% Function Call
 % 
-% *Inputs:* figHandle (double) handle for a figure to be rotated
-% degrees (double) num of degrees to be rotated through
-% fname (string) the name that will be concaternated at the begining of all
+% *Inputs:* 
+% 
+% _figHandle_ (double) handle for a figure to be rotated
+%
+% _degrees_ (double) num of degrees to be rotated through
+%
+% _fname_ (string) the name that will be concaternated at the begining of all
 % of the picture files
-% *Returns:* Null
+%
+% *Returns:* NULL
 
 function rotateFigure(figHandle, degrees, fname)
 

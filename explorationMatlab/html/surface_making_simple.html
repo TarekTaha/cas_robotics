@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>surface_making_simple</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="surface_making_simple"><style>
 
 body {
@@ -94,15 +94,15 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> PointData (3*many double) x,y,z cartesian points mew (double) size of the surfaces DISPON (binary) whether to show the output
-                  or not
-               </li>
-               <li><b>Returns:</b> Null
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> surface_making_simple(PointData,mew,DISPON)
+         <p><b>Inputs:</b></p>
+         <p><i>PointData</i> (3*many double) x,y,z cartesian points
+         </p>
+         <p><i>mew</i> (double) size of the surfaces
+         </p>
+         <p><i>DISPON</i> (binary) whether to show the output or not
+         </p>
+         <p><b>Returns:</b> NULL
+         </p><pre class="codeinput"><span class="keyword">function</span> surface_making_simple(PointData,mew,DISPON)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput">clear <span class="string">global</span> <span class="string">plane</span>
 <span class="keyword">global</span> plane
 
@@ -260,11 +260,15 @@ distance_between.closest_indices=distance_between.indices(temp(temp_order));
 
 %% Function Call
 % 
-% * *Inputs:* 
-% PointData (3*many double) x,y,z cartesian points
-% mew (double) size of the surfaces
-% DISPON (binary) whether to show the output or not
-% * *Returns:* Null
+% *Inputs:* 
+%
+% _PointData_ (3*many double) x,y,z cartesian points
+%
+% _mew_ (double) size of the surfaces
+%
+% _DISPON_ (binary) whether to show the output or not
+%
+% *Returns:* NULL
 
 function surface_making_simple(PointData,mew,DISPON)
 

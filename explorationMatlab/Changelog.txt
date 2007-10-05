@@ -1072,3 +1072,17 @@ end
 
 3/10/2007 Wednesday
 - Deleted streamOnto_mine_nodirection.m go to previous versions (before 12:00 this day)
+
+
+4/10/2007 Thursday
+- Finished first version of sourceforge project be put online for sharing
+
+5/10/2007 Friday
+- Fixed up the comments
+- Removed the old scanning command and added the new mesh commands
+%     robscan_h=actxserver('EyeInHand.ScannerCommand');
+    %give it an initial pose for base position)
+    robscan_h=robmap_h.ScannerCommand(eye(4));
+%     %this function handles the data coming back from the laser object
+%     robscan_h.registerevent(@myhandler);
+- The NBV doesn't work properly since it can't estimate how much new knowledge it is back to front, I think the inverse kinematics still works properly

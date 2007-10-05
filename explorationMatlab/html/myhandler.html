@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>myhandler</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-03">
+      <meta name="date" content="2007-10-05">
       <meta name="m-file" content="myhandler"><style>
 
 body {
@@ -85,14 +85,11 @@ p.footer {
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <div>
-            <ul>
-               <li><b>Inputs:</b> varargin (variable) data returned by C++ com object
-               </li>
-               <li><b>Returns:</b> Null
-               </li>
-            </ul>
-         </div><pre class="codeinput"><span class="keyword">function</span> myhandler(varargin)
+         <p><b>Inputs:</b></p>
+         <p><i>varargin</i> (variable) data returned by C++ com object
+         </p>
+         <p><b>Returns:</b> NULL
+         </p><pre class="codeinput"><span class="keyword">function</span> myhandler(varargin)
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> PoseData RangeData IntensityData PointData
 </pre><h2>Check the value passed in<a name="3"></a></h2><pre class="codeinput"><span class="keyword">if</span> strcmpi(varargin{end}, <span class="string">'ScanComplete'</span>)
      scan = varargin{3}; <span class="comment">% A COM handle to an IRangeScan object</span>
@@ -118,9 +115,11 @@ p.footer {
 
 %% Function Call
 %
-% * *Inputs:* 
-% varargin (variable) data returned by C++ com object
-% * *Returns:* Null
+% *Inputs:* 
+%
+% _varargin_ (variable) data returned by C++ com object
+%
+% *Returns:* NULL
 
 function myhandler(varargin)
 
