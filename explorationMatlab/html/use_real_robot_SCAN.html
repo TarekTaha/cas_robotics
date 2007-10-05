@@ -141,7 +141,7 @@ tempQ=Q*180/pi;
     pause(0.05);
     robscan_h.Start(tilt_scan_range);
 
-    pause(0.2);
+    pause(0.5);
 
     <span class="comment">%if not started their must be a problem or if no data has started to be returned</span>
     <span class="keyword">if</span>(robscan_h.Started==0 &amp;&amp; get(robscan_h,<span class="string">'Completed'</span>)==0)
@@ -155,14 +155,20 @@ tempQ=Q*180/pi;
             pause(0.2);
         <span class="keyword">end</span>
     <span class="keyword">elseif</span> isempty(PointData)
-        display(<span class="string">'Waiting for laser to complete before retrying'</span>);
+        display(<span class="string">'Currently not data coming back: waiting for laser to complete before retrying'</span>);
         <span class="keyword">while</span> get(robscan_h,<span class="string">'Completed'</span>)==0
             pause(0.5);display(<span class="string">'.'</span>);
-            <span class="comment">%checks that there still really is no data coming back</span>
-            <span class="keyword">if</span> ~isempty(PointData); attemptingscan=0; <span class="keyword">break</span>; <span class="keyword">end</span>
+            <span class="comment">%break out if we get some data back</span>
+            <span class="keyword">if</span> ~isempty(PointData); <span class="keyword">break</span>; <span class="keyword">end</span>
         <span class="keyword">end</span>
-        release_scanner(robscan_h);
-        error(<span class="string">'No Data coming back ... Giving up'</span>);
+        <span class="comment">%checks that there still really is no data coming back</span>
+        <span class="keyword">if</span> ~isempty(PointData);
+            display(<span class="string">'Data came back eventually'</span>);
+            attemptingscan=0;
+        <span class="keyword">else</span>
+            release_scanner(robscan_h);
+            error(<span class="string">'No Data coming back ... Giving up'</span>);
+        <span class="keyword">end</span>
     <span class="keyword">else</span>
         <span class="comment">%it has started so we have no need to retry this breaks out of loop</span>
         attemptingscan=0;
@@ -277,7 +283,7 @@ while attemptingscan
     pause(0.05);
     robscan_h.Start(tilt_scan_range);
     
-    pause(0.2);
+    pause(0.5);
     
     %if not started their must be a problem or if no data has started to be returned
     if(robscan_h.Started==0 && get(robscan_h,'Completed')==0)   
@@ -291,14 +297,20 @@ while attemptingscan
             pause(0.2);
         end
     elseif isempty(PointData)
-        display('Waiting for laser to complete before retrying');
+        display('Currently not data coming back: waiting for laser to complete before retrying');
         while get(robscan_h,'Completed')==0
-            pause(0.5);display('.');
-            %checks that there still really is no data coming back
-            if ~isempty(PointData); attemptingscan=0; break; end
+            pause(0.5);display('.'); 
+            %break out if we get some data back
+            if ~isempty(PointData); break; end
         end
-        release_scanner(robscan_h);
-        error('No Data coming back ... Giving up');             
+        %checks that there still really is no data coming back
+        if ~isempty(PointData); 
+            display('Data came back eventually');
+            attemptingscan=0; 
+        else
+            release_scanner(robscan_h);
+            error('No Data coming back ... Giving up');             
+        end        
     else
         %it has started so we have no need to retry this breaks out of loop
         attemptingscan=0;

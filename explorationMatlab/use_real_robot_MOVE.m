@@ -34,15 +34,8 @@ else
 end
 
 %% Check that no steps exceed soft limits
-% $$\begin{array}{l}
-% \forall (n)\\
-% if(all\_steps_{n(3)}\times \frac{180}{\pi} < - \frac{7}{3} \times all\_steps_{n(2)}\times
-% \frac{180}{\pi} -130) \\
-% \rightarrow \mbox{exceeds soft limit}
-% \end{array}$$
-
-if ~isempty(find(all_steps(:,3)*180/pi<-7/3*all_steps(:,2)*180/pi-130,1))
-    display('there is a possible bad position in the joint steps')
+if ~joint_softlimit_check(all_steps)
+    display('there is a possible bad position in the joint steps, this shouldnt be planned, giving you control')
     keyboard
 end
     
@@ -82,6 +75,8 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
         rob_h.Start;
         % want it to wait until it has finished getting to the next posiiotn before scanning
         rob_h.WaitUntilCompleted(30,0);
+        % simply release the object
+        rob_h.release;
 
 %% Drive the arm through the sequence of poses in all_steps
     else
@@ -108,7 +103,7 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
                 if waitcoutner==50 %about 10 seconds                    
                     button = questdlg('Did you press the emergency stop?','Running Slow');
                     if strcmp(button,'Yes')
-                        rob_h.release;
+                        releaserobot(rob_h)
                         error('emergency stop pressed - exiting');                    
                     else
                         rob_h.Params=current_step_DEG;
@@ -116,18 +111,22 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
                     end
                 elseif waitcoutner>100 %about 20 seconds we have reissued the command and still no action
                     keyboard
-                    rob_h.release;
+                    releaserobot(rob_h)
                     error('Problem issuing commands to drive the robot');                    
                 end
                 %display(strcat('Joint state is currently:', num2str(rob_h.JointState)));                
             end
         end
-        pause(0.1);
-        rob_h.Type='StopDriveJointAbs';
-        rob_h.Start;
-        rob_h.WaitUntilCompleted(0.5,0)
+        %% Release movement object
+        releaserobot(rob_h)
     end    
 end
 
-%% Release movement object
-rob_h.release;
+%% FUNCTION release the robot object
+function releaserobot(rob_h)
+
+    pause(0.1);
+    rob_h.Type='StopDriveJointAbs';
+    rob_h.Start;
+    rob_h.WaitUntilCompleted(0.5,0)
+    rob_h.release;

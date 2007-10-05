@@ -43,6 +43,7 @@ result=1;
 
 %% Check the soft motion limits of the arm
 if ~joint_softlimit_check(all_steps)
+    result=0;
     return;
 end
 

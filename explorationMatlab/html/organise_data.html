@@ -264,7 +264,7 @@ workspace.newestknownledge=setdiff(points,[workspace.knowncoords;workspace.index
 workspace.knowncoords=unique([workspace.knowncoords;points],<span class="string">'rows'</span>);
 <span class="comment">%overall point is what is known that is not an obstacle</span>
 workspace.knowncoords=setdiff(unique([workspace.knowncoords;points],<span class="string">'rows'</span>),workspace.indexedobsticles,<span class="string">'rows'</span>);
-</pre><h2>Do the 3D median filtering on the unknown space<a name="17"></a></h2><pre class="codeinput">threeDMedianFilt();
+</pre><h2>Do the 3D median filtering on the unknown space<a name="17"></a></h2><pre class="codeinput"><span class="comment">%threeDMedianFilt();</span>
 </pre><h2>Do surface making on obstacle points from this scan<a name="18"></a></h2><pre class="codeinput"><span class="keyword">try</span> <span class="keyword">if</span> size(ice_cream_bounds_NOSELF,1)&gt;1
         surface_making_simple(ice_cream_bounds_NOSELF,workspace.mew);
     <span class="keyword">end</span>
@@ -507,7 +507,7 @@ workspace.knowncoords=unique([workspace.knowncoords;points],'rows');
 workspace.knowncoords=setdiff(unique([workspace.knowncoords;points],'rows'),workspace.indexedobsticles,'rows');
 
 %% Do the 3D median filtering on the unknown space
-threeDMedianFilt();
+%threeDMedianFilt();
 
 %% Do surface making on obstacle points from this scan 
 try if size(ice_cream_bounds_NOSELF,1)>1

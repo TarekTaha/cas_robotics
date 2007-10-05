@@ -224,7 +224,7 @@ workspace.knowncoords=unique([workspace.knowncoords;points],'rows');
 workspace.knowncoords=setdiff(unique([workspace.knowncoords;points],'rows'),workspace.indexedobsticles,'rows');
 
 %% Do the 3D median filtering on the unknown space
-threeDMedianFilt();
+%threeDMedianFilt();
 
 %% Do surface making on obstacle points from this scan 
 try if size(ice_cream_bounds_NOSELF,1)>1

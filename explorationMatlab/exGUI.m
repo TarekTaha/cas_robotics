@@ -253,6 +253,7 @@ for stepcount=2:size(robot_maxreach.default_Q,1)+1
         catch; display(lasterr); 
             want_to_continue=input('Type (1) to continue, (2) for keyboard command, (0) to exit\n');            
             if want_to_continue==2; keyboard; end
+            if want_to_continue==0; error('User chose to exit');end
             if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end   
         end; 
     end
@@ -298,7 +299,7 @@ if current_test_case==1
 %% TEST 2 - Non points -using algorithm
 elseif current_test_case>1
     %now go through and get NBV and then use them to explore
-    for stepcount=stepcount+1:5;
+    for stepcount=stepcount+1:10;
         %which exploration method to use
         if current_test_case==2;NBV_beta();
         elseif current_test_case==3; NBV();
@@ -322,6 +323,7 @@ elseif current_test_case>1
                 catch; display(lasterr);
                     want_to_continue=input(' Type (1) to continue, (2) for keyboard command, (0) to exit\n');            
                     if want_to_continue==2; keyboard; end
+                    if want_to_continue==0; error('User chose to exit');end
                     if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end   
                 end;
             end                
@@ -594,8 +596,8 @@ f = hMesh.FaceData;
 v = hMesh.VertexData;
 trisurf(f, v(:,1), v(:,2), v(:,3), 'FaceColor', 'None');
 hold on;
-plotdenso(r,Q)
-set(gcf,'CurrentAxes',handles.axes3);
+plotdenso(r,Q);
+% set(gcf,'CurrentAxes',handles.axes3);
 
 % --- Executes on button press in plot_planes_checkbox.
 function plot_planes_checkbox_Callback(hObject, eventdata, handles)%#ok<DEFNU>

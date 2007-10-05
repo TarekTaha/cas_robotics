@@ -326,6 +326,7 @@ set(gcf,<span class="string">'CurrentAxes'</span>,handles.axes3)
         <span class="keyword">catch</span>; display(lasterr);
             want_to_continue=input(<span class="string">'Type (1) to continue, (2) for keyboard command, (0) to exit\n'</span>);
             <span class="keyword">if</span> want_to_continue==2; keyboard; <span class="keyword">end</span>
+            <span class="keyword">if</span> want_to_continue==0; error(<span class="string">'User chose to exit'</span>);<span class="keyword">end</span>
             <span class="keyword">if</span> get(handles.useRealRobot_checkbox,<span class="string">'Value'</span>)==1;  use_real_robot_GETJs();<span class="keyword">end</span>
         <span class="keyword">end</span>;
     <span class="keyword">end</span>
@@ -367,7 +368,7 @@ set(gcf,<span class="string">'CurrentAxes'</span>,handles.axes3)
     <span class="keyword">end</span>
 </pre><h2>TEST 2 - Non points -using algorithm<a name="8"></a></h2><pre class="codeinput"><span class="keyword">elseif</span> current_test_case&gt;1
     <span class="comment">%now go through and get NBV and then use them to explore</span>
-    <span class="keyword">for</span> stepcount=stepcount+1:5;
+    <span class="keyword">for</span> stepcount=stepcount+1:10;
         <span class="comment">%which exploration method to use</span>
         <span class="keyword">if</span> current_test_case==2;NBV_beta();
         <span class="keyword">elseif</span> current_test_case==3; NBV();
@@ -391,6 +392,7 @@ set(gcf,<span class="string">'CurrentAxes'</span>,handles.axes3)
                 <span class="keyword">catch</span>; display(lasterr);
                     want_to_continue=input(<span class="string">' Type (1) to continue, (2) for keyboard command, (0) to exit\n'</span>);
                     <span class="keyword">if</span> want_to_continue==2; keyboard; <span class="keyword">end</span>
+                    <span class="keyword">if</span> want_to_continue==0; error(<span class="string">'User chose to exit'</span>);<span class="keyword">end</span>
                     <span class="keyword">if</span> get(handles.useRealRobot_checkbox,<span class="string">'Value'</span>)==1;  use_real_robot_GETJs();<span class="keyword">end</span>
                 <span class="keyword">end</span>;
             <span class="keyword">end</span>
@@ -654,8 +656,8 @@ f = hMesh.FaceData;
 v = hMesh.VertexData;
 trisurf(f, v(:,1), v(:,2), v(:,3), <span class="string">'FaceColor'</span>, <span class="string">'None'</span>);
 hold <span class="string">on</span>;
-plotdenso(r,Q)
-set(gcf,<span class="string">'CurrentAxes'</span>,handles.axes3);
+plotdenso(r,Q);
+<span class="comment">% set(gcf,'CurrentAxes',handles.axes3);</span>
 
 <span class="comment">% --- Executes on button press in plot_planes_checkbox.</span>
 <span class="keyword">function</span> plot_planes_checkbox_Callback(hObject, eventdata, handles)<span class="comment">%#ok&lt;DEFNU&gt;</span>
@@ -1170,6 +1172,7 @@ for stepcount=2:size(robot_maxreach.default_Q,1)+1
         catch; display(lasterr); 
             want_to_continue=input('Type (1) to continue, (2) for keyboard command, (0) to exit\n');            
             if want_to_continue==2; keyboard; end
+            if want_to_continue==0; error('User chose to exit');end
             if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end   
         end; 
     end
@@ -1215,7 +1218,7 @@ if current_test_case==1
 %% TEST 2 - Non points -using algorithm
 elseif current_test_case>1
     %now go through and get NBV and then use them to explore
-    for stepcount=stepcount+1:5;
+    for stepcount=stepcount+1:10;
         %which exploration method to use
         if current_test_case==2;NBV_beta();
         elseif current_test_case==3; NBV();
@@ -1239,6 +1242,7 @@ elseif current_test_case>1
                 catch; display(lasterr);
                     want_to_continue=input(' Type (1) to continue, (2) for keyboard command, (0) to exit\n');            
                     if want_to_continue==2; keyboard; end
+                    if want_to_continue==0; error('User chose to exit');end
                     if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end   
                 end;
             end                
@@ -1511,8 +1515,8 @@ f = hMesh.FaceData;
 v = hMesh.VertexData;
 trisurf(f, v(:,1), v(:,2), v(:,3), 'FaceColor', 'None');
 hold on;
-plotdenso(r,Q)
-set(gcf,'CurrentAxes',handles.axes3);
+plotdenso(r,Q);
+% set(gcf,'CurrentAxes',handles.axes3);
 
 % REPLACE_WITH_DASH_DASH- Executes on button press in plot_planes_checkbox.
 function plot_planes_checkbox_Callback(hObject, eventdata, handles)%#ok<DEFNU>

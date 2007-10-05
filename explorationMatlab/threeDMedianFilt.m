@@ -11,7 +11,7 @@
 % *Returns:* NULL
 
 function threeDMedianFilt()
-keyboard
+% keyboard
 %% Variables
 global workspace
 OBtofilterout=[];
