@@ -6,21 +6,24 @@ function policy = zmdpPolicyParse(filename)
 % belief  : a (1,n) vector with the probability belief of states where n is
 % the number of states in the POMDP model. 
 
-file = textread(filename,'%s','commentstyle','shell','delimiter','\n','whitespace',' \b\t','bufsize',1000000);
-
+file = textread(filename,'%s','commentstyle','shell','delimiter','\n','whitespace',' \b\t');
+display('HERE 0');
 % remove un-necessary info
 k=0;
 fileTemp = cell(length(file),1);
-for i=1:length(file)
-  leftCurlyBracket =strfind(file{i},'{');
-  if isempty(leftCurlyBracket) && ~isempty(file{i})
+for i=2:length(file)
+  %leftCurlyBracket =strfind(file{i},'{');
+  leftCurlyBracket =strcmp(file{i}(1),'{');
+  if isempty(leftCurlyBracket)
     k=k+1;
     fileTemp{k}=file{i};
   end
 end
+policy = 1;
+return;
 file = fileTemp;
 clear fileTemp;
-
+display('HERE 1');
 k=0;
 fileTemp = cell(length(file),1);
 for i=1:length(file)
@@ -32,7 +35,7 @@ for i=1:length(file)
 end
 file = fileTemp;
 clear fileTemp;
-
+display('HERE 2');
 k=0;
 fileTemp = cell(length(file),1);
 for i=1:length(file)
@@ -44,7 +47,7 @@ for i=1:length(file)
 end
 file = fileTemp;
 clear fileTemp;
-
+display('HERE 3');
 k=0;
 fileTemp = cell(length(file),1);
 for i=1:length(file)
@@ -56,7 +59,7 @@ for i=1:length(file)
 end
 file = fileTemp;
 clear fileTemp;
-
+display('HERE 4');
 k=0;
 fileTemp = cell(length(file),1);
 for i=1:length(file)
@@ -68,7 +71,7 @@ for i=1:length(file)
 end
 file = fileTemp;
 clear fileTemp;
-
+display('HERE 5');
 k=0;
 fileTemp = cell(length(file),1);
 for i=1:length(file)
@@ -80,7 +83,7 @@ for i=1:length(file)
 end
 file = fileTemp;
 clear fileTemp;
-
+display('HERE 6');
 k=0;
 fileTemp = cell(length(file),1);
 for i=1:length(file)
@@ -92,7 +95,7 @@ for i=1:length(file)
 end
 file = fileTemp;
 clear fileTemp;
-
+display('HERE 7');
 lines = file;
 for i=1:length(lines)
   % remove right Arrows
@@ -109,7 +112,7 @@ for i=1:length(lines)
       end
   end
 end
-
+display('HERE 8');
 nrLines = length(lines);
 k=1;
 policy.numPlanes = sscanf(lines{k},'%*s %d');
@@ -124,6 +127,10 @@ for i=1:policy.numPlanes
         x = sscanf(lines{k},'%d %f');
         policy.planeEntries{i,(x(1)+1)} = x(2);
         k=k+1;
+    end
+    if mod(i,1000) == 0
+        display(i);
+        return
     end
 end
 clear lines;

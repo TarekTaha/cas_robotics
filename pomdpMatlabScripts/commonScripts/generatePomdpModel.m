@@ -267,7 +267,8 @@ for i=1:length(rewardSum)
     for j=1:length(total)
         if strcmp(rewardSum{i}.start,total{j}.start)
             result= normalizeTo*rewardSum{i}.reward/total{j}.reward;
-            fprintf(fid,'\nR: * : %-5s : %-5s : %-8s %-2.3f ',rewardSum{i}.start,rewardSum{i}.end,rewardSum{i}.obs,result);
+            %fprintf(fid,'\nR: * : %-5s : %-5s : %-8s %-2.3f ',rewardSum{i}.start,rewardSum{i}.end,rewardSum{i}.obs,result);
+            fprintf(fid,'\nR: * : %-5s : %-5s : * %-2.3f ',rewardSum{i}.start,rewardSum{i}.end,result);
             break;
         end
     end
