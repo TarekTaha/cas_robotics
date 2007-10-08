@@ -1,0 +1,8 @@
+<area shape="rect" href="$classCasPlanner_1_1SearchSpaceNode.html" title="{CasPlanner::SearchSpaceNode\n|+ location\l+ parent\l+ next\l+ type\l+ obstacle_cost\l+ children\l|+ SearchSpaceNode()\l+ ~SearchSpaceNode()\l}" alt="" coords="5,383,251,569">
+<area shape="rect" title="searchSpace" alt="" coords="124,567,132,575">
+<area shape="rect" title="searchSpace" alt="" coords="124,633,132,641">
+<area shape="rect" title="next\nparent" alt="" coords="247,431,255,439">
+<area shape="rect" title="next\nparent" alt="" coords="247,513,255,521">
+<area shape="rect" href="$classPoint.html" title="{Point\n|+ xp\l+ yp\l|+ Point()\l+ Point()\l+ Point()\l+ x()\l+ y()\l+ setX()\l+ setY()\l+ rx()\l+ ry()\l+ operator+=()\l+ operator&#45;=()\l+ operator *=()\l+ operator/=()\l}" alt="" coords="61,5,195,315">
+<area shape="rect" title="location" alt="" coords="124,311,132,319">
+<area shape="rect" title="location" alt="" coords="124,379,132,387">
