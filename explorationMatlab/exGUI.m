@@ -60,104 +60,6 @@ do_clear(handles);
 function varargout = exGUI_OutputFcn(hObject, eventdata, handles) 
 varargout{1} = handles.output;
 
-%% Radio Buttons for Views
-% --- Executes on button press in v4_radiobutton.
-function v1_radiobutton_Callback(hObject, eventdata, handles) %#ok<DEFNU>
-global line_h;
-try delete(line_h(1));delete(line_h(2));delete(line_h(3)); end
-setallradiosfalse(handles);
-set(hObject,'value',true);
-line_h(1)=line([-1,0],[-1,-1],[-1,-1],'Marker','>','Color',[0,1,0]);
-line_h(2)=line([-1,1/sqrt(2)-1],[-1,1/sqrt(2)-1],[-1,1/sqrt(2)-1],'Marker','<','Color',[0,0,1]);
-line_h(3)=line([-1,-1],[-1,0],[-1,-1],'Marker','^','Color',[1,0,0]);
-getchosenview(handles);
-
-function v2_radiobutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global line_h;
-try delete(line_h(1));delete(line_h(2));delete(line_h(3)); end
-setallradiosfalse(handles);
-set(hObject,'value',true);
-line_h(1)=line([0,-1],[0,0],'Marker','<','Color',[0,1,0]);
-line_h(2)=line([0,1/sqrt(2)],[0,1/sqrt(2)],'Marker','<','Color',[0,0,1]);
-line_h(3)=line([0,0],[0,1],[0,0],'Marker','^','Color',[1,0,0]);
-getchosenview(handles);
-
-function v3_radiobutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global line_h;
-try delete(line_h(1));delete(line_h(2));delete(line_h(3)); end
-setallradiosfalse(handles);
-set(hObject,'value',true);
-line_h(1)=line([0,1],[0,0],'Marker','>','Color',[0,1,0]);
-line_h(2)=line([0,1/sqrt(2)],[0,1/sqrt(2)],'Marker','<','Color',[0,0,1]);
-line_h(3)=line([0,0],[0,-1],'Marker','v','Color',[1,0,0]);
-getchosenview(handles);
-
-function v4_radiobutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global line_h;
-try delete(line_h(1));delete(line_h(2));delete(line_h(3)); end
-setallradiosfalse(handles);
-set(hObject,'value',true);
-line_h(1)=line([0,-1],[0,0],'Marker','<','Color',[0,1,0]);
-line_h(2)=line([0,1/sqrt(2)],[0,1/sqrt(2)],'Marker','<','Color',[0,0,1]);
-line_h(3)=line([0,0],[0,-1],'Marker','v','Color',[1,0,0]);
-getchosenview(handles);
-
-function v5_radiobutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global line_h;
-try delete(line_h(1));delete(line_h(2));delete(line_h(3)); end
-setallradiosfalse(handles);
-set(hObject,'value',true);
-line_h(1)=line([0,1],[0,0],'Marker','>','Color',[0,1,0]);
-line_h(2)=line([0,-1/sqrt(2)],[0,-1/sqrt(2)],'Marker','>','Color',[0,0,1]);
-line_h(3)=line([0,0],[0,1],'Marker','^','Color',[1,0,0]);
-getchosenview(handles);
-
-function v6_radiobutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global line_h;
-try delete(line_h(1));delete(line_h(2));delete(line_h(3)); end
-setallradiosfalse(handles);
-set(hObject,'value',true);
-line_h(1)=line([0,-1],[0,0],'Marker','<','Color',[0,1,0]);
-line_h(2)=line([0,-1/sqrt(2)],[0,-1/sqrt(2)],'Marker','>','Color',[0,0,1]);
-line_h(3)=line([0,0],[0,1],'Marker','^','Color',[1,0,0]);
-getchosenview(handles);
-
-function v7_radiobutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global line_h;
-try delete(line_h(1));delete(line_h(2));delete(line_h(3)); end
-setallradiosfalse(handles);
-set(hObject,'value',true);
-line_h(1)=line([0,1],[0,0],'Marker','>','Color',[0,1,0]);
-line_h(2)=line([0,-1/sqrt(2)],[0,-1/sqrt(2)],'Marker','>','Color',[0,0,1]);
-line_h(3)=line([0,0],[0,-1],'Marker','v','Color',[1,0,0]);
-getchosenview(handles);
-
-function v8_radiobutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global line_h;
-try delete(line_h(1));delete(line_h(2));delete(line_h(3)); end
-setallradiosfalse(handles);
-set(hObject,'value',true);
-line_h(1)=line([0,-1],[0,0],'Marker','<','Color',[0,1,0]);
-line_h(2)=line([0,-1/sqrt(2)],[0,-1/sqrt(2)],'Marker','>','Color',[0,0,1]);
-line_h(3)=line([0,0],[0,-1],'Marker','v','Color',[1,0,0]);
-getchosenview(handles);
-
-%%--Set all radios false--------------------------
-function setallradiosfalse(h)
-set(h.v1_radiobutton,'value',false);
-set(h.v2_radiobutton,'value',false);
-set(h.v3_radiobutton,'value',false);
-set(h.v4_radiobutton,'value',false);
-set(h.v5_radiobutton,'value',false);
-set(h.v6_radiobutton,'value',false);
-set(h.v7_radiobutton,'value',false);
-set(h.v8_radiobutton,'value',false);
-%set the current axis to be num5 which is where we draw
-set(gcf,'CurrentAxes',h.axes5);
-axis([-1 1 -1 1])
-
-
-
 %% Executes on button press in clear_pushbutton.
 function clear_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 clc
@@ -174,23 +76,10 @@ catch
     display('Unable to connect to EyeInHand')
 end
 
-%reset the cube direction pointer
-set(gcf,'CurrentAxes',handles.axes5);
-axis equal;axis off;
-global line_h;
-try delete(line_h(1));delete(line_h(2));delete(line_h(3)); end
-setallradiosfalse(handles);
-set(handles.v1_radiobutton,'value',true);
-line_h(1)=line([0,1],[0,0],[0,0],'Marker','>','Color',[0,1,0]);
-line_h(2)=line([0,1/sqrt(2)],[0,1/sqrt(2)],[0,1/sqrt(2)],'Marker','<','Color',[0,0,1]);
-line_h(3)=line([0,0],[0,1],[0,0],'Marker','^','Color',[1,0,0]);
-
 %clear the main axis
 set(gcf,'CurrentAxes',handles.axes3);
 cla('reset')
 set(handles.total_info_text,'String','0');set(handles.total_text,'String','0');
-set(handles.slider1,'Value',0);
-set(handles.zdepthval_text,'String',num2str(0));
 set(handles.best_NBV_listbox,'visible','off');
 set(handles.descripbestview_text,'visible','off');
 set(handles.useRealRobot_checkbox,'Value',0);
@@ -220,7 +109,7 @@ set(gcf,'CurrentAxes',handles.axes3);
 
 setupworkspace(get(handles.show_unknownpoints_checkbox,'Value'));
 global workspace;
-set(handles.maxzdepth_text,'String',num2str(workspace.max(3)));
+
 set(handles.dialog_text,'String','Setup Complete: Lets Explore');
 
 
@@ -426,6 +315,9 @@ global workspace
 workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
 workspace.obsticlepoints=remove_self_scanning(workspace.obsticlepoints);
 
+% --- Executes on button press in threeDmedianfilter_pushbutton.
+function threeDmedianfilter_pushbutton_Callback(hObject, eventdata, handles)
+threeDMedianFilt();
 
 
 %% Classification
@@ -548,6 +440,10 @@ end
 
 
 %% Robot Functionality
+% --- Executes on button press in blasting_pushbutton.
+function blasting_pushbutton_Callback(hObject, eventdata, handles)
+uiwait(msgbox('this does nothing yet'));
+
 % --- Executes on button press in scan_through_pushbutton.
 function scan_through_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 global r Q guiglobal
@@ -583,6 +479,23 @@ set(handles.move_to_J6_edit,'String',num2str(actual_Q(6)));
 %turns off all the stuff on the platform
 function alloff_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 allOff()
+
+% --- Executes on button press in move2start_platform_pushbutton.
+function move2start_platform_pushbutton_Callback(hObject, eventdata, handles)
+uiwait(msgbox('this does nothing yet'));
+
+% --- Executes on button press in move2end_platform_pushbutton.
+function move2end_platform_pushbutton_Callback(hObject, eventdata, handles)
+uiwait(msgbox('this does nothing yet'));
+
+% --- Executes on button press in moveback_platform_pushbutton.
+function moveback_platform_pushbutton_Callback(hObject, eventdata, handles)
+uiwait(msgbox('this does nothing yet'));
+
+% --- Executes on button press in moveforward_platform_pushbutton.
+function moveforward_platform_pushbutton_Callback(hObject, eventdata, handles)
+uiwait(msgbox('this does nothing yet'));
+
 
 %% Plotting and display simple functions
 % --- Executes on button press in plotmesh_pushbutton.
@@ -741,11 +654,6 @@ end
 function zoom_pushbutton_Callback(hObject, eventdata, handles)
 zoom on;
 
-% --- Executes on slider movement.
-function slider1_Callback(hObject, eventdata, handles)
-global workspace;
-set(handles.zdepthval_text,'String',num2str(get(hObject,'Value')*workspace.max(3)));
-
 %this function is used to collect the data for exploration to compare new info
 function state_data=collectdata(state_data)
 global workspace
@@ -855,6 +763,38 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
+% --------------------------------------------------------------------
+function Untitled_1_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
 
+
+% --------------------------------------------------------------------
+function Untitled_2_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Untitled_3_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Untitled_4_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function Untitled_5_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
 
 

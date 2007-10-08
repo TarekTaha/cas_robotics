@@ -1121,3 +1121,8 @@ function releaserobot(rob_h)
 %threeDMedianFilt();
 - Changed the size of the base platform to be 1 cube size up not 2
 workspace.impLev(1).z=[workspace.inc_size,1.5];
+- Deleted the workspace.mat variable because it was big and never used the good variable is the testing5 one and it has a very good map
+- I should also save one of stephens meshes and try and use it for my surface making and then have this fed into the planning process
+
+8/10/2007 Monday
+- Added extra features to the GUI and removed the ability to choose where to explore since it wasn't used
