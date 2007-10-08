@@ -1,3 +1,23 @@
+/***************************************************************************
+ *   Copyright (C) 2006 - 2007 by                                          *
+ *      Tarek Taha, CAS-UTS  <tataha@tarektaha.com>                        *
+ *                                                                         *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
+ ***************************************************************************/
 #include "IntentionRecognizer.h"
 
 IntentionRecognizer::IntentionRecognizer(PlayGround * playG, RobotManager *rManager):
@@ -35,7 +55,7 @@ void IntentionRecognizer::InitializePOMDP()
 {
   MatrixUtils::init_matrix_utils();
   pomdpFileName  = "/home/BlackCoder/Desktop/paperexperiment.pomdp";
-  policyFileName = "/home/BlackCoder/Desktop/out.policy";
+  policyFileName = "/home/BlackCoder/Desktop/mod7.policy";
   config = new ZMDPConfig();
   config->readFromFile("modules/PomdpCore/zmdp.conf");
   config->setString("policyOutputFile", "none");
@@ -162,6 +182,14 @@ void IntentionRecognizer::resetBelief()
   	{
   		destBelief[i] = initialBeliefD((numStates*i) + spatialState) = 1/float(numDestinations);
   	}
+//  	initialBeliefD((numStates*0) + spatialState) = 0;
+//  	initialBeliefD((numStates*1) + spatialState) = 0;
+//  	initialBeliefD((numStates*2) + spatialState) = 0;
+//  	initialBeliefD((numStates*3) + spatialState) = 0;
+//  	initialBeliefD((numStates*4) + spatialState) = 0;
+//  	initialBeliefD((numStates*5) + spatialState) = 0;
+//  	initialBeliefD((numStates*6) + spatialState) = 1;
+  	
   	copy(b, initialBeliefD);
   	em->setBelief(b);
 }
