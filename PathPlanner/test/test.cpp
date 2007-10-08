@@ -19,8 +19,6 @@
  ***************************************************************************/
 
 #include "pathplanner.h"
-#include "robot.h"
-#include "map.h"
 
 using namespace CasPlanner;
 int main( int argc, char ** argv ) 
