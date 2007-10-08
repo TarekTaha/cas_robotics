@@ -188,7 +188,7 @@ if current_test_case==1
 %% TEST 2 - Non points -using algorithm
 elseif current_test_case>1
     %now go through and get NBV and then use them to explore
-    for stepcount=stepcount+1:10;
+    for stepcount=stepcount+1:6;
         %which exploration method to use
         if current_test_case==2;NBV_beta();
         elseif current_test_case==3; NBV();
@@ -494,7 +494,11 @@ uiwait(msgbox('this does nothing yet'));
 
 % --- Executes on button press in moveforward_platform_pushbutton.
 function moveforward_platform_pushbutton_Callback(hObject, eventdata, handles)
-uiwait(msgbox('this does nothing yet'));
+platform_h = actxserver('EyeInHand.PlatformCommand');
+h.Type = 'MoveForward';
+h.Start;
+h.WaitUntilCompleted(120);
+h.release
 
 
 %% Plotting and display simple functions
@@ -510,6 +514,7 @@ v = hMesh.VertexData;
 trisurf(f, v(:,1), v(:,2), v(:,3), 'FaceColor', 'None');
 hold on;
 plotdenso(r,Q);
+axis equal
 % set(gcf,'CurrentAxes',handles.axes3);
 
 % --- Executes on button press in plot_planes_checkbox.

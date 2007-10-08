@@ -45,6 +45,7 @@ while  find(((current_shape(:,1)-center(1)).^2)/params(1)^2+...
     %this one increases each param by 1%
     if alternate==0
         params=params*1.01;
+
         alternate=1;
     else  
         %this one works out the average of a,b,c and then adds 1% of this average to each one
@@ -53,6 +54,9 @@ while  find(((current_shape(:,1)-center(1)).^2)/params(1)^2+...
     end
 end
 
+params=params*1.10;
+params=params+sum(params)/3*0.10;
+        
 %% Matlab's Ellipse Shell Creation Function
 [x,y,z]=ellipsoid(center(1),center(2),center(3),params(1),params(2),params(3),10);
 

@@ -1126,3 +1126,12 @@ workspace.impLev(1).z=[workspace.inc_size,1.5];
 
 8/10/2007 Monday
 - Added extra features to the GUI and removed the ability to choose where to explore since it wasn't used
+- Temp change to make elipses bigger, see if we can still get a path
+params=params*1.10;
+params=params+sum(params)/3*0.10;
+- Seems to be able to get a bit of a safer path
+- CHnaged exGUI so that it would't try and go through as many best views now it has 6 steps which means there should be 2 NBV calculations
+    for stepcount=stepcount+1:6;
+- Added to check path so that it wont check the first 2 pieces
+        if piece>1
+before it does the check_FF
