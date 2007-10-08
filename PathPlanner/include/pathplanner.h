@@ -20,6 +20,8 @@
 #ifndef PATHPLANNER_H_
 #define PATHPLANNER_H_
 
+#include "robot.h"
+#include "map.h"
 #include "astar.h"
 #include "timer.h"
 #include <fstream>
