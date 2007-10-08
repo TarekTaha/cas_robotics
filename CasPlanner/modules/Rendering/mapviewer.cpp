@@ -1,3 +1,23 @@
+/***************************************************************************
+ *   Copyright (C) 2006 - 2007 by                                          *
+ *      Tarek Taha, CAS-UTS  <tataha@tarektaha.com>                        *
+ *                                                                         *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
+ ***************************************************************************/
 #include "mapviewer.h"
 
 MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
@@ -122,6 +142,7 @@ void MapViewer::renderPaths()
 			Node * path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;
 	    	glColor4f(RGB[3][0],RGB[3][1],RGB[3][2],1);
 	    	glLineWidth(2);
+	    	glColor4f(0,0,1,1);
 		    glBegin(GL_LINE_STRIP);
 			while(path && path->next)
 			{
@@ -218,6 +239,7 @@ void MapViewer::renderSearchTree()
 		while(temp)
 		{
 			glColor3f(1,0,0);
+			glLineWidth(2);
 			for(int j=0;j<temp->children.size();j++)
 			{
 				//qDebug("J is:%d",j); fflush(stdout);
@@ -235,6 +257,7 @@ void MapViewer::renderSearchTree()
 			}
 		    temp = temp->next;
 		}
+		glLineWidth(2);
 	    glPopMatrix();
 	}
 }
@@ -821,8 +844,8 @@ void MapViewer::paintGL()
 	    renderSpatialStates();
 	    renderObservation();
 	    renderAction();
-//	  	renderSearchTree();
-//		renderExpandedTree();	
+		renderExpandedTree();
+//		renderSearchTree();
 		if(!mainMapBuilt)
 		{
 			loadTexture();
