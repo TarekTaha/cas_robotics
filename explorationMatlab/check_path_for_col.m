@@ -58,10 +58,12 @@ for i=1:size(all_steps,1)
     t = r.base;
     for piece=1:n        
         t = t * L{piece}(all_steps(i,piece));
-        tempresult=check_FF(t,densoobj(piece+1).ellipse,points);            
-        if tempresult~=1
-            result=0;
-            return %from function since there is a collision
+        if piece>1
+            tempresult=check_FF(t,densoobj(piece+1).ellipse,points);            
+            if tempresult~=1
+                result=0;
+                return %from function since there is a collision
+            end
         end
     end
 end
