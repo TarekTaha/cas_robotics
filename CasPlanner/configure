@@ -1,0 +1,66 @@
+#!/bin/bash
+
+function header 
+{
+    echo -e "\033[0;34m==>\033[0;0;1m $1 \033[0;0m"
+}
+function middle 
+{
+    echo -e "\033[0;33m==>\033[0;0;1m $1 \033[0;0m"
+}
+
+
+header "CasPlanner-1.0 Configure"
+middle "Checking for qmake..."
+
+qmake -v &> /dev/null
+if [[ $? == 127 ]]
+then
+    qmake-qt4 -v &> /dev/null
+    if [[ $? == 0 ]]
+    then
+        QMAKE=qmake-qt4
+    fi
+else
+    QMAKE=qmake
+fi
+
+if [[ $? == 127 ]]
+then
+          ##########################################################################80-->
+	echo "Sorry, qmake was not found, is Qt4 installed? You will want to install your "
+	echo "distribution's packages of qt4 _and_ qt4-devel."
+	exit
+fi
+
+middle "Checking the installed version of Qt is correct..."
+
+# valid qmake output
+# QMake version 2.01a
+# Using Qt version 4.2.2 in /opt/qt/4.2.2/lib
+
+$QMAKE -v | grep '^Using Qt version 4.[2-9]' --color=never &> /dev/null
+
+if [[ $? > 0 ]]
+then
+	      ##########################################################################80-->
+	echo "Your version of Qt seems to be too old, we require Qt 4.2 or above."
+	echo
+	echo "It is possible you have Qt3 and Qt4 both installed. Locate your qt4 installation"
+	echo "and ensure it is placed first in the path, eg:"
+	echo
+	echo "	PATH=/opt/qt4/bin:\$PATH ./configure"
+	echo
+	echo "However this configure script is very basic, perhaps we got it wrong.."
+	echo "Try typing the following, perhaps it will build for you :)"
+	echo
+	echo "	qmake -config release && make"
+	exit
+fi
+
+middle "Generating Makefiles..."
+
+$QMAKE -config release -after "CONFIG-=debug"
+
+echo "Your configuration is finished now.Type 'make all'"
+echo "Check the README file for further help and instructions."
