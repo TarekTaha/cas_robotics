@@ -442,7 +442,23 @@ end
 %% Robot Functionality
 % --- Executes on button press in blasting_pushbutton.
 function blasting_pushbutton_Callback(hObject, eventdata, handles)
-uiwait(msgbox('this does nothing yet'));
+global workspace
+try 
+view(2)
+rect_vars=getrect;
+min_max=[rect_vars(1),rect_vars(2),1.4;
+    rect_vars(1)+rect_vars(3),rect_vars(2)+rect_vars(4),1.6];
+
+hMesh = robmap_h.Mesh(aabb);
+verts = hMesh.VertexData;
+
+surface_making_simple(verts,workspace.mew)
+catch
+    error('failed to get verts or create targets')
+end
+
+%this will be andrew's function
+%do_blasting()
 
 % --- Executes on button press in scan_through_pushbutton.
 function scan_through_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
