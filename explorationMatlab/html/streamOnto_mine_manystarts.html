@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>streamOnto_mine_manystarts</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-05">
+      <meta name="date" content="2007-10-10">
       <meta name="m-file" content="streamOnto_mine_manystarts"><style>
 
 body {
@@ -73,12 +73,10 @@ p.footer {
       <div class="content">
          <h1>streamOnto_mine_manystarts</h1>
          <introduction>
-            <p><b>Description:</b> based on streamOnto - given a start q it will try and get to the given point, it may use various start positions
-            </p><pre> [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(ROBOT, pt)
- [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(ROBOT, pt, q)
- [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(ROBOT, pt, q, targetNormal, q, quickver, ZpointAT)</pre><p>Returns the joint coordinates corresponding to the end-effector at pt Note that the inverse kinematic solution is generally
-               not unique, and depends on the initial guess Q (which defaults to 0). Also returns whether solution is valis and which method
-               used and the dist_val to the required tr
+            <p><b>Description:</b> based on streamOnto - given a start q it will try and get to the given point, it may use various start positions Returns
+               the joint coordinates corresponding to the end-effector at pt Note that the inverse kinematic solution is generally not unique,
+               and depends on the initial guess Q (which defaults to 0). Also returns whether solution is valis and which method used and
+               the dist_val to the required tr
             </p>
          </introduction>
          <h2>Contents</h2>
@@ -290,11 +288,6 @@ p.footer {
 %
 % *Description:* based on streamOnto - given a start q it will try and get to the given
 % point, it may use various start positions 
-%
-%   [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(ROBOT, pt)
-%   [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(ROBOT, pt, q)
-%   [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(ROBOT, pt, q, targetNormal, q, quickver, ZpointAT)
-%
 % Returns the joint coordinates corresponding to the end-effector at pt
 % Note that the inverse kinematic solution is generally not unique, and 
 % depends on the initial guess Q (which defaults to 0).

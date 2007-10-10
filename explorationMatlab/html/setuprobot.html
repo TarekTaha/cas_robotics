@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>setuprobot</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-05">
+      <meta name="date" content="2007-10-10">
       <meta name="m-file" content="setuprobot"><style>
 
 body {
@@ -95,7 +95,7 @@ p.footer {
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> Q r densoobj robot_maxreach;
 
 <span class="comment">%New robot - start pose</span>
-Q=[0,-75,165,0,30,0]*pi/180;
+Q=[0,-75,160,0,30,0]*pi/180;
 <span class="comment">% Default poses - add additional ones as needed</span>
 default_Q=[Q;[0,-88*pi/180,140*pi/180,0,-15*pi/180,0]];
 default_Q=[default_Q;[0,-88*pi/180,98*pi/180,0,-15*pi/180,0]];
@@ -152,7 +152,7 @@ function setuprobot()
 global Q r densoobj robot_maxreach;
 
 %New robot - start pose
-Q=[0,-75,165,0,30,0]*pi/180;
+Q=[0,-75,160,0,30,0]*pi/180;
 % Default poses - add additional ones as needed
 default_Q=[Q;[0,-88*pi/180,140*pi/180,0,-15*pi/180,0]];
 default_Q=[default_Q;[0,-88*pi/180,98*pi/180,0,-15*pi/180,0]];

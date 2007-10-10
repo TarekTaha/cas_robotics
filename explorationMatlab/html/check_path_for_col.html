@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>check_path_for_col</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-05">
+      <meta name="date" content="2007-10-10">
       <meta name="m-file" content="check_path_for_col"><style>
 
 body {
@@ -123,10 +123,12 @@ result=1;
     t = r.base;
     <span class="keyword">for</span> piece=1:n
         t = t * L{piece}(all_steps(i,piece));
-        tempresult=check_FF(t,densoobj(piece+1).ellipse,points);
-        <span class="keyword">if</span> tempresult~=1
-            result=0;
-            <span class="keyword">return</span> <span class="comment">%from function since there is a collision</span>
+        <span class="keyword">if</span> piece&gt;1
+            tempresult=check_FF(t,densoobj(piece+1).ellipse,points);
+            <span class="keyword">if</span> tempresult~=1
+                result=0;
+                <span class="keyword">return</span> <span class="comment">%from function since there is a collision</span>
+            <span class="keyword">end</span>
         <span class="keyword">end</span>
     <span class="keyword">end</span>
 <span class="keyword">end</span>
@@ -195,10 +197,12 @@ for i=1:size(all_steps,1)
     t = r.base;
     for piece=1:n        
         t = t * L{piece}(all_steps(i,piece));
-        tempresult=check_FF(t,densoobj(piece+1).ellipse,points);            
-        if tempresult~=1
-            result=0;
-            return %from function since there is a collision
+        if piece>1
+            tempresult=check_FF(t,densoobj(piece+1).ellipse,points);            
+            if tempresult~=1
+                result=0;
+                return %from function since there is a collision
+            end
         end
     end
 end
