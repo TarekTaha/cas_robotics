@@ -2,11 +2,6 @@
 %
 % *Description:* based on streamOnto - given a start q it will try and get to the given
 % point, it may use various start positions 
-%
-%   [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(ROBOT, pt)
-%   [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(ROBOT, pt, q)
-%   [qt,solutionvalid,used_sol,targetdist,dist_val] = streamOnto_mine_manystarts(ROBOT, pt, q, targetNormal, q, quickver, ZpointAT)
-%
 % Returns the joint coordinates corresponding to the end-effector at pt
 % Note that the inverse kinematic solution is generally not unique, and 
 % depends on the initial guess Q (which defaults to 0).
