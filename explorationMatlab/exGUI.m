@@ -68,6 +68,21 @@ do_clear(handles);
 % this is the do_clear function sets up most stuff
 function do_clear(handles)
 
+% VR world setup
+global myworld
+try close(myworld)
+    delete(myworld)
+end
+
+vrclear('-force');
+try myworld=vrworld('robot_1test.WRL');
+    open(myworld);
+    vrfigure(myworld);   
+catch
+    display('vr setupfailed');
+end
+
+
 %sets up the surface map object and then this is used for scanning
 try global robmap_h;
 robmap_h=actxserver('EyeInHand.SurfaceMap');
