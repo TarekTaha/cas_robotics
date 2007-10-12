@@ -191,6 +191,7 @@ for i=1:length(fileTemp)
   [s,f,t]=regexp(fileTemp{i},pat); 
   last = length(t);
   % Find the destination index from the set of given destinations
+  taskStart= str2num(fileTemp{i}(t{1}(1,1):t{1}(1,2)));
   dest = str2num(fileTemp{i}(t{last}(1,1):t{last}(1,2)));
   indx = strfind(pomdpModel.destinations,sprintf('s%dd',dest));
   for j=1:length(indx)
@@ -208,7 +209,8 @@ for i=1:length(fileTemp)
           continue;
       end
       num = num + 1;
-      reward{num}.prevAction = fileTemp{i}(t{j-1}(2,1):t{j-1}(2,2));
+      reward{num}.action     = fileTemp{i}(t{j-1}(2,1):t{j-1}(2,2));
+      reward{num}.taskStart  = taskStart;
       reward{num}.obs        = fileTemp{i}(t{j}(2,1):t{j}(2,2));
       reward{num}.start      = sprintf('s%dd%d',str2num(fileTemp{i}(t{j-1}(1,1):t{j-1}(1,2))),destIndx);
       reward{num}.end        = sprintf('s%dd%d',str2num(fileTemp{i}(t{j}(1,1):t{j}(1,2))),destIndx);
@@ -229,13 +231,18 @@ for i=1:length(reward)
     rewardSum{s}.reward = 0;
     rewardSum{s}.visited = 0;    
     for j=i:length(reward)
-        if strcmp(reward{i}.start,reward{j}.start) && strcmp(reward{i}.end,reward{j}.end)
+        if strcmp(reward{i}.start,reward{j}.start) && strcmp(reward{i}.end,reward{j}.end) && ...
+                strcmp(reward{i}.obs,reward{j}.obs) && (reward{i}.taskStart == reward{j}.taskStart)
             rewardSum{s}.obs        = reward{i}.obs;
             rewardSum{s}.start      = reward{i}.start;
             rewardSum{s}.end        = reward{i}.end;        
             rewardSum{s}.reward = rewardSum{s}.reward + 10;
+            rewardSum{s}.taskStart = reward{num}.taskStart;
             reward{j}.visited = 1;
         end
+    end
+    if strcmp(rewardSum{s}.start,'s43d3')&& strcmp(reward{i}.end,'s40d3')
+        display(rewardSum{s}.reward);
     end
 end
 
@@ -248,7 +255,7 @@ for i=1:length(rewardSum)
     s = s+1;
     total{s}.reward = 0;
     for j=i:length(rewardSum)
-        if strcmp(rewardSum{i}.start,rewardSum{j}.start)
+        if strcmp(rewardSum{i}.start,rewardSum{j}.start) && (reward{i}.taskStart == reward{j}.taskStart)
             total{s}.reward = total{s}.reward + rewardSum{j}.reward;
             total{s}.start = rewardSum{j}.start;
             rewardSum{j}.visited = 1;
@@ -261,14 +268,14 @@ end
 % Print the rewards to the file
 normalizeTo = 10;
 fprintf(fid,'\n\n# R: <action> : <start-state> : <end-state> : <observation> %%f');
-fprintf(fid,'\nR: * : * : * : * -1.0');
+fprintf(fid,'\nR: * : * : * : * -100.0');
 
 for i=1:length(rewardSum)
     for j=1:length(total)
-        if strcmp(rewardSum{i}.start,total{j}.start)
+        if strcmp(rewardSum{i}.start,total{j}.start) && (reward{i}.taskStart == reward{j}.taskStart)
             result= normalizeTo*rewardSum{i}.reward/total{j}.reward;
             %fprintf(fid,'\nR: * : %-5s : %-5s : %-8s %-2.3f ',rewardSum{i}.start,rewardSum{i}.end,rewardSum{i}.obs,result);
-            fprintf(fid,'\nR: * : %-5s : %-5s : * %-2.3f ',rewardSum{i}.start,rewardSum{i}.end,result);
+            fprintf(fid,'\nR: * : %-5s : %-5s : %-5s %-2.3f ',rewardSum{i}.start,rewardSum{i}.end,rewardSum{i}.obs,result);
             break;
         end
     end
