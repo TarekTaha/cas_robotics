@@ -10,7 +10,7 @@ file = textread(filename,'%s','commentstyle','shell','delimiter','\n','whitespac
 display('HERE 0');
 
 %remove un-necessary info
-k=0;
+k=0; maxEnteris=0;
 lines = cell(length(file),1);
 tic
 for i=1:length(file)
@@ -39,6 +39,14 @@ for i=1:length(file)
       if ~isempty(rightArrow)
           lines{k}(rightArrow(1):rightArrow(1)+1)=[];
       end     
+       % remove right Arrows
+      entries = strfind(lines{k},'numEntries');
+      if ~isempty(entries)
+        x = sscanf(lines{k},'%*s %d');
+        if x> maxEnteris
+            maxEntries =x;
+        end
+      end          
        % remove commas
       commas =strfind(lines{k},',');
       l = length(commas);
@@ -49,10 +57,12 @@ for i=1:length(file)
       end      
   end
 end
-toc
+display('HERE 1');
 
 k=1;
 policy.numPlanes = sscanf(lines{k},'%*s %d');
+policy.planeActions = zeros(policy.numPlanes,1);
+policy.planeEntries = cell(policy.numPlanes,maxEntries);
 k=k+1;
 
 for i=1:policy.numPlanes
@@ -69,7 +79,7 @@ for i=1:policy.numPlanes
         display(i);
     end
 end
-
+toc
 clear lines;
 
 end
