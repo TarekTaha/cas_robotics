@@ -68,6 +68,22 @@ do_clear(handles);
 % this is the do_clear function sets up most stuff
 function do_clear(handles)
 
+%MANUAL CHECKS: To do before start work
+display('Make sure you have done the following');
+display('1) Checked the laser is on by running the checklaser.exe file (power cycle if necessary)');
+display('2) The ROBOT is powered on');
+display('3) The MOTOR power is on');
+display('4) Emergency stop is not on');
+display('5) Robot is in automatic mode on both pendant and E-stop control');
+display('6) The robocontroller program is running on pendant and recieveing no communication');
+display('7) There is no EyeinHand exe running intially in task manager');
+
+display('Note: You should use the vr world robot not toms, you should also draw up the laser to put on the end as the 7th peice');
+
+display('Pausing so you can do these things');
+pause
+
+
 % VR world setup
 global myworld
 try close(myworld)
@@ -75,11 +91,11 @@ try close(myworld)
 end
 
 vrclear('-force');
-try myworld=vrworld('robot_1test.WRL');
+try myworld=vrworld('Robot.WRL');
     open(myworld);
     vrfigure(myworld);   
 catch
-    display('vr setupfailed');
+    display('Unable to setup vr world');
 end
 
 
@@ -208,6 +224,8 @@ elseif current_test_case>1
         if current_test_case==2;NBV_beta();
         elseif current_test_case==3; NBV();
         end
+        %Prompt to let user know next scans are ready
+        uiwait(msgbox('Next scans ready to be taken, press ok when ready'))
         
         current_bestview=1;
         max_bestviews_togothrough=optimise.valid_max*1/4;
@@ -220,7 +238,7 @@ elseif current_test_case>1
             want_to_continue=true;
             while want_to_continue; 
                 try if movetonewQ(handles,bestviews(1).Q*180/pi);
-                        scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];
+                        scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];                        
                         explore(handles,useNBV,1);break;                        
                     end
                     want_to_continue=0;                        
