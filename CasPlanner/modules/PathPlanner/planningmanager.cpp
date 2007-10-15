@@ -200,7 +200,7 @@ bool PlanningManager::fileExist(const char * fname)
 void PlanningManager::generateSpace()
 {
 	QTime timer;
-	const char * filename = "SearchSpace.txt";
+	const char * filename = "logs/SearchSpace.txt";
 	if(!this->pathPlanner)
 		this->setupPlanner();
 	if(pathPlanner->search_space)
