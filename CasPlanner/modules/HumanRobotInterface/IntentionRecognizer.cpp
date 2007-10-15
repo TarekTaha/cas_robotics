@@ -53,15 +53,15 @@ IntentionRecognizer::~IntentionRecognizer()
 
 void IntentionRecognizer::InitializePOMDP()
 {
-  MatrixUtils::init_matrix_utils();
-  pomdpFileName  = "/home/BlackCoder/Desktop/paperexperiment.pomdp";
-  policyFileName = "/home/BlackCoder/Desktop/mod7.policy";
-  config = new ZMDPConfig();
-  config->readFromFile("modules/PomdpCore/zmdp.conf");
-  config->setString("policyOutputFile", "none");
-  em = new BoundPairExec();
-  printf("initializing\n");
-  em->initReadFiles(pomdpFileName,policyFileName, *config);	
+  	MatrixUtils::init_matrix_utils();
+ 	pomdpFileName  = "modules/PomdpModels/paperexperiment.pomdp";
+  	policyFileName = "modules/PomdpModels/mod11.policy";
+  	config = new ZMDPConfig();
+  	config->readFromFile("modules/PomdpCore/zmdp.conf");
+  	config->setString("policyOutputFile", "none");
+  	em = new BoundPairExec();
+  	printf("initializing\n");
+  	em->initReadFiles(pomdpFileName,policyFileName, *config);	
 }
 
 void IntentionRecognizer::navigateToWayPoint(Pose startLoc,Pose destLoc)
@@ -182,13 +182,6 @@ void IntentionRecognizer::resetBelief()
   	{
   		destBelief[i] = initialBeliefD((numStates*i) + spatialState) = 1/float(numDestinations);
   	}
-//  	initialBeliefD((numStates*0) + spatialState) = 0;
-//  	initialBeliefD((numStates*1) + spatialState) = 0;
-//  	initialBeliefD((numStates*2) + spatialState) = 0;
-//  	initialBeliefD((numStates*3) + spatialState) = 0;
-//  	initialBeliefD((numStates*4) + spatialState) = 0;
-//  	initialBeliefD((numStates*5) + spatialState) = 0;
-//  	initialBeliefD((numStates*6) + spatialState) = 1;
   	
   	copy(b, initialBeliefD);
   	em->setBelief(b);
@@ -206,8 +199,13 @@ bool IntentionRecognizer::currentStateIsDestination()
 
 void IntentionRecognizer::run()
 {
-	file=fopen("irLog.txt","wb");
-	odom=fopen("odom.txt","wb");
+	QDate date;
+	QTime time;
+	date = date.currentDate();
+	time = time.currentTime();
+	QString suffex=QString("-%1%2%3%4%5%6.txt").arg(time.second()).arg(time.minute()).arg(time.hour()).arg(date.day()).arg(date.month()).arg(date.year());
+	file=fopen(qPrintable(QString("logs/irLog%1").arg(suffex)),"wb");
+	odom=fopen(qPrintable(QString("logs/odom%1").arg(suffex)),"wb");
 	fprintf(file,"# Values: State, Observation, Belief Dest1 ...n, Action, Next State\n");	
 	fprintf(odom,"# Values: X, Y, Theta, Spatial State \n");
 	while(runRecognition)

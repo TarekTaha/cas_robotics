@@ -348,8 +348,8 @@ double Astar::hCost(Node *n)
 		reverse_penalty = delta_d;
 	
 	// 0.555 is the AXLE Length 
-//	return ( h*(1 + reverse_penalty ) + 0.555 * angle_cost + obstacle_penalty*delta_d);
-	return ( 1 + reverse_penalty )*( h + delta_d + 0.555 * angle_cost + 0.555*angle_cost*obstacle_penalty*delta_d );
+	return ( h*(1 + reverse_penalty ) + 0.555 * angle_cost + obstacle_penalty*delta_d);
+//	return ( 1 + reverse_penalty )*( h + delta_d + 0.555 * angle_cost + 0.555*angle_cost*obstacle_penalty*delta_d );
 };
 
 bool Astar :: goalReached (Node *n) 

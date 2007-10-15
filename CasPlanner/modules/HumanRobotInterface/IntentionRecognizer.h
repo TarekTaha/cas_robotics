@@ -28,6 +28,7 @@
 #include <QThread> 
 #include <QReadWriteLock>
 #include <QTime>
+#include <QDate>
 #include <iostream>
 #include <QDataStream>
 #include "robot.h"

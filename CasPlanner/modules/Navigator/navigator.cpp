@@ -490,9 +490,10 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
 	Node *temp;
 	bool retval = false;
 	Pose robotLocation = robotManager->robot->robotLocation;
-	double angleToWayPoint,prev_angle=0,angle=0, longestDist=0.2,d,maxAllowedTurn=60;
+	double angleToWayPoint,prev_angle=0,angle=robotLocation.phi, longestDist=0.2,d,maxAllowedTurn=60;
 	temp = closestPathNode(robotLocation.p,global_path);
 	temp = global_path;
+
  	while(temp)
  	{
 		prev_angle = angle;
@@ -502,7 +503,7 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
 	 		angle = prev_angle;
  		d = Dist(robotLocation.p,temp->pose.p);
  		angleToWayPoint = ATAN2(temp->pose.p,robotLocation.p);
- 		if( d > traversable_dist || d < longestDist || anglediff(angleToWayPoint,prev_angle)>DTOR(120))
+ 		if( d > traversable_dist || d < longestDist)
  		{
  			temp= temp->next;
  			continue;
@@ -510,7 +511,7 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
  		if (inLaserSpace(laserScan,robotLocation,temp->pose.p))
  		{
  			/* 
- 			 * if we are turning to much starting from this segment
+ 			 * if we are turning too much starting from this segment
  			 * then take the last acceptable goal as the new waypoint.
  			 */
  			if(fabs(anglediffs(angle,prev_angle)) > DTOR(maxAllowedTurn))

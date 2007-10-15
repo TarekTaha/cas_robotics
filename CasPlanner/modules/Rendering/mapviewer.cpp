@@ -144,7 +144,7 @@ void MapViewer::renderPaths()
 	    	glLineWidth(2);
 	    	glColor4f(0,0,1,1);
 		    glBegin(GL_LINE_STRIP);
-			while(path && path->next)
+			while(path)
 			{
 		    	glVertex2f(path->pose.p.x(),path->pose.p.y());
 				path = path->next;
@@ -342,9 +342,9 @@ void MapViewer::renderRobot()
 			glVertex2f(playGround->robotPlatforms[i]->robot->local_edge_points[m].x(),playGround->robotPlatforms[i]->robot->local_edge_points[m].y());
 		}
 		glEnd();
-        glColor4f(1,1,1,1);
+        glColor4f(0,0,1,0.5);
         QFont font40; font40.setPointSize(10);
-	    renderText(1.6,0,0, qPrintable(playGround->robotPlatforms[i]->robot->robotName),font40);
+	    renderText(1.6,0,1, qPrintable(playGround->robotPlatforms[i]->robot->robotName),font40);
 	    glBegin(GL_LINE_LOOP);
 			glColor4f(0,0,1,0.5);
 		    glVertex3f(1.3, 0.15,0);
