@@ -86,7 +86,7 @@ for J1=qlimit(1,1):(qlimit(1,2)-qlimit(1,1))/numNBVanglesteps:qlimit(1,2)
                                         bestviews(end).expectedaddinfo=nbv_volume(tr,newQ);
                                         bestviews(end).addinfo=getweighted_addinfo(bestviews(end).expectedaddinfo)/unknownweight;
                                     else % add to list of impossible scans
-                                        scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(current_view).Q];
+                                        scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;newQ];
                                     end
                                 end
                             end                            

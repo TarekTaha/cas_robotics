@@ -28,9 +28,9 @@ end
 
 %set defaults for if we want to check the FF and plot elispes
 if nargin<4
-    plot_ellipse=0; display('plot_ellipse is set to false by default');
+    plot_ellipse=0; %display('plot_ellipse is set to false by default');
     if nargin<3
-        checkFF=0; display('checkFF is set to false by default');
+        checkFF=0; %display('checkFF is set to false by default');
     end
 end
     

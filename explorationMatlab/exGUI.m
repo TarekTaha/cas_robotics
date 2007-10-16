@@ -475,23 +475,44 @@ end
 %% Robot Functionality
 % --- Executes on button press in blasting_pushbutton.
 function blasting_pushbutton_Callback(hObject, eventdata, handles)
-global workspace
-try 
+global workspace robmap_h
+figure(2)
 view(2)
-rect_vars=getrect;
-min_max=[rect_vars(1),rect_vars(2),1.4;
-    rect_vars(1)+rect_vars(3),rect_vars(2)+rect_vars(4),1.6];
 
-hMesh = robmap_h.Mesh(aabb);
-verts = hMesh.VertexData;
+try 
+    if exist('verts.mat','file')==2 
+        load verts.mat;
+        surface_making_simple(verts,0.04)
+        global plane
+        
+        pathPlannerV4(handles);
+    else
+        rect_vars=getrect;
+        min_max=[rect_vars(1),rect_vars(2),1.4;
+        rect_vars(1)+rect_vars(3),rect_vars(2)+rect_vars(4),1.6];
 
-surface_making_simple(verts,workspace.mew)
+        hMesh = robmap_h.Mesh(min_max);
+        verts = hMesh.VertexData;
+        save verts
+
+        surface_making_simple(verts,0.04)
+        global plane
+
+        if size(plane,2)>30
+            plane=plane(1:30);
+        end
+        save plane
+    end
 catch
-    error('failed to get verts or create targets')
+    error('failed to get verts or create targets');
 end
 
 %this will be andrew's function
-%do_blasting()
+cd RTA
+setupoptimisation
+keyboard
+PathplannerV4(handles)
+
 
 % --- Executes on button press in scan_through_pushbutton.
 function scan_through_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
@@ -560,10 +581,13 @@ aabb = [-2, -1, 0; 2, 0.6, 2];
 hMesh = robmap_h.Mesh(aabb);
 f = hMesh.FaceData;
 v = hMesh.VertexData;
+% save('datafile.mat','v');
+
 trisurf(f, v(:,1), v(:,2), v(:,3), 'FaceColor', 'None');
 hold on;
 plotdenso(r,Q);
 axis equal
+rotate3d;
 % set(gcf,'CurrentAxes',handles.axes3);
 
 % --- Executes on button press in plot_planes_checkbox.
