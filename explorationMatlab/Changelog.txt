@@ -1135,3 +1135,6 @@ params=params+sum(params)/3*0.10;
 - Added to check path so that it wont check the first 2 pieces
         if piece>1
 before it does the check_FF
+
+15/10/2007 Monday
+- Fixed an error with the nbv_beta so it now saves the invalid ones properly
