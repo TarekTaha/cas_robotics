@@ -125,6 +125,7 @@ end
 %need some way to save this to a variable that doesn't get deleted
 scan.PointData=PointData;
 scan.IntensityData=IntensityData;
+scan.RangeData=RangeData;
 
 release_scanner(robscan_h);
 

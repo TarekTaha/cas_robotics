@@ -1,16 +1,16 @@
-function Block_Classifier(PointData, IntensityData, RangeData) % this one uses edges from IntensityData Image
+function [ClassifiedDatawEdges] = Block_Classifier(PointData, IntensityData, RangeData) % this one uses edges from IntensityData Image
 
 %% Flags
 do_smoothing = 1; %Set to 1 to do median filtering to smooth the classification result
-draw_image = 1; %Set to 1 to draw an 2D image of the PC
-draw_PC = 0; %Set to 1 to draw the PC
+draw_image = 0; %Set to 1 to draw an 2D image of the PC
+draw_PC = 1; %Set to 1 to draw the PC
 display_ID_edgeim = 0; %displays an image of the intensity data and an image of teh edges found in the intensity image
 draw_image_with_edge = 1; %displays the images with the found edges marked on them
 dont_run_classifier = 0; %doesn't classify data -used when ClassifiedData already exists
 replace_hoks_false_intensity_data = 1; %This  replaces the hokuyo's false data with the intensity reading from the ray next to the non-returned  ray but on the same scan
-find_surfaces_in_PC = 1; % This finds surface in the PC - used for AOI scaling in the classifier
+find_surfaces_in_PC = 0; % This finds surface in the PC - used for AOI scaling in the classifier
 
-classiy_scan_range_start = 1;
+classiy_scan_range_start = 100;
 classiy_scan_range_end = size(PointData,1);
 
 colordef black;
@@ -90,6 +90,10 @@ if dont_run_classifier == 0
             else
                 found_lines = Classifier(PointData, IntensityDatatoUse, RangeData, i, Iedges, PointsPlaneData, surface_plane_coefs); % this one uses edges from IntensityData Image
             end
+        catch
+
+            a=lasterror;
+            %keyboard
         end
         % This creats the classfier output matrix. The matrix is in the same
         % format as PointData, IntensityData, etc

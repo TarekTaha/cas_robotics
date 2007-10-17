@@ -2,15 +2,11 @@
 %covers all the tiles. Designed for RTA demonstation, does not handle 'do
 %not go' space. Path decision based on robot joint cost and distances
 %between targets.
-function spraypoints = pathPlannerV4(handles)
+function spraypoints = pathPlanner(plane)
 %Variable declaration
-    global r mew Q;
+    global r mew;
+%     r = rob_object;
     mew = 0.04; %Tile diameter
-    %     r = rob_object;
-    load verts;
-    surface_making_simple(verts,mew)
-    global plane
-
     spray = zeros(1,length(plane)); %Array to mark which tile has been sprayed and in which order
     tile_distance = zeros(2, length(plane)); %array to store distance and corresponding tempplane array slot number
     totalDistance = 0; %Variable that accumunlates the distance travelled
@@ -26,26 +22,15 @@ function spraypoints = pathPlannerV4(handles)
 %unreachable. Discard unreachable points
     for i=1:length(plane)    
         if i > 1
-            [plane(i).Q,valid,tempdist] = blasting_posesel(r, plane(i).home_point, plane(i).equ, plane(i-1).Q, true); 
+            plane(i).Q = sandblasting_pose_sel(r, plane(i).home_point, plane(i).equ(1:3), plane(i-1).Q, true); 
         else
-            [plane(i).Q,valid,tempdist]= blasting_posesel(r, plane(i).home_point, plane(i).equ, Q, true); 
+            plane(i).Q = sandblasting_pose_sel(r, plane(i).home_point, plane(i).equ(1:3), [0,-1.5359,1.7104,0,-1.8850,0], true);   
         end
         tile = i
-        if PoseCheck(plane(i),1) == 0
+        d=PoseCheck(plane(i),1);
+        if d == 0
             spray(i) = 1
         end
-        
-        
-        
-        
-%         try movetonewQ(handles,plane(i).Q); 
-%         catch
-%             keyboard
-%         end
-        
-        
-        
-        
     end
 %keyboard    
 %Find the leftmost tile to define as the arbitrary startpoint
@@ -203,7 +188,7 @@ function tempspraypoints = calculateJointCost(current, targetnext, plane) %input
             %r(t) = a + t(b-a)       
             tempspraypoints(i+1).home_point = plane(current).home_point + (i/intervals)*(plane(targetnext(2,1)).home_point - plane(current).home_point);       
             tempspraypoints(i+1).equ = plane(targetnext(2,1)).equ; %All intermediate points are on the same plane as targetnext point       
-            tempspraypoints(i+1).Q = blasting_posesel(r, tempspraypoints(i+1).home_point, tempspraypoints(i+1).equ,tempspraypoints(i).Q, true);
+            tempspraypoints(i+1).Q = streamOnto_mine_manystarts(r, tempspraypoints(i+1).home_point, tempspraypoints(i+1).equ(1:3),tempspraypoints(i).Q, true);
             if i == intervals
                  tempspraypoints(i+2).home_point = plane(targetnext(2,1)).home_point; %Place targetnext at the end of the interval just in case
                  tempspraypoints(i+2).equ = plane(targetnext(2,1)).equ;

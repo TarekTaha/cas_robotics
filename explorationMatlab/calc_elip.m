@@ -20,7 +20,7 @@
 %
 % _center_ = center of ellipse
 
-function [x,y,z,params,center]=calc_elip(piece,current_shape)
+function [x,y,z,params,center]=calc_elip(piece,current_shape,safetyfactor)
 
 %% Variables
 %
@@ -28,6 +28,11 @@ function [x,y,z,params,center]=calc_elip(piece,current_shape)
 %center of elipsoid
 center=(max(current_shape)+min(current_shape))/2;
 
+%added safety factor if nothing passed
+if nargin<3    
+    safetyfactor=0.1;
+end
+    
 %%
 % $$params_{start}= \frac{\max (point) - \min (point)}{2}$$
 %the parameters a,b,c of elispoid
@@ -37,7 +42,7 @@ params=(max(current_shape)-min(current_shape))/2;
 % $$ \frac{(x-center_x)^2}{a^2}+\frac{(y-center_y)^2}{b^2}+\frac{(z-center_z)^2}{c^2}-1=0$$
 
 %we want to grow a, b,c
-%alternate between growing methods
+%alternane between growing methods
 alternate=0; %intial_params=params;
 while  find(((current_shape(:,1)-center(1)).^2)/params(1)^2+...
             ((current_shape(:,2)-center(2)).^2)/params(2)^2+...
@@ -55,7 +60,7 @@ while  find(((current_shape(:,1)-center(1)).^2)/params(1)^2+...
 end
 
 params=params*1.10;
-params=params+sum(params)/3*0.10;
+params=params+sum(params)/3*safetyfactor;
         
 %% Matlab's Ellipse Shell Creation Function
 [x,y,z]=ellipsoid(center(1),center(2),center(3),params(1),params(2),params(3),10);
