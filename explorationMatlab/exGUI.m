@@ -357,18 +357,15 @@ threeDMedianFilt();
 % --- Executes on button press in classify_scan_pushbutton.
 function classify_scan_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 global scan 
-
-%this is a definition for the number used for unknown material
-UNKNOWNVAL=4;
 %case 1 = 'Grey Metal '; case 2 = 'Shiny Metal'; case 3 = 'Cloth/Wood'; OR RED OR WHITE --- JUST CLOTH or WOOD!!! case 4 = 'Do not know';
 
-%if NOT USING real robot
+%if NOT USING real robot load data
 if ~get(handles.useRealRobot_checkbox,'Value')
     display('Inputing data for classification from file');
-    %load matlab2-from0through-60.mat
-    load matlab3-from-60through60.mat
+    load ScanforClassifier-0to-60.mat
     scan.IntensityData=IntensityData;
     scan.PointData=PointData;
+    scan.RangeData=RangeData;
 end
 
 %check that PointData exists and is valid
@@ -387,30 +384,35 @@ if isfield(scan,'IntensityData')
 else error('Cant classify since no IntensityData has been saved to the scan structure - Take a scan with real robot');    
 end
 
+%check that PointData exists and is valid
+if isfield(scan,'RangeData')
+    if size(scan.RangeData,2)==0
+      error('Cant classify since there is no RangeData available');
+    end
+else error('Cant classify since no RangeData has been saved to the scan structure - Take a scan with real robot');    
+end
+
 %do classification with data
 display('Classifying the LATEST set of data that has been scanned');
 scan.ClassificationData=[];
-for current_scan=1:size(scan.PointData,1)
-    %call Nathan's classifier
-    tempval= Classifier(scan.PointData, scan.IntensityData, current_scan);
-    %find the valid readings from returned data
-    valid=find(tempval.line_start_end_points_smoothed(:,1)>0 & tempval.line_start_end_points_smoothed(:,2)>0);
-    %sort out the readings for ease of use (in ascending order)
-    sortedranges_withClass=sort([tempval.line_start_end_points_smoothed(valid,:),tempval.classifier_output(valid)]);
-    %set all points intially to be unknown
-    tempClassData=[squeeze(scan.PointData(current_scan,:,:)),UNKNOWNVAL*ones(size(scan.PointData,2),1)];
-    %go through each one of the ranges that have been classfied
-    for current_group=1:size(sortedranges_withClass,1)
-        %if not UNKNOWNVAL then change to be correct classificaction
-        if sortedranges_withClass(current_group,3)~=UNKNOWNVAL
-            tempClassData(sortedranges_withClass(current_group,1):sortedranges_withClass(current_group,2),4)=sortedranges_withClass(current_group,3);
-        end
-    end
+try
     
-    %add the classified points to the classifcationdata var
-    scan.ClassificationData=[scan.ClassificationData;tempClassData];    
+%     scan.ClassificationData=Block_Classifier(scan.PointData, scan.IntensityData,scan.RangeData);
+    scan.ClassificationData=Block_Classifier(PointData, IntensityData,RangeData);
+% [found_lines] = Classifier(scan.PointData(1,:,:), scan.IntensityData(1,:,:), scan.RangeData(1,:,:), Scan_to_Class);
+    
+    
+%     hold on
+%     figure(2)
+%     plot3(data(:,1),data(:,2),data(:,3),'r.')
+    display('....Classification completed successfully');
+    
+catch
+    display('....Problems in Classification');
+    keyboard
 end
-display('....Classification completed successfully');
+
+
 
 
 % --- Executes on button press in plot_classified_pushbutton.
@@ -475,7 +477,7 @@ end
 %% Robot Functionality
 % --- Executes on button press in blasting_pushbutton.
 function blasting_pushbutton_Callback(hObject, eventdata, handles)
-global workspace robmap_h
+global robmap_h
 figure(2)
 view(2)
 
@@ -511,7 +513,7 @@ end
 cd RTA
 setupoptimisation
 keyboard
-PathplannerV4(handles)
+PathplannerV5(handles)
 
 
 % --- Executes on button press in scan_through_pushbutton.
