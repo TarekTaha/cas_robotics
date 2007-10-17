@@ -20,7 +20,7 @@ function use_real_robot_SCAN(deg2scan)
 display('Clearing all global scan variables before starting a new scan');
 clear global PoseData RangeData IntensityData PointData;
 
-global scan Q PointData IntensityData robot_maxreach robmap_h;
+global scan Q PointData IntensityData RangeData robot_maxreach robmap_h;
 
 if size(Q,2)~=6
     error('Q - Joints have not been defined properly, should be a global');

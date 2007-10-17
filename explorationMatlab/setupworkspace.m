@@ -103,7 +103,7 @@ points=[];
 % points=points(find(points(:,2)<1 & points(:,2)>-1),:);
 
 % Add a floor layer
-uiwait(msgbox('Adding a floor layer only'));
+% uiwait(msgbox('Adding a floor layer only'));
 tempx=[];tempy=[]; 
 tempInc=workspace.inc_size;
 for i=-.65:tempInc:.75

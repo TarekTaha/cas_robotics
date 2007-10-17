@@ -50,16 +50,24 @@ n = r.n;
 L = r.link;
 t = r.base;
 
+
 %% For each piece (base,1->6) plot patch, transform (rot, place) robot pose
 for piece=1:7
     verts = (t(1:3,1:3)*densoobj(piece).M')';    
     verts = [verts(:,1)+t(1,4) verts(:,2)+t(2,4) verts(:,3)+t(3,4)];
+% if piece==2
+%     verts(:,3)= verts(:,3)+0.015;
+% end
     
     %plot the pieces
     if piece==1;     densoobj(piece).patches=patch('Vertices',verts,'Faces',densoobj(piece).F,'FaceColor',[0, 0, 0.7],'EdgeColor',[0 0 0.8]);
+        set(densoobj(piece).patches,'FaceColor',[0.4,0.4,1],'EdgeColor','None');
     elseif piece==7; densoobj(piece).patches=patch('Vertices',verts,'Faces',densoobj(piece).F,'FaceColor',[0.7, 0, 0],'EdgeColor',[0.7, 0, 0]);
+        set(densoobj(piece).patches,'FaceColor',[0.7, 0, 0],'EdgeColor','None');
     else             densoobj(piece).patches=patch('Vertices',verts,'Faces',densoobj(piece).F,'FaceColor',[0.8, 0.8, 0.8],'EdgeColor',[0.4 0.4 0.4]);
+        set(densoobj(piece).patches,'FaceColor',[1, 1, 0.9],'EdgeColor','None');
     end        
+    
     
     %if we want to see an ellipse
     if checkFF

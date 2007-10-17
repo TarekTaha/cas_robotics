@@ -85,22 +85,23 @@ pause
 
 
 % VR world setup
-global myworld
-try close(myworld)
-    delete(myworld)
-end
-
-vrclear('-force');
-try myworld=vrworld('Robot.WRL');
-    open(myworld);
-    vrfigure(myworld);   
-catch
-    display('Unable to setup vr world');
-end
+% global myworld
+% try close(myworld)
+%     delete(myworld)
+% end
+% 
+% vrclear('-force');
+% try myworld=vrworld('Robot.WRL');
+%     open(myworld);
+%     vrfigure(myworld);   
+% catch
+%     display('Unable to setup vr world');
+% end
 
 
 %sets up the surface map object and then this is used for scanning
 try global robmap_h;
+    robmap_h.release;pause(1);
 robmap_h=actxserver('EyeInHand.SurfaceMap');
 robmap_h.registerevent(@myhandler);
 catch
@@ -110,6 +111,10 @@ end
 %clear the main axis
 set(gcf,'CurrentAxes',handles.axes3);
 cla('reset')
+%setlights up
+camlight
+lighting gouraud
+
 set(handles.total_info_text,'String','0');set(handles.total_text,'String','0');
 set(handles.best_NBV_listbox,'visible','off');
 set(handles.descripbestview_text,'visible','off');
@@ -145,8 +150,20 @@ set(handles.dialog_text,'String','Setup Complete: Lets Explore');
 
 
 %% Exploration Functionality
+% --- Executes on button press in stopflag_checkbox.
+function stopflag_checkbox_Callback(hObject, eventdata, handles)
+set(handles.stopflag_checkbox,'Visible','off')
+% hObject    handle to stopflag_checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of stopflag_checkbox
+
+
 % --- Executes on button press in go_pushbutton.
 function go_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
+set(handles.stopflag_checkbox,'Value',0)
+set(handles.stopflag_checkbox,'Visible','on')
 
 %%%CHOOSE THE CURRENT TEST CASE
 current_test_case=2;
@@ -167,21 +184,31 @@ set(gcf,'CurrentAxes',handles.axes3)
 %% intial safe pose default scans
 %since we wish to choose our own default start points
 for stepcount=2:size(robot_maxreach.default_Q,1)+1
-    want_to_continue=true;
+%     want_to_continue=true;
+    want_to_continue=~get(handles.stopflag_checkbox,'Value');
     while want_to_continue && scan.tries<size(robot_maxreach.default_Q,1)
-        try explore(handles,useNBV); break; 
+        try explore(handles,useNBV); 
+            want_to_continue=~get(handles.stopflag_checkbox,'Value');
+            if want_to_continue==0; error('User chose to exit');end
+            break;             
         catch; display(lasterr); 
             want_to_continue=input('Type (1) to continue, (2) for keyboard command, (0) to exit\n');            
             if want_to_continue==2; keyboard; end
             if want_to_continue==0; error('User chose to exit');end
-            if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end   
+            if get(handles.useRealRobot_checkbox,'Value')==1;  
+                use_real_robot_GETJs();
+                set(handles.stopflag_checkbox,'Value',0);
+                set(handles.stopflag_checkbox,'Visible','on');
+            end   
         end; 
     end
     state_data=collectdata(state_data); 
 end
-    
+
+want_to_continue=~get(handles.stopflag_checkbox,'Value');
+
 %% TEST 1 - random points
-if current_test_case==1
+if current_test_case==1 && want_to_continue
     global r bestviews
     qlimits=r.qlim;
     for stepcount=1:20
@@ -217,66 +244,68 @@ if current_test_case==1
     end
 
 %% TEST 2 - Non points -using algorithm
-elseif current_test_case>1
+elseif current_test_case>1 && want_to_continue
     %now go through and get NBV and then use them to explore
     for stepcount=stepcount+1:6;
-        %which exploration method to use
-        if current_test_case==2;NBV_beta();
-        elseif current_test_case==3; NBV();
-        end
-        %Prompt to let user know next scans are ready
-        uiwait(msgbox('Next scans ready to be taken, press ok when ready'))
-        
-        current_bestview=1;
-        max_bestviews_togothrough=optimise.valid_max*1/4;
-        global bestviews;        
-        while current_bestview<=max_bestviews_togothrough && size(bestviews,2)>=1
-            %size(bestviews,2)>optimise.valid_max*3/4
-            current_bestview=current_bestview+1;
-            
-            useNBV=true;
-            want_to_continue=true;
-            while want_to_continue; 
-                try if movetonewQ(handles,bestviews(1).Q*180/pi);
-                        scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];                        
-                        explore(handles,useNBV,1);break;                        
-                    end
-                    want_to_continue=0;                        
-                catch; display(lasterr);
-                    want_to_continue=input(' Type (1) to continue, (2) for keyboard command, (0) to exit\n');            
-                    if want_to_continue==2; keyboard; end
-                    if want_to_continue==0; error('User chose to exit');end
-                    if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end   
-                end;
-            end                
+        while ~get(handles.stopflag_checkbox,'Value')
+            %which exploration method to use
+            if current_test_case==2;NBV_beta();
+            elseif current_test_case==3; NBV();
+            end
+            %Prompt to let user know next scans are ready
+            uiwait(msgbox('Next scans ready to be taken, press ok when ready'))
 
-if show_new_info_details            
-%Plotting and dispalying what we expected compared to what we got
-display(strcat('The size of the expected infor was:',num2str(size(bestviews(1).expectedaddinfo)),', While the actual size was:',num2str(size(workspace.newestknownledge)),...
-    ', The set difference was:',num2str(size(setdiff(bestviews(1).expectedaddinfo,workspace.newestknownledge,'rows'))),...
-    ', The weighted addinfo is:',num2str(bestviews(1).addinfo),'. And the overall weight was:',num2str(bestviews(1).overall)));
+            current_bestview=1;
+            max_bestviews_togothrough=optimise.valid_max*1/4;
+            global bestviews;        
+            while current_bestview<=max_bestviews_togothrough && size(bestviews,2)>=1 && ~get(handles.stopflag_checkbox,'Value')
+                %size(bestviews,2)>optimise.valid_max*3/4
+                current_bestview=current_bestview+1;
 
-    temp=plot3(bestviews(1).expectedaddinfo(:,1),bestviews(1).expectedaddinfo(:,2),bestviews(1).expectedaddinfo(:,3),'r.');
-    temp2=plot3(workspace.newestknownledge(:,1),workspace.newestknownledge(:,2),workspace.newestknownledge(:,3),'g.');
-    temp3=setdiff(bestviews(1).expectedaddinfo,workspace.newestknownledge,'rows');
-    temp4=plot3(temp3(:,1),temp3(:,2),temp3(:,3),'b.');
-    pause(2);
-    delete(temp); delete(temp4);
-    pause(2);delete(temp2); 
-end
+                useNBV=true;
+    %             want_to_continue=true;
+                want_to_continue=~get(handles.stopflag_checkbox,'Value');            
+                while want_to_continue; 
+                    try if movetonewQ(handles,bestviews(1).Q*180/pi);
+                            scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];                        
+                            explore(handles,useNBV,1);break;                        
+                        end
+                        want_to_continue=0;                        
+                    catch; display(lasterr);
+                        want_to_continue=input(' Type (1) to continue, (2) for keyboard command, (0) to exit\n');            
+                        if want_to_continue==2; keyboard; end
+                        if want_to_continue==0; error('User chose to exit');end
+                        if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end   
+                    end;
+                end                
 
-            if size(bestviews,2)>1  
-                %Resize bestviews so as to get rid of the first element
-                clear temp_bestviews;
-                for cur_view=2:size(bestviews,2); temp_bestviews(cur_view-1)=bestviews(cur_view);end
-                    bestviews=temp_bestviews;
+                if show_new_info_details            
+                %Plotting and dispalying what we expected compared to what we got
+                display(strcat('The size of the expected infor was:',num2str(size(bestviews(1).expectedaddinfo)),', While the actual size was:',num2str(size(workspace.newestknownledge)),...
+                    ', The set difference was:',num2str(size(setdiff(bestviews(1).expectedaddinfo,workspace.newestknownledge,'rows'))),...
+                    ', The weighted addinfo is:',num2str(bestviews(1).addinfo),'. And the overall weight was:',num2str(bestviews(1).overall)));
+                    temp=plot3(bestviews(1).expectedaddinfo(:,1),bestviews(1).expectedaddinfo(:,2),bestviews(1).expectedaddinfo(:,3),'r.');
+                    temp2=plot3(workspace.newestknownledge(:,1),workspace.newestknownledge(:,2),workspace.newestknownledge(:,3),'g.');
+                    temp3=setdiff(bestviews(1).expectedaddinfo,workspace.newestknownledge,'rows');
+                    temp4=plot3(temp3(:,1),temp3(:,2),temp3(:,3),'b.');
+                    pause(2);
+                    delete(temp); delete(temp4);
+                    pause(2);delete(temp2); 
+                end
 
-                    state_data=collectdata(state_data); 
+                if size(bestviews,2)>1  
+                    %Resize bestviews so as to get rid of the first element
+                    clear temp_bestviews;
+                    for cur_view=2:size(bestviews,2); temp_bestviews(cur_view-1)=bestviews(cur_view);end
+                        bestviews=temp_bestviews;
 
-                    redo_nbv_vol=true;
-                    order_bestviews(redo_nbv_vol);
-            else
-                bestviews=[];
+                        state_data=collectdata(state_data); 
+
+                        redo_nbv_vol=true;
+                        order_bestviews(redo_nbv_vol);
+                else
+                    bestviews=[];
+                end
             end
         end
     end
@@ -320,10 +349,10 @@ end
 
 % --- Executes on button press in find_best_view_pushbutton.
 function find_best_view_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
- profile clear;profile on;
+%  profile clear;profile on;
 % NBV();
 NBV_beta();
- profile off;profile viewer;
+%  profile off;profile viewer;
 
 %publish to the GUi different options
 global bestviews;
@@ -366,6 +395,12 @@ if ~get(handles.useRealRobot_checkbox,'Value')
     scan.IntensityData=IntensityData;
     scan.PointData=PointData;
     scan.RangeData=RangeData;
+else
+    movetonewQ(handles,[0,-30,80,0,-25,0]);
+    use_real_robot_SCAN(-60);
+    figure;imshow(scan.RangeData/max(max(scan.RangeData)));
+    figure;imshow(scan.IntensityData/max(max(scan.IntensityData)));
+    return
 end
 
 %check that PointData exists and is valid
@@ -396,17 +431,8 @@ end
 display('Classifying the LATEST set of data that has been scanned');
 scan.ClassificationData=[];
 try
-    
-%     scan.ClassificationData=Block_Classifier(scan.PointData, scan.IntensityData,scan.RangeData);
     scan.ClassificationData=Block_Classifier(PointData, IntensityData,RangeData);
-% [found_lines] = Classifier(scan.PointData(1,:,:), scan.IntensityData(1,:,:), scan.RangeData(1,:,:), Scan_to_Class);
-    
-    
-%     hold on
-%     figure(2)
-%     plot3(data(:,1),data(:,2),data(:,3),'r.')
-    display('....Classification completed successfully');
-    
+    display('....Classification completed successfully');    
 catch
     display('....Problems in Classification');
     keyboard
@@ -577,15 +603,17 @@ h.release
 % --- Executes on button press in plotmesh_pushbutton.
 function plotmesh_pushbutton_Callback(hObject, eventdata, handles)
 global r Q robmap_h
-figure(2)
-aabb = [-2, -1, 0; 2, 0.6, 2];
+% figure(2)
+% aabb = [-2, -1, 0; 2, 0.6, 2];
+aabb = [-1.5, -1.5, -1; 2, 1.5, 2];
 %aabb = [-20, -10, -20; 20, 60, 20];
 hMesh = robmap_h.Mesh(aabb);
 f = hMesh.FaceData;
 v = hMesh.VertexData;
 % save('datafile.mat','v');
-
+colordef white
 trisurf(f, v(:,1), v(:,2), v(:,3), 'FaceColor', 'None');
+
 hold on;
 plotdenso(r,Q);
 axis equal
@@ -876,5 +904,7 @@ function Untitled_5_Callback(hObject, eventdata, handles)
 % hObject    handle to Untitled_5 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
 
 
