@@ -33,6 +33,13 @@ indexed_knowncoords=round(setdiff(workspace.knowncoords(GetImpLevInfo(workspace.
 %this makes the check for a collision quicker
 obsticle_points=workspace.indexedobsticles(GetImpLevInfo(workspace.indexedobsticles),:);
 
+%%STARTADDED
+%Additional (unknown info)
+all_possible=round(   workspace.unknowncoords(workspace.lev1unknown   ,:)/workspace.inc_size);
+[nothing,index]=setdiff(all_possible,[indexed_knowncoords;obsticle_points],'rows');
+unknown_points=workspace.unknowncoords(workspace.lev1unknown(index),:);
+%%ENDADDED
+
 unknownweight=calunknownweight();
 
 %% Declare the damper variable
@@ -58,7 +65,14 @@ for J1=qlimit(1,1):(qlimit(1,2)-qlimit(1,1))/numNBVanglesteps:qlimit(1,2)
                  inf==scan.done_bestviews_orfailed(:,4)&...
                  inf==scan.done_bestviews_orfailed(:,5)&...
                  inf==scan.done_bestviews_orfailed(:,6))
-                if check_path_for_col([J1,J2,J3,0,0,0],obsticle_points)
+%%ADDED NEW             
+             [obstacle_result,unknown_result]=check_path_for_col([J1,J2,J3,0,0,0],obsticle_points,unknown_points);
+                if obstacle_result                   
+                    if ~unknown_result
+%                         display('Failed Joint 4s ellipsoid unknown space test');
+                        continue;
+                    end
+%%ENDADDED NEW                             
                     %predefinedJ4's since we don't really need the whole range of movement
                     for J4=[-45,45]*pi/180
                         %Sets up the limits (possible poses) of J5
