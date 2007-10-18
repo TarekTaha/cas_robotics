@@ -423,10 +423,14 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
             rotated_scan.rangeYFlipped = [];
             rotated_scan.intensityXFlipped = [];
             rotated_scan.intensityYFlipped = [];
-            rotated_scan.rangeXFlipped(1:end,1) = rotated_scan.rangeX(end:-1:1,1);
-            rotated_scan.rangeYFlipped(1:end,1) = rotated_scan.rangeY(end:-1:1,1);
-            rotated_scan.intensityXFlipped(1:end,1) = rotated_scan.intensityX(end:-1:1,1);
-            rotated_scan.intensityYFlipped(1:end,1) = rotated_scan.intensityY(end:-1:1,1);
+            rotated_scan.rangeXFlipped = wrev(rotated_scan.rangeX);
+            rotated_scan.rangeYFlipped = wrev(rotated_scan.rangeY);
+            rotated_scan.intensityXFlipped = wrev(rotated_scan.intensityX);
+            rotated_scan.intensityYFlipped = wrev(rotated_scan.intensityY);
+%             rotated_scan.rangeXFlipped(1:end,1) = rotated_scan.rangeX(end:-1:1,1);
+%             rotated_scan.rangeYFlipped(1:end,1) = rotated_scan.rangeY(end:-1:1,1);
+%             rotated_scan.intensityXFlipped(1:end,1) = rotated_scan.intensityX(end:-1:1,1);
+%             rotated_scan.intensityYFlipped(1:end,1) = rotated_scan.intensityY(end:-1:1,1);
             
             % writes orignal data from far low to SP as is
             rotated_scan.rangeYM = rotated_scan.rangeYFlipped;

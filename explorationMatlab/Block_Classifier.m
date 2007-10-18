@@ -1,16 +1,17 @@
 function [ClassifiedDatawEdges] = Block_Classifier(PointData, IntensityData, RangeData) % this one uses edges from IntensityData Image
-
+warning off;
 %% Flags
 do_smoothing = 1; %Set to 1 to do median filtering to smooth the classification result
 draw_image = 0; %Set to 1 to draw an 2D image of the PC
 draw_PC = 1; %Set to 1 to draw the PC
-display_ID_edgeim = 0; %displays an image of the intensity data and an image of teh edges found in the intensity image
+display_ID_edgeim = 1; %displays an image of the intensity data and an image of teh edges found in the intensity image
 draw_image_with_edge = 1; %displays the images with the found edges marked on them
 dont_run_classifier = 0; %doesn't classify data -used when ClassifiedData already exists
 replace_hoks_false_intensity_data = 1; %This  replaces the hokuyo's false data with the intensity reading from the ray next to the non-returned  ray but on the same scan
 find_surfaces_in_PC = 0; % This finds surface in the PC - used for AOI scaling in the classifier
+just_smoothed = 1; %set to 1 if you want just the smoothed PC displayed
 
-classiy_scan_range_start = 100;
+classiy_scan_range_start = 1;
 classiy_scan_range_end = size(PointData,1);
 
 colordef black;
@@ -72,6 +73,7 @@ Iedges = edge(image_being_used, edge_finding_method_to_use);
 if display_ID_edgeim == 1
     figure, imshow(image_being_used);
     figure, imshow(Iedges);
+    drawnow;
 end
 
 %% Init's classification result matrix and does classify
@@ -90,10 +92,6 @@ if dont_run_classifier == 0
             else
                 found_lines = Classifier(PointData, IntensityDatatoUse, RangeData, i, Iedges, PointsPlaneData, surface_plane_coefs); % this one uses edges from IntensityData Image
             end
-        catch
-
-            a=lasterror;
-            %keyboard
         end
         % This creats the classfier output matrix. The matrix is in the same
         % format as PointData, IntensityData, etc
@@ -121,7 +119,7 @@ for i = 1:size(Iedges,1)
 end
 
 %% Point Cloud
-if draw_PC == 1
+if draw_PC == 1 && just_smoothed == 0
     %Coloured (by classification) point cloud
     if draw_image_with_edge == 1
         data_to_display = ClassifiedDatawEdges;
@@ -129,33 +127,48 @@ if draw_PC == 1
         data_to_display = ClassifiedData;
     end
     figure();
-    view(-90,-90);
+    view(90,-90);
     hold on;
+    axis equal;
+    output_colours = [0 0 0; .35 .35 .35; .8 .8 .8; 1 0 0; 0 0 0; .7 .9 .0];
     for i = 1:size(data_to_display,1)
-        for j = 1:size(data_to_display,2)
-            %for user output colouring
-            switch (data_to_display(i,j))
-                case 0
-                    %output = 'void';
-                    output_color = [0 0 0]; % BLACK
-                case 1
-                    %output = 'Grey Metal ';
-                    output_color = [.35 .35 .35]; % GREY
-                case 2
-                    %output = 'Shiny Metal';
-                    output_color = [.8 .8 .8]; % Silver
-                case 3
-                    %output = 'Cloth/Wood'; % OR RED OR WHITE --- JUST CLOTH or WOOD!!!
-                    output_color = [1 0 0]; % RED
-                case 4
-                    %output = 'Do not know';
-                    output_color = [0 0 0]; % BLACK 
-                case 5
-                    %output = 'Edge';
-                    output_color = [.7 .9 .0]; % GREEN 
-            end 
-            plot3(PointData(i,j,1),PointData(i,j,2),PointData(i,j,3),'color', output_color);
-        end 
+%        for j = 1:size(data_to_display,2)
+%             %for user output colouring
+%             switch (data_to_display(i,j))
+%                 case 0
+%                     %output = 'void';
+%                     output_color = [0 0 0]; % BLACK
+%                 case 1
+%                     %output = 'Grey Metal ';
+%                     output_color = [.35 .35 .35]; % GREY
+%                 case 2
+%                     %output = 'Shiny Metal';
+%                     output_color = [.8 .8 .8]; % Silver
+%                 case 3
+%                     %output = 'Cloth/Wood'; % OR RED OR WHITE --- JUST CLOTH or WOOD!!!
+%                     output_color = [1 0 0]; % RED
+%                 case 4
+%                     %output = 'Do not know';
+%                     output_color = [0 0 0]; % BLACK 
+%                 case 5
+%                     %output = 'Edge';
+%                     output_color = [.7 .9 .0]; % GREEN 
+%             end 
+%             plot3(PointData(i,j,1),PointData(i,j,2),PointData(i,j,3),'color', output_color);
+            
+            % a quicker way of plotting
+%             output_colours = [0 0 0; .35 .35 .35; .8 .8 .8; 1 0 0; 0 0 0; .7 .9 .0];
+%             plot3(PointData(i,j,1),PointData(i,j,2),PointData(i,j,3),'color', output_colours(data_to_display(i,j)+1,:));
+             
+            % The QUICK way to plot!
+            for j=1:5
+                if j~=4
+                    a=find(data_to_display(i,:)==j);
+                    plot3(PointData(i,a,1),PointData(i,a,2),PointData(i,a,3),'color', output_colours(j+1,:),'linestyle','none','marker','.','markersize',2);
+                end
+            end
+
+%         end 
     end
     drawnow;
 end
@@ -201,35 +214,50 @@ if do_smoothing == 1
             else
                 data_to_display = ClassifiedDataSmoothed;
             end
-            figure();
-            view(-90,-90);
-            hold on;
+            figure();            
+            view(90,-90);
+            axis equal;
+            hold on;            
+            output_colours = [0 0 0; .35 .35 .35; .8 .8 .8; 1 0 0; 0 0 0; 0 1 0];
             for i = 1:size(data_to_display,1)
-                for j = 1:size(data_to_display,2)
+%                 for j = 1:size(data_to_display,2)
                     %for user output colouring
-                    switch (data_to_display(i,j))
-                        case 0
-                            %output = 'void';
-                            output_color = [0 0 0]; % BLACK
-                        case 1
-                            %output = 'Grey Metal ';
-                            output_color = [.35 .35 .35]; % GREY
-                        case 2
-                            %output = 'Shiny Metal';
-                            output_color = [.8 .8 .8]; % Silver
-                        case 3
-                            %output = 'Cloth/Wood'; % OR RED OR WHITE --- JUST CLOTH or WOOD!!!
-                            output_color = [1 0 0]; % RED
-                        case 4
-                            %output = 'Do not know';
-                            output_color = [0 0 0]; % BLACK 
-                        case 5
-                            %output = 'Edge';
-                            output_color = [.7 .9 .0]; % GREEN 
-                    end 
-                    plot3(PointData(i,j,1),PointData(i,j,2),PointData(i,j,3),'color', output_color);
-                end 
+%                     switch (data_to_display(i,j))
+%                         case 0
+%                             %output = 'void';
+%                             output_color = [0 0 0]; % BLACK
+%                         case 1
+%                             %output = 'Grey Metal ';
+%                             output_color = [.35 .35 .35]; % GREY
+%                         case 2
+%                             %output = 'Shiny Metal';
+%                             output_color = [.8 .8 .8]; % Silver
+%                         case 3
+%                             %output = 'Cloth/Wood'; % OR RED OR WHITE --- JUST CLOTH or WOOD!!!
+%                             output_color = [1 0 0]; % RED
+%                         case 4
+%                             %output = 'Do not know';
+%                             output_color = [0 0 0]; % BLACK 
+%                         case 5
+%                             %output = 'Edge';
+%                             output_color = [.7 .9 .0]; % GREEN 
+%                     end 
+%                     plot3(PointData(i,j,1),PointData(i,j,2),PointData(i,j,3),'color', output_color);
+                    
+                    % a quicker way of plotting
+%                     plot3(PointData(i,j,1),PointData(i,j,2),PointData(i,j,3),'color', output_colours(data_to_display(i,j)+1,:));
+%                     plot3(PointData(i,:,1),PointData(i,:,2),PointData(i,:,3),'color', output_colours(data_to_display(i,:)+1,:));
+ 
+                    % The QUICK way to plot!
+                    for j=1:5
+                        if j~=4
+                            a=find(data_to_display(i,:)==j);
+                            plot3(PointData(i,a,1),PointData(i,a,2),PointData(i,a,3),'color', output_colours(j+1,:),'linestyle','none','marker','.','markersize',2);
+                        end
+                    end
+%                 end 
             end
+            
             drawnow;
         end
 
@@ -246,6 +274,7 @@ if do_smoothing == 1
             image(data_to_display);
         end
     %----------------------------------------------------------------------
+    warning on;
 end
 
 

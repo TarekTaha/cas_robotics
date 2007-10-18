@@ -101,7 +101,7 @@ pause
 
 %sets up the surface map object and then this is used for scanning
 try global robmap_h;
-    robmap_h.release;pause(1);
+    try robmap_h.release;pause(1);end
 robmap_h=actxserver('EyeInHand.SurfaceMap');
 robmap_h.registerevent(@myhandler);
 catch
@@ -396,11 +396,11 @@ if ~get(handles.useRealRobot_checkbox,'Value')
     scan.PointData=PointData;
     scan.RangeData=RangeData;
 else
-    movetonewQ(handles,[0,-30,80,0,-25,0]);
-    use_real_robot_SCAN(-60);
-    figure;imshow(scan.RangeData/max(max(scan.RangeData)));
-    figure;imshow(scan.IntensityData/max(max(scan.IntensityData)));
-    return
+%     movetonewQ(handles,[90,-30,80,0,-25,0]);
+     movetonewQ(handles,[0,-30,80,0,-15,0]);
+     use_real_robot_SCAN(-70);
+%     figure;imshow(scan.RangeData/max(max(scan.RangeData)));
+%     figure;imshow(scan.IntensityData/max(max(scan.IntensityData)));
 end
 
 %check that PointData exists and is valid
@@ -431,7 +431,8 @@ end
 display('Classifying the LATEST set of data that has been scanned');
 scan.ClassificationData=[];
 try
-    scan.ClassificationData=Block_Classifier(PointData, IntensityData,RangeData);
+    scan.ClassificationData=Block_Classifier(scan.PointData, scan.IntensityData,scan.RangeData);
+    axis equal
     display('....Classification completed successfully');    
 catch
     display('....Problems in Classification');
