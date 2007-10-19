@@ -60,6 +60,19 @@ do_clear(handles);
 function varargout = exGUI_OutputFcn(hObject, eventdata, handles) 
 varargout{1} = handles.output;
 
+% --- Executes when user attempts to close figure1.
+function figure1_CloseRequestFcn(hObject, eventdata, handles)
+reply = input('Do you want to delete the mesh from memory and release object 1/0 [1]: ');
+if isempty(reply)
+    reply = 1;
+end
+if reply
+    global robmap_h;
+    try robmap_h.release;end
+end
+delete(hObject);
+
+
 %% Executes on button press in clear_pushbutton.
 function clear_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 clc
@@ -581,45 +594,93 @@ allOff()
 
 % --- Executes on button press in move2start_platform_pushbutton.
 function move2start_platform_pushbutton_Callback(hObject, eventdata, handles)
-uiwait(msgbox('this does nothing yet'));
+platform_h = actxserver('EyeInHand.PlatformCommand');
+platform_h.Type = 'MoveToHome';
+platform_h.Start;
+platform_h.WaitUntilCompleted(20,0);
+platform_h.release
+allOff()
 
 % --- Executes on button press in move2end_platform_pushbutton.
 function move2end_platform_pushbutton_Callback(hObject, eventdata, handles)
-uiwait(msgbox('this does nothing yet'));
+platform_h = actxserver('EyeInHand.PlatformCommand');
+platform_h.Type = 'MoveToEnd';
+platform_h.Start;
+platform_h.WaitUntilCompleted(20,0);
+platform_h.release
+allOff()
 
 % --- Executes on button press in moveback_platform_pushbutton.
 function moveback_platform_pushbutton_Callback(hObject, eventdata, handles)
-uiwait(msgbox('this does nothing yet'));
+platform_h = actxserver('EyeInHand.PlatformCommand');
+platform_h.Type = 'MoveBackward';
+platform_h.Start;
+platform_h.WaitUntilCompleted(20,0);
+platform_h.release
+allOff()
 
 % --- Executes on button press in moveforward_platform_pushbutton.
 function moveforward_platform_pushbutton_Callback(hObject, eventdata, handles)
 platform_h = actxserver('EyeInHand.PlatformCommand');
-h.Type = 'MoveForward';
-h.Start;
-h.WaitUntilCompleted(120);
-h.release
+platform_h.Type = 'MoveForward';
+platform_h.Start;
+platform_h.WaitUntilCompleted(20,0);
+platform_h.release
+allOff()
+
+
+% platform_h.Type = 'NoMotion';
+% platform_h.Type = 'MoveForward';
+% platform_h.Type = 'MoveBackward';
+% platform_h.Type = 'MoveToHome';
+% platform_h.Type = 'MoveToEnd';
+
+
+% platform_h = actxserver('EyeInHand.PlatformState');
+%  get(platform_h,'Status')==0 && get(platform_h,'EmergencyStop')==0 %%this means OK
+%     platform_h.WarningLight = 1; % Turn on
+% 
+%     % platform_h.WarningNoise = 1;
+%     % pause(1)
+%     % platform_h.WarningNoise = 0;
+% 
+%     platform_h.AirSupply = 1; % Turn on
+%     platform_h.Brake = 0; % Turn off
+%     platform_h.Motors = 'Forward';
+%     pause(2.0);
+%     platform_h.Motors = 'Off';
+%     platform_h.Brake = 1; % Turn on
+%     platform_h.WarningLight = 0; % Turn on
+%     platform_h.AirSupply = 0; % Turn off
+     
+% platform_h.release
 
 
 %% Plotting and display simple functions
 % --- Executes on button press in plotmesh_pushbutton.
 function plotmesh_pushbutton_Callback(hObject, eventdata, handles)
-global r Q robmap_h
-% figure(2)
-% aabb = [-2, -1, 0; 2, 0.6, 2];
-aabb = [-1.5, -1.5, -1; 2, 1.5, 2];
-%aabb = [-20, -10, -20; 20, 60, 20];
-hMesh = robmap_h.Mesh(aabb);
-f = hMesh.FaceData;
-v = hMesh.VertexData;
-% save('datafile.mat','v');
-colordef white
-trisurf(f, v(:,1), v(:,2), v(:,3), 'FaceColor', 'None');
+global robmap_h guiglobal
 
-hold on;
-plotdenso(r,Q);
-axis equal
-rotate3d;
-% set(gcf,'CurrentAxes',handles.axes3);
+try delete(guiglobal.mesh_h);
+catch
+    % figure(2)
+    set(gcf,'CurrentAxes',handles.axes3);
+    % aabb = [-2, -1, 0; 2, 0.6, 2];
+    
+    aabb = [-1.5, -1.5, -1; 2, 1.5, 2];
+%     if we want to show the whole environment
+    if get(handles.all_mesh_checkbox,'value')==1
+        aabb = [-20, -20, -20; 20, 20, 20];
+    end
+    hMesh = robmap_h.Mesh(aabb);
+    f = hMesh.FaceData;
+    v = hMesh.VertexData;
+    % save('datafile.mat','v');
+    hold on;
+    guiglobal.mesh_h=trisurf(f, v(:,1), v(:,2), v(:,3), 'FaceColor', 'None');
+    axis equal
+end
+
 
 % --- Executes on button press in plot_planes_checkbox.
 function plot_planes_checkbox_Callback(hObject, eventdata, handles)%#ok<DEFNU>
@@ -657,8 +718,15 @@ rotate3d;
 
 % --- Executes on button press in ResetView.
 function ResetView_Callback(hObject, eventdata, handles)%#ok<INUSD,DEFNU>
-view(2);
+global guiglobal
+try delete(guiglobal.mesh_h);end
+set(gcf,'CurrentAxes',handles.axes3);
+cla('reset')
+camlight
+lighting gouraud
 axis equal
+view(2);
+colordef white
 
 % --- Executes on button press in sideon_pushbutton.
 function sideon_pushbutton_Callback(hObject, eventdata, handles)%#ok<INUSD,DEFNU>
@@ -907,5 +975,10 @@ function Untitled_5_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
+% --- Executes on button press in all_mesh_checkbox.
+function all_mesh_checkbox_Callback(hObject, eventdata, handles)
+% hObject    handle to all_mesh_checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
 
-
+% Hint: get(hObject,'Value') returns toggle state of all_mesh_checkbox

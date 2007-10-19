@@ -113,6 +113,17 @@ end
 tempz=workspace.impLev(1).z(1)*ones([size(tempx,1),1]);
 points=[points;[tempx,tempy,tempz]];
 
+%add the bottoms of the ibeams
+tempx=-1.5:tempInc:1.5;
+tempx=[tempx';tempx';tempx';tempx'];
+tempy=-0.6*ones([size(tempx,1)/4,1]);
+tempy=[tempy;-0.8*ones([size(tempx,1)/4,1])];
+tempy=[tempy;0.5*ones([size(tempx,1)/4,1])];
+tempy=[tempy;0.7*ones([size(tempx,1)/4,1])];
+tempz=1*ones([size(tempx,1),1]);
+points=[points;[tempx,tempy,tempz]];
+
+
 % Only use points within the correct range
 level1=GetImpLevInfo(points);
 points=points(level1,:);
