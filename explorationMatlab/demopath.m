@@ -51,11 +51,11 @@ end
 
 %% Setup the figure (if required)
 if DISPON
-    %fig=figure(2); 
-    if size(points,1)>0 
-        plot3(points(:,1),points(:,2),points(:,3),'marker','.','Color',[.2,.2,.1],'linestyle','none'); 
-    end        
-    view(3);axis([-1 1 -1 1 0 1.5]);colordef white;grid on;hold on;
+%     %fig=figure(2); 
+%     if size(points,1)>0 
+%         plot3(points(:,1),points(:,2),points(:,3),'marker','.','Color',[.2,.2,.1],'linestyle','none'); 
+%     end        
+%     view(3);axis([-1 1 -1 1 0 1.5]);colordef white;grid on;hold on;
 end
 
 
