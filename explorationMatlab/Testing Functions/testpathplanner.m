@@ -4,7 +4,7 @@
 % these if they are possible. If they are not possible then 
 
 function testpathplanner(numtests,tryalternate,useMiddleQ2,check_arm_perms,makenewgoals,useDijkstra)
-global Q r densoobj workspace
+global Q r densoobj workspace optimise
 
 n = r.n;
 L = r.link;
@@ -21,7 +21,7 @@ if nargin<6
             if nargin<3   
                 useMiddleQ2=true;
                 if nargin<2
-                    tryalternate=true;
+                    tryalternate=false;
                     if nargin==0
                         numtests=1000;
                         display(strcat('Setting number of tests to:',num2str(numtests),' since nothing was passed'));
@@ -65,31 +65,36 @@ if makenewgoals
 
             %get pos of the end effector point at the end
             endPoint=fkine(r,ends_to_test);        
-            %we only want points above z=ground
-            if endPoint(3,4)<0
+            %if not within the workspace of robot
+            if isempty(GetImpLevInfo(endPoint(1:3,4)'))
                 notvalid=true;
             end
+            %we only want points above z=ground
+%             if endPoint(3,4)<0
+%                 notvalid=true;
+%             end
+            notvalid=~check_path_for_col(ends_to_test);
 
-            %go through and check each piece for a collision
-            for piece=1:n
-                t = t * L{piece}(ends_to_test(piece));
-                %check ellipses 2->7
-                if ~check_FF(t,densoobj(piece+1).ellipse,workspace.indexedobsticles) 
-                    notvalid=true;
-                end
-                %check that the point is not inside the first two ellipses
-                if piece<3 && ~check_FF(t,densoobj(piece).ellipse,[endPoint(1,4),endPoint(2,4),endPoint(3,4)])
-                    notvalid=true;
-                end
+%             %go through and check each piece for a collision
+%             for piece=1:n
+%                 t = t * L{piece}(ends_to_test(piece));
+%                 %check ellipses 2->7
+%                 if ~check_FF(t,densoobj(piece+1).ellipse,workspace.indexedobsticles) 
+%                     notvalid=true;
+%                 end
+%                 %check that the point is not inside the first two ellipses
+%                 if piece<3 && ~check_FF(t,densoobj(piece).ellipse,[endPoint(1,4),endPoint(2,4),endPoint(3,4)])
+%                     notvalid=true;
+%                 end
                 %make up another end point since previous one will not happen
                 if notvalid
                     tempendQs=rand(1,6);
                     for i=1:size(tempendQs,2)
                         endQs(test,i)=tempendQs(:,i)*(-qlimits(i,1)+qlimits(i,2))+qlimits(i,1);
                     end                
-                    break; 
+%                     break; 
                 end
-            end
+%             end
         end   
     end    
 
@@ -106,12 +111,12 @@ allpathsfound=[];
 numofaltpathsused=0;
 pathsfound_counter=1;
 pathdata=[];
+impossiblepathcnt=0;
 
 for i=1:numtests
     Q=startQs(i,:);
     newQ=endQs(i,:);
-    [temppathfound,all_steps]=pathplanner(newQ,tryalternate,check_arm_perms,useMiddleQ2,false);
-    
+    [temppathfound,all_steps]=pathplanner(newQ,tryalternate,check_arm_perms,useMiddleQ2,optimise.numofPPiterations,false);
     %if we want to try and get a path with dijkstra algorithm
     if ~temppathfound & useDijkstra
         [temppathfound,all_steps]=practiceDijkstra(startQ,endQ);
@@ -121,7 +126,7 @@ for i=1:numtests
         end
     end
         
-    if temppathfound
+    if temppathfound==1
         if (all_steps(end,:)-newQ~=0)
             numofaltpathsused=numofaltpathsused+1;
             %we have to make the new start different because we found an
@@ -137,8 +142,11 @@ for i=1:numtests
         %Since we didn't get to the last end the next start Q is equal to
         %the current start Q, as long as we are not at the end
         if i<size(startQs,1)
-            startQs(i+1,:)=startQs(i,:); 
+            startQs(i+1,:)=startQs(i,:);             
             %display(strcat('For path num:', num2str(i+1),', we set the startQ to be the same as previous startQ since no path found'));
+        end
+        if temppathfound==-1
+            impossiblepathcnt=impossiblepathcnt+1;
         end
     end
     allpathsfound=[allpathsfound;temppathfound];
@@ -147,14 +155,15 @@ end
 
 %% Display Results
 %clc
-display(strcat('Statistics........ for: ',num2str(numtests),'tests, took: ',num2str(etime(clock,starttime)),' seconds'));
-display(strcat('Num of valid paths found = ',num2str(length(find(allpathsfound==1)))));
+finshtime=etime(clock,starttime);
+display(strcat('Statistics........ for: ',num2str(numtests),'tests, took: ',num2str(finshtime),' seconds'));
+display(['Num of valid paths found = ',num2str(length(find(allpathsfound==1))), ' at ',num2str(finshtime/length(find(allpathsfound==1))),' sec/path']);
+display(strcat('Num of impossible end posses = ',num2str(impossiblepathcnt)));
 display(strcat('..of which No. alternate paths = ',num2str(numofaltpathsused)));
-% display(strcat('Num of impossible end posses = ',num2str(length(find(allpathsfound==-1)))));
 % display(strcat('Num of times no path found = ',num2str(length(find(allpathsfound==0)))));
 % display('Saving all steps of all paths to file pathdata.mat');
 display(strcat('Variables are as follows{tryalternate=',num2str(tryalternate),...
                 '; useMiddleQ2=',num2str(useMiddleQ2),...
                 '; check_arm_perms=',num2str(check_arm_perms)));
 display('..........................................................................................');
-% save('pathdata.mat','pathdata');
+save('pathdata.mat','pathdata');
