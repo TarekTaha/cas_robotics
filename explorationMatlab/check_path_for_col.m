@@ -63,7 +63,7 @@ for i=1:size(all_steps,1)
     t = r.base;
     for piece=1:n        
         t = t * L{piece}(all_steps(i,piece));
-        if piece>1
+        if piece>2 % used to be >1, should also be  && ~=5 (since we don't care about the 5th joint (6thpeice)
             tempresult=check_FF(t,densoobj(piece+1).ellipse,points);            
             if tempresult~=1
                 result=0;
