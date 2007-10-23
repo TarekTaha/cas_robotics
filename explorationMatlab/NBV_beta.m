@@ -128,7 +128,8 @@ valid_count=0;
 valid_max=min(optimise.valid_max,size(bestviews,2));
 for current_view=1:valid_max
     if valid_count<1
-        [bestviews(current_view).valid,bestviews(current_view).all_steps]=pathplanner(bestviews(current_view).Q,false,true,true,30);    
+%         [bestviews(current_view).valid,bestviews(current_view).all_steps]=pathplanner(bestviews(current_view).Q,false,true,true,30);    
+        [bestviews(current_view).valid,bestviews(current_view).all_steps]=pathplanner_new(bestviews(current_view).Q,false,true,true,30);    
     else %once we have one path then we just fill the rest in with blanks
         bestviews(current_view).valid=-1;
         bestviews(current_view).all_steps=[];        

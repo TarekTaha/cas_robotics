@@ -22,6 +22,7 @@ starttime=clock;
 % Number of points we want in the cube for ray casting
 numpntsInCube=scan.numpntsInCube;
 
+warning off;
 %% Check data validity
 % Process Data from PointData scan matrix to a 3*many form
 ice_cream_bounds=zeros([size(PointData,1)*size(PointData,2),3]);
@@ -240,3 +241,5 @@ for i=1:size(plane,2)
        floor(plane(i).home_point/workspace.inc_size)*workspace.inc_size];
    workspace.indexedobsticles_equ=[workspace.indexedobsticles_equ;plane(i).equ];   
 end
+
+warning on

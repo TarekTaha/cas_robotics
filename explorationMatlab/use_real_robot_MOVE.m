@@ -128,5 +128,5 @@ function releaserobot(rob_h)
     pause(0.1);
     rob_h.Type='StopDriveJointAbs';
     rob_h.Start;
-    rob_h.WaitUntilCompleted(0.5,0)
+    rob_h.WaitUntilCompleted(1,0)
     rob_h.release;

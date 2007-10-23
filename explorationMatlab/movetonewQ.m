@@ -66,7 +66,8 @@ end
 
 %% Do path planning
 try %set(handles.dialog_text,'String','Calculating Path......');drawnow;
-    [pathfound,all_steps]=pathplanner(newQ,guiglobal.plotpath,tryalternate);
+%     [pathfound,all_steps]=pathplanner(newQ,guiglobal.plotpath,tryalternate);
+    [pathfound,all_steps]=pathplanner_new(newQ,guiglobal.plotpath,tryalternate);
 catch; keyboard
 end
 
@@ -81,7 +82,8 @@ if pathfound && size(all_steps,1)>0
     %if animate has been selected it will go through each step of the path
     if get(handles.animate_move_checkbox,'Value')
         set(handles.dialog_text,'String','Path found - animating....');
-        demopath(all_steps);       
+%         demopath(all_steps);       
+        demopath_new(all_steps);
     end
     %plot the end effector in place
     if get(handles.show_robot_checkbox,'Value');

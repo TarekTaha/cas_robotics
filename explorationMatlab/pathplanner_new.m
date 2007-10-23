@@ -1,7 +1,7 @@
 %% pathplanner
 %
-% *Description:*  this function goes from where we are at Q to where we want
-% to be at newQ and checks for collisions
+% *Description:*  NEW version of function which goes from where we are at Q
+% to where we want to be at newQ and checks for collisions
 
 %% Function Call
 % 
@@ -25,7 +25,7 @@
 %
 % _all_steps_ = 6 collums of joints * many steps
 
-function [pathfound,all_steps] = pathplanner(newQ,tryalternate,check_arm_perms,useMiddleQ2,numofPPiterations,disON)
+function [pathfound,all_steps] = pathplanner_new(newQ,tryalternate,check_arm_perms,useMiddleQ2,numofPPiterations,disON)
 
 %% Variables
 global r Q optimise workspace
@@ -292,9 +292,27 @@ jointcombs= [1,2,3;2,3,1;3,1,2];
             end
             
             %fill size of last 3 joints then tac onto all_steps
-            temp4=[startQ(4):(endQ(4)-startQ(4))/(size(all_steps,1)-1):endQ(4)]';
-            temp5=[startQ(5):(endQ(5)-startQ(5))/(size(all_steps,1)-1):endQ(5)]';
-            temp6=[startQ(6):(endQ(6)-startQ(6))/(size(all_steps,1)-1):endQ(6)]';
+            try %Joint 4
+                temp4=[startQ(4):(endQ(4)-startQ(4))/(size(all_steps,1)-1):endQ(4)]';
+                if isempty(temp4);temp4=0;end
+            catch
+                temp4=0;
+            end
+
+            try %Joint 5
+                temp5=[startQ(5):(endQ(5)-startQ(5))/(size(all_steps,1)-1):endQ(5)]';
+                if isempty(temp5);temp5=0;end
+            catch
+                temp5=0;
+            end
+
+            try %Joint 5
+                temp6=[startQ(6):(endQ(6)-startQ(6))/(size(all_steps,1)-1):endQ(6)]';
+                if isempty(temp6);temp6=0;end
+            catch
+                temp6=0;
+            end
+%             try
             % resize 45 and 6 if necessary either up or down
             if size(temp4,1)>size(all_steps,1)
                 display('speeding up speed of 4th joint');
@@ -319,7 +337,7 @@ jointcombs= [1,2,3;2,3,1;3,1,2];
             elseif size(temp6,1)<size(all_steps,1)
                 temp6=[temp6;temp6(end)*ones([size(all_steps,1)-size(temp6,1),1])];
             end
-
+%             catch;keyboard;end;
             %put them all together
             all_steps=[all_steps,temp4,temp5,temp6];
             

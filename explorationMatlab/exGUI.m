@@ -598,7 +598,9 @@ platform_h = actxserver('EyeInHand.PlatformCommand');
 platform_h.Type = 'MoveToHome';
 platform_h.Start;
 platform_h.WaitUntilCompleted(20,0);
+pause(2);
 platform_h.release
+
 allOff()
 
 % --- Executes on button press in move2end_platform_pushbutton.
@@ -607,7 +609,9 @@ platform_h = actxserver('EyeInHand.PlatformCommand');
 platform_h.Type = 'MoveToEnd';
 platform_h.Start;
 platform_h.WaitUntilCompleted(20,0);
+pause(2);
 platform_h.release
+
 allOff()
 
 % --- Executes on button press in moveback_platform_pushbutton.
@@ -616,6 +620,7 @@ platform_h = actxserver('EyeInHand.PlatformCommand');
 platform_h.Type = 'MoveBackward';
 platform_h.Start;
 platform_h.WaitUntilCompleted(20,0);
+pause(2);
 platform_h.release
 allOff()
 
@@ -625,6 +630,7 @@ platform_h = actxserver('EyeInHand.PlatformCommand');
 platform_h.Type = 'MoveForward';
 platform_h.Start;
 platform_h.WaitUntilCompleted(20,0);
+pause(2);
 platform_h.release
 allOff()
 
