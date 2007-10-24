@@ -125,7 +125,9 @@ order_bestviews()
 
 %% try and get at least 1 path then save the remaing valid_max-1
 valid_count=0;
-valid_max=min(optimise.valid_max,size(bestviews,2));
+% this limits the amount of time we can spend searching for a path when
+% there may not be one
+valid_max=min(2*optimise.valid_max,size(bestviews,2));
 for current_view=1:valid_max
     if valid_count<1
 %         [bestviews(current_view).valid,bestviews(current_view).all_steps]=pathplanner(bestviews(current_view).Q,false,true,true,30);    
@@ -137,7 +139,11 @@ for current_view=1:valid_max
     
     if bestviews(current_view).valid || valid_count>=1
         valid_count=valid_count+1;
-        tempbestviews(valid_count)=bestviews(current_view);       
+        tempbestviews(valid_count)=bestviews(current_view);   
+        %we have enough (optimise.valid_max)
+        if valid_count>=optimise.valid_max
+            break;
+        end
     else %it failed so note down that we can't get to this destination
         scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(current_view).Q];
     end

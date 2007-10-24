@@ -22,6 +22,13 @@ clear global PoseData RangeData IntensityData PointData;
 
 global scan Q PointData IntensityData RangeData robot_maxreach robmap_h;
 
+%make sure their is a surface map object
+if isempty(robmap_h)
+    display('Surface Map object has been deleted previously so I am recreating it')
+    robmap_h=actxserver('EyeInHand.SurfaceMap');
+    robmap_h.registerevent(@myhandler);
+end
+
 if size(Q,2)~=6
     error('Q - Joints have not been defined properly, should be a global');
 end
