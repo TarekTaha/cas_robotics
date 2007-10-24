@@ -71,8 +71,9 @@ Iedges = edge(image_being_used, edge_finding_method_to_use);
 
 %displays images
 if display_ID_edgeim == 1
-    figure, imshow(image_being_used);
-    figure, imshow(Iedges);
+    figure, 
+    subplot(2,1,1);imshow(image_being_used);title('Intensity Image');
+    subplot(2,1,2);imshow(Iedges);title('Line Fitting');
     drawnow;
 end
 

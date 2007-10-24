@@ -428,9 +428,17 @@ while ~isempty(find(result_row==0, 1))
     if startQ(1)<0
         %this will put it on the negative side but close to 0
         J1rand=rand()^6*qlimits(1,1);
-    else
+    elseif startQ(1)>0
         %this will put it on the negative side but close to 0
         J1rand=rand()^6*qlimits(1,2);
+    else %startQ(1)==0
+        if endQ(1)<0
+            J1rand=rand()^6*qlimits(1,1);
+        elseif endQ(1)>0
+            J1rand=rand()^6*qlimits(1,2);
+        else
+            J1rand=0;
+        end
     end
     middleQ=[J1rand,...
              joint2*(-qlimits(2,1)+qlimits(2,2))+qlimits(2,1),...

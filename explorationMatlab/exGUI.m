@@ -70,6 +70,10 @@ if reply
     global robmap_h;
     try robmap_h.release;end
 end
+%try and release platform object
+global platform_h;
+try platform_h.release;end
+
 delete(hObject);
 
 
@@ -86,12 +90,12 @@ display('Make sure you have done the following');
 display('1) Checked the laser is on by running the checklaser.exe file (power cycle if necessary)');
 display('2) The ROBOT is powered on');
 display('3) The MOTOR power is on');
-display('4) Emergency stop is not on');
+display('4) Both EMERGENCY STOPs are not on');
 display('5) Robot is in automatic mode on both pendant and E-stop control');
 display('6) The robocontroller program is running on pendant and recieveing no communication');
 display('7) There is no EyeinHand exe running intially in task manager');
 
-display('Note: You should use the vr world robot not toms, you should also draw up the laser to put on the end as the 7th peice');
+% display('Note: You should use the vr world robot not toms, you should also draw up the laser to put on the end as the 7th peice');
 
 display('Pausing so you can do these things');
 pause
@@ -118,11 +122,21 @@ try global robmap_h;
 robmap_h=actxserver('EyeInHand.SurfaceMap');
 robmap_h.registerevent(@myhandler);
 catch
-    display('Unable to connect to EyeInHand')
+    display('EyeInHand Problem: Unable to create surface map')
 end
+
+% try and setup platform object
+try global platform_h;
+    try platform_h.release;pause(1);end
+    platform_h = actxserver('EyeInHand.PlatformCommand');
+catch
+    display('EyeInHand Problem: Unable to create platform object')
+end
+
 
 %clear the main axis
 set(gcf,'CurrentAxes',handles.axes3);
+colordef white
 cla('reset')
 %setlights up
 camlight
@@ -271,7 +285,7 @@ elseif current_test_case>1 && want_to_continue
             current_bestview=1;
             max_bestviews_togothrough=optimise.valid_max*1/4;
             global bestviews;        
-            while current_bestview<=max_bestviews_togothrough && size(bestviews,2)>=1 && ~get(handles.stopflag_checkbox,'Value')
+            while current_bestview<max_bestviews_togothrough && size(bestviews,2)>=1 && ~get(handles.stopflag_checkbox,'Value')
                 %size(bestviews,2)>optimise.valid_max*3/4
                 current_bestview=current_bestview+1;
 
@@ -279,13 +293,16 @@ elseif current_test_case>1 && want_to_continue
     %             want_to_continue=true;
                 want_to_continue=~get(handles.stopflag_checkbox,'Value');            
                 while want_to_continue; 
-                    try if movetonewQ(handles,bestviews(1).Q*180/pi);
+                    try %if we have already planned a path, use this one otherwise try and get another, otherwise go to next possible one
+                        if movetonewQ(handles,bestviews(1).Q*180/pi,bestviews(1).all_steps);
                             scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];                        
                             explore(handles,useNBV,1);break;                        
+                        else
+                            display(['No Valid path available or found, on #',num2str(current_bestview)]);
                         end
                         want_to_continue=0;                        
                     catch; display(lasterr);
-                        want_to_continue=input(' Type (1) to continue, (2) for keyboard command, (0) to exit\n');            
+                        want_to_continue=input(' Type (1) to continue trying for a path, (2) for keyboard command, (0) to exit\n');            
                         if want_to_continue==2; keyboard; end
                         if want_to_continue==0; error('User chose to exit');end
                         if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end   
@@ -594,45 +611,44 @@ allOff()
 
 % --- Executes on button press in move2start_platform_pushbutton.
 function move2start_platform_pushbutton_Callback(hObject, eventdata, handles)
-platform_h = actxserver('EyeInHand.PlatformCommand');
+global platform_h
+if isempty(platform_h)
+    platform_h = actxserver('EyeInHand.PlatformCommand');
+end
 platform_h.Type = 'MoveToHome';
 platform_h.Start;
-platform_h.WaitUntilCompleted(20,0);
-pause(2);
-platform_h.release
 
-allOff()
 
 % --- Executes on button press in move2end_platform_pushbutton.
 function move2end_platform_pushbutton_Callback(hObject, eventdata, handles)
-platform_h = actxserver('EyeInHand.PlatformCommand');
+global platform_h
+if isempty(platform_h)
+    platform_h = actxserver('EyeInHand.PlatformCommand');
+end
 platform_h.Type = 'MoveToEnd';
 platform_h.Start;
-platform_h.WaitUntilCompleted(20,0);
-pause(2);
-platform_h.release
 
-allOff()
 
 % --- Executes on button press in moveback_platform_pushbutton.
 function moveback_platform_pushbutton_Callback(hObject, eventdata, handles)
-platform_h = actxserver('EyeInHand.PlatformCommand');
+global platform_h
+if isempty(platform_h)
+    platform_h = actxserver('EyeInHand.PlatformCommand');
+end
 platform_h.Type = 'MoveBackward';
 platform_h.Start;
-platform_h.WaitUntilCompleted(20,0);
-pause(2);
-platform_h.release
-allOff()
+
 
 % --- Executes on button press in moveforward_platform_pushbutton.
 function moveforward_platform_pushbutton_Callback(hObject, eventdata, handles)
-platform_h = actxserver('EyeInHand.PlatformCommand');
+global platform_h
+if isempty(platform_h)
+    platform_h = actxserver('EyeInHand.PlatformCommand');
+end
 platform_h.Type = 'MoveForward';
 platform_h.Start;
-platform_h.WaitUntilCompleted(20,0);
-pause(2);
-platform_h.release
-allOff()
+%     platform_h.WaitUntilCompleted(20,0);
+% allOff()
 
 
 % platform_h.Type = 'NoMotion';

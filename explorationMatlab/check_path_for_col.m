@@ -52,6 +52,15 @@ if ~joint_softlimit_check(all_steps)
     return;
 end
 
+% %% Check that they are all numbers
+% if ~isempty(find(isnan(all_steps),1))
+% %     keyboard
+%     display('NaN in path')
+%     result=0;
+%     return;
+% end
+
+
 %% Go through each step and check for collsions
 % $$\begin{array}{ll}
 % \forall Q \in all\_steps: \forall peice \in \{1,2,3,4,5,6\}:\\

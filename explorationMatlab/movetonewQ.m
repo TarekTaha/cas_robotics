@@ -11,28 +11,33 @@
 %
 % _handles_ (array double) GUI variables
 %
-% _newQ_(1*6 double) newQ in degrees
+% _newQ_(1*6 double) newQ in DEGREES
+%
+% _all_steps_ (many*6) path of all 6 joints in RADs
 %
 % *Returns:* 
 %
 % _pathfound_ (binary) if a path was found or not
 
-function pathfound=movetonewQ(handles,newQ)
+function pathfound=movetonewQ(handles,newQ,all_steps)
 
 %% Variables
 global r Q guiglobal;
 
 % check we have got passed a newQ otherwise use from the GUI
-if nargin<2
-    %get the desired destination from the GUI
-    newQ(1)=str2double(get(handles.move_to_J1_edit,'String'));
-    newQ(2)=str2double(get(handles.move_to_J2_edit,'String'));
-    newQ(3)=str2double(get(handles.move_to_J3_edit,'String'));
-    newQ(4)=str2double(get(handles.move_to_J4_edit,'String'));
-    newQ(5)=str2double(get(handles.move_to_J5_edit,'String'));
-    newQ(6)=str2double(get(handles.move_to_J6_edit,'String'));
-    if find(isnan(newQ))>0
-        error('Some values you are requesting to move to are not valid - all must be numbers')
+if nargin<3
+    all_steps=[];
+    if nargin<2
+        %get the desired destination from the GUI
+        newQ(1)=str2double(get(handles.move_to_J1_edit,'String'));
+        newQ(2)=str2double(get(handles.move_to_J2_edit,'String'));
+        newQ(3)=str2double(get(handles.move_to_J3_edit,'String'));
+        newQ(4)=str2double(get(handles.move_to_J4_edit,'String'));
+        newQ(5)=str2double(get(handles.move_to_J5_edit,'String'));
+        newQ(6)=str2double(get(handles.move_to_J6_edit,'String'));
+        if find(isnan(newQ))>0
+            error('Some values you are requesting to move to are not valid - all must be numbers')
+        end
     end
 end
 
@@ -65,10 +70,24 @@ if isempty(find(abs(Q-(newQ*pi/180))>eps, 1));
 end
 
 %% Do path planning
-try %set(handles.dialog_text,'String','Calculating Path......');drawnow;
-%     [pathfound,all_steps]=pathplanner(newQ,guiglobal.plotpath,tryalternate);
-    [pathfound,all_steps]=pathplanner_new(newQ,guiglobal.plotpath,tryalternate);
-catch; keyboard
+% Provided we haven't passed a path in which is full and has a start at Q
+% and finish at newQ, also that they are all numbers
+if ~isempty(all_steps) && ...
+        isempty(find(all_steps(1,1:3)-Q(1:3)>eps,1)) && ...
+        isempty(find(all_steps(end,1:3)-newQ(1:3)>eps,1)) &&...
+        isempty(find(isnan(all_steps),1))
+    %check the path passed in for collisions
+    pathfound=check_path_for_col(all_steps);
+    if ~pathfound
+        display('The passed in path is not valid - calculating another');
+        try [pathfound,all_steps]=pathplanner_new(newQ,guiglobal.plotpath,tryalternate);end
+    end     
+else % no valid path has been passed
+    try %set(handles.dialog_text,'String','Calculating Path......');drawnow;
+    %     [pathfound,all_steps]=pathplanner(newQ,guiglobal.plotpath,tryalternate);
+        [pathfound,all_steps]=pathplanner_new(newQ,guiglobal.plotpath,tryalternate);
+    catch; keyboard
+    end
 end
 
 %if it is an error returned means that the end is not valid

@@ -106,7 +106,7 @@ points=[];
 % uiwait(msgbox('Adding a floor layer only'));
 tempx=[];tempy=[]; 
 tempInc=workspace.inc_size;
-for i=-.65:tempInc:.75
+for i=-.75:tempInc:.85
     tempx=[tempx;i*ones(length(-.65:tempInc:.75),1)];
     tempy=[tempy;(-.65:tempInc:.75)'];
 end
