@@ -1,0 +1,172 @@
+=========================================================
+SSPP (Search Space Path Planner) driver for player/stage.
+=========================================================
+This is a Path Planning driver for path planning using an offline generated Search Space.
+It's a very efficient method for path planning in a mapped environment with tight spaces. The 
+Path Planning takes into consideration the size of the robot and generates a search space of 
+the environment that can be used for online Path Planning.It's based on an efficient sampling 
+method and collision detection that makes path planning for tight and narrow environments 
+possible and fast. I would appreciate any feedback, recommendations and bug reporting that can 
+lead to improving the performance of this driver.
+
+===========
+COMPILATION
+===========
+
+- pk-config should have the player package pointing to the libs and cflags
+- Use the make file to compile the driver and generate the shared object "SSPP.so"
+  
+"make"
+
+to install, copy SSPP.so to /usr/local/lib/
+or 
+create a symbolic link where you're running your configuration file
+	ln -s SSPP_PATH/SSPP.so
+where SSPP_PATH is the path where the SSPP driver was extracted and compiled
+
+==========================
+Specifications / Operation
+==========================
+
+The driver requires:
+- A position device "position2d" that can provide location estimation (AMCL usually).
+- A position device "position2d" that the driver can control (usually VFH or nd). 
+- A map device "map" that will provide an occupancy grid of the environment.
+
+The driver provides:
+- An Planner interface for accepting target goals and sending WayPoints.
+
+On start, the driver will read the map from the map interface and generate the search space
+using the parameters specified in the configuration file (occupied and unknown cells are 
+considered occupied). This step takes some time and the generated search space will be saved
+in a file so that the next time the driver is restarted it doesn't have to regenerate the 
+space but load it from the file.
+
+When the driver recieves a new goal, it finds the path from the current robot's location to that
+goal and save the path's intermediate steps as waypoints and send them to the client once 
+requested. If the driving is enabled (from the client side) then the drived will find the waypoint
+on the generated path that is "traversableDist" away from the current location and sends this
+waypoint as a goal to the underlying position device (nd driver is prefered but it can also be
+VFH+). The driver will keep on checking how far is the robot from the goal and stops it when it
+reaches the destination or when the driving is disabled from the client side.
+===========================
+ Configuration file Options  
+===========================
+
+- traversableDist (float) 
+	- Default: 1.0
+	- Specify how far you want your waypoint be from your current location. This helps in 
+	  reducing the local minima case.
+- narrowestPassage (float)
+	- Default: 0.987
+	- Based on the map you specified, what is the narrowest passage that you want the robot to
+	  be able to pass through. This is used in determining the expansion radius used for the 
+	  collision detection.
+- distanceToGoal (float) 
+	- Default: 2
+	- Define how close you want to be to the goal destination.
+- bridgeLen (float)
+	- Default: 2
+	- Specifies the length of the segments used for the bridge test.
+- bridgeRes (float) 
+	-Default: 0.1
+	- Defines how dense should the sampling resolution be while using the bridge test.
+- regGridLen (float) 
+	-Default: 0.2
+	- Defines how dense should be the regular sampling resolution be.
+- regGridConRad (float)
+	- Default: 0.4
+	- Define what radius should be used for connecting regular grid samples.
+- obstPenalty (float)
+	- Default: 3.0
+	- Defines the how close to an obstacle should we approach to start penalizing.
+- bridgeConRad (float) 
+	- Default: 0.5
+	- Specifies the radius for connecting samples generated using the bridge test.
+- debug (bool)
+	- Default: false
+	- Specify if you want to debug the driver or not. This will save the generated space
+	  and the path into an image file in the local folder.
+
+driver
+(
+  name "SSPP"
+  plugin "SSPP.so"
+  provides ["planner:0"]
+  requires ["output:::position2d:1" "input:::position2d:2" "map:0"] 
+  traversableDist 1
+  narrowestPassage 0.9
+  distanceToGoal 0.2
+  bridgeLen 3.0
+  bridgeRes 0.2
+  regGridLen 0.4
+  regGridConRad 0.4
+  bridgeConRad 0.5
+  obstPenalty 2
+)
+
+================
+ STAGE TESTING  
+================
+
+- The directory stage_test contains a stage configuration for testing SSPP. Simply run:
+  "player sspp.cfg"
+  
+- You can also use playernav to debug it and send goal commands.
+
+	driver
+	(
+	  name "stage"
+	  plugin "libstageplugin"
+	  provides ["simulation:0"]
+	  worldfile "cas.world"
+	)
+	driver
+	(
+	  name "mapfile"
+	  provides ["map:0"]
+	  filename "casarea_sub.jpeg"
+	  resolution 0.05  
+	)
+	driver
+	(
+	  name "stage"
+	  model "robot"
+	  provides ["position2d:0" "laser:0"]
+	)
+	driver
+	(
+	  name "nd"
+	  provides ["position2d:1"]
+	  requires ["output:::position2d:0" "input:::position2d:0" "laser:0"]
+	  max_speed [0.3 30.0]
+	  min_speed [0.1 10.0]
+	  goal_tol [0.3 15.0]
+	  wait_on_stall 1
+	
+	  rotate_stuck_time 5.0
+	  translate_stuck_time 5.0
+	  translate_stuck_dist 0.15
+	  translate_stuck_angle 10.0
+	
+	  avoid_dist 0.4
+	  safety_dist 0.0
+	  laser_buffer 1
+	  alwayson 1
+	)
+	driver
+	(
+	  name "amcl"
+	  update_thresh [0.05 0.175]
+	  provides ["localize:0" "position2d:2"]
+	  requires ["odometry:::position2d:0" "laser:0" "laser:::map:0"]
+	)
+	driver
+	(
+	  name "SSPP"
+	  plugin "SSPP.so"
+	  provides ["planner:0"]
+	  requires ["output:::position2d:1" "input:::position2d:2" "map:0"]
+	)
+
+Tarek Taha 7/11/2007 

@@ -95,31 +95,38 @@ The SSPP driver provides the following device interfaces:
 
 - traversableDist (float) 
 	- Default: 1.0
-	-
+	- Specify how far you want your waypoint be from your current location. This helps in 
+	  reducing the local minima case.
 - narrowestPassage (float)
 	- Default: 0.987
-	- 
+	- Based on the map you specified, what is the narrowest passage that you want the robot to
+	  be able to pass through. This is used in determining the expansion radius used for the 
+	  collision detection.
 - distanceToGoal (float) 
 	- Default: 2
-	-
+	- Define how close you want to be to the goal destination.
 - bridgeLen (float)
 	- Default: 2
-	-
+	- Specifies the length of the segments used for the bridge test.
 - bridgeRes (float) 
 	-Default: 0.1
-	-
+	- Defines how dense should the sampling resolution be while using the bridge test.
 - regGridLen (float) 
 	-Default: 0.2
-	-
+	- Defines how dense should be the regular sampling resolution be.
 - regGridConRad (float)
 	- Default: 0.4
-	-
+	- Define what radius should be used for connecting regular grid samples.
 - obstPenalty (float)
 	- Default: 3.0
-	-
+	- Defines the how close to an obstacle should we approach to start penalizing.
 - bridgeConRad (float) 
 	- Default: 0.5
-	-
+	- Specifies the radius for connecting samples generated using the bridge test.
+- debug (bool)
+	- Default: false
+	- Specify if you want to debug the driver or not. This will save the generated space
+	  and the path into an image file in the local folder.
 @par Example 
 
 @verbatim
