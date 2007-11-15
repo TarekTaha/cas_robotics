@@ -48,7 +48,6 @@ HEADERS += modules/CommManager/commmanager.h \
     modules/PathPlanner/pathplanner.h \
     modules/PathPlanner/robot.h \
     modules/PathPlanner/searchspace.h \
-    modules/PathPlanner/searchspaceNode.h \
     modules/PathPlanner/voronoipathplanner.h \
     modules/Misc/timer.h \
     modules/GeometricTools/Transformations.h \
