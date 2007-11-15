@@ -90,7 +90,8 @@ HEADERS += modules/CommManager/commmanager.h \
     modules/PomdpCore/embedFiles.h \
     modules/MapManager/mapskeleton.h \
     modules/HumanRobotInterface/IntentionRecognizer.h \
-    modules/HumanRobotInterface/activityLogger.h
+    modules/HumanRobotInterface/activityLogger.h \
+    modules/Rendering/FreeType.h
 SOURCES += modules/CommManager/commmanager.cpp \
     modules/CommonTools/bandmat.cpp \
     modules/CommonTools/cholesky.cpp \
@@ -178,7 +179,8 @@ SOURCES += modules/CommManager/commmanager.cpp \
     modules/MapManager/map.cpp \
     modules/HumanRobotInterface/IntentionRecognizer.cpp \
     modules/HumanRobotInterface/activityLogger.cpp \
-    modules/Controller/wheelchairproxy.cpp
+    modules/Controller/wheelchairproxy.cpp \
+    modules/Rendering/FreeType.cpp
 INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     /usr/local/Trolltech/Qt-4.2.2/include/QtGui \
     /usr/local/high/include \
@@ -208,7 +210,8 @@ INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     modules/TasksManager \
     gui \
     modules/PomdpCore \
-    modules/HumanRobotInterface
+    modules/HumanRobotInterface \
+    /usr/include/freetype2
 RESOURCES = resources/icons.qrc
 QT += opengl
 QMAKE_CFLAGS_RELEASE += -g \
@@ -225,7 +228,8 @@ QMAKE_CXXFLAGS_RELEASE += -g \
 
 # QMAKE_CFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
 # QMAKE_LFLAGS_RELEASE += -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
-LIBS += $$system(pkg-config --cflags --libs gthread-2.0 playerc++ playercore) # -lCGAL
+LIBS += $$system(pkg-config --cflags --libs gthread-2.0 playerc++ playercore) \ # -lCGAL
+    -lfreetype
 MOC_DIR = .tmp
 OBJECTS_DIR = .tmp
 RCC_DIR = .tmp

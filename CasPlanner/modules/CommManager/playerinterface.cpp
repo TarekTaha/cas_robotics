@@ -177,7 +177,7 @@ void PlayerInterface::checkForWheelChair()
 		  	printf("\n Turning ON WheelChair"); fflush(stdout);
 		  	wheelChairCommander->setPower(ON);
 		  	wheelChairCommander->setMode(AUTO);
-		  	wheelChairCommander->soundHorn(1000);
+//		  	wheelChairCommander->soundHorn(1000);
 		  	printf("\n WheelChair is on"); fflush(stdout);			
 		  	logMsg.append(QString("\n\t\t - Wheelchair Driver Engaged"));
 		}

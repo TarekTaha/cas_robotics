@@ -34,6 +34,8 @@
 //#include "robotrender.h"
 #include "map.h"
 
+#include "FreeType.h"
+
 //class RobotRender;
 class PlayGround;
 class NavControlPanel;
@@ -116,6 +118,7 @@ Q_OBJECT
 		bool showPointclouds;
 		bool showPatchBorders;
 		bool hideGoals;
+		freetype::font_data font2Render;
 		bool start_initialized,end_initialized,mainMapBuilt;
 	    MapManager mapManager;
 	    Pose start,end,wayPoint;

@@ -19,6 +19,7 @@
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
 #include "mapviewer.h"
+#define ROBOT 1
 
 MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
  : QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::Rgba | QGL::SampleBuffers), parent),
@@ -88,9 +89,11 @@ void MapViewer::initializeGL()
     //glDepthFunc(GL_LEQUAL);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
    	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-//    renderText(0,0,0,"");
+    renderText(0,0,0,"");
     glFlush();
     mapList = glGenLists(1);
+    font2Render.init("resources/Test.ttf", 16);
+    glInitNames();
 }
 
 void MapViewer::resizeGL(int w, int h)
@@ -304,6 +307,7 @@ void MapViewer::renderRobot()
 	    {
 		    // Obstacle
 		    glPushMatrix();
+		    glPushName(ROBOT);
 		    glTranslated(loc.p.x(),loc.p.y(),0);
 		    glRotated(RTOD(loc.phi),0,0,1);
 		    glShadeModel(GL_FLAT);
@@ -345,6 +349,10 @@ void MapViewer::renderRobot()
         glColor4f(0,0,1,0.5);
         QFont font40; font40.setPointSize(10);
 	    renderText(1.6,0,1, qPrintable(playGround->robotPlatforms[i]->robot->robotName),font40);
+	    
+	    glColor3ub(0xff,0,0);
+	    freetype::print(font2Render,1.6,0, "Active FreeType Text");
+	    
 	    glBegin(GL_LINE_LOOP);
 			glColor4f(0,0,1,0.5);
 		    glVertex3f(1.3, 0.15,0);
@@ -512,7 +520,7 @@ void MapViewer::displayGrid()
 			    glVertex3f(i,0,0);
 			    glVertex3f(i-1,-0.5,0);
 		    glEnd();
-//		    renderText(i,-1,1, "X");
+		    renderText(i,-1,1, "X");
 		 }
 		 //Y-axis indicator
 	    int j = int((ogMap->height*ogMap->mapRes)/2.0 + 2);
@@ -523,7 +531,8 @@ void MapViewer::displayGrid()
 			    glVertex3f(0,j,0);
 			    glVertex3f(0.5,j-1,0);
 		    glEnd();
-//		    renderText(1,j,1, "Y");
+		    glColor4f(1.0,1.0,0,0.5);
+		    renderText(1,j,1, "Y");
 		 }
     }
     glPopMatrix();	
@@ -690,9 +699,9 @@ void MapViewer::drawProbHisto(QPointF pos, double prob)
 		return;
 	glPushMatrix();
 	glTranslatef(pos.x(),pos.y(),0.0f);
-//  glColor4f(1.0f,0.5f,0.0f,1.0f);
+  glColor4f(1.0f,0.5f,0.0f,1.0f);
 // 	renderText(0 ,0 + 0.2, prob+ 0.2, str);
-	glScalef(1/12.0, 1/12.0, prob);
+//	glScalef(1/12.0, 1/12.0, prob);
   	//glRotatef(rotqube,0.0f,1.0f,0.0f);	// Rotate The cube around the Y axis
   	//glRotatef(rotqube,1.0f,1.0f,1.0f);
   	glBegin(GL_QUADS);		// Draw The Cube Using quads  
@@ -823,7 +832,7 @@ void MapViewer::paintGL()
    	glPushMatrix();
     glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
     glColor4f(1,1,1,1);
-//    renderText(zoomFactor*aspectRatio*0.90-1, -0.9*zoomFactor, 0, "grid: 1 m");
+    renderText(zoomFactor*aspectRatio*0.90-1, -0.9*zoomFactor, 0, "grid: 1 m");
 
     glRotatef(pitch,1,0,0);
     glRotatef(yaw,0,0,1);
