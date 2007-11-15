@@ -947,6 +947,18 @@ void MapViewer::setShowPatchBorders(int state)
     }
     update();
 }
+
+void MapViewer::wheelEvent( QWheelEvent * event ) 
+{
+    int numDegrees = event->delta() / 8;
+    int numSteps = numDegrees / 15;
+    if(numSteps > 0)
+    	zoomFactor /= 1.1;
+    else
+    	zoomFactor *= 1.1;
+    
+}
+
 void MapViewer::mouseDoubleClickEvent(QMouseEvent *me)
 {
 //	updateMap(playGround->robotPlatforms[0]->planningManager->pathPlanner->map);	

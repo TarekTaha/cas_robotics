@@ -55,6 +55,7 @@ Q_OBJECT
 		void mousePressEvent(QMouseEvent *me);
 		void mouseDoubleClickEvent(QMouseEvent *me);
 		void mouseMoveEvent ( QMouseEvent * me );
+		void wheelEvent( QWheelEvent * event );
 		QPointF getOGLPos(double x, double y);
 		QPointF getOGLPos(QPointF point);
 		void mouseReleaseEvent(QMouseEvent *me);
