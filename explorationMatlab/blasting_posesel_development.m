@@ -70,24 +70,27 @@ function [qt,solutionvalid,dist_val,targetdist,used_sol] = blasting_posesel(robo
     Links = robot.link; 
     t = robot.base;
     qlimits=robot.qlim; 
-   
+    
     %make sure the q is correct
     if nargin < 3
         q = zeros(numlinks, 1);
     else
         q = q(:);
     end
+    %only use the first 5 joints since the 6th makes no difference
+    q=q(1:5);
+    
     q_input=q; %save the input q (or made up q) for later
 
-    options = optimset('Display', 'off', 'Largescale', 'off', 'TolFun', optimise.stol,'MaxFunEvals', optimise.iLimit);
-
+    options = optimset('Display', 'off', 'Largescale', 'off', 'TolFun', optimise.stol,'MaxFunEvals', optimise.iLimit,'DiffMinChange',optimise.jointresolution);
+ 
     xGuess = zeros(size(q));lb = []; ub = [];
     
 %% Do the least squared optimisation function using q passed in       
     [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
 
     % Update the configuration
-    qt = q + dq; all_qts(1).val=qt;
+    qt = [q + dq;0]; all_qts(1).val=qt;
     
     %if there is a collision or out of joint limit then no distance is returned
     dist=[inf,inf,inf,inf];    
@@ -98,9 +101,9 @@ function [qt,solutionvalid,dist_val,targetdist,used_sol] = blasting_posesel(robo
     else
         %check if current q =0, otherwise try getting a solution with q=0
         if ~isempty(find(q(1:3)~=0, 1))
-            q = zeros(numlinks, 1);
-            [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
-            qt = q + dq; all_qts(2).val=qt;
+            q = zeros(numlinks-1, 1);
+            [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);   
+            qt = [q + dq;0]; all_qts(2).val=qt;
             [valid,dist(2),targetdist(2).val]=check_newQ(qt,qlimits,pt,t,Links,numlinks,plane_equ); 
             if valid; used_sol=2; dist_val= dist(2); qt=qt'; return; end
         end
@@ -118,15 +121,15 @@ function [qt,solutionvalid,dist_val,targetdist,used_sol] = blasting_posesel(robo
         %Try a guess which starts at 90' off the current Q, this might find a solution 
         q=q_input+((sqrt(q_input.^2)~=q_input)*2-1)*pi;
         [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
-        qt = q + dq; all_qts(3).val=qt;
+        qt = [q + dq;0]; all_qts(3).val=qt;
         [valid,dist(3),targetdist(3).val]=check_newQ(qt,qlimits,pt,t,Links,numlinks,plane_equ);
         if valid; used_sol=3; dist_val= dist(3); qt=qt'; return; end
-
+ 
         %Try randomly guessing a starting point
-        q=[0;0;0;0;0;0];
-        for i=1:size(qlimits,1);  q(i)=rand()*(-qlimits(i,1)+qlimits(i,2))+qlimits(i,1); end
+        q=[0;0;0;0;0];
+        for i=1:size(qlimits,1)-1;  q(i)=rand()*(-qlimits(i,1)+qlimits(i,2))+qlimits(i,1); end
         [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
-        qt = q + dq; all_qts(4).val=qt;
+        qt = [q + dq;0]; all_qts(4).val=qt;
         [valid,dist(4),targetdist(4).val]=check_newQ(qt,qlimits,pt,t,Links,numlinks,plane_equ);
         if valid; used_sol=4; dist_val= dist(4); qt=qt'; return;  end
         
@@ -148,12 +151,9 @@ function [qt,solutionvalid,dist_val,targetdist,used_sol] = blasting_posesel(robo
 
 % \end{arrary}$$
     function [e]=costComponents(dq)
-        tr=t;
-        q_temp=q+dq;
-        if ~isempty(find(isnan(dq),1))
-            return;
-        end
-        
+        tr=t;          
+        q_temp=[q+dq;0];
+%         q_temp=q+dq;
         Jlimitresult=[0,0,0,0,0,0];
         result_row=[1,1,1,1,1,1];
         %check each joint and link for collisions and exceeding limits
@@ -181,16 +181,17 @@ function [qt,solutionvalid,dist_val,targetdist,used_sol] = blasting_posesel(robo
 % e^{5\times \sum{Jlimitresult}}-1\\
 % e^{5(6-\sum{result\_row}}-1\\
 % \end{array} \right)$$
-streamlength=dist_pt2tr(pt,tr);
+% stream length should be distance to actual point of intersection
+disttotarget=dist_pt2tr(pt,tr);
 theta = acos(plane_equ(1:3)*unit((tr(1:3,3)+tr(1:3,4))));
 % theta=acos(dot(targetNormal,unit(tr(1:3,3)+tr(1:3,4))));
 % theta*180/pi
-% plot(r,q_temp')
+% plot(r,q_temp','joints');hold on; plot3(pt(1),pt(2),pt(3),'r*')
 % drawnow
 
-    streamStart=tr(1:3,4);
-    streamEnd=tr(1:3,3)'+tr(1:3,4)';
-    r_var=[streamStart(1)-streamEnd(1),streamStart(2)-streamEnd(2),streamStart(3)-streamEnd(3)];
+%     streamStart=tr(1:3,4);
+%     streamEnd=tr(1:3,3)'+tr(1:3,4)';
+%     r_var=[streamStart(1)-streamEnd(1),streamStart(2)-streamEnd(2),streamStart(3)-streamEnd(3)];
     r_var=-tr(1:3,3)';
 
     %find intersection point between surface and the scan line between scan origin and point
@@ -199,7 +200,7 @@ theta = acos(plane_equ(1:3)*unit((tr(1:3,3)+tr(1:3,4))));
                    plane_equ(3)*r_var(3);
     %make sure it is not 0 otherwise change it so it is simply a very small
     %number (epsilon)
-    if ~isempty(find(bottomof_t_var==0, 1)); bottomof_t_var(bottomof_t_var==0)=eps; end                                                                               
+    if ~isempty(find(bottomof_t_var==0, 1)); bottomof_t_var=eps; end                                                                               
     t_var=( plane_equ(1)*tr(1,4)+...
             plane_equ(2)*tr(2,4)+...
             plane_equ(3)*tr(3,4)+...
@@ -211,15 +212,33 @@ theta = acos(plane_equ(1:3)*unit((tr(1:3,3)+tr(1:3,4))));
                      t_var.*-r_var(2)+tr(2,4),...
                      t_var.*-r_var(3)+tr(3,4)];
 
+streamlength=dist_pt2tr(intersectionPNT,tr);
+%determine distance from unit long stream length to intersectionPNT to make
+%sure that it is on the same side
+streamEnd=tr(1:3,3)'+tr(1:3,4)';
+cor_orient_vec_streamlen=sqrt((intersectionPNT(1)-streamEnd(1))^2+...
+                                          (intersectionPNT(2)-streamEnd(2))^2+...
+                                          (intersectionPNT(3)-streamEnd(3))^2);
                  
-        e = [exp(-5*(optimise.maxtargetdis-streamlength));
-             exp(-10*(streamlength-optimise.mintargetdis));
-             exp(10*(sqrt((pt(1)-intersectionPNT(1))^2+...
-                          (pt(2)-intersectionPNT(2))^2+...
-                          (pt(3)-intersectionPNT(3))^2)-optimise.minAccepDis));
-             exp(5*(theta-optimise.maxDeflectionError));
-             exp(5*sum(Jlimitresult))-1;
-             exp(5*(6-sum(result_row)))-1];
+%         e = [exp(-5*(optimise.maxtargetdis-streamlength));
+%              exp(-10*(streamlength-optimise.mintargetdis));
+%              exp(10*(sqrt((pt(1)-intersectionPNT(1))^2+...
+%                           (pt(2)-intersectionPNT(2))^2+...
+%                           (pt(3)-intersectionPNT(3))^2)-optimise.minAccepDis));
+%              exp(5*(theta-optimise.maxDeflectionError));
+%              exp(5*sum(Jlimitresult))-1;
+%              exp(5*(6-sum(result_row)))-1]; 
+         e = [exp(10*(disttotarget-optimise.maxtargetdis));
+              exp(10*(optimise.mintargetdis-disttotarget));
+             exp((streamlength-optimise.maxtargetdis)/10);
+              exp((optimise.mintargetdis-streamlength)/10);
+              exp((cor_orient_vec_streamlen-(1-optimise.mintargetdis))/5);
+              exp((sqrt((pt(1)-intersectionPNT(1))^2+...
+                        (pt(2)-intersectionPNT(2))^2+...
+                        (pt(3)-intersectionPNT(3))^2)-optimise.minAccepDis)/10);
+              exp(theta-optimise.maxDeflectionError);
+              exp(5*sum(Jlimitresult))-1;
+              exp(5*(6-sum(result_row)))-1];
     end
 end
 
