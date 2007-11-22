@@ -182,7 +182,10 @@ void IntentionRecognizer::resetBelief()
   	{
   		destBelief[i] = initialBeliefD((numStates*i) + spatialState) = 1/float(numDestinations);
   	}
-  	
+//  	destBelief[0] = initialBeliefD((numStates*0) + spatialState) = 0;
+//  	destBelief[1] = initialBeliefD((numStates*1) + spatialState) = 0.25;
+//  	destBelief[2] = initialBeliefD((numStates*2) + spatialState) = 0;
+//  	destBelief[3] = initialBeliefD((numStates*3) + spatialState) = 0.75;
   	copy(b, initialBeliefD);
   	em->setBelief(b);
 }
@@ -292,7 +295,7 @@ void IntentionRecognizer::run()
 				}
 			}
 			for(int i=0;i<numDestinations;i++)
-			{			
+			{
 				printf("\n Belief is now Updated to Dest:%d with %f",i,destBelief[i]);				
 				fprintf(file,"%.5f ",destBelief[i]);
 			}
