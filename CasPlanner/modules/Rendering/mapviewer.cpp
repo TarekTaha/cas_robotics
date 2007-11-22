@@ -19,6 +19,7 @@
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
 #include "mapviewer.h"
+#include "bitmap_fonts.h"
 #define ROBOT 1
 
 MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
@@ -82,17 +83,18 @@ QSize MapViewer::minimumSizeHint()
 void MapViewer::initializeGL()
 {
     // Initialization
-    //glShadeModel(GL_SMOOTH);       
-    glShadeModel(GL_FLAT);
+    glShadeModel(GL_SMOOTH);       
     glClearDepth(1.0f);
     glEnable(GL_DEPTH_TEST);
-    //glDepthFunc(GL_LEQUAL);
+//    glDepthFunc(GL_LEQUAL);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
    	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    renderText(0,0,0,"");
-    glFlush();
+
+   	beginRenderText(screenWidth,screenHeight);
+
+   	glFlush();
     mapList = glGenLists(1);
-    font2Render.init("resources/Test.ttf", 16);
+//    font2Render.init("resources/Test.ttf", 16);
     glInitNames();
 }
 
@@ -104,7 +106,7 @@ void MapViewer::resizeGL(int w, int h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	gluPerspective(180, aspectRatio, 1,1000);
+	gluPerspective(180, aspectRatio, 0.1,100);
 	glViewport(0,0,w,h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -348,10 +350,10 @@ void MapViewer::renderRobot()
 		glEnd();
         glColor4f(0,0,1,0.5);
         QFont font40; font40.setPointSize(10);
-	    renderText(1.6,0,1, qPrintable(playGround->robotPlatforms[i]->robot->robotName),font40);
-	    
-	    glColor3ub(0xff,0,0);
-	    freetype::print(font2Render,1.6,0, "Active FreeType Text");
+//	    renderText(1.6,0,1, qPrintable(playGround->robotPlatforms[i]->robot->robotName),font40);
+	    renderTextFont(1.6,0, BITMAP_FONT_TYPE_HELVETICA_12, (char *)qPrintable(playGround->robotPlatforms[i]->robot->robotName));
+	    glColor4f(0,0,1,0.5);
+//	    freetype::print(font2Render,1.6,0, "Active FreeType Text");
 	    
 	    glBegin(GL_LINE_LOOP);
 			glColor4f(0,0,1,0.5);
@@ -475,7 +477,7 @@ void MapViewer::renderMap()
     glEnd();
 
     // Surrounding BOX
-	glColor4f(0,0,0,0.5);
+	glColor4f(0,1.0,0,1.0);
 	glBegin(GL_LINE_LOOP);
 		glVertex2f(0,0);
 		glVertex2f(0.0,newHeight*ogMap->mapRes);
@@ -520,7 +522,9 @@ void MapViewer::displayGrid()
 			    glVertex3f(i,0,0);
 			    glVertex3f(i-1,-0.5,0);
 		    glEnd();
-		    renderText(i,-1,1, "X");
+		    glColor4f(0.0f,0.0f,0.0f,1.0f);
+//		    renderText(i,-1,1, "X");
+		    renderTextFont(i,-1, BITMAP_FONT_TYPE_HELVETICA_18, "X-axis");		    		    
 		 }
 		 //Y-axis indicator
 	    int j = int((ogMap->height*ogMap->mapRes)/2.0 + 2);
@@ -531,8 +535,9 @@ void MapViewer::displayGrid()
 			    glVertex3f(0,j,0);
 			    glVertex3f(0.5,j-1,0);
 		    glEnd();
-		    glColor4f(1.0,1.0,0,0.5);
-		    renderText(1,j,1, "Y");
+		    glColor4f(0.0f,0.0f,0.0f,1.0f);
+//		    renderText(1,j,1, "Y");
+		    renderTextFont(1,j, BITMAP_FONT_TYPE_HELVETICA_18, "Y-axis");		    
 		 }
     }
     glPopMatrix();	
@@ -540,7 +545,7 @@ void MapViewer::displayGrid()
 
 void MapViewer::drawCircle(float radius)
 {
-   glBegin(GL_LINES);
+   glBegin(GL_LINE_STRIP);
 	   for (int i=0; i < 360; i++)
 	   {
 	      float degInRad = DTOR(i);
@@ -551,7 +556,7 @@ void MapViewer::drawCircle(float radius)
 
 void MapViewer::drawCircle(QPointF center,float radius)
 {
-   glBegin(GL_LINES);
+   glBegin(GL_LINE_STRIP);
 	   for (int i=0; i < 360; i++)
 	   {
 	      float degInRad = DTOR(i);
@@ -565,7 +570,11 @@ void MapViewer::renderObservation()
 	if(!playGround->mapManager || !playGround->robotPlatforms[0]->intentionRecognizer||!playGround->robotPlatforms[0]->commManager)
 		return;
 	glPushMatrix();
-		glTranslatef(-0.7,0.8,0.0);
+		glColor4f(1.0f,0.0f,0.0f,1.0f);
+		glLineWidth(2);	
+		renderTextFont(-0.99,0.95, BITMAP_FONT_TYPE_HELVETICA_18,"Joystick");
+		glColor4f(0.0f,0.0f,1.0f,1.0f);
+		glTranslatef(-0.9,0.85,0.0);
 		glScalef(1/15.0, 1/15.0, 1.0);
 		drawCircle(1.0);
 		int obs = playGround->robotPlatforms[0]->intentionRecognizer->observation;
@@ -648,15 +657,23 @@ void MapViewer::renderSpatialStates()
 	    glTranslated(playGround->mapManager->mapSkeleton.verticies[i].location.x(),playGround->mapManager->mapSkeleton.verticies[i].location.y(),0);
 	    glShadeModel(GL_FLAT);
 	    if(i==playGround->mapManager->mapSkeleton.getCurrentSpatialState(l))
+	    {
 	    	glColor4f(1,0,0,0.5);
+	    	renderTextFont(0,0, BITMAP_FONT_TYPE_HELVETICA_10,"Current");
+	    }
 	    else if (i == playGround->robotPlatforms[0]->intentionRecognizer->nextState)
+	    {
 	    	glColor4f(0,0,1,1);
+	    	renderTextFont(0,0, BITMAP_FONT_TYPE_HELVETICA_10,"Next");
+	    }
 	    else
 	    	glColor4f(0.33,0.33,0.33,0.5);
 		glRectf(-0.2f,0.2f, 0.2f, -0.2f);
-		
-		if( playGround->mapManager->mapSkeleton.destIndexes.indexOf((i%playGround->mapManager->mapSkeleton.numStates))!=-1 )
+		int d;
+		if( (d = playGround->mapManager->mapSkeleton.destIndexes.indexOf((i%playGround->mapManager->mapSkeleton.numStates)))!=-1 )
 		{
+			glColor4f(1.0,0.0,0.0,1.0);
+			renderTextFont(-0.1,0.3, BITMAP_FONT_TYPE_HELVETICA_12,(char*)qPrintable(QString("%1").arg(d+1)));
 			glColor4f(1.0,0.33,0.33,0.5);
 			glBegin(GL_LINE);
 				glVertex2f(-0.2f, 0.2f);
@@ -678,14 +695,17 @@ void MapViewer::renderDestIndicators()
 //	This is not the general Case now and i might need to change it
 //	Pose l = playGround->robotPlatforms[0]->commManager->getOdomLocation();
 	Pose l = playGround->robotPlatforms[0]->commManager->getLocation();
+	glColor4f(1.0f,0.0f,0.0f,1.0f);
+	renderTextFont(-0.65,0.95, BITMAP_FONT_TYPE_HELVETICA_18,"Probs:");
 	for(int i=0; i < playGround->robotPlatforms[0]->intentionRecognizer->numDestinations ;i++)
 	{
 		int r;
 		r = playGround->mapManager->mapSkeleton.destIndexes[i];
 //		drawProbHisto(playGround->mapManager->mapSkeleton.verticies[r].location, playGround->robotPlatforms[0]->intentionRecognizer->destBelief[i]);
 		glPushMatrix();
-			glTranslatef(-0.5,0.9 - i*0.05 ,0.0);
-			glColor4f(1.0f,0.5f,0.0f,1.0f);
+			glColor4f(1.0f,0.5f,0.0f,1.0f);	
+			renderTextFont(-0.65,0.9 - i*0.04, BITMAP_FONT_TYPE_HELVETICA_12,(char*)qPrintable(QString("Dest %1:").arg(i+1)));
+			glTranslatef(-0.5,0.9 - i*0.04 ,0.0);			
 			glScalef(playGround->robotPlatforms[0]->intentionRecognizer->destBelief[i]*4.0f,1.0f, 1.0f);
 			glRectf(0.0,0.025f, 0.025f, 0.0f);
 		glPopMatrix();
@@ -817,9 +837,16 @@ void MapViewer::showIndicators()
 void MapViewer::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//    glBlendFunc(GL_DST_COLOR, GL_ZERO);
     glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//    glDisable(GL_BLEND);
+//    glBlendFunc(GL_ONE, GL_ONE);
+//    glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_ONE_MINUS_SRC_ALPHA);
+//    glBlendFunc(GL_SRC_COLOR, GL_SRC_ALPHA);
+//    glBlendFunc(GL_DST_COLOR, GL_DST_ALPHA);
+//    glBlendFunc(GL_DST_COLOR, GL_ZERO);
+
+
 	glEnable(GL_DEPTH_TEST);
 //    glDisable(GL_DEPTH_TEST);
 //    glEnable(GL_POINT_SMOOTH);
@@ -827,13 +854,14 @@ void MapViewer::paintGL()
 //    glEnable(GL_LINE_SMOOTH);
 //    glEnable(GL_POLYGON_SMOOTH);
 	
-	renderObservation();
+    renderObservation();
 	renderDestIndicators();	
    	glPushMatrix();
     glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
-    glColor4f(1,1,1,1);
-    renderText(zoomFactor*aspectRatio*0.90-1, -0.9*zoomFactor, 0, "grid: 1 m");
-
+    glColor4f(0.0f,0.0f,0.0f,1.0f);
+    renderTextFont(zoomFactor*aspectRatio-4, -zoomFactor, BITMAP_FONT_TYPE_HELVETICA_18, "Scale:1m/Tile" );    
+//    renderText(zoomFactor*aspectRatio*0.90 - 2, -0.9*zoomFactor, 1, "grid: 1 m");
+    
     glRotatef(pitch,1,0,0);
     glRotatef(yaw,0,0,1);
     glTranslatef(xOffset, yOffset, zOffset);
@@ -851,7 +879,6 @@ void MapViewer::paintGL()
 		setRobotsLocation();	
 //	    renderLaser();      
 	    renderSpatialStates();
-	    renderObservation();
 	    renderAction();
 		renderExpandedTree();
 //		renderSearchTree();
@@ -860,15 +887,10 @@ void MapViewer::paintGL()
 			loadTexture();
 			renderMap();
 		}
-	}		
+	}
     glCallList(mapList);
         
-    //glDisable(GL_BLEND);
-    //glEnable(GL_DEPTH_TEST);
-    //glDisable(GL_POINT_SMOOTH);
-    //glDisable(GL_LINE_SMOOTH);
-    //glDisable(GL_POLYGON_SMOOTH);
-    glPopMatrix();
+	glPopMatrix();
 }
 
 void MapViewer::setShowOGs(int state)
@@ -1132,12 +1154,10 @@ void MapViewer::keyPressEvent(QKeyEvent *e)
     else if(e->key() == Qt::Key_Up)
     {
 		pitch += 5;
-		if(pitch > 90) pitch = 90;
     }
     else if(e->key() == Qt::Key_Down)
     {
 		pitch -= 5;
-		if(pitch < -90) pitch = -90;
     }
     else if(e->key() == Qt::Key_R)
     {
