@@ -62,7 +62,7 @@ public:
 	QVector <double> destBelief;	
 	Pose currentState,currentPose,goToState,oldGoToState;
 	ActivityLogger activityLogger;
-	int  observation,action,spatialState,oldSpatialState;
+	int  lastObs,observation,action,spatialState,oldSpatialState;
 private:
 	dvector initialBeliefD;
 	string pomdpFileName, policyFileName;

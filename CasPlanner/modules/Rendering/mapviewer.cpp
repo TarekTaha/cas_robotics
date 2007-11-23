@@ -57,15 +57,15 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
 	connect(this, SIGNAL(setEnd(Pose))  ,  navControlPanel, SLOT(setEnd(Pose)));
 	connect(playGround,SIGNAL(mapUpdated(Map*)),this,       SLOT(updateMap(Map*)));
 	
-  	RGB[0][0] = 0.0; RGB[0][1] = 0.7;   RGB[0][2] = 0.7;   // Lightblue
-  	RGB[1][0] = 1.0; RGB[1][1] = 0.51;  RGB[1][2] = 0.278; // Sienna1
-  	RGB[2][0] = 0.0; RGB[2][1] = 0.7;   RGB[2][2] = 0.0;   // Green
-  	RGB[3][0] = 0.7; RGB[3][1] = 0.7;   RGB[3][2] = 0.0;   // Yellow
-  	RGB[5][0] = 1.0; RGB[5][1] = 0.0;   RGB[5][2] = 1.0;   // Magenta
-  	RGB[6][0] = 0.0; RGB[6][1] = 0.0;   RGB[6][2] = 0.7;   // Blue
-  	RGB[7][0] = 1.0; RGB[7][1] = 0.65;  RGB[7][2] = 0.0;   // Orange
-  	RGB[8][0] = 1.0; RGB[8][1] = 0.078; RGB[8][2] = 0.576; // DeepPink
-  	RGB[9][0] = 0.8; RGB[9][1] = 0.0;   RGB[9][2] = 0.0;   // Red
+  	RGB_COLOR[0][0] = 0.0; RGB_COLOR[0][1] = 0.7;   RGB_COLOR[0][2] = 0.7;   // Lightblue
+  	RGB_COLOR[1][0] = 1.0; RGB_COLOR[1][1] = 0.51;  RGB_COLOR[1][2] = 0.278; // Sienna1
+  	RGB_COLOR[2][0] = 0.0; RGB_COLOR[2][1] = 0.7;   RGB_COLOR[2][2] = 0.0;   // Green
+  	RGB_COLOR[3][0] = 0.7; RGB_COLOR[3][1] = 0.7;   RGB_COLOR[3][2] = 0.0;   // Yellow
+  	RGB_COLOR[5][0] = 1.0; RGB_COLOR[5][1] = 0.0;   RGB_COLOR[5][2] = 1.0;   // Magenta
+  	RGB_COLOR[6][0] = 0.0; RGB_COLOR[6][1] = 0.0;   RGB_COLOR[6][2] = 0.7;   // Blue
+  	RGB_COLOR[7][0] = 1.0; RGB_COLOR[7][1] = 0.65;  RGB_COLOR[7][2] = 0.0;   // Orange
+  	RGB_COLOR[8][0] = 1.0; RGB_COLOR[8][1] = 0.078; RGB_COLOR[8][2] = 0.576; // DeepPink
+  	RGB_COLOR[9][0] = 0.8; RGB_COLOR[9][1] = 0.0;   RGB_COLOR[9][2] = 0.0;   // Red
 //	qDebug("OpenGL Initialized"); fflush(stdout);
 }
 
@@ -145,7 +145,7 @@ void MapViewer::renderPaths()
 		if(playGround->robotPlatforms[i]->planningManager->pathPlanner->path)
 		{
 			Node * path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;
-	    	glColor4f(RGB[3][0],RGB[3][1],RGB[3][2],1);
+	    	glColor4f(RGB_COLOR[3][0],RGB_COLOR[3][1],RGB_COLOR[3][2],1);
 	    	glLineWidth(2);
 	    	glColor4f(0,0,1,1);
 		    glBegin(GL_LINE_STRIP);
@@ -325,7 +325,7 @@ void MapViewer::renderRobot()
 	    }
 		if(playGround->robotPlatforms[i]->navigator->trail.size()>1)
 		{
-	    	glColor4f(RGB[i][0],RGB[i][1],RGB[i][2],1);
+	    	glColor4f(RGB_COLOR[i][0],RGB_COLOR[i][1],RGB_COLOR[i][2],1);
 		    glBegin(GL_LINE_STRIP);
 			    for(int k =0;k<playGround->robotPlatforms[i]->navigator->trail.size();k++)
 			    {
@@ -341,7 +341,7 @@ void MapViewer::renderRobot()
 	    // Robot Boundaries BOX
 //		glColor4f(0.63,0.58,0.22,1.0f/double(i+1));
 //		glColor4f(0.5,0.5/double(i+1),0.5,1.0f/double(i+1));
-		glColor4f(RGB[i][0],RGB[i][1],RGB[i][2],1);
+		glColor4f(RGB_COLOR[i][0],RGB_COLOR[i][1],RGB_COLOR[i][2],1);
 		glBegin(GL_TRIANGLE_FAN);
 		for(int m=0;m<playGround->robotPlatforms[i]->robot->local_edge_points.size();m++)
 		{
@@ -424,7 +424,7 @@ void MapViewer::loadTexture()
 //   	if (newWidth != ogMap->width && newHeight != ogMap->height)
 //   	{
 //      	scaledData = new unsigned char[newWidth * newHeight * 4];
-//      	if (gluScaleImage(GL_RGBA, ogMap->width, ogMap->height,
+//      	if (gluScaleImage(GL_RGB_COLORA, ogMap->width, ogMap->height,
 //                        GL_UNSIGNED_BYTE, imgData, newWidth, 
 //                        newHeight, GL_UNSIGNED_BYTE, scaledData) != 0)
 //      	{
@@ -570,27 +570,27 @@ void MapViewer::renderObservation()
 	if(!playGround->mapManager || !playGround->robotPlatforms[0]->intentionRecognizer||!playGround->robotPlatforms[0]->commManager)
 		return;
 	glPushMatrix();
-		glColor4f(1.0f,0.0f,0.0f,1.0f);
-		glLineWidth(2);	
-		renderTextFont(-0.99,0.95, BITMAP_FONT_TYPE_HELVETICA_18,"Joystick");
+		glLineWidth(1);	
 		glColor4f(0.0f,0.0f,1.0f,1.0f);
-		glTranslatef(-0.9,0.85,0.0);
+		glTranslatef(-aspectRatio+0.1,0.9,0.0);
 		glScalef(1/15.0, 1/15.0, 1.0);
+		renderTextFont(-0.99,0.95, BITMAP_FONT_TYPE_HELVETICA_12,"Joystick");		
 		drawCircle(1.0);
-		int obs = playGround->robotPlatforms[0]->intentionRecognizer->observation;
+		int obs = playGround->robotPlatforms[0]->intentionRecognizer->lastObs;
 		glLineWidth(2);
 		switch (obs)
 		{
 			case 0:
-   				glBegin(GL_LINES);			
-					glVertex2f( 0.0, 0.0);
-					glVertex2f( 0.0, 1.0);
-				glEnd();	
+//   				glBegin(GL_LINES);			
+//					glVertex2f( 0.0, 0.0);
+//					glVertex2f( 0.0, 1.0);
+//				glEnd();
+				glRectf(-0.1,0.0f,0.1f, 0.7f);
 				glBegin(GL_TRIANGLE_FAN);
-					glVertex2f(-0.2, 0.8);
+					glVertex2f(-0.2, 0.7);
 					glVertex2f( 0.0, 1.0);
-					glVertex2f( 0.2, 0.8);			
-					glVertex2f(-0.2, 0.8);
+					glVertex2f( 0.2, 0.7);			
+					glVertex2f(-0.2, 0.7);
 				glEnd();
 				break;
 			case 1:
@@ -653,35 +653,28 @@ void MapViewer::renderSpatialStates()
 	Pose l = playGround->robotPlatforms[0]->commManager->getLocation();
 	for(int i=0; i < playGround->mapManager->mapSkeleton.verticies.size() ;i++)
 	{
+		int d;
 	    glPushMatrix();
 	    glTranslated(playGround->mapManager->mapSkeleton.verticies[i].location.x(),playGround->mapManager->mapSkeleton.verticies[i].location.y(),0);
 	    glShadeModel(GL_FLAT);
 	    if(i==playGround->mapManager->mapSkeleton.getCurrentSpatialState(l))
 	    {
 	    	glColor4f(1,0,0,0.5);
-	    	renderTextFont(0,0, BITMAP_FONT_TYPE_HELVETICA_10,"Current");
+//	    	renderTextFont(0,0, BITMAP_FONT_TYPE_HELVETICA_10,"Current");
 	    }
 	    else if (i == playGround->robotPlatforms[0]->intentionRecognizer->nextState)
 	    {
 	    	glColor4f(0,0,1,1);
-	    	renderTextFont(0,0, BITMAP_FONT_TYPE_HELVETICA_10,"Next");
+	    	renderTextFont(-0.5,0.5, BITMAP_FONT_TYPE_HELVETICA_10,"Next");
 	    }
+		else if( (d = playGround->mapManager->mapSkeleton.destIndexes.indexOf((i%playGround->mapManager->mapSkeleton.numStates)))!=-1 )
+		{
+			glColor4f(RGB_COLOR[d%9][0],RGB_COLOR[d%9][1],RGB_COLOR[d%9][2],1.0f);
+			renderTextFont(-0.1,0.3, BITMAP_FONT_TYPE_HELVETICA_12,(char*)qPrintable(QString("%1").arg(d+1)));
+		}
 	    else
 	    	glColor4f(0.33,0.33,0.33,0.5);
 		glRectf(-0.2f,0.2f, 0.2f, -0.2f);
-		int d;
-		if( (d = playGround->mapManager->mapSkeleton.destIndexes.indexOf((i%playGround->mapManager->mapSkeleton.numStates)))!=-1 )
-		{
-			glColor4f(1.0,0.0,0.0,1.0);
-			renderTextFont(-0.1,0.3, BITMAP_FONT_TYPE_HELVETICA_12,(char*)qPrintable(QString("%1").arg(d+1)));
-			glColor4f(1.0,0.33,0.33,0.5);
-			glBegin(GL_LINE);
-				glVertex2f(-0.2f, 0.2f);
-				glVertex2f( 0.2f,-0.2f);
-				glVertex2f(-0.2f,-0.2f);
-				glVertex2f( 0.2f, 0.2f);
-			glEnd();
-		}
 		glPopMatrix();
 	}
 
@@ -696,16 +689,16 @@ void MapViewer::renderDestIndicators()
 //	Pose l = playGround->robotPlatforms[0]->commManager->getOdomLocation();
 	Pose l = playGround->robotPlatforms[0]->commManager->getLocation();
 	glColor4f(1.0f,0.0f,0.0f,1.0f);
-	renderTextFont(-0.65,0.95, BITMAP_FONT_TYPE_HELVETICA_18,"Probs:");
+	renderTextFont(-0.83,0.87, BITMAP_FONT_TYPE_HELVETICA_18,"Probs:");
 	for(int i=0; i < playGround->robotPlatforms[0]->intentionRecognizer->numDestinations ;i++)
 	{
 		int r;
 		r = playGround->mapManager->mapSkeleton.destIndexes[i];
 //		drawProbHisto(playGround->mapManager->mapSkeleton.verticies[r].location, playGround->robotPlatforms[0]->intentionRecognizer->destBelief[i]);
 		glPushMatrix();
-			glColor4f(1.0f,0.5f,0.0f,1.0f);	
-			renderTextFont(-0.65,0.9 - i*0.04, BITMAP_FONT_TYPE_HELVETICA_12,(char*)qPrintable(QString("Dest %1:").arg(i+1)));
-			glTranslatef(-0.5,0.9 - i*0.04 ,0.0);			
+			glColor4f(RGB_COLOR[i%9][0],RGB_COLOR[i%9][1],RGB_COLOR[i%9][2],1.0f);	
+			renderTextFont(-0.65,0.93 - i*0.035, BITMAP_FONT_TYPE_HELVETICA_12,(char*)qPrintable(QString("Dest %1:").arg(i+1)));
+			glTranslatef(-0.5,0.93 - i*0.035 ,0.0);			
 			glScalef(playGround->robotPlatforms[0]->intentionRecognizer->destBelief[i]*4.0f,1.0f, 1.0f);
 			glRectf(0.0,0.025f, 0.025f, 0.0f);
 		glPopMatrix();
@@ -831,7 +824,7 @@ void MapViewer::showIndicators()
 //	        renderText(0.2,0,0,QString("End"), font40);
 			glPopMatrix();
 	    }
-	}	
+	}
 }
 
 void MapViewer::paintGL()
@@ -853,13 +846,29 @@ void MapViewer::paintGL()
 //    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 //    glEnable(GL_LINE_SMOOTH);
 //    glEnable(GL_POLYGON_SMOOTH);
-	
-    renderObservation();
-	renderDestIndicators();	
-   	glPushMatrix();
-    glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
     glColor4f(0.0f,0.0f,0.0f,1.0f);
-    renderTextFont(zoomFactor*aspectRatio-4, -zoomFactor, BITMAP_FONT_TYPE_HELVETICA_18, "Scale:1m/Tile" );    
+    renderTextFont(0.65,-0.95, BITMAP_FONT_TYPE_HELVETICA_18, "Scale:1m/Tile" );
+    glColor4f(0.78f,0.78f,0.78f,1.0f);
+    glRectf(0.64,-0.9f,aspectRatio-0.03,-0.96f);
+    
+    renderObservation();
+	renderDestIndicators();
+	
+	glColor4f(0.78f,0.78f,0.78f,1.0f);
+	glRectf(-aspectRatio+0.01,0.8f,-0.4f, 1.0f-0.01);
+	
+	glColor4f(0.0f,0.0f,0.0f,1.0f);
+	glLineWidth(3);
+	glBegin(GL_LINE_STRIP);
+		glVertex3f(-aspectRatio+0.01,0.8,0);
+		glVertex3f(-aspectRatio+0.01,1.0-0.01,0);
+		glVertex3f(-0.4,1.0-0.01,0);
+		glVertex3f(-0.4,0.8,0);
+		glVertex3f(-aspectRatio+0.01,0.8,0);
+	glEnd();
+	glLineWidth(1);
+	glPushMatrix();
+    glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
 //    renderText(zoomFactor*aspectRatio*0.90 - 2, -0.9*zoomFactor, 1, "grid: 1 m");
     
     glRotatef(pitch,1,0,0);
@@ -880,7 +889,7 @@ void MapViewer::paintGL()
 //	    renderLaser();      
 	    renderSpatialStates();
 	    renderAction();
-		renderExpandedTree();
+//		renderExpandedTree();
 //		renderSearchTree();
 		if(!mainMapBuilt)
 		{

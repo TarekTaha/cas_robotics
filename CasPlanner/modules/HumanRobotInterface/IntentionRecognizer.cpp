@@ -27,6 +27,7 @@ beliefInitialized(false),
 destBelief(playG->mapManager->mapSkeleton.numDestinations,0),
 goToState(-1,-1,-1),
 oldGoToState(0,0,0),
+lastObs(4),
 observation(4),
 action(4),
 spatialState(-1),
@@ -258,7 +259,7 @@ void IntentionRecognizer::run()
 		{
 			/* We are now in action new State so Save it as visited */
 		    // Get an Observation
-		    observation = robotManager->commManager->getJoyStickGlobalDir();
+			lastObs = observation = robotManager->commManager->getJoyStickGlobalDir();
 		    /* 
 		     * Get an observation and if it's directional(not NoInput) then don't
 		     * take any more observations from this state.
