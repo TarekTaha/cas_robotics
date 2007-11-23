@@ -135,7 +135,7 @@ Q_OBJECT
 	    QTimer * renderTimer;
 		friend class MapControlPanel;
 		GLuint texId;
-		double RGB[10][3];
+		double RGB_COLOR[10][3];
 		float ratioW, ratioH;
 		int newWidth,newHeight;
 };
