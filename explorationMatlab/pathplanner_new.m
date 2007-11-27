@@ -1,4 +1,4 @@
-%% pathplanner
+%% pathplanner_new
 %
 % *Description:*  NEW version of function which goes from where we are at Q
 % to where we want to be at newQ and checks for collisions
