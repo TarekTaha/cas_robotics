@@ -228,14 +228,26 @@ workspace.knowncoords=setdiff(unique([workspace.knowncoords;points],'rows'),work
 %threeDMedianFilt();
 
 %% Do surface making on obstacle points from this scan 
-try if size(ice_cream_bounds_NOSELF,1)>1
-        surface_making_simple(ice_cream_bounds_NOSELF,workspace.mew);
-    end
+% try if size(ice_cream_bounds_NOSELF,1)>1
+%         surface_making_simple(ice_cream_bounds_NOSELF,workspace.mew);
+%     end
+try if size(workspace.indexedobsticles,1)>1
+        surface_making_simple(workspace.indexedobsticles,workspace.mew);
+    end        
 catch; keyboard; end
 global plane
 
 %% Add to made surface variables
 %this makes a workspace indexed version of the home points
+% for i=1:size(plane,2)
+%    workspace.indexedobsticles_home_point=[workspace.indexedobsticles_home_point;...
+%        floor(plane(i).home_point/workspace.inc_size)*workspace.inc_size];
+%    workspace.indexedobsticles_equ=[workspace.indexedobsticles_equ;plane(i).equ];   
+% end
+
+% Clear it and reset everytime
+workspace.indexedobsticles_home_point=[];
+workspace.indexedobsticles_equ=[];
 for i=1:size(plane,2)
    workspace.indexedobsticles_home_point=[workspace.indexedobsticles_home_point;...
        floor(plane(i).home_point/workspace.inc_size)*workspace.inc_size];

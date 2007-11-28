@@ -11,7 +11,7 @@
 % *Returns:* NULL
 
 function NBV_beta()
-
+count=0
 %% Variables
 % clear the plots and global bestviews variable
 clear global bestviews;
@@ -23,9 +23,9 @@ global r workspace bestviews optimise scan;
 %actually will go through first step and then this many more 
 numNBVanglesteps=6;
 qlimit=r.qlim;
-%taking 5 deg off either side so we don't use the max range for these joints
-qlimit(1:3,1)=qlimit(1:3,1)+5*pi/180;
-qlimit(1:3,2)=qlimit(1:3,2)-5*pi/180;
+%taking 10 deg off either side so we don't use the max range for these joints
+qlimit(1:3,1)=qlimit(1:3,1)+10*pi/180;
+qlimit(1:3,2)=qlimit(1:3,2)-10*pi/180;
 
 bestviews=[]; 
 indexed_knowncoords=round(setdiff(workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:),workspace.indexedobsticles,'rows')/workspace.inc_size);
@@ -72,7 +72,9 @@ for J1=qlimit(1,1):(qlimit(1,2)-qlimit(1,1))/numNBVanglesteps:qlimit(1,2)
 %                         display('Failed Joint 4s ellipsoid unknown space test');
                         continue;
                     end
-%%ENDADDED NEW                             
+%%ENDADDED NEW      
+plot(r,[J1,J2,J3,0,0,0]);count=count+1
+display(num2str([J1,J2,J3]));
                     %predefinedJ4's since we don't really need the whole range of movement
                     for J4=[-45,45]*pi/180
                         %Sets up the limits (possible poses) of J5

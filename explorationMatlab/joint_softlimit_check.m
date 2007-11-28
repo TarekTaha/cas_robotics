@@ -29,4 +29,9 @@ result=true;
 % \end{array}$$
 if ~isempty(find(all_steps(:,3)*180/pi<-7/3*all_steps(:,2)*180/pi-130,1))
     result=false;
+    return
+end
+
+if ~isempty(find(all_steps(:,2)*180/pi>90 & all_steps(:,3)*180/pi>90,1))
+    result=false;
 end
