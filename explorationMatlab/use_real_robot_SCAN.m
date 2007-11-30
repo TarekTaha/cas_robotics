@@ -17,10 +17,10 @@ function use_real_robot_SCAN(deg2scan)
 
 %% Variables:  Declarations and checks
 %THIS CLEARS GLOBAL VARS USED IN SCANS SO THEY DON'T BUILD UP
-display('Clearing all global scan variables before starting a new scan');
+% display('Clearing all global scan variables before starting a new scan');
 clear global PoseData RangeData IntensityData PointData;
 
-global scan Q PointData IntensityData RangeData robot_maxreach robmap_h;
+global scan Q r PointData IntensityData RangeData robot_maxreach robmap_h;
 
 %make sure their is a surface map object
 if isempty(robmap_h)
@@ -34,6 +34,10 @@ if size(Q,2)~=6
 end
 
 tempQ=Q*180/pi;
+
+%update the actual scanning origin
+tr=fkine(r,Q);
+scan.origin=tr(1:3,4)';
 
 %% Check view and make scan go in correct direction
 if nargin==0
@@ -66,9 +70,9 @@ while attemptingscan
     robscan_h.width=2*scan.theta*180/pi;
 
     %display scan details
-    display(strcat('Current Scan mode is: ',robscan_h.Mode,...
-        '. Total width is: ',num2str(robscan_h.width),...
-        '. Scanning through: ', num2str(tilt_scan_range)));
+%     display(strcat('Current Scan mode is: ',robscan_h.Mode,...
+%         '. Total width is: ',num2str(robscan_h.width),...
+%         '. Scanning through: ', num2str(tilt_scan_range)));
 
     %tilt through desired scan range in the negative direction so laser is safe (might be confusing)
     pause(0.05);

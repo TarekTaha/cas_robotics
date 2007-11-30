@@ -15,7 +15,7 @@
 function order_bestviews(redo_nbv_vol)
 
 %% Variables
-global bestviews workspace
+global bestviews
 
 if nargin==0
     redo_nbv_vol=0;

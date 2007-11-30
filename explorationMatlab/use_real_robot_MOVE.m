@@ -50,7 +50,7 @@ while size(rob_h.JointState,2)~=6
     end    
 end
 %check joint state and can continually check this to see that it has got to the correct position
-display(strcat('Current Joint State is:',num2str(rob_h.JointState),' and the desired is:', num2str(tempQ)));
+% display(strcat('Current Joint State is:',num2str(rob_h.JointState),' and the desired is:', num2str(tempQ)));
 
 %% Check if all joints are the same as what we want them to be within 1degree
 if ~isempty(find(round(tempQ-rob_h.JointState), 1))
@@ -128,5 +128,5 @@ function releaserobot(rob_h)
     pause(0.1);
     rob_h.Type='StopDriveJointAbs';
     rob_h.Start;
-    rob_h.WaitUntilCompleted(1,0)
+    rob_h.WaitUntilCompleted(2,0)
     rob_h.release;

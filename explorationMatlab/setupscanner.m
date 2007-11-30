@@ -13,7 +13,7 @@
 function setupscanner()
 
 %% Variables
-global scan r Q
+global scan r Q all_views
 
 %the first scan origin is where the robot arm is
 initialpoint=fkine(r,Q);
@@ -62,3 +62,8 @@ end
 %this is the best views that we have already gone to, this will be in rads
 %and is used in nbv_beta since this has predefined poses
 scan.done_bestviews_orfailed=[inf, inf, inf, inf, inf, inf];
+
+try load all_views.mat
+catch
+    display('Cant call or load all_views.mat');
+end

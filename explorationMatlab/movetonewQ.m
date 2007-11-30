@@ -22,7 +22,7 @@
 function pathfound=movetonewQ(handles,newQ,all_steps)
 
 %% Variables
-global r Q guiglobal;
+global r Q guiglobal workspace;
 
 % check we have got passed a newQ otherwise use from the GUI
 if nargin<3
@@ -41,8 +41,11 @@ if nargin<3
     end
 end
 
+
 %change to rads
 newQ=newQ*pi/180;
+
+scanwhilemove=get(handles.scanwhilemove_checkbox,'value');
 
 %% Check if we only want to go to the exact destination
 if get(handles.exact_joints_only_checkbox,'Value')
@@ -60,12 +63,14 @@ end
 %check if we are already at the destination and return if we are
 %eps is a very small value and if there is less than this angular distance
 %we disregard this and say it is at the same place
-if isempty(find(abs(Q-(newQ*pi/180))>eps, 1));
+if isempty(find(abs(Q-newQ)>eps, 1));
     %since we are already at the correct path
     set(handles.dialog_text,'String','Already at destination');drawnow;
     if get(handles.show_robot_checkbox,'Value');
         plotdenso(r, newQ, guiglobal.checkFF, guiglobal.plot_ellipse);
     end
+    %since we are already there
+    pathfound=1;
     return
 end
 
@@ -111,15 +116,36 @@ if pathfound && size(all_steps,1)>0
     set(handles.dialog_text,'String','Path found - animation updated');
     %If using real robot try and move it
     if get(handles.useRealRobot_checkbox,'Value')
-        try use_real_robot_MOVE(all_steps); 
-            set(handles.dialog_text,'String','Actual robot movement complete');
+        try if ~scanwhilemove
+                use_real_robot_MOVE(all_steps); 
+                set(handles.dialog_text,'String','Actual robot movement complete');
+            else
+                use_real_robot_SCANandMOVE(all_steps)
+%                 profile clear; profile on;
+                %try but if no data because already at the end then don't worry
+                try organise_data(); end
+%                 profile off; profile viewer;
+                set(handles.dialog_text,'String','Scan N Move completed');
+            end
+            
         catch set(handles.dialog_text,'String','Error: Did not complete movement - Emergency Stop Probably Hit');
+            lasterr;
             error('Did not complete movement');
         end
+    end
+    %remove
+    if get(handles.remv_unkn_in_mv_checkbox,'value')
+       insidepoints=[];
+       for step=1:size(all_steps,1)           
+           insidepoints = [insidepoints;find_points_in_FF(workspace.unknowncoords(workspace.lev1unknown,:),all_steps(step,:),1)];
+       end
+       insidepoints=setdiff(insidepoints,workspace.obsticlepoints,'rows'); 
+       workspace.knowncoords=unique([workspace.knowncoords;insidepoints],'rows');
     end
     %set overall Q to be the last step in path
     Q=all_steps(end,:);
 else %no path found, update GUI accordingly
+      
     if get(handles.show_robot_checkbox,'Value');
         plotdenso(r, Q, guiglobal.checkFF, guiglobal.plot_ellipse);
     end

@@ -16,18 +16,24 @@
 %
 % _newQ_ (6*1 double) holds the joint angles in radians
 %
+% _removefactor_ (double) this is how big the ellisoids indicates how many
+% points removed
+%
 % *Returns:* 
 %
 % _points_ (3*m double) holds the remaining points in space
 
-function points = remove_self_scanning(points,newQ)
+function points = remove_self_scanning(points,newQ,removefactor)
 
 %% Variables
 global r Q densoobj
 
 % if we haven't been passed the joints then 
-if nargin<2
-    newQ=Q;
+if nargin<3
+    removefactor=2.2;
+    if nargin<2
+        newQ=Q;
+    end    
 end
 
 n = r.n;
@@ -51,7 +57,7 @@ for i=1:n
     if n<3 
         points=points((((translated_points(:,1)-densoobj(i+1).ellipse.center(1)).^2)/densoobj(i+1).ellipse.params(1)^2+...
                        ((translated_points(:,2)-densoobj(i+1).ellipse.center(2)).^2)/densoobj(i+1).ellipse.params(2)^2+...
-                       ((translated_points(:,3)-densoobj(i+1).ellipse.center(3)).^2)/densoobj(i+1).ellipse.params(3)^2>1.5),:);
+                       ((translated_points(:,3)-densoobj(i+1).ellipse.center(3)).^2)/densoobj(i+1).ellipse.params(3)^2>removefactor/2),:);
    
 %% For the remaining n-2 links: Get point outside this ellipse
 % $$ \begin{array}{c}
@@ -61,6 +67,6 @@ for i=1:n
     else
        points=points((((translated_points(:,1)-densoobj(i+1).ellipse.center(1)).^2)/densoobj(i+1).ellipse.params(1)^2+...
                       ((translated_points(:,2)-densoobj(i+1).ellipse.center(2)).^2)/densoobj(i+1).ellipse.params(2)^2+...
-                      ((translated_points(:,3)-densoobj(i+1).ellipse.center(3)).^2)/densoobj(i+1).ellipse.params(3)^2>2.5),:);
+                      ((translated_points(:,3)-densoobj(i+1).ellipse.center(3)).^2)/densoobj(i+1).ellipse.params(3)^2>removefactor),:);
    end
 end

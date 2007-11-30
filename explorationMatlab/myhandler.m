@@ -27,5 +27,5 @@ if strcmpi(varargin{end}, 'ScanComplete')
      end
      scan.release;
 elseif strcmpi(varargin{end}, 'TiltComplete')
-     disp('Tilt complete'); % Change this to something useful
+%      disp('Tilt complete'); % Change this to something useful
 end

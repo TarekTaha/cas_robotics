@@ -149,7 +149,7 @@ set(handles.useRealRobot_checkbox,'Value',0);
 drawnow;
 
 %clear the globals for scan, workspace, robot(r,Q), bestviews, PointData, RangeData
-clear global workspace scan bestviews Q r PointData RangeData guiglobal densoobj;
+clear global workspace scan bestviews Q r PointData RangeData guiglobal densoobj all_views;
 
 %Sets up the robot
 setuprobot()
@@ -171,7 +171,15 @@ set(handles.dialog_text,'String','Clearing and re-setting up the workspace... Pl
 set(gcf,'CurrentAxes',handles.axes3);
 
 setupworkspace(get(handles.show_unknownpoints_checkbox,'Value'));
-global workspace;
+
+global all_views
+if isempty(all_views)
+    display('Having to calculate all_views for exploration, this happens ones only');
+    calc_all_views();
+    load all_views.mat
+end
+
+clc;
 
 set(handles.dialog_text,'String','Setup Complete: Lets Explore');
 
@@ -274,16 +282,17 @@ if current_test_case==1 && want_to_continue
 elseif current_test_case>1 && want_to_continue
     %now go through and get NBV and then use them to explore
     for stepcount=stepcount+1:6;
-        while ~get(handles.stopflag_checkbox,'Value')
+        if ~get(handles.stopflag_checkbox,'Value')
             %which exploration method to use
-            if current_test_case==2;NBV_beta();
+%             if current_test_case==2;NBV_beta();
+            if current_test_case==2;NBV_beta2();
             elseif current_test_case==3; NBV();
             end
             %Prompt to let user know next scans are ready
-            uiwait(msgbox('Next scans ready to be taken, press ok when ready'))
+%             uiwait(msgbox('Next scans ready to be taken, press ok when ready'))
 
             current_bestview=1;
-            max_bestviews_togothrough=optimise.valid_max*1/4;
+            max_bestviews_togothrough=optimise.valid_max*1/5;
             global bestviews;        
             while current_bestview<max_bestviews_togothrough && size(bestviews,2)>=1 && ~get(handles.stopflag_checkbox,'Value')
                 %size(bestviews,2)>optimise.valid_max*3/4
@@ -298,13 +307,21 @@ elseif current_test_case>1 && want_to_continue
                             scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];                        
                             explore(handles,useNBV,1);break;                        
                         else
-                            display(['No Valid path available or found, on #',num2str(current_bestview)]);
+                            %remove indexed and normal obsticle points within robot FF since not valid
+                            workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
+                            workspace.obsticlepoints=remove_self_scanning(workspace.obsticlepoints);
+                            if movetonewQ(handles,bestviews(1).Q*180/pi,bestviews(1).all_steps);
+                                scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];                        
+                                explore(handles,useNBV,1);break;                        
+                            else
+                                display(['No Valid path available or found, on #',num2str(current_bestview)]);
+                            end
                         end
                         want_to_continue=0;                        
                     catch; display(lasterr);
-                        want_to_continue=input(' Type (1) to continue trying for a path, (2) for keyboard command, (0) to exit\n');            
+                        want_to_continue=input(' Type (0) to go to new best view, (1) to continue trying for a path, (2) for keyboard command, (3) to exit\n');            
                         if want_to_continue==2; keyboard; end
-                        if want_to_continue==0; error('User chose to exit');end
+                        if want_to_continue==3; error('User chose to exit');end
                         if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end   
                     end;
                 end                
@@ -323,6 +340,16 @@ elseif current_test_case>1 && want_to_continue
                     pause(2);delete(temp2); 
                 end
 
+                %termination conditions
+                changeinweight=diff(state_data.knownweight);
+                if length(changeinweight)>3
+                    if sum(changeinweight(end-3:end))<100
+                        %set to stop ASAP
+                        set(handles.stopflag_checkbox,'Value',1);
+                        break;
+                    end
+                end
+                    
                 if size(bestviews,2)>1  
                     %Resize bestviews so as to get rid of the first element
                     clear temp_bestviews;
@@ -381,7 +408,8 @@ end
 function find_best_view_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 %  profile clear;profile on;
 % NBV();
-NBV_beta();
+% NBV_beta();
+NBV_beta2();
 %  profile off;profile viewer;
 
 %publish to the GUi different options
@@ -534,6 +562,9 @@ end
 %% Robot Functionality
 % --- Executes on button press in blasting_pushbutton.
 function blasting_pushbutton_Callback(hObject, eventdata, handles)
+keyboard
+return
+
 global robmap_h
 figure(2)
 view(2)
@@ -573,23 +604,38 @@ keyboard
 PathplannerV5(handles)
 
 
-% --- Executes on button press in scan_through_pushbutton.
-function scan_through_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
+% --- Executes on button press in tilt_scan_pushbutton.
+function tilt_scan_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 global r Q guiglobal
 if get(handles.useRealRobot_checkbox,'Value')==0
     doscan();
 else
-    deg2scan=str2double(get(handles.scan_through_deg_edit,'String'));
+    deg2scan=str2double(get(handles.tilt_scan_deg_edit,'String'));
     use_real_robot_SCAN(deg2scan);
-    organise_data(deg2scan*pi/180);
+    organise_data();
     use_real_robot_GETJs();
     plotdenso(r, Q, guiglobal.checkFF, guiglobal.plot_ellipse);
 end
+
+% --- Executes on button press in rot_scan_pushbutton.
+function rot_scan_pushbutton_Callback(hObject, eventdata, handles) %#ok<DEFNU>
+global r Q guiglobal
+if get(handles.useRealRobot_checkbox,'Value')==0
+    error('Cant do this type of scan yet');
+else
+    deg2scan=str2double(get(handles.rot_scan_deg_edit,'String'));
+    use_real_robot_SCANandMOVE(deg2scan);
+    organise_data()
+    use_real_robot_GETJs();
+    plotdenso(r, Q, guiglobal.checkFF, guiglobal.plot_ellipse);
+end
+
 
 % --- Executes on button press in move_to_pushbutton.
 function move_to_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 %will move to newQ from the GUI
 movetonewQ(handles);
+
 
 % --- Executes on button press in get_current_Js_pushbutton.
 function get_current_Js_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
@@ -896,9 +942,9 @@ end
 % --- Executes on button press in useRealRobot_checkbox.
 function useRealRobot_checkbox_Callback(hObject, eventdata, handles)
 
-function scan_through_deg_edit_Callback(hObject, eventdata, handles)
+function tilt_scan_deg_edit_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
-function scan_through_deg_edit_CreateFcn(hObject, eventdata, handles)
+function tilt_scan_deg_edit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -1004,3 +1050,24 @@ function all_mesh_checkbox_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of all_mesh_checkbox
+
+
+
+
+
+function rot_scan_deg_edit_Callback(hObject, eventdata, handles)
+
+
+% --- Executes during object creation, after setting all properties.
+function rot_scan_deg_edit_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in scanwhilemove_checkbox.
+function scanwhilemove_checkbox_Callback(hObject, eventdata, handles)
+
+% --- Executes on button press in remv_unkn_in_mv_checkbox.
+function remv_unkn_in_mv_checkbox_Callback(hObject, eventdata, handles)
+
