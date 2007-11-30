@@ -11,7 +11,7 @@
 % *Returns:* NULL
 
 function NBV_beta()
-count=0
+
 %% Variables
 % clear the plots and global bestviews variable
 clear global bestviews;
@@ -72,9 +72,7 @@ for J1=qlimit(1,1):(qlimit(1,2)-qlimit(1,1))/numNBVanglesteps:qlimit(1,2)
 %                         display('Failed Joint 4s ellipsoid unknown space test');
                         continue;
                     end
-%%ENDADDED NEW      
-plot(r,[J1,J2,J3,0,0,0]);count=count+1
-display(num2str([J1,J2,J3]));
+
                     %predefinedJ4's since we don't really need the whole range of movement
                     for J4=[-45,45]*pi/180
                         %Sets up the limits (possible poses) of J5

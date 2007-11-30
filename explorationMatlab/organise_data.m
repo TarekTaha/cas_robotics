@@ -8,16 +8,13 @@
 
 %% Function Call
 %
-% *Inputs:* 
-%
-% _tilt_scan_range_ (double) radians - the new scan.alpha used to determine
-% ration of points to use 
+% *Inputs:* NULL
 %
 % *Returns:* NULL
-function organise_data(tilt_scan_range)
+function organise_data()
 
 %% Variables
-global workspace scan r Q PointData RangeData
+global workspace scan r Q PointData RangeData PoseData
 starttime=clock;
 % Number of points we want in the cube for ray casting
 numpntsInCube=scan.numpntsInCube;
@@ -25,21 +22,80 @@ numpntsInCube=scan.numpntsInCube;
 % warning off;
 %% Check data validity
 % Process Data from PointData scan matrix to a 3*many form
-ice_cream_bounds=zeros([size(PointData,1)*size(PointData,2),3]);
+ ice_cream_bounds=zeros([size(PointData,1)*size(PointData,2),3]);
+ laser_pos_ice_cream_bounds=zeros([size(PointData,1)*size(PointData,2),3]);
 for i=1:size(PointData,1);
     ice_cream_bounds((i-1)*size(PointData,2)+1 : i*size(PointData,2) , :)=...
-        [[PointData(i,:,1)]',[PointData(i,:,2)]',[PointData(i,:,3)]'];                  
+        [[PointData(i,:,1)]',[PointData(i,:,2)]',[PointData(i,:,3)]'];    
+    laser_pos_ice_cream_bounds((i-1)*size(PointData,2)+1 : i*size(PointData,2) , :)=...
+        ones([size(PointData,2),1])*[PoseData(i,1,4),PoseData(i,2,4),PoseData(i,3,4)];    
 end
+
 
 % Eliminate points where the range data is == 0
 if ~isempty(RangeData)
     rangedata_singlemat=zeros([size(RangeData,1)*size(RangeData,2),1]);
+    noreturnplaces=[];
+    laser_pos_noreturnplaces=[];
+    raywidth=(2*scan.theta)/size(RangeData,2);
+    averagefiltering = filter2(fspecial('average',20),RangeData);   
+    noreturnplaces=zeros([size(averagefiltering,2),3]);
+    laser_pos_noreturnplaces=zeros([size(averagefiltering,2),3]);    
+    countnoreturns=0;
+    countnoreturns_pose=1;
+    
     for i=1:size(RangeData,1);
         rangedata_singlemat((i-1)*size(RangeData,2)+1 : i*size(RangeData,2))=RangeData(i,:)';                  
+
+%         noreturnstemp=find(RangeData(i,:)<20);        
+        noreturnstemp=find(averagefiltering(i,:)<20);
+        %go to each point which isn't returned and make it and x,y,z at max
+        if size(noreturnstemp,1)>0
+            angularofnoreturn=(size(RangeData,2)/2-noreturnstemp)*raywidth;
+
+%             figure(3);grid on; hold on; view(3);axis equal;
+
+            %go through every second ray on the pan since if they are one
+            %off they are not good, if they are multiple then 1 is enough
+            %even at 1.6 met
+            for j=1:2:size(angularofnoreturn,2)
+%                 hgtr=makehgtform('axisrotate',[PoseData(i,1:3,1)],angularofnoreturn(j));                 
+%                 rotatedpoint=scan.size*PoseData(i,1:3,3)*hgtr(1:3,1:3);
+                rotatedpoint=rot_vec(scan.size*PoseData(i,1:3,3),PoseData(i,1:3,1),-angularofnoreturn(j));
+                
+%                 if ~isempty(find((rotatedpoint-rotatedpoint2)>eps, 1))
+%                     keyboard
+%                 end
+                
+%                 noreturnplaces=[noreturnplaces;rotatedpoint+PoseData(i,1:3,4)];
+%                 laser_pos_noreturnplaces=[laser_pos_noreturnplaces;PoseData(i,1:3,4)];
+                countnoreturns=countnoreturns+1;
+                noreturnplaces(countnoreturns,:)=rotatedpoint+PoseData(i,1:3,4);
+%                 laser_pos_noreturnplaces(countnoreturns,:)=PoseData(i,1:3,4);
+                
+                
+%                 plot3(noreturnplaces(end,1),noreturnplaces(end,2),noreturnplaces(end,3),'r.')
+%                 pause(0.1);
+            end
+            laser_pos_noreturnplaces(countnoreturns_pose:countnoreturns,:)=ones([countnoreturns-countnoreturns_pose+1,1])*PoseData(i,1:3,4);
+            countnoreturns_pose=countnoreturns+1;
+        end
     end
-    ice_cream_bounds=ice_cream_bounds((rangedata_singlemat>0),:);
+
+    %resize so we remove any unnessesary ones
+    noreturnplaces=noreturnplaces(1:countnoreturns,:);
+    laser_pos_noreturnplaces=laser_pos_noreturnplaces(1:countnoreturns,:);
+    
+    ice_cream_bounds=ice_cream_bounds(rangedata_singlemat>20,:);
+    laser_pos_ice_cream_bounds=laser_pos_ice_cream_bounds(rangedata_singlemat>20,:);
+    
+%     figure(3);plot3(noreturnplaces(:,1),noreturnplaces(:,2),noreturnplaces(:,3),'r.')
+%     hold on; plot3(ice_cream_bounds(:,1),ice_cream_bounds(:,2),ice_cream_bounds(:,3),'b.')
+
+
+    
     if size(ice_cream_bounds,1)==0
-        error('There is no data with range greater than 0');
+        error('There is no data with range greater than 20');
     end
     % Save this scan data as a block
     workspace.ALLlastscandataInWkspace=ice_cream_bounds;
@@ -47,65 +103,15 @@ else
     error('There is some problem with the laser, no data has been returned');
 end
 
-%% Determine max distance used in ray casting
-% $$\begin{array}{ll}
-% P=(x_j,y_j,z_j)_{j=1,...,m_{u1}}& pt=ScanOrigin\\\\
-% dist=\sqrt{(pt_x-P_x)^2+(pt_y-P_y)^2 + (pt_z-P_z)^2}\\\\
-% maxdist=min(max(dist), scansize))
-% \end{array}$$ 
 
-% Cube of interest is minout of maxrange and specified scan size
-maxdist = min( max(rangedata_singlemat) , scan.size);
-
-%% Maxangle so that we have numpntsInCube at maxdist
-% $$\begin{array}{l}
-% a=\frac{inc\_size}{numpntsInCube}\\
-% b=c=maxdist \\
-% A=maxangle\\
-% a^2=b^2+c^2-2bc\cos A\\\\
-% maxangle=cos^{-1}\left(1-\left(\frac{inc\_size/numpntsInCube}{\sqrt{2} \times
-% maxdist}\right)^2\right)
-% \end{array}$$
-maxangle=acos(...            
-               1-(...
-                  (workspace.inc_size/numpntsInCube)/(sqrt(2)*maxdist)...%used to be scan.size %%Now it will be AT LEAST scan size but maybe bigger
-                  )^2 ...
-              );
-%% Determine ration of points to use          
-% $$\begin{array}{l}
-% P=(x_{i,j},y_{i,j},z_{i,j})_{(i=1,...,n),(j=1,...,m)}\\\\
-% ratioOfScansToUse=\left|\lfloor \frac{maxangle}{2\theta/m}\rfloor \times
-% \lfloor \frac{maxangle}{2|\alpha|/n} \rfloor\right|
-% \end{array}$$
-ratioOfScansToUse=abs(...
-                    floor(...
-                        maxangle/...  
-                                ((scan.theta*2) / ...
-                                 (size(PointData,2))...
-                                 )...
-                         )...
-                     *...
-                    floor(...
-                        maxangle/...  
-                                 ((abs(tilt_scan_range)*2) / ...
-                                  (size(PointData,1))...
-                                  )...
-                         )...
-                       );
-                   
-%% Make sure we have a ration logically at minimum 1:1
-if ratioOfScansToUse<1; 
-    ratioOfScansToUse=1;
-    % ice_cream_bounds stays the same
-else
-    % Go through the index at a ratio as decided and only use these points
-    indexofScanstoUse=1:ratioOfScansToUse:size(ice_cream_bounds,1);
-    ice_cream_bounds=ice_cream_bounds(indexofScanstoUse,:);
-end
+%% The points we want to trace too
+[totraceto,whichones]=unique(round([ice_cream_bounds;noreturnplaces]/workspace.inc_size)*workspace.inc_size,'rows');
+laser_pos=[laser_pos_ice_cream_bounds;laser_pos_noreturnplaces];
+laser_pos=laser_pos(whichones,:);
 
 %% Setup ray tracing variables
 % Where the laser is at start of scan (used thoughout as origin)
-laser_pos=scan.origin;
+% laser_pos=scan.origin;
 % Min and max cubes
 space_min_and_max=[workspace.min/workspace.inc_size,workspace.max/workspace.inc_size];
 % The cubes that rays pass through
@@ -116,48 +122,48 @@ markedcubes=[];
 % Pe=ice\_cream\_bounds=(x_{j},y_{j},z_{j})_{j=1,2...m}\\
 % \forall m, dist_m=\sqrt{(P_{ex}-P_{sx})^2+(P_{ey}-P_{sy})^2+(P_{ez}-P_{sz})^2}
 % \end{array}$$
-dist=sqrt((laser_pos(1)-ice_cream_bounds(:,1)).^2+...
-          (laser_pos(2)-ice_cream_bounds(:,2)).^2+...
-          (laser_pos(3)-ice_cream_bounds(:,3)).^2);
+dist=sqrt((laser_pos(:,1)-totraceto(:,1)).^2+...
+          (laser_pos(:,2)-totraceto(:,2)).^2+...
+          (laser_pos(:,3)-totraceto(:,3)).^2);
 % the valid distances (greater than 0)
 valid_rows=find(dist);
 
 %% Setup ray tracing discrete check points
 % $$\forall m, tempstarter_m=\frac{Pe_{mx}-Ps_{mx}}{2dist_m/inc\_size}$$
-tempstarter=(ice_cream_bounds(:,1)-laser_pos(1))./(2*dist(:)/workspace.inc_size);
+tempstarter=(totraceto(:,1)-laser_pos(:,1))./(2*dist(:)/workspace.inc_size);
 
 %% Go through each valid row (where dist>0) and ray trace
 for i=[valid_rows]'
 %---collum 1
     %check each one of the segements for zero distance and fill with that planes value for inbetweens  
-    if abs(laser_pos(1)-ice_cream_bounds(i,1))<tempstarter(i)
-        tempCOL=[laser_pos(1)*ones([round((2*dist(i)/workspace.inc_size))+1,1])];
+    if abs(laser_pos(i,1)-totraceto(i,1))<tempstarter(i)
+        tempCOL=[laser_pos(i,1)*ones([round((2*dist(i)/workspace.inc_size))+1,1])];
     else
-        tempCOL=[(laser_pos(1):tempstarter(i):ice_cream_bounds(i,1))'];       
+        tempCOL=[(laser_pos(i,1):tempstarter(i):totraceto(i,1))'];       
     end
     inbetweenpoint=[tempCOL,ones([length(tempCOL),2])];
 
 %---collum 2
-    if laser_pos(2)==ice_cream_bounds(i,2) || size(inbetweenpoint,1)<=1
-          inbetweenpoint(:,2)=inbetweenpoint(:,2)*laser_pos(2);
+    if laser_pos(i,2)==totraceto(i,2) || size(inbetweenpoint,1)<=1
+          inbetweenpoint(:,2)=inbetweenpoint(:,2)*laser_pos(i,2);
      else
         %since sometimes due to a rounding error dividing it will not be the same, so minus 0.5 off the size and we should get the correct
         %num of rows so concaternation can happen properly
         try 
-            tempCOL(1:end)=(laser_pos(2):(ice_cream_bounds(i,2)-laser_pos(2))/(size(inbetweenpoint,1)-1):ice_cream_bounds(i,2))';
+            tempCOL(1:end)=(laser_pos(i,2):(totraceto(i,2)-laser_pos(i,2))/(size(inbetweenpoint,1)-1):totraceto(i,2))';
         catch; 
-            tempCOL(1:end)=(laser_pos(2):(ice_cream_bounds(i,2)-laser_pos(2))/(size(inbetweenpoint,1)-0.5):ice_cream_bounds(i,2))';
+            tempCOL(1:end)=(laser_pos(i,2):(totraceto(i,2)-laser_pos(i,2))/(size(inbetweenpoint,1)-0.5):totraceto(i,2))';
         end
         inbetweenpoint(:,2)=tempCOL;
     end
 %---collum 3    
-    if laser_pos(3)==ice_cream_bounds(i,3) || size(inbetweenpoint,1)<=1
-        inbetweenpoint(:,3)=inbetweenpoint(:,3)*laser_pos(3);
+    if laser_pos(i,3)==totraceto(i,3) || size(inbetweenpoint,1)<=1
+        inbetweenpoint(:,3)=inbetweenpoint(:,3)*laser_pos(i,3);
     else
         try 
-            tempCOL(1:end)=(laser_pos(3):(ice_cream_bounds(i,3)-laser_pos(3))/(size(inbetweenpoint,1)-1):ice_cream_bounds(i,3))';       
+            tempCOL(1:end)=(laser_pos(i,3):(totraceto(i,3)-laser_pos(i,3))/(size(inbetweenpoint,1)-1):totraceto(i,3))';       
         catch; 
-            tempCOL(1:end)=(laser_pos(3):(ice_cream_bounds(i,3)-laser_pos(3))/(size(inbetweenpoint,1)-0.5):ice_cream_bounds(i,3))';       
+            tempCOL(1:end)=(laser_pos(i,3):(totraceto(i,3)-laser_pos(i,3))/(size(inbetweenpoint,1)-0.5):totraceto(i,3))';       
         end
         inbetweenpoint(:,3)=tempCOL;
     end
@@ -206,7 +212,7 @@ end
 
 %% Timing and Display purposes
 temptime=etime(clock,starttime);
-display (strcat('With ratioOfScansToUse=',num2str(ratioOfScansToUse),', You filled in:',num2str(size(points)),' cubes in: ',num2str(temptime),'secs'));
+% display (strcat('You filled in:',num2str(size(points)),' cubes in: ',num2str(temptime),'secs'));
 
 %% Update (indexed) obstacles points global variables
 workspace.obsticlepoints=[workspace.obsticlepoints;ice_cream_bounds_NOSELF];

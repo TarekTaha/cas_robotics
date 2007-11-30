@@ -30,7 +30,7 @@ global workspace scan bestviews r Q robot_maxreach
 
 % this is either using a calculated NBV or choose our own
 if true(useNBV)
-    scan.origin=bestviews(selection).scanorigin;
+    db=bestviews(selection).scanorigin;
     scan.chosenview=bestviews(selection).chosenview;
     % Make it so that the last angle is 0
     newQ=[bestviews(selection).Q(1:5),0];
@@ -87,14 +87,14 @@ else
     use_real_robot_SCAN(tilt_scan_range*180/pi);
         
     %this sort out the points that we have got from a scan
-    organise_data(tilt_scan_range);
+    organise_data();
 end
 
 %% Display results
 
 % print results this exploration step details
-display(strcat('The scan origin is (',num2str(scan.origin),'), [with 0=+ & 1=-] pose is (abc)  (',num2str(scan.chosenview),...
-               '), and this is try:',num2str(scan.tries)));
+display('. . . . . . . . . . . . . . . . . . . . . . . . ');
+display(strcat('The scan origin is (',num2str(scan.origin),'),TRY # :',num2str(scan.tries)));
 
 scan.ALLorigin=[scan.ALLorigin;scan.origin];
 
@@ -104,9 +104,9 @@ knownweight=calknownweight();
 obstacleweight=calobstacleweight();
 
 % Print out the details of WEIGHTED known/unknown/obstacle knowledge
-display(strcat('New freespace knowledge:',num2str(knownweight-previously_known),...
-               ', Weighted Total Known Free:',num2str(knownweight), ', Weighted Obsticles:',num2str(obstacleweight),...
-               ' Remaining Weighted Unknown withing workspace:',num2str(unknownweight)));
+display(strcat('NEW Free Weight:',num2str(knownweight-previously_known),...
+               ', Total Free Weight:',num2str(knownweight), ', Obstacles Weight:',num2str(obstacleweight),...
+               ' Remain Unknown Weight:',num2str(unknownweight)));
 
 % Set GUI to show size of known + obstacle knowledge out of total knowledge  
 set(h.total_info_text,'String',num2str(size(workspace.knowncoords,1)+size(workspace.indexedobsticles,1)));
