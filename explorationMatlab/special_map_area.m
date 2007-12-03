@@ -1,7 +1,8 @@
 function special_map_area()
-% load ScanforClassifier-0to-60
+
 global RangeData PointData workspace
-tic
+
+% load ScanforClassifier-0to-60
 % workspace.spec_pnts=[];
 
 [zeroRangeCol,zeroRangeRow]=find(RangeData<20);
@@ -60,10 +61,8 @@ end
 %normalise to the workspace size
 workspace.spec_pnts=unique(workspace.spec_pnts,'rows');
 workspace.spec_pnts=round(workspace.spec_pnts/workspace.inc_size)*workspace.inc_size;
-keyboard
-workspace.spec_pnts=setdiff(workspace.spec_pnts,all_known=[workspace.knowncoords;workspace.indexedobsticles]);
+workspace.spec_pnts=setdiff(workspace.spec_pnts,[workspace.knowncoords;workspace.indexedobsticles],'rows');
 
 % plot3(workspace.spec_pnts(:,1),workspace.spec_pnts(:,2),workspace.spec_pnts(:,3),'k*');
 % hold on;
 % plot3(PointData(:,:,1),PointData(:,:,2),PointData(:,:,3),'g.')
-toc

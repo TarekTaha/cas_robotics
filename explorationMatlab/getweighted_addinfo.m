@@ -37,10 +37,19 @@ if ~isempty(addinfo)
     weighted_addinfo=length(level1)*workspace.dotweight(1)+...
                      length(level2)*workspace.dotweight(2)+...
                      length(level3)*workspace.dotweight(3);
-keyboard                 
-     if isfield(workspace,'spec_pnts') && size(workspace.spec_pnts,1)>0
-         %add on the weight of the special points
+    
+%% add on the weight of the special points
+     if size(workspace.spec_pnts,1)>0
+%          if size(intersect(addinfo(level2,:),workspace.spec_pnts,'rows'),1)>0
+%              display([num2str(size(intersect(addinfo,workspace.spec_pnts,'rows'),1))]);
+%              temp=intersect(addinfo(level2,:),workspace.spec_pnts,'rows')
+% 
+%              temph=plot3(temp(:,1),temp(:,2),temp(:,3),'r.');
+%              keyboard             
+%              try delete(temph);end
+%          end
+
          weighted_addinfo=weighted_addinfo+...
-             length(intersect(addinfo,workspace.spec_pnts))*workspace.dotweight(1);
+             size(intersect(addinfo(level2,:),workspace.spec_pnts,'rows'),1)*workspace.dotweight(1);         
      end
 end
