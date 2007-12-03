@@ -304,19 +304,30 @@ elseif current_test_case>1 && want_to_continue
                 while want_to_continue; 
                     try %if we have already planned a path, use this one otherwise try and get another, otherwise go to next possible one
                         if movetonewQ(handles,bestviews(1).Q*180/pi,bestviews(1).all_steps);
-                            scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];                        
-                            explore(handles,useNBV,1);break;                        
-                        else
-                            %remove indexed and normal obsticle points within robot FF since not valid
-                            workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
-                            workspace.obsticlepoints=remove_self_scanning(workspace.obsticlepoints);
+                            scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];explore(handles,useNBV,1);break;
+                        else %can't get to the desired best view
+                            display('User has control');
+                            keyboard
+                            %move back along the path taken to get here
+                            if ~movetonewQ(handles,robot_maxreach.path(end).all_steps(end,:)*180/pi,robot_maxreach.path(end).all_steps(end:1,:));
+                                display('some major problem if we cant follow the same path back');
+                                keyboard                                
+                            end
+                            %try once again to move to the actual desired
+                            %newQ for exploration
                             if movetonewQ(handles,bestviews(1).Q*180/pi,bestviews(1).all_steps);
-                                scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];                        
-                                explore(handles,useNBV,1);break;                        
-                            else
-                                display(['No Valid path available or found, on #',num2str(current_bestview)]);
+                                scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];explore(handles,useNBV,1);break;
+                            else % last resort is to remove surrounding obstacle points remove indexed and normal obsticle points within robot FF since not valid
+                                workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
+                                workspace.obsticlepoints=remove_self_scanning(workspace.obsticlepoints);
+                                if movetonewQ(handles,bestviews(1).Q*180/pi,bestviews(1).all_steps);
+                                    scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q]; explore(handles,useNBV,1);break;                        
+                                else
+                                    display(['No Valid path available or found, on #',num2str(current_bestview)]);
+                                end
                             end
                         end
+                        
                         want_to_continue=0;                        
                     catch; display(lasterr);
                         want_to_continue=input(' Type (0) to go to new best view, (1) to continue trying for a path, (2) for keyboard command, (3) to exit\n');            
