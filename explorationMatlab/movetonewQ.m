@@ -22,7 +22,7 @@
 function pathfound=movetonewQ(handles,newQ,all_steps)
 
 %% Variables
-global r Q guiglobal workspace;
+global r Q guiglobal workspace robot_maxreach;
 
 % check we have got passed a newQ otherwise use from the GUI
 if nargin<3
@@ -121,27 +121,38 @@ if pathfound && size(all_steps,1)>0
                 set(handles.dialog_text,'String','Actual robot movement complete');
             else
                 use_real_robot_SCANandMOVE(all_steps)
-%                 profile clear; profile on;
                 %try but if no data because already at the end then don't worry
                 try organise_data(); end
-%                 profile off; profile viewer;
                 set(handles.dialog_text,'String','Scan N Move completed');
             end
-            
+            %save the successfull path incase we need to retrace our steps
+            display('User has control');
+            keyboard
+            robot_maxreach.path(end).all_steps=all_steps;            
         catch set(handles.dialog_text,'String','Error: Did not complete movement - Emergency Stop Probably Hit');
             lasterr;
             error('Did not complete movement');
         end
     end
-    %remove
+    %remove obstacle points that are recorded but were in the path    
+    insidepoints=[];
+    for step=1:size(all_steps,1)           
+        insidepoints = [insidepoints;find_points_in_FF(workspace.unknowncoords(workspace.lev1unknown,:),all_steps(step,:),1)];
+    end
+
+    %update the obstacle points with only obstacles that weren't in path
+    presize=size(workspace.obsticlepoints,1);
+    workspace.obsticlepoints=setdiff(workspace.obsticlepoints,insidepoints,'rows');
+    if size(workspace.obsticlepoints,1)~=presize
+        display('User has control');
+        keyboard
+    end
+    %if we are asked to remove unknown point by moving through space
     if get(handles.remv_unkn_in_mv_checkbox,'value')
-       insidepoints=[];
-       for step=1:size(all_steps,1)           
-           insidepoints = [insidepoints;find_points_in_FF(workspace.unknowncoords(workspace.lev1unknown,:),all_steps(step,:),1)];
-       end
-       insidepoints=setdiff(insidepoints,workspace.obsticlepoints,'rows'); 
+       insidepoints_NOTob=setdiff(insidepoints,workspace.obsticlepoints(GetImpLevInfo(workspace.obsticlepoints),:),'rows');
        workspace.knowncoords=unique([workspace.knowncoords;insidepoints],'rows');
     end
+    
     %set overall Q to be the last step in path
     Q=all_steps(end,:);
 else %no path found, update GUI accordingly
