@@ -37,4 +37,10 @@ if ~isempty(addinfo)
     weighted_addinfo=length(level1)*workspace.dotweight(1)+...
                      length(level2)*workspace.dotweight(2)+...
                      length(level3)*workspace.dotweight(3);
+keyboard                 
+     if isfield(workspace,'spec_pnts') && size(workspace.spec_pnts,1)>0
+         %add on the weight of the special points
+         weighted_addinfo=weighted_addinfo+...
+             length(intersect(addinfo,workspace.spec_pnts))*workspace.dotweight(1);
+     end
 end

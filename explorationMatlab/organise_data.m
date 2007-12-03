@@ -98,7 +98,7 @@ if ~isempty(RangeData)
         error('There is no data with range greater than 20');
     end
     % Save this scan data as a block
-    workspace.ALLlastscandataInWkspace=ice_cream_bounds;
+    workspace.ALLlastscandataInWkspace=ice_cream_bounds;    
 else
     error('There is some problem with the laser, no data has been returned');
 end
@@ -260,4 +260,7 @@ for i=1:size(plane,2)
    workspace.indexedobsticles_equ=[workspace.indexedobsticles_equ;plane(i).equ];   
 end
 
+%% Determine the special area 
+special_map_area();
+    
 % warning on
