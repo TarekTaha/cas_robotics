@@ -14,10 +14,10 @@
 function organise_data()
 
 %% Variables
-global workspace scan r Q PointData RangeData PoseData
-starttime=clock;
+global workspace scan PointData RangeData PoseData robot_maxreach
+% starttime=clock;
 % Number of points we want in the cube for ray casting
-numpntsInCube=scan.numpntsInCube;
+% numpntsInCube=scan.numpntsInCube;
 
 % warning off;
 %% Check data validity
@@ -205,22 +205,28 @@ if size(markedcubes)>0
     %remove self scanning points (points that are within the joints force fields)
     ice_cream_bounds_NOSELF=remove_self_scanning(ice_cream_bounds);
     
-    indexedobsticles=unique(floor(ice_cream_bounds_NOSELF/workspace.inc_size)*workspace.inc_size,'rows');
+%     indexedobsticles=unique(floor(ice_cream_bounds_NOSELF/workspace.inc_size)*workspace.inc_size,'rows');
+    indexedobsticles=unique(round(ice_cream_bounds_NOSELF/workspace.inc_size)*workspace.inc_size,'rows');
     %also get rid of any indexed points that are within the feilds
     indexedobsticles=remove_self_scanning(indexedobsticles);
 end
 
 %% Timing and Display purposes
-temptime=etime(clock,starttime);
+% temptime=etime(clock,starttime);
 % display (strcat('You filled in:',num2str(size(points)),' cubes in: ',num2str(temptime),'secs'));
 
 %% Update (indexed) obstacles points global variables
-workspace.obsticlepoints=[workspace.obsticlepoints;ice_cream_bounds_NOSELF];
+% workspace.Nobsticlepoints=[workspace.Nobsticlepoints;ice_cream_bounds_NOSELF];
 % only want unique indexed obsticles
 if size(workspace.indexedobsticles,2)==0
     workspace.indexedobsticles=indexedobsticles;
 else
     workspace.indexedobsticles=union(indexedobsticles,workspace.indexedobsticles,'rows');
+end
+
+%% Remove points that are on a path we have taken
+if size(robot_maxreach.pointcarvedout,1)>0
+    workspace.indexedobsticles=setdiff(workspace.indexedobsticles,robot_maxreach.pointcarvedout,'rows');
 end
 
 %% Fill in the newest knowledge about points
@@ -261,6 +267,8 @@ for i=1:size(plane,2)
 end
 
 %% Determine the special area 
-special_map_area();
-    
+try special_map_area();
+catch; display('Some problem with special points');
+    keyboard;
+end    
 % warning on

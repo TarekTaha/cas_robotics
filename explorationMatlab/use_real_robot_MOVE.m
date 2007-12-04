@@ -100,7 +100,7 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
             while max(abs((rob_h.JointState-current_step_DEG)))>7
                 pause(0.15);
                 waitcoutner=waitcoutner+1;
-                if waitcoutner==50 %about 10 seconds                    
+                if waitcoutner==75 %about 15 seconds                    
                     button = questdlg('Did you press the emergency stop?','Running Slow');
                     if strcmp(button,'Yes')
                         releaserobot(rob_h)
@@ -109,7 +109,7 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
                         rob_h.Params=current_step_DEG;
                         rob_h.Start;
                     end
-                elseif waitcoutner>100 %about 20 seconds we have reissued the command and still no action
+                elseif waitcoutner>150 %about 30 seconds we have reissued the command and still no action
                     keyboard
                     releaserobot(rob_h)
                     error('Problem issuing commands to drive the robot');                    

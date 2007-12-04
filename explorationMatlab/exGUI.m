@@ -149,7 +149,7 @@ set(handles.useRealRobot_checkbox,'Value',0);
 drawnow;
 
 %clear the globals for scan, workspace, robot(r,Q), bestviews, PointData, RangeData
-clear global workspace scan bestviews Q r PointData RangeData guiglobal densoobj all_views;
+clear global workspace scan bestviews Q r PointData RangeData guiglobal densoobj all_views robot_maxreach;
 
 %Sets up the robot
 setuprobot()
@@ -206,7 +206,7 @@ show_new_info_details=false;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % profile clear; profile on;
-global robot_maxreach optimise workspace scan
+global robot_maxreach optimise workspace scan Q
 
 %update Q to the latest actual value of the robot
 if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end   
@@ -281,7 +281,7 @@ if current_test_case==1 && want_to_continue
 %% TEST 2 - Non points -using algorithm
 elseif current_test_case>1 && want_to_continue
     %now go through and get NBV and then use them to explore
-    for stepcount=stepcount+1:6;
+    for stepcount=stepcount+1:7;
         if ~get(handles.stopflag_checkbox,'Value')
             %which exploration method to use
 %             if current_test_case==2;NBV_beta();
@@ -292,7 +292,7 @@ elseif current_test_case>1 && want_to_continue
 %             uiwait(msgbox('Next scans ready to be taken, press ok when ready'))
 
             current_bestview=1;
-            max_bestviews_togothrough=optimise.valid_max*1/5;
+            max_bestviews_togothrough=optimise.valid_max*1/4;
             global bestviews;        
             while current_bestview<max_bestviews_togothrough && size(bestviews,2)>=1 && ~get(handles.stopflag_checkbox,'Value')
                 %size(bestviews,2)>optimise.valid_max*3/4
@@ -300,31 +300,32 @@ elseif current_test_case>1 && want_to_continue
 
                 useNBV=true;
     %             want_to_continue=true;
-                want_to_continue=~get(handles.stopflag_checkbox,'Value');            
+                want_to_continue=~get(handles.stopflag_checkbox,'Value');   
+                
                 while want_to_continue; 
                     try %if we have already planned a path, use this one otherwise try and get another, otherwise go to next possible one
                         if movetonewQ(handles,bestviews(1).Q*180/pi,bestviews(1).all_steps);
-                            scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];explore(handles,useNBV,1);break;
+                            scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];explore(handles,useNBV,1);validpathfound=true;break;
                         else %can't get to the desired best view
-                            display('User has control');
-                            keyboard
+%                             display('User has control');
+%                             keyboard
+                            
+                            %tac on the actual position here just in case
+                            %it isn't exactly where it was supposed to
+                            %finish
+                            robot_maxreach.path(end).all_steps(end+1,:)=Q;
                             %move back along the path taken to get here
-                            if ~movetonewQ(handles,robot_maxreach.path(end).all_steps(end,:)*180/pi,robot_maxreach.path(end).all_steps(end:1,:));
+                            if ~movetonewQ(handles,robot_maxreach.path(end).all_steps(1,:)*180/pi,robot_maxreach.path(end).all_steps(end:-1:1,:));
                                 display('some major problem if we cant follow the same path back');
                                 keyboard                                
                             end
                             %try once again to move to the actual desired
                             %newQ for exploration
                             if movetonewQ(handles,bestviews(1).Q*180/pi,bestviews(1).all_steps);
-                                scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];explore(handles,useNBV,1);break;
+                                scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];explore(handles,useNBV,1);validpathfound=true;break;
                             else % last resort is to remove surrounding obstacle points remove indexed and normal obsticle points within robot FF since not valid
-                                workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
-                                workspace.obsticlepoints=remove_self_scanning(workspace.obsticlepoints);
-                                if movetonewQ(handles,bestviews(1).Q*180/pi,bestviews(1).all_steps);
-                                    scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q]; explore(handles,useNBV,1);break;                        
-                                else
-                                    display(['No Valid path available or found, on #',num2str(current_bestview)]);
-                                end
+                                display(['No Valid path available or found, on #',num2str(current_bestview)]);
+                                validpathfound=false;
                             end
                         end
                         
@@ -333,7 +334,9 @@ elseif current_test_case>1 && want_to_continue
                         want_to_continue=input(' Type (0) to go to new best view, (1) to continue trying for a path, (2) for keyboard command, (3) to exit\n');            
                         if want_to_continue==2; keyboard; end
                         if want_to_continue==3; error('User chose to exit');end
-                        if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end   
+                        if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end 
+                        display(['No Valid path available or found, on #',num2str(current_bestview)]);
+                        validpathfound=false;
                     end;
                 end                
 
@@ -366,8 +369,11 @@ elseif current_test_case>1 && want_to_continue
                     clear temp_bestviews;
                     for cur_view=2:size(bestviews,2); temp_bestviews(cur_view-1)=bestviews(cur_view);end
                         bestviews=temp_bestviews;
-
-                        state_data=collectdata(state_data); 
+                        %if we actually found a place to move and explore
+                        %from record new data
+                        if validpathfound==true
+                            state_data=collectdata(state_data); 
+                        end
 
                         redo_nbv_vol=true;
                         order_bestviews(redo_nbv_vol);
@@ -385,6 +391,9 @@ figure;
 subplot(3,1,1);plot(state_data.knownweight);grid on; title('Known Weight');
 subplot(3,1,2);plot(state_data.size_known);grid on; title('Total Known Points');
 subplot(3,1,3);plot(state_data.time);grid on; title('Time Taken');
+save('state_data.mat','state_data');
+testnum=input('test num');
+saveresultstofile(testnum);
 
 % profile off; profile viewer;
 
@@ -444,7 +453,7 @@ function remove_selfscan_pushbutton_Callback(hObject, eventdata, handles)%#ok<DE
 global workspace
 %remove indexed and normal obsticle points within robot FF since not valid
 workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
-workspace.obsticlepoints=remove_self_scanning(workspace.obsticlepoints);
+% workspace.Nobsticlepoints=remove_self_scanning(workspace.Nobsticlepoints);
 
 % --- Executes on button press in threeDmedianfilter_pushbutton.
 function threeDmedianfilter_pushbutton_Callback(hObject, eventdata, handles)
@@ -645,7 +654,9 @@ end
 % --- Executes on button press in move_to_pushbutton.
 function move_to_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 %will move to newQ from the GUI
+% profile clear; profile on;
 movetonewQ(handles);
+% profile off; profile viewer;
 
 
 % --- Executes on button press in get_current_Js_pushbutton.
@@ -736,6 +747,46 @@ platform_h.Start;
 
 
 %% Plotting and display simple functions
+% --- Executes on button press in plot_special_checkbox.
+function plot_special_checkbox_Callback(hObject, eventdata, handles)
+global workspace guiglobal
+%can't plot before moving the robot once
+if size(workspace.spec_pnts,1)==0
+   error('not valid when there are no spec_pnts'); 
+else
+    hold on;
+    set(gcf,'CurrentAxes',handles.axes3);
+    if ~isfield(guiglobal,'special_pntsplot')
+        guiglobal.special_pntsplot=plot3(workspace.spec_pnts(:,1),workspace.spec_pnts(:,2),workspace.spec_pnts(:,3),'k*');
+        axis vis3d;grid on
+    else
+        try delete(guiglobal.special_pntsplot)
+        catch display('cant delete the special points plot');
+        end
+        guiglobal=rmfield(guiglobal,'special_pntsplot');
+    end
+end
+
+% --- Executes on button press in plot_arm_carved_checkbox.
+function plot_arm_carved_checkbox_Callback(hObject, eventdata, handles)
+global robot_maxreach guiglobal
+%can't plot before moving the robot once
+if size(robot_maxreach.pointcarvedout,1)==0
+   error('not valid when there are no points carved out yet'); 
+else
+    hold on;
+    set(gcf,'CurrentAxes',handles.axes3);
+    if ~isfield(guiglobal,'pointcarvedout')
+        guiglobal.pointcarvedout=plot3(robot_maxreach.pointcarvedout(:,1),robot_maxreach.pointcarvedout(:,2),robot_maxreach.pointcarvedout(:,3),'b.');
+        axis vis3d;grid on
+    else
+        try delete(guiglobal.pointcarvedout)
+        catch display('cant delete the pointcarvedout plot');
+        end
+        guiglobal=rmfield(guiglobal,'pointcarvedout');
+    end
+end
+
 % --- Executes on button press in plotmesh_pushbutton.
 function plotmesh_pushbutton_Callback(hObject, eventdata, handles)
 global robmap_h guiglobal
@@ -781,11 +832,18 @@ end
 
 % --- Executes on button press in make_surface_pushbutton.
 function make_surface_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global workspace
+global robmap_h 
+      
+try aabb = [-1.5, -1.5, -1; 2, 1.5, 2];
+hMesh = robmap_h.Mesh(aabb);
+obsticlepoints = GetImpLevInfo(hMesh.VertexData);
+catch; error('In getting the mesh needed for surface making');
+end
+
 temp_mew=str2double(get(handles.temp_mew_edit,'String'));
-if size(workspace.obsticlepoints)>0
+if size(obsticlepoints)>0
     set(handles.dialog_text,'String','Making planes....');drawnow;
-    surface_making_simple(workspace.obsticlepoints,temp_mew);
+    surface_making_simple(obsticlepoints,temp_mew);
     set(handles.dialog_text,'String','successfully made planes');
 else
     set(handles.dialog_text,'String','There are no points to make surfaces out of');
@@ -835,13 +893,12 @@ end
 % --- Executes on button press in plot_obstacles_pushbutton.
 function plot_obstacles_pushbutton_Callback(hObject, eventdata, handles) %#ok<DEFNU>
 global  workspace guiglobal
-if size(workspace.obsticlepoints,1)==0
-   error('not valid when there are no obsticle points'); 
+if size(workspace.indexedobsticles,1)==0
+   error('not valid when there are no indexedobsticles points'); 
 else
     set(gcf,'CurrentAxes',handles.axes3)
     hold on;
     if ~isfield(guiglobal,'obsticleplot')
-        %guiglobal.obsticleplot=plot3(workspace.obsticlepoints(:,1),workspace.obsticlepoints(:,2),workspace.obsticlepoints(:,3),'g.');
         guiglobal.obsticleplot=plot3(workspace.indexedobsticles(:,1),workspace.indexedobsticles(:,2),workspace.indexedobsticles(:,3),'g.');
     else
         try delete(guiglobal.obsticleplot);
@@ -1081,4 +1138,6 @@ function scanwhilemove_checkbox_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in remv_unkn_in_mv_checkbox.
 function remv_unkn_in_mv_checkbox_Callback(hObject, eventdata, handles)
+
+
 
