@@ -58,3 +58,9 @@ robot_maxreach.firstlinkpos=[0,t(2:3,4)'];
 
 robot_maxreach.scan_speed=10;
 robot_maxreach.move_speed=60;
+
+%% Used to hold all paths for the robot
+robot_maxreach.path=[];
+%these are the points that are inside the elispses inside all the paths,
+%not per path
+robot_maxreach.pointcarvedout=[];

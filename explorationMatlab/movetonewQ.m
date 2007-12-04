@@ -90,7 +90,9 @@ if ~isempty(all_steps) && ...
 else % no valid path has been passed
     try %set(handles.dialog_text,'String','Calculating Path......');drawnow;
     %     [pathfound,all_steps]=pathplanner(newQ,guiglobal.plotpath,tryalternate);
+tic
         [pathfound,all_steps]=pathplanner_new(newQ,guiglobal.plotpath,tryalternate);
+display(['Additional Path Planning time is: ',num2str(toc)]);
     catch; keyboard
     end
 end
@@ -120,39 +122,57 @@ if pathfound && size(all_steps,1)>0
                 use_real_robot_MOVE(all_steps); 
                 set(handles.dialog_text,'String','Actual robot movement complete');
             else
-                use_real_robot_SCANandMOVE(all_steps)
+% tic
+                use_real_robot_SCANandMOVE(all_steps);
+% toc
                 %try but if no data because already at the end then don't worry
-                try organise_data(); end
+% tic
+                try organise_data(); end;
+% toc
                 set(handles.dialog_text,'String','Scan N Move completed');
             end
             %save the successfull path incase we need to retrace our steps
-            display('User has control');
-            keyboard
-            robot_maxreach.path(end).all_steps=all_steps;            
+            if (size(all_steps,1)>3 && ~isempty(find(abs(all_steps(1,1:4)-all_steps(end,1:4))>pi/180,1))) ||...
+                    isempty(robot_maxreach.path)
+                robot_maxreach.path(end+1).all_steps=all_steps;
+            else %add the slight movement (scan move/adjust) onto the end of last path
+                robot_maxreach.path(end).all_steps=[robot_maxreach.path(end).all_steps;all_steps];
+            end
+            
         catch set(handles.dialog_text,'String','Error: Did not complete movement - Emergency Stop Probably Hit');
             lasterr;
             error('Did not complete movement');
         end
     end
+% tic
     %remove obstacle points that are recorded but were in the path    
     insidepoints=[];
     for step=1:size(all_steps,1)           
         insidepoints = [insidepoints;find_points_in_FF(workspace.unknowncoords(workspace.lev1unknown,:),all_steps(step,:),1)];
-    end
-
-    %update the obstacle points with only obstacles that weren't in path
-    presize=size(workspace.obsticlepoints,1);
-    workspace.obsticlepoints=setdiff(workspace.obsticlepoints,insidepoints,'rows');
-    if size(workspace.obsticlepoints,1)~=presize
-        display('User has control');
-        keyboard
+        if scanwhilemove
+%             workspace.Nobsticlepoints=remove_self_scanning(workspace.Nobsticlepoints,all_steps(step,:),1);
+             workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles,all_steps(step,:),1);
+        end
+        if rand>0.7            
+            insidepoints = unique(insidepoints ,'rows');        
+        end
     end
     %if we are asked to remove unknown point by moving through space
+    robot_maxreach.pointcarvedout=unique([robot_maxreach.pointcarvedout;insidepoints],'rows');
+    
+    %since later on we are using only the obstacle points so we need to
+    %update this set
+%     if scanwhilemove
+%         workspace.indexedobsticles=unique(round(workspace.Nobsticlepoints/workspace.inc_size)*workspace.inc_size,'rows');
+%         %update the obstacle points with only obstacles that weren't in any
+%         workspace.indexedobsticles=setdiff(workspace.indexedobsticles,robot_maxreach.pointcarvedout,'rows');        
+%     end
+    
     if get(handles.remv_unkn_in_mv_checkbox,'value')
-       insidepoints_NOTob=setdiff(insidepoints,workspace.obsticlepoints(GetImpLevInfo(workspace.obsticlepoints),:),'rows');
        workspace.knowncoords=unique([workspace.knowncoords;insidepoints],'rows');
     end
-    
+% toc
+
     %set overall Q to be the last step in path
     Q=all_steps(end,:);
 else %no path found, update GUI accordingly

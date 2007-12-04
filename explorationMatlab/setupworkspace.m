@@ -57,7 +57,7 @@ workspace.robotplanes.equ=[1,0,0,0; 0,1,0,0; 0,0,1,0;
                            1,0,0,0; 0,1,0,0; 0,0,1,sum(workspace.robotsize(3,:))/2];
 
 %this will hold the points which are obsticles and obviously known
-workspace.obsticlepoints=[];
+% workspace.Nobsticlepoints=[];
 %this will hold the obstacles in voxeles (using inc_size)
 workspace.indexedobsticles=[];
 
@@ -127,8 +127,10 @@ points=[points;[tempx,tempy,tempz]];
 % Only use points within the correct range
 level1=GetImpLevInfo(points);
 points=points(level1,:);
-workspace.obsticlepoints=points;
-workspace.indexedobsticles=unique(round(workspace.obsticlepoints/tempInc)*(tempInc),'rows');
+% workspace.Nobsticlepoints=points;
+% workspace.indexedobsticles=unique(round(workspace.Nobsticlepoints/tempInc)*(tempInc),'rows');
+workspace.indexedobsticles=unique(round(points/tempInc)*(tempInc),'rows');
+
 
 % Could also load up freespace variable 
 % a=load('workspace.mat');
@@ -160,7 +162,7 @@ workspace.unknowncoords=workspace.unknowncoords(newindex,:);
 %make sure all points are within the workspace
 [nothing1,nothing1,level3_un]=GetImpLevInfo(workspace.unknowncoords);
 workspace.unknowncoords=workspace.unknowncoords(level3_un,:);
-workspace.lev1unknown=GetImpLevInfo(workspace.unknowncoords);
+[workspace.lev1unknown,workspace.lev2unknown]=GetImpLevInfo(workspace.unknowncoords);
 
 %% Plot the main unknown graph
 hold on;

@@ -85,7 +85,8 @@ else
     
     %take a scan through determined tilt_scan_range
     use_real_robot_SCAN(tilt_scan_range*180/pi);
-        
+    %update the latest position of robot
+    use_real_robot_GETJs();    
     %this sort out the points that we have got from a scan
     organise_data();
 end

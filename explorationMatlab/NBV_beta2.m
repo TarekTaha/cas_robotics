@@ -18,6 +18,15 @@ clear global bestviews;
 
 global workspace Q all_views bestviews optimise scan;
 
+%%%%%%%%%saving for the exhastive search
+try load Xsearchdata.mat;
+    Xsearchdata(end+1).workspace=workspace;
+catch;
+    Xsearchdata(1).workspace=workspace;
+end
+save('Xsearchdata.mat','Xsearchdata');
+%%%%%%%%end saving file
+
 tic
 
 indexed_knowncoords=round(setdiff(workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:),workspace.indexedobsticles,'rows')/workspace.inc_size);

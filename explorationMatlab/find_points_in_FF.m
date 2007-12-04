@@ -47,10 +47,10 @@ for i=1:n
 % points_{remaining}=\forall [X,Y,Z] :: \\\\
 % \frac{(X-center_x)^2}{a^2}+\frac{(Y-center_y)^2}{b^2}+\frac{(Z-center_z)^2}{c^2}<includefactor
 % \end{array}$$
-
-      insidepoints=points((((translated_points(:,1)-densoobj(i+1).ellipse.center(1)).^2)/densoobj(i+1).ellipse.params(1)^2+...
+      insidepoints=[insidepoints;points((((translated_points(:,1)-densoobj(i+1).ellipse.center(1)).^2)/densoobj(i+1).ellipse.params(1)^2+...
                            ((translated_points(:,2)-densoobj(i+1).ellipse.center(2)).^2)/densoobj(i+1).ellipse.params(2)^2+...
-                           ((translated_points(:,3)-densoobj(i+1).ellipse.center(3)).^2)/densoobj(i+1).ellipse.params(3)^2<includefactor),:);
+                           ((translated_points(:,3)-densoobj(i+1).ellipse.center(3)).^2)/densoobj(i+1).ellipse.params(3)^2<includefactor),:)];
+
 end
 
 insidepoints=unique(insidepoints,'rows');
