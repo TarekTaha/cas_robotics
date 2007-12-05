@@ -281,7 +281,7 @@ if current_test_case==1 && want_to_continue
 %% TEST 2 - Non points -using algorithm
 elseif current_test_case>1 && want_to_continue
     %now go through and get NBV and then use them to explore
-    for stepcount=stepcount+1:7;
+    for stepcount=stepcount+1:15;
         if ~get(handles.stopflag_checkbox,'Value')
             %which exploration method to use
 %             if current_test_case==2;NBV_beta();
@@ -360,6 +360,7 @@ elseif current_test_case>1 && want_to_continue
                     if sum(changeinweight(end-3:end))<100
                         %set to stop ASAP
                         set(handles.stopflag_checkbox,'Value',1);
+                        display('Termination condition reached');
                         break;
                     end
                 end
