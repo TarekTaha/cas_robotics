@@ -67,6 +67,10 @@ function result=bridgeSection
         end
         plywrite(data,'bridgeSection.ply','ascii');
     end
+    
+    
+    trisurf(cell2mat(data.face.vertex_indices)+1,data.vertex.x, data.vertex.y, data.vertex.z, 'FaceColor', 'None');
+    
 end
 
 function r=xRotation(t)
