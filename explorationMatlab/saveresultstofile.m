@@ -11,8 +11,10 @@ catch; keyboard;end
 %save mesh
 aabb = [-1.5, -1.5, -1; 2, 1.5, 2];
 hMesh = robmap_h.Mesh(aabb);
+hMeshdata.v=hMesh.v;
+hMeshdata.f=hMesh.f;
 
-try save(['test',num2str(testnum),'hMesh.mat'],'hMesh');
+try save(['test',num2str(testnum),'hMesh.mat'],'hMeshdata');
 catch; display('Problems saving mesh');
     keyboard;end
  
