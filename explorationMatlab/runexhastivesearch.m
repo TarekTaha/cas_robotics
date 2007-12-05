@@ -1,7 +1,12 @@
 function runexhastivesearch()
 %variables
+
 global r workspace %scan;
 tic
+cd journal' results'\
+load test2workspace.mat
+cd ..
+
 qlim=r.qlim.*0.98;
 unknownweight=calunknownweight();
 
@@ -16,7 +21,7 @@ unknown_points=workspace.unknowncoords(workspace.lev1unknown(index),:);
 
 %the increments between angles
 %  angle_inc=0.5*pi/180*ones(size(qlim,1),1);
-angle_inc=2*pi/180*ones([1,3]);
+angle_inc=15*pi/180*ones([1,3]);
 % angle_inc=[5,5,5,45,20].*pi/180;
 % angle_inc=[20,20,20,45,20].*pi/180;
 
@@ -87,9 +92,11 @@ free=find(all_data(:,4)==1 & all_data(:,5)==1);
 
 figure(2)
 
-plot3(all_data(obstacles,1),all_data(obstacles,2),all_data(obstacles,3),'b','marker','.','markersize',angle_inc(1)*180/pi,'linestyle','none');
+% plot3(all_data(obstacles,1),all_data(obstacles,2),all_data(obstacles,3),'b','marker','.','markersize',angle_inc(1)*180/pi,'linestyle','none');
+plot3(all_data(obstacles,1),all_data(obstacles,2),all_data(obstacles,3),'b','linestyle','none');
 hold on;
-plot3(all_data(unknown,1),all_data(unknown,2),all_data(unknown,3),'y','marker','.','markersize',angle_inc(1)*180/pi,'linestyle','none')
+% plot3(all_data(unknown,1),all_data(unknown,2),all_data(unknown,3),'y','marker','.','markersize',angle_inc(1)*180/pi,'linestyle','none')
+plot3(all_data(unknown,1),all_data(unknown,2),all_data(unknown,3),'y','linestyle','none')
 plot3(all_data(free,1),all_data(free,2),all_data(free,3),'g','marker','*','markersize',angle_inc(1)*180/pi,'linestyle','none')
 title('Discretised Configuration Space');
 xlabel('Joint 1 (rads)')
