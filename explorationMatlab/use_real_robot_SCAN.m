@@ -113,7 +113,7 @@ while attemptingscan
 end
     
 %% Wait till complete
-temp_counter=150; %simply keep on checking arbitary time if finished until actually finished
+temp_counter=300; %simply keep on checking arbitary time if finished until actually finished
 while get(robscan_h,'Completed')==0 || isempty(PointData)
     %display('waiting in scan');
     pause(0.5);
