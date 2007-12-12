@@ -60,13 +60,13 @@ class Navigator : public Controller
 		void setPath(Node *path);
 		void setObstAvoidAlgo(int);
 		int  getObstAvoidAlgo();
-		double NearestObstacle(LaserScan laser_scan);
+		double nearestObstacle(LaserScan laser_scan);
 		bool inLaserSpace(LaserScan laserScan,Pose robotLocation,QPointF waypoint);
 		void  setPause(bool pause);
 		Node * closestPathSeg(QPointF location,Node * all_path);
 		Node * closestPathNode(QPointF location,Node * all_path);
-		void GenerateLocalMap(QVector<QPointF> laser_scan,Pose laser_pose, Pose rob_location);
-		bool MapModified(QVector<QPointF> laser_scan,Pose rob_location);
+		void generateLocalMap(LaserScan laserScan, Pose rob_location);
+		bool mapModified(LaserScan laserScan, Pose rob_location);
 		bool getGoal(LaserScan laserScan, Pose &goal);
         void stop();
         void run();

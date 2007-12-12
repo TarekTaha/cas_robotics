@@ -558,15 +558,12 @@ void PlayerInterface::connectDevices()
     for(int i=0; i < lasers.size(); i++)
     {
     	player_pose_t 	lp_pose;
-    	lp_pose.px = 0;
-    	lp_pose.py = 0;
-    	lp_pose.pa = 0;
     	lasers[i].lp = new LaserProxy(pc,lasers[i].index);
-    	//lp_pose = lasers[i].lp->GetPose();
+    	lp_pose = lasers[i].lp->GetPose();
     	lasers[i].pose.p.setX(lp_pose.px);
     	lasers[i].pose.p.setY(lp_pose.py);	    	
     	lasers[i].pose.phi = lp_pose.pa;
-    	//qDebug("Laser Pose X:%f Y:%f Phi:%f",lasers[i].pose.p.x(),lasers[i].pose.p.y(),lasers[i].pose.phi);	    	
+    	qDebug("Laser Pose X:%f Y:%f Phi:%f",lasers[i].pose.p.x(),lasers[i].pose.p.y(),lasers[i].pose.phi);	    	
 		logMsg.append(QString("\n\t\t - Laser interface:%1 Interface Added Successfully").arg(lasers[i].index));  
     }
     if(mapEnabled)
