@@ -54,7 +54,8 @@ PlanningManager::PlanningManager(RobotManager *robMan,
 	this->bridgeTestEnabled = true;
 	this->showTreeEnabled   = false;
 	robotManager->robot->setCheckPoints(obst_exp);	
-   	connect(this, SIGNAL(addMsg(int,int,QString)), robMan->playGround,SLOT(addMsg(int,int,QString)));	
+   	connect(this, SIGNAL(addMsg(int,int,QString)), robMan->playGround,SLOT(addMsg(int,int,QString)));
+   	this->setupPlanner();
 //	qDebug("Pixel Res in Navigator =%f",this->pixel_res);	
 }
 
@@ -163,20 +164,20 @@ void PlanningManager::setMap(Map * mapData)
 	pathPlanner->setMap(mapData);		
 }
 
-//void PlanningManager::setMap(LaserScan laserScan,double local_dist,Pose robotLocation)
-//{
-//	if(!this->pathPlanner)
-//		this->setupPlanner();
-//	pathPlanner->setMap(provideLaserOG(laserScan,local_dist,pixel_res,robotLocation));
-//}
+void PlanningManager::setMap(LaserScan laserScan,double local_dist,Pose robotLocation)
+{
+	if(!this->pathPlanner)
+		this->setupPlanner();
+	pathPlanner->setMap(robotManager->playGround->mapManager->provideLaserOG(laserScan,local_dist,pixel_res,robotLocation));
+}
 
-//void PlanningManager::updateMap(LaserScan laserScan,double local_dist,Pose robotLocation)
-//{
-//	Map *newMap = providePointCloud(laserScan,local_dist,robotLocation);
-//	if(!this->pathPlanner)
-//		this->setupPlanner();
-//	pathPlanner->updateMap(newMap);
-//}
+void PlanningManager::updateMap(LaserScan laserScan,double local_dist,Pose robotLocation)
+{
+	Map *newMap = robotManager->playGround->mapManager->providePointCloud(laserScan,local_dist,robotLocation);
+	if(!this->pathPlanner)
+		this->setupPlanner();
+	pathPlanner->updateMap(newMap);
+}
 
 void PlanningManager::setStart(Pose start)
 {
@@ -205,6 +206,7 @@ void PlanningManager::generateSpace()
 		this->setupPlanner();
 	if(pathPlanner->search_space)
 	{
+		qDebug("\n Search Space already Exist");
 		return;
 		//pathPlanner->FreeSearchSpace();
 	}		

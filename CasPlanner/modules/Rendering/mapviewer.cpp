@@ -886,7 +886,7 @@ void MapViewer::paintGL()
 		renderPaths();
 	    renderRobot();	    
 		setRobotsLocation();	
-//	    renderLaser();      
+	    renderLaser();      
 	    renderSpatialStates();
 	    renderAction();
 //		renderExpandedTree();

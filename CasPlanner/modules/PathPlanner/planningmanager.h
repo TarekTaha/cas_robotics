@@ -56,7 +56,7 @@ class PlanningManager : public QObject
 	        void  setStart(Pose);
 	        void  setEnd(Pose);
 	        void  setMap(Map *);
-//	        void  setMap(LaserScan laserScan,double local_dist,Pose pose);
+	        void  setMap(LaserScan laserScan,double local_dist,Pose pose);
 	        void  setBridgeTest(int);
 	        void  setConnNodes(int);
 	        void  setRegGrid(int);
@@ -69,7 +69,7 @@ class PlanningManager : public QObject
 	        void  setObstPenValue(double);
 	        void  setExpObstValue(double);
 			void  setBridgeResValue(double val);
-//			void  updateMap(LaserScan laserScan,double local_dist,Pose robotLocation);
+			void  updateMap(LaserScan laserScan,double local_dist,Pose robotLocation);
 			bool  fileExist(const char * fname);
        signals:
 		    void addMsg(int,int, QString);
