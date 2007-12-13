@@ -1,4 +1,9 @@
 function createfigure(YMatrix1,AXBAM)
+if nargin<2
+    AXBAM=1;
+end
+
+    
 %CREATEFIGURE(YMATRIX1)
 %  YMATRIX1:  matrix of y data
 
@@ -9,17 +14,18 @@ figure1 = figure('PaperSize',[20.98 29.68]);
 
 % Create axes
 axes1 = axes('Parent',figure1,...    'YTick',[1e+004 1.2e+004 1.4e+004 1.6e+004 1.8e+004 2e+004 2.2e+004 2.4e+004 2.5e+004],...
-    'XTick',[1:size(YMatrix1,2)],...
+    'XTick',[0:12],...
     'FontSize',14);
+
 box('on');
 grid('on');
 hold('all');
 
 % Create multiple lines using matrix input to plot
-plot1 = plot(YMatrix1);
+plot1 = plot([0:12],YMatrix1(2:end-1));
 set(plot1(1),'DisplayName','AXBAM','marker','*');
 hold on;
-plot2=plot(36688*ones([1,size(YMatrix1,2)]),'g')
+plot2=plot([0:12],36688*ones([1,size(YMatrix1,2)-2]),'g')
 set(plot2(1),'DisplayName','Max Available');
 
 % set(plot1(2),'DisplayName','Env 2','Color',[1 0 0],'LineStyle','-.');
