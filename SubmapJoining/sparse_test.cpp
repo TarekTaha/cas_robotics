@@ -7,11 +7,12 @@ using namespace std;
 
 SparseMatrix random_matrix(int rows, int cols, int num_nonzero){
 	SparseMatrix result(rows, cols);
-	int tmp_row, tmp_col, tmp_value;
+	int tmp_row, tmp_col;
+	double tmp_value;
 	for(int i = 0; i < num_nonzero; ++i){
 		tmp_row = (int)(rows * (double)rand()/(double)RAND_MAX) + 1;
 		tmp_col = (int)(cols * (double)rand()/(double)RAND_MAX) + 1;
-		tmp_value = (int)(9 * (double)rand()/(double)RAND_MAX) + 1;
+		tmp_value = (9 * (double)rand()/(double)RAND_MAX) + 1;
 		result.set(tmp_row, tmp_col, tmp_value);
 	}
 	return result;
@@ -49,29 +50,31 @@ int main(int argc, char *argv[]){
 	Matrix dA, dB, dC, db, dx;
   
 	SparseSymmMatrix sC(2,2);
-	SparseMatrix sB;
+	SparseMatrix sB, L;
 	SparseMatrix sb(size, 1), x;
   
 	for(int i = 0; i < 1000; ++i){
-		sA = random_symm_matrix(size,size, 10);
+		sA = random_symm_matrix(size,size, 1000);
 		for(int j = 1; j<= size; ++j){
-			sA.set(j,j, 25);
+			sA.set(j,j, 50 + (int)(30 * (double)rand()/(double)RAND_MAX));
 			sb.set(j, 1, 1);
 		}
 		try{
 			dA = to_dence_matrix(sA);
-			sB = cholesky(sA);
-			x = solve_cholesky(sB, sb);
+			L = cholesky(sA);
+			x = solve_cholesky(L, sb);
 			
 
-			dB = to_dence_matrix(sB);
+			//dB = to_dence_matrix(sB);
+			dC = to_dence_matrix(trn(sB));
 			//dC = trn(dB) * dB;
 			db = to_dence_matrix(sb);
 			dx = to_dence_matrix(x);
 			//x.print();
 			//(inv(trn(dB))*db).print();
-
-			if(dx == (inv(trn(dB))*db)){
+			//(inv(dA)*db).print();
+			//dx.print();
+			if(inv(dA)*db == dx){
 				//cout << "works" << endl;
 				stringstream out;
 				out << i;

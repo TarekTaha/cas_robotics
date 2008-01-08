@@ -62,9 +62,19 @@ SparseMatrix cholesky(SparseSymmMatrix m){
 	return result;
 }
 
+double solve_cholesky_help_func(SparseMatrixElement *row_ptr, SparseMatrix& rhs2){
+	if(!row_ptr->next_in_row){
+		return rhs2.first_in_row[row_ptr->col]->value/row_ptr->value;
+	}
+	double temp = solve_cholesky_help_func(row_ptr->next_in_row, rhs2);
+	rhs2.add(row_ptr->col, 1, -temp*row_ptr->value);
+	return temp;
+}
+
 SparseMatrix solve_cholesky(const SparseMatrix& L, SparseMatrix rhs){
 	SparseMatrixElement *row_ptr;
 	SparseMatrix rhs2(rhs.rows, 1);
+	SparseMatrix result(rhs.rows, 1);
 	double temp_d;
 	for(int i = 1; i <= L.rows; ++i){
 		row_ptr = L.first_in_row[i];
@@ -78,5 +88,16 @@ SparseMatrix solve_cholesky(const SparseMatrix& L, SparseMatrix rhs){
 			}
 		}
 	}
-	return rhs2;
+	SparseMatrix trnL = trn(L);
+	//L.print();
+	//trnL.print();
+	for(int i = L.rows; i >= 1; --i){
+		//cout << "rhs2" << endl;
+		//rhs2.print();
+		row_ptr = trnL.first_in_row[i];
+		result.set(i, 1, solve_cholesky_help_func(row_ptr, rhs2));
+	}
+	return result;
 }
+
+
