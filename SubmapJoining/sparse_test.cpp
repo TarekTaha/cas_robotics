@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <iostream.h>
 #include "MatrixFunctions.h"
+#include <sstream>
 
 using namespace std;
 
@@ -42,44 +43,34 @@ int main(int argc, char *argv[]){
 	sA.set(2,6, 1);
 	sA.set(6,4, 2);
 	sA.add(6,4, 1);
-	SparseSymmMatrix sB(sA);
-	sB.set(6,6,6);
+
 
 	Matrix dA, dB, dC;
   
 	SparseSymmMatrix sC(2,2);
+	SparseMatrix sB;
   
-	for(int i = 0; i < 0; ++i){
-		sA = random_symm_matrix(50,50, 1000);
-		sB = random_symm_matrix(50,50, 1000);
-		sC = sA + sB;
-
+	for(int i = 0; i < 10; ++i){
+		sA = random_symm_matrix(10,10, 20);
+		sC.set(1,1,2);
+		sC.set(2,2,2);
+		sC.set(1,2,1);
+		//sA = sC;
+		sB = cholesky(sA);
   
 		dA = to_dence_matrix(sA);
 		dB = to_dence_matrix(sB);
-		dC = to_dence_matrix(sC);
+		dC = trn(dB) * dB;
 
-		if(dC == dA + dB){}
+		if(dC == dA){}
 		else{
-			cout << "dA" << endl;
-			dA.print();
-			cout << "dB" << endl;
-			dB.print();
-			cout << "dC" << endl;
-			dC.print();
-			cout << "sA" << endl;
-			sA.print();
-			cout << "sB" << endl;
-			sB.print();
-			cout << "sC" << endl;
-			sC.print();
+			stringstream out;
+			out << i;
+			string tmp = "SavedMatrices/A" + out.str() + ".mat";
+			dA.write_to_file("SavedMatrices/A.mat");
 		}
 	}
-	sC.set(1,1,2);
-	sC.set(2,2,2);
-	sC.set(1,2,1);
-	cholesky(sC).print();
-  cout << "finish" <<endl;
+	cout << "finish" <<endl;
 
 
   return 1;

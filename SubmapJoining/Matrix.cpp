@@ -402,3 +402,17 @@ double det(const Matrix& m){
 
   return sum;
 }
+
+void Matrix::write_to_file(const char* filename){
+  ofstream file;
+  file.open(filename);
+  for(int i = 0; i < rows; ++i){
+    for(int j = 0; j < columns; ++j){
+      if(j != 0)
+        file << ",";
+      file << values[i][j];
+    }
+    file << endl;
+  }
+  file.close();
+}
