@@ -6,6 +6,7 @@
 #include <iostream.h>
 #include <cmath>
 #include <exception>
+#include <fstream>
 
 using namespace std;
 
@@ -33,6 +34,7 @@ class Matrix{
     Matrix& operator+=(const Matrix&);
     Matrix& operator-=(const Matrix&);
 
+    void write_to_file(const char* filename);
     void set(int row, int column, double value);
     void set(int row, int column, const Matrix&);
     double get(int row, int column) const;

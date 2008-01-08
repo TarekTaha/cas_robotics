@@ -36,7 +36,6 @@ SparseMatrix cholesky(SparseSymmMatrix m){
 	//SparseMatrixElement *last_added;
 	double lambda;
 	for(int i = 1; i <= m.rows; ++i){
-		m.print();
 		row_ptr1 = m.first_in_row[i];
 		if(m.first_in_row[i]){
 			lambda = sqrt(m.first_in_row[i]->value);
