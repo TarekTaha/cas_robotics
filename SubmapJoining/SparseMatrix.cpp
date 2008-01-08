@@ -191,3 +191,16 @@ SparseMatrix operator+(SparseMatrix m1, const SparseMatrix& m2){
 	}
 	return m1;
 }
+
+SparseMatrix trn(const SparseMatrix& m){
+	SparseMatrix result(m.cols, m.rows);
+	SparseMatrixElement *row_ptr;
+	for(int i = 1; i <= m.rows; ++i){
+		row_ptr = m.first_in_row[i];
+		while(row_ptr){
+			result.set(row_ptr->col, row_ptr->row, row_ptr->value);
+			row_ptr = row_ptr->next_in_row;
+		}
+	}
+	return result;
+}
