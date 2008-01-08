@@ -7,22 +7,10 @@
 #include <cmath>
 #include <exception>
 #include <fstream>
+#include "MatrixException.h"
 
 using namespace std;
 
-class MatrixException: public exception
-{
-  public:  
-    MatrixException(char* msg){
-      this->msg = msg;
-    }
-    virtual const char* what() const throw(){
-      return msg;
-    }
-
-  private:
-   char* msg;
-};
 
 class Matrix{	
   public:

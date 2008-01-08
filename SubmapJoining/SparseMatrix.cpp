@@ -151,7 +151,7 @@ void SparseMatrix::remove_all_elements(){
 	}
 }
 
-void SparseMatrix::print(){
+void SparseMatrix::print() const{
 	SparseMatrixElement *row_ptr;
 	int last_col;
 	for(int i = 1; i <= rows; ++i){
