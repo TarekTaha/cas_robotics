@@ -2,8 +2,27 @@ CCC = g++
 CCCFLAGS = -Wno-deprecated
 LDFLAGS = -IMatrixLib
 MOBJECTS = ./MatrixLib/SparseMatrix.o ./MatrixLib/Matrix.o ./MatrixLib/SparseMatrixElement.o ./MatrixLib/MatrixLib.o
+INCLUDE =
 
-all: main
+all: st
+
+st : sparse_test.o SparseMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o
+	$(CCC) $(CCCFLAGS) sparse_test.o SparseMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o -o main
+
+sparse_test.o : sparse_test.cpp
+	$(CCC) $(CCCFLAGS) -c sparse_test.cpp $(LDFLAGS)
+
+SparseMatrix.o : SparseMatrix.cpp SparseMatrix.h
+	$(CCC) $(CCCFLAGS) -c SparseMatrix.cpp $(LDFLAGS)
+	
+SparseMatrixElement.o : SparseMatrixElement.cpp SparseMatrixElement.h
+	$(CCC) $(CCCFLAGS) -c SparseMatrixElement.cpp $(LDFLAGS)
+
+Matrix.o : Matrix.cpp Matrix.h
+	$(CCC) $(CCCFLAGS) -c Matrix.cpp $(LDFLAGS)
+
+MatrixFunctions.o : MatrixFunctions.cpp MatrixFunctions.h
+	$(CCC) $(CCCFLAGS) -c MatrixFunctions.cpp $(LDFLAGS)
 
 main : main.o LocalMap.o LocalMapList.o GlobalMap.o
 	$(CCC) $(CCCFLAGS) -o main main.o LocalMap.o LocalMapList.o GlobalMap.o $(MOBJECTS)
