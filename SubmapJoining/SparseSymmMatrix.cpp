@@ -1,6 +1,6 @@
-#include "SparseMatrix.h"
+#include "SparseSymmMatrix.h"
 
-SparseMatrix::SparseMatrix(int rows, int cols){
+SparseSymmMatrix::SparseSymmMatrix(int rows, int cols){
 	this->rows = rows;
 	this->cols = cols;
 	for(int i = 0; i < rows; ++i){
@@ -8,11 +8,11 @@ SparseMatrix::SparseMatrix(int rows, int cols){
 	}
 }
 
-SparseMatrix::~SparseMatrix(){
+SparseSymmMatrix::~SparseSymmMatrix(){
 	remove_all_elements();
 }
 
-SparseMatrix::SparseMatrix(const SparseMatrix& md){
+SparseSymmMatrix::SparseSymmMatrix(const SparseSymmMatrix& md){
 	rows = md.rows;
 	cols = md.cols;
 
@@ -36,7 +36,7 @@ SparseMatrix::SparseMatrix(const SparseMatrix& md){
 	}
 }
 
-SparseMatrix& SparseMatrix::operator=(const SparseMatrix& md){
+SparseSymmMatrix& SparseSymmMatrix::operator=(const SparseSymmMatrix& md){
 	remove_all_elements();
 
 	rows = md.rows;
@@ -62,10 +62,13 @@ SparseMatrix& SparseMatrix::operator=(const SparseMatrix& md){
 	return *this;
 }
 
-void SparseMatrix::set(int row, int column, double value){
+void SparseSymmMatrix::set(int row, int column, double value){
+
+	if(row > column){
+		swap(row, column);
+	}
 	SparseMatrixElement *row_ptr = first_in_row[row];
 	SparseMatrixElement *new_elem = new SparseMatrixElement(row, column, value);
-
 	if(!first_in_row[row]){
 		first_in_row[row] = new_elem;
 	}
@@ -100,7 +103,7 @@ void SparseMatrix::set(int row, int column, double value){
 	}
 }
 
-void SparseMatrix::add(int row, int column, double value){
+void SparseSymmMatrix::add(int row, int column, double value){
 	SparseMatrixElement *row_ptr = first_in_row[row];
 	SparseMatrixElement *new_elem = new SparseMatrixElement(row, column, value);
 	if(!first_in_row[row]){
@@ -137,7 +140,7 @@ void SparseMatrix::add(int row, int column, double value){
 	}
 }
 
-void SparseMatrix::remove_all_elements(){
+void SparseSymmMatrix::remove_all_elements(){
 	SparseMatrixElement *row_ptr;
 	SparseMatrixElement *temp;
 	for(int i = 1; i <=rows; ++i){
@@ -151,7 +154,8 @@ void SparseMatrix::remove_all_elements(){
 	}
 }
 
-void SparseMatrix::print(){
+void SparseSymmMatrix::print(){
+	cout << "Symmetry matrix" << endl;
 	SparseMatrixElement *row_ptr;
 	int last_col;
 	for(int i = 1; i <= rows; ++i){
@@ -180,7 +184,7 @@ void SparseMatrix::print(){
 	}
 }
 
-SparseMatrix operator+(SparseMatrix m1, const SparseMatrix& m2){
+SparseSymmMatrix operator+(SparseSymmMatrix m1, const SparseSymmMatrix& m2){
 	SparseMatrixElement *row_ptr;
 	for(int i = 1; i <= m2.rows; ++i){
 		row_ptr = m2.first_in_row[i];
