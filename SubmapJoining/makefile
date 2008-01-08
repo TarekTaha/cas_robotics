@@ -6,8 +6,8 @@ INCLUDE =
 
 all: st
 
-st : sparse_test.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o
-	$(CCC) $(CCCFLAGS) sparse_test.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o -o main
+st : sparse_test.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o
+	$(CCC) $(CCCFLAGS) sparse_test.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o -o main
 
 sparse_test.o : sparse_test.cpp
 	$(CCC) $(CCCFLAGS) -c sparse_test.cpp $(LDFLAGS)
@@ -23,6 +23,9 @@ SparseMatrixElement.o : SparseMatrixElement.cpp SparseMatrixElement.h
 
 Matrix.o : Matrix.cpp Matrix.h
 	$(CCC) $(CCCFLAGS) -c Matrix.cpp $(LDFLAGS)
+	
+MatrixException.o : MatrixException.h MatrixException.cpp
+	$(CCC) $(CCCFLAGS) -c MatrixException.cpp $(LDFLAGS)
 
 MatrixFunctions.o : MatrixFunctions.cpp MatrixFunctions.h
 	$(CCC) $(CCCFLAGS) -c MatrixFunctions.cpp $(LDFLAGS)

@@ -63,7 +63,9 @@ SparseSymmMatrix& SparseSymmMatrix::operator=(const SparseSymmMatrix& md){
 }
 
 void SparseSymmMatrix::set(int row, int column, double value){
-
+	 if(row > rows || column > cols)
+	    throw MatrixException("Error in SparseSymmMatrix::set(int row, int column, double value): trying to set element outside matrix");
+	 
 	if(row > column){
 		swap(row, column);
 	}
@@ -104,6 +106,12 @@ void SparseSymmMatrix::set(int row, int column, double value){
 }
 
 void SparseSymmMatrix::add(int row, int column, double value){
+	if(row > rows || column > cols)
+		throw MatrixException("Error in SparseSymmMatrix::add(int row, int column, double value): trying to set element outside matrix");
+	
+	if(row > column){
+		swap(row, column);
+	}
 	SparseMatrixElement *row_ptr = first_in_row[row];
 	SparseMatrixElement *new_elem = new SparseMatrixElement(row, column, value);
 	if(!first_in_row[row]){
@@ -154,7 +162,7 @@ void SparseSymmMatrix::remove_all_elements(){
 	}
 }
 
-void SparseSymmMatrix::print(){
+void SparseSymmMatrix::print() const{
 	cout << "Symmetry matrix" << endl;
 	SparseMatrixElement *row_ptr;
 	int last_col;
@@ -185,6 +193,11 @@ void SparseSymmMatrix::print(){
 }
 
 SparseSymmMatrix operator+(SparseSymmMatrix m1, const SparseSymmMatrix& m2){
+	  if(m1.rows != m2.rows)
+	    throw MatrixException("Error in operator+(SparseSymmMatrix m1, const SparseSymmMatrix& m2): matices must have same dimensions");
+	  if(m1.cols != m2.cols)
+	    throw MatrixException("Error in operator+(SparseSymmMatrix m1, const SparseSymmMatrix& m2): matices must have same dimensions");
+	  
 	SparseMatrixElement *row_ptr;
 	for(int i = 1; i <= m2.rows; ++i){
 		row_ptr = m2.first_in_row[i];

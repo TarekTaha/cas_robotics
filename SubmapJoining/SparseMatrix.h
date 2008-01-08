@@ -16,7 +16,7 @@ class SparseMatrix{
 
     void set(int, int, double);
     void add(int, int, double);
-    void print();
+    void print() const;
     void remove_all_elements();
     //void print();
     //void print_plain();

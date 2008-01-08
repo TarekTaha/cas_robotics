@@ -3,6 +3,7 @@
 
 #include <iostream.h>
 #include "SparseMatrixElement.h"
+#include "MatrixException.h"
 
 class SparseSymmMatrix{
   public:
@@ -16,7 +17,7 @@ class SparseSymmMatrix{
 
     void set(int, int, double);
     void add(int, int, double);
-    void print();
+    void print() const;
     void remove_all_elements();
     //void print();
     //void print_plain();
