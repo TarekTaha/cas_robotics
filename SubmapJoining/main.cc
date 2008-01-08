@@ -16,6 +16,7 @@ int main(int argc, char * argv[])
   SparseMatrix B;
   SparseMatrix C;
   SparseMatrix D;
+  SparseMatrix E;
   
   Matrix F(3,2);
   F.set(1,1, 0);
