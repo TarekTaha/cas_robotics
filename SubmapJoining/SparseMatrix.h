@@ -24,4 +24,5 @@ class SparseMatrix{
 
 SparseMatrix operator+(SparseMatrix m1, const SparseMatrix& m2);
 SparseMatrix trn(const SparseMatrix&);
+SparseMatrix operator*(const SparseMatrix& m1, const SparseMatrix& m2);
 #endif

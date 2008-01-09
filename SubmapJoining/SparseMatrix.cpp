@@ -192,6 +192,38 @@ SparseMatrix operator+(SparseMatrix m1, const SparseMatrix& m2){
 	return m1;
 }
 
+SparseMatrix operator*(const SparseMatrix& m1, const SparseMatrix& m2){
+	SparseMatrix m3 = trn(m2);
+	SparseMatrixElement *row_ptr1;
+	SparseMatrixElement *row_ptr3;
+	SparseMatrix result(m1.rows, m2.cols);
+	double sum;
+	for(int i = 1; i <= m1.rows; ++i){
+		for(int j = 1; j <= m3.rows; ++j){
+			sum = 0;
+			row_ptr1 = m1.first_in_row[i];
+			row_ptr3 = m3.first_in_row[j];
+			while(row_ptr1 && row_ptr3){
+				if(row_ptr1->col > row_ptr3->col){
+					row_ptr3 = row_ptr3->next_in_row;		
+				}
+				else if(row_ptr1->col < row_ptr3->col){
+					row_ptr1 = row_ptr1->next_in_row;		
+				}
+				else if(row_ptr1->col == row_ptr3->col){
+					sum += row_ptr1->value * row_ptr3->value;
+					row_ptr1 = row_ptr1->next_in_row;
+					row_ptr3 = row_ptr3->next_in_row;
+				}
+			}
+			if(sum){
+				result.set(i, j, sum);
+			}
+		}
+	}
+	return result;
+}
+
 SparseMatrix trn(const SparseMatrix& m){
 	SparseMatrix result(m.cols, m.rows);
 	SparseMatrixElement *row_ptr;
