@@ -46,7 +46,7 @@ class Matrix{
     int get_rows() const;
     int get_columns() const;
 
-  protected:
+  //protected:
     double values[50][50];
     int rows;
     int columns;

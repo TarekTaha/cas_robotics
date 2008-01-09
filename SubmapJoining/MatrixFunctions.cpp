@@ -89,13 +89,33 @@ SparseMatrix solve_cholesky(const SparseMatrix& L, SparseMatrix rhs){
 		}
 	}
 	SparseMatrix trnL = trn(L);
-	//L.print();
-	//trnL.print();
+
 	for(int i = L.rows; i >= 1; --i){
-		//cout << "rhs2" << endl;
-		//rhs2.print();
 		row_ptr = trnL.first_in_row[i];
 		result.set(i, 1, solve_cholesky_help_func(row_ptr, rhs2));
+	}
+	return result;
+}
+
+SparseMatrix operator*(const SparseMatrix& spa, const Matrix& denc){
+	SparseMatrixElement *row_ptr;
+	SparseMatrix result(spa.rows, denc.columns);
+	double sum;
+	for(int i = 1; i <= spa.rows; ++i){
+		for(int j = 1; j <= denc.columns; ++j){
+			//cout << "i: " << i << " j: " << j << endl;
+			sum = 0;
+			row_ptr = spa.first_in_row[i];
+			while(row_ptr){
+				//cout << row_ptr->value << "   " <<  denc.get(row_ptr->col,j) << endl;
+				sum += row_ptr->value * denc.get(row_ptr->col,j);
+				row_ptr = row_ptr->next_in_row;
+				//cout << sum << endl;
+			}
+			if(sum){
+				result.set(i, j, sum);
+			}
+		}
 	}
 	return result;
 }

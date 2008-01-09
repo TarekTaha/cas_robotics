@@ -7,3 +7,4 @@ Matrix to_dence_matrix(const SparseSymmMatrix& md);
 
 SparseMatrix cholesky(SparseSymmMatrix m);
 SparseMatrix solve_cholesky(const SparseMatrix& L, SparseMatrix rhs);
+SparseMatrix operator*(const SparseMatrix& spa, const Matrix& denc);
