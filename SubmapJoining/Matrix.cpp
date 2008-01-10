@@ -103,13 +103,13 @@ int Matrix::get_columns() const{
 }
 
 void Matrix::print() const{
-  cout.precision(5);
+  cout.precision(10);
   for(int i = 0; i < rows; ++i){
     cout << "[";
     for(int j = 0; j < columns; ++j){
       if(j != 0)
         cout << " ";
-      if(abs(values[i][j]) < 0.00005)
+      if(abs(values[i][j]) < 0.0000005)
 	cout << 0.0;
       else
 	cout << values[i][j];
@@ -415,4 +415,25 @@ void Matrix::write_to_file(const char* filename){
     file << endl;
   }
   file.close();
+}
+
+void Matrix::read_from_file(const char* filename){
+	int row_count = 0, col_count = 0;
+	double read_double;
+	char c;
+	ifstream file(filename);
+
+	while(!file.eof() && file.peek() != -1){
+		file >> read_double;
+		values[row_count][col_count] = read_double;
+		file.get(c);
+		++col_count;
+		if(c == '\n'){
+			++row_count;
+			columns = col_count;
+			col_count = 0;
+		}
+	}
+	rows = row_count;
+	file.close();
 }

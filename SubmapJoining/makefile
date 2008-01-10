@@ -1,10 +1,10 @@
 CCC = g++
 CCCFLAGS = -Wno-deprecated
 LDFLAGS = -IMatrixLib
-MOBJECTS = ./MatrixLib/SparseMatrix.o ./MatrixLib/Matrix.o ./MatrixLib/SparseMatrixElement.o ./MatrixLib/MatrixLib.o
+#MOBJECTS = ./MatrixLib/SparseMatrix.o ./MatrixLib/Matrix.o ./MatrixLib/SparseMatrixElement.o ./MatrixLib/MatrixLib.o
 INCLUDE =
 
-all: st
+all: main
 
 st : sparse_test.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o
 	$(CCC) $(CCCFLAGS) sparse_test.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o -o main
@@ -30,8 +30,10 @@ MatrixException.o : MatrixException.h MatrixException.cpp
 MatrixFunctions.o : MatrixFunctions.cpp MatrixFunctions.h
 	$(CCC) $(CCCFLAGS) -c MatrixFunctions.cpp $(LDFLAGS)
 
-main : main.o LocalMap.o LocalMapList.o GlobalMap.o
-	$(CCC) $(CCCFLAGS) -o main main.o LocalMap.o LocalMapList.o GlobalMap.o $(MOBJECTS)
+
+
+main : main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o MapFuser.o
+	$(CCC) $(CCCFLAGS) -o main main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o MapFuser.o
 
 main.o : main.cc
 	$(CCC) $(CCCFLAGS) -c main.cc $(LDFLAGS)
@@ -44,6 +46,9 @@ LocalMapList.o: LocalMapList.h LocalMapList.cpp
 
 GlobalMap.o: GlobalMap.h GlobalMap.cpp
 	$(CCC) $(CCCFLAGS) -c GlobalMap.cpp $(LDFLAGS)
-	rm *.o
+	
+MapFuser.o: MapFuser.h MapFuser.cpp
+	$(CCC) $(CCCFLAGS) -c MapFuser.cpp $(LDFLAGS)
+
 clean:
 	rm *.o

@@ -3,6 +3,7 @@
 
 #include <iostream.h>
 #include "SparseMatrixElement.h"
+#include "MatrixException.h"
 
 class SparseMatrix{
   public:
