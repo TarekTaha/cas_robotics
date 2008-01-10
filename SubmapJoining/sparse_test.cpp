@@ -41,7 +41,7 @@ int main(int argc, char *argv[]){
 	SparseMatrix spaA, spaB, spaC;
 	SparseMatrix sb(size, 1), x;
   
-	for(int i = 0; i < 1000; ++i){
+	for(int i = 0; i < 0; ++i){
 		spaA = random_matrix(size,5, 100);
 		spaB = random_matrix(5,size, 2000);
 		//cout << "mult start" << endl;
@@ -96,7 +96,8 @@ int main(int argc, char *argv[]){
 		}
 	}
 	cout << "finish" <<endl;
-
+	dA.read_from_file("SimulationData/localmap_1_st");
+	dA.print();
 
   return 1;
 }

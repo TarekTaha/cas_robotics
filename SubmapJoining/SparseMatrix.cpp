@@ -63,6 +63,8 @@ SparseMatrix& SparseMatrix::operator=(const SparseMatrix& md){
 }
 
 void SparseMatrix::set(int row, int column, double value){
+	 if(row > rows || column > cols)
+	    throw MatrixException("Error in SparseMatrix::set(int row, int column, double value): trying to set element outside matrix");
 	SparseMatrixElement *row_ptr = first_in_row[row];
 	SparseMatrixElement *new_elem = new SparseMatrixElement(row, column, value);
 
@@ -101,6 +103,9 @@ void SparseMatrix::set(int row, int column, double value){
 }
 
 void SparseMatrix::add(int row, int column, double value){
+	if(row > rows || column > cols)
+		throw MatrixException("Error in SparseMatrix::add(int row, int column, double value): trying to set element outside matrix");
+	
 	SparseMatrixElement *row_ptr = first_in_row[row];
 	SparseMatrixElement *new_elem = new SparseMatrixElement(row, column, value);
 	if(!first_in_row[row]){
@@ -181,6 +186,11 @@ void SparseMatrix::print() const{
 }
 
 SparseMatrix operator+(SparseMatrix m1, const SparseMatrix& m2){
+	if(m1.rows != m2.rows)
+		throw MatrixException("Error in operator+(SparseMatrix m1, const SparseSymmMatrix& m2): matices must have same dimensions");
+	if(m1.cols != m2.cols)
+		throw MatrixException("Error in operator+(SparseMatrix m1, const SparseSymmMatrix& m2): matices must have same dimensions");
+	  
 	SparseMatrixElement *row_ptr;
 	for(int i = 1; i <= m2.rows; ++i){
 		row_ptr = m2.first_in_row[i];
@@ -193,6 +203,9 @@ SparseMatrix operator+(SparseMatrix m1, const SparseMatrix& m2){
 }
 
 SparseMatrix operator*(const SparseMatrix& m1, const SparseMatrix& m2){
+	if(m1.rows != m2.cols)
+		throw MatrixException("Error in operator*(const SparseMatrix& m1, const SparseSymmMatrix& m2): wrong dimensions");
+	
 	SparseMatrix m3 = trn(m2);
 	SparseMatrixElement *row_ptr1;
 	SparseMatrixElement *row_ptr3;

@@ -1,4 +1,4 @@
-#include "SparseMatrix.h"
+#include "MatrixFunctions.h"
 
 #ifndef GLOBALMAP
 #define GLOBALMAP
@@ -7,7 +7,7 @@ class GlobalMap{
 	public:
 		GlobalMap();
 		SparseMatrix i;
-		SparseMatrix I;
+		SparseSymmMatrix I;
 		SparseMatrix L;
 };
 
