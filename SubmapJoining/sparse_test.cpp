@@ -34,33 +34,28 @@ SparseSymmMatrix random_symm_matrix(int rows, int cols, int num_nonzero){
 
 int main(int argc, char *argv[]){
 
-	int size = 30;
+	int size = 5;
 	Matrix dA, dB, dC, db, dx;
   
 	SparseSymmMatrix symmA, symmB, symmC;
 	SparseMatrix spaA, spaB, spaC;
 	SparseMatrix sb(size, 1), x;
   
-	for(int i = 0; i < 0; ++i){
-		spaA = random_matrix(size,5, 100);
-		spaB = random_matrix(5,size, 2000);
-		//cout << "mult start" << endl;
-		//spaC = spaA*spaB;
-		//cout << "mult end" << endl;
-		/*spaA.print();
-		cout << endl;
-		spaB.print();
-		cout << endl;
-		spaC.print();*/
-		/*for(int j = 1; j<= size; ++j){
-			sA.set(j,j, 50 + (int)(30 * (double)rand()/(double)RAND_MAX));
-			sb.set(j, 1, 1);
-		}*/
+	for(int i = 0; i < 1000; ++i){
+		symmA = random_symm_matrix(size,size, 100);
+
+		for(int j = 1; j<= size; ++j){
+			symmA.set(j,j, 50 + (int)(30 * (double)rand()/(double)RAND_MAX));
+			sb.set(1, 1, (30 * (double)rand()/(double)RAND_MAX));
+		}
+
+		
 		try{
-			dA = to_dence_matrix(spaA);
-			dB = to_dence_matrix(spaB);
-			spaC = spaA*dB;
-			dC = to_dence_matrix(spaC);
+			dA = to_dence_matrix(symmA);
+			db = to_dence_matrix(sb);
+			spaB = cholesky(symmA);
+			x = solve_cholesky(spaB, sb);
+			dx = to_dence_matrix(x);
 			/*spaA.print();
 			cout << endl;
 			dB.print();
@@ -69,8 +64,8 @@ int main(int argc, char *argv[]){
 			cout << endl;*/
 			
 			
-			if(dA*dB == dC){
-				//cout << "works" << endl;
+			if(inv(dA) * db == dx){
+				cout << "works" << endl;
 				/*stringstream out;
 				out << i;
 				string tmp = "SavedMatrices/B" + out.str() + ".mat";
@@ -97,7 +92,9 @@ int main(int argc, char *argv[]){
 	}
 	cout << "finish" <<endl;
 	dA.read_from_file("SimulationData/localmap_1_st");
-	dA.print();
+	//dA.print();
+	symmA = random_symm_matrix(size,size, 100);
+	//symmA.print();
 
   return 1;
 }

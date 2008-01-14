@@ -29,6 +29,43 @@ Matrix to_dence_matrix(const SparseSymmMatrix& md){
   return result;
 }
 
+SparseMatrix to_sparse_matrix(const Matrix& m){
+  SparseMatrix result(m.rows, m.columns);
+  for(int i = 0; i < m.rows; ++i){
+    for(int j = 0; j < m.columns; ++j){
+      if(m.values[i][j])
+        result.set(i + 1,j + 1, m.values[i][j]); 
+    }
+  }
+  return result;
+}
+
+SparseSymmMatrix to_sparse_symm_matrix(const Matrix& m){
+  SparseSymmMatrix result(m.rows, m.columns);
+  for(int i = 0; i < m.rows; ++i){
+    for(int j = 0; j < i + 1; ++j){
+      if(m.values[i][j])
+        result.set(i + 1,j + 1, m.values[i][j]); 
+    }
+  }
+  return result;
+}
+
+SparseSymmMatrix to_sparse_symm_matrix(const SparseMatrix& m){
+	SparseSymmMatrix result(m.rows, m.cols);
+	SparseMatrixElement *row_ptr;
+	for(int i = 1; i <= m.rows; ++i){
+		row_ptr = m.first_in_row[i];
+		while(row_ptr){
+			if(row_ptr->col >= row_ptr->row)
+				result.set(row_ptr->row, row_ptr->col, row_ptr->value);
+			row_ptr = row_ptr->next_in_row;
+		}
+	}
+	return result;
+}
+
+
 SparseMatrix cholesky(SparseSymmMatrix m){
 	SparseMatrix result(m.rows, m.cols);
 	SparseMatrixElement *row_ptr1;
@@ -64,7 +101,9 @@ SparseMatrix cholesky(SparseSymmMatrix m){
 
 double solve_cholesky_help_func(SparseMatrixElement *row_ptr, SparseMatrix& rhs2){
 	if(!row_ptr->next_in_row){
-		return rhs2.first_in_row[row_ptr->col]->value/row_ptr->value;
+		if(rhs2.first_in_row[row_ptr->col])
+			return rhs2.first_in_row[row_ptr->col]->value/row_ptr->value;
+		return 0;
 	}
 	double temp = solve_cholesky_help_func(row_ptr->next_in_row, rhs2);
 	rhs2.add(row_ptr->col, 1, -temp*row_ptr->value);
@@ -78,12 +117,12 @@ SparseMatrix solve_cholesky(const SparseMatrix& L, SparseMatrix rhs){
 	double temp_d;
 	for(int i = 1; i <= L.rows; ++i){
 		row_ptr = L.first_in_row[i];
-		if(rhs.first_in_row[rhs.rows + 1 - i]){
-			temp_d = rhs.first_in_row[rhs.rows + 1 - i]->value/row_ptr->value;
+		if(rhs.first_in_row[i]){
+			temp_d = rhs.first_in_row[i]->value/row_ptr->value;
 			rhs2.set(i, 1, temp_d);
 			row_ptr = row_ptr->next_in_row;
 			while(row_ptr){
-				rhs.add(rhs.rows + 1 - row_ptr->col, 1, -temp_d*row_ptr->value);
+				rhs.add(row_ptr->col, 1, -temp_d*row_ptr->value);
 				row_ptr = row_ptr->next_in_row;
 			}
 		}
@@ -98,7 +137,7 @@ SparseMatrix solve_cholesky(const SparseMatrix& L, SparseMatrix rhs){
 }
 
 SparseMatrix operator*(const SparseMatrix& spa, const Matrix& denc){
-	if(spa.rows != denc.columns)
+	if(spa.cols != denc.rows)
 		throw MatrixException("Error in operator*(const SparseMatrix& spa, const Matrix& denc): wrong dimensions");
 	
 	SparseMatrixElement *row_ptr;
@@ -118,4 +157,17 @@ SparseMatrix operator*(const SparseMatrix& spa, const Matrix& denc){
 		}
 	}
 	return result;
+}
+
+
+Matrix operator+(Matrix denc, const SparseMatrix& spa){
+	SparseMatrixElement *row_ptr;
+	for(int i = 1; i <= spa.rows; ++i){
+		row_ptr = spa.first_in_row[i];
+		while(row_ptr){
+			denc.values[i - 1][row_ptr->col - 1] += row_ptr->value;
+			row_ptr = row_ptr->next_in_row;
+		}
+	}
+	return denc;
 }

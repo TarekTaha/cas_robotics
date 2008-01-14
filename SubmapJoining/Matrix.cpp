@@ -103,15 +103,13 @@ int Matrix::get_columns() const{
 }
 
 void Matrix::print() const{
-  cout.precision(10);
+  cout.precision(20);
   for(int i = 0; i < rows; ++i){
     cout << "[";
     for(int j = 0; j < columns; ++j){
       if(j != 0)
         cout << " ";
-      if(abs(values[i][j]) < 0.0000005)
-	cout << 0.0;
-      else
+
 	cout << values[i][j];
     }
     cout << "]" << endl;
@@ -250,46 +248,45 @@ void Matrix::row_op_divide(int row, double factor){
 }
 
 Matrix inv(const Matrix& m1){
-  if(m1.rows != m1.columns)
-    throw MatrixException("Error in inv(const Matrix&): Matrix must be squared");
+	if(m1.rows != m1.columns)
+		throw MatrixException("Error in inv(const Matrix&): Matrix must be squared");
 
-  Matrix m2(m1);
-  Matrix m3;
-  m3 = unit_matrix(m2.rows);
+	Matrix m2(m1);
+	Matrix m3;
+	m3 = unit_matrix(m2.rows);
 
-  int k;
+	int k;
 
-  for(int i = 1; i < m2.rows; ++i){
-    if(abs(m2.get(i,i)) < 0.0001){
-      m2.set(i,i,0);
-      k = i + 1;
-      while(abs(m2.get(k,i)) < 0.0001){
-	++k;
-	if(k > m2.rows)
-          throw MatrixException("Error in inv(const Matrix&): invers dose not exist");
-      }
-      m3.row_op_swap(i,k);
-      m2.row_op_swap(i,k);
-    }
-    for(int j = i + 1; j <= m2.rows; ++j){
-      m3.row_op_factor(i,j, -m2.get(j,i)/m2.get(i,i));
-      m2.row_op_factor(i,j, -m2.get(j,i)/m2.get(i,i));
-    }
-  }
-
-  for(int i = m2.rows; i >= 1; --i){
-    if(abs(m2.get(i,i)) < 0.0001)
-      throw MatrixException("Error in inv(const Matrix&): invers dose not exist");
-
-    m3.row_op_divide(i, m2.get(i,i));
-    m2.row_op_divide(i, m2.get(i,i));
-    for(int j = 1; j < i; ++j){
-      m3.row_op_factor(i,j, -m2.get(j,i)/m2.get(i,i));
-      m2.row_op_factor(i,j, -m2.get(j,i)/m2.get(i,i));
-    }
-  }
-
-  return m3;
+	for(int i = 1; i < m2.rows; ++i){
+		if(!m2.get(i,i)){
+			m2.set(i,i,0);
+			k = i + 1;
+			while(!m2.get(k,i)){
+				++k;
+				if(k > m2.rows)
+					throw MatrixException("Error in inv(const Matrix&): invers dose not exist");
+			}
+			m3.row_op_swap(i,k);
+			m2.row_op_swap(i,k);
+		}
+		for(int j = i + 1; j <= m2.rows; ++j){
+			m3.row_op_factor(i,j, -m2.get(j,i)/m2.get(i,i));
+			m2.row_op_factor(i,j, -m2.get(j,i)/m2.get(i,i));
+		}
+	}
+	
+	for(int i = m2.rows; i >= 1; --i){
+		if(!m2.get(i,i))
+			throw MatrixException("Error in inv(const Matrix&): invers dose not exist");
+		
+		m3.row_op_divide(i, m2.get(i,i));
+		m2.row_op_divide(i, m2.get(i,i));
+		for(int j = 1; j < i; ++j){
+			m3.row_op_factor(i,j, -m2.get(j,i)/m2.get(i,i));
+			m2.row_op_factor(i,j, -m2.get(j,i)/m2.get(i,i));
+		}
+	}
+	return m3;
 }
 
 bool operator==(const Matrix& m1, const Matrix& m2){
@@ -353,7 +350,37 @@ void Matrix::delete_columns(int from_column, int to_column){
 
 }
 
-Matrix Matrix::get_sub_matrix(int from_row, int from_column, int to_row, int to_column){
+void Matrix::swap_rows(int row1, int row2){
+  if(row1 > rows)
+    throw MatrixException("Error in swap_rows(int, int) : Row dose not exsist");
+  if(row1 < 1)
+    throw MatrixException("Error in swap_rows(int, int) : Row dose not exsist");
+  if(row2 > rows)
+    throw MatrixException("Error in swap_rows(int, int) : Row dose not exsist");
+  if(row2 < 1)
+    throw MatrixException("Error in swap_rows(int, int) : Row dose not exsist");
+
+  for(int i = 0; i < columns; ++i){
+    swap(values[row1 - 1][i], values[row2 - 1][i]);
+  }
+}
+
+void Matrix::swap_columns(int col1, int col2){
+  if(col1 > columns)
+    throw MatrixException("Error in swap_columns(int, int) : Column dose not exsist");
+   if(col1 < 1)
+    throw MatrixException("Error in swap_columns(int, int) : Column dose not exsist");
+  if(col2 > columns)
+    throw MatrixException("Error in swap_columns(int, int) : Column dose not exsist");
+  if(col2 < 1)
+    throw MatrixException("Error in swap_columns(int, int) : Column dose not exsist");
+
+  for(int i = 0; i < rows; ++i){
+    swap(values[i][col1 - 1], values[i][col2 - 1]);
+  }
+}
+
+Matrix Matrix::get_sub_matrix(int from_row, int from_column, int to_row, int to_column) const{
   if(to_column > columns)
     throw MatrixException("Error in get_sub_matrix(int, int) : Row dose not exsist");
   if(from_column < 1)
