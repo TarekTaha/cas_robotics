@@ -17,7 +17,6 @@ Matrix MapFuser::get_part_of_X_for_assositation(){
 	result.set(3, 1, glb_map.X.get(glb_map.X.rows		, 1));
 	for(int i = 0; i < size; ++i){
 		for(int k = 0; k < 2; ++k){
-			cout << " i: " << i << " "<< place_of_beacon[potential_assosiation_beacons[i]] << endl;
 			result.set(2 * i + k + 4, 1, glb_map.X.get(place_of_beacon[potential_assosiation_beacons[i]] + k, 1));
 		}
 	}
@@ -35,8 +34,9 @@ Matrix MapFuser::restore_part_of_P_for_assositation(){
 			rhs.set(place_of_beacon[potential_assosiation_beacons[i]] + k, 1, 1);
 			x = solve_cholesky(glb_map.L, rhs);
 			for(int j = 0; j < 3; ++j){
-				if(x.first_in_row[rhs.rows - 2 + j])
+				if(x.first_in_row[rhs.rows - 2 + j]){
 					result.values[j][2 * i + k + 3] = x.first_in_row[rhs.rows - 2 + j]->value;
+				}
 			}
 			for(int j = 0; j < size; ++j){
 				for(int m = 0; m < 2; ++m){
@@ -48,13 +48,14 @@ Matrix MapFuser::restore_part_of_P_for_assositation(){
 			}	
 		}
 	}
-	for(int i = 0; i < 2; ++i){
+	for(int i = 0; i < 3; ++i){
 		rhs.remove_all_elements();
 		rhs.set(rhs.rows - 2 + i, 1, 1);
 		x = solve_cholesky(glb_map.L, rhs);
 		for(int j = 0; j < 3; ++j){
-			if(x.first_in_row[rhs.rows - 2 + j])
+			if(x.first_in_row[rhs.rows - 2 + j]){
 				result.values[j][i] = x.first_in_row[rhs.rows - 2 + j]->value;
+			}
 		}
 		for(int j = 0; j < size; ++j){
 			for(int m = 0; m < 2; ++m){
@@ -70,27 +71,37 @@ Matrix MapFuser::restore_part_of_P_for_assositation(){
 }
 
 void MapFuser::fuse_map(LocalMap m){
+	if(m.P.values[0][0] < 1e-8 || m.P.values[1][1] < 1e-8 || m.P.values[2][2] < 1e-8){
+		m.P.values[0][0] += 1e-8;
+		m.P.values[1][1] += 1e-8;
+		m.P.values[2][2] += 1e-8;
+	}
+	
 	Matrix obsP = m.P.get_sub_matrix(4,4, m.P.rows, m.P.columns);
 	Matrix obsX = m.X.get_sub_matrix(4, 1, m.X.rows, 1);
 	set_potential_assosiations();
 	
 	Matrix P = restore_part_of_P_for_assositation();
 	Matrix X = get_part_of_X_for_assositation();
+
 	Matrix beacP = trans_cov_matrix_to_local_cordinate_system(P,X);
 	Matrix beacX = trans_state_matrix_to_local_cordinate_system(X);
+	/*beacP.write_to_file("SavedMatrices/beacP");
+	beacX.write_to_file("SavedMatrices/beacX");
+	obsP.write_to_file("SavedMatrices/obsP");
+	obsX.write_to_file("SavedMatrices/obsX");*/
+	assosiate_beacons(beacX, beacP, obsX, obsP);
 }
 
 void MapFuser::fuse_first_map(LocalMap m){
-	cout << "here1" << endl;
+
 	//add a bit to P to avoid singularity
-	m.P.values[0][0] += 1e-8;
-	m.P.values[1][1] += 1e-8;
-	m.P.values[2][2] += 1e-8;
-	cout << "here1" << endl;
-	m.X.print();
-	cout << "here3" << endl;
-    trans_state_matrix_to_local_cordinate_system(m.X).print();
-	cout << "here2" << endl;
+	if(m.P.values[0][0] < 1e-8 || m.P.values[1][1] < 1e-8 || m.P.values[2][2] < 1e-8){
+		m.P.values[0][0] += 1e-8;
+		m.P.values[1][1] += 1e-8;
+		m.P.values[2][2] += 1e-8;
+	}
+
 	double temp1 = m.X.values[0][0];
 	double temp2 = m.X.values[1][0];
 	double temp3 = m.X.values[2][0];
@@ -122,7 +133,6 @@ void MapFuser::fuse_first_map(LocalMap m){
 		m.P.values[i][m.P.columns - 2] = temp2;
 		m.P.values[i][m.P.columns - 1] = temp3;
 	}
-
     glb_map.I = to_sparse_symm_matrix(inv(m.P));
     glb_map.i = to_sparse_matrix(inv(m.P)* m.X);
     glb_map.L = cholesky(glb_map.I);
@@ -183,8 +193,8 @@ Matrix MapFuser::trans_state_matrix_to_local_cordinate_system(const Matrix& X){
 
 void MapFuser::assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const Matrix& obsX, const Matrix& obsP){
 
-	int num_obs = obsP.rows;
-	int num_beac = beacP.rows;
+	int num_obs = obsP.rows/2;
+	int num_beac = beacP.rows/2;
 	double r_obs, b_obs, r_beac, b_beac;
 	Matrix cov_obs, cov_beac, totalcov;
 	Matrix innov(2,1);
@@ -209,8 +219,13 @@ void MapFuser::assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const
 	        }
 	    }
 	}
+	cout << "Matches" << endl;
 	for(int j = 1; j <= num_obs; ++j){
 		cout << assosiations[j] << " " << j << endl;
 	}
+}
+
+void MapFuser::update_map(){
+	
 }
 

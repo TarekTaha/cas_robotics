@@ -15,6 +15,7 @@ class MapFuser{
 	public:
 		MapFuser();
 		GlobalMap glb_map;
+		void update_map();
 		void fuse_map(LocalMap m);
 		void fuse_first_map(LocalMap m);
 		void set_potential_assosiations();
