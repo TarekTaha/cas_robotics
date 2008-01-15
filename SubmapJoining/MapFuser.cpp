@@ -269,8 +269,8 @@ void MapFuser::add_new_beacons_and_robot_location_to_state(const Matrix& obsX){
 }
 
 void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
-	int index_robot1 = 9;
-	int index_robot2 = 12;
+	int index_robot1 = glb_map.X.rows - 2 * num_beacons_in_submap[num_submaps] - 5;
+	int index_robot2 = glb_map.X.rows - 2;
 	double xi, yi;
 	double xr1 = glb_map.X.get(index_robot1		, 1);
 	double yr1 = glb_map.X.get(index_robot1 + 1	, 1);
@@ -331,5 +331,7 @@ void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
 	glb_map.i = glb_map.i + trn(jh) * inv(obsP) * (obsX - H + jh * glb_map.X);
 	to_dence_matrix(glb_map.I).write_to_file("SavedMatrices/I");
 	to_dence_matrix(glb_map.i).write_to_file("SavedMatrices/i");
+	glb_map.L = cholesky(glb_map.I);
+	glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
 }
 
