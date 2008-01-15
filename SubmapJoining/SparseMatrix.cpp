@@ -64,6 +64,7 @@ SparseMatrix& SparseMatrix::operator=(const SparseMatrix& md){
 	}
 	return *this;
 }
+
 double SparseMatrix::get(int row, int column){
 	 if(row > rows || column > cols)
 	    throw MatrixException("Error in SparseMatrix::get(int row, int column, double value): trying to get element outside matrix");

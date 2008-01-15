@@ -33,7 +33,7 @@ class Matrix{
     void add_columns(int num);
     void delete_rows(int from_row, int to_row);
     void delete_columns(int from_column, int to_column);
-    Matrix get_sub_matrix(int from_row, int from_column, int to_row, int to_column);
+    Matrix get_sub_matrix(int from_row, int from_column, int to_row, int to_column) const;
 
     friend Matrix operator+(Matrix, const Matrix&);
     friend Matrix operator-(Matrix, const Matrix&);
@@ -52,6 +52,8 @@ class Matrix{
     double values[50][50];
     int rows;
     int columns;
+    void swap_rows(int row1, int row2);
+    void swap_columns(int col1, int col2);
     void row_op_factor(int row1, int row2, double factor);
     void row_op_swap(int row1, int row2);
     void row_op_divide(int row, double factor);

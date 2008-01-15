@@ -9,6 +9,7 @@ class GlobalMap{
 		SparseMatrix i;
 		SparseSymmMatrix I;
 		SparseMatrix L;
+		SparseMatrix X;
 };
 
 #endif

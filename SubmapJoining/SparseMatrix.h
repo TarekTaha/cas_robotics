@@ -16,8 +16,10 @@ class SparseMatrix{
     int cols;
 
     void set(int, int, double);
+    double get(int row, int column);
     void add(int, int, double);
     void print() const;
+    void print_coord_format() const;
     void remove_all_elements();
     //void print();
     //void print_plain();
