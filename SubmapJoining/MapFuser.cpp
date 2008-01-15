@@ -2,10 +2,30 @@
 
 MapFuser::MapFuser(){}
 
-Matrix MapFuser::restore_part_of_P(int size){
-	//fixa in robotloc
-	potential_assosiation_beacons[0] = 0;
-	potential_assosiation_beacons[1] = 1;
+void MapFuser::set_potential_assosiations(){
+	for(int i = 0; i < num_beacons; ++i){
+		potential_assosiation_beacons[i] = i;
+	}
+	num_potential_assosiations = num_beacons;
+}
+
+Matrix MapFuser::get_part_of_X_for_assositation(){
+	int size = num_potential_assosiations;
+	Matrix result(2*size + 3, 1);
+	result.set(1, 1, glb_map.X.get(glb_map.X.rows - 2	, 1));
+	result.set(2, 1, glb_map.X.get(glb_map.X.rows - 1	, 1));
+	result.set(3, 1, glb_map.X.get(glb_map.X.rows		, 1));
+	for(int i = 0; i < size; ++i){
+		for(int k = 0; k < 2; ++k){
+			cout << " i: " << i << " "<< place_of_beacon[potential_assosiation_beacons[i]] << endl;
+			result.set(2 * i + k + 4, 1, glb_map.X.get(place_of_beacon[potential_assosiation_beacons[i]] + k, 1));
+		}
+	}
+	return result;
+}
+
+Matrix MapFuser::restore_part_of_P_for_assositation(){
+	int size = num_potential_assosiations;
 	Matrix result(2*size + 3, 2*size + 3);
 	SparseMatrix rhs(glb_map.I.rows, 1);
 	SparseMatrix x;
@@ -14,40 +34,63 @@ Matrix MapFuser::restore_part_of_P(int size){
 			rhs.remove_all_elements();
 			rhs.set(place_of_beacon[potential_assosiation_beacons[i]] + k, 1, 1);
 			x = solve_cholesky(glb_map.L, rhs);
+			for(int j = 0; j < 3; ++j){
+				if(x.first_in_row[rhs.rows - 2 + j])
+					result.values[j][2 * i + k + 3] = x.first_in_row[rhs.rows - 2 + j]->value;
+			}
 			for(int j = 0; j < size; ++j){
 				for(int m = 0; m < 2; ++m){
 					if(x.first_in_row[place_of_beacon[potential_assosiation_beacons[j]] + m]){
 						//cout << "m : " << x.first_in_row[2 * potential_assosiation_beacons[j] + 1 + m]->value << endl;
-						result.values[2 * j + m][2 * i + k] = x.first_in_row[place_of_beacon[potential_assosiation_beacons[j]] + m]->value;
+						result.values[2 * j + m + 3][2 * i + k + 3] = x.first_in_row[place_of_beacon[potential_assosiation_beacons[j]] + m]->value;
 					}
 				}
-			}
-			for(int j = 1; j <=3; ++j){
-				if(x.first_in_row[rhs.rows - j])
-					result.values[rhs.rows - j][2 * i + k] = x.first_in_row[rhs.rows - j]->value;
-			}
-
-			
-			
+			}	
 		}
 	}
+	for(int i = 0; i < 2; ++i){
+		rhs.remove_all_elements();
+		rhs.set(rhs.rows - 2 + i, 1, 1);
+		x = solve_cholesky(glb_map.L, rhs);
+		for(int j = 0; j < 3; ++j){
+			if(x.first_in_row[rhs.rows - 2 + j])
+				result.values[j][i] = x.first_in_row[rhs.rows - 2 + j]->value;
+		}
+		for(int j = 0; j < size; ++j){
+			for(int m = 0; m < 2; ++m){
+				if(x.first_in_row[place_of_beacon[potential_assosiation_beacons[j]] + m]){
+					//cout << "m : " << x.first_in_row[2 * potential_assosiation_beacons[j] + 1 + m]->value << endl;
+					result.values[2 * j + m + 3][i] = x.first_in_row[place_of_beacon[potential_assosiation_beacons[j]] + m]->value;
+				}
+			}
+		}	
+	}
+
 	return result;
 }
 
-void MapFuser::fuse_map(const LocalMap& m){
-	//Matrix obsP = m.P.get_sub_matrix(3,3, P.rows, P.columns);
-	//Matrix obsX = m.X.get_sub_matrix(3, 1, X.rows, 1);
+void MapFuser::fuse_map(LocalMap m){
+	Matrix obsP = m.P.get_sub_matrix(4,4, m.P.rows, m.P.columns);
+	Matrix obsX = m.X.get_sub_matrix(4, 1, m.X.rows, 1);
+	set_potential_assosiations();
 	
+	Matrix P = restore_part_of_P_for_assositation();
+	Matrix X = get_part_of_X_for_assositation();
+	Matrix beacP = trans_cov_matrix_to_local_cordinate_system(P,X);
+	Matrix beacX = trans_state_matrix_to_local_cordinate_system(X);
 }
 
 void MapFuser::fuse_first_map(LocalMap m){
-
+	cout << "here1" << endl;
 	//add a bit to P to avoid singularity
 	m.P.values[0][0] += 1e-8;
 	m.P.values[1][1] += 1e-8;
 	m.P.values[2][2] += 1e-8;
+	cout << "here1" << endl;
 	m.X.print();
+	cout << "here3" << endl;
     trans_state_matrix_to_local_cordinate_system(m.X).print();
+	cout << "here2" << endl;
 	double temp1 = m.X.values[0][0];
 	double temp2 = m.X.values[1][0];
 	double temp3 = m.X.values[2][0];
@@ -79,7 +122,7 @@ void MapFuser::fuse_first_map(LocalMap m){
 		m.P.values[i][m.P.columns - 2] = temp2;
 		m.P.values[i][m.P.columns - 1] = temp3;
 	}
-	
+
     glb_map.I = to_sparse_symm_matrix(inv(m.P));
     glb_map.i = to_sparse_matrix(inv(m.P)* m.X);
     glb_map.L = cholesky(glb_map.I);
