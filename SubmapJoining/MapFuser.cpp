@@ -91,6 +91,9 @@ void MapFuser::fuse_map(LocalMap m){
 	obsP.write_to_file("SavedMatrices/obsP");
 	obsX.write_to_file("SavedMatrices/obsX");*/
 	assosiate_beacons(beacX, beacP, obsX, obsP);
+	add_new_beacons_and_robot_location_to_state(m.X);
+	to_dence_matrix(glb_map.X).write_to_file("SavedMatrices/glbX");
+	update_map(m.X, m.P);
 }
 
 void MapFuser::fuse_first_map(LocalMap m){
@@ -219,13 +222,114 @@ void MapFuser::assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const
 	        }
 	    }
 	}
+	num_matches = num_obs;
+	
 	cout << "Matches" << endl;
 	for(int j = 1; j <= num_obs; ++j){
 		cout << assosiations[j] << " " << j << endl;
 	}
 }
 
-void MapFuser::update_map(){
+void MapFuser::add_new_beacons_and_robot_location_to_state(const Matrix& obsX){
+	double xr1 = glb_map.X.get(glb_map.X.rows - 2	, 1);
+	double yr1 = glb_map.X.get(glb_map.X.rows - 1	, 1);
+	double fir1 = glb_map.X.get(glb_map.X.rows		, 1);
+	double xj;
+	double yj;
 	
+	submaps_first_beacon[num_submaps] = num_beacons;
+	num_beacons_in_submap[num_submaps] = 0;
+	for(int i = 0; i < num_matches; ++i){
+		if(assosiation_matches[i] == -100){
+			xj = obsX.get(2*i + 4, 1);
+			yj =  obsX.get(2*i + 5, 1);
+			glb_map.X.rows += 2;
+			glb_map.I.rows += 2;
+			glb_map.I.cols += 2;
+			glb_map.i.rows += 2;
+			glb_map.X.set(glb_map.X.rows - 1, 1, xr1 + xj * cos(fir1) - yj * sin(fir1));
+			glb_map.X.set(glb_map.X.rows	, 1, yr1 + yj * cos(fir1) + xj * sin(fir1));
+			place_of_beacon[num_beacons] = glb_map.X.rows - 2;
+			++num_beacons;
+			++num_beacons_in_submap[num_submaps];
+		}
+	}
+	glb_map.X.rows += 3;
+	glb_map.I.rows += 3;
+	glb_map.I.cols += 3;
+	glb_map.i.rows += 3;
+	double xr2 = obsX.get(1	, 1);
+	double yr2 = obsX.get(2	, 1);
+	double fir2 = obsX.get(3, 1);
+	glb_map.X.set(glb_map.X.rows - 2, 1, xr1 + xr2 * cos(fir1) - yr2 * sin(fir1));
+	glb_map.X.set(glb_map.X.rows - 1, 1, xr1 + yr2 * cos(fir1) + xr2 * sin(fir1));
+	glb_map.X.set(glb_map.X.rows	, 1, fir1 + fir2);
+	
+	++num_submaps;
+}
+
+void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
+	int index_robot1 = 9;
+	int index_robot2 = 12;
+	double xi, yi;
+	double xr1 = glb_map.X.get(index_robot1		, 1);
+	double yr1 = glb_map.X.get(index_robot1 + 1	, 1);
+	double fir1 = glb_map.X.get(index_robot1 + 2, 1);
+	double xr2 = glb_map.X.get(index_robot2		, 1);
+	double yr2 = glb_map.X.get(index_robot2 + 1	, 1);
+	double fir2 = glb_map.X.get(index_robot2 + 2, 1);
+	
+	cout << glb_map.I.rows << endl;
+	SparseMatrix jh(2 * num_matches + 3, glb_map.I.rows);
+	Matrix H(2 * num_matches + 3, 1);
+	
+	//the first three rows (robot) of jacobian
+	jh.set(1, index_robot1		, -cos(fir1));
+	jh.set(1, index_robot1 + 1	, -sin(fir1));
+	jh.set(1, index_robot1 + 2	, -(xr2 - xr1) * sin(fir1) + (yr2 - yr1) * cos(fir1));
+	jh.set(2, index_robot1		, sin(fir1));
+	jh.set(2, index_robot1 + 1	, -cos(fir1));
+	jh.set(2, index_robot1 + 2	, -(xr2 - xr1) * cos(fir1) - (yr2 - yr1) * sin(fir1));
+	jh.set(3, index_robot1 + 2	, -1);
+
+	jh.set(1, index_robot2		, cos(fir1));
+	jh.set(1, index_robot2 + 1	, sin(fir1));
+	jh.set(2, index_robot2		, -sin(fir1));
+	jh.set(2, index_robot2 + 1	, cos(fir1));
+	jh.set(3, index_robot2 + 2	, 1);
+	
+	// the first three rows (robot) of predicted measurement
+	
+	H.set(1, 1, (xr2 - xr1) * cos(fir1) + (yr2 - yr1) * sin(fir1));
+	H.set(2, 1, -(xr2 - xr1) * sin(fir1) + (yr2 - yr1) * cos(fir1));
+	H.set(3, 1, fir2 - fir1);
+	
+	// the other rows (beacons) of jacobian and predicted measurement
+	for(int i = 0; i < num_matches; ++i){
+		xi = glb_map.X.get(place_of_beacon[assosiations[i]]		, 1);
+		yi = glb_map.X.get(place_of_beacon[assosiations[i]] + 1	, 1);
+		//cout << xi << " " << yi << " " << place_of_beacon[assosiations[i]] << endl;
+		jh.set(2 * i + 4, 2 * i + 1, cos(fir1));
+		jh.set(2 * i + 4, 2 * i + 2, sin(fir1));
+		jh.set(2 * i + 5, 2 * i + 1, -sin(fir1));
+		jh.set(2 * i + 5, 2 * i + 2, cos(fir1));
+		
+		jh.set(2 * i + 4, index_robot1		, -cos(fir1));
+		jh.set(2 * i + 4, index_robot1 + 1	, -sin(fir1));
+		jh.set(2 * i + 4, index_robot1 + 2	, -(xi - xr1) * sin(fir1) + (yi - yr1) * cos(fir1));
+		jh.set(2 * i + 5, index_robot1		, sin(fir1));
+		jh.set(2 * i + 5, index_robot1 + 1	, -cos(fir1));
+		jh.set(2 * i + 5, index_robot1 + 2	, -(xi - xr1) * cos(fir1) - (yi - yr1) * sin(fir1));
+		
+		H.set(2 * i + 4, 1, (xi - xr1) * cos(fir1) + (yi - yr1) * sin(fir1));
+		H.set(2 * i + 5, 1, -(xi - xr1) * sin(fir1) + (yi - yr1) * cos(fir1));
+	}
+	//to_dence_matrix(jh).write_to_file("SavedMatrices/jh");
+	//H.write_to_file("SavedMatrices/H");
+	
+	glb_map.I = glb_map.I + to_sparse_symm_matrix(trn(jh) * inv(obsP) * jh);
+	glb_map.i = glb_map.i + trn(jh) * inv(obsP) * (obsX - H + jh * glb_map.X);
+	to_dence_matrix(glb_map.I).write_to_file("SavedMatrices/I");
+	to_dence_matrix(glb_map.i).write_to_file("SavedMatrices/i");
 }
 
