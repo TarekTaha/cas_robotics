@@ -5,22 +5,37 @@ MapFuser::MapFuser(){}
 double MapFuser::distance_to_submap(int map){
 	double rx = glb_map.X.get( glb_map.X.rows - 2, 1);
 	double ry = glb_map.X.get( glb_map.X.rows - 1, 1);
-	double mx = glb_map.X.get( place_of_beacon[ submaps_first_beacon[map]] + 2 * num_beacons_in_submap[map], 1);
-	double my = glb_map.X.get( place_of_beacon[ submaps_first_beacon[map]] + 2 * num_beacons_in_submap[map] + 1, 1);
+	double mx, my;
+	if(map == 0){
+		mx = 0;
+		my = 0;
+	}
+	else{
+		mx = glb_map.X.get( place_of_beacon[ submaps_first_beacon[map]] - 3 , 1);
+		my = glb_map.X.get( place_of_beacon[ submaps_first_beacon[map]] - 2, 1);
+	}
 	return sqrt((rx - mx) * (rx - mx) + (ry - my) * (ry - my)); 
 }
 
-void MapFuser::set_potential_assosiations(){
+void MapFuser::set_potential_assosiations(){ //const Matrix& P_glb_robot, const Matrix& P_loc_robot){
 	num_potential_assosiations = 0;
+	double glb_rob_uncertanty = 0;//max_eig(sqrt(P_glb_robot));
+	double loc_rob_uncertanty = 0;//max_eig(sqrt(P_loc_robot));
 	for(int i = 0; i < num_submaps; ++i){
-		if(distance_to_submap(i) < radius_of_submap[i] + radius_of_submap[num_submaps]){
+		//cout << "i: " << i << " " << distance_to_submap(i)<< "  "<< radius_of_submap[i] << " " <<  radius_of_submap[num_submaps] <<   global_robot_uncertainty[num_submaps - 1] << " " <<  global_robot_uncertainty[i]<< " " << local_robot_uncertainty[num_submaps - 1] << endl;
+		if(distance_to_submap(i) < radius_of_submap[i] + radius_of_submap[num_submaps] + global_robot_uncertainty[num_submaps - 1]+ global_robot_uncertainty[i] + local_robot_uncertainty[num_submaps - 1] + 3){
+			//cout << "Submap " << i << " is in " << num_beacons_in_submap[i] << endl;
 			for(int j = 0; j < num_beacons_in_submap[i]; ++j){
+				cout << "setting potential: " << submaps_first_beacon[i] + j << endl;
 				potential_assosiation_beacons[num_potential_assosiations] = submaps_first_beacon[i] + j;
 				++num_potential_assosiations;
 			}
 		}
 	}
-
+	cout << "potentiella" << endl;
+	for(int i = 0; i < num_potential_assosiations; ++i){
+		cout << potential_assosiation_beacons[i] << endl;
+	}
 	/*for(int i = 0; i <= num_beacons; ++i){
 		potential_assosiation_beacons[i] = i;
 	}
@@ -95,11 +110,15 @@ void MapFuser::fuse_map(LocalMap m){
 		m.P.values[2][2] += 1e-8;
 	}
 	radius_of_submap[num_submaps] = submap_radius(m);
+	
 	Matrix obsP = m.P.get_sub_matrix(4,4, m.P.rows, m.P.columns);
 	Matrix obsX = m.X.get_sub_matrix(4, 1, m.X.rows, 1);
 	set_potential_assosiations();
 	
 	Matrix P = restore_part_of_P_for_assositation();
+	global_robot_uncertainty[num_submaps] = 3 * max_eig(sqrt(P.get_sub_matrix(1, 1, 2, 2)));
+	local_robot_uncertainty[num_submaps] = 3 * max_eig(sqrt(m.P.get_sub_matrix(1, 1, 2, 2)));
+	P.get_sub_matrix( 1, 1,2, 2).print();
 	Matrix X = get_part_of_X_for_assositation();
 
 	Matrix beacP = trans_cov_matrix_to_local_cordinate_system(P,X);
@@ -167,6 +186,7 @@ void MapFuser::fuse_first_map(LocalMap m){
     	place_of_beacon[i] = 2 * i + 1;
     }
     submaps_first_beacon[0] = 0;
+    global_robot_uncertainty[0] = 0;
 }
 
 Matrix MapFuser::trans_cov_matrix_to_local_cordinate_system(const Matrix& P, const Matrix& X){
@@ -237,12 +257,12 @@ void MapFuser::assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const
 	        innov.set(2,1, b_beac-b_obs);
 	        totalcov = cov_beac + cov_obs;
 	        mahadist_new  = (trn(innov)*inv(totalcov)*innov).get(1,1);
+	        //cout << "j: " << j << " " << mahadist_new << endl;
 	        if(mahadist_new < mahadist){
 	        	mahadist = mahadist_new;
 	        	//9.2103 is the chi-square invers for 99% with 2 degrees of freedom
 	        	if(mahadist < 9.2103){
 	        		assosiations[j - 1] = i - 1;
-	        		++num_matches;
 	        	}
 	        	else{
 	        		assosiations[j] = -100;
@@ -250,7 +270,7 @@ void MapFuser::assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const
 	        }
 	    }
 	}
-	cout << "Matches" << endl;
+	cout << "Matches: "<<endl;
 	for(int j = 0; j < num_obs; ++j){
 		if(assosiations[j] >= 0)
 			assosiations[j] = potential_assosiation_beacons[assosiations[j]];
@@ -302,6 +322,7 @@ void MapFuser::add_new_beacons_and_robot_location_to_state(const Matrix& obsX){
 }
 
 void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
+	int num_obs = (obsX.rows - 3)/2;
 	int index_robot1 = glb_map.X.rows - 2 * num_beacons_in_submap[num_submaps - 1] - 5;
 	int index_robot2 = glb_map.X.rows - 2;
 	double xi, yi;
@@ -313,9 +334,9 @@ void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
 	double fir2 = glb_map.X.get(index_robot2 + 2, 1);
 	//cout << xr1 << " "<< yr1 << " "<< fir1 << " "<< xr2 << " "<< yr2 << " "<< fir2 << " " << endl;
 	
-	//cout << num_matches<< " " << glb_map.I.rows << endl;
-	SparseMatrix jh(2 * num_matches + 3, glb_map.I.rows);
-	Matrix H(2 * num_matches + 3, 1);
+	
+	SparseMatrix jh(2 * num_obs + 3, glb_map.I.rows);
+	Matrix H(2 * num_obs + 3, 1);
 	
 	//the first three rows (robot) of jacobian
 	jh.set(1, index_robot1		, -cos(fir1));
@@ -339,7 +360,7 @@ void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
 	H.set(3, 1, fir2 - fir1);
 	
 	// the other rows (beacons) of jacobian and predicted measurement
-	for(int i = 0; i < num_matches; ++i){
+	for(int i = 0; i < num_obs; ++i){
 		//if(assosiations[i] >= 0){
 			xi = glb_map.X.get(place_of_beacon[assosiations[i]]		, 1);
 			yi = glb_map.X.get(place_of_beacon[assosiations[i]] + 1	, 1);
@@ -364,7 +385,9 @@ void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
 	//H.write_to_file("SavedMatrices/H");
 	
 	//cout << "rows/cols " << glb_map.I.rows << "/" << glb_map.I.cols << endl;
+	cout << "here1" << endl;
 	glb_map.I = glb_map.I + to_sparse_symm_matrix(trn(jh) * inv(obsP) * jh);
+	cout << "here2" << endl;
 	glb_map.i = glb_map.i + trn(jh) * inv(obsP) * (obsX - H + jh * glb_map.X);
 	//to_dence_matrix(glb_map.I).write_to_file("SavedMatrices/I");
 	//to_dence_matrix(glb_map.i).write_to_file("SavedMatrices/i");
