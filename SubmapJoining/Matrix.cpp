@@ -2,8 +2,8 @@
 #include "Matrix.h"
 
 Matrix::Matrix(int rows, int columns){
-  if(rows > 50 || columns > 50)
-    throw MatrixException("Error in Matrix(int,int): matrices with more than 50 rows or columns are not handeled");
+  if(rows > 100 || columns > 100)
+    throw MatrixException("Error in Matrix(int,int): matrices with more than 100 rows or columns are not handeled");
 
   this->rows = rows,
   this->columns = columns;
@@ -19,8 +19,8 @@ Matrix::Matrix(const Matrix& m){
   rows = m.rows;
   columns = m.columns;
 
-  if(rows > 50 || columns > 50)
-    throw MatrixException("Error in Matrix(const Matrix&): matrices with more than 50 rows or columns are not handeled");
+  if(rows > 100 || columns > 100)
+    throw MatrixException("Error in Matrix(const Matrix&): matrices with more than 100 rows or columns are not handeled");
 
   for(int i = 1; i <= m.rows; ++i){
     for(int j = 1; j <= m.columns; ++j){
@@ -33,8 +33,8 @@ Matrix& Matrix::operator=(const Matrix& m){
   rows = m.rows;
   columns = m.columns;
 
-  if(rows > 50 || columns > 50)
-    throw MatrixException("Error in Matrix(const Matrix&): matrices with more than 50 rows or columns are not handeled");
+  if(rows > 100 || columns > 100)
+    throw MatrixException("Error in Matrix(const Matrix&): matrices with more than 100 rows or columns are not handeled");
 
   for(int i = 1; i <= m.rows; ++i){
     for(int j = 1; j <= m.columns; ++j){
@@ -306,15 +306,15 @@ bool operator==(const Matrix& m1, const Matrix& m2){
 
 void Matrix::add_rows(int num){
   rows += num;
-  if(rows > 50 || columns > 50)
-    throw MatrixException("Error in add_rows(int): matrices with more than 50 rows or columns are not handeled");
+  if(rows > 100 || columns > 100)
+    throw MatrixException("Error in add_rows(int): matrices with more than 100 rows or columns are not handeled");
 
 }
 
 void Matrix::add_columns(int num){
   columns += num;
-  if(rows > 50 || columns > 50)
-    throw MatrixException("Error in add_columns(int): matrices with more than 50 rows or columns are not handeled");
+  if(rows > 100 || columns > 100)
+    throw MatrixException("Error in add_columns(int): matrices with more than 100 rows or columns are not handeled");
 }
 
 void Matrix::delete_rows(int from_row, int to_row){

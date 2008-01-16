@@ -4,6 +4,7 @@
 #include <iostream.h>
 #include "SparseMatrixElement.h"
 #include "MatrixException.h"
+#include <fstream>
 
 class SparseSymmMatrix{
   public:
@@ -16,9 +17,11 @@ class SparseSymmMatrix{
     int cols;
 
     void set(int, int, double);
+    double get(int row, int column);
     void add(int, int, double);
     void print() const;
     void remove_all_elements();
+    void write_to_file(const char* filename);
     //void print();
     //void print_plain();
 };
