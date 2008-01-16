@@ -25,6 +25,8 @@ class MapFuser{
 		Matrix trans_cov_matrix_to_local_cordinate_system(const Matrix& P, const Matrix& X);
 		Matrix trans_state_matrix_to_local_cordinate_system(const Matrix& X);
 		void assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const Matrix& obsX, const Matrix& obsP);
+		double submap_radius(const LocalMap& map);
+		double distance_to_submap(int map);
 
 		//void nearest_neightbour(SparseMatrix bec)
 		int potential_assosiation_beacons[100];
@@ -35,6 +37,7 @@ class MapFuser{
 		int num_assositations;
 		int submaps_first_beacon[1000];
 		int num_beacons_in_submap[1000];
+		double radius_of_submap[1000];
 		int place_of_beacon[10000];
 		int num_submaps;
 		int num_beacons;

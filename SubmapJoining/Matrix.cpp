@@ -464,3 +464,25 @@ void Matrix::read_from_file(const char* filename){
 	rows = row_count;
 	file.close();
 }
+
+double max_eig(const Matrix& m){
+	if(m.rows != 2)
+	    throw MatrixException("Error in max_eig(const Matrix& m): Matrix must be 2x2");
+	if(m.columns != 2)
+	    throw MatrixException("Error in max_eig(const Matrix& m): Matrix must be 2x2");
+	return (m.get(1,1) + m.get(2,2))/2 + sqrt(4 * m.get(1,2) * m.get(2,1) + (m.get(1,1) - m.get(2,2)) * (m.get(1,1) - m.get(2,2)))/2;
+}
+
+Matrix sqrt(const Matrix& m){
+	if(m.rows != m.columns)
+	    throw MatrixException("Error in sqrt(const Matrix& m): Matrix must be squared");
+	Matrix Y = m;
+	Matrix Z = unit_matrix(m.rows);
+	Matrix temp_Y;
+	for(int i = 0; i < 20; ++i){
+		temp_Y = Y;
+		Y = 0.5*(Y + inv(Z));
+		Z = 0.5*(Z + inv(temp_Y));
+	}
+	return Y;
+}
