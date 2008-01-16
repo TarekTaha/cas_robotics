@@ -38,6 +38,8 @@ class Matrix{
     friend Matrix operator+(Matrix, const Matrix&);
     friend Matrix operator-(Matrix, const Matrix&);
     friend Matrix trn(const Matrix&);
+    friend Matrix sqrt(const Matrix&);
+    friend double max_eig(const Matrix& m);
     friend Matrix operator*(const Matrix&, const Matrix&);
     friend Matrix operator*(double, const Matrix&);
     friend Matrix operator*(const Matrix&, double);

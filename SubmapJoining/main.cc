@@ -23,13 +23,13 @@ int main(int argc, char * argv[])
 	LocalMap locMap;
 	load_map(locMap, 1);
 	fuser.fuse_first_map(locMap);
-	for(int i = 2; i <= 15; ++i){
+	for(int i = 2; i <= 25; ++i){
+		cout << "localmap: " << i <<endl;
 		load_map(locMap, i);
 		fuser.fuse_map(locMap);
 	}
 	fuser.glb_map.I.write_to_file("SavedMatrices/I");
 	cout << "done fusing" << endl;
-
 
 	return 1;
 }

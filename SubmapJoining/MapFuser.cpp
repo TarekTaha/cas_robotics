@@ -2,11 +2,29 @@
 
 MapFuser::MapFuser(){}
 
+double MapFuser::distance_to_submap(int map){
+	double rx = glb_map.X.get( glb_map.X.rows - 2, 1);
+	double ry = glb_map.X.get( glb_map.X.rows - 1, 1);
+	double mx = glb_map.X.get( place_of_beacon[ submaps_first_beacon[map]] + 2 * num_beacons_in_submap[map], 1);
+	double my = glb_map.X.get( place_of_beacon[ submaps_first_beacon[map]] + 2 * num_beacons_in_submap[map] + 1, 1);
+	return sqrt((rx - mx) * (rx - mx) + (ry - my) * (ry - my)); 
+}
+
 void MapFuser::set_potential_assosiations(){
-	for(int i = 0; i <= num_beacons; ++i){
+	num_potential_assosiations = 0;
+	for(int i = 0; i < num_submaps; ++i){
+		if(distance_to_submap(i) < radius_of_submap[i] + radius_of_submap[num_submaps]){
+			for(int j = 0; j < num_beacons_in_submap[i]; ++j){
+				potential_assosiation_beacons[num_potential_assosiations] = submaps_first_beacon[i] + j;
+				++num_potential_assosiations;
+			}
+		}
+	}
+
+	/*for(int i = 0; i <= num_beacons; ++i){
 		potential_assosiation_beacons[i] = i;
 	}
-	num_potential_assosiations = num_beacons;
+	num_potential_assosiations = num_beacons;*/
 }
 
 Matrix MapFuser::get_part_of_X_for_assositation(){
@@ -76,25 +94,20 @@ void MapFuser::fuse_map(LocalMap m){
 		m.P.values[1][1] += 1e-8;
 		m.P.values[2][2] += 1e-8;
 	}
-	cout << "main1" << endl;
+	radius_of_submap[num_submaps] = submap_radius(m);
 	Matrix obsP = m.P.get_sub_matrix(4,4, m.P.rows, m.P.columns);
-	cout << "main2" << endl;
 	Matrix obsX = m.X.get_sub_matrix(4, 1, m.X.rows, 1);
-	cout << "main3" << endl;
 	set_potential_assosiations();
-	cout << "main4" << endl;
 	
 	Matrix P = restore_part_of_P_for_assositation();
-	cout << "main5" << endl;
 	Matrix X = get_part_of_X_for_assositation();
-	cout << "main6" << endl;
 
 	Matrix beacP = trans_cov_matrix_to_local_cordinate_system(P,X);
 	Matrix beacX = trans_state_matrix_to_local_cordinate_system(X);
-	beacP.write_to_file("SavedMatrices/beacP");
-	beacX.write_to_file("SavedMatrices/beacX");
-	obsP.write_to_file("SavedMatrices/obsP");
-	obsX.write_to_file("SavedMatrices/obsX");
+	//beacP.write_to_file("SavedMatrices/beacP");
+	//beacX.write_to_file("SavedMatrices/beacX");
+	//obsP.write_to_file("SavedMatrices/obsP");
+	//obsX.write_to_file("SavedMatrices/obsX");
 	assosiate_beacons(beacX, beacP, obsX, obsP);
 	add_new_beacons_and_robot_location_to_state(m.X);
 	//to_dence_matrix(glb_map.X).write_to_file("SavedMatrices/glbX");
@@ -103,7 +116,6 @@ void MapFuser::fuse_map(LocalMap m){
 }
 
 void MapFuser::fuse_first_map(LocalMap m){
-
 	//add a bit to P to avoid singularity
 	if(m.P.values[0][0] < 1e-8 || m.P.values[1][1] < 1e-8 || m.P.values[2][2] < 1e-8){
 		m.P.values[0][0] += 1e-8;
@@ -111,6 +123,7 @@ void MapFuser::fuse_first_map(LocalMap m){
 		m.P.values[2][2] += 1e-8;
 	}
 
+	radius_of_submap[0] = submap_radius(m);
 	double temp1 = m.X.values[0][0];
 	double temp2 = m.X.values[1][0];
 	double temp3 = m.X.values[2][0];
@@ -149,6 +162,7 @@ void MapFuser::fuse_first_map(LocalMap m){
     
     num_submaps = 1;
     num_beacons = (m.P.rows - 3)/2;
+    num_beacons_in_submap[0] = num_beacons;
     for(int i = 0; i <= num_beacons; ++i){
     	place_of_beacon[i] = 2 * i + 1;
     }
@@ -236,10 +250,11 @@ void MapFuser::assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const
 	        }
 	    }
 	}
-	
 	cout << "Matches" << endl;
 	for(int j = 0; j < num_obs; ++j){
-		cout << assosiations[j] << " " << j << endl;
+		if(assosiations[j] >= 0)
+			assosiations[j] = potential_assosiation_beacons[assosiations[j]];
+		cout << assosiations[j] << endl;
 	}
 }
 
@@ -252,10 +267,11 @@ void MapFuser::add_new_beacons_and_robot_location_to_state(const Matrix& obsX){
 	double yj;
 	
 	submaps_first_beacon[num_submaps] = num_beacons;
+
 	num_beacons_in_submap[num_submaps] = 0;
 	for(int i = 0; i < num_obs; ++i){
 		if(assosiations[i] == -100){
-			cout << "i: " << i << endl;
+			//cout << "i: " << i << endl;
 			xj = obsX.get(2*i + 4, 1);
 			yj =  obsX.get(2*i + 5, 1);
 			glb_map.X.rows += 2;
@@ -295,7 +311,7 @@ void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
 	double xr2 = glb_map.X.get(index_robot2		, 1);
 	double yr2 = glb_map.X.get(index_robot2 + 1	, 1);
 	double fir2 = glb_map.X.get(index_robot2 + 2, 1);
-	cout << xr1 << " "<< yr1 << " "<< fir1 << " "<< xr2 << " "<< yr2 << " "<< fir2 << " " << endl;
+	//cout << xr1 << " "<< yr1 << " "<< fir1 << " "<< xr2 << " "<< yr2 << " "<< fir2 << " " << endl;
 	
 	//cout << num_matches<< " " << glb_map.I.rows << endl;
 	SparseMatrix jh(2 * num_matches + 3, glb_map.I.rows);
@@ -327,7 +343,7 @@ void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
 		//if(assosiations[i] >= 0){
 			xi = glb_map.X.get(place_of_beacon[assosiations[i]]		, 1);
 			yi = glb_map.X.get(place_of_beacon[assosiations[i]] + 1	, 1);
-			cout << xi << " " << yi <<  " " << place_of_beacon[assosiations[i]] <<" " << assosiations[i] <<endl;
+			//cout << xi << " " << yi <<  " " << place_of_beacon[assosiations[i]] <<" " << assosiations[i] <<endl;
 			jh.set(2 * i + 4, place_of_beacon[assosiations[i]], cos(fir1));
 			jh.set(2 * i + 4, place_of_beacon[assosiations[i]] + 1, sin(fir1));
 			jh.set(2 * i + 5, place_of_beacon[assosiations[i]], -sin(fir1));
@@ -347,17 +363,42 @@ void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
 	//to_dence_matrix(jh).write_to_file("SavedMatrices/jh");
 	//H.write_to_file("SavedMatrices/H");
 	
-	cout << "rows/cols " << glb_map.I.rows << "/" << glb_map.I.cols << endl;
+	//cout << "rows/cols " << glb_map.I.rows << "/" << glb_map.I.cols << endl;
 	glb_map.I = glb_map.I + to_sparse_symm_matrix(trn(jh) * inv(obsP) * jh);
-	cout << "here1" << endl;
 	glb_map.i = glb_map.i + trn(jh) * inv(obsP) * (obsX - H + jh * glb_map.X);
-	cout << "here2" << endl;
 	//to_dence_matrix(glb_map.I).write_to_file("SavedMatrices/I");
 	//to_dence_matrix(glb_map.i).write_to_file("SavedMatrices/i");
 	glb_map.L = cholesky(glb_map.I);
-	cout << "here3" << endl;
 	glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
-	cout << "here4" << endl;
 
+}
+
+double MapFuser::submap_radius(const LocalMap& map){
+	int num_beac = (map.X.rows - 3)/2;
+
+	double radius = 0;
+	double distance, uncertainty;
+	Matrix cov;
+
+	for(int i = 1; i <= num_beac; ++i){
+	    distance = sqrt((map.X.get(2 * i + 2, 1)- map.X.get(1,1)) * (map.X.get(2 * i + 2, 1)- map.X.get(1,1)) + (map.X.get(2 * i + 3, 1)- map.X.get(2,1)) * (map.X.get(2 * i + 3, 1)- map.X.get(2,1)) );
+	    // uncertainty of the beacon
+	    cov = map.P.get_sub_matrix(2 * i + 2, 2 * i + 2, 2 * i + 3, 2 * i + 3);
+	    // times the uncertainty with multiplier (e.g. 3 sigma)
+	    uncertainty = 3 * max_eig(sqrt(cov));
+	    //sqrt(cov).print();
+	    //cout << endl;
+	    //cout << uncertainty << endl;
+	    if(uncertainty>1){ // check whether the uncertainty is too large
+	        cout << "uncertainty to large " << uncertainty << endl;
+	    }
+	    distance = distance + uncertainty;
+	    if(distance > radius){ // find the largest distance
+	        radius = distance;
+	    }
+	}
+	//cout << radius << endl;
+	//cout << endl;
+	return radius;
 }
 
