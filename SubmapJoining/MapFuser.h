@@ -41,7 +41,8 @@ class MapFuser{
 		int place_of_beacon[10000];
 		int num_submaps;
 		int num_beacons;
-		
+		double global_robot_uncertainty[1000];
+		double local_robot_uncertainty[1000];
 };
 
 #endif
