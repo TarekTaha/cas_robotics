@@ -208,3 +208,38 @@ SparseSymmMatrix operator+(SparseSymmMatrix m1, const SparseSymmMatrix& m2){
 	}
 	return m1;
 }
+
+double SparseSymmMatrix::get(int row, int column){
+	if(row > column){
+		swap(row, column);
+	}
+	 if(row > rows || column > cols)
+	    throw MatrixException("Error in SparseMatrix::get(int row, int column, double value): trying to get element outside matrix");
+	 
+	 SparseMatrixElement *row_ptr;
+	 row_ptr = first_in_row[row];
+	 while(row_ptr){
+		 if(row_ptr->col == column){
+			 return row_ptr->value;
+		 }
+		 if(row_ptr->col > column){
+			 return 0;
+		 }
+		 row_ptr = row_ptr->next_in_row;
+	 }
+	 return 0;
+}
+
+void SparseSymmMatrix::write_to_file(const char* filename){
+  ofstream file;
+  file.open(filename);
+  for(int i = 1; i <= rows; ++i){
+    for(int j = 1; j <= cols; ++j){
+      if(j != 1)
+        file << ",";
+      file << get(i,j);
+    }
+    file << endl;
+  }
+  file.close();
+}

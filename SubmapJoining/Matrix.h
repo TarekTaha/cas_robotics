@@ -49,7 +49,7 @@ class Matrix{
     int get_columns() const;
 
   //protected:
-    double values[50][50];
+    double values[100][100];
     int rows;
     int columns;
     void swap_rows(int row1, int row2);

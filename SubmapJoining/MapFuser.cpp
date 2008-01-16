@@ -3,7 +3,7 @@
 MapFuser::MapFuser(){}
 
 void MapFuser::set_potential_assosiations(){
-	for(int i = 0; i < num_beacons; ++i){
+	for(int i = 0; i <= num_beacons; ++i){
 		potential_assosiation_beacons[i] = i;
 	}
 	num_potential_assosiations = num_beacons;
@@ -76,23 +76,29 @@ void MapFuser::fuse_map(LocalMap m){
 		m.P.values[1][1] += 1e-8;
 		m.P.values[2][2] += 1e-8;
 	}
-	
+	cout << "main1" << endl;
 	Matrix obsP = m.P.get_sub_matrix(4,4, m.P.rows, m.P.columns);
+	cout << "main2" << endl;
 	Matrix obsX = m.X.get_sub_matrix(4, 1, m.X.rows, 1);
+	cout << "main3" << endl;
 	set_potential_assosiations();
+	cout << "main4" << endl;
 	
 	Matrix P = restore_part_of_P_for_assositation();
+	cout << "main5" << endl;
 	Matrix X = get_part_of_X_for_assositation();
+	cout << "main6" << endl;
 
 	Matrix beacP = trans_cov_matrix_to_local_cordinate_system(P,X);
 	Matrix beacX = trans_state_matrix_to_local_cordinate_system(X);
-	/*beacP.write_to_file("SavedMatrices/beacP");
+	beacP.write_to_file("SavedMatrices/beacP");
 	beacX.write_to_file("SavedMatrices/beacX");
 	obsP.write_to_file("SavedMatrices/obsP");
-	obsX.write_to_file("SavedMatrices/obsX");*/
+	obsX.write_to_file("SavedMatrices/obsX");
 	assosiate_beacons(beacX, beacP, obsX, obsP);
 	add_new_beacons_and_robot_location_to_state(m.X);
-	to_dence_matrix(glb_map.X).write_to_file("SavedMatrices/glbX");
+	//to_dence_matrix(glb_map.X).write_to_file("SavedMatrices/glbX");
+	
 	update_map(m.X, m.P);
 }
 
@@ -143,7 +149,7 @@ void MapFuser::fuse_first_map(LocalMap m){
     
     num_submaps = 1;
     num_beacons = (m.P.rows - 3)/2;
-    for(int i = 0; i < num_beacons; ++i){
+    for(int i = 0; i <= num_beacons; ++i){
     	place_of_beacon[i] = 2 * i + 1;
     }
     submaps_first_beacon[0] = 0;
@@ -202,6 +208,7 @@ void MapFuser::assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const
 	Matrix cov_obs, cov_beac, totalcov;
 	Matrix innov(2,1);
 	double mahadist, mahadist_new;
+	num_matches = 0;
 	for(int j = 1; j <= num_obs; ++j){
 		mahadist = 1e8;
 	    r_obs = obsX.get(j*2-1, 1);
@@ -218,19 +225,26 @@ void MapFuser::assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const
 	        mahadist_new  = (trn(innov)*inv(totalcov)*innov).get(1,1);
 	        if(mahadist_new < mahadist){
 	        	mahadist = mahadist_new;
-	        	assosiations[j] = i;
+	        	//9.2103 is the chi-square invers for 99% with 2 degrees of freedom
+	        	if(mahadist < 9.2103){
+	        		assosiations[j - 1] = i - 1;
+	        		++num_matches;
+	        	}
+	        	else{
+	        		assosiations[j] = -100;
+	        	}
 	        }
 	    }
 	}
-	num_matches = num_obs;
 	
 	cout << "Matches" << endl;
-	for(int j = 1; j <= num_obs; ++j){
+	for(int j = 0; j < num_obs; ++j){
 		cout << assosiations[j] << " " << j << endl;
 	}
 }
 
 void MapFuser::add_new_beacons_and_robot_location_to_state(const Matrix& obsX){
+	int num_obs = (obsX.rows - 3)/2;
 	double xr1 = glb_map.X.get(glb_map.X.rows - 2	, 1);
 	double yr1 = glb_map.X.get(glb_map.X.rows - 1	, 1);
 	double fir1 = glb_map.X.get(glb_map.X.rows		, 1);
@@ -239,8 +253,9 @@ void MapFuser::add_new_beacons_and_robot_location_to_state(const Matrix& obsX){
 	
 	submaps_first_beacon[num_submaps] = num_beacons;
 	num_beacons_in_submap[num_submaps] = 0;
-	for(int i = 0; i < num_matches; ++i){
-		if(assosiation_matches[i] == -100){
+	for(int i = 0; i < num_obs; ++i){
+		if(assosiations[i] == -100){
+			cout << "i: " << i << endl;
 			xj = obsX.get(2*i + 4, 1);
 			yj =  obsX.get(2*i + 5, 1);
 			glb_map.X.rows += 2;
@@ -249,7 +264,9 @@ void MapFuser::add_new_beacons_and_robot_location_to_state(const Matrix& obsX){
 			glb_map.i.rows += 2;
 			glb_map.X.set(glb_map.X.rows - 1, 1, xr1 + xj * cos(fir1) - yj * sin(fir1));
 			glb_map.X.set(glb_map.X.rows	, 1, yr1 + yj * cos(fir1) + xj * sin(fir1));
-			place_of_beacon[num_beacons] = glb_map.X.rows - 2;
+			place_of_beacon[num_beacons] = glb_map.X.rows - 1;
+			assosiations[i] = num_beacons;
+			++num_matches;
 			++num_beacons;
 			++num_beacons_in_submap[num_submaps];
 		}
@@ -262,14 +279,14 @@ void MapFuser::add_new_beacons_and_robot_location_to_state(const Matrix& obsX){
 	double yr2 = obsX.get(2	, 1);
 	double fir2 = obsX.get(3, 1);
 	glb_map.X.set(glb_map.X.rows - 2, 1, xr1 + xr2 * cos(fir1) - yr2 * sin(fir1));
-	glb_map.X.set(glb_map.X.rows - 1, 1, xr1 + yr2 * cos(fir1) + xr2 * sin(fir1));
+	glb_map.X.set(glb_map.X.rows - 1, 1, yr1 + yr2 * cos(fir1) + xr2 * sin(fir1));
 	glb_map.X.set(glb_map.X.rows	, 1, fir1 + fir2);
 	
 	++num_submaps;
 }
 
 void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
-	int index_robot1 = glb_map.X.rows - 2 * num_beacons_in_submap[num_submaps] - 5;
+	int index_robot1 = glb_map.X.rows - 2 * num_beacons_in_submap[num_submaps - 1] - 5;
 	int index_robot2 = glb_map.X.rows - 2;
 	double xi, yi;
 	double xr1 = glb_map.X.get(index_robot1		, 1);
@@ -278,8 +295,9 @@ void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
 	double xr2 = glb_map.X.get(index_robot2		, 1);
 	double yr2 = glb_map.X.get(index_robot2 + 1	, 1);
 	double fir2 = glb_map.X.get(index_robot2 + 2, 1);
+	cout << xr1 << " "<< yr1 << " "<< fir1 << " "<< xr2 << " "<< yr2 << " "<< fir2 << " " << endl;
 	
-	cout << glb_map.I.rows << endl;
+	//cout << num_matches<< " " << glb_map.I.rows << endl;
 	SparseMatrix jh(2 * num_matches + 3, glb_map.I.rows);
 	Matrix H(2 * num_matches + 3, 1);
 	
@@ -306,32 +324,40 @@ void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
 	
 	// the other rows (beacons) of jacobian and predicted measurement
 	for(int i = 0; i < num_matches; ++i){
-		xi = glb_map.X.get(place_of_beacon[assosiations[i]]		, 1);
-		yi = glb_map.X.get(place_of_beacon[assosiations[i]] + 1	, 1);
-		//cout << xi << " " << yi << " " << place_of_beacon[assosiations[i]] << endl;
-		jh.set(2 * i + 4, 2 * i + 1, cos(fir1));
-		jh.set(2 * i + 4, 2 * i + 2, sin(fir1));
-		jh.set(2 * i + 5, 2 * i + 1, -sin(fir1));
-		jh.set(2 * i + 5, 2 * i + 2, cos(fir1));
+		//if(assosiations[i] >= 0){
+			xi = glb_map.X.get(place_of_beacon[assosiations[i]]		, 1);
+			yi = glb_map.X.get(place_of_beacon[assosiations[i]] + 1	, 1);
+			cout << xi << " " << yi <<  " " << place_of_beacon[assosiations[i]] <<" " << assosiations[i] <<endl;
+			jh.set(2 * i + 4, place_of_beacon[assosiations[i]], cos(fir1));
+			jh.set(2 * i + 4, place_of_beacon[assosiations[i]] + 1, sin(fir1));
+			jh.set(2 * i + 5, place_of_beacon[assosiations[i]], -sin(fir1));
+			jh.set(2 * i + 5, place_of_beacon[assosiations[i]] + 1, cos(fir1));
 		
-		jh.set(2 * i + 4, index_robot1		, -cos(fir1));
-		jh.set(2 * i + 4, index_robot1 + 1	, -sin(fir1));
-		jh.set(2 * i + 4, index_robot1 + 2	, -(xi - xr1) * sin(fir1) + (yi - yr1) * cos(fir1));
-		jh.set(2 * i + 5, index_robot1		, sin(fir1));
-		jh.set(2 * i + 5, index_robot1 + 1	, -cos(fir1));
-		jh.set(2 * i + 5, index_robot1 + 2	, -(xi - xr1) * cos(fir1) - (yi - yr1) * sin(fir1));
+			jh.set(2 * i + 4, index_robot1		, -cos(fir1));
+			jh.set(2 * i + 4, index_robot1 + 1	, -sin(fir1));
+			jh.set(2 * i + 4, index_robot1 + 2	, -(xi - xr1) * sin(fir1) + (yi - yr1) * cos(fir1));
+			jh.set(2 * i + 5, index_robot1		, sin(fir1));
+			jh.set(2 * i + 5, index_robot1 + 1	, -cos(fir1));
+			jh.set(2 * i + 5, index_robot1 + 2	, -(xi - xr1) * cos(fir1) - (yi - yr1) * sin(fir1));
 		
-		H.set(2 * i + 4, 1, (xi - xr1) * cos(fir1) + (yi - yr1) * sin(fir1));
-		H.set(2 * i + 5, 1, -(xi - xr1) * sin(fir1) + (yi - yr1) * cos(fir1));
+			H.set(2 * i + 4, 1, (xi - xr1) * cos(fir1) + (yi - yr1) * sin(fir1));
+			H.set(2 * i + 5, 1, -(xi - xr1) * sin(fir1) + (yi - yr1) * cos(fir1));
+		//}
 	}
 	//to_dence_matrix(jh).write_to_file("SavedMatrices/jh");
 	//H.write_to_file("SavedMatrices/H");
 	
+	cout << "rows/cols " << glb_map.I.rows << "/" << glb_map.I.cols << endl;
 	glb_map.I = glb_map.I + to_sparse_symm_matrix(trn(jh) * inv(obsP) * jh);
+	cout << "here1" << endl;
 	glb_map.i = glb_map.i + trn(jh) * inv(obsP) * (obsX - H + jh * glb_map.X);
-	to_dence_matrix(glb_map.I).write_to_file("SavedMatrices/I");
-	to_dence_matrix(glb_map.i).write_to_file("SavedMatrices/i");
+	cout << "here2" << endl;
+	//to_dence_matrix(glb_map.I).write_to_file("SavedMatrices/I");
+	//to_dence_matrix(glb_map.i).write_to_file("SavedMatrices/i");
 	glb_map.L = cholesky(glb_map.I);
+	cout << "here3" << endl;
 	glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
+	cout << "here4" << endl;
+
 }
 
