@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>setupworkspace</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-10">
+      <meta name="date" content="2008-01-14">
       <meta name="m-file" content="setupworkspace"><style>
 
 body {
@@ -136,7 +136,7 @@ workspace.robotplanes.equ=[1,0,0,0; 0,1,0,0; 0,0,1,0;
                            1,0,0,0; 0,1,0,0; 0,0,1,sum(workspace.robotsize(3,:))/2];
 
 <span class="comment">%this will hold the points which are obsticles and obviously known</span>
-workspace.obsticlepoints=[];
+<span class="comment">% workspace.Nobsticlepoints=[];</span>
 <span class="comment">%this will hold the obstacles in voxeles (using inc_size)</span>
 workspace.indexedobsticles=[];
 
@@ -181,21 +181,34 @@ workspace.unknowncoords=zeros([round(((workspace.max(1)-workspace.min(1))*<span 
 <span class="comment">% points=points(find(points(:,2)&lt;1 &amp; points(:,2)&gt;-1),:);</span>
 
 <span class="comment">% Add a floor layer</span>
-uiwait(msgbox(<span class="string">'Adding a floor layer only'</span>));
+<span class="comment">% uiwait(msgbox('Adding a floor layer only'));</span>
 tempx=[];tempy=[];
 tempInc=workspace.inc_size;
-<span class="keyword">for</span> i=-.65:tempInc:.75
+<span class="keyword">for</span> i=-.75:tempInc:.85
     tempx=[tempx;i*ones(length(-.65:tempInc:.75),1)];
     tempy=[tempy;(-.65:tempInc:.75)'];
 <span class="keyword">end</span>
 tempz=workspace.impLev(1).z(1)*ones([size(tempx,1),1]);
 points=[points;[tempx,tempy,tempz]];
 
+<span class="comment">%add the bottoms of the ibeams</span>
+tempx=-1.5:tempInc:1.5;
+tempx=[tempx';tempx';tempx';tempx'];
+tempy=-0.6*ones([size(tempx,1)/4,1]);
+tempy=[tempy;-0.8*ones([size(tempx,1)/4,1])];
+tempy=[tempy;0.5*ones([size(tempx,1)/4,1])];
+tempy=[tempy;0.7*ones([size(tempx,1)/4,1])];
+tempz=1*ones([size(tempx,1),1]);
+points=[points;[tempx,tempy,tempz]];
+
+
 <span class="comment">% Only use points within the correct range</span>
 level1=GetImpLevInfo(points);
 points=points(level1,:);
-workspace.obsticlepoints=points;
-workspace.indexedobsticles=unique(round(workspace.obsticlepoints/tempInc)*(tempInc),<span class="string">'rows'</span>);
+<span class="comment">% workspace.Nobsticlepoints=points;</span>
+<span class="comment">% workspace.indexedobsticles=unique(round(workspace.Nobsticlepoints/tempInc)*(tempInc),'rows');</span>
+workspace.indexedobsticles=unique(round(points/tempInc)*(tempInc),<span class="string">'rows'</span>);
+
 
 <span class="comment">% Could also load up freespace variable</span>
 <span class="comment">% a=load('workspace.mat');</span>
@@ -225,7 +238,7 @@ workspace.unknowncoords=workspace.unknowncoords(newindex,:);
 <span class="comment">%make sure all points are within the workspace</span>
 [nothing1,nothing1,level3_un]=GetImpLevInfo(workspace.unknowncoords);
 workspace.unknowncoords=workspace.unknowncoords(level3_un,:);
-workspace.lev1unknown=GetImpLevInfo(workspace.unknowncoords);
+[workspace.lev1unknown,workspace.lev2unknown]=GetImpLevInfo(workspace.unknowncoords);
 </pre><h2>Plot the main unknown graph<a name="5"></a></h2><pre class="codeinput">hold <span class="string">on</span>;
 
 xlabel(<span class="string">'x axis'</span>);ylabel(<span class="string">'y axis'</span>);zlabel(<span class="string">'z axis'</span>);
@@ -250,6 +263,8 @@ drawnow
 <span class="comment">%    plot3(workspace.unknowncoords(level2,1),workspace.unknowncoords(level2,2),workspace.unknowncoords(level2,3),'.','Color',[1-workspace.dotweight(2) 1-workspace.dotweight(2) 1])</span>
 <span class="comment">%    plot3(workspace.unknowncoords(level3,1),workspace.unknowncoords(level3,2),workspace.unknowncoords(level3,3),'.','Color',[1-workspace.dotweight(3) 1-workspace.dotweight(3) 1])</span>
 <span class="keyword">end</span>
+
+workspace.spec_pnts=[];
 </pre><p class="footer"><br>
             Published with MATLAB&reg; 7.4<br></p>
       </div>
@@ -314,7 +329,7 @@ workspace.robotplanes.equ=[1,0,0,0; 0,1,0,0; 0,0,1,0;
                            1,0,0,0; 0,1,0,0; 0,0,1,sum(workspace.robotsize(3,:))/2];
 
 %this will hold the points which are obsticles and obviously known
-workspace.obsticlepoints=[];
+% workspace.Nobsticlepoints=[];
 %this will hold the obstacles in voxeles (using inc_size)
 workspace.indexedobsticles=[];
 
@@ -360,21 +375,34 @@ points=[];
 % points=points(find(points(:,2)<1 & points(:,2)>-1),:);
 
 % Add a floor layer
-uiwait(msgbox('Adding a floor layer only'));
+% uiwait(msgbox('Adding a floor layer only'));
 tempx=[];tempy=[]; 
 tempInc=workspace.inc_size;
-for i=-.65:tempInc:.75
+for i=-.75:tempInc:.85
     tempx=[tempx;i*ones(length(-.65:tempInc:.75),1)];
     tempy=[tempy;(-.65:tempInc:.75)'];
 end
 tempz=workspace.impLev(1).z(1)*ones([size(tempx,1),1]);
 points=[points;[tempx,tempy,tempz]];
 
+%add the bottoms of the ibeams
+tempx=-1.5:tempInc:1.5;
+tempx=[tempx';tempx';tempx';tempx'];
+tempy=-0.6*ones([size(tempx,1)/4,1]);
+tempy=[tempy;-0.8*ones([size(tempx,1)/4,1])];
+tempy=[tempy;0.5*ones([size(tempx,1)/4,1])];
+tempy=[tempy;0.7*ones([size(tempx,1)/4,1])];
+tempz=1*ones([size(tempx,1),1]);
+points=[points;[tempx,tempy,tempz]];
+
+
 % Only use points within the correct range
 level1=GetImpLevInfo(points);
 points=points(level1,:);
-workspace.obsticlepoints=points;
-workspace.indexedobsticles=unique(round(workspace.obsticlepoints/tempInc)*(tempInc),'rows');
+% workspace.Nobsticlepoints=points;
+% workspace.indexedobsticles=unique(round(workspace.Nobsticlepoints/tempInc)*(tempInc),'rows');
+workspace.indexedobsticles=unique(round(points/tempInc)*(tempInc),'rows');
+
 
 % Could also load up freespace variable 
 % a=load('workspace.mat');
@@ -406,7 +434,7 @@ workspace.unknowncoords=workspace.unknowncoords(newindex,:);
 %make sure all points are within the workspace
 [nothing1,nothing1,level3_un]=GetImpLevInfo(workspace.unknowncoords);
 workspace.unknowncoords=workspace.unknowncoords(level3_un,:);
-workspace.lev1unknown=GetImpLevInfo(workspace.unknowncoords);
+[workspace.lev1unknown,workspace.lev2unknown]=GetImpLevInfo(workspace.unknowncoords);
 
 %% Plot the main unknown graph
 hold on;
@@ -433,6 +461,9 @@ if showunknownpnts
 %    plot3(workspace.unknowncoords(level2,1),workspace.unknowncoords(level2,2),workspace.unknowncoords(level2,3),'.','Color',[1-workspace.dotweight(2) 1-workspace.dotweight(2) 1])
 %    plot3(workspace.unknowncoords(level3,1),workspace.unknowncoords(level3,2),workspace.unknowncoords(level3,3),'.','Color',[1-workspace.dotweight(3) 1-workspace.dotweight(3) 1])
 end
+
+workspace.spec_pnts=[];
+
 ##### SOURCE END #####
 -->
    </body>

@@ -6,49 +6,71 @@
 <table border="1" width="100%">
 <tr><th width="15%">File (function)</th><th width="30%">Calls</th><th width="30%">Called By</th><th width="25%">Globals Used</th></tr>
 <tr><td><a href="Block_Classifier.html">Block_Classifier</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="Classifier.html">Classifier</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="GetImpLevInfo.html">GetImpLevInfo</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="NBV.html">NBV</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="NBV_beta.html">NBV_beta</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="allOff.html">allOff</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="calc_elip.html">calc_elip</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="calculate_NBV_overallweight.html">calculate_NBV_overallweight</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="calknownweight.html">calknownweight</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="calobstacleweight.html">calobstacleweight</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="calunknownweight.html">calunknownweight</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="check_FF.html">check_FF</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="check_path_for_col.html">check_path_for_col</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="deg2rad.html">deg2rad</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="demopath.html">demopath</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="dijkstra_new.html">dijkstra_new</a></td>
+<td> Classifier surface_making_simple</td><td> exGUI</td><td></td></tr><tr><td><a href="Classifier.html">Classifier</a></td>
+<td> surface_making_simple</td><td> Block_Classifier exGUI</td><td></td></tr><tr><td><a href="GetImpLevInfo.html">GetImpLevInfo</a></td>
+<td></td><td> NBV NBV_beta NBV_beta2 calc_all_views calknownweight calobstacleweight calunknownweight check_FF check_path_for_col exGUI getweighted_addinfo pathplanner pathplanner_new runexhastivesearch setupworkspace special_map_area threeDMedianFilt</td><td>workspace; robot_maxreach;</td></tr><tr><td><a href="NBV.html">NBV</a></td>
+<td> GetImpLevInfo calunknownweight check_path_for_col getweighted_addinfo nbv_volume order_bestviews pathplanner pathplanner_new remove_all_views_result0 streamOnto_mine_manystarts</td><td> exGUI</td><td>r; workspace; bestviews; Q; optimise;</td></tr><tr><td><a href="NBV_beta.html">NBV_beta</a></td>
+<td> GetImpLevInfo calunknownweight check_path_for_col getweighted_addinfo nbv_volume order_bestviews pathplanner pathplanner_new remove_all_views_result0</td><td> exGUI</td><td>r; workspace; bestviews; optimise; scan;</td></tr><tr><td><a href="NBV_beta2.html">NBV_beta2</a></td>
+<td> GetImpLevInfo calunknownweight check_path_for_col getweighted_addinfo order_bestviews pathplanner_new remove_all_views_result0</td><td> exGUI</td><td>workspace; Q; all_views; bestviews; optimise; scan;</td></tr><tr><td><a href="allOff.html">allOff</a></td>
+<td></td><td> exGUI</td><td></td></tr><tr><td><a href="blasting_posesel.html">blasting_posesel</a></td>
+<td> check_FF dist_pt2tr surface_making_simple</td><td> blasting_posesel_development coverage</td><td></td></tr><tr><td><a href="blasting_posesel_development.html">blasting_posesel_development</a></td>
+<td> blasting_posesel check_FF dist_pt2tr surface_making_simple</td><td></td><td></td></tr><tr><td><a href="calc_all_views.html">calc_all_views</a></td>
+<td> GetImpLevInfo calunknownweight check_path_for_col nbv_volume pathplanner_new remove_all_views_result0</td><td> exGUI</td><td>Q; r; workspace; robot_maxreach;</td></tr><tr><td><a href="calc_elip.html">calc_elip</a></td>
+<td></td><td> plotdenso setuprobot</td><td></td></tr><tr><td><a href="calculate_NBV_overallweight.html">calculate_NBV_overallweight</a></td>
+<td></td><td> order_bestviews</td><td>bestviews; optimise; Q;</td></tr><tr><td><a href="calknownweight.html">calknownweight</a></td>
+<td> GetImpLevInfo</td><td> exGUI explore</td><td>workspace;</td></tr><tr><td><a href="calobstacleweight.html">calobstacleweight</a></td>
+<td> GetImpLevInfo</td><td> explore</td><td>workspace;</td></tr><tr><td><a href="calunknownweight.html">calunknownweight</a></td>
+<td> GetImpLevInfo</td><td> NBV NBV_beta NBV_beta2 calc_all_views exGUI explore order_bestviews runexhastivesearch</td><td>workspace;</td></tr><tr><td><a href="check_FF.html">check_FF</a></td>
+<td> GetImpLevInfo</td><td> blasting_posesel blasting_posesel_development check_path_for_col demopath demopath_new pathplanner pathplanner_new plotdenso sandblasting_pose_sel streamOnto_mine_manystarts</td><td></td></tr><tr><td><a href="check_path_for_col.html">check_path_for_col</a></td>
+<td> GetImpLevInfo check_FF joint_softlimit_check</td><td> NBV_beta NBV_beta2 calc_all_views movetonewQ order_bestviews pathplanner pathplanner_new runexhastivesearch</td><td>r; densoobj;</td></tr><tr><td><a href="comparemaps.html">comparemaps</a></td>
+<td> surface_making_simple</td><td></td><td></td></tr><tr><td><a href="coverage.html">coverage</a></td>
+<td> blasting_posesel plot_planes</td><td></td><td>r;</td></tr><tr><td><a href="deg2rad.html">deg2rad</a></td>
+<td></td><td> rob_object</td><td></td></tr><tr><td><a href="demopath.html">demopath</a></td>
+<td> check_FF pathplanner plotdenso</td><td> demopath_new movetonewQ</td><td>r; Q; densoobj; workspace;</td></tr><tr><td><a href="demopath_new.html">demopath_new</a></td>
+<td> check_FF demopath pathplanner plotdenso</td><td> movetonewQ</td><td>r; Q; densoobj; workspace; optimise;</td></tr><tr><td><a href="dijkstra_new.html">dijkstra_new</a></td>
 <td></td><td></td><td></td></tr><tr><td><a href="dist_pt2tr.html">dist_pt2tr</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="doscan.html">doscan</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="exGUI.html">exGUI</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="explore.html">explore</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="getchosenview.html">getchosenview</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="getweighted_addinfo.html">getweighted_addinfo</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="joint_softlimit_check.html">joint_softlimit_check</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="makeindex.html">makeindex</a></td>
+<td></td><td> blasting_posesel blasting_posesel_development sandblasting_pose_sel streamOnto_mine_manystarts</td><td></td></tr><tr><td><a href="doscan.html">doscan</a></td>
+<td> nbv_volume</td><td> exGUI explore</td><td>workspace; Q;</td></tr><tr><td><a href="drawthevrworld.html">drawthevrworld</a></td>
+<td></td><td></td><td>r; Q; myworld;</td></tr><tr><td><a href="exGUI.html">exGUI</a></td>
+<td> Block_Classifier Classifier GetImpLevInfo NBV NBV_beta NBV_beta2 allOff calc_all_views calknownweight calunknownweight doscan explore movetonewQ order_bestviews organise_data pathplanner plot_planes plotdenso remove_self_scanning saveresultstofile setupoptimisation setuprobot setupscanner setupworkspace surface_making_simple threeDMedianFilt use_real_robot_GETJs use_real_robot_SCAN use_real_robot_SCANandMOVE</td><td></td><td>platform_h; guiglobal; all_views; robot_maxreach; optimise; workspace; scan; Q; bestviews; robmap_h; plane; densoobj;</td></tr><tr><td><a href="explore.html">explore</a></td>
+<td> calknownweight calobstacleweight calunknownweight doscan movetonewQ organise_data use_real_robot_GETJs use_real_robot_SCAN</td><td> exGUI</td><td>workspace; scan; bestviews; Q; robot_maxreach;</td></tr><tr><td><a href="find_points_in_FF.html">find_points_in_FF</a></td>
+<td></td><td> movetonewQ</td><td>r; densoobj;</td></tr><tr><td><a href="getchosenview.html">getchosenview</a></td>
+<td></td><td></td><td>scan;</td></tr><tr><td><a href="getweighted_addinfo.html">getweighted_addinfo</a></td>
+<td> GetImpLevInfo</td><td> NBV NBV_beta NBV_beta2 order_bestviews runexhastivesearch</td><td>workspace;</td></tr><tr><td><a href="joint_softlimit_check.html">joint_softlimit_check</a></td>
+<td></td><td> check_path_for_col use_real_robot_MOVE</td><td></td></tr><tr><td><a href="makeindex.html">makeindex</a></td>
 <td></td><td></td><td></td></tr><tr><td><a href="movetonewQ.html">movetonewQ</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="myhandler.html">myhandler</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="nbv_volume.html">nbv_volume</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="order_bestviews.html">order_bestviews</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="organise_data.html">organise_data</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="pathplanner.html">pathplanner</a></td>
+<td> check_path_for_col demopath demopath_new find_points_in_FF organise_data pathplanner pathplanner_new plotdenso remove_self_scanning use_real_robot_GETJs use_real_robot_MOVE use_real_robot_SCANandMOVE</td><td> exGUI explore</td><td>r; Q; guiglobal; workspace; robot_maxreach;</td></tr><tr><td><a href="myhandler.html">myhandler</a></td>
+<td></td><td></td><td>PoseData; RangeData; IntensityData; PointData;</td></tr><tr><td><a href="nbv_volume.html">nbv_volume</a></td>
+<td> plot_planes remove_self_scanning rot_vec</td><td> NBV NBV_beta calc_all_views doscan order_bestviews runexhastivesearch</td><td>scan; workspace;</td></tr><tr><td><a href="order_bestviews.html">order_bestviews</a></td>
+<td> calculate_NBV_overallweight calunknownweight check_path_for_col getweighted_addinfo nbv_volume</td><td> NBV NBV_beta NBV_beta2 exGUI</td><td>bestviews;</td></tr><tr><td><a href="organise_data.html">organise_data</a></td>
+<td> remove_self_scanning rot_vec special_map_area surface_making_simple threeDMedianFilt</td><td> exGUI explore movetonewQ</td><td>workspace; scan; PointData; RangeData; PoseData; robot_maxreach; plane;</td></tr><tr><td><a href="pathplanner.html">pathplanner</a></td>
+<td> GetImpLevInfo check_FF check_path_for_col streamOnto_mine_manystarts</td><td> NBV NBV_beta demopath demopath_new exGUI movetonewQ</td><td>r; Q; optimise; workspace; densoobj;</td></tr><tr><td><a href="pathplanner_new.html">pathplanner_new</a></td>
+<td> GetImpLevInfo check_FF check_path_for_col streamOnto_mine_manystarts</td><td> NBV_beta NBV_beta2 calc_all_views movetonewQ</td><td>r; Q; optimise; workspace; densoobj;</td></tr><tr><td><a href="pdfpractice.html">pdfpractice</a></td>
 <td></td><td></td><td></td></tr><tr><td><a href="plot_planes.html">plot_planes</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="plotdenso.html">plotdenso</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="putIntoVoxels.html">putIntoVoxels</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="remove_self_scanning.html">remove_self_scanning</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="rob_object.html">rob_object</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="rotateFigure.html">rotateFigure</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="setupoptimisation.html">setupoptimisation</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="setuprobot.html">setuprobot</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="setupscanner.html">setupscanner</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="setupworkspace.html">setupworkspace</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="streamOnto_mine_manystarts.html">streamOnto_mine_manystarts</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="surface_making_simple.html">surface_making_simple</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="threeDMedianFilt.html">threeDMedianFilt</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="use_real_robot_GETJs.html">use_real_robot_GETJs</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="use_real_robot_MOVE.html">use_real_robot_MOVE</a></td>
-<td></td><td></td><td></td></tr><tr><td><a href="use_real_robot_SCAN.html">use_real_robot_SCAN</a></td>
-<td></td><td></td><td></td></tr></body></html>
+<td></td><td> coverage exGUI nbv_volume</td><td></td></tr><tr><td><a href="plotdenso.html">plotdenso</a></td>
+<td> calc_elip check_FF</td><td> demopath demopath_new exGUI movetonewQ</td><td>densoobj;</td></tr><tr><td><a href="practicefunction.html">practicefunction</a></td>
+<td></td><td></td><td>r;</td></tr><tr><td><a href="putIntoVoxels.html">putIntoVoxels</a></td>
+<td></td><td></td><td>workspace;</td></tr><tr><td><a href="remove_all_views_result0.html">remove_all_views_result0</a></td>
+<td></td><td> NBV_beta2 calc_all_views</td><td></td></tr><tr><td><a href="remove_self_scanning.html">remove_self_scanning</a></td>
+<td> use_real_robot_GETJs</td><td> exGUI movetonewQ nbv_volume organise_data</td><td>r; Q; densoobj;</td></tr><tr><td><a href="rob_object.html">rob_object</a></td>
+<td> deg2rad</td><td></td><td></td></tr><tr><td><a href="rot_vec.html">rot_vec</a></td>
+<td></td><td> nbv_volume organise_data</td><td></td></tr><tr><td><a href="rotateFigure.html">rotateFigure</a></td>
+<td></td><td></td><td></td></tr><tr><td><a href="runexhastivesearch.html">runexhastivesearch</a></td>
+<td> GetImpLevInfo calunknownweight check_path_for_col getweighted_addinfo nbv_volume</td><td></td><td>r; workspace; %scan;</td></tr><tr><td><a href="sandblasting_pose_sel.html">sandblasting_pose_sel</a></td>
+<td> check_FF dist_pt2tr</td><td></td><td></td></tr><tr><td><a href="saveresultstofile.html">saveresultstofile</a></td>
+<td></td><td> exGUI</td><td>workspace; robot_maxreach; robmap_h;</td></tr><tr><td><a href="setupoptimisation.html">setupoptimisation</a></td>
+<td></td><td> exGUI setupoptimisation_fordevelopement setupoptimisation_old</td><td>optimise;</td></tr><tr><td><a href="setupoptimisation_fordevelopement.html">setupoptimisation_fordevelopement</a></td>
+<td> setupoptimisation</td><td></td><td>optimise;</td></tr><tr><td><a href="setupoptimisation_old.html">setupoptimisation_old</a></td>
+<td> setupoptimisation</td><td></td><td>optimise;</td></tr><tr><td><a href="setuprobot.html">setuprobot</a></td>
+<td> calc_elip</td><td> exGUI</td><td>Q; r; densoobj; robot_maxreach;</td></tr><tr><td><a href="setupscanner.html">setupscanner</a></td>
+<td></td><td> exGUI</td><td>scan; r; Q; all_views;</td></tr><tr><td><a href="setupworkspace.html">setupworkspace</a></td>
+<td> GetImpLevInfo</td><td> exGUI</td><td>workspace; Q; guiglobal;</td></tr><tr><td><a href="special_map_area.html">special_map_area</a></td>
+<td> GetImpLevInfo</td><td> organise_data</td><td>RangeData; PointData; workspace;</td></tr><tr><td><a href="streamOnto_mine_manystarts.html">streamOnto_mine_manystarts</a></td>
+<td> check_FF dist_pt2tr</td><td> NBV pathplanner pathplanner_new</td><td></td></tr><tr><td><a href="surface_making_simple.html">surface_making_simple</a></td>
+<td></td><td> Block_Classifier blasting_posesel blasting_posesel_development comparemaps exGUI organise_data</td><td>plane;</td></tr><tr><td><a href="threeDMedianFilt.html">threeDMedianFilt</a></td>
+<td> GetImpLevInfo</td><td> exGUI organise_data</td><td>workspace;</td></tr><tr><td><a href="use_real_robot_GETJs.html">use_real_robot_GETJs</a></td>
+<td></td><td> exGUI explore movetonewQ remove_self_scanning</td><td>Q;</td></tr><tr><td><a href="use_real_robot_MOVE.html">use_real_robot_MOVE</a></td>
+<td> joint_softlimit_check</td><td> movetonewQ use_real_robot_SCAN_q6 use_real_robot_SCANandMOVE</td><td>Q; robot_maxreach;</td></tr><tr><td><a href="use_real_robot_SCAN.html">use_real_robot_SCAN</a></td>
+<td> use_real_robot_MOVE</td><td> exGUI explore</td><td>scan; Q; r; PointData; IntensityData; RangeData; robot_maxreach; robmap_h;</td></tr><tr><td><a href="use_real_robot_SCAN_q6.html">use_real_robot_SCAN_q6</a></td>
+<td> use_real_robot_MOVE</td><td></td><td>scan; Q; r; PointData; IntensityData; RangeData; robot_maxreach; robmap_h;</td></tr><tr><td><a href="use_real_robot_SCANandMOVE.html">use_real_robot_SCANandMOVE</a></td>
+<td> use_real_robot_MOVE</td><td> exGUI movetonewQ</td><td>scan; Q; r; PointData; IntensityData; RangeData; robot_maxreach; robmap_h;</td></tr></body></html>

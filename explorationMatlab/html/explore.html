@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>explore</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-10">
+      <meta name="date" content="2008-01-14">
       <meta name="m-file" content="explore"><style>
 
 body {
@@ -104,7 +104,7 @@ p.footer {
 </pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> workspace scan bestviews r Q robot_maxreach
 </pre><h2>Selection of Scan Pose and direction<a name="3"></a></h2><pre class="codeinput"><span class="comment">% this is either using a calculated NBV or choose our own</span>
 <span class="keyword">if</span> true(useNBV)
-    scan.origin=bestviews(selection).scanorigin;
+    db=bestviews(selection).scanorigin;
     scan.chosenview=bestviews(selection).chosenview;
     <span class="comment">% Make it so that the last angle is 0</span>
     newQ=[bestviews(selection).Q(1:5),0];
@@ -153,13 +153,14 @@ p.footer {
 
     <span class="comment">%take a scan through determined tilt_scan_range</span>
     use_real_robot_SCAN(tilt_scan_range*180/pi);
-
+    <span class="comment">%update the latest position of robot</span>
+    use_real_robot_GETJs();
     <span class="comment">%this sort out the points that we have got from a scan</span>
-    organise_data(tilt_scan_range);
+    organise_data();
 <span class="keyword">end</span>
 </pre><h2>Display results<a name="7"></a></h2><pre class="codeinput"><span class="comment">% print results this exploration step details</span>
-display(strcat(<span class="string">'The scan origin is ('</span>,num2str(scan.origin),<span class="string">'), [with 0=+ &amp; 1=-] pose is (abc)  ('</span>,num2str(scan.chosenview),<span class="keyword">...</span>
-               <span class="string">'), and this is try:'</span>,num2str(scan.tries)));
+display(<span class="string">'. . . . . . . . . . . . . . . . . . . . . . . . '</span>);
+display(strcat(<span class="string">'The scan origin is ('</span>,num2str(scan.origin),<span class="string">'),TRY # :'</span>,num2str(scan.tries)));
 
 scan.ALLorigin=[scan.ALLorigin;scan.origin];
 
@@ -169,9 +170,9 @@ knownweight=calknownweight();
 obstacleweight=calobstacleweight();
 
 <span class="comment">% Print out the details of WEIGHTED known/unknown/obstacle knowledge</span>
-display(strcat(<span class="string">'New freespace knowledge:'</span>,num2str(knownweight-previously_known),<span class="keyword">...</span>
-               <span class="string">', Weighted Total Known Free:'</span>,num2str(knownweight), <span class="string">', Weighted Obsticles:'</span>,num2str(obstacleweight),<span class="keyword">...</span>
-               <span class="string">' Remaining Weighted Unknown withing workspace:'</span>,num2str(unknownweight)));
+display(strcat(<span class="string">'NEW Free Weight:'</span>,num2str(knownweight-previously_known),<span class="keyword">...</span>
+               <span class="string">', Total Free Weight:'</span>,num2str(knownweight), <span class="string">', Obstacles Weight:'</span>,num2str(obstacleweight),<span class="keyword">...</span>
+               <span class="string">' Remain Unknown Weight:'</span>,num2str(unknownweight)));
 
 <span class="comment">% Set GUI to show size of known + obstacle knowledge out of total knowledge</span>
 set(h.total_info_text,<span class="string">'String'</span>,num2str(size(workspace.knowncoords,1)+size(workspace.indexedobsticles,1)));
@@ -217,7 +218,7 @@ global workspace scan bestviews r Q robot_maxreach
 
 % this is either using a calculated NBV or choose our own
 if true(useNBV)
-    scan.origin=bestviews(selection).scanorigin;
+    db=bestviews(selection).scanorigin;
     scan.chosenview=bestviews(selection).chosenview;
     % Make it so that the last angle is 0
     newQ=[bestviews(selection).Q(1:5),0];
@@ -272,16 +273,17 @@ else
     
     %take a scan through determined tilt_scan_range
     use_real_robot_SCAN(tilt_scan_range*180/pi);
-        
+    %update the latest position of robot
+    use_real_robot_GETJs();    
     %this sort out the points that we have got from a scan
-    organise_data(tilt_scan_range);
+    organise_data();
 end
 
 %% Display results
 
 % print results this exploration step details
-display(strcat('The scan origin is (',num2str(scan.origin),'), [with 0=+ & 1=-] pose is (abc)  (',num2str(scan.chosenview),...
-               '), and this is try:',num2str(scan.tries)));
+display('. . . . . . . . . . . . . . . . . . . . . . . . ');
+display(strcat('The scan origin is (',num2str(scan.origin),'),TRY # :',num2str(scan.tries)));
 
 scan.ALLorigin=[scan.ALLorigin;scan.origin];
 
@@ -291,9 +293,9 @@ knownweight=calknownweight();
 obstacleweight=calobstacleweight();
 
 % Print out the details of WEIGHTED known/unknown/obstacle knowledge
-display(strcat('New freespace knowledge:',num2str(knownweight-previously_known),...
-               ', Weighted Total Known Free:',num2str(knownweight), ', Weighted Obsticles:',num2str(obstacleweight),...
-               ' Remaining Weighted Unknown withing workspace:',num2str(unknownweight)));
+display(strcat('NEW Free Weight:',num2str(knownweight-previously_known),...
+               ', Total Free Weight:',num2str(knownweight), ', Obstacles Weight:',num2str(obstacleweight),...
+               ' Remain Unknown Weight:',num2str(unknownweight)));
 
 % Set GUI to show size of known + obstacle knowledge out of total knowledge  
 set(h.total_info_text,'String',num2str(size(workspace.knowncoords,1)+size(workspace.indexedobsticles,1)));
