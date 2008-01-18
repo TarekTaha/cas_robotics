@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>threeDMedianFilt</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-10">
+      <meta name="date" content="2008-01-14">
       <meta name="m-file" content="threeDMedianFilt"><style>
 
 body {
@@ -130,7 +130,10 @@ c=round(workspace.indexedobsticles(GetImpLevInfo(workspace.indexedobsticles),:)/
     display(strcat(<span class="string">'Num Points to be added to OBSTACLE list after median filtering:'</span>,num2str(size(OBtofilterout,1))));
 <span class="keyword">end</span>
 </pre><h2>Add filtered out unknown points to either obstacles or known free<a name="6"></a></h2><pre class="codeinput">workspace.knowncoords=[workspace.knowncoords;workspace.unknowncoords(workspace.lev1unknown(index(KNtofilterout)),:)];
-workspace.obsticlepoints=[workspace.obsticlepoints;workspace.unknowncoords(workspace.lev1unknown(index(OBtofilterout)),:)];
+<span class="comment">% workspace.Nobsticlepoints=[workspace.Nobsticlepoints;workspace.unknowncoords(workspace.lev1unknown(index(OBtofilterout)),:)];</span>
+<span class="comment">%update indexed obstacle points</span>
+<span class="comment">% workspace.indexedobsticles=unique(round(workspace.Nobsticlepoints/workspace.inc_size)*workspace.inc_size,'rows');</span>
+workspace.indexedobsticles=unique([workspace.indexedobsticles,workspace.unknowncoords(workspace.lev1unknown(index(OBtofilterout)),:)],<span class="string">'rows'</span>);
 </pre><h2>Additional Future work to remove unknown points in ellipses on a path<a name="7"></a></h2><pre class="codeinput"><span class="comment">% %robot parameters</span>
 <span class="comment">% n = r.n;</span>
 <span class="comment">% L = r.link;</span>
@@ -223,7 +226,10 @@ end
 
 %% Add filtered out unknown points to either obstacles or known free
 workspace.knowncoords=[workspace.knowncoords;workspace.unknowncoords(workspace.lev1unknown(index(KNtofilterout)),:)];
-workspace.obsticlepoints=[workspace.obsticlepoints;workspace.unknowncoords(workspace.lev1unknown(index(OBtofilterout)),:)];
+% workspace.Nobsticlepoints=[workspace.Nobsticlepoints;workspace.unknowncoords(workspace.lev1unknown(index(OBtofilterout)),:)];
+%update indexed obstacle points
+% workspace.indexedobsticles=unique(round(workspace.Nobsticlepoints/workspace.inc_size)*workspace.inc_size,'rows');
+workspace.indexedobsticles=unique([workspace.indexedobsticles,workspace.unknowncoords(workspace.lev1unknown(index(OBtofilterout)),:)],'rows');
 
 %% Additional Future work to remove unknown points in ellipses on a path
 

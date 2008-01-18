@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>organise_data</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-10">
+      <meta name="date" content="2008-01-14">
       <meta name="m-file" content="organise_data"><style>
 
 body {
@@ -84,138 +84,165 @@ p.footer {
                <li><a href="#1">Function Call</a></li>
                <li><a href="#2">Variables</a></li>
                <li><a href="#3">Check data validity</a></li>
-               <li><a href="#4">Determine max distance used in ray casting</a></li>
-               <li><a href="#5">Maxangle so that we have numpntsInCube at maxdist</a></li>
-               <li><a href="#6">Determine ration of points to use</a></li>
-               <li><a href="#7">Make sure we have a ration logically at minimum 1:1</a></li>
-               <li><a href="#8">Setup ray tracing variables</a></li>
-               <li><a href="#9">Get distance from 1 laser_pos to end points</a></li>
-               <li><a href="#10">Setup ray tracing discrete check points</a></li>
-               <li><a href="#11">Go through each valid row (where dist&gt;0) and ray trace</a></li>
-               <li><a href="#12">Determine the cubes which the ray passed through within work (generous)</a></li>
-               <li><a href="#13">final step of saving the unique cubes rays passed through and end points</a></li>
-               <li><a href="#14">Timing and Display purposes</a></li>
-               <li><a href="#15">Update (indexed) obstacles points global variables</a></li>
-               <li><a href="#16">Fill in the newest knowledge about points</a></li>
-               <li><a href="#17">Do the 3D median filtering on the unknown space</a></li>
-               <li><a href="#18">Do surface making on obstacle points from this scan</a></li>
-               <li><a href="#19">Add to made surface variables</a></li>
+               <li><a href="#4">The points we want to trace too</a></li>
+               <li><a href="#5">Setup ray tracing variables</a></li>
+               <li><a href="#6">Get distance from 1 laser_pos to end points</a></li>
+               <li><a href="#7">Setup ray tracing discrete check points</a></li>
+               <li><a href="#8">Go through each valid row (where dist&gt;0) and ray trace</a></li>
+               <li><a href="#9">Determine the cubes which the ray passed through within work (generous)</a></li>
+               <li><a href="#10">final step of saving the unique cubes rays passed through and end points</a></li>
+               <li><a href="#11">Timing and Display purposes</a></li>
+               <li><a href="#12">Update (indexed) obstacles points global variables</a></li>
+               <li><a href="#13">Remove points that are on a path we have taken</a></li>
+               <li><a href="#14">Fill in the newest knowledge about points</a></li>
+               <li><a href="#15">Do the 3D median filtering on the unknown space</a></li>
+               <li><a href="#16">Do surface making on obstacle points from this scan</a></li>
+               <li><a href="#17">Add to made surface variables</a></li>
+               <li><a href="#18">Determine the special area</a></li>
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
-         <p><b>Inputs:</b></p>
-         <p><i>tilt_scan_range</i> (double) radians - the new scan.alpha used to determine ration of points to use
+         <p><b>Inputs:</b> NULL
          </p>
          <p><b>Returns:</b> NULL
-         </p><pre class="codeinput"><span class="keyword">function</span> organise_data(tilt_scan_range)
-</pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> workspace scan r Q PointData RangeData
-starttime=clock;
+         </p><pre class="codeinput"><span class="keyword">function</span> organise_data()
+</pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="keyword">global</span> workspace scan PointData RangeData PoseData robot_maxreach
+<span class="comment">% starttime=clock;</span>
 <span class="comment">% Number of points we want in the cube for ray casting</span>
-numpntsInCube=scan.numpntsInCube;
+<span class="comment">% numpntsInCube=scan.numpntsInCube;</span>
+
+<span class="comment">% warning off;</span>
 </pre><h2>Check data validity<a name="3"></a></h2>
-         <p>Process Data from PointData scan matrix to a 3*many form</p><pre class="codeinput">ice_cream_bounds=zeros([size(PointData,1)*size(PointData,2),3]);
+         <p>Process Data from PointData scan matrix to a 3*many form</p><pre class="codeinput"> ice_cream_bounds=zeros([size(PointData,1)*size(PointData,2),3]);
+ laser_pos_ice_cream_bounds=zeros([size(PointData,1)*size(PointData,2),3]);
 <span class="keyword">for</span> i=1:size(PointData,1);
     ice_cream_bounds((i-1)*size(PointData,2)+1 : i*size(PointData,2) , :)=<span class="keyword">...</span>
         [[PointData(i,:,1)]',[PointData(i,:,2)]',[PointData(i,:,3)]'];
+    laser_pos_ice_cream_bounds((i-1)*size(PointData,2)+1 : i*size(PointData,2) , :)=<span class="keyword">...</span>
+        ones([size(PointData,2),1])*[PoseData(i,1,4),PoseData(i,2,4),PoseData(i,3,4)];
 <span class="keyword">end</span>
+
 
 <span class="comment">% Eliminate points where the range data is == 0</span>
 <span class="keyword">if</span> ~isempty(RangeData)
     rangedata_singlemat=zeros([size(RangeData,1)*size(RangeData,2),1]);
+    noreturnplaces=[];
+    laser_pos_noreturnplaces=[];
+    raywidth=(2*scan.theta)/size(RangeData,2);
+    averagefiltering = filter2(fspecial(<span class="string">'average'</span>,20),RangeData);
+    noreturnplaces=zeros([size(averagefiltering,2),3]);
+    laser_pos_noreturnplaces=zeros([size(averagefiltering,2),3]);
+    countnoreturns=0;
+    countnoreturns_pose=1;
+
     <span class="keyword">for</span> i=1:size(RangeData,1);
         rangedata_singlemat((i-1)*size(RangeData,2)+1 : i*size(RangeData,2))=RangeData(i,:)';
+
+<span class="comment">%         noreturnstemp=find(RangeData(i,:)&lt;20);</span>
+        noreturnstemp=find(averagefiltering(i,:)&lt;20);
+        <span class="comment">%go to each point which isn't returned and make it and x,y,z at max</span>
+        <span class="keyword">if</span> size(noreturnstemp,1)&gt;0
+            angularofnoreturn=(size(RangeData,2)/2-noreturnstemp)*raywidth;
+
+<span class="comment">%             figure(3);grid on; hold on; view(3);axis equal;</span>
+
+            <span class="comment">%go through every second ray on the pan since if they are one</span>
+            <span class="comment">%off they are not good, if they are multiple then 1 is enough</span>
+            <span class="comment">%even at 1.6 met</span>
+            <span class="keyword">for</span> j=1:2:size(angularofnoreturn,2)
+<span class="comment">%                 hgtr=makehgtform('axisrotate',[PoseData(i,1:3,1)],angularofnoreturn(j));</span>
+<span class="comment">%                 rotatedpoint=scan.size*PoseData(i,1:3,3)*hgtr(1:3,1:3);</span>
+                rotatedpoint=rot_vec(scan.size*PoseData(i,1:3,3),PoseData(i,1:3,1),-angularofnoreturn(j));
+
+<span class="comment">%                 if ~isempty(find((rotatedpoint-rotatedpoint2)&gt;eps, 1))</span>
+<span class="comment">%                     keyboard</span>
+<span class="comment">%                 end</span>
+
+<span class="comment">%                 noreturnplaces=[noreturnplaces;rotatedpoint+PoseData(i,1:3,4)];</span>
+<span class="comment">%                 laser_pos_noreturnplaces=[laser_pos_noreturnplaces;PoseData(i,1:3,4)];</span>
+                countnoreturns=countnoreturns+1;
+                noreturnplaces(countnoreturns,:)=rotatedpoint+PoseData(i,1:3,4);
+<span class="comment">%                 laser_pos_noreturnplaces(countnoreturns,:)=PoseData(i,1:3,4);</span>
+
+
+<span class="comment">%                 plot3(noreturnplaces(end,1),noreturnplaces(end,2),noreturnplaces(end,3),'r.')</span>
+<span class="comment">%                 pause(0.1);</span>
+            <span class="keyword">end</span>
+            laser_pos_noreturnplaces(countnoreturns_pose:countnoreturns,:)=ones([countnoreturns-countnoreturns_pose+1,1])*PoseData(i,1:3,4);
+            countnoreturns_pose=countnoreturns+1;
+        <span class="keyword">end</span>
     <span class="keyword">end</span>
-    ice_cream_bounds=ice_cream_bounds((rangedata_singlemat&gt;0),:);
+
+    <span class="comment">%resize so we remove any unnessesary ones</span>
+    noreturnplaces=noreturnplaces(1:countnoreturns,:);
+    laser_pos_noreturnplaces=laser_pos_noreturnplaces(1:countnoreturns,:);
+
+    ice_cream_bounds=ice_cream_bounds(rangedata_singlemat&gt;20,:);
+    laser_pos_ice_cream_bounds=laser_pos_ice_cream_bounds(rangedata_singlemat&gt;20,:);
+
+<span class="comment">%     figure(3);plot3(noreturnplaces(:,1),noreturnplaces(:,2),noreturnplaces(:,3),'r.')</span>
+<span class="comment">%     hold on; plot3(ice_cream_bounds(:,1),ice_cream_bounds(:,2),ice_cream_bounds(:,3),'b.')</span>
+
+
+
     <span class="keyword">if</span> size(ice_cream_bounds,1)==0
-        error(<span class="string">'There is no data with range greater than 0'</span>);
+        error(<span class="string">'There is no data with range greater than 20'</span>);
     <span class="keyword">end</span>
     <span class="comment">% Save this scan data as a block</span>
     workspace.ALLlastscandataInWkspace=ice_cream_bounds;
 <span class="keyword">else</span>
     error(<span class="string">'There is some problem with the laser, no data has been returned'</span>);
 <span class="keyword">end</span>
-</pre><h2>Determine max distance used in ray casting<a name="4"></a></h2>
-         <p><img vspace="5" hspace="5" src="organise_data_eq1863988.png"> </p><pre class="codeinput"><span class="comment">% Cube of interest is minout of maxrange and specified scan size</span>
-maxdist = min( max(rangedata_singlemat) , scan.size);
-</pre><h2>Maxangle so that we have numpntsInCube at maxdist<a name="5"></a></h2>
-         <p><img vspace="5" hspace="5" src="organise_data_eq3869064.png"> </p><pre class="codeinput">maxangle=acos(<span class="keyword">...</span>
-               1-(<span class="keyword">...</span>
-                  (workspace.inc_size/numpntsInCube)/(sqrt(2)*maxdist)<span class="keyword">...</span><span class="comment">%used to be scan.size %%Now it will be AT LEAST scan size but maybe bigger</span>
-                  )^2 <span class="keyword">...</span>
-              );
-</pre><h2>Determine ration of points to use<a name="6"></a></h2>
-         <p><img vspace="5" hspace="5" src="organise_data_eq3379403.png"> </p><pre class="codeinput">ratioOfScansToUse=abs(<span class="keyword">...</span>
-                    floor(<span class="keyword">...</span>
-                        maxangle/<span class="keyword">...</span>
-                                ((scan.theta*2) / <span class="keyword">...</span>
-                                 (size(PointData,2))<span class="keyword">...</span>
-                                 )<span class="keyword">...</span>
-                         )<span class="keyword">...</span>
-                     *<span class="keyword">...</span>
-                    floor(<span class="keyword">...</span>
-                        maxangle/<span class="keyword">...</span>
-                                 ((abs(tilt_scan_range)*2) / <span class="keyword">...</span>
-                                  (size(PointData,1))<span class="keyword">...</span>
-                                  )<span class="keyword">...</span>
-                         )<span class="keyword">...</span>
-                       );
-</pre><h2>Make sure we have a ration logically at minimum 1:1<a name="7"></a></h2><pre class="codeinput"><span class="keyword">if</span> ratioOfScansToUse&lt;1;
-    ratioOfScansToUse=1;
-    <span class="comment">% ice_cream_bounds stays the same</span>
-<span class="keyword">else</span>
-    <span class="comment">% Go through the index at a ratio as decided and only use these points</span>
-    indexofScanstoUse=1:ratioOfScansToUse:size(ice_cream_bounds,1);
-    ice_cream_bounds=ice_cream_bounds(indexofScanstoUse,:);
-<span class="keyword">end</span>
-</pre><h2>Setup ray tracing variables<a name="8"></a></h2>
-         <p>Where the laser is at start of scan (used thoughout as origin)</p><pre class="codeinput">laser_pos=scan.origin;
-<span class="comment">% Min and max cubes</span>
-space_min_and_max=[workspace.min/workspace.inc_size,workspace.max/workspace.inc_size];
+</pre><h2>The points we want to trace too<a name="4"></a></h2><pre class="codeinput">[totraceto,whichones]=unique(round([ice_cream_bounds;noreturnplaces]/workspace.inc_size)*workspace.inc_size,<span class="string">'rows'</span>);
+laser_pos=[laser_pos_ice_cream_bounds;laser_pos_noreturnplaces];
+laser_pos=laser_pos(whichones,:);
+</pre><h2>Setup ray tracing variables<a name="5"></a></h2>
+         <p>Where the laser is at start of scan (used thoughout as origin) laser_pos=scan.origin; Min and max cubes</p><pre class="codeinput">space_min_and_max=[workspace.min/workspace.inc_size,workspace.max/workspace.inc_size];
 <span class="comment">% The cubes that rays pass through</span>
 markedcubes=[];
-</pre><h2>Get distance from 1 laser_pos to end points<a name="9"></a></h2>
-         <p><img vspace="5" hspace="5" src="organise_data_eq3425998.png"> </p><pre class="codeinput">dist=sqrt((laser_pos(1)-ice_cream_bounds(:,1)).^2+<span class="keyword">...</span>
-          (laser_pos(2)-ice_cream_bounds(:,2)).^2+<span class="keyword">...</span>
-          (laser_pos(3)-ice_cream_bounds(:,3)).^2);
+</pre><h2>Get distance from 1 laser_pos to end points<a name="6"></a></h2>
+         <p><img vspace="5" hspace="5" src="organise_data_eq3425998.png"> </p><pre class="codeinput">dist=sqrt((laser_pos(:,1)-totraceto(:,1)).^2+<span class="keyword">...</span>
+          (laser_pos(:,2)-totraceto(:,2)).^2+<span class="keyword">...</span>
+          (laser_pos(:,3)-totraceto(:,3)).^2);
 <span class="comment">% the valid distances (greater than 0)</span>
 valid_rows=find(dist);
-</pre><h2>Setup ray tracing discrete check points<a name="10"></a></h2>
-         <p><img vspace="5" hspace="5" src="organise_data_eq126095.png"> </p><pre class="codeinput">tempstarter=(ice_cream_bounds(:,1)-laser_pos(1))./(2*dist(:)/workspace.inc_size);
-</pre><h2>Go through each valid row (where dist&gt;0) and ray trace<a name="11"></a></h2><pre class="codeinput"><span class="keyword">for</span> i=[valid_rows]'
+</pre><h2>Setup ray tracing discrete check points<a name="7"></a></h2>
+         <p><img vspace="5" hspace="5" src="organise_data_eq126095.png"> </p><pre class="codeinput">tempstarter=(totraceto(:,1)-laser_pos(:,1))./(2*dist(:)/workspace.inc_size);
+</pre><h2>Go through each valid row (where dist&gt;0) and ray trace<a name="8"></a></h2><pre class="codeinput"><span class="keyword">for</span> i=[valid_rows]'
 <span class="comment">%---collum 1</span>
     <span class="comment">%check each one of the segements for zero distance and fill with that planes value for inbetweens</span>
-    <span class="keyword">if</span> abs(laser_pos(1)-ice_cream_bounds(i,1))&lt;tempstarter(i)
-        tempCOL=[laser_pos(1)*ones([round((2*dist(i)/workspace.inc_size))+1,1])];
+    <span class="keyword">if</span> abs(laser_pos(i,1)-totraceto(i,1))&lt;tempstarter(i)
+        tempCOL=[laser_pos(i,1)*ones([round((2*dist(i)/workspace.inc_size))+1,1])];
     <span class="keyword">else</span>
-        tempCOL=[(laser_pos(1):tempstarter(i):ice_cream_bounds(i,1))'];
+        tempCOL=[(laser_pos(i,1):tempstarter(i):totraceto(i,1))'];
     <span class="keyword">end</span>
     inbetweenpoint=[tempCOL,ones([length(tempCOL),2])];
 
 <span class="comment">%---collum 2</span>
-    <span class="keyword">if</span> laser_pos(2)==ice_cream_bounds(i,2) || size(inbetweenpoint,1)&lt;=1
-          inbetweenpoint(:,2)=inbetweenpoint(:,2)*laser_pos(2);
+    <span class="keyword">if</span> laser_pos(i,2)==totraceto(i,2) || size(inbetweenpoint,1)&lt;=1
+          inbetweenpoint(:,2)=inbetweenpoint(:,2)*laser_pos(i,2);
      <span class="keyword">else</span>
         <span class="comment">%since sometimes due to a rounding error dividing it will not be the same, so minus 0.5 off the size and we should get the correct</span>
         <span class="comment">%num of rows so concaternation can happen properly</span>
         <span class="keyword">try</span>
-            tempCOL(1:end)=(laser_pos(2):(ice_cream_bounds(i,2)-laser_pos(2))/(size(inbetweenpoint,1)-1):ice_cream_bounds(i,2))';
+            tempCOL(1:end)=(laser_pos(i,2):(totraceto(i,2)-laser_pos(i,2))/(size(inbetweenpoint,1)-1):totraceto(i,2))';
         <span class="keyword">catch</span>;
-            tempCOL(1:end)=(laser_pos(2):(ice_cream_bounds(i,2)-laser_pos(2))/(size(inbetweenpoint,1)-0.5):ice_cream_bounds(i,2))';
+            tempCOL(1:end)=(laser_pos(i,2):(totraceto(i,2)-laser_pos(i,2))/(size(inbetweenpoint,1)-0.5):totraceto(i,2))';
         <span class="keyword">end</span>
         inbetweenpoint(:,2)=tempCOL;
     <span class="keyword">end</span>
 <span class="comment">%---collum 3</span>
-    <span class="keyword">if</span> laser_pos(3)==ice_cream_bounds(i,3) || size(inbetweenpoint,1)&lt;=1
-        inbetweenpoint(:,3)=inbetweenpoint(:,3)*laser_pos(3);
+    <span class="keyword">if</span> laser_pos(i,3)==totraceto(i,3) || size(inbetweenpoint,1)&lt;=1
+        inbetweenpoint(:,3)=inbetweenpoint(:,3)*laser_pos(i,3);
     <span class="keyword">else</span>
         <span class="keyword">try</span>
-            tempCOL(1:end)=(laser_pos(3):(ice_cream_bounds(i,3)-laser_pos(3))/(size(inbetweenpoint,1)-1):ice_cream_bounds(i,3))';
+            tempCOL(1:end)=(laser_pos(i,3):(totraceto(i,3)-laser_pos(i,3))/(size(inbetweenpoint,1)-1):totraceto(i,3))';
         <span class="keyword">catch</span>;
-            tempCOL(1:end)=(laser_pos(3):(ice_cream_bounds(i,3)-laser_pos(3))/(size(inbetweenpoint,1)-0.5):ice_cream_bounds(i,3))';
+            tempCOL(1:end)=(laser_pos(i,3):(totraceto(i,3)-laser_pos(i,3))/(size(inbetweenpoint,1)-0.5):totraceto(i,3))';
         <span class="keyword">end</span>
         inbetweenpoint(:,3)=tempCOL;
     <span class="keyword">end</span>
-</pre><h2>Determine the cubes which the ray passed through within work (generous)<a name="12"></a></h2>
+</pre><h2>Determine the cubes which the ray passed through within work (generous)<a name="9"></a></h2>
          <p><img vspace="5" hspace="5" src="organise_data_eq1073527.png"> </p><pre class="codeinput">    cubes_checked=[int16(floor(inbetweenpoint/workspace.inc_size));int16(inbetweenpoint/workspace.inc_size)];
     <span class="comment">% Concaternate the cubes check which are in workspace with current list</span>
     markedcubes=[markedcubes;int16(cubes_checked((cubes_checked(:,1)&gt;=space_min_and_max(1) &amp;<span class="keyword">...</span>
@@ -231,7 +258,7 @@ valid_rows=find(dist);
         markedcubes=unique(markedcubes,<span class="string">'rows'</span>);
     <span class="keyword">end</span>
 <span class="keyword">end</span>
-</pre><h2>final step of saving the unique cubes rays passed through and end points<a name="13"></a></h2><pre class="codeinput"><span class="keyword">if</span> size(markedcubes)&gt;0
+</pre><h2>final step of saving the unique cubes rays passed through and end points<a name="10"></a></h2><pre class="codeinput"><span class="keyword">if</span> size(markedcubes)&gt;0
     markedcubes=unique(double(markedcubes),<span class="string">'rows'</span>);
     <span class="comment">%put back in realworld coords</span>
     points=markedcubes.*workspace.inc_size;
@@ -246,36 +273,54 @@ valid_rows=find(dist);
     <span class="comment">%remove self scanning points (points that are within the joints force fields)</span>
     ice_cream_bounds_NOSELF=remove_self_scanning(ice_cream_bounds);
 
-    indexedobsticles=unique(floor(ice_cream_bounds_NOSELF/workspace.inc_size)*workspace.inc_size,<span class="string">'rows'</span>);
+<span class="comment">%     indexedobsticles=unique(floor(ice_cream_bounds_NOSELF/workspace.inc_size)*workspace.inc_size,'rows');</span>
+    indexedobsticles=unique(round(ice_cream_bounds_NOSELF/workspace.inc_size)*workspace.inc_size,<span class="string">'rows'</span>);
     <span class="comment">%also get rid of any indexed points that are within the feilds</span>
     indexedobsticles=remove_self_scanning(indexedobsticles);
 <span class="keyword">end</span>
-</pre><h2>Timing and Display purposes<a name="14"></a></h2><pre class="codeinput">temptime=etime(clock,starttime);
-display (strcat(<span class="string">'With ratioOfScansToUse='</span>,num2str(ratioOfScansToUse),<span class="string">', You filled in:'</span>,num2str(size(points)),<span class="string">' cubes in: '</span>,num2str(temptime),<span class="string">'secs'</span>));
-</pre><h2>Update (indexed) obstacles points global variables<a name="15"></a></h2><pre class="codeinput">workspace.obsticlepoints=[workspace.obsticlepoints;ice_cream_bounds_NOSELF];
-<span class="comment">% only want unique indexed obsticles</span>
-<span class="keyword">if</span> size(workspace.indexedobsticles,2)==0
+</pre><h2>Timing and Display purposes<a name="11"></a></h2>
+         <p>temptime=etime(clock,starttime); display (strcat('You filled in:',num2str(size(points)),' cubes in: ',num2str(temptime),'secs'));</p>
+         <h2>Update (indexed) obstacles points global variables<a name="12"></a></h2>
+         <p>workspace.Nobsticlepoints=[workspace.Nobsticlepoints;ice_cream_bounds_NOSELF]; only want unique indexed obsticles</p><pre class="codeinput"><span class="keyword">if</span> size(workspace.indexedobsticles,2)==0
     workspace.indexedobsticles=indexedobsticles;
 <span class="keyword">else</span>
     workspace.indexedobsticles=union(indexedobsticles,workspace.indexedobsticles,<span class="string">'rows'</span>);
 <span class="keyword">end</span>
-</pre><h2>Fill in the newest knowledge about points<a name="16"></a></h2><pre class="codeinput"><span class="comment">%the newestscan knowledge is what is now known compared to what was known about freespace and obstacles before</span>
+</pre><h2>Remove points that are on a path we have taken<a name="13"></a></h2><pre class="codeinput"><span class="keyword">if</span> size(robot_maxreach.pointcarvedout,1)&gt;0
+    workspace.indexedobsticles=setdiff(workspace.indexedobsticles,robot_maxreach.pointcarvedout,<span class="string">'rows'</span>);
+<span class="keyword">end</span>
+</pre><h2>Fill in the newest knowledge about points<a name="14"></a></h2><pre class="codeinput"><span class="comment">%the newestscan knowledge is what is now known compared to what was known about freespace and obstacles before</span>
 workspace.newestknownledge=setdiff(points,[workspace.knowncoords;workspace.indexedobsticles],<span class="string">'rows'</span>);
 workspace.knowncoords=unique([workspace.knowncoords;points],<span class="string">'rows'</span>);
 <span class="comment">%overall point is what is known that is not an obstacle</span>
 workspace.knowncoords=setdiff(unique([workspace.knowncoords;points],<span class="string">'rows'</span>),workspace.indexedobsticles,<span class="string">'rows'</span>);
-</pre><h2>Do the 3D median filtering on the unknown space<a name="17"></a></h2><pre class="codeinput"><span class="comment">%threeDMedianFilt();</span>
-</pre><h2>Do surface making on obstacle points from this scan<a name="18"></a></h2><pre class="codeinput"><span class="keyword">try</span> <span class="keyword">if</span> size(ice_cream_bounds_NOSELF,1)&gt;1
-        surface_making_simple(ice_cream_bounds_NOSELF,workspace.mew);
+</pre><h2>Do the 3D median filtering on the unknown space<a name="15"></a></h2><pre class="codeinput"><span class="comment">%threeDMedianFilt();</span>
+</pre><h2>Do surface making on obstacle points from this scan<a name="16"></a></h2>
+         <p>try if size(ice_cream_bounds_NOSELF,1)&gt;1         surface_making_simple(ice_cream_bounds_NOSELF,workspace.mew);     end</p><pre class="codeinput"><span class="keyword">try</span> <span class="keyword">if</span> size(workspace.indexedobsticles,1)&gt;1
+        surface_making_simple(workspace.indexedobsticles,workspace.mew);
     <span class="keyword">end</span>
 <span class="keyword">catch</span>; keyboard; <span class="keyword">end</span>
 <span class="keyword">global</span> plane
-</pre><h2>Add to made surface variables<a name="19"></a></h2><pre class="codeinput"><span class="comment">%this makes a workspace indexed version of the home points</span>
+</pre><h2>Add to made surface variables<a name="17"></a></h2><pre class="codeinput"><span class="comment">%this makes a workspace indexed version of the home points</span>
+<span class="comment">% for i=1:size(plane,2)</span>
+<span class="comment">%    workspace.indexedobsticles_home_point=[workspace.indexedobsticles_home_point;...</span>
+<span class="comment">%        floor(plane(i).home_point/workspace.inc_size)*workspace.inc_size];</span>
+<span class="comment">%    workspace.indexedobsticles_equ=[workspace.indexedobsticles_equ;plane(i).equ];</span>
+<span class="comment">% end</span>
+
+<span class="comment">% Clear it and reset everytime</span>
+workspace.indexedobsticles_home_point=[];
+workspace.indexedobsticles_equ=[];
 <span class="keyword">for</span> i=1:size(plane,2)
    workspace.indexedobsticles_home_point=[workspace.indexedobsticles_home_point;<span class="keyword">...</span>
        floor(plane(i).home_point/workspace.inc_size)*workspace.inc_size];
    workspace.indexedobsticles_equ=[workspace.indexedobsticles_equ;plane(i).equ];
 <span class="keyword">end</span>
+</pre><h2>Determine the special area<a name="18"></a></h2><pre class="codeinput"><span class="keyword">try</span> special_map_area();
+<span class="keyword">catch</span>; display(<span class="string">'Some problem with special points'</span>);
+    keyboard;
+<span class="keyword">end</span>
+<span class="comment">% warning on</span>
 </pre><p class="footer"><br>
             Published with MATLAB&reg; 7.4<br></p>
       </div>
@@ -291,103 +336,110 @@ workspace.knowncoords=setdiff(unique([workspace.knowncoords;points],<span class=
 
 %% Function Call
 %
-% *Inputs:* 
-%
-% _tilt_scan_range_ (double) radians - the new scan.alpha used to determine
-% ration of points to use 
+% *Inputs:* NULL
 %
 % *Returns:* NULL
-function organise_data(tilt_scan_range)
+function organise_data()
 
 %% Variables
-global workspace scan r Q PointData RangeData
-starttime=clock;
+global workspace scan PointData RangeData PoseData robot_maxreach
+% starttime=clock;
 % Number of points we want in the cube for ray casting
-numpntsInCube=scan.numpntsInCube;
+% numpntsInCube=scan.numpntsInCube;
 
+% warning off;
 %% Check data validity
 % Process Data from PointData scan matrix to a 3*many form
-ice_cream_bounds=zeros([size(PointData,1)*size(PointData,2),3]);
+ ice_cream_bounds=zeros([size(PointData,1)*size(PointData,2),3]);
+ laser_pos_ice_cream_bounds=zeros([size(PointData,1)*size(PointData,2),3]);
 for i=1:size(PointData,1);
     ice_cream_bounds((i-1)*size(PointData,2)+1 : i*size(PointData,2) , :)=...
-        [[PointData(i,:,1)]',[PointData(i,:,2)]',[PointData(i,:,3)]'];                  
+        [[PointData(i,:,1)]',[PointData(i,:,2)]',[PointData(i,:,3)]'];    
+    laser_pos_ice_cream_bounds((i-1)*size(PointData,2)+1 : i*size(PointData,2) , :)=...
+        ones([size(PointData,2),1])*[PoseData(i,1,4),PoseData(i,2,4),PoseData(i,3,4)];    
 end
+
 
 % Eliminate points where the range data is == 0
 if ~isempty(RangeData)
     rangedata_singlemat=zeros([size(RangeData,1)*size(RangeData,2),1]);
+    noreturnplaces=[];
+    laser_pos_noreturnplaces=[];
+    raywidth=(2*scan.theta)/size(RangeData,2);
+    averagefiltering = filter2(fspecial('average',20),RangeData);   
+    noreturnplaces=zeros([size(averagefiltering,2),3]);
+    laser_pos_noreturnplaces=zeros([size(averagefiltering,2),3]);    
+    countnoreturns=0;
+    countnoreturns_pose=1;
+    
     for i=1:size(RangeData,1);
         rangedata_singlemat((i-1)*size(RangeData,2)+1 : i*size(RangeData,2))=RangeData(i,:)';                  
+
+%         noreturnstemp=find(RangeData(i,:)<20);        
+        noreturnstemp=find(averagefiltering(i,:)<20);
+        %go to each point which isn't returned and make it and x,y,z at max
+        if size(noreturnstemp,1)>0
+            angularofnoreturn=(size(RangeData,2)/2-noreturnstemp)*raywidth;
+
+%             figure(3);grid on; hold on; view(3);axis equal;
+
+            %go through every second ray on the pan since if they are one
+            %off they are not good, if they are multiple then 1 is enough
+            %even at 1.6 met
+            for j=1:2:size(angularofnoreturn,2)
+%                 hgtr=makehgtform('axisrotate',[PoseData(i,1:3,1)],angularofnoreturn(j));                 
+%                 rotatedpoint=scan.size*PoseData(i,1:3,3)*hgtr(1:3,1:3);
+                rotatedpoint=rot_vec(scan.size*PoseData(i,1:3,3),PoseData(i,1:3,1),-angularofnoreturn(j));
+                
+%                 if ~isempty(find((rotatedpoint-rotatedpoint2)>eps, 1))
+%                     keyboard
+%                 end
+                
+%                 noreturnplaces=[noreturnplaces;rotatedpoint+PoseData(i,1:3,4)];
+%                 laser_pos_noreturnplaces=[laser_pos_noreturnplaces;PoseData(i,1:3,4)];
+                countnoreturns=countnoreturns+1;
+                noreturnplaces(countnoreturns,:)=rotatedpoint+PoseData(i,1:3,4);
+%                 laser_pos_noreturnplaces(countnoreturns,:)=PoseData(i,1:3,4);
+                
+                
+%                 plot3(noreturnplaces(end,1),noreturnplaces(end,2),noreturnplaces(end,3),'r.')
+%                 pause(0.1);
+            end
+            laser_pos_noreturnplaces(countnoreturns_pose:countnoreturns,:)=ones([countnoreturns-countnoreturns_pose+1,1])*PoseData(i,1:3,4);
+            countnoreturns_pose=countnoreturns+1;
+        end
     end
-    ice_cream_bounds=ice_cream_bounds((rangedata_singlemat>0),:);
+
+    %resize so we remove any unnessesary ones
+    noreturnplaces=noreturnplaces(1:countnoreturns,:);
+    laser_pos_noreturnplaces=laser_pos_noreturnplaces(1:countnoreturns,:);
+    
+    ice_cream_bounds=ice_cream_bounds(rangedata_singlemat>20,:);
+    laser_pos_ice_cream_bounds=laser_pos_ice_cream_bounds(rangedata_singlemat>20,:);
+    
+%     figure(3);plot3(noreturnplaces(:,1),noreturnplaces(:,2),noreturnplaces(:,3),'r.')
+%     hold on; plot3(ice_cream_bounds(:,1),ice_cream_bounds(:,2),ice_cream_bounds(:,3),'b.')
+
+
+    
     if size(ice_cream_bounds,1)==0
-        error('There is no data with range greater than 0');
+        error('There is no data with range greater than 20');
     end
     % Save this scan data as a block
-    workspace.ALLlastscandataInWkspace=ice_cream_bounds;
+    workspace.ALLlastscandataInWkspace=ice_cream_bounds;    
 else
     error('There is some problem with the laser, no data has been returned');
 end
 
-%% Determine max distance used in ray casting
-% $$\begin{array}{ll}
-% P=(x_j,y_j,z_j)_{j=1,...,m_{u1}}& pt=ScanOrigin\\\\
-% dist=\sqrt{(pt_x-P_x)^2+(pt_y-P_y)^2 + (pt_z-P_z)^2}\\\\
-% maxdist=min(max(dist), scansize))
-% \end{array}$$ 
 
-% Cube of interest is minout of maxrange and specified scan size
-maxdist = min( max(rangedata_singlemat) , scan.size);
-
-%% Maxangle so that we have numpntsInCube at maxdist
-% $$\begin{array}{l}
-% a=\frac{inc\_size}{numpntsInCube}\\
-% b=c=maxdist \\
-% A=maxangle\\
-% a^2=b^2+c^2-2bc\cos A\\\\
-% maxangle=cos^{-1}\left(1-\left(\frac{inc\_size/numpntsInCube}{\sqrt{2} \times
-% maxdist}\right)^2\right)
-% \end{array}$$
-maxangle=acos(...            
-               1-(...
-                  (workspace.inc_size/numpntsInCube)/(sqrt(2)*maxdist)...%used to be scan.size %%Now it will be AT LEAST scan size but maybe bigger
-                  )^2 ...
-              );
-%% Determine ration of points to use          
-% $$\begin{array}{l}
-% P=(x_{i,j},y_{i,j},z_{i,j})_{(i=1,...,n),(j=1,...,m)}\\\\
-% ratioOfScansToUse=\left|\lfloor \frac{maxangle}{2\theta/m}\rfloor \times
-% \lfloor \frac{maxangle}{2|\alpha|/n} \rfloor\right|
-% \end{array}$$
-ratioOfScansToUse=abs(...
-                    floor(...
-                        maxangle/...  
-                                ((scan.theta*2) / ...
-                                 (size(PointData,2))...
-                                 )...
-                         )...
-                     *...
-                    floor(...
-                        maxangle/...  
-                                 ((abs(tilt_scan_range)*2) / ...
-                                  (size(PointData,1))...
-                                  )...
-                         )...
-                       );
-                   
-%% Make sure we have a ration logically at minimum 1:1
-if ratioOfScansToUse<1; 
-    ratioOfScansToUse=1;
-    % ice_cream_bounds stays the same
-else
-    % Go through the index at a ratio as decided and only use these points
-    indexofScanstoUse=1:ratioOfScansToUse:size(ice_cream_bounds,1);
-    ice_cream_bounds=ice_cream_bounds(indexofScanstoUse,:);
-end
+%% The points we want to trace too
+[totraceto,whichones]=unique(round([ice_cream_bounds;noreturnplaces]/workspace.inc_size)*workspace.inc_size,'rows');
+laser_pos=[laser_pos_ice_cream_bounds;laser_pos_noreturnplaces];
+laser_pos=laser_pos(whichones,:);
 
 %% Setup ray tracing variables
 % Where the laser is at start of scan (used thoughout as origin)
-laser_pos=scan.origin;
+% laser_pos=scan.origin;
 % Min and max cubes
 space_min_and_max=[workspace.min/workspace.inc_size,workspace.max/workspace.inc_size];
 % The cubes that rays pass through
@@ -398,48 +450,48 @@ markedcubes=[];
 % Pe=ice\_cream\_bounds=(x_{j},y_{j},z_{j})_{j=1,2...m}\\
 % \forall m, dist_m=\sqrt{(P_{ex}-P_{sx})^2+(P_{ey}-P_{sy})^2+(P_{ez}-P_{sz})^2}
 % \end{array}$$
-dist=sqrt((laser_pos(1)-ice_cream_bounds(:,1)).^2+...
-          (laser_pos(2)-ice_cream_bounds(:,2)).^2+...
-          (laser_pos(3)-ice_cream_bounds(:,3)).^2);
+dist=sqrt((laser_pos(:,1)-totraceto(:,1)).^2+...
+          (laser_pos(:,2)-totraceto(:,2)).^2+...
+          (laser_pos(:,3)-totraceto(:,3)).^2);
 % the valid distances (greater than 0)
 valid_rows=find(dist);
 
 %% Setup ray tracing discrete check points
 % $$\forall m, tempstarter_m=\frac{Pe_{mx}-Ps_{mx}}{2dist_m/inc\_size}$$
-tempstarter=(ice_cream_bounds(:,1)-laser_pos(1))./(2*dist(:)/workspace.inc_size);
+tempstarter=(totraceto(:,1)-laser_pos(:,1))./(2*dist(:)/workspace.inc_size);
 
 %% Go through each valid row (where dist>0) and ray trace
 for i=[valid_rows]'
 %REPLACE_WITH_DASH_DASH-collum 1
     %check each one of the segements for zero distance and fill with that planes value for inbetweens  
-    if abs(laser_pos(1)-ice_cream_bounds(i,1))<tempstarter(i)
-        tempCOL=[laser_pos(1)*ones([round((2*dist(i)/workspace.inc_size))+1,1])];
+    if abs(laser_pos(i,1)-totraceto(i,1))<tempstarter(i)
+        tempCOL=[laser_pos(i,1)*ones([round((2*dist(i)/workspace.inc_size))+1,1])];
     else
-        tempCOL=[(laser_pos(1):tempstarter(i):ice_cream_bounds(i,1))'];       
+        tempCOL=[(laser_pos(i,1):tempstarter(i):totraceto(i,1))'];       
     end
     inbetweenpoint=[tempCOL,ones([length(tempCOL),2])];
 
 %REPLACE_WITH_DASH_DASH-collum 2
-    if laser_pos(2)==ice_cream_bounds(i,2) || size(inbetweenpoint,1)<=1
-          inbetweenpoint(:,2)=inbetweenpoint(:,2)*laser_pos(2);
+    if laser_pos(i,2)==totraceto(i,2) || size(inbetweenpoint,1)<=1
+          inbetweenpoint(:,2)=inbetweenpoint(:,2)*laser_pos(i,2);
      else
         %since sometimes due to a rounding error dividing it will not be the same, so minus 0.5 off the size and we should get the correct
         %num of rows so concaternation can happen properly
         try 
-            tempCOL(1:end)=(laser_pos(2):(ice_cream_bounds(i,2)-laser_pos(2))/(size(inbetweenpoint,1)-1):ice_cream_bounds(i,2))';
+            tempCOL(1:end)=(laser_pos(i,2):(totraceto(i,2)-laser_pos(i,2))/(size(inbetweenpoint,1)-1):totraceto(i,2))';
         catch; 
-            tempCOL(1:end)=(laser_pos(2):(ice_cream_bounds(i,2)-laser_pos(2))/(size(inbetweenpoint,1)-0.5):ice_cream_bounds(i,2))';
+            tempCOL(1:end)=(laser_pos(i,2):(totraceto(i,2)-laser_pos(i,2))/(size(inbetweenpoint,1)-0.5):totraceto(i,2))';
         end
         inbetweenpoint(:,2)=tempCOL;
     end
 %REPLACE_WITH_DASH_DASH-collum 3    
-    if laser_pos(3)==ice_cream_bounds(i,3) || size(inbetweenpoint,1)<=1
-        inbetweenpoint(:,3)=inbetweenpoint(:,3)*laser_pos(3);
+    if laser_pos(i,3)==totraceto(i,3) || size(inbetweenpoint,1)<=1
+        inbetweenpoint(:,3)=inbetweenpoint(:,3)*laser_pos(i,3);
     else
         try 
-            tempCOL(1:end)=(laser_pos(3):(ice_cream_bounds(i,3)-laser_pos(3))/(size(inbetweenpoint,1)-1):ice_cream_bounds(i,3))';       
+            tempCOL(1:end)=(laser_pos(i,3):(totraceto(i,3)-laser_pos(i,3))/(size(inbetweenpoint,1)-1):totraceto(i,3))';       
         catch; 
-            tempCOL(1:end)=(laser_pos(3):(ice_cream_bounds(i,3)-laser_pos(3))/(size(inbetweenpoint,1)-0.5):ice_cream_bounds(i,3))';       
+            tempCOL(1:end)=(laser_pos(i,3):(totraceto(i,3)-laser_pos(i,3))/(size(inbetweenpoint,1)-0.5):totraceto(i,3))';       
         end
         inbetweenpoint(:,3)=tempCOL;
     end
@@ -481,22 +533,28 @@ if size(markedcubes)>0
     %remove self scanning points (points that are within the joints force fields)
     ice_cream_bounds_NOSELF=remove_self_scanning(ice_cream_bounds);
     
-    indexedobsticles=unique(floor(ice_cream_bounds_NOSELF/workspace.inc_size)*workspace.inc_size,'rows');
+%     indexedobsticles=unique(floor(ice_cream_bounds_NOSELF/workspace.inc_size)*workspace.inc_size,'rows');
+    indexedobsticles=unique(round(ice_cream_bounds_NOSELF/workspace.inc_size)*workspace.inc_size,'rows');
     %also get rid of any indexed points that are within the feilds
     indexedobsticles=remove_self_scanning(indexedobsticles);
 end
 
 %% Timing and Display purposes
-temptime=etime(clock,starttime);
-display (strcat('With ratioOfScansToUse=',num2str(ratioOfScansToUse),', You filled in:',num2str(size(points)),' cubes in: ',num2str(temptime),'secs'));
+% temptime=etime(clock,starttime);
+% display (strcat('You filled in:',num2str(size(points)),' cubes in: ',num2str(temptime),'secs'));
 
 %% Update (indexed) obstacles points global variables
-workspace.obsticlepoints=[workspace.obsticlepoints;ice_cream_bounds_NOSELF];
+% workspace.Nobsticlepoints=[workspace.Nobsticlepoints;ice_cream_bounds_NOSELF];
 % only want unique indexed obsticles
 if size(workspace.indexedobsticles,2)==0
     workspace.indexedobsticles=indexedobsticles;
 else
     workspace.indexedobsticles=union(indexedobsticles,workspace.indexedobsticles,'rows');
+end
+
+%% Remove points that are on a path we have taken
+if size(robot_maxreach.pointcarvedout,1)>0
+    workspace.indexedobsticles=setdiff(workspace.indexedobsticles,robot_maxreach.pointcarvedout,'rows');
 end
 
 %% Fill in the newest knowledge about points
@@ -510,20 +568,38 @@ workspace.knowncoords=setdiff(unique([workspace.knowncoords;points],'rows'),work
 %threeDMedianFilt();
 
 %% Do surface making on obstacle points from this scan 
-try if size(ice_cream_bounds_NOSELF,1)>1
-        surface_making_simple(ice_cream_bounds_NOSELF,workspace.mew);
-    end
+% try if size(ice_cream_bounds_NOSELF,1)>1
+%         surface_making_simple(ice_cream_bounds_NOSELF,workspace.mew);
+%     end
+try if size(workspace.indexedobsticles,1)>1
+        surface_making_simple(workspace.indexedobsticles,workspace.mew);
+    end        
 catch; keyboard; end
 global plane
 
 %% Add to made surface variables
 %this makes a workspace indexed version of the home points
+% for i=1:size(plane,2)
+%    workspace.indexedobsticles_home_point=[workspace.indexedobsticles_home_point;...
+%        floor(plane(i).home_point/workspace.inc_size)*workspace.inc_size];
+%    workspace.indexedobsticles_equ=[workspace.indexedobsticles_equ;plane(i).equ];   
+% end
+
+% Clear it and reset everytime
+workspace.indexedobsticles_home_point=[];
+workspace.indexedobsticles_equ=[];
 for i=1:size(plane,2)
    workspace.indexedobsticles_home_point=[workspace.indexedobsticles_home_point;...
        floor(plane(i).home_point/workspace.inc_size)*workspace.inc_size];
    workspace.indexedobsticles_equ=[workspace.indexedobsticles_equ;plane(i).equ];   
 end
 
+%% Determine the special area 
+try special_map_area();
+catch; display('Some problem with special points');
+    keyboard;
+end    
+% warning on
 ##### SOURCE END #####
 -->
    </body>

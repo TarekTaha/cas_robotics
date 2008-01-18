@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>joint_softlimit_check</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2007-10-10">
+      <meta name="date" content="2008-01-14">
       <meta name="m-file" content="joint_softlimit_check"><style>
 
 body {
@@ -96,6 +96,11 @@ result=true;
 </pre><h2>Check all_steps<a name="3"></a></h2>
          <p><img vspace="5" hspace="5" src="joint_softlimit_check_eq2303460.png"> </p><pre class="codeinput"><span class="keyword">if</span> ~isempty(find(all_steps(:,3)*180/pi&lt;-7/3*all_steps(:,2)*180/pi-130,1))
     result=false;
+    <span class="keyword">return</span>
+<span class="keyword">end</span>
+
+<span class="keyword">if</span> ~isempty(find(all_steps(:,2)*180/pi&gt;90 &amp; all_steps(:,3)*180/pi&gt;90,1))
+    result=false;
 <span class="keyword">end</span>
 </pre><p class="footer"><br>
             Published with MATLAB&reg; 7.4<br></p>
@@ -132,6 +137,11 @@ result=true;
 % \rightarrow & \mbox{ELSE exceeds soft limit(return 0)}
 % \end{array}$$
 if ~isempty(find(all_steps(:,3)*180/pi<-7/3*all_steps(:,2)*180/pi-130,1))
+    result=false;
+    return
+end
+
+if ~isempty(find(all_steps(:,2)*180/pi>90 & all_steps(:,3)*180/pi>90,1))
     result=false;
 end
 ##### SOURCE END #####
