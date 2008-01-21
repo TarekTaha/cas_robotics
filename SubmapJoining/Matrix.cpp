@@ -2,8 +2,8 @@
 #include "Matrix.h"
 
 Matrix::Matrix(int rows, int columns){
-  if(rows > 100 || columns > 100)
-    throw MatrixException("Error in Matrix(int,int): matrices with more than 100 rows or columns are not handeled");
+  if(rows > 200 || columns > 200)
+    throw MatrixException("Error in Matrix(int,int): matrices with more than 200 rows or columns are not handeled");
 
   this->rows = rows,
   this->columns = columns;
@@ -19,8 +19,8 @@ Matrix::Matrix(const Matrix& m){
   rows = m.rows;
   columns = m.columns;
 
-  if(rows > 100 || columns > 100)
-    throw MatrixException("Error in Matrix(const Matrix&): matrices with more than 100 rows or columns are not handeled");
+  if(rows > 200 || columns > 200)
+    throw MatrixException("Error in Matrix(const Matrix&): matrices with more than 200 rows or columns are not handeled");
 
   for(int i = 1; i <= m.rows; ++i){
     for(int j = 1; j <= m.columns; ++j){
@@ -33,8 +33,8 @@ Matrix& Matrix::operator=(const Matrix& m){
   rows = m.rows;
   columns = m.columns;
 
-  if(rows > 100 || columns > 100)
-    throw MatrixException("Error in Matrix(const Matrix&): matrices with more than 100 rows or columns are not handeled");
+  if(rows > 200 || columns > 200)
+    throw MatrixException("Error in Matrix(const Matrix&): matrices with more than 200 rows or columns are not handeled");
 
   for(int i = 1; i <= m.rows; ++i){
     for(int j = 1; j <= m.columns; ++j){
@@ -103,7 +103,7 @@ int Matrix::get_columns() const{
 }
 
 void Matrix::print() const{
-  cout.precision(20);
+  cout.precision(30);
   for(int i = 0; i < rows; ++i){
     cout << "[";
     for(int j = 0; j < columns; ++j){
@@ -306,15 +306,15 @@ bool operator==(const Matrix& m1, const Matrix& m2){
 
 void Matrix::add_rows(int num){
   rows += num;
-  if(rows > 100 || columns > 100)
-    throw MatrixException("Error in add_rows(int): matrices with more than 100 rows or columns are not handeled");
+  if(rows > 200 || columns > 200)
+    throw MatrixException("Error in add_rows(int): matrices with more than 200 rows or columns are not handeled");
 
 }
 
 void Matrix::add_columns(int num){
   columns += num;
-  if(rows > 100 || columns > 100)
-    throw MatrixException("Error in add_columns(int): matrices with more than 100 rows or columns are not handeled");
+  if(rows > 200 || columns > 200)
+    throw MatrixException("Error in add_columns(int): matrices with more than 200 rows or columns are not handeled");
 }
 
 void Matrix::delete_rows(int from_row, int to_row){
@@ -430,9 +430,10 @@ double det(const Matrix& m){
   return sum;
 }
 
-void Matrix::write_to_file(const char* filename){
+void Matrix::write_to_file(const char* filename) const{
   ofstream file;
   file.open(filename);
+  file.precision(30);
   for(int i = 0; i < rows; ++i){
     for(int j = 0; j < columns; ++j){
       if(j != 0)
@@ -449,10 +450,10 @@ void Matrix::read_from_file(const char* filename){
 	double read_double;
 	char c;
 	ifstream file(filename);
+	file.precision(100);
 
 	while(!file.eof() && file.peek() != -1){
-		file >> read_double;
-		values[row_count][col_count] = read_double;
+		file >> values[row_count][col_count];
 		file.get(c);
 		++col_count;
 		if(c == '\n'){
@@ -463,6 +464,8 @@ void Matrix::read_from_file(const char* filename){
 	}
 	rows = row_count;
 	file.close();
+	
+	
 }
 
 double max_eig(const Matrix& m){

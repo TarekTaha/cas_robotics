@@ -13,3 +13,6 @@ SparseMatrix cholesky(SparseSymmMatrix m);
 SparseMatrix solve_cholesky(const SparseMatrix& L, SparseMatrix rhs);
 SparseMatrix operator*(const SparseMatrix& spa, const Matrix& denc);
 Matrix operator+(Matrix denc, const SparseMatrix& spa);
+
+SparseMatrix extract_sub_matrix(SparseSymmMatrix& m, int from_row, int from_col, int to_row, int to_col);
+void set(SparseSymmMatrix& set_m, int row, int col, const SparseMatrix& m);

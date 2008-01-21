@@ -22,14 +22,31 @@ int main(int argc, char * argv[])
 	MapFuser fuser;
 	LocalMap locMap;
 	load_map(locMap, 1);
+	locMap.P.write_to_file("SavedMatrices/Ploc");
 	fuser.fuse_first_map(locMap);
-	for(int i = 2; i <= 26; ++i){
+	for(int i = 2; i <= 40; ++i){
 		cout << "localmap: " << i <<endl;
 		load_map(locMap, i);
+		to_sparse_symm_matrix(locMap.P).write_to_file("SavedMatrices/Ploc");
 		fuser.fuse_map(locMap);
+		if(i == 27){
+			fuser.reorder_submaps();
+			fuser.glb_map.I.write_to_file("SavedMatrices/Ireord");
+			fuser.glb_map.i.write_to_file("SavedMatrices/ireord");
+		}
 	}
-	fuser.glb_map.I.write_to_file("SavedMatrices/I");
+	//fuser.glb_map.I.write_to_file("SavedMatrices/I");
+	//fuser.glb_map.i.write_to_file("SavedMatrices/i");
 	cout << "done fusing" << endl;
+
+	typedef std::numeric_limits< long double > dl;
+	typedef std::numeric_limits< float > fl;
+
+	using namespace std;
+
+	cout << "double:\n";
+	cout << "\tdigits (bits):\t\t" << dl::digits << endl;
+	cout << "\tdigits (decimal):\t" << dl::digits10 << endl;
 
 	return 1;
 }
