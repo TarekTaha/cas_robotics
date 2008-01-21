@@ -4,6 +4,7 @@
 #include <iostream.h>
 #include "SparseMatrixElement.h"
 #include "MatrixException.h"
+#include <fstream>
 
 class SparseMatrix{
   public:
@@ -21,6 +22,7 @@ class SparseMatrix{
     void print() const;
     void print_coord_format() const;
     void remove_all_elements();
+    void write_to_file(const char* filename);
     //void print();
     //void print_plain();
 };

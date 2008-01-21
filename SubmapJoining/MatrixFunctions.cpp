@@ -41,11 +41,13 @@ SparseMatrix to_sparse_matrix(const Matrix& m){
 }
 
 SparseSymmMatrix to_sparse_symm_matrix(const Matrix& m){
+
   SparseSymmMatrix result(m.rows, m.columns);
   for(int i = 0; i < m.rows; ++i){
-    for(int j = 0; j < i + 1; ++j){
-      if(m.values[i][j])
-        result.set(i + 1,j + 1, m.values[i][j]); 
+    for(int j = i; j < m.rows; ++j){
+      if(m.values[i][j]){
+        result.set(i + 1,j + 1, m.values[i][j]);
+      }
     }
   }
   return result;
@@ -170,4 +172,24 @@ Matrix operator+(Matrix denc, const SparseMatrix& spa){
 		}
 	}
 	return denc;
+}
+
+SparseMatrix extract_sub_matrix(SparseSymmMatrix& m, int from_row, int from_col, int to_row, int to_col){
+	SparseMatrix result(to_row - from_row + 1, to_col - from_col + 1);
+	for(int i = 1; i <= result.rows; ++i){
+		m.extract_sub_segment(from_row - 1 + i, from_col, to_col, &result.first_in_row[i], 0, -from_row + 1, -from_col + 1);
+	}
+	//result.print();
+	return result;
+}
+
+void set(SparseSymmMatrix& set_m, int row, int col, const SparseMatrix& m){
+	SparseMatrixElement *row_ptr;
+	for(int i = 1; i <= m.rows; ++i){
+		row_ptr = m.first_in_row[i];
+		while(row_ptr){
+			set_m.set(i + row - 1, col + row_ptr->col - 1, row_ptr->value);
+			row_ptr = row_ptr->next_in_row;
+		}
+	}
 }

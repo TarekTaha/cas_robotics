@@ -164,6 +164,7 @@ void SparseSymmMatrix::remove_all_elements(){
 
 void SparseSymmMatrix::print() const{
 	cout << "Symmetry matrix" << endl;
+	cout.precision(20);
 	SparseMatrixElement *row_ptr;
 	int last_col;
 	for(int i = 1; i <= rows; ++i){
@@ -233,6 +234,7 @@ double SparseSymmMatrix::get(int row, int column){
 void SparseSymmMatrix::write_to_file(const char* filename){
   ofstream file;
   file.open(filename);
+  file.precision(30);
   for(int i = 1; i <= rows; ++i){
     for(int j = 1; j <= cols; ++j){
       if(j != 1)
@@ -243,3 +245,65 @@ void SparseSymmMatrix::write_to_file(const char* filename){
   }
   file.close();
 }
+
+void SparseSymmMatrix::extract_sub_segment(int row, int from_col, int to_col, SparseMatrixElement **start, SparseMatrixElement *end, int row_num_change, int col_num_change){
+	//cout << "Extract: " << row << " " << from_col << " " << to_col << " " << col_num_change << endl;
+	SparseMatrixElement *row_ptr;
+	SparseMatrixElement *last_row_ptr;
+	SparseMatrixElement *cut_row_ptr;
+	row_ptr = first_in_row[row];
+	last_row_ptr = row_ptr;
+	if(!row_ptr){
+		*start = end;
+		return;
+	}
+
+	//cout << "Col: " << row_ptr->col <<  " " << row_ptr->value << endl;
+	if(row_ptr->col >= from_col){
+		if(row_ptr->col > to_col){
+			*start = end;
+			return;
+		}
+		*start = row_ptr;
+		while(row_ptr){
+			if(row_ptr->col > to_col){
+				break;
+			}
+			row_ptr->row += row_num_change;
+			row_ptr->col += col_num_change;
+			last_row_ptr = row_ptr;
+			row_ptr = row_ptr->next_in_row;
+		}
+		first_in_row[row] = row_ptr;
+		last_row_ptr->next_in_row = end;
+	}
+	else{
+		while(row_ptr){
+			if(row_ptr->col >= from_col){
+				break;
+			}
+			last_row_ptr = row_ptr;
+			row_ptr = row_ptr->next_in_row;
+		}
+		cut_row_ptr = last_row_ptr;
+		if(row_ptr){
+			if(row_ptr->col > to_col){
+				*start = end;
+				return;
+			}
+			*start = row_ptr;
+		}
+		while(row_ptr){
+			if(row_ptr->col > to_col){
+				break;
+			}
+			row_ptr->row += row_num_change;
+			row_ptr->col += col_num_change;
+			last_row_ptr = row_ptr;
+			row_ptr = row_ptr->next_in_row;
+		}
+		cut_row_ptr->next_in_row = row_ptr;
+		last_row_ptr->next_in_row = end;
+	}
+}
+

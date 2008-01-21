@@ -22,6 +22,7 @@ class SparseSymmMatrix{
     void print() const;
     void remove_all_elements();
     void write_to_file(const char* filename);
+    void extract_sub_segment(int row, int from_col, int to_col, SparseMatrixElement **start, SparseMatrixElement *end,  int row_num_change, int col_num_change);
     //void print();
     //void print_plain();
 };

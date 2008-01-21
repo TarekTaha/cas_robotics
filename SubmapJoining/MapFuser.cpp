@@ -2,18 +2,188 @@
 
 MapFuser::MapFuser(){}
 
+double MapFuser::wrap(double angle){
+	double PI = 3.14159265358979;
+	while(angle < PI){
+		angle += 2*PI;
+	}
+	while(angle > PI){
+		angle -= 2*PI;
+	}
+	return angle;
+}
+
+void MapFuser::reorder_submaps(){
+	double dist[1000];
+	int order[1000];
+	int temp_index;
+	double temp_dist;
+	int temp_order;
+
+	for(int i = 0; i < num_submaps; ++i){
+		dist[i] = distance_to_submap(i);
+		order[i] = i;
+	}
+	for(int i = 0; i < num_submaps; ++i){
+		cout << dist[i] << " ";
+	}
+	cout << endl;
+	for(int i = 0; i < num_submaps; ++i){
+		cout << order[i] << " ";
+	}
+	cout << endl;
+	
+	for(int i = 0; i < num_submaps; ++i){
+		temp_dist = dist[i];
+		temp_index = i;
+		for(int j = i + 1; j < num_submaps; ++j){
+			if(dist[j] > temp_dist){
+				temp_dist = dist[j];
+				temp_index = j;
+			}
+		}
+		temp_order = order[temp_index];
+		temp_dist = dist[temp_index];
+		for(int j = temp_index; j > i; --j){
+			dist[j] = dist[j - 1];
+			order[j] = order[j - 1];
+		}
+		order[i] = temp_order;
+		dist[i] = temp_dist;
+	}
+
+	for(int i = 0; i < num_submaps; ++i){
+		cout << dist[i] << " ";
+	}
+	cout << endl;
+	for(int i = 0; i < num_submaps; ++i){
+		cout << order[i] << " ";
+	}
+	cout << endl;
+	
+	// reorder I
+	SparseSymmMatrix temp(glb_map.I.rows, glb_map.I.cols);
+	SparseMatrixElement *row_ptr;
+	int set_row = 0;
+	int to_row, from_row, to_col, from_col;
+	int submap1_index, submap2_index;
+	int col_num;
+	int row_num = 1;
+	SparseMatrix temp_sparse;
+	for(int i = 0; i < num_submaps; ++i){
+		col_num = glb_map.I.cols + 1;
+		for(int j = num_submaps - 1; j >= i; --j){
+			col_num -= 2 * num_beacons_in_submap[order[j]] + 3;
+			submap1_index = index_of_submap[order[i]];
+			submap2_index = index_of_submap[order[j]];
+			if(submap1_index > submap2_index){
+				from_row = submap2_index;
+				to_row = submap2_index + 2 * num_beacons_in_submap[order[j]] + 2;
+				from_col = submap1_index;
+				to_col = submap1_index + 2 * num_beacons_in_submap[order[i]] + 2;
+				temp_sparse = extract_sub_matrix(glb_map.I, from_row, from_col, to_row, to_col);
+				set(temp, row_num, col_num, trn(temp_sparse));
+			}
+			else{
+				from_row = submap1_index;
+				to_row = submap1_index + 2 * num_beacons_in_submap[order[i]] + 2;
+				from_col = submap2_index;
+				to_col = submap2_index + 2 * num_beacons_in_submap[order[j]] + 2;
+				temp_sparse = extract_sub_matrix(glb_map.I, from_row, from_col, to_row, to_col);
+				set(temp, row_num, col_num, temp_sparse);
+			}
+		}
+		row_num += 2 * num_beacons_in_submap[order[i]] + 3;
+	}
+	glb_map.I = temp;
+	
+	glb_map.i.write_to_file("SavedMatrices/ibr");
+	temp_sparse.remove_all_elements();
+	temp_sparse.rows = glb_map.i.rows;
+	temp_sparse.cols = 1;
+	
+	//reorder i
+	col_num = 1;
+	for(int i = 0; i < num_submaps; ++i){
+		submap1_index = index_of_submap[order[i]];
+		from_col = submap1_index;
+		to_col = submap1_index + 2 * num_beacons_in_submap[order[i]] + 2;
+		for(int j = from_col; j <= to_col; ++j){
+			temp_sparse.set(col_num, 1, glb_map.i.get(j, 1));
+			++col_num;
+		}
+	}
+	glb_map.i = temp_sparse;
+	glb_map.i.write_to_file("SavedMatrices/iar");
+	
+	//reorder X
+	temp_sparse.remove_all_elements();
+	temp_sparse.rows = glb_map.X.rows;
+	temp_sparse.cols = 1;
+	col_num = 1;
+	for(int i = 0; i < num_submaps; ++i){
+		submap1_index = index_of_submap[order[i]];
+		from_col = submap1_index;
+		to_col = submap1_index + 2 * num_beacons_in_submap[order[i]] + 2;
+		for(int j = from_col; j <= to_col; ++j){
+			temp_sparse.set(col_num, 1, glb_map.X.get(j, 1));
+			++col_num;
+		}
+	}
+	glb_map.X = temp_sparse;
+	glb_map.X.write_to_file("SavedMatrices/Xar");
+	
+	cout << "index before" << endl;
+	for(int i = 0; i < num_submaps; ++i){
+		cout << index_of_submap[i] << " ";
+	}
+	cout << endl;
+	for(int i = 0; i < num_beacons; ++i){
+		cout << place_of_beacon[i] << " ";
+	}
+	cout << endl;
+	int index = 1;
+	int index_diff;
+	//int index_of_submap[1000];
+	//int place_of_beacon[10000];
+	for(int i = 0; i < num_submaps; ++i){
+		index_diff = index_of_submap[order[i]] - index;
+		index_of_submap[order[i]] -= index_diff; 
+		for(int j = submaps_first_beacon[order[i]]; j < submaps_first_beacon[order[i]] + num_beacons_in_submap[order[i]]; ++j){
+			place_of_beacon[j] -= index_diff;
+		}
+		index += 2 * num_beacons_in_submap[order[i]] + 3;
+	}
+	
+	cout << "index after" << endl;
+	for(int i = 0; i < num_submaps; ++i){
+		cout << index_of_submap[i] << " ";
+	}
+	cout << endl;
+	for(int i = 0; i < num_beacons; ++i){
+		cout << place_of_beacon[i] << " ";
+	}
+	cout << endl;
+}
+
 double MapFuser::distance_to_submap(int map){
+	//cout << "dist start" << endl;
 	double rx = glb_map.X.get( glb_map.X.rows - 2, 1);
 	double ry = glb_map.X.get( glb_map.X.rows - 1, 1);
+	//cout << "dist1" << endl;
 	double mx, my;
 	if(map == 0){
 		mx = 0;
 		my = 0;
 	}
 	else{
-		mx = glb_map.X.get( place_of_beacon[ submaps_first_beacon[map]] - 3 , 1);
-		my = glb_map.X.get( place_of_beacon[ submaps_first_beacon[map]] - 2, 1);
+		//cout << "dist2" << endl;
+		//cout << "index" <<  index_of_submap[map] << endl;
+		mx = glb_map.X.get( index_of_submap[map - 1] + 2 * num_beacons_in_submap[map - 1] , 1);
+		my = glb_map.X.get(index_of_submap[map - 1] + 2 * num_beacons_in_submap[map - 1] + 1, 1);
+		//cout << "dist3" << endl;
 	}
+	//cout << "dist end" << endl;
 	return sqrt((rx - mx) * (rx - mx) + (ry - my) * (ry - my)); 
 }
 
@@ -22,19 +192,21 @@ void MapFuser::set_potential_assosiations(){ //const Matrix& P_glb_robot, const 
 	double glb_rob_uncertanty = 0;//max_eig(sqrt(P_glb_robot));
 	double loc_rob_uncertanty = 0;//max_eig(sqrt(P_loc_robot));
 	for(int i = 0; i < num_submaps; ++i){
+		//cout << "here pot1" << endl;
 		//cout << "i: " << i << " " << distance_to_submap(i)<< "  "<< radius_of_submap[i] << " " <<  radius_of_submap[num_submaps] <<   global_robot_uncertainty[num_submaps - 1] << " " <<  global_robot_uncertainty[i]<< " " << local_robot_uncertainty[num_submaps - 1] << endl;
 		if(distance_to_submap(i) < radius_of_submap[i] + radius_of_submap[num_submaps] + global_robot_uncertainty[num_submaps - 1]+ global_robot_uncertainty[i] + local_robot_uncertainty[num_submaps - 1] + 3){
 			//cout << "Submap " << i << " is in " << num_beacons_in_submap[i] << endl;
 			for(int j = 0; j < num_beacons_in_submap[i]; ++j){
-				cout << "setting potential: " << submaps_first_beacon[i] + j << endl;
+				//cout << "here pot2" << endl;
+				//cout << "setting potential: " << submaps_first_beacon[i] + j << endl;
 				potential_assosiation_beacons[num_potential_assosiations] = submaps_first_beacon[i] + j;
 				++num_potential_assosiations;
 			}
 		}
 	}
-	cout << "potentiella" << endl;
+	//cout << "potentiella" << endl;
 	for(int i = 0; i < num_potential_assosiations; ++i){
-		cout << potential_assosiation_beacons[i] << endl;
+		//cout << potential_assosiation_beacons[i] << endl;
 	}
 	/*for(int i = 0; i <= num_beacons; ++i){
 		potential_assosiation_beacons[i] = i;
@@ -110,28 +282,34 @@ void MapFuser::fuse_map(LocalMap m){
 		m.P.values[2][2] += 1e-8;
 	}
 	radius_of_submap[num_submaps] = submap_radius(m);
-	
+	//cout << "here1" << endl;
 	Matrix obsP = m.P.get_sub_matrix(4,4, m.P.rows, m.P.columns);
+	//cout << "here1.1" << endl;
 	Matrix obsX = m.X.get_sub_matrix(4, 1, m.X.rows, 1);
+	//cout << "here1.2" << endl;
 	set_potential_assosiations();
 	
+	//cout << "here2" << endl;
 	Matrix P = restore_part_of_P_for_assositation();
 	global_robot_uncertainty[num_submaps] = 3 * max_eig(sqrt(P.get_sub_matrix(1, 1, 2, 2)));
 	local_robot_uncertainty[num_submaps] = 3 * max_eig(sqrt(m.P.get_sub_matrix(1, 1, 2, 2)));
-	P.get_sub_matrix( 1, 1,2, 2).print();
+	//P.get_sub_matrix( 1, 1,2, 2).print();
+	//cout << "here3" << endl;
 	Matrix X = get_part_of_X_for_assositation();
+
 
 	Matrix beacP = trans_cov_matrix_to_local_cordinate_system(P,X);
 	Matrix beacX = trans_state_matrix_to_local_cordinate_system(X);
-	//beacP.write_to_file("SavedMatrices/beacP");
-	//beacX.write_to_file("SavedMatrices/beacX");
-	//obsP.write_to_file("SavedMatrices/obsP");
-	//obsX.write_to_file("SavedMatrices/obsX");
+	beacP.write_to_file("SavedMatrices/beacP");
+	beacX.write_to_file("SavedMatrices/beacX");
+	obsP.write_to_file("SavedMatrices/obsP");
+	obsX.write_to_file("SavedMatrices/obsX");
 	assosiate_beacons(beacX, beacP, obsX, obsP);
 	add_new_beacons_and_robot_location_to_state(m.X);
-	//to_dence_matrix(glb_map.X).write_to_file("SavedMatrices/glbX");
+	glb_map.X.write_to_file("SavedMatrices/glbX");
 	
 	update_map(m.X, m.P);
+	
 }
 
 void MapFuser::fuse_first_map(LocalMap m){
@@ -174,6 +352,12 @@ void MapFuser::fuse_first_map(LocalMap m){
 		m.P.values[i][m.P.columns - 2] = temp2;
 		m.P.values[i][m.P.columns - 1] = temp3;
 	}
+	//m.P.print();
+	m.P.write_to_file("SavedMatrices/updP");
+	inv(m.P).write_to_file("SavedMatrices/updPinv");
+	//(inv(m.P) - inv(inv(inv(inv(inv(m.P)))))).print();
+	inv(inv(inv(inv(inv(inv(inv(m.P))))))).write_to_file("SavedMatrices/updPsinv");
+	m.X.write_to_file("SavedMatrices/X");
     glb_map.I = to_sparse_symm_matrix(inv(m.P));
     glb_map.i = to_sparse_matrix(inv(m.P)* m.X);
     glb_map.L = cholesky(glb_map.I);
@@ -185,6 +369,7 @@ void MapFuser::fuse_first_map(LocalMap m){
     for(int i = 0; i <= num_beacons; ++i){
     	place_of_beacon[i] = 2 * i + 1;
     }
+    index_of_submap[0] = 1;
     submaps_first_beacon[0] = 0;
     global_robot_uncertainty[0] = 0;
 }
@@ -270,11 +455,11 @@ void MapFuser::assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const
 	        }
 	    }
 	}
-	cout << "Matches: "<<endl;
+	//cout << "Matches: "<<endl;
 	for(int j = 0; j < num_obs; ++j){
 		if(assosiations[j] >= 0)
 			assosiations[j] = potential_assosiation_beacons[assosiations[j]];
-		cout << assosiations[j] << endl;
+		//cout << assosiations[j] << endl;
 	}
 }
 
@@ -287,7 +472,7 @@ void MapFuser::add_new_beacons_and_robot_location_to_state(const Matrix& obsX){
 	double yj;
 	
 	submaps_first_beacon[num_submaps] = num_beacons;
-
+	index_of_submap[num_submaps] = glb_map.X.rows + 1;
 	num_beacons_in_submap[num_submaps] = 0;
 	for(int i = 0; i < num_obs; ++i){
 		if(assosiations[i] == -100){
@@ -316,7 +501,11 @@ void MapFuser::add_new_beacons_and_robot_location_to_state(const Matrix& obsX){
 	double fir2 = obsX.get(3, 1);
 	glb_map.X.set(glb_map.X.rows - 2, 1, xr1 + xr2 * cos(fir1) - yr2 * sin(fir1));
 	glb_map.X.set(glb_map.X.rows - 1, 1, yr1 + yr2 * cos(fir1) + xr2 * sin(fir1));
-	glb_map.X.set(glb_map.X.rows	, 1, fir1 + fir2);
+	
+
+	glb_map.X.set(glb_map.X.rows	, 1, wrap(fir1 + fir2));
+
+	
 	
 	++num_submaps;
 }
@@ -381,19 +570,28 @@ void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
 			H.set(2 * i + 5, 1, -(xi - xr1) * sin(fir1) + (yi - yr1) * cos(fir1));
 		//}
 	}
-	//to_dence_matrix(jh).write_to_file("SavedMatrices/jh");
-	//H.write_to_file("SavedMatrices/H");
-	
+	//cout << "here1" << endl;
+	jh.write_to_file("SavedMatrices/jh");
+	//cout << "here2" << endl;
+	H.write_to_file("SavedMatrices/H");
+	glb_map.X.write_to_file("SavedMatrices/X");
+	obsX.write_to_file("SavedMatrices/obsX");
+	glb_map.i.write_to_file("SavedMatrices/iInnan");
 	//cout << "rows/cols " << glb_map.I.rows << "/" << glb_map.I.cols << endl;
-	cout << "here1" << endl;
-	glb_map.I = glb_map.I + to_sparse_symm_matrix(trn(jh) * inv(obsP) * jh);
-	cout << "here2" << endl;
-	glb_map.i = glb_map.i + trn(jh) * inv(obsP) * (obsX - H + jh * glb_map.X);
-	//to_dence_matrix(glb_map.I).write_to_file("SavedMatrices/I");
-	//to_dence_matrix(glb_map.i).write_to_file("SavedMatrices/i");
-	glb_map.L = cholesky(glb_map.I);
-	glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
 
+	glb_map.I = glb_map.I + to_sparse_symm_matrix(trn(jh) * inv(obsP) * jh);
+	//cout << "here2" << endl;
+	Matrix z = obsX - H;
+	z.set(3, 1, wrap(z.get(3,1)));
+	glb_map.i = glb_map.i + trn(jh) * inv(obsP) * (z + jh * glb_map.X);
+	glb_map.I.write_to_file("SavedMatrices/I");
+	glb_map.i.write_to_file("SavedMatrices/i");
+	glb_map.L = cholesky(glb_map.I);
+	//glb_map.X.print();
+	glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
+	//cout << endl << endl;
+	//glb_map.X.print();
+	glb_map.X.write_to_file("SavedMatrices/Xaft");
 }
 
 double MapFuser::submap_radius(const LocalMap& map){

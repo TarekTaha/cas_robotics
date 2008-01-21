@@ -22,7 +22,7 @@ class Matrix{
     Matrix& operator+=(const Matrix&);
     Matrix& operator-=(const Matrix&);
 
-    void write_to_file(const char* filename);
+    void write_to_file(const char* filename) const;
     void read_from_file(const char* filename);
     
     void set(int row, int column, double value);
@@ -51,7 +51,7 @@ class Matrix{
     int get_columns() const;
 
   //protected:
-    double values[100][100];
+    double values[200][200];
     int rows;
     int columns;
     void swap_rows(int row1, int row2);

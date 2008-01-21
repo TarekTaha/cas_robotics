@@ -78,6 +78,7 @@ double SparseMatrix::get(int row, int column){
 		 if(row_ptr->col > column){
 			 return 0;
 		 }
+		 row_ptr = row_ptr->next_in_row;
 	 }
 	 return 0;
 }
@@ -312,4 +313,19 @@ SparseMatrix trn(const SparseMatrix& m){
 		row_ptr = row_ptr->next_in_row;
 	}*/
 	return result;
+}
+
+void SparseMatrix::write_to_file(const char* filename){
+  ofstream file;
+  file.open(filename);
+  file.precision(30);
+  for(int i = 1; i <= rows; ++i){
+    for(int j = 1; j <= cols; ++j){
+      if(j != 1)
+        file << ",";
+      file << get(i,j);
+    }
+    file << endl;
+  }
+  file.close();
 }
