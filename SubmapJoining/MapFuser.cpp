@@ -1,6 +1,34 @@
 #include "MapFuser.h"
 
-MapFuser::MapFuser(){}
+MapFuser::MapFuser(){
+	num_elements_updated_in_I = 0;
+}
+
+void MapFuser::compute_cholesky_factorization(){
+	part_cholesky(glb_map.L, glb_map.I, num_elements_updated_in_I);
+	//cout << glb_map.I.rows - num_elements_updated_in_I << endl;
+	//SparseMatrix chol_new;
+	/*for(int i = 1; i <=num_elements_updated_in_I; ++i){
+		new_I.first_in_row[i] = glb_map.I.first_in_row[glb_map.I.rows - num_elements_updated_in_I + i];
+	}
+	cout << "glb_map" << endl;
+	glb_map.I.print();
+	cout << "new_I" << endl;
+	new_I.print();*/
+	/*chol_new = cholesky(glb_map.I, glb_map.I.rows - num_elements_updated_in_I);
+	for(int i = glb_map.I.rows - num_elements_updated_in_I; i <=glb_map.I.rows; ++i){
+		//memmory leak!!
+		glb_map.L.first_in_row[i] = chol_new.first_in_row[i];
+		chol_new.first_in_row[i] = 0;
+	}
+	glb_map.L.rows = glb_map.I.rows;
+	glb_map.L.cols = glb_map.I.cols;
+	
+	cout << "Cholesky" << endl;
+	glb_map.L.print();
+	cout << "should be" << endl;
+	(cholesky(glb_map.I, 1)).print();*/
+}
 
 double MapFuser::wrap(double angle){
 	double PI = 3.14159265358979;
@@ -97,10 +125,9 @@ void MapFuser::reorder_submaps(){
 	}
 	glb_map.I = temp;
 	
-	glb_map.i.write_to_file("SavedMatrices/ibr");
-	temp_sparse.remove_all_elements();
-	temp_sparse.rows = glb_map.i.rows;
-	temp_sparse.cols = 1;
+	//glb_map.i.write_to_file("SavedMatrices/ibr");
+
+	SparseMatrix temp_i(glb_map.i.rows, 1);
 	
 	//reorder i
 	col_num = 1;
@@ -109,29 +136,30 @@ void MapFuser::reorder_submaps(){
 		from_col = submap1_index;
 		to_col = submap1_index + 2 * num_beacons_in_submap[order[i]] + 2;
 		for(int j = from_col; j <= to_col; ++j){
-			temp_sparse.set(col_num, 1, glb_map.i.get(j, 1));
+			cout << "Set: " << col_num << " " <<glb_map.i.get(j, 1) << endl;
+			temp_i.set(col_num, 1, glb_map.i.get(j, 1));
+			cout << "after set" << endl;
 			++col_num;
 		}
 	}
-	glb_map.i = temp_sparse;
-	glb_map.i.write_to_file("SavedMatrices/iar");
+	glb_map.i = temp_i;
+	//glb_map.i.write_to_file("SavedMatrices/iar");
 	
 	//reorder X
-	temp_sparse.remove_all_elements();
-	temp_sparse.rows = glb_map.X.rows;
-	temp_sparse.cols = 1;
+	SparseMatrix temp_X(glb_map.X.rows, 1);
+
 	col_num = 1;
 	for(int i = 0; i < num_submaps; ++i){
 		submap1_index = index_of_submap[order[i]];
 		from_col = submap1_index;
 		to_col = submap1_index + 2 * num_beacons_in_submap[order[i]] + 2;
 		for(int j = from_col; j <= to_col; ++j){
-			temp_sparse.set(col_num, 1, glb_map.X.get(j, 1));
+			temp_X.set(col_num, 1, glb_map.X.get(j, 1));
 			++col_num;
 		}
 	}
-	glb_map.X = temp_sparse;
-	glb_map.X.write_to_file("SavedMatrices/Xar");
+	glb_map.X = temp_X;
+	//glb_map.X.write_to_file("SavedMatrices/Xar");
 	
 	cout << "index before" << endl;
 	for(int i = 0; i < num_submaps; ++i){
@@ -168,6 +196,9 @@ void MapFuser::reorder_submaps(){
 
 double MapFuser::distance_to_submap(int map){
 	//cout << "dist start" << endl;
+	if(map == num_submaps - 1){
+		return 0;
+	}
 	double rx = glb_map.X.get( glb_map.X.rows - 2, 1);
 	double ry = glb_map.X.get( glb_map.X.rows - 1, 1);
 	//cout << "dist1" << endl;
@@ -183,24 +214,34 @@ double MapFuser::distance_to_submap(int map){
 		my = glb_map.X.get(index_of_submap[map - 1] + 2 * num_beacons_in_submap[map - 1] + 1, 1);
 		//cout << "dist3" << endl;
 	}
-	//cout << "dist end" << endl;
 	return sqrt((rx - mx) * (rx - mx) + (ry - my) * (ry - my)); 
 }
 
 void MapFuser::set_potential_assosiations(){ //const Matrix& P_glb_robot, const Matrix& P_loc_robot){
 	num_potential_assosiations = 0;
+	double x_beac, y_beac, dist_beac;
+	double rx = glb_map.X.get( glb_map.X.rows - 2, 1);
+	double ry = glb_map.X.get( glb_map.X.rows - 1, 1);
 	double glb_rob_uncertanty = 0;//max_eig(sqrt(P_glb_robot));
 	double loc_rob_uncertanty = 0;//max_eig(sqrt(P_loc_robot));
 	for(int i = 0; i < num_submaps; ++i){
 		//cout << "here pot1" << endl;
-		//cout << "i: " << i << " " << distance_to_submap(i)<< "  "<< radius_of_submap[i] << " " <<  radius_of_submap[num_submaps] <<   global_robot_uncertainty[num_submaps - 1] << " " <<  global_robot_uncertainty[i]<< " " << local_robot_uncertainty[num_submaps - 1] << endl;
+		//cout << "i: " << i << " " << " start beac: " << submaps_first_beacon[i] << " num beac: " << num_beacons_in_submap[i] << " " << distance_to_submap(i)<< "  "<< radius_of_submap[i] << " " <<  radius_of_submap[num_submaps] <<   global_robot_uncertainty[num_submaps - 1] << " " <<  global_robot_uncertainty[i]<< " " << local_robot_uncertainty[num_submaps - 1] << endl;
 		if(distance_to_submap(i) < radius_of_submap[i] + radius_of_submap[num_submaps] + global_robot_uncertainty[num_submaps - 1]+ global_robot_uncertainty[i] + local_robot_uncertainty[num_submaps - 1] + 3){
+			//cout << "i: " << i << " index: " << index_of_submap[i] << " " << index_of_submap[i] + 2 * num_beacons_in_submap[i] - 1 << endl;
 			//cout << "Submap " << i << " is in " << num_beacons_in_submap[i] << endl;
 			for(int j = 0; j < num_beacons_in_submap[i]; ++j){
+		        x_beac= glb_map.X.get(place_of_beacon[ submaps_first_beacon[i] + j], 1);
+		        y_beac= glb_map.X.get(place_of_beacon[ submaps_first_beacon[i] + j] + 1, 1);     
+		        dist_beac = sqrt((x_beac - rx) * (x_beac - rx) + (y_beac - ry) * (y_beac - ry));
+		        
+		        if(dist_beac < radius_of_submap[num_submaps] + 3){
+					potential_assosiation_beacons[num_potential_assosiations] = submaps_first_beacon[i] + j;
+					++num_potential_assosiations;
+		        }
 				//cout << "here pot2" << endl;
 				//cout << "setting potential: " << submaps_first_beacon[i] + j << endl;
-				potential_assosiation_beacons[num_potential_assosiations] = submaps_first_beacon[i] + j;
-				++num_potential_assosiations;
+
 			}
 		}
 	}
@@ -300,15 +341,36 @@ void MapFuser::fuse_map(LocalMap m){
 
 	Matrix beacP = trans_cov_matrix_to_local_cordinate_system(P,X);
 	Matrix beacX = trans_state_matrix_to_local_cordinate_system(X);
-	beacP.write_to_file("SavedMatrices/beacP");
-	beacX.write_to_file("SavedMatrices/beacX");
-	obsP.write_to_file("SavedMatrices/obsP");
-	obsX.write_to_file("SavedMatrices/obsX");
+	//cout << "BeacX" << endl;
+	//beacX.print();
+	//cout << "glb_X" << endl;
+	//glb_map.X.print();
+	//beacP.write_to_file("SavedMatrices/beacP");
+	//beacX.write_to_file("SavedMatrices/beacX");
+	//obsP.write_to_file("SavedMatrices/obsP");
+	//obsX.write_to_file("SavedMatrices/obsX");
 	assosiate_beacons(beacX, beacP, obsX, obsP);
+	//cout << "here4" << endl;
 	add_new_beacons_and_robot_location_to_state(m.X);
-	glb_map.X.write_to_file("SavedMatrices/glbX");
-	
+	//glb_map.X.write_to_file("SavedMatrices/glbX");
+	//cout << "here5" << endl;
 	update_map(m.X, m.P);
+	//cout << "here6" << endl;
+	if(num_elements_updated_in_I > 250){
+		//cout << "here7" << endl;
+		
+		glb_map.L = cholesky(glb_map.I);
+		glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
+		reorder_submaps();
+		glb_map.L = cholesky(glb_map.I);
+		
+	}
+	else{
+		compute_cholesky_factorization();
+		glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
+	}
+	
+	//cout << "here8" << endl;
 	
 }
 
@@ -353,11 +415,11 @@ void MapFuser::fuse_first_map(LocalMap m){
 		m.P.values[i][m.P.columns - 1] = temp3;
 	}
 	//m.P.print();
-	m.P.write_to_file("SavedMatrices/updP");
-	inv(m.P).write_to_file("SavedMatrices/updPinv");
+	//m.P.write_to_file("SavedMatrices/updP");
+	//inv(m.P).write_to_file("SavedMatrices/updPinv");
 	//(inv(m.P) - inv(inv(inv(inv(inv(m.P)))))).print();
-	inv(inv(inv(inv(inv(inv(inv(m.P))))))).write_to_file("SavedMatrices/updPsinv");
-	m.X.write_to_file("SavedMatrices/X");
+	//inv(inv(inv(inv(inv(inv(inv(m.P))))))).write_to_file("SavedMatrices/updPsinv");
+	//m.X.write_to_file("SavedMatrices/X");
     glb_map.I = to_sparse_symm_matrix(inv(m.P));
     glb_map.i = to_sparse_matrix(inv(m.P)* m.X);
     glb_map.L = cholesky(glb_map.I);
@@ -430,12 +492,19 @@ void MapFuser::assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const
 	num_matches = 0;
 	for(int j = 1; j <= num_obs; ++j){
 		mahadist = 1e8;
+
 	    r_obs = obsX.get(j*2-1, 1);
 	    b_obs = obsX.get(j*2, 1);
+		if(j == 10){
+			//cout << "pos obs: " << r_obs << " " << b_obs << endl;
+		}
 	    cov_obs = obsP.get_sub_matrix(j*2-1,j*2-1,j*2,j*2);  // covariance matrix of the j-th obs
 	    for(int i = 1; i <= num_beac; ++i){
 	        r_beac = beacX.get(i*2-1, 1);
 	        b_beac = beacX.get(i*2, 1);
+	        if(j == 10){
+	        	//cout << "pos beac: " << r_beac << " " << b_beac << endl;
+	        }
 	        cov_beac = beacP.get_sub_matrix(i*2-1,i*2-1,i*2,i*2);  // covariance matrix of the i-th beac
 	        // compute Mahalanobis distance from j-th obs to i-th beac
 	        innov.set(1,1, r_beac-r_obs);
@@ -443,23 +512,34 @@ void MapFuser::assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const
 	        totalcov = cov_beac + cov_obs;
 	        mahadist_new  = (trn(innov)*inv(totalcov)*innov).get(1,1);
 	        //cout << "j: " << j << " " << mahadist_new << endl;
+        	//if(j == 10){
+        		//cout << "Maha dist: " << mahadist_new << endl;
+        	//}
 	        if(mahadist_new < mahadist){
+	        	//cout << "obs: " << j << " old: " << i  << " new dist " << mahadist_new << " old dist: " << mahadist << endl;
 	        	mahadist = mahadist_new;
 	        	//9.2103 is the chi-square invers for 99% with 2 degrees of freedom
-	        	if(mahadist < 9.2103){
+
+	        	if(mahadist < 9.21034037197618){
 	        		assosiations[j - 1] = i - 1;
 	        	}
 	        	else{
-	        		assosiations[j] = -100;
+	        		assosiations[j - 1] = -100;
 	        	}
 	        }
 	    }
+	}
+	//if(num_submaps == 42){
+		//assosiations[9] = -100;
+	//}
+	if(num_submaps == 42){
+	//cout << "index 25 " << place_of_beacon[25] << endl;
 	}
 	//cout << "Matches: "<<endl;
 	for(int j = 0; j < num_obs; ++j){
 		if(assosiations[j] >= 0)
 			assosiations[j] = potential_assosiation_beacons[assosiations[j]];
-		//cout << assosiations[j] << endl;
+		//cout << assosiations[j] << " x: " << glb_map.X.get(place_of_beacon[assosiations[j]], 1) << " y: " << glb_map.X.get(place_of_beacon[assosiations[j]] + 1, 1) << endl;
 	}
 }
 
@@ -571,27 +651,35 @@ void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
 		//}
 	}
 	//cout << "here1" << endl;
-	jh.write_to_file("SavedMatrices/jh");
+	//jh.write_to_file("SavedMatrices/jh");
 	//cout << "here2" << endl;
-	H.write_to_file("SavedMatrices/H");
-	glb_map.X.write_to_file("SavedMatrices/X");
-	obsX.write_to_file("SavedMatrices/obsX");
-	glb_map.i.write_to_file("SavedMatrices/iInnan");
+	//H.write_to_file("SavedMatrices/H");
+	//glb_map.X.write_to_file("SavedMatrices/X");
+	//obsX.write_to_file("SavedMatrices/obsX");
+	//glb_map.i.write_to_file("SavedMatrices/iInnan");
 	//cout << "rows/cols " << glb_map.I.rows << "/" << glb_map.I.cols << endl;
 
-	glb_map.I = glb_map.I + to_sparse_symm_matrix(trn(jh) * inv(obsP) * jh);
+	SparseSymmMatrix I_new = to_sparse_symm_matrix(trn(jh) * inv(obsP) * jh);
+
+	glb_map.I = glb_map.I + I_new;
+	int i = 1;
+	while(!I_new.first_in_row[i]){
+		++i;
+	}
+	num_elements_updated_in_I = glb_map.I.rows - i;
+
 	//cout << "here2" << endl;
 	Matrix z = obsX - H;
 	z.set(3, 1, wrap(z.get(3,1)));
 	glb_map.i = glb_map.i + trn(jh) * inv(obsP) * (z + jh * glb_map.X);
-	glb_map.I.write_to_file("SavedMatrices/I");
-	glb_map.i.write_to_file("SavedMatrices/i");
-	glb_map.L = cholesky(glb_map.I);
+	//glb_map.I.write_to_file("SavedMatrices/I");
+	//glb_map.i.write_to_file("SavedMatrices/i");
+	//glb_map.L = cholesky(glb_map.I);
 	//glb_map.X.print();
-	glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
+	//glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
 	//cout << endl << endl;
 	//glb_map.X.print();
-	glb_map.X.write_to_file("SavedMatrices/Xaft");
+	//glb_map.X.write_to_file("SavedMatrices/Xaft");
 }
 
 double MapFuser::submap_radius(const LocalMap& map){
