@@ -67,6 +67,51 @@ SparseSymmMatrix to_sparse_symm_matrix(const SparseMatrix& m){
 	return result;
 }
 
+void part_cholesky(SparseMatrix& L, SparseSymmMatrix m, int size){
+
+	SparseMatrixElement *row_ptr1;
+	SparseMatrixElement *row_ptr2;
+	//SparseMatrixElement *last_added;
+	for(int i = m.rows - size; i <= m.rows; ++i){
+		L.remove_row(i);
+	}
+	L.rows = m.rows - size - 1;
+	L.cols = m.cols;
+
+	
+	//SparseSymmMatrix A = to_sparse_symm_matrix(trn(L)*L);
+	//A.write_to_file_coord("temp");
+
+	m = m - to_sparse_symm_matrix(trn(L)*L);
+
+	L.rows = m.rows;
+	
+	double lambda;
+	for(int i = m.rows - size; i <= m.rows; ++i){
+		row_ptr1 = m.first_in_row[i];
+		if(m.first_in_row[i]){
+			if(m.first_in_row[i]->value <= 0)
+				throw MatrixException("Error in cholesky(SparseSymmMatrix m): matrices must be positive definite");
+			lambda = sqrt(m.first_in_row[i]->value);
+			L.set(i, i, lambda);
+			row_ptr1 = row_ptr1->next_in_row;
+			while(row_ptr1){
+				L.set(i, row_ptr1->col, row_ptr1->value/lambda);
+				row_ptr1 = row_ptr1->next_in_row;
+			}
+		}
+		row_ptr1 = L.first_in_row[i];
+		while(row_ptr1){
+			row_ptr2 = L.first_in_row[i];
+			while(row_ptr2 != row_ptr1){
+				m.add(row_ptr2->col, row_ptr1->col, -row_ptr1->value * row_ptr2->value);
+				row_ptr2 = row_ptr2->next_in_row;
+			}
+			m.add(row_ptr1->col, row_ptr2->col, -row_ptr1->value * row_ptr2->value);
+			row_ptr1 = row_ptr1->next_in_row;
+		}
+	}
+}
 
 SparseMatrix cholesky(SparseSymmMatrix m){
 	SparseMatrix result(m.rows, m.cols);

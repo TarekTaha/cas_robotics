@@ -22,6 +22,7 @@ class SparseMatrix{
     void print() const;
     void print_coord_format() const;
     void remove_all_elements();
+    void remove_row(int row);
     void write_to_file(const char* filename);
     //void print();
     //void print_plain();

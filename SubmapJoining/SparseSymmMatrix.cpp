@@ -3,7 +3,7 @@
 SparseSymmMatrix::SparseSymmMatrix(int rows, int cols){
 	this->rows = rows;
 	this->cols = cols;
-	for(int i = 0; i < rows; ++i){
+	for(int i = 0; i <= rows; ++i){
 		first_in_row[i] = 0;
 	}
 }
@@ -106,6 +106,7 @@ void SparseSymmMatrix::set(int row, int column, double value){
 }
 
 void SparseSymmMatrix::add(int row, int column, double value){
+	//cout << row << " " << rows << " // " << column << " " << cols << endl;
 	if(row > rows || column > cols)
 		throw MatrixException("Error in SparseSymmMatrix::add(int row, int column, double value): trying to set element outside matrix");
 	
@@ -210,6 +211,25 @@ SparseSymmMatrix operator+(SparseSymmMatrix m1, const SparseSymmMatrix& m2){
 	return m1;
 }
 
+SparseSymmMatrix operator-(SparseSymmMatrix m1, const SparseSymmMatrix& m2){
+	m2.write_to_file_coord("temp2");
+	cout << "after write" << endl;
+	  if(m1.rows != m2.rows)
+	    throw MatrixException("Error in operator-(SparseSymmMatrix m1, const SparseSymmMatrix& m2): matices must have same dimensions");
+	  if(m1.cols != m2.cols)
+	    throw MatrixException("Error in operator-(SparseSymmMatrix m1, const SparseSymmMatrix& m2): matices must have same dimensions");
+	  
+	SparseMatrixElement *row_ptr;
+	for(int i = 1; i <= m2.rows; ++i){
+		row_ptr = m2.first_in_row[i];
+		while(row_ptr){
+			m1.add(i, row_ptr->col, -row_ptr->value);
+			row_ptr = row_ptr->next_in_row;
+		}
+	}
+	return m1;
+}
+
 double SparseSymmMatrix::get(int row, int column){
 	if(row > column){
 		swap(row, column);
@@ -244,6 +264,27 @@ void SparseSymmMatrix::write_to_file(const char* filename){
     file << endl;
   }
   file.close();
+}
+
+void SparseSymmMatrix::write_to_file_coord(const char* filename) const{
+	  ofstream file;
+	  file.open(filename);
+	  file.precision(30);
+	  SparseMatrixElement *row_ptr;
+	  for(int i = 1; i <= rows; ++i){
+		  row_ptr = first_in_row[i];
+		  while(row_ptr){
+			  file << "(";
+			  file << i;
+			  file << ",";
+			  file << row_ptr->col;
+			  file << ") ";
+			  file << row_ptr->value;
+			  file << endl;
+			  row_ptr = row_ptr->next_in_row;
+		  }
+	  }
+	  file.close();
 }
 
 void SparseSymmMatrix::extract_sub_segment(int row, int from_col, int to_col, SparseMatrixElement **start, SparseMatrixElement *end, int row_num_change, int col_num_change){

@@ -83,6 +83,7 @@ double SparseMatrix::get(int row, int column){
 	 return 0;
 }
 void SparseMatrix::set(int row, int column, double value){
+	//cout << "set start" << endl;
 	if(!value)
 		return;
 	 if(row > rows || column > cols)
@@ -91,15 +92,17 @@ void SparseMatrix::set(int row, int column, double value){
 	SparseMatrixElement *new_elem = new SparseMatrixElement(row, column, value);
 
 	if(!first_in_row[row]){
-		//cout << "first in row" << endl;
+		//cout << "set1" << endl;
 		first_in_row[row] = new_elem;
 	}
 	else if(first_in_row[row]->col > column){
+		//cout << "set2" << endl;
 		new_elem->next_in_row = first_in_row[row];
 		first_in_row[row] = new_elem;
 	}
 	else{
 		while(row_ptr->next_in_row){
+			//cout << "set3" << endl;
 			if(row_ptr->next_in_row->col > column){
 				if(row_ptr->col == column){
 					delete new_elem;
@@ -115,6 +118,7 @@ void SparseMatrix::set(int row, int column, double value){
 			row_ptr = row_ptr->next_in_row;
 		}
 		if(!row_ptr->next_in_row){
+			//cout << "set4" << endl;
 			if(row_ptr->col == column){
 				delete new_elem;
 				row_ptr->value = value;
@@ -124,6 +128,7 @@ void SparseMatrix::set(int row, int column, double value){
 			}
 		}
 	}
+	//cout << "set end" << endl;
 }
 
 void SparseMatrix::add(int row, int column, double value){
@@ -167,7 +172,26 @@ void SparseMatrix::add(int row, int column, double value){
 		}
 	}
 }
+void SparseMatrix::remove_row(int row){
+	SparseMatrixElement *row_ptr;
+	SparseMatrixElement *temp;
+		//cout << "here4" << endl;
+		row_ptr = first_in_row[row];
+		//cout << "here5" << endl;
+		while(row_ptr){
+			//cout << "here" << endl;
+			temp = row_ptr->next_in_row;
+			//cout << "here1" << endl;
+			delete row_ptr;
+			//cout << "here2" << endl;
+			row_ptr = temp;
+			//cout << "here3" << endl;
+		}
+		//cout << "here6" << endl;
+		first_in_row[row] = 0;
+		//cout << "here7" << endl;
 
+}
 void SparseMatrix::remove_all_elements(){
 	SparseMatrixElement *row_ptr;
 	SparseMatrixElement *temp;
@@ -302,7 +326,7 @@ SparseMatrix trn(const SparseMatrix& m){
 	for(int i = 1; i <= m.rows; ++i){
 		row_ptr = m.first_in_row[i];
 		while(row_ptr){
-			result.set(row_ptr->col, row_ptr->row, row_ptr->value);
+			result.set(row_ptr->col, i, row_ptr->value);
 			row_ptr = row_ptr->next_in_row;
 		}
 	}
@@ -329,3 +353,4 @@ void SparseMatrix::write_to_file(const char* filename){
   }
   file.close();
 }
+

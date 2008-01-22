@@ -29,6 +29,7 @@ class MapFuser{
 		double submap_radius(const LocalMap& map);
 		double distance_to_submap(int map);
 		void reorder_submaps();
+		void compute_cholesky_factorization();
 		double wrap(double angle);
 
 		//void nearest_neightbour(SparseMatrix bec)
@@ -47,6 +48,7 @@ class MapFuser{
 		int num_beacons;
 		double global_robot_uncertainty[1000];
 		double local_robot_uncertainty[1000];
+		int num_elements_updated_in_I;
 };
 
 #endif
