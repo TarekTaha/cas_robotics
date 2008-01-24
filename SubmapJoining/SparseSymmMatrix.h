@@ -24,11 +24,13 @@ class SparseSymmMatrix{
     void write_to_file(const char* filename);
     void write_to_file_coord(const char* filename) const;
     void extract_sub_segment(int row, int from_col, int to_col, SparseMatrixElement **start, SparseMatrixElement *end,  int row_num_change, int col_num_change);
+    void remove_row(int row);
+    void plus_equals(SparseSymmMatrix& m);
     //void print();
     //void print_plain();
 };
 
-SparseSymmMatrix operator+(SparseSymmMatrix m1, const SparseSymmMatrix& m2);
+SparseSymmMatrix operator+(const SparseSymmMatrix& m1, const SparseSymmMatrix& m2);
 SparseSymmMatrix operator-(SparseSymmMatrix m1, const SparseSymmMatrix& m2);
 
 #endif

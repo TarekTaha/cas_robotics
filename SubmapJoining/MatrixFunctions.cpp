@@ -67,11 +67,161 @@ SparseSymmMatrix to_sparse_symm_matrix(const SparseMatrix& m){
 	return result;
 }
 
-void part_cholesky(SparseMatrix& L, SparseSymmMatrix m, int size){
+SparseSymmMatrix LtimesLtrn(const SparseMatrix& L, int row_start){
+
+	SparseMatrixElement *row_ptr1;
+	SparseMatrixElement *row_ptr3;
+	SparseMatrixElement **last_in_row;
+	SparseSymmMatrix result(L.rows, L.rows);
+	double sum;
+	for(int i = row_start; i <= L.rows; ++i){
+		last_in_row = &result.first_in_row[i];
+		for(int j = i; j <= L.rows; ++j){
+			sum = 0;
+			row_ptr1 = L.first_in_row[i];
+			row_ptr3 = L.first_in_row[j];
+			while(row_ptr1 && row_ptr3){
+				if(row_ptr1->col > row_ptr3->col){
+					row_ptr3 = row_ptr3->next_in_row;
+				}
+				else if(row_ptr1->col < row_ptr3->col){
+					row_ptr1 = row_ptr1->next_in_row;
+				}
+				else if(row_ptr1->col == row_ptr3->col){
+					sum += row_ptr1->value * row_ptr3->value;
+					row_ptr1 = row_ptr1->next_in_row;
+					row_ptr3 = row_ptr3->next_in_row;
+				}
+			}
+			if(sum){
+				*last_in_row = new SparseMatrixElement(i, j, sum);
+				last_in_row = &(*last_in_row)->next_in_row;
+			}
+		}
+	}
+	return result;
+}
+
+void part_cholesky(SparseMatrix& L, SparseSymmMatrix m, int size, Timer& timer){
+
+	SparseMatrixElement *row_ptr1;
+	SparseMatrixElement *row_ptr2;
+
+	if(size + 1 == m.rows){
+		L = cholesky(m, timer);
+		return;
+	}
+
+	timer.start(10);
+	double saved_values[1000];
+	int row[1000];
+	int num_saved;
+	for(int i = 1; i <= m.rows; ++i){
+		row_ptr1 = L.first_in_row[i];
+		if(row_ptr1){
+			if(row_ptr1->col >= m.rows - size){
+				L.first_in_row[i] = 0;
+			}
+			else{
+				while(row_ptr1->next_in_row){
+					//cout << "COL2 " << L.first_in_row[1]->col << endl;
+					if(row_ptr1->next_in_row->col >= m.rows - size){
+						row_ptr2 = row_ptr1->next_in_row;
+						row_ptr1->next_in_row = 0;
+						row_ptr1 = row_ptr2;
+						break;
+					}
+					row_ptr1 = row_ptr1->next_in_row;
+				}
+			}
+			if(row_ptr1){
+				if(row_ptr1->col >= m.rows - size){
+					while(row_ptr1){
+						row_ptr2 = row_ptr1->next_in_row;
+						delete row_ptr1;
+						row_ptr1 = row_ptr2;
+				
+					}
+				}
+			}
+		}
+	}
+	timer.stop(10);
+
+	L.rows = m.rows;
+	L.cols = m.cols - size - 1;
+	//L.print();
+	for(int i = 1; i < m.rows - size; ++i){
+		m.remove_row(i);
+	}
+	
+	
+	//A.write_to_file_coord("temp");
+
+	timer.start(11);
+	SparseSymmMatrix A = LtimesLtrn(L, m.rows - size);
+	//for(int i = 1; i < m.rows - size; ++i){
+		//A.remove_row(i);
+	//}
+	timer.stop(11);
+	timer.start(12);
+	m = m - A;
+	timer.stop(12);
+	//cout << "after" << endl;
+
+	timer.start(13);
+	//m.print();
+	L.cols = m.cols;
+	double lambda;
+	//cout << "START at row: " << m.rows - size << endl;
+	for(int i = m.rows - size; i <= m.rows; ++i){
+		timer.start(14);
+		num_saved = 0;
+		row_ptr1 = m.first_in_row[i];
+		if(m.first_in_row[i]){
+			if(m.first_in_row[i]->value <= 0)
+				throw MatrixException("Error in cholesky(SparseSymmMatrix m): matrices must be positive definite");
+			lambda = sqrt(m.first_in_row[i]->value);
+			L.set(i, i, lambda);
+			row_ptr1 = row_ptr1->next_in_row;
+			while(row_ptr1){
+				saved_values[num_saved] = row_ptr1->value/lambda;
+				row[num_saved] = row_ptr1->col;
+				++num_saved;
+
+				L.set(row_ptr1->col, i, row_ptr1->value/lambda);
+
+				row_ptr1 = row_ptr1->next_in_row;
+			}
+		}
+		timer.stop(14);
+		timer.start(15);
+		m.remove_row(i);
+		SparseSymmMatrix temp(m.rows, m.cols);
+		SparseMatrixElement **end_of_row;
+		for(int i = 0; i < num_saved; ++i){
+			end_of_row = &temp.first_in_row[row[i]];
+			for(int j = i; j < num_saved; ++j){
+				*end_of_row = new SparseMatrixElement(row[i], row[j], -saved_values[i] * saved_values[j]);
+				end_of_row = &(*end_of_row)->next_in_row;
+			}
+		}
+		timer.stop(15);
+		timer.start(16);
+		m.plus_equals(temp);
+		//m = m + temp;
+		timer.stop(16);
+	}
+	timer.stop(13);
+}
+
+void part_cholesky_trn(SparseMatrix& L, SparseSymmMatrix m, int size, Timer& timer){
 
 	SparseMatrixElement *row_ptr1;
 	SparseMatrixElement *row_ptr2;
 	//SparseMatrixElement *last_added;
+
+	
 	for(int i = m.rows - size; i <= m.rows; ++i){
 		L.remove_row(i);
 	}
@@ -79,13 +229,16 @@ void part_cholesky(SparseMatrix& L, SparseSymmMatrix m, int size){
 	L.cols = m.cols;
 
 	
-	//SparseSymmMatrix A = to_sparse_symm_matrix(trn(L)*L);
+	
 	//A.write_to_file_coord("temp");
 
-	m = m - to_sparse_symm_matrix(trn(L)*L);
+	SparseSymmMatrix A = to_sparse_symm_matrix(trn(L)*L);
+
+	m = m - A;
+
+	
 
 	L.rows = m.rows;
-	
 	double lambda;
 	for(int i = m.rows - size; i <= m.rows; ++i){
 		row_ptr1 = m.first_in_row[i];
@@ -113,8 +266,53 @@ void part_cholesky(SparseMatrix& L, SparseSymmMatrix m, int size){
 	}
 }
 
-SparseMatrix cholesky(SparseSymmMatrix m){
+SparseMatrix cholesky(SparseSymmMatrix m, Timer& timer){
 	SparseMatrix result(m.rows, m.cols);
+	//SparseMatrix result2(m.rows, m.cols);
+	SparseMatrixElement *row_ptr1;
+	SparseMatrixElement *row_ptr2;
+	//SparseMatrixElement *last_added;
+	double saved_values[1000];
+	int row[1000];
+	int num_saved;
+	double lambda;
+	for(int i = 1; i <= m.rows; ++i){
+		num_saved = 0;
+		row_ptr1 = m.first_in_row[i];
+		if(m.first_in_row[i]){
+			if(m.first_in_row[i]->value <= 0)
+				throw MatrixException("Error in cholesky(SparseSymmMatrix m): matrices must be positive definite");
+			lambda = sqrt(m.first_in_row[i]->value);
+			result.set(i, i, lambda);
+			row_ptr1 = row_ptr1->next_in_row;
+			while(row_ptr1){
+				saved_values[num_saved] = row_ptr1->value/lambda;
+				row[num_saved] = row_ptr1->col;
+				++num_saved;
+				
+				result.set(row_ptr1->col, i, row_ptr1->value/lambda);
+				row_ptr1 = row_ptr1->next_in_row;
+			}
+		}
+		m.remove_row(i);
+		SparseSymmMatrix temp(m.rows, m.cols);
+		SparseMatrixElement **end_of_row;
+		for(int i = 0; i < num_saved; ++i){
+			end_of_row = &temp.first_in_row[row[i]];
+			for(int j = i; j < num_saved; ++j){
+				*end_of_row = new SparseMatrixElement(row[i], row[j], -saved_values[i] * saved_values[j]);
+				end_of_row = &(*end_of_row)->next_in_row;
+				//m.add(row[i], row[j], -saved_values[i] * saved_values[j]);
+			}
+		}
+		m = m + temp;
+	}
+	return result;
+}
+
+SparseMatrix cholesky_trn(SparseSymmMatrix m, Timer& timer){
+	SparseMatrix result(m.rows, m.cols);
+	//SparseMatrix result2(m.rows, m.cols);
 	SparseMatrixElement *row_ptr1;
 	SparseMatrixElement *row_ptr2;
 	//SparseMatrixElement *last_added;
@@ -129,6 +327,7 @@ SparseMatrix cholesky(SparseSymmMatrix m){
 			row_ptr1 = row_ptr1->next_in_row;
 			while(row_ptr1){
 				result.set(i, row_ptr1->col, row_ptr1->value/lambda);
+				//result2.set(row_ptr1->col, i, row_ptr1->value/lambda);
 				row_ptr1 = row_ptr1->next_in_row;
 			}
 		}
@@ -157,7 +356,91 @@ double solve_cholesky_help_func(SparseMatrixElement *row_ptr, SparseMatrix& rhs2
 	return temp;
 }
 
-SparseMatrix solve_cholesky(const SparseMatrix& L, SparseMatrix rhs){
+SparseMatrix solve_cholesky(const SparseMatrix& L, SparseMatrix rhs, Timer& timer){
+	SparseMatrixElement *row_ptr;
+	SparseMatrix rhs2(rhs.rows, 1);
+	SparseMatrix result(rhs.rows, 1);
+	double temp_d;
+
+	for(int i = 1; i <= L.rows; ++i){
+		row_ptr = L.first_in_row[i];
+		if(rhs.first_in_row[i]){
+			temp_d = rhs.first_in_row[i]->value/row_ptr->value;
+			rhs2.set(i, 1, temp_d);
+			row_ptr = row_ptr->next_in_row;
+			while(row_ptr){
+				rhs.add(row_ptr->col, 1, -temp_d*row_ptr->value);
+				row_ptr = row_ptr->next_in_row;
+			}
+		}
+	}
+
+	SparseMatrix trnL = trn(L);
+
+	for(int i = L.rows; i >= 1; --i){
+		row_ptr = trnL.first_in_row[i];
+		result.set(i, 1, solve_cholesky_help_func(row_ptr, rhs2));
+	}
+
+	return result;
+}
+
+double solve_cholesky_help_func2_1(SparseMatrixElement *row_ptr, const SparseMatrix& res, double rhs){
+	if(row_ptr->next_in_row){
+		if(res.first_in_row[row_ptr->col]){
+			return solve_cholesky_help_func2_1(row_ptr->next_in_row, res, rhs - row_ptr->value * res.first_in_row[row_ptr->col]->value);
+		}
+		return solve_cholesky_help_func2_1(row_ptr->next_in_row, res, rhs);
+	}
+	return rhs/row_ptr->value;
+}
+
+double solve_cholesky_help_func2_2(SparseMatrixElement *row_ptr, SparseMatrix& rhs){
+	if(row_ptr->next_in_row){
+		double temp = solve_cholesky_help_func2_2(row_ptr->next_in_row, rhs);
+		rhs.add(row_ptr->col, 1, -row_ptr->value * temp);
+		return temp;
+	}
+	return rhs.first_in_row[row_ptr->col]->value/row_ptr->value;
+}
+
+SparseMatrix solve_cholesky2(const SparseMatrix& L, SparseMatrix rhs, Timer& timer){
+	SparseMatrixElement *row_ptr;
+	SparseMatrix rhs2(rhs.rows, 1);
+	SparseMatrix result(rhs.rows, 1);
+	double temp_d;
+	for(int i = 1; i <= L.rows; ++i){
+		if(rhs.first_in_row[i]){
+			rhs2.set(i, 1, solve_cholesky_help_func2_1( L.first_in_row[i], rhs2, rhs.first_in_row[i]->value));
+		}
+		else{
+			rhs2.set(i, 1, solve_cholesky_help_func2_1( L.first_in_row[i], rhs2, 0));
+		}
+	}
+
+	for(int i = L.rows; i >= 1; --i){
+		if(rhs2.first_in_row[i]){
+			result.set(i, 1, solve_cholesky_help_func2_2( L.first_in_row[i], rhs2));
+		}
+		else{
+			result.set(i, 1, 0);
+		}
+	}
+	return result;
+	//return rhs2;
+}
+
+double solve_cholesky_help_func2_trn(SparseMatrixElement *row_ptr, const SparseMatrix& res, double rhs){
+	if(row_ptr){
+		if(res.first_in_row[row_ptr->col]){
+			return solve_cholesky_help_func2_trn(row_ptr->next_in_row, res, rhs) - row_ptr->value * res.first_in_row[row_ptr->col]->value;
+		}
+		return solve_cholesky_help_func2_trn(row_ptr->next_in_row, res, rhs);
+	}
+	return rhs;
+}
+
+SparseMatrix solve_cholesky2_trn(const SparseMatrix& L, SparseMatrix rhs, Timer& timer){
 	SparseMatrixElement *row_ptr;
 	SparseMatrix rhs2(rhs.rows, 1);
 	SparseMatrix result(rhs.rows, 1);
@@ -174,11 +457,16 @@ SparseMatrix solve_cholesky(const SparseMatrix& L, SparseMatrix rhs){
 			}
 		}
 	}
-	SparseMatrix trnL = trn(L);
 
+	
 	for(int i = L.rows; i >= 1; --i){
-		row_ptr = trnL.first_in_row[i];
-		result.set(i, 1, solve_cholesky_help_func(row_ptr, rhs2));
+		row_ptr = L.first_in_row[i];
+		if(rhs2.first_in_row[i]){
+			result.set(i, 1, solve_cholesky_help_func2_trn(row_ptr->next_in_row, result, rhs2.first_in_row[i]->value)/row_ptr->value);
+		}
+		else{
+			result.set(i, 1, solve_cholesky_help_func2_trn(row_ptr->next_in_row, result, 0)/row_ptr->value);
+		}
 	}
 	return result;
 }

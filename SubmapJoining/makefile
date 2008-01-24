@@ -6,8 +6,8 @@ INCLUDE =
 
 all: main
 
-st : sparse_test.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o
-	$(CCC) $(CCCFLAGS) sparse_test.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o -o main
+st : sparse_test.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o Timer.o
+	$(CCC) $(CCCFLAGS) sparse_test.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o Timer.o -o main
 
 sparse_test.o : sparse_test.cpp
 	$(CCC) $(CCCFLAGS) -c sparse_test.cpp $(LDFLAGS)
@@ -32,8 +32,8 @@ MatrixFunctions.o : MatrixFunctions.cpp MatrixFunctions.h
 
 
 
-main : main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o MapFuser.o
-	$(CCC) $(CCCFLAGS) -o main main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o MapFuser.o
+main : main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o MapFuser.o Timer.o
+	$(CCC) $(CCCFLAGS) -o main main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o MapFuser.o Timer.o
 
 main.o : main.cc
 	$(CCC) $(CCCFLAGS) -c main.cc $(LDFLAGS)
@@ -49,6 +49,9 @@ GlobalMap.o: GlobalMap.h GlobalMap.cpp
 	
 MapFuser.o: MapFuser.h MapFuser.cpp
 	$(CCC) $(CCCFLAGS) -c MapFuser.cpp $(LDFLAGS)
+
+Timer.o: Timer.h Timer.cpp
+	$(CCC) $(CCCFLAGS) -c Timer.cpp $(LDFLAGS)
 
 clean:
 	rm *.o
