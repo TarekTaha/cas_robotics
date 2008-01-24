@@ -261,12 +261,12 @@ void SparseMatrix::print_coord_format() const{
 	}
 }
 
-SparseMatrix operator+(SparseMatrix m1, const SparseMatrix& m2){
+/*SparseMatrix operator+(SparseMatrix m1, const SparseMatrix& m2){
 	if(m1.rows != m2.rows)
 		throw MatrixException("Error in operator+(SparseMatrix m1, const SparseMatrix& m2): matices must have same dimensions");
 	if(m1.cols != m2.cols)
 		throw MatrixException("Error in operator+(SparseMatrix m1, const SparseMatrix& m2): matices must have same dimensions");
-	  
+
 	SparseMatrixElement *row_ptr;
 	for(int i = 1; i <= m2.rows; ++i){
 		row_ptr = m2.first_in_row[i];
@@ -276,6 +276,52 @@ SparseMatrix operator+(SparseMatrix m1, const SparseMatrix& m2){
 		}
 	}
 	return m1;
+}*/
+
+SparseMatrix operator+(const SparseMatrix& m1, const SparseMatrix& m2){
+	if(m1.rows != m2.rows)
+		throw MatrixException("Error in operator+(SparseMatrix m1, const SparseMatrix& m2): matices must have same dimensions");
+	if(m1.cols != m2.cols)
+		throw MatrixException("Error in operator+(SparseMatrix m1, const SparseMatrix& m2): matices must have same dimensions");
+	
+	SparseMatrix result(m1.rows, m1.cols);
+	SparseMatrixElement *row_ptr1;
+	SparseMatrixElement *row_ptr2;
+	SparseMatrixElement **row_ptr_result;
+	for(int i = 1; i <= m1.rows; ++i){
+		row_ptr1 = m1.first_in_row[i];
+		row_ptr2 = m2.first_in_row[i];
+		row_ptr_result = &result.first_in_row[i];
+		while(row_ptr1 && row_ptr2){
+			if(row_ptr1->col > row_ptr2->col){
+				*row_ptr_result = new SparseMatrixElement(row_ptr2->row, row_ptr2->col, row_ptr2->value);
+				row_ptr2 = row_ptr2->next_in_row;
+				row_ptr_result  = &((*row_ptr_result)->next_in_row);
+			}
+			else if(row_ptr1->col < row_ptr2->col){
+				*row_ptr_result = new SparseMatrixElement(row_ptr1->row, row_ptr1->col, row_ptr1->value);
+				row_ptr1 = row_ptr1->next_in_row;
+				row_ptr_result  = &((*row_ptr_result)->next_in_row);
+			}
+			else{
+				*row_ptr_result = new SparseMatrixElement(row_ptr1->row, row_ptr1->col, row_ptr1->value + row_ptr2->value);
+				row_ptr1 = row_ptr1->next_in_row;
+				row_ptr2 = row_ptr2->next_in_row;
+				row_ptr_result  = &((*row_ptr_result)->next_in_row);
+			}
+		}
+		while(row_ptr1){
+			*row_ptr_result = new SparseMatrixElement(row_ptr1->row, row_ptr1->col, row_ptr1->value);
+			row_ptr1 = row_ptr1->next_in_row;
+			row_ptr_result  = &((*row_ptr_result)->next_in_row);
+		}
+		while(row_ptr2){
+			*row_ptr_result = new SparseMatrixElement(row_ptr2->row, row_ptr2->col, row_ptr2->value);
+			row_ptr2 = row_ptr2->next_in_row;
+			row_ptr_result  = &((*row_ptr_result)->next_in_row);
+		}
+	}
+	return result;
 }
 
 SparseMatrix operator*(const SparseMatrix& m1, const SparseMatrix& m2){

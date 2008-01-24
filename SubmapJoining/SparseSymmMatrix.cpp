@@ -194,7 +194,107 @@ void SparseSymmMatrix::print() const{
 	}
 }
 
-SparseSymmMatrix operator+(SparseSymmMatrix m1, const SparseSymmMatrix& m2){
+void SparseSymmMatrix::plus_equals(SparseSymmMatrix& m){
+	//cout << "start" << endl;
+	SparseMatrixElement **row_ptr1;
+	SparseMatrixElement **row_ptr2;
+	SparseMatrixElement *temp1;
+	SparseMatrixElement *temp2;
+	for(int i = 1; i <= rows; ++i){
+
+		row_ptr1 = &first_in_row[i];
+		row_ptr2 = &m.first_in_row[i];
+
+		while(*row_ptr2){
+			if(!(*row_ptr1)){
+				*row_ptr1 = *row_ptr2;
+				break;
+			}
+			else if((*row_ptr1)->col > (*row_ptr2)->col){
+				temp1 = *row_ptr1;
+				*row_ptr1 = *row_ptr2;
+				temp2 = (*row_ptr2)->next_in_row; 
+				(*row_ptr2)->next_in_row = temp1;
+				*row_ptr2 = temp2;
+				row_ptr1 = &(*row_ptr1)->next_in_row;
+			}
+			else if((*row_ptr1)->col < (*row_ptr2)->col){
+				row_ptr1 = &(*row_ptr1)->next_in_row;
+			}
+			else{
+				(*row_ptr1)->value += (*row_ptr2)->value;
+				temp2 = (*row_ptr2)->next_in_row;
+				delete *row_ptr2;
+				*row_ptr2 = temp2;
+				row_ptr1 = &(*row_ptr1)->next_in_row;
+			}
+		}
+		m.first_in_row[i] = 0;
+	}
+	//print();
+	//cout << "end" << endl;
+}
+
+SparseSymmMatrix operator+(const SparseSymmMatrix& m1, const SparseSymmMatrix& m2){
+	if(m1.rows != m2.rows)
+		throw MatrixException("Error in operator+(SparseMatrix m1, const SparseMatrix& m2): matices must have same dimensions");
+	if(m1.cols != m2.cols)
+		throw MatrixException("Error in operator+(SparseMatrix m1, const SparseMatrix& m2): matices must have same dimensions");
+	
+	SparseSymmMatrix result(m1.rows, m1.cols);
+	SparseMatrixElement *row_ptr1;
+	SparseMatrixElement *row_ptr2;
+	SparseMatrixElement **row_ptr_result;
+	for(int i = 1; i <= m1.rows; ++i){
+		row_ptr1 = m1.first_in_row[i];
+		row_ptr2 = m2.first_in_row[i];
+		row_ptr_result = &result.first_in_row[i];
+		while(row_ptr1 && row_ptr2){
+			if(row_ptr1->col > row_ptr2->col){
+				*row_ptr_result = new SparseMatrixElement(row_ptr2->row, row_ptr2->col, row_ptr2->value);
+				row_ptr2 = row_ptr2->next_in_row;
+				row_ptr_result  = &((*row_ptr_result)->next_in_row);
+			}
+			else if(row_ptr1->col < row_ptr2->col){
+				*row_ptr_result = new SparseMatrixElement(row_ptr1->row, row_ptr1->col, row_ptr1->value);
+				row_ptr1 = row_ptr1->next_in_row;
+				row_ptr_result  = &((*row_ptr_result)->next_in_row);
+			}
+			else{
+				*row_ptr_result = new SparseMatrixElement(row_ptr1->row, row_ptr1->col, row_ptr1->value + row_ptr2->value);
+				row_ptr1 = row_ptr1->next_in_row;
+				row_ptr2 = row_ptr2->next_in_row;
+				row_ptr_result  = &((*row_ptr_result)->next_in_row);
+			}
+		}
+		while(row_ptr1){
+			*row_ptr_result = new SparseMatrixElement(row_ptr1->row, row_ptr1->col, row_ptr1->value);
+			row_ptr1 = row_ptr1->next_in_row;
+			row_ptr_result  = &((*row_ptr_result)->next_in_row);
+		}
+		while(row_ptr2){
+			*row_ptr_result = new SparseMatrixElement(row_ptr2->row, row_ptr2->col, row_ptr2->value);
+			row_ptr2 = row_ptr2->next_in_row;
+			row_ptr_result  = &((*row_ptr_result)->next_in_row);
+		}
+	}
+	return result;
+}
+
+void SparseSymmMatrix::remove_row(int row){
+	SparseMatrixElement *row_ptr;
+	SparseMatrixElement *temp;
+	row_ptr = first_in_row[row];
+	while(row_ptr){
+		temp = row_ptr->next_in_row;
+		delete row_ptr;
+		row_ptr = temp;
+	}
+	first_in_row[row] = 0;
+
+}
+
+/*SparseSymmMatrix operator+(SparseSymmMatrix m1, const SparseSymmMatrix& m2){
 	  if(m1.rows != m2.rows)
 	    throw MatrixException("Error in operator+(SparseSymmMatrix m1, const SparseSymmMatrix& m2): matices must have same dimensions");
 	  if(m1.cols != m2.cols)
@@ -209,11 +309,9 @@ SparseSymmMatrix operator+(SparseSymmMatrix m1, const SparseSymmMatrix& m2){
 		}
 	}
 	return m1;
-}
+}*/
 
 SparseSymmMatrix operator-(SparseSymmMatrix m1, const SparseSymmMatrix& m2){
-	m2.write_to_file_coord("temp2");
-	cout << "after write" << endl;
 	  if(m1.rows != m2.rows)
 	    throw MatrixException("Error in operator-(SparseSymmMatrix m1, const SparseSymmMatrix& m2): matices must have same dimensions");
 	  if(m1.cols != m2.cols)

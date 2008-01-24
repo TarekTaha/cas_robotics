@@ -8,6 +8,7 @@
 #include "GlobalMap.h"
 #include "LocalMap.h"
 #include "MatrixFunctions.h"
+#include "Timer.h"
 
 
 using namespace std;
@@ -49,6 +50,8 @@ class MapFuser{
 		double global_robot_uncertainty[1000];
 		double local_robot_uncertainty[1000];
 		int num_elements_updated_in_I;
+		
+		Timer timer;
 };
 
 #endif
