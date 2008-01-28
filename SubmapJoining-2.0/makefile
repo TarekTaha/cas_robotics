@@ -1,14 +1,14 @@
 CCC = g++
 CCCFLAGS = -Wno-deprecated
-LDFLAGS = -IMatrixLib
+LDFLAGS = -IMatrixLib -I/home/casuser/Desktop/SuiteSparse/CHOLMOD/Include/ -I/home/casuser/Desktop/SuiteSparse/UFconfig/ -L/home/casuser/Desktop/SuiteSparse/CHOLMOD/Lib/libcholmod.a
 #MOBJECTS = ./MatrixLib/SparseMatrix.o ./MatrixLib/Matrix.o ./MatrixLib/SparseMatrixElement.o ./MatrixLib/MatrixLib.o
 INCLUDE =
 
-all: main
+all: st
 
-st : sparse_test.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o Timer.o
-	$(CCC) $(CCCFLAGS) sparse_test.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o Timer.o -o main
-
+st : sparse_test.o SparseMatrix.o SparseSymmMatrix.o Matrix.o DenseMatrix.o
+	$(CCC) $(CCCFLAGS) -L/home/casuser/Desktop/SuiteSparse/CHOLMOD/Lib/ sparse_test.o SparseMatrix.o SparseSymmMatrix.o Matrix.o DenseMatrix.o -o main -lcholmod
+	 
 sparse_test.o : sparse_test.cpp
 	$(CCC) $(CCCFLAGS) -c sparse_test.cpp $(LDFLAGS)
 
@@ -23,6 +23,9 @@ SparseMatrixElement.o : SparseMatrixElement.cpp SparseMatrixElement.h
 
 Matrix.o : Matrix.cpp Matrix.h
 	$(CCC) $(CCCFLAGS) -c Matrix.cpp $(LDFLAGS)
+	
+DenseMatrix.o : DenseMatrix.cpp DenseMatrix.h
+	$(CCC) $(CCCFLAGS) -c DenseMatrix.cpp $(LDFLAGS)
 	
 MatrixException.o : MatrixException.h MatrixException.cpp
 	$(CCC) $(CCCFLAGS) -c MatrixException.cpp $(LDFLAGS)

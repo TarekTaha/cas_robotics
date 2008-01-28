@@ -1,402 +1,115 @@
 #include "SparseMatrix.h"
 
-SparseMatrix::SparseMatrix(int rows, int cols){
-	this->rows = rows;
-	this->cols = cols;
-	for(int i = 0; i <= rows; ++i){
-		first_in_row[i] = 0;
-	}
+SparseMatrix::SparseMatrix(int rows, int cols, int zmax){
+	cholmod_start (&c);
+	A = cholmod_allocate_sparse(rows, cols, zmax + 2, true, true, 0, CHOLMOD_REAL, &c);
 }
 
 SparseMatrix::~SparseMatrix(){
-	//cout << "entering destructing" << endl;
-	//print();
-	remove_all_elements();
-	//cout << "exiting destructing" << endl;
+	cholmod_free_sparse(&A, &c);
+	cholmod_finish (&c);
 }
 
 SparseMatrix::SparseMatrix(const SparseMatrix& md){
-	rows = md.rows;
-	cols = md.cols;
-
-	SparseMatrixElement *row_ptr;
-	SparseMatrixElement *temp_ptr;
-	for(int i = 1; i <= md.rows; ++i){
-		row_ptr = md.first_in_row[i];
-		if(row_ptr){
-			first_in_row[i] = new SparseMatrixElement(row_ptr->row, row_ptr->col, row_ptr->value);
-			temp_ptr =first_in_row[i];
-			row_ptr = row_ptr->next_in_row;
-		}
-		else{
-			first_in_row[i] = 0;
-		}
-		while(row_ptr){
-			temp_ptr->next_in_row = new SparseMatrixElement(row_ptr->row, row_ptr->col, row_ptr->value);
-			row_ptr = row_ptr->next_in_row;
-			temp_ptr = temp_ptr->next_in_row;
-		}
-	}
+	cholmod_start (&c);
+	A =  cholmod_copy_sparse(md.A, &c);
 }
 
 SparseMatrix& SparseMatrix::operator=(const SparseMatrix& md){
-	remove_all_elements();
-
-	rows = md.rows;
-	cols = md.cols;
-	SparseMatrixElement *row_ptr;
-	SparseMatrixElement *temp_ptr;
-	for(int i = 1; i <= md.rows; ++i){
-		row_ptr = md.first_in_row[i];
-		if(row_ptr){
-			first_in_row[i] = new SparseMatrixElement(row_ptr->row, row_ptr->col, row_ptr->value);
-			temp_ptr =first_in_row[i];
-			row_ptr = row_ptr->next_in_row;
-		}
-		else{
-			first_in_row[i] = 0;
-		}
-		while(row_ptr){
-			temp_ptr->next_in_row = new SparseMatrixElement(row_ptr->row, row_ptr->col, row_ptr->value);
-			row_ptr = row_ptr->next_in_row;
-			temp_ptr = temp_ptr->next_in_row;
-		}
-	}
+	A =  cholmod_copy_sparse(md.A, &c);
 	return *this;
 }
 
-double SparseMatrix::get(int row, int column){
-	 if(row > rows || column > cols)
-	    throw MatrixException("Error in SparseMatrix::get(int row, int column, double value): trying to get element outside matrix");
-	 
-	 SparseMatrixElement *row_ptr;
-	 row_ptr = first_in_row[row];
-	 while(row_ptr){
-		 if(row_ptr->col == column){
-			 return row_ptr->value;
-		 }
-		 if(row_ptr->col > column){
-			 return 0;
-		 }
-		 row_ptr = row_ptr->next_in_row;
-	 }
-	 return 0;
-}
-void SparseMatrix::set(int row, int column, double value){
-	//cout << "set start" << endl;
-	if(!value)
-		return;
-	 if(row > rows || column > cols)
-	    throw MatrixException("Error in SparseMatrix::set(int row, int column, double value): trying to set element outside matrix");
-	SparseMatrixElement *row_ptr = first_in_row[row];
-	SparseMatrixElement *new_elem = new SparseMatrixElement(row, column, value);
-
-	if(!first_in_row[row]){
-		//cout << "set1" << endl;
-		first_in_row[row] = new_elem;
-	}
-	else if(first_in_row[row]->col > column){
-		//cout << "set2" << endl;
-		new_elem->next_in_row = first_in_row[row];
-		first_in_row[row] = new_elem;
-	}
-	else{
-		while(row_ptr->next_in_row){
-			//cout << "set3" << endl;
-			if(row_ptr->next_in_row->col > column){
-				if(row_ptr->col == column){
-					delete new_elem;
-					row_ptr->value = value;
-				}
-				else{
-
-					new_elem->next_in_row = row_ptr->next_in_row;
-					row_ptr->next_in_row = new_elem;
-				}
-				break;
-			}
-			row_ptr = row_ptr->next_in_row;
-		}
-		if(!row_ptr->next_in_row){
-			//cout << "set4" << endl;
-			if(row_ptr->col == column){
-				delete new_elem;
-				row_ptr->value = value;
-			}
-			else{
-				row_ptr->next_in_row = new_elem;
-			}
-		}
-	}
-	//cout << "set end" << endl;
+int SparseMatrix::get_cols() const{
+	return A->ncol;
 }
 
-void SparseMatrix::add(int row, int column, double value){
-	if(!value)
-		return;
-	if(row > rows || column > cols)
-		throw MatrixException("Error in SparseMatrix::add(int row, int column, double value): trying to set element outside matrix");
+int SparseMatrix::get_rows() const{
+	return A->nrow;
+}
+
+double SparseMatrix::get(int get_row, int get_col) const{
+	int *row = (int*)A->i;
+	int *col = (int*)A->p;
+	double *x = (double*)A->x;
+	int i = col[get_col - 1];
+	while(i < col[get_col]){
+		if(row[i] == get_row -1){
+			return x[i];
+		}
+		++i;
+	}
+	return 0;
+}
+
+void SparseMatrix::set(int set_row, int set_col, double val){
+	int *row = (int*)A->i;
+	int *col = (int*)A->p;
+	double *x = (double*)A->x;
+	int i = set_col;
+	int temp_col;
+	int start;
+
+	while(i < get_cols()){
+		++col[i];
+		++i;
+	}
+	++col[i];
+	start = col[set_col] - 2;
 	
-	SparseMatrixElement *row_ptr = first_in_row[row];
-	SparseMatrixElement *new_elem = new SparseMatrixElement(row, column, value);
-	if(!first_in_row[row]){
-		first_in_row[row] = new_elem;
+	while(start > col[set_col - 1] - 1 && set_row - 1 < row[start]){
+		--start;
 	}
-	else if(first_in_row[row]->col > column){
-		new_elem->next_in_row = first_in_row[row];
-		first_in_row[row] = new_elem;
+	if( set_row - 1 == row[start] && start != col[set_col - 1] - 1){
+		x[start] = val;
+		while(i >= set_col){
+			--col[i];
+			--i;
+		}
 	}
 	else{
-		while(row_ptr->next_in_row){
-			if(row_ptr->next_in_row->col > column){
-				if(row_ptr->col == column){
-					delete new_elem;
-					row_ptr->value += value;
-				}
-				else{
-					new_elem->next_in_row = row_ptr->next_in_row;
-					row_ptr->next_in_row = new_elem;
-				}
-				break;
-			}
-			row_ptr = row_ptr->next_in_row;
+		for(int j = col[i]; j > start; --j){
+			x[j + 1] = x[j];
+			row[j + 1] = row[j];
 		}
-		if(!row_ptr->next_in_row){
-			if(row_ptr->col == column){
-				delete new_elem;
-				row_ptr->value += value;
-			}
-			else{
-				row_ptr->next_in_row = new_elem;
-			}
-		}
-	}
-}
-void SparseMatrix::remove_row(int row){
-	SparseMatrixElement *row_ptr;
-	SparseMatrixElement *temp;
-		//cout << "here4" << endl;
-		row_ptr = first_in_row[row];
-		//cout << "here5" << endl;
-		while(row_ptr){
-			//cout << "here" << endl;
-			temp = row_ptr->next_in_row;
-			//cout << "here1" << endl;
-			delete row_ptr;
-			//cout << "here2" << endl;
-			row_ptr = temp;
-			//cout << "here3" << endl;
-		}
-		//cout << "here6" << endl;
-		first_in_row[row] = 0;
-		//cout << "here7" << endl;
-
-}
-void SparseMatrix::remove_all_elements(){
-	SparseMatrixElement *row_ptr;
-	SparseMatrixElement *temp;
-	//cout << "entering remove all" << endl;
-	for(int i = 1; i <=rows; ++i){
-		//cout << "here4" << endl;
-		row_ptr = first_in_row[i];
-		//cout << "here5" << endl;
-		while(row_ptr){
-			//cout << "here" << endl;
-			temp = row_ptr->next_in_row;
-			//cout << "here1" << endl;
-			delete row_ptr;
-			//cout << "here2" << endl;
-			row_ptr = temp;
-			//cout << "here3" << endl;
-		}
-		//cout << "here6" << endl;
-		first_in_row[i] = 0;
-		//cout << "here7" << endl;
-	}
-	//cout << "exiting remove all" << endl;
-}
-
-void SparseMatrix::print() const{
-	//cout << "Print " << cols << endl;
-
-	cout.precision(20);
-	SparseMatrixElement *row_ptr;
-	int last_col;
-	for(int i = 1; i <= rows; ++i){
-		last_col = 0;
-		row_ptr = first_in_row[i];
-		if(!first_in_row[i]){
-			for(int j = 1; j <= cols; ++j)
-				cout << "0 ";
-		}
-		else{
-			while(row_ptr){
-				//cout << "Print3 " << row_ptr->col<< " " << last_col << endl;
-				for(int j = last_col; j < row_ptr->col - 1; ++j){
-					cout << "0 ";
-				}
-				cout << row_ptr->value << " ";
-				if(!row_ptr->next_in_row){
-					//cout << "Print2 " << row_ptr->col<< " " << cols << endl;
-					for(int j = row_ptr->col; j < cols; ++j){
-						cout << "0 ";
-					}
-				}
-				last_col = row_ptr->col;
-				row_ptr = row_ptr->next_in_row;
-			}
-		}
-		cout << endl;
+		x[start + 1] = val;
+		row[start + 1] = set_row - 1;
 	}
 }
 
-void SparseMatrix::print_coord_format() const{
-	SparseMatrixElement *row_ptr;
-	for(int i = 1; i <= rows; ++i){
-		row_ptr = first_in_row[i];
-		while(row_ptr){
-			cout << "(" << row_ptr->col << "," << row_ptr->row << ")" << "  " << row_ptr->value << endl;
-			row_ptr = row_ptr->next_in_row;
-		}
-	}
+SparseMatrix trn(const SparseMatrix& m){
+	SparseMatrix result;
+	result.A = cholmod_transpose(m.A, 1, &result.c);
+	return result;
 }
 
-/*SparseMatrix operator+(SparseMatrix m1, const SparseMatrix& m2){
-	if(m1.rows != m2.rows)
-		throw MatrixException("Error in operator+(SparseMatrix m1, const SparseMatrix& m2): matices must have same dimensions");
-	if(m1.cols != m2.cols)
-		throw MatrixException("Error in operator+(SparseMatrix m1, const SparseMatrix& m2): matices must have same dimensions");
-
-	SparseMatrixElement *row_ptr;
-	for(int i = 1; i <= m2.rows; ++i){
-		row_ptr = m2.first_in_row[i];
-		while(row_ptr){
-			m1.add(row_ptr->row, row_ptr->col, row_ptr->value);
-			row_ptr = row_ptr->next_in_row;
-		}
-	}
-	return m1;
-}*/
+void SparseMatrix::print_coord() const{
+	cholmod_write_sparse(stdout, A, NULL, NULL, &c);
+}
 
 SparseMatrix operator+(const SparseMatrix& m1, const SparseMatrix& m2){
-	if(m1.rows != m2.rows)
-		throw MatrixException("Error in operator+(SparseMatrix m1, const SparseMatrix& m2): matices must have same dimensions");
-	if(m1.cols != m2.cols)
-		throw MatrixException("Error in operator+(SparseMatrix m1, const SparseMatrix& m2): matices must have same dimensions");
-	
-	SparseMatrix result(m1.rows, m1.cols);
-	SparseMatrixElement *row_ptr1;
-	SparseMatrixElement *row_ptr2;
-	SparseMatrixElement **row_ptr_result;
-	for(int i = 1; i <= m1.rows; ++i){
-		row_ptr1 = m1.first_in_row[i];
-		row_ptr2 = m2.first_in_row[i];
-		row_ptr_result = &result.first_in_row[i];
-		while(row_ptr1 && row_ptr2){
-			if(row_ptr1->col > row_ptr2->col){
-				*row_ptr_result = new SparseMatrixElement(row_ptr2->row, row_ptr2->col, row_ptr2->value);
-				row_ptr2 = row_ptr2->next_in_row;
-				row_ptr_result  = &((*row_ptr_result)->next_in_row);
-			}
-			else if(row_ptr1->col < row_ptr2->col){
-				*row_ptr_result = new SparseMatrixElement(row_ptr1->row, row_ptr1->col, row_ptr1->value);
-				row_ptr1 = row_ptr1->next_in_row;
-				row_ptr_result  = &((*row_ptr_result)->next_in_row);
-			}
-			else{
-				*row_ptr_result = new SparseMatrixElement(row_ptr1->row, row_ptr1->col, row_ptr1->value + row_ptr2->value);
-				row_ptr1 = row_ptr1->next_in_row;
-				row_ptr2 = row_ptr2->next_in_row;
-				row_ptr_result  = &((*row_ptr_result)->next_in_row);
-			}
-		}
-		while(row_ptr1){
-			*row_ptr_result = new SparseMatrixElement(row_ptr1->row, row_ptr1->col, row_ptr1->value);
-			row_ptr1 = row_ptr1->next_in_row;
-			row_ptr_result  = &((*row_ptr_result)->next_in_row);
-		}
-		while(row_ptr2){
-			*row_ptr_result = new SparseMatrixElement(row_ptr2->row, row_ptr2->col, row_ptr2->value);
-			row_ptr2 = row_ptr2->next_in_row;
-			row_ptr_result  = &((*row_ptr_result)->next_in_row);
-		}
-	}
+	SparseMatrix result;
+	double alpha[2] = {1, 1};
+	double beta[2] = {1, 1};
+	result.A = cholmod_add(m1.A, m2.A, alpha, beta, true, true, &result.c);
+	return result;
+}
+
+SparseMatrix operator-(const SparseMatrix& m1, const SparseMatrix& m2){
+	SparseMatrix result;
+	double alpha[2] = {1, 1};
+	double beta[2] = {-1, 1};
+	result.A = cholmod_add(m1.A, m2.A, alpha, beta, true, true, &result.c);
 	return result;
 }
 
 SparseMatrix operator*(const SparseMatrix& m1, const SparseMatrix& m2){
-	//cout << "entering operator*(const SparseMatrix& m1, const SparseMatrix& m2)" << endl;
-	if(m1.cols != m2.rows)
-		throw MatrixException("Error in operator*(const SparseMatrix& m1, const SparseMatrix& m2): wrong dimensions");
-	
-
-	SparseMatrix m3(trn(m2));
-
-	SparseMatrixElement *row_ptr1;
-	SparseMatrixElement *row_ptr3;
-	SparseMatrix result(m1.rows, m2.cols);
-	double sum;
-	for(int i = 1; i <= m1.rows; ++i){
-		for(int j = 1; j <= m3.rows; ++j){
-			sum = 0;
-			row_ptr1 = m1.first_in_row[i];
-			row_ptr3 = m3.first_in_row[j];
-			while(row_ptr1 && row_ptr3){
-				if(row_ptr1->col > row_ptr3->col){
-					row_ptr3 = row_ptr3->next_in_row;		
-				}
-				else if(row_ptr1->col < row_ptr3->col){
-					row_ptr1 = row_ptr1->next_in_row;		
-				}
-				else if(row_ptr1->col == row_ptr3->col){
-					sum += row_ptr1->value * row_ptr3->value;
-					row_ptr1 = row_ptr1->next_in_row;
-					row_ptr3 = row_ptr3->next_in_row;
-				}
-			}
-			if(sum){
-				result.set(i, j, sum);
-			}
-		}
-	}
-	row_ptr1 = 0;
-	row_ptr3 = 0;
-	//cout << "exiting operator*(const SparseMatrix& m1, const SparseMatrix& m2)" << endl;
+	SparseMatrix result;
+	result.A = cholmod_ssmult(m1.A, m2.A, 0, true, true, &result.c);
 	return result;
 }
 
-SparseMatrix trn(const SparseMatrix& m){
-	SparseMatrix result(m.cols, m.rows);
-	SparseMatrixElement *row_ptr;
 
-	for(int i = 1; i <= m.rows; ++i){
-		row_ptr = m.first_in_row[i];
-		while(row_ptr){
-			result.set(row_ptr->col, i, row_ptr->value);
-			row_ptr = row_ptr->next_in_row;
-		}
-	}
-	/*row_ptr = m.first_in_row[11];
-	row_ptr = row_ptr->next_in_row;
-	while(row_ptr){
-		result.set(row_ptr->col, row_ptr->row, row_ptr->value);
-		row_ptr = row_ptr->next_in_row;
-	}*/
-	return result;
-}
 
-void SparseMatrix::write_to_file(const char* filename){
-  ofstream file;
-  file.open(filename);
-  file.precision(30);
-  for(int i = 1; i <= rows; ++i){
-    for(int j = 1; j <= cols; ++j){
-      if(j != 1)
-        file << ",";
-      file << get(i,j);
-    }
-    file << endl;
-  }
-  file.close();
-}
+
 
