@@ -2,7 +2,7 @@
 
 LocalMap::LocalMap(){}
 
-LocalMap::LocalMap(const Matrix& X, const Matrix& P){
+LocalMap::LocalMap(const SparseMatrix& X, const SparseMatrix& P){
 	this->X = X;
 	this->P = P;
 }

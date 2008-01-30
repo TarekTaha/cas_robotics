@@ -14,8 +14,8 @@ void load_map(LocalMap& map, int index){
 	out << index;
 	string st_str = "SimulationData/localmap_"+ out.str() + "_st";
 	string P_str = "SimulationData/localmap_"+ out.str() + "_P";
-	map.P.read_from_file(P_str.c_str());
-	map.X.read_from_file(st_str.c_str());
+	map.P.read_from_delimited_file(P_str.c_str());
+	map.X.read_from_delimited_file(st_str.c_str());
 }
 
 int main(int argc, char * argv[])
@@ -23,9 +23,8 @@ int main(int argc, char * argv[])
 	MapFuser fuser;
 	LocalMap locMap;
 	load_map(locMap, 1);
-	locMap.P.write_to_file("SavedMatrices/Ploc");
 	fuser.fuse_first_map(locMap);
-	for(int i = 2; i <= 100; ++i){
+	for(int i = 2; i <= 30; ++i){
 		cout << "localmap: " << i <<endl;
 		load_map(locMap, i);
 		to_sparse_symm_matrix(locMap.P).write_to_file("SavedMatrices/Ploc");
@@ -42,19 +41,11 @@ int main(int argc, char * argv[])
 		tmp = "SavedMatrices/X" + out.str();
 		fuser.glb_map.X.write_to_file(tmp.c_str());
 	}
-	fuser.timer.print();
-	//fuser.glb_map.I.write_to_file("SavedMatrices/I");
-	//fuser.glb_map.i.write_to_file("SavedMatrices/i");
+	//fuser.timer.print();
+	fuser.glb_map.I.write_to_file("SavedMatrices/I1");
+	fuser.glb_map.i.write_to_file("SavedMatrices/i1");
 	cout << "done fusing" << endl;
 
-	typedef std::numeric_limits< long double > dl;
-	typedef std::numeric_limits< float > fl;
-
-	using namespace std;
-
-	cout << "double:\n";
-	cout << "\tdigits (bits):\t\t" << dl::digits << endl;
-	cout << "\tdigits (decimal):\t" << dl::digits10 << endl;
 
 	return 1;
 }

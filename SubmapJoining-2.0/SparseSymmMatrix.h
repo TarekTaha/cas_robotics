@@ -25,5 +25,7 @@ SparseSymmMatrix operator+(const SparseSymmMatrix&, const SparseSymmMatrix&);
 SparseSymmMatrix operator-(const SparseSymmMatrix&, const SparseSymmMatrix&);
 SparseSymmMatrix operator*(const SparseSymmMatrix&, const SparseSymmMatrix&);
 SparseSymmMatrix trn(const SparseSymmMatrix&);
+SparseSymmMatrix eye(int size);
+SparseSymmMatrix operator*(double, const SparseSymmMatrix&);
 
 #endif

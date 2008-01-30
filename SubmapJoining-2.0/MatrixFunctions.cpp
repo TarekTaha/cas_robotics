@@ -1,5 +1,5 @@
 #include "MatrixFunctions.h"
-
+/*
 Matrix to_dence_matrix(const SparseMatrix& md){
   Matrix result(md.rows, md.cols);
   SparseMatrixElement *row_ptr;
@@ -525,4 +525,75 @@ void set(SparseSymmMatrix& set_m, int row, int col, const SparseMatrix& m){
 			row_ptr = row_ptr->next_in_row;
 		}
 	}
+}
+*/
+
+CholeskyFactor cholesky(const SparseSymmMatrix& m){
+	CholeskyFactor result(m.get_rows());
+	result.c.final_ll = true;
+	result.c.nmethods = 1 ;
+	result.c.method [0].ordering = CHOLMOD_NATURAL ;
+	result.c.postorder = false ;
+
+	result.A = cholmod_analyze(m.A, &result.c);
+	cholmod_factorize(m.A, result.A, &result.c);
+	return result;
+}
+
+SparseMatrix solve_cholesky(const CholeskyFactor& L, const SparseMatrix& rhs){
+	SparseMatrix result;
+	//cout << "bla" << endl;
+	result.A = cholmod_spsolve(CHOLMOD_LDLt, L.A, rhs.A, &result.c);
+	//cout << "bla2" << endl;
+	return result;
+}
+
+SparseSymmMatrix inv(const SparseSymmMatrix& m){
+	SparseMatrix result;
+	result.c.final_ll = true;
+	result.c.nmethods = 1 ;
+	result.c.method [0].ordering = CHOLMOD_NATURAL ;
+	result.c.postorder = false ;
+	CholeskyFactor L;
+	L.A = cholmod_analyze(m.A, &result.c);
+	cholmod_factorize(m.A, L.A, &result.c);
+	result.A = cholmod_spsolve(CHOLMOD_LDLt, L.A, eye(m.get_rows()).A, &result.c);
+	
+	//CholeskyFactor L = cholesky(m);
+	//return to_sparse_symm_matrix(solve_cholesky(L, eye(m.get_rows())));
+	return to_sparse_symm_matrix(result);
+}
+
+SparseSymmMatrix to_sparse_symm_matrix(const SparseMatrix& m){
+	SparseSymmMatrix result;
+	result.A =  cholmod_copy_sparse(m.A, &m.c);
+	result.A->stype = 1;
+	cholmod_sort(result.A, &result.c);
+	return result;
+}
+
+SparseMatrix to_sparse_matrix_fast(const SparseSymmMatrix& m){
+	SparseMatrix result;
+	result.A =  cholmod_copy_sparse(m.A, &m.c);
+	result.A->stype = 0;
+	return result;
+}
+
+SparseSymmMatrix sqrt(const SparseSymmMatrix& m){
+	SparseSymmMatrix Y(m);
+	SparseSymmMatrix Z = eye(m.get_rows());
+	SparseSymmMatrix temp_Y;
+	for(int i = 0; i < 5; ++i){
+		temp_Y = Y;
+		//cout << "inv" << endl;
+		Y = 0.5*(Y + inv(Z));
+		Z = 0.5*(Z + inv(temp_Y));
+		//cout << "after inv" << endl;
+	}
+	return Y;
+}
+
+double max_eig(const SparseSymmMatrix& m){
+	//cout <<"Max eig" << endl;
+	return (m.get(1,1) + m.get(2,2))/2 + sqrt(4 * m.get(1,2) * m.get(2,1) + (m.get(1,1) - m.get(2,2)) * (m.get(1,1) - m.get(2,2)))/2;
 }

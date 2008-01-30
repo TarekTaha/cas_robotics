@@ -8,7 +8,7 @@
 #include "GlobalMap.h"
 #include "LocalMap.h"
 #include "MatrixFunctions.h"
-#include "Timer.h"
+//#include "Timer.h"
 
 
 using namespace std;
@@ -17,20 +17,20 @@ class MapFuser{
 	public:
 		MapFuser();
 		GlobalMap glb_map;
-		void update_map(const Matrix& obsX, const Matrix& obsP);
+		void update_map(const SparseMatrix& obsX, const SparseMatrix& obsP);
 		void fuse_map(LocalMap m);
 		void fuse_first_map(LocalMap m);
 		void set_potential_assosiations();
-		void add_new_beacons_and_robot_location_to_state(const Matrix& obsX);
-		Matrix get_part_of_X_for_assositation();
-		Matrix restore_part_of_P_for_assositation();
-		Matrix trans_cov_matrix_to_local_cordinate_system(const Matrix& P, const Matrix& X);
-		Matrix trans_state_matrix_to_local_cordinate_system(const Matrix& X);
-		void assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const Matrix& obsX, const Matrix& obsP);
+		void add_new_beacons_and_robot_location_to_state(const SparseMatrix& obsX);
+		SparseMatrix get_part_of_X_for_assositation();
+		SparseMatrix restore_part_of_P_for_assositation();
+		SparseMatrix trans_cov_matrix_to_local_cordinate_system(const SparseMatrix& P, const SparseMatrix& X);
+		SparseMatrix trans_state_matrix_to_local_cordinate_system(const SparseMatrix& X);
+		void assosiate_beacons(const SparseMatrix& beacX, const SparseMatrix& beacP, const SparseMatrix& obsX, const SparseMatrix& obsP);
 		double submap_radius(const LocalMap& map);
 		double distance_to_submap(int map);
-		void reorder_submaps();
-		void compute_cholesky_factorization();
+		//void reorder_submaps();
+		//void compute_cholesky_factorization();
 		double wrap(double angle);
 
 		//void nearest_neightbour(SparseMatrix bec)
@@ -51,7 +51,7 @@ class MapFuser{
 		double local_robot_uncertainty[1000];
 		int num_elements_updated_in_I;
 		
-		Timer timer;
+		//Timer timer;
 };
 
 #endif
