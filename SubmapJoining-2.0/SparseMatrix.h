@@ -10,23 +10,35 @@ using namespace std;
 
 class SparseMatrix : public Matrix{
   public:
-    SparseMatrix(int rows = 0, int cols = 0, int zmax = 0);
-    SparseMatrix(const SparseMatrix&);
-    ~SparseMatrix();
-    SparseMatrix& operator=(const SparseMatrix& m);
-	cholmod_sparse *A;
-	mutable cholmod_common c;
+	  SparseMatrix();
+	  SparseMatrix(int rows, int cols, int zmax);
+	  SparseMatrix(const SparseMatrix&);
+	  ~SparseMatrix();
+	  SparseMatrix& operator=(const SparseMatrix& m);
+	  cholmod_sparse *A;
+	  mutable cholmod_common c;
 
-	virtual int get_cols() const;
-	virtual int get_rows() const;
-    virtual void set(int, int, double);
-    virtual double get(int, int) const;
-    virtual void print_coord() const;
+	  virtual int get_cols() const;
+	  virtual int get_rows() const;
+	  virtual void set(int, int, double);
+	  virtual double get(int, int) const;
+	  virtual void read_from_file(const char* filename);
+	  void read_from_delimited_file(const char* filename);
+	  virtual void print_coord() const;
+	  SparseMatrix get_submatrix(int*,int, int*, int) const;
+	  SparseMatrix get_submatrix(int, int, int, int) const;
+    	void clear();
+    	int max_num_nonzero();
 };
 
 SparseMatrix operator+(const SparseMatrix&, const SparseMatrix&);
 SparseMatrix operator-(const SparseMatrix&, const SparseMatrix&);
 SparseMatrix operator*(const SparseMatrix&, const SparseMatrix&);
+SparseMatrix operator*(double, const SparseMatrix&);
 SparseMatrix trn(const SparseMatrix&);
+SparseMatrix sqrt(const SparseMatrix&);
+SparseMatrix vertcat(const SparseMatrix&, const SparseMatrix&);
+SparseMatrix horzcat(const SparseMatrix&, const SparseMatrix&);
+SparseMatrix zeros(int rows, int cols);
 
 #endif

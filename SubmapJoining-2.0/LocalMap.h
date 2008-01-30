@@ -1,4 +1,4 @@
-#include "Matrix.h"
+#include "SparseMatrix.h"
 
 #ifndef LOCALMAP
 #define LOCALMAP
@@ -6,9 +6,9 @@
 class LocalMap{
 	public:
 		LocalMap();
-		LocalMap(const Matrix& X, const Matrix& P);
-		Matrix X;
-		Matrix P;
+		LocalMap(const SparseMatrix& X, const SparseMatrix& P);
+		SparseMatrix X;
+		SparseMatrix P;
 };
 
 #endif

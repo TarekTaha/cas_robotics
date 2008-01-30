@@ -4,8 +4,62 @@ MapFuser::MapFuser(){
 	num_elements_updated_in_I = 0;
 }
 
-void MapFuser::compute_cholesky_factorization(){
-	part_cholesky(glb_map.L, glb_map.I, num_elements_updated_in_I, timer);
+void MapFuser::fuse_map(LocalMap m){
+	if(m.P.get(1,1) < 1e-8 || m.P.get(2,2) < 1e-8 || m.P.get(3,3) < 1e-8){
+		m.P.set(1,1, m.P.get(1,1) + 1e-8);
+		m.P.set(2,2, m.P.get(2,2) + 1e-8);
+		m.P.set(3,3, m.P.get(3,3) + 1e-8);
+	}
+	
+
+	radius_of_submap[num_submaps] = submap_radius(m);
+	cout << "here" << endl;
+	m.P.get_submatrix(4,4, m.P.get_rows(), m.P.get_cols());
+	cout << "here" << endl;
+	SparseMatrix obsP = m.P.get_submatrix(4,4, m.P.get_rows(), m.P.get_cols());
+	SparseMatrix obsX = m.X.get_submatrix(4, 1, m.X.get_rows(), 1);
+	set_potential_assosiations();
+	SparseMatrix P = restore_part_of_P_for_assositation();
+	//cout << "before " << endl;
+	global_robot_uncertainty[num_submaps] = 3 * max_eig(sqrt(to_sparse_symm_matrix(P.get_submatrix(1, 1, 2, 2))));
+	//cout << "here" << endl;
+	local_robot_uncertainty[num_submaps] = 3 * max_eig(sqrt(to_sparse_symm_matrix(m.P.get_submatrix(1, 1, 2, 2))));
+	//cout << "here1.1" << endl;
+	SparseMatrix X = get_part_of_X_for_assositation();
+	//cout << "here2" << endl;
+	SparseMatrix beacP = trans_cov_matrix_to_local_cordinate_system(P,X);
+	//cout << "here3" << endl;
+	SparseMatrix beacX = trans_state_matrix_to_local_cordinate_system(X);
+
+	beacX.write_to_file("SavedMatrices/beacX1");
+	beacP.write_to_file("SavedMatrices/beacP1");
+	obsX.write_to_file("SavedMatrices/obsX1");
+	obsP.write_to_file("SavedMatrices/obsP1");
+	assosiate_beacons(beacX, beacP, obsX, obsP);
+	//cout << "here4" << endl;
+	add_new_beacons_and_robot_location_to_state(m.X);
+	
+	update_map(m.X, m.P);
+	//cout << "here5" << endl;
+	glb_map.L = cholesky(glb_map.I);
+	//cout << "here6" << endl;
+	glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
+	//cout << "here7" << endl;
+	/*if(num_elements_updated_in_I > 250){
+		glb_map.L = cholesky(glb_map.I, timer);
+		glb_map.X = solve_cholesky2(glb_map.L, glb_map.i, timer);
+		reorder_submaps();
+		glb_map.L = cholesky(glb_map.I, timer);
+		
+	}
+	else{
+		compute_cholesky_factorization();
+		glb_map.X = solve_cholesky2(glb_map.L, glb_map.i, timer);
+	}*/
+}
+
+//void MapFuser::compute_cholesky_factorization(){
+	//part_cholesky(glb_map.L, glb_map.I, num_elements_updated_in_I, timer);
 	//cout << glb_map.I.rows - num_elements_updated_in_I << endl;
 	//SparseMatrix chol_new;
 	/*for(int i = 1; i <=num_elements_updated_in_I; ++i){
@@ -28,7 +82,7 @@ void MapFuser::compute_cholesky_factorization(){
 	glb_map.L.print();
 	cout << "should be" << endl;
 	(cholesky(glb_map.I, 1)).print();*/
-}
+//
 
 double MapFuser::wrap(double angle){
 	double PI = 3.14159265358979;
@@ -41,7 +95,7 @@ double MapFuser::wrap(double angle){
 	return angle;
 }
 
-void MapFuser::reorder_submaps(){
+/*void MapFuser::reorder_submaps(){
 	double dist[1000];
 	int order[1000];
 	int temp_index;
@@ -192,15 +246,15 @@ void MapFuser::reorder_submaps(){
 		cout << place_of_beacon[i] << " ";
 	}
 	cout << endl;
-}
+}*/
 
 double MapFuser::distance_to_submap(int map){
 	//cout << "dist start" << endl;
 	if(map == num_submaps - 1){
 		return 0;
 	}
-	double rx = glb_map.X.get( glb_map.X.rows - 2, 1);
-	double ry = glb_map.X.get( glb_map.X.rows - 1, 1);
+	double rx = glb_map.X.get( glb_map.X.get_rows() - 2, 1);
+	double ry = glb_map.X.get( glb_map.X.get_rows() - 1, 1);
 	//cout << "dist1" << endl;
 	double mx, my;
 	if(map == 0){
@@ -220,8 +274,8 @@ double MapFuser::distance_to_submap(int map){
 void MapFuser::set_potential_assosiations(){ //const Matrix& P_glb_robot, const Matrix& P_loc_robot){
 	num_potential_assosiations = 0;
 	double x_beac, y_beac, dist_beac;
-	double rx = glb_map.X.get( glb_map.X.rows - 2, 1);
-	double ry = glb_map.X.get( glb_map.X.rows - 1, 1);
+	double rx = glb_map.X.get( glb_map.X.get_rows() - 2, 1);
+	double ry = glb_map.X.get( glb_map.X.get_rows() - 1, 1);
 	double glb_rob_uncertanty = 0;//max_eig(sqrt(P_glb_robot));
 	double loc_rob_uncertanty = 0;//max_eig(sqrt(P_loc_robot));
 	for(int i = 0; i < num_submaps; ++i){
@@ -249,18 +303,15 @@ void MapFuser::set_potential_assosiations(){ //const Matrix& P_glb_robot, const 
 	for(int i = 0; i < num_potential_assosiations; ++i){
 		//cout << potential_assosiation_beacons[i] << endl;
 	}
-	/*for(int i = 0; i <= num_beacons; ++i){
-		potential_assosiation_beacons[i] = i;
-	}
-	num_potential_assosiations = num_beacons;*/
+
 }
 
-Matrix MapFuser::get_part_of_X_for_assositation(){
+SparseMatrix MapFuser::get_part_of_X_for_assositation(){
 	int size = num_potential_assosiations;
-	Matrix result(2*size + 3, 1);
-	result.set(1, 1, glb_map.X.get(glb_map.X.rows - 2	, 1));
-	result.set(2, 1, glb_map.X.get(glb_map.X.rows - 1	, 1));
-	result.set(3, 1, glb_map.X.get(glb_map.X.rows		, 1));
+	SparseMatrix result(2*size + 3, 1, 2*size + 3);
+	result.set(1, 1, glb_map.X.get(glb_map.X.get_rows() - 2	, 1));
+	result.set(2, 1, glb_map.X.get(glb_map.X.get_rows() - 1	, 1));
+	result.set(3, 1, glb_map.X.get(glb_map.X.get_rows()		, 1));
 	for(int i = 0; i < size; ++i){
 		for(int k = 0; k < 2; ++k){
 			result.set(2 * i + k + 4, 1, glb_map.X.get(place_of_beacon[potential_assosiation_beacons[i]] + k, 1));
@@ -269,48 +320,41 @@ Matrix MapFuser::get_part_of_X_for_assositation(){
 	return result;
 }
 
-Matrix MapFuser::restore_part_of_P_for_assositation(){
+SparseMatrix MapFuser::restore_part_of_P_for_assositation(){
 	int size = num_potential_assosiations;
-	Matrix result(2*size + 3, 2*size + 3);
-	SparseMatrix rhs(glb_map.I.rows, 1);
+	SparseMatrix result(2*size + 3, 2*size + 3, (2*size + 3)*(2*size + 3));
+	SparseMatrix rhs(glb_map.I.get_rows(), 1, glb_map.I.get_rows());
 	SparseMatrix x;
+	//solve_cholesky(glb_map.L, eye(glb_map.I.get_rows())).print();
 	for(int i = 0; i < size; ++i){
 		for(int k = 0; k < 2; ++k){
-			rhs.remove_all_elements();
+			rhs.clear();
 			rhs.set(place_of_beacon[potential_assosiation_beacons[i]] + k, 1, 1);
-			timer.start(30);
-			x = solve_cholesky2(glb_map.L, rhs, timer);
-			timer.stop(30);
+
+			x = solve_cholesky(glb_map.L, rhs);
 			for(int j = 0; j < 3; ++j){
-				if(x.first_in_row[rhs.rows - 2 + j]){
-					result.values[j][2 * i + k + 3] = x.first_in_row[rhs.rows - 2 + j]->value;
-				}
+				result.set(j + 1, 2 * i + k + 4, x.get(rhs.get_rows() - 2 + j, 1));
 			}
 			for(int j = 0; j < size; ++j){
 				for(int m = 0; m < 2; ++m){
-					if(x.first_in_row[place_of_beacon[potential_assosiation_beacons[j]] + m]){
-						//cout << "m : " << x.first_in_row[2 * potential_assosiation_beacons[j] + 1 + m]->value << endl;
-						result.values[2 * j + m + 3][2 * i + k + 3] = x.first_in_row[place_of_beacon[potential_assosiation_beacons[j]] + m]->value;
-					}
+					//result.values[2 * j + m + 3][2 * i + k + 3] = x.first_in_row[place_of_beacon[potential_assosiation_beacons[j]] + m]->value;
+					result.set(2 * j + m + 4,2 * i + k + 4, x.get(place_of_beacon[potential_assosiation_beacons[j]] + m, 1));
 				}
 			}	
 		}
 	}
 	for(int i = 0; i < 3; ++i){
-		rhs.remove_all_elements();
-		rhs.set(rhs.rows - 2 + i, 1, 1);
-		x = solve_cholesky2(glb_map.L, rhs, timer);
+		rhs.clear();
+		rhs.set(rhs.get_rows() - 2 + i, 1, 1);
+		x = solve_cholesky(glb_map.L, rhs);
 		for(int j = 0; j < 3; ++j){
-			if(x.first_in_row[rhs.rows - 2 + j]){
-				result.values[j][i] = x.first_in_row[rhs.rows - 2 + j]->value;
-			}
+			//result.values[j][i] = x.first_in_row[rhs.rows - 2 + j]->value;
+			result.set(j + 1, i + 1, x.get(rhs.get_rows() - 2 + j, 1));
 		}
 		for(int j = 0; j < size; ++j){
 			for(int m = 0; m < 2; ++m){
-				if(x.first_in_row[place_of_beacon[potential_assosiation_beacons[j]] + m]){
-					//cout << "m : " << x.first_in_row[2 * potential_assosiation_beacons[j] + 1 + m]->value << endl;
-					result.values[2 * j + m + 3][i] = x.first_in_row[place_of_beacon[potential_assosiation_beacons[j]] + m]->value;
-				}
+				//result.values[2 * j + m + 3][i] = x.first_in_row[place_of_beacon[potential_assosiation_beacons[j]] + m]->value;
+				result.set(2 * j + m + 4, i + 1, x.get(place_of_beacon[potential_assosiation_beacons[j]] + m, 1));
 			}
 		}	
 	}
@@ -318,122 +362,36 @@ Matrix MapFuser::restore_part_of_P_for_assositation(){
 	return result;
 }
 
-void MapFuser::fuse_map(LocalMap m){
-	if(m.P.values[0][0] < 1e-8 || m.P.values[1][1] < 1e-8 || m.P.values[2][2] < 1e-8){
-		m.P.values[0][0] += 1e-8;
-		m.P.values[1][1] += 1e-8;
-		m.P.values[2][2] += 1e-8;
-	}
-	radius_of_submap[num_submaps] = submap_radius(m);
-	Matrix obsP = m.P.get_sub_matrix(4,4, m.P.rows, m.P.columns);
-	Matrix obsX = m.X.get_sub_matrix(4, 1, m.X.rows, 1);
 
-	timer.start(1);
-	set_potential_assosiations();
-	timer.stop(1);
-
-	timer.start(2);
-	Matrix P = restore_part_of_P_for_assositation();
-	timer.stop(2);
-	
-	global_robot_uncertainty[num_submaps] = 3 * max_eig(sqrt(P.get_sub_matrix(1, 1, 2, 2)));
-	local_robot_uncertainty[num_submaps] = 3 * max_eig(sqrt(m.P.get_sub_matrix(1, 1, 2, 2)));
-
-	timer.start(3);
-	Matrix X = get_part_of_X_for_assositation();
-	Matrix beacP = trans_cov_matrix_to_local_cordinate_system(P,X);
-	Matrix beacX = trans_state_matrix_to_local_cordinate_system(X);
-	timer.stop(3);
-
-	timer.start(4);
-	assosiate_beacons(beacX, beacP, obsX, obsP);
-	timer.stop(4);
-	
-	timer.start(5);
-	add_new_beacons_and_robot_location_to_state(m.X);
-	timer.stop(5);
-	
-	timer.start(6);
-	update_map(m.X, m.P);
-	timer.stop(6);
-	
-	
-	if(num_elements_updated_in_I > 250){
-		//cout << "here7" << endl;
-		timer.start(7);
-		glb_map.L = cholesky(glb_map.I, timer);
-		glb_map.X = solve_cholesky2(glb_map.L, glb_map.i, timer);
-		reorder_submaps();
-		glb_map.L = cholesky(glb_map.I, timer);
-		timer.stop(7);
-		
-	}
-	else{
-		timer.start(8);
-		compute_cholesky_factorization();
-		timer.stop(8);
-		timer.start(9);
-		glb_map.X = solve_cholesky2(glb_map.L, glb_map.i, timer);
-		timer.stop(9);
-		
-	}
-}
 
 void MapFuser::fuse_first_map(LocalMap m){
 	//add a bit to P to avoid singularity
-	if(m.P.values[0][0] < 1e-8 || m.P.values[1][1] < 1e-8 || m.P.values[2][2] < 1e-8){
-		m.P.values[0][0] += 1e-8;
-		m.P.values[1][1] += 1e-8;
-		m.P.values[2][2] += 1e-8;
+	if(m.P.get(1,1) < 1e-8 || m.P.get(2,2) < 1e-8 || m.P.get(3,3) < 1e-8){
+		m.P.set(1,1, m.P.get(1,1) + 1e-8);
+		m.P.set(2,2, m.P.get(2,2) + 1e-8);
+		m.P.set(3,3, m.P.get(3,3) + 1e-8);
 	}
-
+	
 	radius_of_submap[0] = submap_radius(m);
-	double temp1 = m.X.values[0][0];
-	double temp2 = m.X.values[1][0];
-	double temp3 = m.X.values[2][0];
-	for(int j = 0; j < m.X.rows - 3; ++j){
-		m.X.values[j][0] = m.X.values[j + 3][0];
+	int set[m.P.get_rows()];
+	int set2[1] = {0};
+	for(int i = 0; i < m.P.get_rows() - 3; ++i){
+		set[i] = i + 3;
 	}
-	m.X.values[m.X.rows - 3][0] = temp1;
-	m.X.values[m.X.rows - 2][0] = temp2;
-	m.X.values[m.X.rows - 1][0] = temp3;
-	for(int i = 0; i < m.P.columns; ++i){
-		temp1 = m.P.values[0][i];
-		temp2 = m.P.values[1][i];
-		temp3 = m.P.values[2][i];
-		for(int j = 0; j < m.P.rows - 3; ++j){
-    		m.P.values[j][i] = m.P.values[j + 3][i];
-    	}
-		m.P.values[m.P.rows - 3][i] = temp1;
-		m.P.values[m.P.rows - 2][i] = temp2;
-		m.P.values[m.P.rows - 1][i] = temp3;
-	}
-	for(int i = 0; i < m.P.rows; ++i){
-		temp1 = m.P.values[i][0];
-		temp2 = m.P.values[i][1];
-		temp3 = m.P.values[i][2];
-		for(int j = 0; j < m.P.columns - 3; ++j){
-    		m.P.values[i][j] = m.P.values[i][j + 3];
-    	}
-		m.P.values[i][m.P.columns - 3] = temp1;
-		m.P.values[i][m.P.columns - 2] = temp2;
-		m.P.values[i][m.P.columns - 1] = temp3;
-	}
-	//m.P.print();
-	//m.P.write_to_file("SavedMatrices/updP");
-	//inv(m.P).write_to_file("SavedMatrices/updPinv");
-	//(inv(m.P) - inv(inv(inv(inv(inv(m.P)))))).print();
-	//inv(inv(inv(inv(inv(inv(inv(m.P))))))).write_to_file("SavedMatrices/updPsinv");
-	//m.X.write_to_file("SavedMatrices/X");
-    glb_map.I = to_sparse_symm_matrix(inv(m.P));
-    glb_map.i = to_sparse_matrix(inv(m.P)* m.X);
-    glb_map.L = cholesky(glb_map.I, timer);
-   // glb_map.L.print();
+	set[m.P.get_rows() - 3] = 0;
+	set[m.P.get_rows() - 2] = 1;
+	set[m.P.get_rows() - 1] = 2;
+	m.P = m.P.get_submatrix(set, m.P.get_rows(), set, m.P.get_rows());
+	m.X = m.X.get_submatrix(set, m.P.get_rows(), set2, 1);
+	
+    glb_map.I = inv(to_sparse_symm_matrix(m.P));
+    glb_map.i = inv(to_sparse_symm_matrix(m.P))* m.X;
+    glb_map.L = cholesky(glb_map.I);
 
-    glb_map.X = to_sparse_matrix(m.X);
+    glb_map.X = m.X;
     
     num_submaps = 1;
-    num_beacons = (m.P.rows - 3)/2;
+    num_beacons = (m.P.get_rows() - 3)/2;
     num_beacons_in_submap[0] = num_beacons;
     for(int i = 0; i <= num_beacons; ++i){
     	place_of_beacon[i] = 2 * i + 1;
@@ -443,13 +401,13 @@ void MapFuser::fuse_first_map(LocalMap m){
     global_robot_uncertainty[0] = 0;
 }
 
-Matrix MapFuser::trans_cov_matrix_to_local_cordinate_system(const Matrix& P, const Matrix& X){
+SparseMatrix MapFuser::trans_cov_matrix_to_local_cordinate_system(const SparseMatrix& P, const SparseMatrix& X){
 	//robot pos is first in X and will be (0,0,0) in the new system 
 	double xr = X.get(1, 1);
 	double yr = X.get(2, 1);
 	double fir = X.get(3, 1);
-	Matrix jh(X.rows - 3, X.rows);
-	int num_beacons = (X.rows -3)/2;
+	SparseMatrix jh(X.get_rows() - 3, X.get_rows(), (X.get_rows() - 3) * X.get_rows());
+	int num_beacons = (X.get_rows() -3)/2;
 	double dx, dy;
 	for(int i = 1; i <= num_beacons; ++i){
 		dx = X.get(3 + 2*i - 1, 1) - xr;
@@ -470,14 +428,14 @@ Matrix MapFuser::trans_cov_matrix_to_local_cordinate_system(const Matrix& P, con
 	return jh*P*trn(jh);
 }
 
-Matrix MapFuser::trans_state_matrix_to_local_cordinate_system(const Matrix& X){
+SparseMatrix MapFuser::trans_state_matrix_to_local_cordinate_system(const SparseMatrix& X){
 	
 	double xr = X.get(1, 1);
 	double yr = X.get(2, 1);
 	double fir = X.get(3, 1);
-	int num_beacons = (X.rows -3)/2;
+	int num_beacons = (X.get_rows() -3)/2;
 	double dx, dy;
-	Matrix result(X.rows - 3, 1);
+	SparseMatrix result(X.get_rows() - 3, 1, X.get_rows() - 3);
 	for(int i = 1; i <= num_beacons; ++i){
 		dx=X.get(2*i + 2, 1) - xr;
 		dy=X.get(2*i + 3, 1) - yr;    
@@ -488,13 +446,13 @@ Matrix MapFuser::trans_state_matrix_to_local_cordinate_system(const Matrix& X){
 	return result;
 }
 
-void MapFuser::assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const Matrix& obsX, const Matrix& obsP){
+void MapFuser::assosiate_beacons(const SparseMatrix& beacX, const SparseMatrix& beacP, const SparseMatrix& obsX, const SparseMatrix& obsP){
 
-	int num_obs = obsP.rows/2;
-	int num_beac = beacP.rows/2;
+	int num_obs = obsP.get_rows()/2;
+	int num_beac = beacP.get_rows()/2;
 	double r_obs, b_obs, r_beac, b_beac;
-	Matrix cov_obs, cov_beac, totalcov;
-	Matrix innov(2,1);
+	SparseSymmMatrix cov_obs, cov_beac, totalcov;
+	SparseMatrix innov(2,1, 2);
 	double mahadist, mahadist_new;
 	num_matches = 0;
 	for(int j = 1; j <= num_obs; ++j){
@@ -502,17 +460,19 @@ void MapFuser::assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const
 
 	    r_obs = obsX.get(j*2-1, 1);
 	    b_obs = obsX.get(j*2, 1);
+	    //cout << "obs pos: " << r_obs << " " << b_obs << endl;
 		if(j == 10){
 			//cout << "pos obs: " << r_obs << " " << b_obs << endl;
 		}
-	    cov_obs = obsP.get_sub_matrix(j*2-1,j*2-1,j*2,j*2);  // covariance matrix of the j-th obs
+	    cov_obs = to_sparse_symm_matrix(obsP.get_submatrix(j*2-1,j*2-1,j*2,j*2));  // covariance matrix of the j-th obs
 	    for(int i = 1; i <= num_beac; ++i){
 	        r_beac = beacX.get(i*2-1, 1);
 	        b_beac = beacX.get(i*2, 1);
+	        //cout << "beac pos: " << r_beac << " " << b_beac << endl;
 	        if(j == 10){
 	        	//cout << "pos beac: " << r_beac << " " << b_beac << endl;
 	        }
-	        cov_beac = beacP.get_sub_matrix(i*2-1,i*2-1,i*2,i*2);  // covariance matrix of the i-th beac
+	        cov_beac = to_sparse_symm_matrix(beacP.get_submatrix(i*2-1,i*2-1,i*2,i*2));  // covariance matrix of the i-th beac
 	        // compute Mahalanobis distance from j-th obs to i-th beac
 	        innov.set(1,1, r_beac-r_obs);
 	        innov.set(2,1, b_beac-b_obs);
@@ -550,57 +510,61 @@ void MapFuser::assosiate_beacons(const Matrix& beacX, const Matrix& beacP, const
 	}
 }
 
-void MapFuser::add_new_beacons_and_robot_location_to_state(const Matrix& obsX){
-	int num_obs = (obsX.rows - 3)/2;
-	double xr1 = glb_map.X.get(glb_map.X.rows - 2	, 1);
-	double yr1 = glb_map.X.get(glb_map.X.rows - 1	, 1);
-	double fir1 = glb_map.X.get(glb_map.X.rows		, 1);
+void MapFuser::add_new_beacons_and_robot_location_to_state(const SparseMatrix& obsX){
+	int num_obs = (obsX.get_rows() - 3)/2;
+	double xr1 = glb_map.X.get(glb_map.X.get_rows() - 2	, 1);
+	double yr1 = glb_map.X.get(glb_map.X.get_rows() - 1	, 1);
+	double fir1 = glb_map.X.get(glb_map.X.get_rows()		, 1);
 	double xj;
 	double yj;
-	
+	int num_new = 0;
+	for(int i = 0; i < num_obs; ++i){
+		if(assosiations[i] == -100){
+			++num_new;
+		}
+	}
+	SparseMatrix newX(2 * num_new + 3, 1, 2 * num_new + 3);
+	//SparseMatrix newI(glb_map.I.get_rows() + 2 * num_obs + 3, glb_map.I.get_cols() + 2 * num_obs + 3, glb_map.I.max_num_nonzero());
+	//SparseMatrix newi(glb_map.i.get_rows() + 2 * num_obs + 3, 1, glb_map.i.max_num_nonzero());
 	submaps_first_beacon[num_submaps] = num_beacons;
-	index_of_submap[num_submaps] = glb_map.X.rows + 1;
+	index_of_submap[num_submaps] = glb_map.X.get_rows() + 1;
 	num_beacons_in_submap[num_submaps] = 0;
+	int j = 0;
 	for(int i = 0; i < num_obs; ++i){
 		if(assosiations[i] == -100){
 			//cout << "i: " << i << endl;
 			xj = obsX.get(2*i + 4, 1);
 			yj =  obsX.get(2*i + 5, 1);
-			glb_map.X.rows += 2;
-			glb_map.I.rows += 2;
-			glb_map.I.cols += 2;
-			glb_map.i.rows += 2;
-			glb_map.X.set(glb_map.X.rows - 1, 1, xr1 + xj * cos(fir1) - yj * sin(fir1));
-			glb_map.X.set(glb_map.X.rows	, 1, yr1 + yj * cos(fir1) + xj * sin(fir1));
-			place_of_beacon[num_beacons] = glb_map.X.rows - 1;
+			newX.set(2 * j + 1, 1, xr1 + xj * cos(fir1) - yj * sin(fir1));
+			newX.set(2 * j + 2, 1, yr1 + yj * cos(fir1) + xj * sin(fir1));
+			place_of_beacon[num_beacons] = glb_map.X.get_rows() + 1 + 2 * j;
 			assosiations[i] = num_beacons;
 			++num_matches;
 			++num_beacons;
 			++num_beacons_in_submap[num_submaps];
+			++j;
 		}
 	}
-	glb_map.X.rows += 3;
-	glb_map.I.rows += 3;
-	glb_map.I.cols += 3;
-	glb_map.i.rows += 3;
 	double xr2 = obsX.get(1	, 1);
 	double yr2 = obsX.get(2	, 1);
 	double fir2 = obsX.get(3, 1);
-	glb_map.X.set(glb_map.X.rows - 2, 1, xr1 + xr2 * cos(fir1) - yr2 * sin(fir1));
-	glb_map.X.set(glb_map.X.rows - 1, 1, yr1 + yr2 * cos(fir1) + xr2 * sin(fir1));
-	
+	newX.set(2 * num_new + 1, 1, xr1 + xr2 * cos(fir1) - yr2 * sin(fir1));
+	newX.set(2 * num_new + 2, 1, yr1 + yr2 * cos(fir1) + xr2 * sin(fir1));
+	newX.set(2 * num_new + 3, 1, wrap(fir1 + fir2));
 
-	glb_map.X.set(glb_map.X.rows	, 1, wrap(fir1 + fir2));
 
+	glb_map.X = vertcat(glb_map.X, newX);
+	glb_map.i = vertcat(glb_map.i, zeros(2 * num_new + 3, 1));
 	
-	
+	SparseMatrix temp = vertcat(to_sparse_matrix_fast(glb_map.I), zeros(2 * num_new + 3, glb_map.I.get_cols()));
+	glb_map.I = to_sparse_symm_matrix(horzcat(temp, zeros(temp.get_rows(), 2 * num_new + 3)));
 	++num_submaps;
 }
 
-void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
-	int num_obs = (obsX.rows - 3)/2;
-	int index_robot1 = glb_map.X.rows - 2 * num_beacons_in_submap[num_submaps - 1] - 5;
-	int index_robot2 = glb_map.X.rows - 2;
+void MapFuser::update_map(const SparseMatrix& obsX, const SparseMatrix& obsP){
+	int num_obs = (obsX.get_rows() - 3)/2;
+	int index_robot1 = glb_map.X.get_rows() - 2 * num_beacons_in_submap[num_submaps - 1] - 5;
+	int index_robot2 = glb_map.X.get_rows() - 2;
 	double xi, yi;
 	double xr1 = glb_map.X.get(index_robot1		, 1);
 	double yr1 = glb_map.X.get(index_robot1 + 1	, 1);
@@ -611,8 +575,8 @@ void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
 	//cout << xr1 << " "<< yr1 << " "<< fir1 << " "<< xr2 << " "<< yr2 << " "<< fir2 << " " << endl;
 	
 	
-	SparseMatrix jh(2 * num_obs + 3, glb_map.I.rows);
-	Matrix H(2 * num_obs + 3, 1);
+	SparseMatrix jh(2 * num_obs + 3, glb_map.I.get_rows(), (2 + 3) * (2 * num_obs + 3) + 9);
+	SparseMatrix H(2 * num_obs + 3, 1, 2 * num_obs + 3);
 	
 	//the first three rows (robot) of jacobian
 	jh.set(1, index_robot1		, -cos(fir1));
@@ -658,27 +622,27 @@ void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
 		//}
 	}
 	//cout << "here1" << endl;
-	//jh.write_to_file("SavedMatrices/jh");
+	jh.write_to_file("SavedMatrices/jh1");
 	//cout << "here2" << endl;
-	//H.write_to_file("SavedMatrices/H");
+	H.write_to_file("SavedMatrices/H1");
 	//glb_map.X.write_to_file("SavedMatrices/X");
 	//obsX.write_to_file("SavedMatrices/obsX");
 	//glb_map.i.write_to_file("SavedMatrices/iInnan");
 	//cout << "rows/cols " << glb_map.I.rows << "/" << glb_map.I.cols << endl;
 
-	SparseSymmMatrix I_new = to_sparse_symm_matrix(trn(jh) * inv(obsP) * jh);
+	SparseSymmMatrix I_new = to_sparse_symm_matrix(trn(jh) * inv(to_sparse_symm_matrix(obsP)) * jh);
 
 	glb_map.I = glb_map.I + I_new;
-	int i = 1;
+	/*int i = 1;
 	while(!I_new.first_in_row[i]){
 		++i;
 	}
-	num_elements_updated_in_I = glb_map.I.rows - i;
+	num_elements_updated_in_I = glb_map.I.rows - i;*/
 
 	//cout << "here2" << endl;
-	Matrix z = obsX - H;
+	SparseMatrix z = obsX - H;
 	z.set(3, 1, wrap(z.get(3,1)));
-	glb_map.i = glb_map.i + trn(jh) * inv(obsP) * (z + jh * glb_map.X);
+	glb_map.i = glb_map.i + trn(jh) * inv(to_sparse_symm_matrix(obsP)) * (z + jh * glb_map.X);
 	//glb_map.I.write_to_file("SavedMatrices/I");
 	//glb_map.i.write_to_file("SavedMatrices/i");
 	//glb_map.L = cholesky(glb_map.I);
@@ -690,16 +654,16 @@ void MapFuser::update_map(const Matrix& obsX, const Matrix& obsP){
 }
 
 double MapFuser::submap_radius(const LocalMap& map){
-	int num_beac = (map.X.rows - 3)/2;
+	int num_beac = (map.X.get_rows() - 3)/2;
 
 	double radius = 0;
 	double distance, uncertainty;
-	Matrix cov;
+	SparseSymmMatrix cov;
 
 	for(int i = 1; i <= num_beac; ++i){
 	    distance = sqrt((map.X.get(2 * i + 2, 1)- map.X.get(1,1)) * (map.X.get(2 * i + 2, 1)- map.X.get(1,1)) + (map.X.get(2 * i + 3, 1)- map.X.get(2,1)) * (map.X.get(2 * i + 3, 1)- map.X.get(2,1)) );
 	    // uncertainty of the beacon
-	    cov = map.P.get_sub_matrix(2 * i + 2, 2 * i + 2, 2 * i + 3, 2 * i + 3);
+	    cov = to_sparse_symm_matrix(map.P.get_submatrix(2 * i + 2, 2 * i + 2, 2 * i + 3, 2 * i + 3));
 	    // times the uncertainty with multiplier (e.g. 3 sigma)
 	    uncertainty = 3 * max_eig(sqrt(cov));
 	    //sqrt(cov).print();

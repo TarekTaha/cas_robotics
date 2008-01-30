@@ -8,7 +8,7 @@ class GlobalMap{
 		GlobalMap();
 		SparseMatrix i;
 		SparseSymmMatrix I;
-		SparseMatrix L;
+		CholeskyFactor L;
 		SparseMatrix X;
 };
 

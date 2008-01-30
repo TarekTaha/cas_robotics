@@ -16,6 +16,7 @@ SparseSymmMatrix::SparseSymmMatrix(const SparseSymmMatrix& md){
 }
 
 SparseSymmMatrix& SparseSymmMatrix::operator=(const SparseSymmMatrix& md){
+	cholmod_free_sparse(&A, &c);
 	A =  cholmod_copy_sparse(md.A, &c);
 	return *this;
 }
@@ -89,5 +90,28 @@ SparseSymmMatrix operator*(const SparseSymmMatrix& m1, const SparseSymmMatrix& m
 
 SparseSymmMatrix trn(const SparseSymmMatrix& m){
 	SparseSymmMatrix result(m);
+	return result;
+}
+
+SparseSymmMatrix eye(int size){
+	SparseSymmMatrix result;
+	result.A  = cholmod_speye
+	(
+	    /* ---- input ---- */
+	    size,        /* # of rows of A */
+	    size,        /* # of columns of A */
+	    CHOLMOD_REAL,          /* CHOLMOD_PATTERN, _REAL, _COMPLEX, or _ZOMPLEX */
+	    /* --------------- */
+	    &result.c
+	) ;
+	return result;
+}
+
+SparseSymmMatrix operator*(double fact, const SparseSymmMatrix& m){
+	SparseSymmMatrix result(m);
+	double *x = (double*)result.A->x;
+	for(int i = 0; i < result.A->nzmax; ++i){
+		x[i] = 	fact * x[i];
+	}
 	return result;
 }
