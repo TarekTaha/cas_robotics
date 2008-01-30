@@ -1,0 +1,590 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>NBV_beta2</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2008-01-14">
+      <meta name="m-file" content="NBV_beta2"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>NBV_beta2</h1>
+         <introduction>
+            <p><b>Description:</b>  Goes through all_views variable previously calculated and checks which poses are now safe, then goes through these views
+               and removes point already calculated if their are new planes obstructing
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Function Call</a></li>
+               <li><a href="#2">Variables</a></li>
+               <li><a href="#3">Remove points that are beyond osticle points</a></li>
+               <li><a href="#4">Go through each obstacle where the home point is within the scan</a></li>
+               <li><a href="#5">If points on other side of this plane, ray trace, check if intersec&lt;mew</a></li>
+               <li><a href="#6">update the expected info and update best views</a></li>
+               <li><a href="#7">Check if any bestviews were found, if so order them</a></li>
+               <li><a href="#8">try and get at least 1 path then save the remaing valid_max-1</a></li>
+            </ul>
+         </div>
+         <h2>Function Call<a name="1"></a></h2>
+         <p><b>Inputs:</b> NULL
+         </p>
+         <p><b>Returns:</b> NULL
+         </p><pre class="codeinput"><span class="keyword">function</span> NBV_beta2()
+</pre><h2>Variables<a name="2"></a></h2>
+         <p>clear the plots and global bestviews variable</p><pre class="codeinput">clear <span class="string">global</span> <span class="string">bestviews</span>;
+
+<span class="keyword">global</span> workspace Q all_views bestviews optimise scan;
+
+<span class="comment">%%%%%%%%%saving for the exhastive search</span>
+<span class="keyword">try</span> load <span class="string">Xsearchdata.mat</span>;
+    Xsearchdata(end+1).workspace=workspace;
+<span class="keyword">catch</span>;
+    Xsearchdata(1).workspace=workspace;
+<span class="keyword">end</span>
+save(<span class="string">'Xsearchdata.mat'</span>,<span class="string">'Xsearchdata'</span>);
+<span class="comment">%%%%%%%%end saving file</span>
+
+tic
+
+indexed_knowncoords=round(setdiff(workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:),workspace.indexedobsticles,<span class="string">'rows'</span>)/workspace.inc_size);
+<span class="comment">%this makes the check for a collision quicker</span>
+obsticle_points=workspace.indexedobsticles(GetImpLevInfo(workspace.indexedobsticles),:);
+all_possible=round(workspace.unknowncoords(workspace.lev1unknown   ,:)/workspace.inc_size);
+[nothing,index]=setdiff(all_possible,[indexed_knowncoords;obsticle_points],<span class="string">'rows'</span>);
+unknown_points=workspace.unknowncoords(workspace.lev1unknown(index),:);
+
+all_known=[workspace.knowncoords;workspace.indexedobsticles];
+
+unknownweight=calunknownweight();
+
+<span class="comment">% find valid configs</span>
+pos_validconfigs=find(all_views.result==-1);
+
+<span class="comment">%recheck the said to be valid configs</span>
+<span class="keyword">for</span> cur_con=pos_validconfigs'
+    [obstacle_result,unknown_result]=check_path_for_col(all_views.newQ(cur_con,:),obsticle_points,unknown_points);
+    <span class="keyword">if</span> ~obstacle_result
+        all_views.result(cur_con)=0;
+    <span class="keyword">elseif</span> ~unknown_result <span class="comment">%we are in unknown space</span>
+        all_views.result(cur_con)=-1;
+    <span class="keyword">else</span>
+        all_views.result(cur_con)=1;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">if</span> size(scan.done_bestviews_orfailed,1)&gt;0
+    [nothing,nolongervalid]=intersect(all_views.newQ,scan.done_bestviews_orfailed,<span class="string">'rows'</span>);
+    <span class="comment">%set the result to 0 since we have already done it or it has failed somewhere</span>
+    all_views.result(nolongervalid)=0;
+    scan.done_bestviews_orfailed=[inf,inf,inf,inf,inf,inf];
+<span class="keyword">end</span>
+
+<span class="comment">%delete all unneeded ones from memory</span>
+all_views=remove_all_views_result0(all_views);
+
+[nothing,scanoriginOKindex]=intersect(all_views.scanorigin,workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:),<span class="string">'rows'</span>);
+<span class="comment">%update the valid config var</span>
+
+validconfigs=intersect(find(all_views.result==1),scanoriginOKindex);
+
+bestviews(size(validconfigs,1)).tr=zeros(4);
+bestviews(size(validconfigs,1)).chosenview=zeros([1,3]);
+bestviews(size(validconfigs,1)).scanorigin=zeros([1,3]);
+bestviews(size(validconfigs,1)).Q=zeros([1,6]);
+bestviews(size(validconfigs,1)).expectedaddinfo=[];
+bestviews(size(validconfigs,1)).addinfo=0;
+bestviews(size(validconfigs,1)).all_views_val=0;
+
+BVcount=1;
+
+<span class="keyword">for</span> cur_con=validconfigs'
+    points=all_views.expectedaddinfo(cur_con).vals;
+</pre><h2>Remove points that are beyond osticle points<a name="3"></a></h2><pre class="codeinput">    <span class="comment">%obstructing planes</span>
+    plane_homepnts=[workspace.indexedobsticles_home_point];
+    <span class="comment">%equations of planes</span>
+    plane_equ=[workspace.indexedobsticles_equ];
+    <span class="comment">%if any are the same then probably there is some obstruction by the planes</span>
+    plane_index=(1:size(plane_homepnts,1))';
+    <span class="comment">% remove points which are obscured by surfaces</span>
+        <span class="comment">%scanorigin</span>
+        <span class="comment">% o-------------</span>
+    <span class="comment">%     \ Known</span>
+    <span class="comment">%      \ 0\ obsticle</span>
+    <span class="comment">%       \XX\ unknown since behind obsticle</span>
+    <span class="comment">%        \XXX\</span>
+
+    <span class="comment">% firstly remove all points that we either know are free or have an obstacle</span>
+    <span class="keyword">if</span> size(all_known,1)&lt;size(workspace.unknowncoords,1)
+        points=setdiff(points,all_known,<span class="string">'rows'</span>);
+    <span class="keyword">else</span>
+        points=intersect(points,workspace.unknowncoords,<span class="string">'rows'</span>);
+    <span class="keyword">end</span>
+</pre><h2>Go through each obstacle where the home point is within the scan<a name="4"></a></h2>
+         <p><img vspace="5" hspace="5" src="NBV_beta2_eq4864098.png"> </p><pre class="codeinput">    <span class="comment">% showld be the same as the surfaces made when we get obsticle points</span>
+    mew=workspace.mew;
+    current_scan_origin=all_views.scanorigin(cur_con,:);
+    <span class="keyword">for</span> i=plane_index'
+        <span class="comment">%what side are the points on of this plane?</span>
+        points_sign=(plane_equ(i,1)*points(:,1)+<span class="keyword">...</span>
+                     plane_equ(i,2)*points(:,2)+<span class="keyword">...</span>
+                     plane_equ(i,3)*points(:,3)+<span class="keyword">...</span>
+                     ones([size(points,1),1])*plane_equ(i,4))&gt;0;
+
+        <span class="comment">%what side is the scan.origin on?</span>
+        scan_origin_sign=(plane_equ(i,1)*current_scan_origin(1)+<span class="keyword">...</span>
+                          plane_equ(i,2)*current_scan_origin(2)+<span class="keyword">...</span>
+                          plane_equ(i,3)*current_scan_origin(3)+<span class="keyword">...</span>
+                          plane_equ(i,4))&gt;0;
+
+        <span class="comment">%All point on the same side are automatically valid</span>
+        <span class="comment">%Now look at point on the opisite side of the plane</span>
+        points_on_oposite_side=points(points_sign~=scan_origin_sign,:);
+</pre><h2>If points on other side of this plane, ray trace, check if intersec&lt;mew<a name="5"></a></h2>
+         <p><img vspace="5" hspace="5" src="NBV_beta2_eq7109979.png"> </p><pre class="codeinput">        <span class="keyword">if</span> size(points_on_oposite_side,1)&gt;0
+            <span class="comment">%we get the r variables for the parametric forms of a line between 2 points</span>
+            r_var=[current_scan_origin(1)-points_on_oposite_side(:,1),<span class="keyword">...</span>
+                   current_scan_origin(2)-points_on_oposite_side(:,2),<span class="keyword">...</span>
+                   current_scan_origin(3)-points_on_oposite_side(:,3)];
+
+            <span class="comment">%find intersection point between surface and the scan line between scan origin and point</span>
+            bottomof_t_var=plane_equ(i,1)*r_var(:,1)+<span class="keyword">...</span>
+                           plane_equ(i,2)*r_var(:,2)+<span class="keyword">...</span>
+                           plane_equ(i,3)*r_var(:,3);
+            <span class="comment">%make sure it is not 0 otherwise change it so it is simply a very small number (epsilon) so we can keep the size of matrixes</span>
+            <span class="keyword">if</span> ~isempty(find(bottomof_t_var==0, 1)); bottomof_t_var(bottomof_t_var==0)=eps; <span class="keyword">end</span>
+            t_var=( plane_equ(i,1)*current_scan_origin(1)+<span class="keyword">...</span>
+                    plane_equ(i,2)*current_scan_origin(2)+<span class="keyword">...</span>
+                    plane_equ(i,3)*current_scan_origin(3)+<span class="keyword">...</span>
+                    plane_equ(i,4)<span class="keyword">...</span>
+                   )./ bottomof_t_var;
+
+            <span class="comment">% Get the intersection points</span>
+            intersectionPNTs=[t_var.*-r_var(:,1)+current_scan_origin(1),<span class="keyword">...</span>
+                              t_var.*-r_var(:,2)+current_scan_origin(2),<span class="keyword">...</span>
+                              t_var.*-r_var(:,3)+current_scan_origin(3)];
+
+            <span class="comment">%find the points which are either on the same side of the plane as the scanning point</span>
+            <span class="comment">%or they are on the other side and are less than mew fmro the intersection point</span>
+            points=[points(points_sign==scan_origin_sign,:);<span class="keyword">...</span>
+                    points_on_oposite_side((sqrt((intersectionPNTs(:,1)-plane_homepnts(i,1)).^2+<span class="keyword">...</span>
+                                                 (intersectionPNTs(:,2)-plane_homepnts(i,2)).^2+<span class="keyword">...</span>
+                                                 (intersectionPNTs(:,3)-plane_homepnts(i,3)).^2)&gt;mew),:)];
+           <span class="comment">%it is possible that all points have been removed so we can break</span>
+           <span class="comment">%out and say no points are give (if surface is right in front)</span>
+            <span class="keyword">if</span> size(points,1)==0
+                <span class="keyword">break</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+</pre><h2>update the expected info and update best views<a name="6"></a></h2><pre class="codeinput">    all_views.expectedaddinfo(cur_con).vals=points;
+
+    bestviews(BVcount).tr=squeeze(all_views.tr(cur_con,:,:));
+    bestviews(BVcount).chosenview=sum(bestviews(BVcount).tr(1:3,1:3));
+    bestviews(BVcount).scanorigin=bestviews(BVcount).tr(1:3,4)*workspace.inc_size;
+    bestviews(BVcount).Q=all_views.newQ(cur_con,:);
+    bestviews(BVcount).expectedaddinfo=all_views.expectedaddinfo(cur_con).vals;
+    bestviews(BVcount).addinfo=getweighted_addinfo(bestviews(BVcount).expectedaddinfo)/unknownweight;
+    bestviews(BVcount).all_views_val=cur_con;
+
+    BVcount=BVcount+1;
+<span class="keyword">end</span>
+</pre><h2>Check if any bestviews were found, if so order them<a name="7"></a></h2><pre class="codeinput"><span class="keyword">if</span> isempty(bestviews)
+    error(<span class="string">'There were no bestviews found, probably because there are no known points to go too'</span>);
+<span class="keyword">end</span>
+
+<span class="comment">%order the best views</span>
+order_bestviews()
+</pre><h2>try and get at least 1 path then save the remaing valid_max-1<a name="8"></a></h2><pre class="codeinput">valid_count=0;
+<span class="comment">% this limits the amount of time we can spend searching for a path when</span>
+<span class="comment">% there may not be one</span>
+valid_max=min(2*optimise.valid_max,size(bestviews,2));
+<span class="keyword">for</span> current_view=1:valid_max
+    <span class="keyword">if</span> valid_count&lt;1
+        <span class="comment">%if a path calculated previously exists from current place use it</span>
+        <span class="keyword">if</span> all_views.path(bestviews(current_view).all_views_val).valid==1 &amp;&amp;<span class="keyword">...</span>
+                isempty(find(all_views.path(bestviews(current_view).all_views_val).all_steps(1,:)-Q&gt;eps,1))
+            <span class="comment">% check to make sure</span>
+            <span class="keyword">if</span> check_path_for_col(all_views.path(bestviews(current_view).all_views_val).all_steps,obsticle_points)
+                bestviews(current_view).valid=1;
+                bestviews(current_view).all_steps=all_views.path(bestviews(current_view).all_views_val).all_steps;
+            <span class="keyword">else</span> <span class="comment">%find a new path</span>
+                all_views.path(cur_con).valid=0;
+                [bestviews(current_view).valid,bestviews(current_view).all_steps]=pathplanner_new(bestviews(current_view).Q,false,true,true,30);
+            <span class="keyword">end</span>
+        <span class="keyword">else</span> <span class="comment">%otherwise try and get another</span>
+            [bestviews(current_view).valid,bestviews(current_view).all_steps]=pathplanner_new(bestviews(current_view).Q,false,true,true,30);
+        <span class="keyword">end</span>
+    <span class="keyword">else</span> <span class="comment">%once we have one path then we just fill the rest in with pre cal or blanks</span>
+        <span class="keyword">if</span> all_views.path(bestviews(current_view).all_views_val).valid==1 &amp;&amp;<span class="keyword">...</span>
+                isempty(find(all_views.path(bestviews(current_view).all_views_val).all_steps(1,:)-Q&gt;eps,1))
+            <span class="keyword">if</span> check_path_for_col(all_views.path(bestviews(current_view).all_views_val).all_steps,obsticle_points)
+                bestviews(current_view).valid=1;
+                bestviews(current_view).all_steps=all_views.path(bestviews(current_view).all_views_val).all_steps;
+            <span class="keyword">else</span> <span class="comment">%set global var all_path valid to 0 and set dummy values for</span>
+                all_views.path(cur_con).valid=0;
+                bestviews(current_view).valid=-1;
+                bestviews(current_view).all_steps=[];
+            <span class="keyword">end</span>
+        <span class="keyword">else</span>
+            bestviews(current_view).valid=-1;
+            bestviews(current_view).all_steps=[];
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="keyword">if</span> bestviews(current_view).valid || valid_count&gt;=1
+        valid_count=valid_count+1;
+        tempbestviews(valid_count)=bestviews(current_view);
+        <span class="comment">%we have enough (optimise.valid_max)</span>
+        <span class="keyword">if</span> valid_count&gt;=optimise.valid_max
+            <span class="keyword">break</span>;
+        <span class="keyword">end</span>
+    <span class="keyword">else</span> <span class="comment">%it failed so note down that we can't get to this destination</span>
+        all_views.path(bestviews(current_view).all_views_val).valid=0;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="comment">%set to the new sorted and pathplanned tempbestviews</span>
+<span class="keyword">if</span> valid_count==0
+     error(<span class="string">'There were no bestviews found, probably because there were no possible paths to any of the desired ones, consider changing end_value_damper_weight'</span>);
+<span class="keyword">else</span>
+    bestviews=tempbestviews;
+<span class="keyword">end</span>
+
+
+toc
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% NBV_beta2
+%
+% *Description:*  Goes through all_views variable previously calculated and
+% checks which poses are now safe, then goes through these views and
+% removes point already calculated if their are new planes obstructing 
+
+%% Function Call
+%
+% *Inputs:* NULL
+%
+% *Returns:* NULL
+
+function NBV_beta2()
+
+%% Variables
+% clear the plots and global bestviews variable
+clear global bestviews;
+
+global workspace Q all_views bestviews optimise scan;
+
+%%%%%%%%%saving for the exhastive search
+try load Xsearchdata.mat;
+    Xsearchdata(end+1).workspace=workspace;
+catch;
+    Xsearchdata(1).workspace=workspace;
+end
+save('Xsearchdata.mat','Xsearchdata');
+%%%%%%%%end saving file
+
+tic
+
+indexed_knowncoords=round(setdiff(workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:),workspace.indexedobsticles,'rows')/workspace.inc_size);
+%this makes the check for a collision quicker
+obsticle_points=workspace.indexedobsticles(GetImpLevInfo(workspace.indexedobsticles),:);
+all_possible=round(workspace.unknowncoords(workspace.lev1unknown   ,:)/workspace.inc_size);
+[nothing,index]=setdiff(all_possible,[indexed_knowncoords;obsticle_points],'rows');
+unknown_points=workspace.unknowncoords(workspace.lev1unknown(index),:);
+
+all_known=[workspace.knowncoords;workspace.indexedobsticles];
+
+unknownweight=calunknownweight();
+
+% find valid configs
+pos_validconfigs=find(all_views.result==-1);
+
+%recheck the said to be valid configs
+for cur_con=pos_validconfigs'
+    [obstacle_result,unknown_result]=check_path_for_col(all_views.newQ(cur_con,:),obsticle_points,unknown_points);
+    if ~obstacle_result
+        all_views.result(cur_con)=0;
+    elseif ~unknown_result %we are in unknown space
+        all_views.result(cur_con)=-1;
+    else
+        all_views.result(cur_con)=1;
+    end   
+end
+
+if size(scan.done_bestviews_orfailed,1)>0
+    [nothing,nolongervalid]=intersect(all_views.newQ,scan.done_bestviews_orfailed,'rows');
+    %set the result to 0 since we have already done it or it has failed somewhere
+    all_views.result(nolongervalid)=0;
+    scan.done_bestviews_orfailed=[inf,inf,inf,inf,inf,inf];
+end
+
+%delete all unneeded ones from memory
+all_views=remove_all_views_result0(all_views);
+
+[nothing,scanoriginOKindex]=intersect(all_views.scanorigin,workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:),'rows');
+%update the valid config var
+
+validconfigs=intersect(find(all_views.result==1),scanoriginOKindex);
+
+bestviews(size(validconfigs,1)).tr=zeros(4);
+bestviews(size(validconfigs,1)).chosenview=zeros([1,3]);
+bestviews(size(validconfigs,1)).scanorigin=zeros([1,3]);
+bestviews(size(validconfigs,1)).Q=zeros([1,6]);
+bestviews(size(validconfigs,1)).expectedaddinfo=[];
+bestviews(size(validconfigs,1)).addinfo=0;
+bestviews(size(validconfigs,1)).all_views_val=0;
+    
+BVcount=1;
+
+for cur_con=validconfigs'
+    points=all_views.expectedaddinfo(cur_con).vals;
+
+
+%% Remove points that are beyond osticle points
+    %obstructing planes
+    plane_homepnts=[workspace.indexedobsticles_home_point];
+    %equations of planes
+    plane_equ=[workspace.indexedobsticles_equ];
+    %if any are the same then probably there is some obstruction by the planes
+    plane_index=(1:size(plane_homepnts,1))';
+    % remove points which are obscured by surfaces
+        %scanorigin
+        % oREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+    %     \ Known
+    %      \ 0\ obsticle
+    %       \XX\ unknown since behind obsticle
+    %        \XXX\
+
+    % firstly remove all points that we either know are free or have an obstacle
+    if size(all_known,1)<size(workspace.unknowncoords,1)
+        points=setdiff(points,all_known,'rows');
+    else
+        points=intersect(points,workspace.unknowncoords,'rows');
+    end
+
+%% Go through each obstacle where the home point is within the scan
+% $$ \begin{array}{l}
+% \mbox{PlaneEq...} ax_p+by_p+cz_p+d=0\\
+% \mbox{PlaneCenter...} P_c=(x_c,y_c,z_c)\\
+% \mbox{PlaneRadius...} \mu\\
+% \mbox{ScanOrigin...} P_s=(x_s,y_s,z_s)\\
+% \mbox{PointsOnOpSide...} P_{o(j)}=(x_o,y_o,z_o)_{j=1...m}\\
+% \end{array}$$
+    % showld be the same as the surfaces made when we get obsticle points
+    mew=workspace.mew; 
+    current_scan_origin=all_views.scanorigin(cur_con,:);
+    for i=plane_index'           
+        %what side are the points on of this plane? 
+        points_sign=(plane_equ(i,1)*points(:,1)+...
+                     plane_equ(i,2)*points(:,2)+...
+                     plane_equ(i,3)*points(:,3)+...
+                     ones([size(points,1),1])*plane_equ(i,4))>0;
+
+        %what side is the scan.origin on?
+        scan_origin_sign=(plane_equ(i,1)*current_scan_origin(1)+...
+                          plane_equ(i,2)*current_scan_origin(2)+...
+                          plane_equ(i,3)*current_scan_origin(3)+...
+                          plane_equ(i,4))>0;
+
+        %All point on the same side are automatically valid        
+        %Now look at point on the opisite side of the plane
+        points_on_oposite_side=points(points_sign~=scan_origin_sign,:);       
+
+%% If points on other side of this plane, ray trace, check if intersec<mew
+% $$ \begin{array}{l}
+% r=P_s-P_o \\
+% t=\frac{ax_s+by_s+cz_s+d}{ar_x+br_y+xr_z}\\
+% P_{intersection}=tr+P_s=(tr_x+x_s, tr_y+y_s, tr_z+z_s)=P_{i(k)}=(x_i,y_i,z_i)_{k=1...n}\\
+% \forall(n), \sqrt{(x_i-x_c)^2+(y_i-y_c)^2+(z_i-z_c)^2}>\mu 
+% \rightarrow \mbox{unobscured points}
+% \end{array}$$
+        if size(points_on_oposite_side,1)>0
+            %we get the r variables for the parametric forms of a line between 2 points
+            r_var=[current_scan_origin(1)-points_on_oposite_side(:,1),...
+                   current_scan_origin(2)-points_on_oposite_side(:,2),...
+                   current_scan_origin(3)-points_on_oposite_side(:,3)];               
+
+            %find intersection point between surface and the scan line between scan origin and point
+            bottomof_t_var=plane_equ(i,1)*r_var(:,1)+...
+                           plane_equ(i,2)*r_var(:,2)+...
+                           plane_equ(i,3)*r_var(:,3);
+            %make sure it is not 0 otherwise change it so it is simply a very small number (epsilon) so we can keep the size of matrixes
+            if ~isempty(find(bottomof_t_var==0, 1)); bottomof_t_var(bottomof_t_var==0)=eps; end                                                                               
+            t_var=( plane_equ(i,1)*current_scan_origin(1)+...
+                    plane_equ(i,2)*current_scan_origin(2)+...
+                    plane_equ(i,3)*current_scan_origin(3)+...
+                    plane_equ(i,4)...
+                   )./ bottomof_t_var;                 
+
+            % Get the intersection points
+            intersectionPNTs=[t_var.*-r_var(:,1)+current_scan_origin(1),...
+                              t_var.*-r_var(:,2)+current_scan_origin(2),...
+                              t_var.*-r_var(:,3)+current_scan_origin(3)];
+
+            %find the points which are either on the same side of the plane as the scanning point 
+            %or they are on the other side and are less than mew fmro the intersection point       
+            points=[points(points_sign==scan_origin_sign,:);...
+                    points_on_oposite_side((sqrt((intersectionPNTs(:,1)-plane_homepnts(i,1)).^2+...
+                                                 (intersectionPNTs(:,2)-plane_homepnts(i,2)).^2+...
+                                                 (intersectionPNTs(:,3)-plane_homepnts(i,3)).^2)>mew),:)];
+           %it is possible that all points have been removed so we can break
+           %out and say no points are give (if surface is right in front)
+            if size(points,1)==0
+                break
+            end
+        end
+    end
+
+%% update the expected info and update best views
+    all_views.expectedaddinfo(cur_con).vals=points;
+
+    bestviews(BVcount).tr=squeeze(all_views.tr(cur_con,:,:));
+    bestviews(BVcount).chosenview=sum(bestviews(BVcount).tr(1:3,1:3));
+    bestviews(BVcount).scanorigin=bestviews(BVcount).tr(1:3,4)*workspace.inc_size;
+    bestviews(BVcount).Q=all_views.newQ(cur_con,:);                                
+    bestviews(BVcount).expectedaddinfo=all_views.expectedaddinfo(cur_con).vals;
+    bestviews(BVcount).addinfo=getweighted_addinfo(bestviews(BVcount).expectedaddinfo)/unknownweight;
+    bestviews(BVcount).all_views_val=cur_con;
+
+    BVcount=BVcount+1;
+end
+
+
+
+%% Check if any bestviews were found, if so order them
+if isempty(bestviews)
+    error('There were no bestviews found, probably because there are no known points to go too');
+end
+
+%order the best views
+order_bestviews()
+
+%% try and get at least 1 path then save the remaing valid_max-1
+valid_count=0;
+% this limits the amount of time we can spend searching for a path when
+% there may not be one
+valid_max=min(2*optimise.valid_max,size(bestviews,2));
+for current_view=1:valid_max
+    if valid_count<1
+        %if a path calculated previously exists from current place use it
+        if all_views.path(bestviews(current_view).all_views_val).valid==1 &&...
+                isempty(find(all_views.path(bestviews(current_view).all_views_val).all_steps(1,:)-Q>eps,1))
+            % check to make sure
+            if check_path_for_col(all_views.path(bestviews(current_view).all_views_val).all_steps,obsticle_points)
+                bestviews(current_view).valid=1;
+                bestviews(current_view).all_steps=all_views.path(bestviews(current_view).all_views_val).all_steps;
+            else %find a new path
+                all_views.path(cur_con).valid=0;
+                [bestviews(current_view).valid,bestviews(current_view).all_steps]=pathplanner_new(bestviews(current_view).Q,false,true,true,30);    
+            end
+        else %otherwise try and get another
+            [bestviews(current_view).valid,bestviews(current_view).all_steps]=pathplanner_new(bestviews(current_view).Q,false,true,true,30);    
+        end
+    else %once we have one path then we just fill the rest in with pre cal or blanks
+        if all_views.path(bestviews(current_view).all_views_val).valid==1 &&...
+                isempty(find(all_views.path(bestviews(current_view).all_views_val).all_steps(1,:)-Q>eps,1))
+            if check_path_for_col(all_views.path(bestviews(current_view).all_views_val).all_steps,obsticle_points)
+                bestviews(current_view).valid=1;
+                bestviews(current_view).all_steps=all_views.path(bestviews(current_view).all_views_val).all_steps;
+            else %set global var all_path valid to 0 and set dummy values for
+                all_views.path(cur_con).valid=0;
+                bestviews(current_view).valid=-1;
+                bestviews(current_view).all_steps=[];        
+            end
+        else
+            bestviews(current_view).valid=-1;
+            bestviews(current_view).all_steps=[];        
+        end
+    end
+
+    if bestviews(current_view).valid || valid_count>=1
+        valid_count=valid_count+1;
+        tempbestviews(valid_count)=bestviews(current_view);   
+        %we have enough (optimise.valid_max)
+        if valid_count>=optimise.valid_max
+            break;
+        end
+    else %it failed so note down that we can't get to this destination
+        all_views.path(bestviews(current_view).all_views_val).valid=0;
+    end
+end
+%set to the new sorted and pathplanned tempbestviews
+if valid_count==0
+     error('There were no bestviews found, probably because there were no possible paths to any of the desired ones, consider changing end_value_damper_weight');
+else
+    bestviews=tempbestviews;
+end
+
+
+toc
+##### SOURCE END #####
+-->
+   </body>
+</html>

@@ -1,0 +1,179 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>pdfpractice</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2008-01-14">
+      <meta name="m-file" content="pdfpractice"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content"><pre class="codeinput"><span class="keyword">function</span> pdfpractice();
+
+close <span class="string">all</span>;
+clear <span class="string">all</span>;
+
+<span class="comment">% vals={'beta'</span>
+<span class="comment">% 'bino'</span>
+<span class="comment">% 'chi2'</span>
+<span class="comment">% 'exp'</span>
+<span class="comment">% 'ev'</span>
+<span class="comment">% 'f'</span>
+<span class="comment">% 'gam'</span>
+<span class="comment">% 'gev'</span>
+<span class="comment">% 'gp'</span>
+<span class="comment">% 'geo'</span>
+<span class="comment">% 'hyge'</span>
+<span class="comment">% 'logn'</span>
+<span class="comment">% 'nbin'</span>
+<span class="comment">% 'ncf'</span>
+<span class="comment">% 'nct'</span>
+<span class="comment">% 'ncx2'</span>
+<span class="comment">% 'norm'</span>
+<span class="comment">% 'poiss'</span>
+<span class="comment">% 'rayl'</span>
+<span class="comment">% 't'</span>
+<span class="comment">% 'unif'</span>
+<span class="comment">% 'unid'</span>
+<span class="comment">% 'wbl' };</span>
+
+
+<span class="comment">% for the normal it is X, mean</span>
+X=-10:0.1:10;
+mew=0;
+sig=4;
+
+
+Y = pdf(<span class="string">'norm'</span>,X,mew,sig);
+plot(X,Y)
+
+<span class="keyword">for</span> Xval=-10:0.05:10
+    <span class="keyword">try</span> delete(temp);
+    <span class="keyword">end</span>
+
+    Yval=(mod(Xval,2)+1)*(1/(sig*sqrt(2*pi))*exp(-(Xval-mew)^2/(2*(sig)^2)));
+    hold <span class="string">on</span>;
+    temp=plot(Xval,Yval,<span class="string">'r*'</span>);
+    pause(0.1)
+<span class="keyword">end</span>
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+function pdfpractice();
+
+close all;
+clear all;
+
+% vals={'beta' 
+% 'bino' 
+% 'chi2' 
+% 'exp' 
+% 'ev' 
+% 'f' 
+% 'gam' 
+% 'gev' 
+% 'gp' 
+% 'geo' 
+% 'hyge'
+% 'logn'
+% 'nbin' 
+% 'ncf'
+% 'nct' 
+% 'ncx2' 
+% 'norm' 
+% 'poiss' 
+% 'rayl' 
+% 't' 
+% 'unif' 
+% 'unid' 
+% 'wbl' };
+
+
+% for the normal it is X, mean 
+X=-10:0.1:10;
+mew=0;
+sig=4;
+
+
+Y = pdf('norm',X,mew,sig);
+plot(X,Y)
+
+for Xval=-10:0.05:10
+    try delete(temp);
+    end
+    
+    Yval=(mod(Xval,2)+1)*(1/(sig*sqrt(2*pi))*exp(-(Xval-mew)^2/(2*(sig)^2)));
+    hold on;
+    temp=plot(Xval,Yval,'r*');
+    pause(0.1)
+end
+
+
+##### SOURCE END #####
+-->
+   </body>
+</html>

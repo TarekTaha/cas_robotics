@@ -66,6 +66,9 @@ function [qt,solutionvalid,dist_val,targetdist,used_sol] = blasting_posesel(robo
     targetNormal = plane_equ(1:3)/ norm(plane_equ(1:3));
     targetNormal=targetNormal(:);
 
+    %need to normalise plane equation (should be already)
+    plane_equ(1:3)=plane_equ(1:3)/norm(plane_equ(1:3));
+    
     numlinks = robot.n;
     Links = robot.link; 
     t = robot.base;
@@ -215,7 +218,7 @@ theta = acos(plane_equ(1:3)*unit((tr(1:3,3)+tr(1:3,4))));
         e = [exp(-5*(optimise.maxtargetdis-streamlength));
              exp(-10*(streamlength-optimise.mintargetdis));
              exp(10*(sqrt((pt(1)-intersectionPNT(1))^2+...
-                          (pt(2)-intersectionPNT(2))^2+...
+                          (pt(2)-intersectionPNT(2))^2+...  
                           (pt(3)-intersectionPNT(3))^2)-optimise.minAccepDis));
              exp(5*(theta-optimise.maxDeflectionError));
              exp(5*sum(Jlimitresult))-1;
@@ -286,13 +289,13 @@ function [valid,dist,targetdist]=check_newQ(qt,qlimits,pt,tr,Links,numlinks,plan
        targetdist(2)>optimise.maxtargetdis||...
        dist>optimise.minAccepDis ||...
        theta>optimise.maxDeflectionError 
-        display('Didnt find perfect solution but may still be good enough');            
-        display(['values: dist= ',num2str(dist),' targetdist(2) = ',num2str(targetdist(2)),' theta(deg)= ',num2str(theta*180/pi)])
+%         display('Didnt find perfect solution but may still be good enough');            
+%         display(['values: dist= ',num2str(dist),' targetdist(2) = ',num2str(targetdist(2)),' theta(deg)= ',num2str(theta*180/pi)])
         return; 
     else
         %if we get to here it is valid
         valid=true;
-        display('Found a solution');
-        display(['values: dist= ',num2str(dist),' targetdist(2) = ',num2str(targetdist(2)),' theta(deg)= ',num2str(theta*180/pi)])
+%         display('Found a solution');
+%         display(['values: dist= ',num2str(dist),' targetdist(2) = ',num2str(targetdist(2)),' theta(deg)= ',num2str(theta*180/pi)])
     end;       
 end
