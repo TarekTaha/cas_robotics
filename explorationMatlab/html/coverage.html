@@ -1,0 +1,425 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>coverage</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2008-01-14">
+      <meta name="m-file" content="coverage"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">streamOnto_mine_manystarts</a></li>
+               <li><a href="#2">Variables</a></li>
+               <li><a href="#3">Get all joint configs</a></li>
+               <li><a href="#4">Go through number of itterations</a></li>
+               <li><a href="#5">Setting up converage: The mesh points</a></li>
+               <li><a href="#6">Generate a random list</a></li>
+               <li><a href="#7">Go through each of the list</a></li>
+            </ul>
+         </div>
+         <h2>streamOnto_mine_manystarts<a name="1"></a></h2>
+         <p><b>Description:</b> This determines the path and coverage for each
+         </p><pre class="codeinput"><span class="keyword">function</span> coverage()
+
+close <span class="string">all</span>
+</pre><h2>Variables<a name="2"></a></h2><pre class="codeinput"><span class="comment">%first time you need to load the mesh</span>
+load <span class="string">meshNplanes</span>
+<span class="comment">% plot_planes(plane,0.04);</span>
+<span class="keyword">global</span> r
+
+<span class="comment">%define mew</span>
+mew=0.04;
+
+Q=[0,0,0,0,0,0];
+
+quickver=false;
+
+findjointconfig=false;
+
+numofitts=10;
+</pre><h2>Get all joint configs<a name="3"></a></h2><pre class="codeinput"><span class="keyword">if</span> findjointconfig
+    display(<span class="string">'Getting joint configurations for all planes'</span>);
+    tic; warning <span class="string">off</span>;
+    <span class="keyword">for</span> i=1:size(plane,2)
+        <span class="keyword">if</span> i==1;
+            previous_q=Q;
+        <span class="keyword">else</span>
+            <span class="keyword">if</span> j_sol(i-1).solutionvalid &amp;&amp; ~isempty(find(isnan(previous_q),1));
+                previous_q=j_sol(i-1).qt;
+            <span class="keyword">else</span> previous_q=Q;
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">try</span> [j_sol(i).qt,j_sol(i).solutionvalid,j_sol(i).dist_val,j_sol(i).targetdist,j_sol(i).used_sol] = <span class="keyword">...</span>
+            blasting_posesel(r, plane(i).home_point, plane(i).equ, previous_q, quickver);
+
+            <span class="keyword">if</span> ~isempty(find(isnan(j_sol(i).qt),1))
+                j_sol(i).solutionvalid=0;
+            <span class="keyword">end</span>
+    <span class="comment">%         j_sol(i)</span>
+        <span class="keyword">catch</span>
+            j_sol(i).solutionvalid=0;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    save(<span class="string">'j_sol.mat'</span>,<span class="string">'j_sol'</span>);
+    toc; warning <span class="string">on</span>;
+<span class="keyword">else</span> <span class="comment">%load it from file</span>
+    load <span class="string">j_sol.mat</span>
+<span class="keyword">end</span>
+
+allsols=[];<span class="keyword">for</span> i=1:size(j_sol,2);allsols=[allsols;j_sol(i).solutionvalid];<span class="keyword">end</span>
+allsols_equal_1=find(allsols==1);
+</pre><h2>Go through number of itterations<a name="4"></a></h2><pre class="codeinput"><span class="keyword">for</span> currentit=1:numofitts
+    jointdiffweight=0;
+    coverageweight=0;
+</pre><h2>Setting up converage: The mesh points<a name="5"></a></h2><pre class="codeinput">    figure(1)
+    cla(<span class="string">'reset'</span>);
+    P0=points;
+    subplot(3,1,2)
+    plot3(P0(:,1),P0(:,2),P0(:,3),<span class="string">'g.'</span>);hold <span class="string">on</span>;axis <span class="string">equal</span>
+    P0cover=zeros(size(P0,1),1);
+</pre><h2>Generate a random list<a name="6"></a></h2><pre class="codeinput">    listofplanes=1:size(allsols_equal_1,1);
+    randvals=rand(1,size(allsols_equal_1,1));
+    [notused,order]=sort(randvals);
+    rand_listofplanes=allsols_equal_1(listofplanes(order));
+</pre><h2>Go through each of the list<a name="7"></a></h2><pre class="codeinput">    previous_q=j_sol(rand_listofplanes(1)).qt;
+
+    <span class="keyword">for</span> i=rand_listofplanes(2:end)'
+        jointdiffweight=jointdiffweight+abs(j_sol(i).qt-previous_q);
+
+        <span class="comment">%start blast point</span>
+        P1=plane(i-1).home_point;
+
+        <span class="comment">%End blast point</span>
+        P2=plane(i).home_point;
+
+        <span class="comment">%distance between P1 and P2</span>
+        D12=sqrt((P1(1)-P2(1))^2+(P1(2)-P2(2))^2+(P1(3)-P2(3))^2);
+
+        <span class="comment">% Arbitary test to see if close enough between planes</span>
+    <span class="comment">%     if D12&lt;4*mew</span>
+            <span class="keyword">try</span> delete(h1);<span class="keyword">end</span>
+            <span class="keyword">try</span> delete(h2);<span class="keyword">end</span>
+            h1=plot3(P1(1),P1(2),P1(3),<span class="string">'r*'</span>);
+            h2=plot3(P2(1),P2(2),P2(3),<span class="string">'b*'</span>);
+    <span class="comment">%     else</span>
+            <span class="comment">%     display('not close enough');</span>
+    <span class="comment">%         continue;</span>
+    <span class="comment">%     end</span>
+
+
+
+        <span class="comment">%get distance from P1 and P2 to all mesh points</span>
+        D02=sqrt((P0(:,1)-P2(1)).^2+(P0(:,2)-P2(2)).^2+(P0(:,3)-P2(3)).^2);
+        D10=sqrt((P1(1)-P0(:,1)).^2+(P1(2)-P0(:,2)).^2+(P1(3)-P0(:,3)).^2);
+
+        <span class="comment">%fill out mat so same size for cross product</span>
+        P2minusP1mat=[ones(size(P0,1),1)*P2(1)-P1(1),<span class="keyword">...</span>
+                      ones(size(P0,1),1)*P2(2)-P1(2),<span class="keyword">...</span>
+                      ones(size(P0,1),1)*P2(3)-P1(3)];
+
+        <span class="comment">%get perp distances to surface</span>
+        <span class="comment">% see this page %</span>
+        <span class="comment">% http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html</span>
+        Dh=sqrt(<span class="keyword">...</span>
+                sum(<span class="keyword">...</span>
+                    cross(<span class="keyword">...</span>
+                           P2minusP1mat,<span class="keyword">...</span>
+                           [P1(1)-P0(:,1),P1(2)-P0(:,2),P1(3)-P0(:,3)]<span class="keyword">...</span>
+                           )<span class="keyword">...</span>
+                    .^2 <span class="keyword">...</span>
+                    ,2)<span class="keyword">...</span>
+                )<span class="keyword">...</span>
+             /<span class="keyword">...</span>
+             sqrt(<span class="keyword">...</span>
+                  sum(<span class="keyword">...</span>
+                      (P2-P1).^2 <span class="keyword">...</span>
+                      )<span class="keyword">...</span>
+                  );
+        <span class="comment">%Find points on mesh covered</span>
+        <span class="comment">%%% mew from line AND</span>
+        <span class="comment">%%% where the sum of distance from each home point to the mesh points is less than then the distance between home points + mew</span>
+        newlycovered=find(Dh&lt;mew &amp;  D02+D10&lt;D12+mew);
+        P0cover(newlycovered)=P0cover(newlycovered)+0.1;
+        <span class="comment">%make sure it can't have a value greater than 1</span>
+<span class="comment">%         P0cover(find(P0cover&gt;1))=1;</span>
+
+        <span class="comment">% update the previous q</span>
+        previous_q=j_sol(i).qt;
+    <span class="keyword">end</span>
+
+    <span class="comment">%display results</span>
+    display([<span class="string">'Current Itteration = '</span>,num2str(currentit)]);
+    display([<span class="string">'Joint diff weight in rads= '</span>,num2str(jointdiffweight)]);
+    figure (1)
+    subplot(3,1,1);
+    bar(jointdiffweight)
+    title(<span class="string">'Absolute Joint Change for each of 6 joints (rads)'</span>)
+
+    subplot(3,1,2);
+    title(<span class="string">'Coverage map'</span>)
+    <span class="keyword">for</span> j=0.1:0.1:1
+        <span class="keyword">try</span> delete(plothandle(j/0.1)); <span class="keyword">end</span>
+        <span class="keyword">if</span> j&lt;1
+            covered=find(P0cover==j);
+        <span class="keyword">else</span> <span class="comment">%when j==1</span>
+            covered=find(P0cover&gt;=j);
+        <span class="keyword">end</span>
+        <span class="keyword">if</span> ~isempty(covered)
+            plothandle(int32(j/0.1))=plot3(P0(covered,1),P0(covered,2),P0(covered,3),<span class="string">'color'</span>,[1-j,1-j,1-j],<span class="string">'marker'</span>,<span class="string">'.'</span>,<span class="string">'linestyle'</span>,<span class="string">'none'</span>);
+            drawnow
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+    subplot(3,1,3);
+    hist(P0cover,0:0.1:max(P0cover))
+    title(<span class="string">'Coverage histogram each 0.1 is covered once'</span>);
+    uiwait(msgbox(<span class="string">'Press to continue'</span>));
+<span class="keyword">end</span>
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% streamOnto_mine_manystarts
+%
+% *Description:* This determines the path and coverage for each
+
+function coverage()
+
+close all
+
+%% Variables
+%first time you need to load the mesh
+load meshNplanes
+% plot_planes(plane,0.04);
+global r
+
+%define mew
+mew=0.04;
+
+Q=[0,0,0,0,0,0];
+
+quickver=false;
+
+findjointconfig=false;
+
+numofitts=10;
+
+%% Get all joint configs
+if findjointconfig
+    display('Getting joint configurations for all planes');
+    tic; warning off;
+    for i=1:size(plane,2)
+        if i==1; 
+            previous_q=Q; 
+        else
+            if j_sol(i-1).solutionvalid && ~isempty(find(isnan(previous_q),1)); 
+                previous_q=j_sol(i-1).qt; 
+            else previous_q=Q; 
+            end
+        end
+
+        try [j_sol(i).qt,j_sol(i).solutionvalid,j_sol(i).dist_val,j_sol(i).targetdist,j_sol(i).used_sol] = ...
+            blasting_posesel(r, plane(i).home_point, plane(i).equ, previous_q, quickver);        
+
+            if ~isempty(find(isnan(j_sol(i).qt),1))
+                j_sol(i).solutionvalid=0;
+            end
+    %         j_sol(i)
+        catch
+            j_sol(i).solutionvalid=0;
+        end
+    end
+    save('j_sol.mat','j_sol');
+    toc; warning on;
+else %load it from file
+    load j_sol.mat
+end
+
+allsols=[];for i=1:size(j_sol,2);allsols=[allsols;j_sol(i).solutionvalid];end
+allsols_equal_1=find(allsols==1);
+
+
+%% Go through number of itterations
+for currentit=1:numofitts
+    jointdiffweight=0;
+    coverageweight=0;
+    
+%% Setting up converage: The mesh points      
+    figure(1)    
+    cla('reset');
+    P0=points;
+    subplot(3,1,2)
+    plot3(P0(:,1),P0(:,2),P0(:,3),'g.');hold on;axis equal
+    P0cover=zeros(size(P0,1),1);
+    
+%% Generate a random list
+    listofplanes=1:size(allsols_equal_1,1);
+    randvals=rand(1,size(allsols_equal_1,1));
+    [notused,order]=sort(randvals);
+    rand_listofplanes=allsols_equal_1(listofplanes(order));
+
+%% Go through each of the list
+    previous_q=j_sol(rand_listofplanes(1)).qt;
+    
+    for i=rand_listofplanes(2:end)'
+        jointdiffweight=jointdiffweight+abs(j_sol(i).qt-previous_q);
+
+        %start blast point
+        P1=plane(i-1).home_point;
+
+        %End blast point
+        P2=plane(i).home_point;
+
+        %distance between P1 and P2
+        D12=sqrt((P1(1)-P2(1))^2+(P1(2)-P2(2))^2+(P1(3)-P2(3))^2);
+        
+        % Arbitary test to see if close enough between planes
+    %     if D12<4*mew
+            try delete(h1);end
+            try delete(h2);end
+            h1=plot3(P1(1),P1(2),P1(3),'r*');
+            h2=plot3(P2(1),P2(2),P2(3),'b*');
+    %     else
+            %     display('not close enough');
+    %         continue;
+    %     end
+
+
+
+        %get distance from P1 and P2 to all mesh points
+        D02=sqrt((P0(:,1)-P2(1)).^2+(P0(:,2)-P2(2)).^2+(P0(:,3)-P2(3)).^2);
+        D10=sqrt((P1(1)-P0(:,1)).^2+(P1(2)-P0(:,2)).^2+(P1(3)-P0(:,3)).^2);
+
+        %fill out mat so same size for cross product
+        P2minusP1mat=[ones(size(P0,1),1)*P2(1)-P1(1),...
+                      ones(size(P0,1),1)*P2(2)-P1(2),...
+                      ones(size(P0,1),1)*P2(3)-P1(3)];
+
+        %get perp distances to surface
+        % see this page %
+        % http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
+        Dh=sqrt(...
+                sum(...
+                    cross(...
+                           P2minusP1mat,...
+                           [P1(1)-P0(:,1),P1(2)-P0(:,2),P1(3)-P0(:,3)]...
+                           )...
+                    .^2 ...
+                    ,2)...
+                )...
+             /...
+             sqrt(...
+                  sum(...
+                      (P2-P1).^2 ...
+                      )...
+                  );
+        %Find points on mesh covered
+        %%% mew from line AND 
+        %%% where the sum of distance from each home point to the mesh points is less than then the distance between home points + mew
+        newlycovered=find(Dh<mew &  D02+D10<D12+mew);
+        P0cover(newlycovered)=P0cover(newlycovered)+0.1;
+        %make sure it can't have a value greater than 1
+%         P0cover(find(P0cover>1))=1;
+    
+        % update the previous q
+        previous_q=j_sol(i).qt;
+    end
+    
+    %display results
+    display(['Current Itteration = ',num2str(currentit)]);
+    display(['Joint diff weight in rads= ',num2str(jointdiffweight)]);
+    figure (1)
+    subplot(3,1,1);    
+    bar(jointdiffweight)
+    title('Absolute Joint Change for each of 6 joints (rads)')
+    
+    subplot(3,1,2);
+    title('Coverage map')
+    for j=0.1:0.1:1
+        try delete(plothandle(j/0.1)); end
+        if j<1
+            covered=find(P0cover==j);
+        else %when j==1
+            covered=find(P0cover>=j);
+        end
+        if ~isempty(covered)
+            plothandle(int32(j/0.1))=plot3(P0(covered,1),P0(covered,2),P0(covered,3),'color',[1-j,1-j,1-j],'marker','.','linestyle','none');
+            drawnow
+        end
+    end
+    subplot(3,1,3);    
+    hist(P0cover,0:0.1:max(P0cover))
+    title('Coverage histogram each 0.1 is covered once');
+    uiwait(msgbox('Press to continue'));
+end
+##### SOURCE END #####
+-->
+   </body>
+</html>

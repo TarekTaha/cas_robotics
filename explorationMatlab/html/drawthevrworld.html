@@ -1,0 +1,230 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>drawthevrworld</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2008-01-14">
+      <meta name="m-file" content="drawthevrworld"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#2">FUNCTION: determinerots</a></li>
+            </ul>
+         </div><pre class="codeinput"><span class="keyword">function</span> drawthevrworld()
+<span class="keyword">global</span> r Q myworld
+n = r.n;
+L = r.link;
+tr = r.base;
+
+keyboard
+
+[Rx,Ry,Rz]=determinerots(tr);
+<span class="comment">% setfield(myworld.piece1,'translation',[tr(1,4),tr(2,4),tr(3,4)]);</span>
+setfield(myworld.piece1,<span class="string">'translation'</span>,[tr(2,4),tr(3,4)+0.18,tr(1,4)+0.18]);
+<span class="comment">% setfield(myworld.piece1,'rotation',[1,0,0,Rx]);</span>
+<span class="comment">% setfield(myworld.piece1,'rotation',[0,1,0,Ry]);</span>
+<span class="comment">% setfield(myworld.piece1,'rotation',[0,0,1,Rz]);</span>
+setfield(myworld.piece1,<span class="string">'rotation'</span>,[1,0,0,Ry]);
+setfield(myworld.piece1,<span class="string">'rotation'</span>,[0,1,0,Rz]);
+setfield(myworld.piece1,<span class="string">'rotation'</span>,[0,0,1,Rx]);
+
+
+
+tr = tr * L{1}(Q(1));
+[Rx,Ry,Rz]=determinerots(tr);
+setfield(myworld.piece2,<span class="string">'translation'</span>,[tr(2,4),tr(3,4),tr(1,4)]);
+setfield(myworld.piece2,<span class="string">'rotation'</span>,[1,0,0,Ry]);
+setfield(myworld.piece2,<span class="string">'rotation'</span>,[0,1,0,Rz]);
+setfield(myworld.piece2,<span class="string">'rotation'</span>,[0,0,1,Rx+pi/2]);
+
+tr = tr * L{2}(Q(2));
+[Rx,Ry,Rz]=determinerots(tr);
+setfield(myworld.piece3,<span class="string">'translation'</span>,[tr(2,4),tr(3,4),tr(1,4)]);
+setfield(myworld.piece3,<span class="string">'rotation'</span>,[1,0,0,Ry]);
+setfield(myworld.piece3,<span class="string">'rotation'</span>,[0,1,0,Rz]);
+setfield(myworld.piece3,<span class="string">'rotation'</span>,[0,0,1,Rx]);
+
+tr = tr * L{3}(Q(3));
+[Rx,Ry,Rz]=determinerots(tr);
+setfield(myworld.piece4,<span class="string">'translation'</span>,[tr(2,4),tr(3,4),tr(1,4)]);
+setfield(myworld.piece4,<span class="string">'rotation'</span>,[1,0,0,Ry]);
+setfield(myworld.piece4,<span class="string">'rotation'</span>,[0,1,0,Rz]);
+setfield(myworld.piece4,<span class="string">'rotation'</span>,[0,0,1,Rx]);
+
+tr = tr * L{4}(Q(4));
+[Rx,Ry,Rz]=determinerots(tr);
+setfield(myworld.piece5,<span class="string">'translation'</span>,[tr(2,4),tr(3,4),tr(1,4)]);
+setfield(myworld.piece5,<span class="string">'rotation'</span>,[1,0,0,Ry]);
+setfield(myworld.piece5,<span class="string">'rotation'</span>,[0,1,0,Rz]);
+setfield(myworld.piece5,<span class="string">'rotation'</span>,[0,0,1,Rx]);
+
+tr = tr * L{5}(Q(5));
+[Rx,Ry,Rz]=determinerots(tr);
+setfield(myworld.piece6,<span class="string">'translation'</span>,[tr(2,4),tr(3,4),tr(1,4)]);
+setfield(myworld.piece6,<span class="string">'rotation'</span>,[1,0,0,Ry]);
+setfield(myworld.piece6,<span class="string">'rotation'</span>,[0,1,0,Rz]);
+setfield(myworld.piece6,<span class="string">'rotation'</span>,[0,0,1,Rx]);
+
+vrdrawnow;
+</pre><h2>FUNCTION: determinerots<a name="2"></a></h2>
+         <p>to work out the rotations around the x,y,z to be passed to vrlm</p><pre class="codeinput"><span class="keyword">function</span> [Rx,Ry,Rz]=determinerots(tr)
+
+Rz=atan2(tr(2,1),tr(1,1));
+Ry=atan2(-tr(3,1),tr(1,1)*cos(Rz)+tr(2,1)*sin(Rz));
+Rx=atan2(-tr(2,3)*cos(Rz)-tr(1,3)*sin(Rz),tr(2,2)*cos(Rz)-tr(1,2)*sin(Rz));
+
+<span class="comment">% to_compare=[cos(Rz)*cos(Ry) , cos(Rz)*sin(Ry)*sin(Rx)-sin(Rz)*cos(Rx) , cos(Rz)*sin(Ry)*cos(Rx)+sin(Rz)*sin(Rx);</span>
+<span class="comment">%             sin(Rz)*cos(Ry) , sin(Rz)*sin(Ry)*sin(Rx)+cos(Rz)*cos(Rx) , sin(Rz)*sin(Ry)*cos(Rx)-cos(Rz)*sin(Rx);</span>
+<span class="comment">%             -sin(Ry)        , cos(Ry)*sin(Rx)                         , cos(Ry)*cos(Rx)];</span>
+<span class="comment">%</span>
+<span class="comment">% if ~isempty(find(to_compare-tr(1:3,1:3)&gt;eps,1))</span>
+<span class="comment">%     keyboard</span>
+<span class="comment">% end</span>
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+function drawthevrworld()
+global r Q myworld
+n = r.n;
+L = r.link;
+tr = r.base;
+
+keyboard
+
+[Rx,Ry,Rz]=determinerots(tr); 
+% setfield(myworld.piece1,'translation',[tr(1,4),tr(2,4),tr(3,4)]);
+setfield(myworld.piece1,'translation',[tr(2,4),tr(3,4)+0.18,tr(1,4)+0.18]);
+% setfield(myworld.piece1,'rotation',[1,0,0,Rx]);
+% setfield(myworld.piece1,'rotation',[0,1,0,Ry]);
+% setfield(myworld.piece1,'rotation',[0,0,1,Rz]);
+setfield(myworld.piece1,'rotation',[1,0,0,Ry]);
+setfield(myworld.piece1,'rotation',[0,1,0,Rz]);
+setfield(myworld.piece1,'rotation',[0,0,1,Rx]);
+
+
+
+tr = tr * L{1}(Q(1));
+[Rx,Ry,Rz]=determinerots(tr); 
+setfield(myworld.piece2,'translation',[tr(2,4),tr(3,4),tr(1,4)]);
+setfield(myworld.piece2,'rotation',[1,0,0,Ry]);
+setfield(myworld.piece2,'rotation',[0,1,0,Rz]);
+setfield(myworld.piece2,'rotation',[0,0,1,Rx+pi/2]);
+
+tr = tr * L{2}(Q(2));
+[Rx,Ry,Rz]=determinerots(tr);
+setfield(myworld.piece3,'translation',[tr(2,4),tr(3,4),tr(1,4)]);
+setfield(myworld.piece3,'rotation',[1,0,0,Ry]);
+setfield(myworld.piece3,'rotation',[0,1,0,Rz]);
+setfield(myworld.piece3,'rotation',[0,0,1,Rx]);
+
+tr = tr * L{3}(Q(3));
+[Rx,Ry,Rz]=determinerots(tr);
+setfield(myworld.piece4,'translation',[tr(2,4),tr(3,4),tr(1,4)]);
+setfield(myworld.piece4,'rotation',[1,0,0,Ry]);
+setfield(myworld.piece4,'rotation',[0,1,0,Rz]);
+setfield(myworld.piece4,'rotation',[0,0,1,Rx]);
+
+tr = tr * L{4}(Q(4));
+[Rx,Ry,Rz]=determinerots(tr);
+setfield(myworld.piece5,'translation',[tr(2,4),tr(3,4),tr(1,4)]);
+setfield(myworld.piece5,'rotation',[1,0,0,Ry]);
+setfield(myworld.piece5,'rotation',[0,1,0,Rz]);
+setfield(myworld.piece5,'rotation',[0,0,1,Rx]);
+
+tr = tr * L{5}(Q(5));
+[Rx,Ry,Rz]=determinerots(tr);
+setfield(myworld.piece6,'translation',[tr(2,4),tr(3,4),tr(1,4)]);
+setfield(myworld.piece6,'rotation',[1,0,0,Ry]);
+setfield(myworld.piece6,'rotation',[0,1,0,Rz]);
+setfield(myworld.piece6,'rotation',[0,0,1,Rx]);
+
+vrdrawnow;
+
+%% FUNCTION: determinerots 
+% to work out the rotations around the x,y,z to be passed to vrlm
+function [Rx,Ry,Rz]=determinerots(tr)    
+
+Rz=atan2(tr(2,1),tr(1,1));
+Ry=atan2(-tr(3,1),tr(1,1)*cos(Rz)+tr(2,1)*sin(Rz));
+Rx=atan2(-tr(2,3)*cos(Rz)-tr(1,3)*sin(Rz),tr(2,2)*cos(Rz)-tr(1,2)*sin(Rz));
+
+% to_compare=[cos(Rz)*cos(Ry) , cos(Rz)*sin(Ry)*sin(Rx)-sin(Rz)*cos(Rx) , cos(Rz)*sin(Ry)*cos(Rx)+sin(Rz)*sin(Rx);
+%             sin(Rz)*cos(Ry) , sin(Rz)*sin(Ry)*sin(Rx)+cos(Rz)*cos(Rx) , sin(Rz)*sin(Ry)*cos(Rx)-cos(Rz)*sin(Rx);
+%             -sin(Ry)        , cos(Ry)*sin(Rx)                         , cos(Ry)*cos(Rx)];
+% 
+% if ~isempty(find(to_compare-tr(1:3,1:3)>eps,1))
+%     keyboard
+% end
+
+##### SOURCE END #####
+-->
+   </body>
+</html>
