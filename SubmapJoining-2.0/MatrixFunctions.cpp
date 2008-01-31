@@ -534,9 +534,17 @@ CholeskyFactor cholesky(const SparseSymmMatrix& m){
 	result.c.nmethods = 1 ;
 	result.c.method [0].ordering = CHOLMOD_NATURAL ;
 	result.c.postorder = false ;
+	m.write_to_file("SavedMatrices/ill1");
+	cout << "chol1" << endl;
 
+
+	//cholmod_reallocate_factor(2 * m.max_num_nonzero(), result.A, &result.c);
 	result.A = cholmod_analyze(m.A, &result.c);
+	cout << "chol2" << endl;
+	cout << "Check: " << cholmod_check_sparse(m.A, &m.c) << endl;
+	cout << "Check: " << cholmod_check_factor(result.A, &result.c) << endl;
 	cholmod_factorize(m.A, result.A, &result.c);
+	cout << "chol3" << endl;
 	return result;
 }
 
@@ -576,6 +584,24 @@ SparseMatrix to_sparse_matrix_fast(const SparseSymmMatrix& m){
 	SparseMatrix result;
 	result.A =  cholmod_copy_sparse(m.A, &m.c);
 	result.A->stype = 0;
+	return result;
+}
+
+SparseMatrix to_sparse_matrix(const SparseSymmMatrix& m){
+	SparseMatrix result;
+	result.A =  cholmod_copy_sparse(m.A, &m.c);
+	result.A->stype = 0;
+	cholmod_reallocate_sparse(2 * result.max_num_nonzero(), result.A, &result.c);
+
+	
+	int *row = (int*)m.A->i;
+	int *col = (int*)m.A->p;
+	double *x = (double*)m.A->x;
+	for(int i = 0; i < m.get_cols(); ++i){
+		for(int j = col[i]; j < col[i + 1]; ++j){
+			result.set(i + 1, row[j] + 1, x[j]);
+		}
+	}
 	return result;
 }
 

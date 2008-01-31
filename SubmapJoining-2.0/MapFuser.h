@@ -29,7 +29,7 @@ class MapFuser{
 		void assosiate_beacons(const SparseMatrix& beacX, const SparseMatrix& beacP, const SparseMatrix& obsX, const SparseMatrix& obsP);
 		double submap_radius(const LocalMap& map);
 		double distance_to_submap(int map);
-		//void reorder_submaps();
+		void reorder_submaps();
 		//void compute_cholesky_factorization();
 		double wrap(double angle);
 

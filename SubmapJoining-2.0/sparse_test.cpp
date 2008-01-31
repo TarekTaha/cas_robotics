@@ -85,16 +85,9 @@ int main(int argc, char *argv[]){
 
 	cout << "finish! The test took (clock):" <<endl;
 	cout << (double)(1000 * (clock() - clock_start))<< endl;
-	spaA = random_matrix(2,2,4);
-	symmA = random_symm_matrix(2,2,4);
-	spaA.set(1,1, 4);
-	spaA.set(1, 2, 1);
-	spaA.set(2, 1, 1);
-	spaA.set(2, 2, 4);
-	symmA.set(1,1, 4);
-	symmA.set(1, 2, 1);
-	symmA.set(2, 1, 1);
-	symmA.set(2, 2, 4);
+
+	symmA = random_symm_matrix(5,5,10);
+	spaA = to_sparse_matrix_fast(symmA);
 	
 	cout << "SymmA" << endl;
 	symmA.print();
@@ -102,8 +95,6 @@ int main(int argc, char *argv[]){
 	spaA.print();
 	cout << endl;
 	
-	cholesky(symmA).print();
-	cout << endl;
 	//cholesky(spaA).print();
 	
 

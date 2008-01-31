@@ -28,7 +28,7 @@ class SparseMatrix : public Matrix{
 	  SparseMatrix get_submatrix(int*,int, int*, int) const;
 	  SparseMatrix get_submatrix(int, int, int, int) const;
     	void clear();
-    	int max_num_nonzero();
+    	int max_num_nonzero() const;
 };
 
 SparseMatrix operator+(const SparseMatrix&, const SparseMatrix&);
