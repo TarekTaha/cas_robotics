@@ -27,9 +27,9 @@ end
 global workspace r scan
 
 %The test cases Need to write this fucking shit down!!
-if ~strcmp(pwd,'C:\MATLAB\R2007a\work\explorationMatlab\journal')
+if ~strcmp(pwd,[matlabroot,'\work\explorationMatlab\journal'])
     try 
-        cd C:\MATLAB\R2007a\work\explorationMatlab\journal
+        cd ([matlabroot,'\work\explorationMatlab\journal']);
     catch
         display('fucking fix it!!');
     end
@@ -354,6 +354,32 @@ if tests2do(6)==1
         load(['test',num2str(testnum),'hMesh.mat']);
     end
 
+%average the mesh out
+    global workspace
+    roundedmesh=round(hMeshdata.v/workspace.inc_size)*workspace.inc_size;
+    roundedmesh=roundedmesh(GetImpLevInfo(roundedmesh),:);
+    roundedmesh=unique(roundedmesh,'rows');
+
+%Add in components to the bridge section map for the 3 tests,
+
+%Then make discrete points along each of the patches
+
+brSec=plyread('bridgeSection.ply');
+for i=1:size(brSec.face.vertex_indices,1)
+    %have to move it up one
+    verts=brSec.face.vertex_indices(i)+1;
+    pnt1=[brSec.vertex.x(verts(1)),brSec.vertex.y(verts(1)),brSec.vertex.z(verts(1))];
+    pnt2=[brSec.vertex.x(verts(2)),brSec.vertex.y(verts(2)),brSec.vertex.z(verts(2))];
+    pnt3=[brSec.vertex.x(verts(3)),brSec.vertex.y(verts(3)),brSec.vertex.z(verts(3))];
+    pnt4=[brSec.vertex.x(verts(4)),brSec.vertex.y(verts(4)),brSec.vertex.z(verts(4))];
+    
+end
+
+%now search through all(most configs and see what the range of movements is    
+    
+   
+
+    
 
 
 

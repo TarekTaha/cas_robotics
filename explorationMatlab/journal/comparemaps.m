@@ -1,6 +1,7 @@
 function [u,sig,D] = comparemaps(patch)
 % close all
 testnum=11;
+display('This always set to test num 11 in comparemaps!');
 mew=0.05;
 % patch=9;
 
@@ -100,9 +101,13 @@ p3=[brSec.vertex.x(19),brSec.vertex.y(19),brSec.vertex.z(19)];
 
 elseif patch==9
  % left flange
-p1=[brSec.vertex.x(37),brSec.vertex.y(37),brSec.vertex.z(37)];
-p2=[brSec.vertex.x(40),brSec.vertex.y(40),brSec.vertex.z(40)];
-p3=[brSec.vertex.x(38),brSec.vertex.y(38),brSec.vertex.z(38)];
+% p1=[brSec.vertex.x(37),brSec.vertex.y(37),brSec.vertex.z(37)];
+% p2=[brSec.vertex.x(40),brSec.vertex.y(40),brSec.vertex.z(40)];
+% p3=[brSec.vertex.x(38),brSec.vertex.y(38),brSec.vertex.z(38)];
+p1=[brSec.vertex.x(33),brSec.vertex.y(33),brSec.vertex.z(33)];
+p2=[brSec.vertex.x(34),brSec.vertex.y(34),brSec.vertex.z(34)];
+p3=[brSec.vertex.x(35),brSec.vertex.y(35),brSec.vertex.z(35)];
+
 
 elseif patch==10
  % right flange
