@@ -194,7 +194,7 @@ SparseMatrix operator*(double fact, const SparseMatrix& m){
 	return result;
 }
 
-int SparseMatrix::max_num_nonzero(){
+int SparseMatrix::max_num_nonzero() const{
 	return A->nzmax;
 }
 

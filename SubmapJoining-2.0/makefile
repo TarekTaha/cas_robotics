@@ -5,6 +5,15 @@ LDFLAGS = -IMatrixLib -I/home/casuser/Desktop/SuiteSparse/CHOLMOD/Include/ -I/ho
 INCLUDE =
 LIB = -lcholmod -lamd -lcolamd -lccolamd -lcamd -lmetis -llapack -lblas -lgfortran -lgfortranbegin -lm
 
+SUITESPARSE = /home/casuser/Desktop/SuiteSparse/
+CHOLMOD = CHOLMOD/Lib
+AMD = AMD/Lib
+COLAMD = COLAMD/Lib
+CCOLAMD = CCOLAMD/Lib
+CAMD = CAMD/Lib
+METIS = /metis-4.0
+LINK = -L$(SUITESPARSE)$(CHOLMOD) -L$(SUITESPARSE)$(AMD) -L$(SUITESPARSE)$(COLAMD) -L$(SUITESPARSE)$(CCOLAMD) -L$(SUITESPARSE)$(CAMD) -L$(SUITESPARSE)$(METIS)
+
 all: main
 
 st : sparse_test.o SparseMatrix.o SparseSymmMatrix.o Matrix.o DenseMatrix.o CholeskyFactor.o MatrixFunctions.o
@@ -40,7 +49,7 @@ MatrixFunctions.o : MatrixFunctions.cpp MatrixFunctions.h
 
 
 main : main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o MapFuser.o Timer.o CholeskyFactor.o
-	$(CCC) $(CCCFLAGS) -L./Lib -o main main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o MapFuser.o Timer.o CholeskyFactor.o $(LIB)
+	$(CCC) $(CCCFLAGS) $(LINK) -o main main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o MapFuser.o Timer.o CholeskyFactor.o $(LIB)
 
 main.o : main.cc
 	$(CCC) $(CCCFLAGS) -c main.cc $(LDFLAGS)

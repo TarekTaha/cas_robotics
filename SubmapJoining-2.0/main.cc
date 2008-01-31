@@ -9,6 +9,7 @@
 using namespace std;
 
 
+
 void load_map(LocalMap& map, int index){
 	stringstream out;
 	out << index;
@@ -29,9 +30,9 @@ int main(int argc, char * argv[])
 		load_map(locMap, i);
 		to_sparse_symm_matrix(locMap.P).write_to_file("SavedMatrices/Ploc");
 		fuser.fuse_map(locMap);
-		//if(i == 27 || i == 34 || i == 43 || i == 57){
-			//fuser.reorder_submaps();
-		//}
+		if(i == 27 || i == 34 || i == 43 || i == 57){
+			fuser.reorder_submaps();
+		}
 		stringstream out;
 		out << i;
 		string tmp = "SavedMatrices/I" + out.str();
