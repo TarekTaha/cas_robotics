@@ -896,7 +896,7 @@ test3hMesh.mat            test6state_data.mat
 
 ---------------------
 test11
-- difficult environment like 9 (I think)
+- difficult environment like 9 (I think) (%%ADDED LATER 1/2/08 - This is same as 6 but with improvements made by steph due to the errornous runners going off)
 move speed is 20%
 
 . . . . . . . . . . . . . . . . . . . . . . . . 

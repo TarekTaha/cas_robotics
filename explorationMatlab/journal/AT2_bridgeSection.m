@@ -39,7 +39,7 @@ cartYoffset=0.11;
     sagAngle = tan(0.004 / ibeam1.height);
     section1 = rotate(section1, xRotation(-sagAngle));
     % move origin to robot base
-    section1 = shift(section1, [-robotOffset, -(surface.breadth - flange.breadth / 2)-cartYoffset, 1.5+0.5+3*surface.height - 0.540]);
+    section1 = shift(section1, [-robotOffset, -(surface.breadth - flange.breadth / 2)-cartYoffset, 1.498+0.5+3*surface.height - 0.540]);
     
     section2 = compositeGlyph({ibeam2, ceiling2});
     % move origin to ceiling above ibeam
@@ -47,7 +47,7 @@ cartYoffset=0.11;
     % rotate to achieve 8mm expansion at the bootom of the ibeam
     section2 = rotate(section2, xRotation(sagAngle));
     % move origin to robot base
-    section2 = shift(section2, [-robotOffset, surface.breadth - flange.breadth / 2, 1.5+0.5+3*surface.height - 0.540]);
+    section2 = shift(section2, [-robotOffset, surface.breadth - flange.breadth / 2, 1.498+0.5+3*surface.height - 0.540]);
     
     % combine the sections
     fullSection = compositeGlyph({section1, section2});

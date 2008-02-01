@@ -284,32 +284,41 @@ end
 if tests2do(5)==1
     
     
-%     if testnum==6
-%         display('Using the 9th mesh for test6 since same env, but improved map by steph');
-%         load(['test',num2str(9),'hMesh.mat']);
-%     else
+    if testnum==6
+        display('Using the 11th mesh for test6 since same env, but improved map by steph');
+        load(['test',num2str(11),'hMesh.mat']);
+    else
         load(['test',num2str(testnum),'hMesh.mat']);
-%     end
+    end
 
     
     figure
     bridgeSection;
     hold on;
     for i=1:10;
-        [u(i),sig(i),D(i).vals]=comparemaps(i);
+        [u(i),sig(i),D(i).vals]=comparemaps(i,testnum,false);
     end;
+  
+    %fix up the pic figure
     figure(1)
     global r Q
+    Q=[pi/6,pi/3,-pi/2,0,pi/2,0]
     plotdenso(r,Q);
+    %set view to be desired one
+    az =   71.5000;
+    el =    10;
+    view(az,el)
+    
     camlight
     lighting gouraud
     axis equal;
     axis off;
-    uiwait(msgbox('Move figure to the way you want then press OK'));
-    figure(1)
+%     uiwait(msgbox('Move figure to the way you want then do save as and patches.eps - then press ok'));
+%     figure(1)
+    scrsz = get(0,'ScreenSize');set(gcf,'position',[scrsz(1) scrsz(2) scrsz(3) scrsz(4)]);
     saveas(gcf,['test',num2str(testnum),'patches.png']);
 
-    close all;
+%     close all;
     
     figure;       
     bar(u);
@@ -326,14 +335,22 @@ if tests2do(5)==1
         vals=[vals;D(i).vals(:)*1000];
     end
     boxplot(vals,names)
-    uiwait(msgbox('Fig plot up with what you want then press OK'));
-    saveas(gcf,['test',num2str(testnum),'boxplot.eps'])
+    title('Map Surface Variation Boxplots','Fontsize',30)
+    ylabel('Distance To Plane (mm)','Fontsize',24)
+    xlabel('Surface Number','Fontsize',24)
+    set(gca,'Fontsize',20)
+    scrsz = get(0,'ScreenSize');set(gcf,'position',[scrsz(1)/2 scrsz(2)/2 scrsz(3)/2 scrsz(4)/2]);
+    grid on;
+%     uiwait(msgbox('Fig plot up with what you want then press OK'));
+    saveas(gcf,['test',num2str(testnum),'boxplot.png'])
     
     figure        
     index=GetImpLevInfo(hMeshdata.v);
     index2=find(hMeshdata.v(index,1)>-0.88);
     plot3(hMeshdata.v(index(index2),1),hMeshdata.v(index(index2),2),hMeshdata.v(index(index2),3),'r','marker','.','linestyle','none','markersize',0.1);axis equal; grid on
     
+    
+    figure(1)
     
 
 
@@ -347,36 +364,151 @@ end
 %%%%%%%  ~
 %\subsubsection{KPI 6 - C space opened up}
 if tests2do(6)==1
-    if testnum==6
-        display('Using the 9th mesh for test6 since same env, but improved map by steph');
-        load(['test',num2str(9),'hMesh.mat']);
-    else
+%     if testnum==6
+%         display('Using the 9th mesh for test6 since same env, but improved map by steph');
+%         load(['test',num2str(9),'hMesh.mat']);
+%     else
         load(['test',num2str(testnum),'hMesh.mat']);
-    end
+        
+%     end
 
-%average the mesh out
-    global workspace
+    load(['test',num2str(testnum),'workspace.mat']);
+
+    %average the mesh out
+    global workspace r
     roundedmesh=round(hMeshdata.v/workspace.inc_size)*workspace.inc_size;
     roundedmesh=roundedmesh(GetImpLevInfo(roundedmesh),:);
     roundedmesh=unique(roundedmesh,'rows');
 
-%Add in components to the bridge section map for the 3 tests,
+    %Add in components to the bridge section map for the 3 tests,
 
-%Then make discrete points along each of the patches
+    %now search through all(most configs and see what the range of movements is    
+    qlimit=r.qlim;
 
-brSec=plyread('bridgeSection.ply');
-for i=1:size(brSec.face.vertex_indices,1)
-    %have to move it up one
-    verts=brSec.face.vertex_indices(i)+1;
-    pnt1=[brSec.vertex.x(verts(1)),brSec.vertex.y(verts(1)),brSec.vertex.z(verts(1))];
-    pnt2=[brSec.vertex.x(verts(2)),brSec.vertex.y(verts(2)),brSec.vertex.z(verts(2))];
-    pnt3=[brSec.vertex.x(verts(3)),brSec.vertex.y(verts(3)),brSec.vertex.z(verts(3))];
-    pnt4=[brSec.vertex.x(verts(4)),brSec.vertex.y(verts(4)),brSec.vertex.z(verts(4))];
-    
-end
+    incval=5; %degrees between steps
+    numvals=floor((qlimit(:,2)-qlimit(:,1))/(incval*pi/180));
 
-%now search through all(most configs and see what the range of movements is    
-    
+    %if do 100 check a second then this will take 
+    display(['if do 500 checks a second then search space of ',num2str(numvals(1)*numvals(2)*numvals(3)) ,' will take ',num2str(((numvals(1)*numvals(2)*numvals(3))/500)/60),'minutes per test']);
+
+
+    %Then make discrete points along each of the patches
+    % for testcase=1:2
+    for testcase=1
+        validcount(testcase)=0;
+        %1 is ideal, 2 is real case
+        if testcase==1
+            %set empty var for points
+            points=[];
+            brSec=plyread('bridgeSection.ply');
+            for i=1:size(brSec.face.vertex_indices,1)
+                %have to move it up one
+                verts=brSec.face.vertex_indices{i}+1;
+                pnt1=[brSec.vertex.x(verts(1)),brSec.vertex.y(verts(1)),brSec.vertex.z(verts(1))];
+                pnt2=[brSec.vertex.x(verts(2)),brSec.vertex.y(verts(2)),brSec.vertex.z(verts(2))];
+                pnt3=[brSec.vertex.x(verts(3)),brSec.vertex.y(verts(3)),brSec.vertex.z(verts(3))];
+                pnt4=[brSec.vertex.x(verts(4)),brSec.vertex.y(verts(4)),brSec.vertex.z(verts(4))];    
+                points=[points;pnt1;pnt2;pnt3;pnt4];
+
+%                 inc_size=floor((pnt1-pnt2)/(workspace.inc_size/4));
+                
+                close all;plot3(pnt1(1),pnt1(2),pnt1(3),'r*');hold on;plot3(pnt2(1),pnt2(2),pnt2(3),'g*');plot3(pnt3(1),pnt3(2),pnt3(3),'b*');plot3(pnt4(1),pnt4(2),pnt4(3),'black*')
+
+%there may be times when the box is too small so just skip it               
+                try
+                %gets ponts on one side
+                inc_size=max([ceil(abs((pnt4-pnt1)/(workspace.inc_size/4))),2]);
+                if pnt4(1)==pnt1(1)
+                    pointonside1=ones([inc_size,1])*pnt1(1);
+                else
+                    pointonside1=[pnt1(1):(pnt4(1)-pnt1(1))/(inc_size-1):pnt4(1)]';
+                end
+                if pnt4(2)==pnt1(2)
+                    pointonside1=[pointonside1,ones([inc_size,1])*pnt1(2)];
+                else
+                    pointonside1=[pointonside1,[pnt1(2):(pnt4(2)-pnt1(2))/(inc_size-1):pnt4(2)]'];
+                end                                                                         
+                if pnt4(3)==pnt1(3)
+                    pointonside1=[pointonside1,ones([inc_size,1])*pnt1(3)];
+                else
+                    pointonside1=[pointonside1,[pnt1(3):(pnt4(3)-pnt1(3))/(inc_size-1):pnt4(3)]'];
+                end
+                
+                %gets ponts on other side
+                inc_size=max([ceil(abs((pnt3-pnt2)/(workspace.inc_size/4))),2]);
+                if pnt2(1)==pnt3(1)
+                    pointonside2=ones([inc_size,1])*pnt2(1);
+                else
+                    pointonside2=[pnt2(1):(pnt3(1)-pnt2(1))/(inc_size-1):pnt3(1)]';
+                end
+                if pnt2(2)==pnt3(2)
+                    pointonside2=[pointonside2,ones([inc_size,1])*pnt2(2)];
+                else
+                    pointonside2=[pointonside2,[pnt2(2):(pnt3(2)-pnt2(2))/(inc_size-1):pnt3(2)]'];
+                end                                                                         
+                if pnt2(3)==pnt3(3)
+                    pointonside2=[pointonside2,ones([inc_size,1])*pnt2(3)];
+                else
+                    pointonside2=[pointonside2,[pnt2(3):(pnt3(3)-pnt2(3))/(inc_size-1):pnt3(3)]'];
+                end
+                
+                %gets all points in between
+                for j=1:length(pointonside1)
+
+                    startpnt=pointonside1(j,:);
+                    endpnt=pointonside2(j,:);
+                    
+                    inc_size=max([ceil(abs((endpnt-startpnt)/(workspace.inc_size/4))),2]);
+                    if endpnt(1)==startpnt(1)
+                        pointonline=ones([inc_size,1])*startpnt(1);
+                    else
+                        pointonline=[startpnt(1):(endpnt(1)-startpnt(1))/(inc_size-1):endpnt(1)]';
+                    end
+                    if endpnt(2)==startpnt(2)
+                        pointonline=[pointonline,ones([inc_size,1])*startpnt(2)];
+                    else
+                        pointonline=[pointonline,[startpnt(2):(endpnt(2)-startpnt(2))/(inc_size-1):endpnt(2)]'];
+                    end                                                                         
+                    if endpnt(3)==startpnt(3)
+                        pointonline=[pointonline,ones([inc_size,1])*startpnt(3)];
+                    else
+                        pointonline=[pointonline,[startpnt(3):(endpnt(3)-startpnt(3))/(inc_size-1):endpnt(3)]'];
+                    end
+
+                    hold on;plot3(pointonline(:,1),pointonline(:,2),pointonline(:,3),'b.')
+
+                    points=[points;pointonline];
+%                     points=round(points/workspace.inc_size)*workspace.inc_size;
+%                     if rand>0.8
+%                         points=unique(points,'rows');
+%                     end
+                
+                end
+                end
+                points=unique(round(points/(workspace.inc_size/4))*(workspace.inc_size/4),'rows');
+                
+            end
+        elseif testcase==2
+            points=workspace.indexedobsticles;
+            
+            
+        end
+
+
+tic
+        for i=qlimit(1,1):(incval*pi/180):qlimit(1,2)
+            for j=qlimit(2,1):(incval*pi/180):qlimit(2,2)
+                for k=qlimit(3,1):(incval*pi/180):qlimit(3,2)
+                    if check_path_for_col([i,j,k,0,0,0],points)
+                        validcount(testcase)=validcount(testcase)+1;
+                    end
+                end
+            end
+        end
+    end
+toc
+
+    keyboard
    
 
     
