@@ -39,7 +39,7 @@ cartYoffset=0.11;
     sagAngle = tan(0.004 / ibeam1.height);
     section1 = rotate(section1, xRotation(-sagAngle));
     % move origin to robot base
-    section1 = shift(section1, [-robotOffset, -(surface.breadth - flange.breadth / 2)-cartYoffset, 1.5+0.5+3*surface.height - 0.540]);
+    section1 = shift(section1, [-robotOffset, -(surface.breadth - flange.breadth / 2)-cartYoffset, 1.498+0.5+3*surface.height - 0.540]);
     
     section2 = compositeGlyph({ibeam2, ceiling2});
     % move origin to ceiling above ibeam
@@ -47,13 +47,32 @@ cartYoffset=0.11;
     % rotate to achieve 8mm expansion at the bootom of the ibeam
     section2 = rotate(section2, xRotation(sagAngle));
     % move origin to robot base
-    section2 = shift(section2, [-robotOffset, surface.breadth - flange.breadth / 2, 1.5+0.5+3*surface.height - 0.540]);
+    section2 = shift(section2, [-robotOffset, surface.breadth - flange.breadth / 2, 1.498+0.5+3*surface.height - 0.540]);
     
     % combine the sections
     fullSection = compositeGlyph({section1, section2});
     % adjust for the slope of the robot platform
 %     robotAngle = tan(0.085 / 1.300);
 %     fullSection = rotate(fullSection, zRotation(pi)*yRotation(robotAngle));
+
+%Add extra faces to this FUCK!
+%back mid small plane
+faces(end,:)=[32,61,28,57];
+%front mid small plane
+faces(end,:)=[31,62,58,27];
+%top mid plane
+faces(end,:)=[32,61,62,31];
+%top mid plane
+faces(end,:)=[31,28,57,58];
+
+%Add vertices for the 
+numverts=size(vertices,1);
+vertices(numverts+1,:)=(vertices(57,:)+vertices(58,:))/2;
+vertices(numverts+1,:)=(vertices(57,:)+vertices(58,:))/2;
+
+
+
+
 
     if 0 < nargout
         result = fullSection;

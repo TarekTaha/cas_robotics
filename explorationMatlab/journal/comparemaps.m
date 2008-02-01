@@ -1,7 +1,12 @@
-function [u,sig,D] = comparemaps(patch)
+function [u,sig,D] = comparemaps(patch,testnum,doplots)
+if nargin<3
+    doplots=true;
+end
 % close all
-testnum=11;
-display('This always set to test num 11 in comparemaps!');
+if testnum==6
+    testnum=11;
+    display('NOTE!!!!!!!!!!!This always set to test num 11 if testnum = 6!');
+end
 mew=0.05;
 % patch=9;
 
@@ -22,14 +27,14 @@ elseif patch==4
     IntPs=[-0.05,0.6,1.23];
 %% ROOF    
 %right roof front 
-elseif patch==5
-    IntPs=[0.25,0.17,1.5];    
+elseif patch==5 %moved slightly away from pure shiny metal
+    IntPs=[0.25,0.25,1.5];   
 %right roof back HAD TO BE MOVED FORWARD this is where the girder is at the back so it must be brought forward) 
 elseif patch==6 
     IntPs=[-0.10,0.17,1.5];    
 %left roof front
-elseif patch==7
-    IntPs=[0.25,-0.25,1.5];    
+elseif patch==7 %moved slightly away from pure shiny metal
+    IntPs=[0.25,-0.35,1.5];    
 %left roof back
 elseif patch==8
     IntPs=[-0.20,-0.25,1.5];
@@ -67,6 +72,8 @@ index2=find(sqrt((hMeshdata.v(index,1)-IntPs(1)).^2+...
 %                  (hMeshdata.v(index,3)-IntPs1(3)).^2)<sizeInt);             
 plot3(hMeshdata.v(index(index2),1),hMeshdata.v(index(index2),2),hMeshdata.v(index(index2),3),'r','marker','.','linestyle','none','markersize',0.1);axis equal; grid on
 
+%add the text where the IntPs patch is
+text(IntPs(1),IntPs(2),IntPs(3),num2str(patch),'FontSize',30)
 
 cd journal
 brSec=plyread('bridgeSection.ply');
@@ -78,14 +85,25 @@ axis equal
 points=hMeshdata.v(index(index2),:);
 if patch==1 || patch==3
 %first plot (left wall)
+%inside
 p1=[brSec.vertex.x(11),brSec.vertex.y(11),brSec.vertex.z(11)];%11
 p2=[brSec.vertex.x(12),brSec.vertex.y(12),brSec.vertex.z(12)];%12
 p3=[brSec.vertex.x(15),brSec.vertex.y(15),brSec.vertex.z(15)];%15
+%outside
+p4=[brSec.vertex.x(10),brSec.vertex.y(10),brSec.vertex.z(10)];%10
+p5=[brSec.vertex.x(9),brSec.vertex.y(9),brSec.vertex.z(9)];%9
+p6=[brSec.vertex.x(14),brSec.vertex.y(14),brSec.vertex.z(14)];%14
+
 elseif patch==2 ||patch==4
 % secondplot (right wall)
+%inside
 p1=[brSec.vertex.x(42),brSec.vertex.y(42),brSec.vertex.z(42)];
 p2=[brSec.vertex.x(41),brSec.vertex.y(41),brSec.vertex.z(41)];
 p3=[brSec.vertex.x(46),brSec.vertex.y(46),brSec.vertex.z(46)];   
+%outside
+p4=[brSec.vertex.x(43),brSec.vertex.y(43),brSec.vertex.z(43)];
+p5=[brSec.vertex.x(44),brSec.vertex.y(44),brSec.vertex.z(44)];
+p6=[brSec.vertex.x(48),brSec.vertex.y(48),brSec.vertex.z(48)];   
 
 elseif patch==5 || patch==6
  % right roof
@@ -101,21 +119,25 @@ p3=[brSec.vertex.x(19),brSec.vertex.y(19),brSec.vertex.z(19)];
 
 elseif patch==9
  % left flange
-% p1=[brSec.vertex.x(37),brSec.vertex.y(37),brSec.vertex.z(37)];
-% p2=[brSec.vertex.x(40),brSec.vertex.y(40),brSec.vertex.z(40)];
-% p3=[brSec.vertex.x(38),brSec.vertex.y(38),brSec.vertex.z(38)];
-p1=[brSec.vertex.x(33),brSec.vertex.y(33),brSec.vertex.z(33)];
-p2=[brSec.vertex.x(34),brSec.vertex.y(34),brSec.vertex.z(34)];
-p3=[brSec.vertex.x(35),brSec.vertex.y(35),brSec.vertex.z(35)];
+p1=[brSec.vertex.x(37),brSec.vertex.y(37),brSec.vertex.z(37)];
+p2=[brSec.vertex.x(40),brSec.vertex.y(40),brSec.vertex.z(40)];
+p3=[brSec.vertex.x(38),brSec.vertex.y(38),brSec.vertex.z(38)];
 
+p4=[brSec.vertex.x(33),brSec.vertex.y(33),brSec.vertex.z(33)];
+p5=[brSec.vertex.x(34),brSec.vertex.y(34),brSec.vertex.z(34)];
+p6=[brSec.vertex.x(35),brSec.vertex.y(35),brSec.vertex.z(35)];
 
 elseif patch==10
  % right flange
- p1=[brSec.vertex.x(3),brSec.vertex.y(3),brSec.vertex.z(3)];
-p2=[brSec.vertex.x(1),brSec.vertex.y(1),brSec.vertex.z(1)];
-p3=[brSec.vertex.x(2),brSec.vertex.y(2),brSec.vertex.z(2)];
+ %top
+p1=[brSec.vertex.x(7),brSec.vertex.y(7),brSec.vertex.z(7)];
+p2=[brSec.vertex.x(8),brSec.vertex.y(8),brSec.vertex.z(8)];
+p3=[brSec.vertex.x(5),brSec.vertex.y(5),brSec.vertex.z(5)];
 
-
+%bottom
+p4=[brSec.vertex.x(4),brSec.vertex.y(4),brSec.vertex.z(4)];
+p5=[brSec.vertex.x(2),brSec.vertex.y(2),brSec.vertex.z(2)];
+p6=[brSec.vertex.x(3),brSec.vertex.y(3),brSec.vertex.z(3)];
 end
 
 
@@ -128,29 +150,81 @@ norm=cross((p2-p1),(p3-p1));
 d=-norm(1)*p1(1)-norm(2)*p1(2)-norm(3)*p1(3);
 plane_equ=[norm,d];
 
+%if we have a second plane to compare to as well
+if exist('p4')
+    norm2=cross((p5-p4),(p6-p4));
+    %d=-ax-by-cz
+    d2=-norm2(1)*p4(1)-norm2(2)*p4(2)-norm2(3)*p4(3);
+    plane_equ2=[norm2,d2];
+end
+
+
+
 planesign=(plane_equ(1)*points(:,1)+...
            plane_equ(2)*points(:,2)+...
            plane_equ(3)*points(:,3)+...
            plane_equ(4))>0;
        planesign=2*planesign-1;
- figure;
- hist(planesign)
+if doplots
+    figure;
+    hist(planesign)
+end
  
-D=abs(plane_equ(1)*points(:,1)+plane_equ(2)*points(:,2)+plane_equ(3)*points(:,3)+plane_equ(4)*ones([size(points,1),1]))./...
-    sqrt(plane_equ(1)^2+plane_equ(2)^2+plane_equ(3)^2);
-D=D.*planesign;
-figure;
-hist(D,50)
+%if we have a second plane to compare to as well
+if exist('p4')
+    planesign2=(plane_equ2(1)*points(:,1)+...
+           plane_equ2(2)*points(:,2)+...
+           plane_equ2(3)*points(:,3)+...
+           plane_equ2(4))>0;
+     planesign2=2*planesign2-1;
+     if doplots
+         figure;
+         hist(planesign2)
+     end
+end
+ 
 
+%if we have a second plane to compare to as well then we need to remove
+%points from one set of stats and put on the other
+if exist('p4')
+    D=abs(plane_equ(1)*points(:,1)+plane_equ(2)*points(:,2)+plane_equ(3)*points(:,3)+plane_equ(4)*ones([size(points,1),1]))./...
+        sqrt(plane_equ(1)^2+plane_equ(2)^2+plane_equ(3)^2);
+    
+    D2=abs(plane_equ2(1)*points(:,1)+plane_equ2(2)*points(:,2)+plane_equ2(3)*points(:,3)+plane_equ2(4)*ones([size(points,1),1]))./...
+        sqrt(plane_equ2(1)^2+plane_equ2(2)^2+plane_equ2(3)^2);
+    %get closest plane to be the one it lies on
+    [vals,order]=min([D';D2']);
+    
+    D=D.*planesign;
+    D2=D2.*planesign2;
+    
+    %break up sets
+    D=D(find(order==1));
+    D2=D2(find(order==2));
+        
+    %merge them back together
+    D=[D;D2];   
+else    
+    D=abs(plane_equ(1)*points(:,1)+plane_equ(2)*points(:,2)+plane_equ(3)*points(:,3)+plane_equ(4)*ones([size(points,1),1]))./...
+        sqrt(plane_equ(1)^2+plane_equ(2)^2+plane_equ(3)^2);
+    D=D.*planesign;
+
+end
 
 [u,sig]=normfit(D);
-Xrang=[-0.05:0.001:0.05];Yrang = pdf('norm',Xrang,u,sig);
 
-hold on;plot(Xrang,Yrang)
+if doplots
+    figure;
+    hist(D,50)
+    Xrang=[-0.05:0.001:0.05];Yrang = pdf('norm',Xrang,u,sig);
+    hold on;plot(Xrang,Yrang)
+    %do a box plot
+    figure
+    boxplot(D)
+end
 
-%do a box plot
-figure
-boxplot(D)
+
+
 
 
 % surface_making_simple(points,mew)
