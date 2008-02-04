@@ -33,6 +33,10 @@ double CholeskyFactor::get(int get_row, int get_col) const{
 	int *row = (int*)A->i;
 	int *col = (int*)A->p;
 	double *x = (double*)A->x;
+	/*cout << "Cholesky get" << endl;
+	for(int i =0; i < 3; ++i){
+		cout << "Col: " << col[i] << endl;
+	}*/
 	int i = col[get_col - 1];
 	while(i < col[get_col]){
 		if(row[i] == get_row -1){
@@ -40,6 +44,7 @@ double CholeskyFactor::get(int get_row, int get_col) const{
 		}
 		++i;
 	}
+	
 	return 0;
 }
 
@@ -77,3 +82,5 @@ void CholeskyFactor::set(int set_row, int set_col, double val){
 		row[start + 1] = set_row - 1;
 	}
 }
+
+

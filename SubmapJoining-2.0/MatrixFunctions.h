@@ -21,8 +21,10 @@ SparseSymmMatrix inv(const SparseSymmMatrix&);
 SparseSymmMatrix to_sparse_symm_matrix(const SparseMatrix& m);
 SparseMatrix to_sparse_matrix_fast(const SparseSymmMatrix& m);
 SparseMatrix to_sparse_matrix(const SparseSymmMatrix& m);
+SparseMatrix to_sparse_matrix(const CholeskyFactor&);
 double max_eig(const SparseSymmMatrix&);
 SparseSymmMatrix sqrt(const SparseSymmMatrix&);
+CholeskyFactor append(CholeskyFactor m1, const SparseMatrix& m2, const CholeskyFactor&);
 //SparseMatrix solve_cholesky2(const SparseMatrix& L, SparseMatrix rhs, Timer& timer);
 //SparseMatrix operator*(const SparseMatrix& spa, const Matrix& denc);
 //Matrix operator+(Matrix denc, const SparseMatrix& spa);
@@ -30,5 +32,5 @@ SparseSymmMatrix sqrt(const SparseSymmMatrix&);
 
 //SparseMatrix extract_sub_matrix(SparseSymmMatrix& m, int from_row, int from_col, int to_row, int to_col);
 //void set(SparseSymmMatrix& set_m, int row, int col, const SparseMatrix& m);
-
+void compare(const CholeskyFactor& L1, const CholeskyFactor& L2);
 #endif

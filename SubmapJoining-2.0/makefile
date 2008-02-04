@@ -1,9 +1,9 @@
 CCC = g++
-CCCFLAGS = -Wno-deprecated
+CCCFLAGS = -Wno-deprecated -m64
 LDFLAGS = -IMatrixLib -I/home/casuser/Desktop/SuiteSparse/CHOLMOD/Include/ -I/home/casuser/Desktop/SuiteSparse/UFconfig/ -L/home/casuser/Desktop/SuiteSparse/CHOLMOD/Lib/
 #MOBJECTS = ./MatrixLib/SparseMatrix.o ./MatrixLib/Matrix.o ./MatrixLib/SparseMatrixElement.o ./MatrixLib/MatrixLib.o
 INCLUDE =
-LIB = -lcholmod -lamd -lcolamd -lccolamd -lcamd -lmetis -llapack -lblas -lgfortran -lgfortranbegin -lm
+LIB = -lcholmod -lamd -lcolamd -lccolamd -lcamd -lmetis -llapack /usr/lib64/libblas.so.3 -lgfortran -lgfortranbegin -lm
 
 SUITESPARSE = /home/casuser/Desktop/SuiteSparse/
 CHOLMOD = CHOLMOD/Lib
@@ -14,10 +14,10 @@ CAMD = CAMD/Lib
 METIS = /metis-4.0
 LINK = -L$(SUITESPARSE)$(CHOLMOD) -L$(SUITESPARSE)$(AMD) -L$(SUITESPARSE)$(COLAMD) -L$(SUITESPARSE)$(CCOLAMD) -L$(SUITESPARSE)$(CAMD) -L$(SUITESPARSE)$(METIS)
 
-all: main
+all: st
 
 st : sparse_test.o SparseMatrix.o SparseSymmMatrix.o Matrix.o DenseMatrix.o CholeskyFactor.o MatrixFunctions.o
-	$(CCC) $(CCCFLAGS) -L./Lib sparse_test.o SparseMatrix.o SparseSymmMatrix.o MatrixFunctions.o Matrix.o DenseMatrix.o CholeskyFactor.o -o main -lcholmod -lamd -lcolamd -lccolamd -lcamd -lmetis -llapack -lblas -lgfortran -lgfortranbegin -lm
+	$(CCC) $(CCCFLAGS) $(LINK) sparse_test.o SparseMatrix.o SparseSymmMatrix.o MatrixFunctions.o Matrix.o DenseMatrix.o CholeskyFactor.o -o main $(LIB)
 	 
 sparse_test.o : sparse_test.cpp
 	$(CCC) $(CCCFLAGS) -c sparse_test.cpp $(LDFLAGS)

@@ -40,9 +40,9 @@ void MapFuser::fuse_map(LocalMap m){
 	add_new_beacons_and_robot_location_to_state(m.X);
 	
 	update_map(m.X, m.P);
-	cout << "here5" << endl;
+	//cout << "here5" << endl;
 	glb_map.L = cholesky(glb_map.I);
-	cout << "here6" << endl;
+	//cout << "here6" << endl;
 	glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
 	//cout << "here7" << endl;
 	/*if(num_elements_updated_in_I > 250){
@@ -395,7 +395,6 @@ void MapFuser::set_potential_assosiations(){ //const Matrix& P_glb_robot, const 
 		        x_beac= glb_map.X.get(place_of_beacon[ submaps_first_beacon[i] + j], 1);
 		        y_beac= glb_map.X.get(place_of_beacon[ submaps_first_beacon[i] + j] + 1, 1);     
 		        dist_beac = sqrt((x_beac - rx) * (x_beac - rx) + (y_beac - ry) * (y_beac - ry));
-		        
 		        if(dist_beac < radius_of_submap[num_submaps] + 3){
 					potential_assosiation_beacons[num_potential_assosiations] = submaps_first_beacon[i] + j;
 					++num_potential_assosiations;

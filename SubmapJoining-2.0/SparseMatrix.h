@@ -35,10 +35,12 @@ SparseMatrix operator+(const SparseMatrix&, const SparseMatrix&);
 SparseMatrix operator-(const SparseMatrix&, const SparseMatrix&);
 SparseMatrix operator*(const SparseMatrix&, const SparseMatrix&);
 SparseMatrix operator*(double, const SparseMatrix&);
+bool operator==(const SparseMatrix&, const SparseMatrix&);
 SparseMatrix trn(const SparseMatrix&);
 SparseMatrix sqrt(const SparseMatrix&);
 SparseMatrix vertcat(const SparseMatrix&, const SparseMatrix&);
 SparseMatrix horzcat(const SparseMatrix&, const SparseMatrix&);
 SparseMatrix zeros(int rows, int cols);
+SparseMatrix ones(int rows, int cols);
 
 #endif

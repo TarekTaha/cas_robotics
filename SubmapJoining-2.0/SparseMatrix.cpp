@@ -188,7 +188,7 @@ SparseMatrix SparseMatrix::get_submatrix(int row_start, int col_start, int row_e
 SparseMatrix operator*(double fact, const SparseMatrix& m){
 	SparseMatrix result(m);
 	double *x = (double*)result.A->x;
-	for(int i = 0; i < result.A->nzmax; ++i){
+	for(int i = 1; i < result.A->nzmax; ++i){
 		x[i] = 	fact * x[i];
 	}
 	return result;
@@ -223,4 +223,28 @@ SparseMatrix zeros(int rows, int cols){
 	    &result.c
 	) ;
 	return result;
+}
+
+SparseMatrix ones(int rows, int cols){
+	SparseMatrix result(rows, cols, rows*cols);
+	for(int i = 1; i <= rows; ++i){
+		for(int j = 1; j <= cols; ++j){
+			result.set(i,j,1);
+		}
+	}
+	return result;
+}
+
+bool operator==(const SparseMatrix& m1, const SparseMatrix& m2){
+	if(m1.get_rows() != m2.get_rows())
+		return false;
+	if(m1.get_cols() != m2.get_cols())
+		return false;
+	for(int i = 1; i <= m1.get_rows(); ++i){
+		for(int j = 1; j <= m1.get_cols(); ++j){
+			if(abs(m1.get(i,j) - m2.get(i,j)) > 1e-8)
+				return false;
+		}
+	}
+	return true;
 }
