@@ -535,16 +535,12 @@ CholeskyFactor cholesky(const SparseSymmMatrix& m){
 	result.c.method [0].ordering = CHOLMOD_NATURAL ;
 	result.c.postorder = false ;
 	m.write_to_file("SavedMatrices/ill1");
-	cout << "chol1" << endl;
 
 
 	//cholmod_reallocate_factor(2 * m.max_num_nonzero(), result.A, &result.c);
 	result.A = cholmod_analyze(m.A, &result.c);
-	cout << "chol2" << endl;
-	cout << "Check: " << cholmod_check_sparse(m.A, &m.c) << endl;
-	cout << "Check: " << cholmod_check_factor(result.A, &result.c) << endl;
 	cholmod_factorize(m.A, result.A, &result.c);
-	cout << "chol3" << endl;
+	cholmod_change_factor(CHOLMOD_REAL, true, false, true, false, result.A, &result.c);
 	return result;
 }
 
@@ -557,15 +553,24 @@ SparseMatrix solve_cholesky(const CholeskyFactor& L, const SparseMatrix& rhs){
 }
 
 SparseSymmMatrix inv(const SparseSymmMatrix& m){
+	if(m.get_rows() == 2){
+		double temp = m.get(1,1) * m.get(2,2) - m.get(1,2)*m.get(2,1);
+		SparseSymmMatrix tva(2,2,4);
+		tva.set(1,1, m.get(2,2));
+		tva.set(1, 2, -m.get(1,2));
+		tva.set(2, 1, -m.get(2,1));
+		tva.set(2, 2, m.get(1,1));
+		return 1/temp*tva;
+	}
 	SparseMatrix result;
-	result.c.final_ll = true;
-	result.c.nmethods = 1 ;
-	result.c.method [0].ordering = CHOLMOD_NATURAL ;
-	result.c.postorder = false ;
+	//result.c.final_ll = true;
+	//result.c.nmethods = 1 ;
+	//result.c.method [0].ordering = CHOLMOD_NATURAL ;
+	//result.c.postorder = false ;
 	CholeskyFactor L;
 	L.A = cholmod_analyze(m.A, &result.c);
 	cholmod_factorize(m.A, L.A, &result.c);
-	result.A = cholmod_spsolve(CHOLMOD_LDLt, L.A, eye(m.get_rows()).A, &result.c);
+	result.A = cholmod_spsolve(CHOLMOD_A, L.A, eye(m.get_rows()).A, &result.c);
 	
 	//CholeskyFactor L = cholesky(m);
 	//return to_sparse_symm_matrix(solve_cholesky(L, eye(m.get_rows())));
@@ -605,13 +610,18 @@ SparseMatrix to_sparse_matrix(const SparseSymmMatrix& m){
 	return result;
 }
 
+SparseMatrix to_sparse_matrix(const CholeskyFactor& L){
+	SparseMatrix result;
+	result.A = cholmod_factor_to_sparse(L.A, &L.c);
+	return result;
+}
+
 SparseSymmMatrix sqrt(const SparseSymmMatrix& m){
 	SparseSymmMatrix Y(m);
 	SparseSymmMatrix Z = eye(m.get_rows());
 	SparseSymmMatrix temp_Y;
-	for(int i = 0; i < 5; ++i){
+	for(int i = 0; i < 20; ++i){
 		temp_Y = Y;
-		//cout << "inv" << endl;
 		Y = 0.5*(Y + inv(Z));
 		Z = 0.5*(Z + inv(temp_Y));
 		//cout << "after inv" << endl;
@@ -622,4 +632,167 @@ SparseSymmMatrix sqrt(const SparseSymmMatrix& m){
 double max_eig(const SparseSymmMatrix& m){
 	//cout <<"Max eig" << endl;
 	return (m.get(1,1) + m.get(2,2))/2 + sqrt(4 * m.get(1,2) * m.get(2,1) + (m.get(1,1) - m.get(2,2)) * (m.get(1,1) - m.get(2,2)))/2;
+}
+
+void compare(const CholeskyFactor& L1, const CholeskyFactor& L2){
+	cout << "---- compare ---- " << endl;
+	for(int i = 0; i < L1.get_cols(); ++i){
+		if(((int*)L1.A->nz)[i] != ((int*)L2.A->nz)[i])
+			cout << "Co nz: " << ((int*)L1.A->nz)[i] << " / " << ((int*)L2.A->nz)[i] << endl;
+	}
+	for(int i = 0; i < L1.get_cols() + 2; ++i){
+		if(((int*)L1.A->prev)[i] != ((int*)L2.A->prev)[i])
+			cout << "Co prev: " << ((int*)L1.A->prev)[i] << " / " << ((int*)L2.A->prev)[i] << endl;
+	}
+	for(int i = 0; i < L1.get_cols() + 2; ++i){
+		if(((int*)L1.A->next)[i] != ((int*)L2.A->next)[i])
+			cout << "Co next: " << ((int*)L1.A->next)[i] << " / " << ((int*)L2.A->next)[i] << endl;
+	}
+	for(int i = 0; i < min(L1.A->nzmax, L2.A->nzmax); ++i){
+		if(((int*)L1.A->i)[i] != ((int*)L2.A->i)[i])
+			cout << "Co i: " << ((int*)L1.A->i)[i] << " / " << ((int*)L2.A->i)[i] << endl;
+	}
+	for(int i = 0; i < L1.get_cols(); ++i){
+		if(((int*)L1.A->p)[i] != ((int*)L2.A->p)[i])
+			cout << "Co p: " << ((int*)L1.A->p)[i] << " / " << ((int*)L2.A->p)[i] << endl;
+	}
+	for(int i = 0; i < min(L1.A->nzmax, L2.A->nzmax); ++i){
+		if( abs(((double*)L1.A->x)[i] - ((double*)L2.A->x)[i]) > 1e-8)
+			cout << "Co x: " << ((double*)L1.A->x)[i] << " / " << ((double*)L2.A->x)[i] << endl;
+	}
+	if(L1.A->ordering != L2.A->ordering){
+		cout << "Ordering: " << L1.A->ordering << " / " << L2.A->ordering << endl;
+	}
+	if(L1.A->is_ll != L2.A->is_ll){
+		cout << "is_ll: " << L1.A->is_ll << " / " << L2.A->is_ll<< endl;
+	}
+	if(L1.A->is_super!= L2.A->is_super){
+		cout << "is_super: " << L1.A->is_super<< " / " << L2.A->is_super<< endl;
+	}
+	if(L1.A->is_monotonic!= L2.A->is_monotonic){
+		cout << "is_monotonic: " << L1.A->is_monotonic<< " / " << L2.A->is_monotonic<< endl;
+	}
+	if(L1.A->itype!= L2.A->itype){
+		cout << "itype: " << L1.A->itype << " / " << L2.A->itype << endl;
+	}
+	if(L1.A->xtype != L2.A->xtype){
+		cout << "xtype: " << L1.A->xtype << " / " << L2.A->xtype << endl;
+	}
+	if(L1.A->dtype != L2.A->dtype){
+		cout << "dtype: " << L1.A->dtype << " / " << L2.A->dtype << endl;
+	}
+	if(L1.A->minor != L2.A->minor){
+		cout << "minor: " << L1.A->minor<< " / " << L2.A->minor<< endl;
+	}
+	
+	cout << " --- after compare ---- " << endl;
+}
+
+CholeskyFactor append(CholeskyFactor m1, const SparseMatrix& m2, const CholeskyFactor& temp_in){
+	SparseMatrix result;
+	SparseMatrix temp;
+	CholeskyFactor result2(4);
+
+	temp.A = cholmod_factor_to_sparse(m1.A, &m1.c);
+
+	//temp = temp.get_submatrix(1, 1, 2, 2);
+	result.A = cholmod_horzcat(temp.A, zeros(temp.get_rows(),m2.get_cols() - temp.get_cols()).A, true, &result.c);
+	result.A = cholmod_vertcat(result.A, m2.A, true, &result.c);
+
+
+	//cholmod_reallocate_sparse(result.get_cols() * result.get_rows(), result.A, &result.c);
+	
+	/*result2.A->x = result.A->x;
+	result2.A->p = result.A->p;
+	result2.A->i = result.A->i;*/
+	/*for(int i = 1; i <= 4; ++i){
+		for(int j = 1; j <= i; ++j){
+			result.set(i, j, temp_in.get(i,j));
+		}
+	}*/
+
+		
+	result2.A->nzmax = result.A->nzmax;
+	result2.A->n = result.A->nrow;
+	
+	result2.A->x = new double[result.A->nzmax];
+	result2.A->i = new int[result.A->nzmax];
+	for(int i =0; i < result.A->nzmax; ++i){
+		((double*)result2.A->x)[i] = ((double*)result.A->x)[i];
+		((int*)result2.A->i)[i] = ((int*)result.A->i)[i];
+	}
+	result2.A->p = new int[result.A->ncol + 1];
+	for(int i =0; i < result.A->ncol + 1; ++i){
+		((int*)result2.A->p)[i] = ((int*)result.A->p)[i];
+	}
+	/*for(int i = 0; i < result.A->nzmax; ++i){
+		cout << ((int*)result.A->i)[i] << " / " << ((int*)temp_in.A->i)[i] << endl;
+	}*/
+	//result2.A->x = temp_in.A->x;
+	//((int*)(result2.A->i))[9] = 3;
+	//result2.A->i = temp_in.A->i;
+	//result2.A->p = temp_in.A->p;
+	int *nex = new int[result.get_cols() + 2];
+	for(int i = 0; i < result.get_cols(); ++i){
+		nex[i] = i + 1;
+	}
+	nex[result.get_cols()] = -1;
+	nex[result.get_cols() + 1] = 0;
+	//nex[0] = 1; nex[1] = 2; nex[2] = 3; nex[3] = 4; nex[4] = -1; nex[5] = 0;//{1 , 2, 3, 4, -1, 0};
+	int *pre = new int[result.get_cols() + 2];
+	for(int i = 1; i < result.get_cols() + 1; ++i){
+		pre[i] = i  - 1;
+	}
+	pre[0] = result.get_cols() + 1;
+	pre[result.get_cols() + 1] = -1;
+
+	//pre[0] = 5; pre[1] = 0; pre[2] = 1; pre[3] = 2; pre[4] = 3; pre[5] = -1;//{5, 0, 1, 2, 3, -1};
+	int *colco = new int[result.get_cols()];
+	for(int i = 0; i < result.get_cols(); ++i){
+		colco[i] = ((int*)result.A->p)[i + 1] - ((int*)result.A->p)[i];
+	}
+	//colco[0] = 4; colco[1] = 3; colco[2] = 1; colco[3] = 1; //{4, 3, 2, 1};
+	int *perm = new int[result.get_cols()];
+	for(int i = 0; i < result.get_cols(); ++i){
+		perm[i] = i;
+	}
+	//perm[0] = 0; perm[1] = 1; perm[2] = 2; perm[3] = 3; //{0, 1, 2, 3};
+	int *nz = new int[result.get_cols()];
+	for(int i = 0; i < result.get_cols(); ++i){
+		nz[i] = ((int*)result.A->p)[i + 1] - ((int*)result.A->p)[i];
+	}
+	//nz[0] = 4; nz[1] = 3; nz[2] = 1; nz[3] = 1; //{4, 3, 2, 1};
+	result2.A->next = nex;
+	result2.A->prev = pre;
+	result2.A->ColCount = colco;
+	result2.A->Perm = perm;
+	result2.A->nz = nz;
+	
+	result2.A->ordering = 0;
+	result2.A->is_ll = 1;
+	result2.A->is_super = 0;
+	result2.A->is_monotonic = 1;
+	result2.A->itype = 0;
+	result2.A->xtype = 1;
+	result2.A->dtype = 0;
+	result2.A->minor= result.get_cols();
+	
+	//compare(result2, temp_in);
+	//result2.print();
+	/*cholmod_change_factor
+	(
+	    CHOLMOD_REAL,
+	    true, 
+	    false, 
+	    true,
+	    false,
+	    result2.A,
+	    &result2.c
+	) ;*/
+
+	if(!cholmod_check_factor(result2.A, &result2.c)){
+		compare(result2, temp_in);
+	}
+	//cout << "Valid: " << cholmod_check_factor(result2.A, &result2.c)  << endl;
+	return result2;
 }
