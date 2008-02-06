@@ -1,13 +1,22 @@
-function [u,sig,D] = comparemaps(patch,testnum,doplots)
-if nargin<3
-    doplots=true;
+function [u,sig,D] = comparemaps(patch,testnum,doplots,brSecfilename)
+if nargin<4
+    try cd journal;end
+%     brSecfilename='bridgeSection';
+    brSecfilename='CASESTUDY_bridgeSection';
+    if nargin<3
+        doplots=true;
+    end
 end
+%load the correct bridge section to compare
+brSec=plyread([brSecfilename,'.ply']);
+display(['Loading ',brSecfilename]);
+
 % close all
-if testnum==6
-    testnum=11;
-    display('NOTE!!!!!!!!!!!This always set to test num 11 if testnum = 6!');
-end
-mew=0.05;
+% if testnum==6
+%     testnum=11;
+%     display('NOTE!!!!!!!!!!!This always set to test num 11 if testnum = 6!');
+% end
+% mew=0.05;
 % patch=9;
 
 %% WEB
@@ -45,15 +54,25 @@ elseif patch==9
 %left bottom flange
 elseif patch==10
     IntPs=[0,-0.68,0.8];    
+%% OVERALL
+elseif patch==11
+    IntPs=[0,0,0];
 end
+
 
 if patch<5
     sizeInt=0.21;
 elseif (patch <9 && patch >=5)
     sizeInt=0.16;
+elseif patch==11
+    %just cover the whole thing
+    sizeInt=10;
+    
 else
     sizeInt=0.20;
 end
+
+
     
 PlanesofInt=[];
 figure(1)
@@ -75,14 +94,14 @@ plot3(hMeshdata.v(index(index2),1),hMeshdata.v(index(index2),2),hMeshdata.v(inde
 %add the text where the IntPs patch is
 text(IntPs(1),IntPs(2),IntPs(3),num2str(patch),'FontSize',30)
 
-cd journal
-brSec=plyread('bridgeSection.ply');
+
 
 hold on
  plot3(brSec.vertex.x,brSec.vertex.y,brSec.vertex.z,'g*')
 axis equal
 
 points=hMeshdata.v(index(index2),:);
+
 if patch==1 || patch==3
 %first plot (left wall)
 %inside
@@ -138,84 +157,136 @@ p3=[brSec.vertex.x(5),brSec.vertex.y(5),brSec.vertex.z(5)];
 p4=[brSec.vertex.x(4),brSec.vertex.y(4),brSec.vertex.z(4)];
 p5=[brSec.vertex.x(2),brSec.vertex.y(2),brSec.vertex.z(2)];
 p6=[brSec.vertex.x(3),brSec.vertex.y(3),brSec.vertex.z(3)];
+
 end
 
+if patch<11
+    temp=[p1;p2;p3];
+    plot3(temp(:,1),temp(:,2),temp(:,3),'y');
+    axis equal
 
-temp=[p1;p2;p3];
-plot3(temp(:,1),temp(:,2),temp(:,3),'y');
-axis equal
-
-norm=cross((p2-p1),(p3-p1));
-%d=-ax-by-cz
-d=-norm(1)*p1(1)-norm(2)*p1(2)-norm(3)*p1(3);
-plane_equ=[norm,d];
-
-%if we have a second plane to compare to as well
-if exist('p4')
-    norm2=cross((p5-p4),(p6-p4));
+    norm=cross((p2-p1),(p3-p1));
     %d=-ax-by-cz
-    d2=-norm2(1)*p4(1)-norm2(2)*p4(2)-norm2(3)*p4(3);
-    plane_equ2=[norm2,d2];
-end
+    d=-norm(1)*p1(1)-norm(2)*p1(2)-norm(3)*p1(3);
+    plane_equ=[norm,d];
 
-
-
-planesign=(plane_equ(1)*points(:,1)+...
+    %if we have a second plane to compare to as well
+    if exist('p4')
+        norm2=cross((p5-p4),(p6-p4));
+        %d=-ax-by-cz
+        d2=-norm2(1)*p4(1)-norm2(2)*p4(2)-norm2(3)*p4(3);
+        plane_equ2=[norm2,d2];
+    end
+    
+    planesign=(plane_equ(1)*points(:,1)+...
            plane_equ(2)*points(:,2)+...
            plane_equ(3)*points(:,3)+...
            plane_equ(4))>0;
        planesign=2*planesign-1;
-if doplots
-    figure;
-    hist(planesign)
+    if doplots
+        figure;
+        hist(planesign)
+    end
+
+    %if we have a second plane to compare to as well
+    if exist('p4')
+        planesign2=(plane_equ2(1)*points(:,1)+...
+               plane_equ2(2)*points(:,2)+...
+               plane_equ2(3)*points(:,3)+...
+               plane_equ2(4))>0;
+         planesign2=2*planesign2-1;
+         if doplots
+             figure;
+             hist(planesign2)
+         end
+    end
+    %if we have a second plane to compare to as well then we need to remove
+    %points from one set of stats and put on the other
+    if exist('p4')
+        D=abs(plane_equ(1)*points(:,1)+plane_equ(2)*points(:,2)+plane_equ(3)*points(:,3)+plane_equ(4)*ones([size(points,1),1]))./...
+            sqrt(plane_equ(1)^2+plane_equ(2)^2+plane_equ(3)^2);
+
+        D2=abs(plane_equ2(1)*points(:,1)+plane_equ2(2)*points(:,2)+plane_equ2(3)*points(:,3)+plane_equ2(4)*ones([size(points,1),1]))./...
+            sqrt(plane_equ2(1)^2+plane_equ2(2)^2+plane_equ2(3)^2);
+        %get closest plane to be the one it lies on
+        [vals,order]=min([D';D2']);
+
+        D=D.*planesign;
+        D2=D2.*planesign2;
+
+        %break up sets
+        D=D(find(order==1));
+        D2=D2(find(order==2));
+
+        %merge them back together
+        D=[D;D2];   
+    else    
+        D=abs(plane_equ(1)*points(:,1)+plane_equ(2)*points(:,2)+plane_equ(3)*points(:,3)+plane_equ(4)*ones([size(points,1),1]))./...
+            sqrt(plane_equ(1)^2+plane_equ(2)^2+plane_equ(3)^2);
+        D=D.*planesign;
+
+    end
+
+%% Do overall
+elseif patch==11
+    %do some other funky stuff
+%only interested in points where I can compare (so one the Ibeam)
+%above the min plane value + some error 0.02
+temppoints=points;
+points=points(find(points(:,3)>min(brSec.vertex.z)-0.02 & points(:,2)<max(brSec.vertex.y)+0.02),:);
+
+
+    for i=1:size(brSec.face.vertex_indices,1)
+        planevertsIndx= brSec.face.vertex_indices{i}+1;    
+        p1=[brSec.vertex.x(planevertsIndx(1)),brSec.vertex.y(planevertsIndx(1)),brSec.vertex.z(planevertsIndx(1))];
+        p2=[brSec.vertex.x(planevertsIndx(2)),brSec.vertex.y(planevertsIndx(2)),brSec.vertex.z(planevertsIndx(2))];
+        p3=[brSec.vertex.x(planevertsIndx(3)),brSec.vertex.y(planevertsIndx(3)),brSec.vertex.z(planevertsIndx(3))];
+
+        %make plane
+        norm=cross((p2-p1),(p3-p1));
+        %d=-ax-by-cz
+        d=-norm(1)*p1(1)-norm(2)*p1(2)-norm(3)*p1(3);
+        plane_equ=[norm,d];
+
+        %measure all points distance from it
+        D(:,i)=abs(plane_equ(1)*points(:,1)+plane_equ(2)*points(:,2)+plane_equ(3)*points(:,3)+plane_equ(4)*ones([size(points,1),1]))./...
+            sqrt(plane_equ(1)^2+plane_equ(2)^2+plane_equ(3)^2);
+        planesign=(plane_equ(1)*points(:,1)+...
+               plane_equ(2)*points(:,2)+...
+               plane_equ(3)*points(:,3)+...
+               plane_equ(4))>0;
+        planesign=2*planesign-1;
+        D(:,i)=D(:,i).*planesign;
+    end
+    %get min distances to the planes
+    [vals,order]=min(abs(D),[],2);
+
+    tempD=zeros([size(order,1),1]);
+    for i=1:size(order,1)
+        tempD(i)=D(i,order(i));
+    end
+    D=tempD;
+    
+    if doplots
+        figure
+        plot3(points(:,1),points(:,2),points(:,3),'r.','marker','.','linestyle','none','markersize',0.1);axis equal; grid on;hold on;
+        cd journal
+        CASESTUDY_bridgeSection    
+    end
 end
+
+
+
  
-%if we have a second plane to compare to as well
-if exist('p4')
-    planesign2=(plane_equ2(1)*points(:,1)+...
-           plane_equ2(2)*points(:,2)+...
-           plane_equ2(3)*points(:,3)+...
-           plane_equ2(4))>0;
-     planesign2=2*planesign2-1;
-     if doplots
-         figure;
-         hist(planesign2)
-     end
-end
  
 
-%if we have a second plane to compare to as well then we need to remove
-%points from one set of stats and put on the other
-if exist('p4')
-    D=abs(plane_equ(1)*points(:,1)+plane_equ(2)*points(:,2)+plane_equ(3)*points(:,3)+plane_equ(4)*ones([size(points,1),1]))./...
-        sqrt(plane_equ(1)^2+plane_equ(2)^2+plane_equ(3)^2);
-    
-    D2=abs(plane_equ2(1)*points(:,1)+plane_equ2(2)*points(:,2)+plane_equ2(3)*points(:,3)+plane_equ2(4)*ones([size(points,1),1]))./...
-        sqrt(plane_equ2(1)^2+plane_equ2(2)^2+plane_equ2(3)^2);
-    %get closest plane to be the one it lies on
-    [vals,order]=min([D';D2']);
-    
-    D=D.*planesign;
-    D2=D2.*planesign2;
-    
-    %break up sets
-    D=D(find(order==1));
-    D2=D2(find(order==2));
-        
-    %merge them back together
-    D=[D;D2];   
-else    
-    D=abs(plane_equ(1)*points(:,1)+plane_equ(2)*points(:,2)+plane_equ(3)*points(:,3)+plane_equ(4)*ones([size(points,1),1]))./...
-        sqrt(plane_equ(1)^2+plane_equ(2)^2+plane_equ(3)^2);
-    D=D.*planesign;
 
-end
 
 [u,sig]=normfit(D);
 
 if doplots
     figure;
-    hist(D,50)
+    hist(D,150)
     Xrang=[-0.05:0.001:0.05];Yrang = pdf('norm',Xrang,u,sig);
     hold on;plot(Xrang,Yrang)
     %do a box plot

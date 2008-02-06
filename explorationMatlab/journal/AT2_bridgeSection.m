@@ -19,7 +19,7 @@ cartYoffset=0.11;
     surface.breadth = ((0.085+0.018)+1.222)/2;
     surface.height = 0.018;
     surface.color = color;
-    robotOffset = flange.width - 1.440;
+    robotOffset = flange.width - 1.430;
 
     % The origin is at the center of the bottom of one end
     % of one flange
