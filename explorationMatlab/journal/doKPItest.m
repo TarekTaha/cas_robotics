@@ -74,9 +74,15 @@ if testnum==6
     av_time=tot_time/total_vpts;
     display(['Average time per decision= ',num2str(av_time)])
     maxAvailInfo=36688; %after 30 iterations
+    posefromRobMaxReach=[3,8,13];
+    %so after a search is done then how many did AXBAM use before doing the
+    %next search, so exhastive must do the same
+    aftersearch_num_poses=[3,4,3];
 else
     av_time=inf;
     display(['Nothing given so : Average time per decision= ',num2str(av_time)])
+    display('Need to look at the poses and find out where the scans were taken');
+    error('define posefromRobMaxReach')
 end
 
 %This is to give the stats of the 
@@ -96,21 +102,12 @@ load(['test',num2str(testnum),'robot_maxreach.mat']);
 %     pause    
 % end
 
-if testnum==6
-    posefromRobMaxReach=[3,8,13];
-    %so after a search is done then how many did AXBAM use before doing the
-    %next search, so exhastive must do the same
-    aftersearch_num_poses=[3,4,3];
-else
-    display('Need to look at the poses and find out where the scans were taken');
-    error('define posefromRobMaxReach')
-end
     
 for i=1:size(Xsearchdata,2)
     global workspace Q
                 
     %This makes the size of the search, cal with x^3*7*2
-    numNBVanglesteps=[2,3,4];
+    numNBVanglesteps=[5,6,7];
     for searchsizeIndex=1:length(numNBVanglesteps)
         %find out where the arm is
         try    use_real_robot_GETJs(); 
@@ -120,25 +117,41 @@ for i=1:size(Xsearchdata,2)
         workspace=Xsearchdata(i).workspace;
         %Set the supposed Q for here
         newQ=robot_maxreach.path(posefromRobMaxReach(i)).all_steps(end,:);
-        valid=0;
+        valid=0;invalidcount=0;
         while valid==0
-            [valid,all_steps]=pathplanner(newQ,false,true,true,100);            
+            [valid,all_steps]=pathplanner(newQ,false,true,true,150);            
             if valid==-1
                 display('Im being told that this is a dangerous position when I know this is not the case-you have control, please use exGUI to move manually to the required newQ and remove selefscanning points al the way along')            
                 keyboard
+            elseif valid==0                
+                invalidcount=invalidcount+1;
+                if invalidcount>10
+                    display('REALLY! No Path found - you have control');
+                    break
+                else
+                    display('No Path found to get to a possible position - trying again');
+                end
             end
         end
-        try use_real_robot_MOVE(all_steps)
-            use_real_robot_GETJs(); 
-        catch display('couldnt move robot - updating the Q in memory regardless');
-            %update the actual possion in memory in case it hasn't been done
-            Q=newQ;
-        end   
+        
+        %make sure we have a path 
+        if invalidcount>=10 && valid==0
+            display(['Please use GUI to move to desired place which is ',num2str(newQ*180/pi),' degrees']);
+            keyboard
+        else
+            try use_real_robot_MOVE(all_steps)
+                use_real_robot_GETJs(); 
+            catch display('couldnt move robot - updating the Q in memory regardless');
+                %update the actual possion in memory in case it hasn't been done
+                Q=newQ;
+            end   
+        end
         
         %do appropriate search
         [data(i).totaltime(searchsizeIndex),data(i).searchspace(searchsizeIndex)]= near_exhastive_NBV_search(numNBVanglesteps(searchsizeIndex));    
         global bestviews
         currentBview=1;
+        %try and get to the position told
         while ~isfield(bestviews,'valid') || bestviews(currentBview).valid==false            
             [bestviews(currentBview).valid,bestviews(currentBview).all_steps]=pathplanner(bestviews(currentBview).Q,false,true,true,30);            
             if ~bestviews(currentBview).valid
@@ -204,8 +217,9 @@ for i=1:size(Xsearchdata,2)
     end    
 end
 
+display('Stopping here for results to be analysed'); 
 %save results to disk for later analysis
-save('doKPItest.mat','data');
+save(['doKPItest',num2str(testnum),'.mat'],'data');
 
 %need some way to compare the overall search with AXBAM, but AXBAM 
 % at 3 possitions where we worked these out we have realistic exploration values 
@@ -284,12 +298,12 @@ end
 if tests2do(5)==1
     
     
-    if testnum==6
-        display('Using the 11th mesh for test6 since same env, but improved map by steph');
-        load(['test',num2str(11),'hMesh.mat']);
-    else
+%     if testnum==6
+%         display('Using the 11th mesh for test6 since same env, but improved map by steph');
+%         load(['test',num2str(11),'hMesh.mat']);
+%     else
         load(['test',num2str(testnum),'hMesh.mat']);
-    end
+%     end
 
     
     figure
@@ -364,157 +378,175 @@ end
 %%%%%%%  ~
 %\subsubsection{KPI 6 - C space opened up}
 if tests2do(6)==1
-%     if testnum==6
-%         display('Using the 9th mesh for test6 since same env, but improved map by steph');
-%         load(['test',num2str(9),'hMesh.mat']);
-%     else
-        load(['test',num2str(testnum),'hMesh.mat']);
-        
-%     end
+    
+    load(['test',num2str(testnum),'hMesh.mat']);        
 
     load(['test',num2str(testnum),'workspace.mat']);
-
+    
+    r=rob_object;
     %average the mesh out
     global workspace r
-    roundedmesh=round(hMeshdata.v/workspace.inc_size)*workspace.inc_size;
-    roundedmesh=roundedmesh(GetImpLevInfo(roundedmesh),:);
-    roundedmesh=unique(roundedmesh,'rows');
-
-    %Add in components to the bridge section map for the 3 tests,
-
-    %now search through all(most configs and see what the range of movements is    
+	points_found=unique(round(hMeshdata.v/workspace.inc_size)*workspace.inc_size,'rows');
+    points_found=points_found(GetImpLevInfo(points_found),:);
+    clear hMeshdata
+    
     qlimit=r.qlim;
 
-    incval=5; %degrees between steps
+%% optimal case, derive points from ply file map
+    %set empty var for points
+            points=[];
+%             brSecfilename='bridgeSection';
+            brSecfilename='CASESTUDY_bridgeSection';
+%             brSecfilename='AT1_bridgeSection';
+%             brSecfilename='AT2_bridgeSection';
+            
+            brSec=plyread([brSecfilename,'.ply']);
+    for i=1:size(brSec.face.vertex_indices,1)
+
+        %have to move it up one
+        verts=brSec.face.vertex_indices{i}+1;
+        pnt1=[brSec.vertex.x(verts(1)),brSec.vertex.y(verts(1)),brSec.vertex.z(verts(1))];
+        pnt2=[brSec.vertex.x(verts(2)),brSec.vertex.y(verts(2)),brSec.vertex.z(verts(2))];
+        pnt3=[brSec.vertex.x(verts(3)),brSec.vertex.y(verts(3)),brSec.vertex.z(verts(3))];
+        pnt4=[brSec.vertex.x(verts(4)),brSec.vertex.y(verts(4)),brSec.vertex.z(verts(4))];    
+        points=[points;pnt1;pnt2;pnt3;pnt4];
+
+%       inc_size=floor((pnt1-pnt2)/(workspace.inc_size/4));
+%       if i>=size(brSec.face.vertex_indices,1)-8
+%           close all;plot3(pnt1(1),pnt1(2),pnt1(3),'r*');hold on;plot3(pnt2(1),pnt2(2),pnt2(3),'g*');plot3(pnt3(1),pnt3(2),pnt3(3),'b*');plot3(pnt4(1),pnt4(2),pnt4(3),'black*')
+%           keyboard
+%       end                
+
+        %there may be times when the box is too small so just skip it               
+        try
+            %gets ponts on one side
+            inc_size=max([ceil(abs((pnt4-pnt1)/(workspace.inc_size/4))),2]);
+            if pnt4(1)==pnt1(1); 
+                pointonside1=ones([inc_size,1])*pnt1(1);
+            else
+                pointonside1=[pnt1(1):(pnt4(1)-pnt1(1))/(inc_size-1):pnt4(1)]';
+            end
+            if pnt4(2)==pnt1(2)
+                pointonside1=[pointonside1,ones([inc_size,1])*pnt1(2)];
+            else
+                pointonside1=[pointonside1,[pnt1(2):(pnt4(2)-pnt1(2))/(inc_size-1):pnt4(2)]'];
+            end                                                                         
+            if pnt4(3)==pnt1(3)
+                pointonside1=[pointonside1,ones([inc_size,1])*pnt1(3)];
+            else
+                pointonside1=[pointonside1,[pnt1(3):(pnt4(3)-pnt1(3))/(inc_size-1):pnt4(3)]'];
+            end
+
+            %gets ponts on other side
+            inc_size=max([ceil(abs((pnt3-pnt2)/(workspace.inc_size/4))),2]);
+            if pnt2(1)==pnt3(1)
+                pointonside2=ones([inc_size,1])*pnt2(1);
+            else
+                pointonside2=[pnt2(1):(pnt3(1)-pnt2(1))/(inc_size-1):pnt3(1)]';
+            end
+            if pnt2(2)==pnt3(2)
+                pointonside2=[pointonside2,ones([inc_size,1])*pnt2(2)];
+            else
+                pointonside2=[pointonside2,[pnt2(2):(pnt3(2)-pnt2(2))/(inc_size-1):pnt3(2)]'];
+            end                                                                         
+            if pnt2(3)==pnt3(3)
+                pointonside2=[pointonside2,ones([inc_size,1])*pnt2(3)];
+            else
+                pointonside2=[pointonside2,[pnt2(3):(pnt3(3)-pnt2(3))/(inc_size-1):pnt3(3)]'];
+            end
+
+            %gets all points in between
+            for j=1:length(pointonside1)
+
+                startpnt=pointonside1(j,:);
+                endpnt=pointonside2(j,:);
+
+                inc_size=max([ceil(abs((endpnt-startpnt)/(workspace.inc_size/4))),2]);
+                if endpnt(1)==startpnt(1)
+                    pointonline=ones([inc_size,1])*startpnt(1);
+                else
+                    pointonline=[startpnt(1):(endpnt(1)-startpnt(1))/(inc_size-1):endpnt(1)]';
+                end
+                if endpnt(2)==startpnt(2)
+                    pointonline=[pointonline,ones([inc_size,1])*startpnt(2)];
+                else
+                    pointonline=[pointonline,[startpnt(2):(endpnt(2)-startpnt(2))/(inc_size-1):endpnt(2)]'];
+                end                                                                         
+                if endpnt(3)==startpnt(3)
+                    pointonline=[pointonline,ones([inc_size,1])*startpnt(3)];
+                else
+                    pointonline=[pointonline,[startpnt(3):(endpnt(3)-startpnt(3))/(inc_size-1):endpnt(3)]'];
+                end
+
+%                 if i>=size(brSec.face.vertex_indices,1)-8
+%                     hold on;plot3(pointonline(:,1),pointonline(:,2),pointonline(:,3),'b.')
+%                     keyboard
+%                 end                
+
+                points=[points;pointonline];
+            end
+        end
+        
+        points=unique(round(points/(workspace.inc_size))*(workspace.inc_size),'rows');
+    
+    end
+
+
+%%%%%%%%%%%%%%%%%%%%
+%% Compare 2 point sets
+    points=            points(GetImpLevInfo(unique(round(      points/(workspace.inc_size))*(workspace.inc_size),'rows')),:);
+    points_found=points_found(GetImpLevInfo(unique(round(points_found/(workspace.inc_size))*(workspace.inc_size),'rows')),:);
+    %remove points found below the lowest ideal case theshold since that is
+    %what we have compared the maps on
+    points_found=points_found(find(points_found(:,3)>min(points(:,3))),:);
+    
+    %compare the 11th patch (the whole map)
+    [u,sig]=comparemaps(11,testnum,true,brSecfilename);
+    display(['Mean is ', num2str(u),' and Standard deviation is',num2str(sig)]) ;
+    
+    incval=15; %degrees between steps
     numvals=floor((qlimit(:,2)-qlimit(:,1))/(incval*pi/180));
 
     %if do 100 check a second then this will take 
     display(['if do 500 checks a second then search space of ',num2str(numvals(1)*numvals(2)*numvals(3)) ,' will take ',num2str(((numvals(1)*numvals(2)*numvals(3))/500)/60),'minutes per test']);
 
-
-    %Then make discrete points along each of the patches
-    % for testcase=1:2
-    for testcase=1
+    %Test
+    for testcase=1:2
         validcount(testcase)=0;
+        failedcount(testcase)=0;
+        
         %1 is ideal, 2 is real case
         if testcase==1
-            %set empty var for points
-            points=[];
-            brSec=plyread('bridgeSection.ply');
-            for i=1:size(brSec.face.vertex_indices,1)
-                %have to move it up one
-                verts=brSec.face.vertex_indices{i}+1;
-                pnt1=[brSec.vertex.x(verts(1)),brSec.vertex.y(verts(1)),brSec.vertex.z(verts(1))];
-                pnt2=[brSec.vertex.x(verts(2)),brSec.vertex.y(verts(2)),brSec.vertex.z(verts(2))];
-                pnt3=[brSec.vertex.x(verts(3)),brSec.vertex.y(verts(3)),brSec.vertex.z(verts(3))];
-                pnt4=[brSec.vertex.x(verts(4)),brSec.vertex.y(verts(4)),brSec.vertex.z(verts(4))];    
-                points=[points;pnt1;pnt2;pnt3;pnt4];
-
-%                 inc_size=floor((pnt1-pnt2)/(workspace.inc_size/4));
-                
-                close all;plot3(pnt1(1),pnt1(2),pnt1(3),'r*');hold on;plot3(pnt2(1),pnt2(2),pnt2(3),'g*');plot3(pnt3(1),pnt3(2),pnt3(3),'b*');plot3(pnt4(1),pnt4(2),pnt4(3),'black*')
-
-%there may be times when the box is too small so just skip it               
-                try
-                %gets ponts on one side
-                inc_size=max([ceil(abs((pnt4-pnt1)/(workspace.inc_size/4))),2]);
-                if pnt4(1)==pnt1(1)
-                    pointonside1=ones([inc_size,1])*pnt1(1);
-                else
-                    pointonside1=[pnt1(1):(pnt4(1)-pnt1(1))/(inc_size-1):pnt4(1)]';
-                end
-                if pnt4(2)==pnt1(2)
-                    pointonside1=[pointonside1,ones([inc_size,1])*pnt1(2)];
-                else
-                    pointonside1=[pointonside1,[pnt1(2):(pnt4(2)-pnt1(2))/(inc_size-1):pnt4(2)]'];
-                end                                                                         
-                if pnt4(3)==pnt1(3)
-                    pointonside1=[pointonside1,ones([inc_size,1])*pnt1(3)];
-                else
-                    pointonside1=[pointonside1,[pnt1(3):(pnt4(3)-pnt1(3))/(inc_size-1):pnt4(3)]'];
-                end
-                
-                %gets ponts on other side
-                inc_size=max([ceil(abs((pnt3-pnt2)/(workspace.inc_size/4))),2]);
-                if pnt2(1)==pnt3(1)
-                    pointonside2=ones([inc_size,1])*pnt2(1);
-                else
-                    pointonside2=[pnt2(1):(pnt3(1)-pnt2(1))/(inc_size-1):pnt3(1)]';
-                end
-                if pnt2(2)==pnt3(2)
-                    pointonside2=[pointonside2,ones([inc_size,1])*pnt2(2)];
-                else
-                    pointonside2=[pointonside2,[pnt2(2):(pnt3(2)-pnt2(2))/(inc_size-1):pnt3(2)]'];
-                end                                                                         
-                if pnt2(3)==pnt3(3)
-                    pointonside2=[pointonside2,ones([inc_size,1])*pnt2(3)];
-                else
-                    pointonside2=[pointonside2,[pnt2(3):(pnt3(3)-pnt2(3))/(inc_size-1):pnt3(3)]'];
-                end
-                
-                %gets all points in between
-                for j=1:length(pointonside1)
-
-                    startpnt=pointonside1(j,:);
-                    endpnt=pointonside2(j,:);
-                    
-                    inc_size=max([ceil(abs((endpnt-startpnt)/(workspace.inc_size/4))),2]);
-                    if endpnt(1)==startpnt(1)
-                        pointonline=ones([inc_size,1])*startpnt(1);
-                    else
-                        pointonline=[startpnt(1):(endpnt(1)-startpnt(1))/(inc_size-1):endpnt(1)]';
-                    end
-                    if endpnt(2)==startpnt(2)
-                        pointonline=[pointonline,ones([inc_size,1])*startpnt(2)];
-                    else
-                        pointonline=[pointonline,[startpnt(2):(endpnt(2)-startpnt(2))/(inc_size-1):endpnt(2)]'];
-                    end                                                                         
-                    if endpnt(3)==startpnt(3)
-                        pointonline=[pointonline,ones([inc_size,1])*startpnt(3)];
-                    else
-                        pointonline=[pointonline,[startpnt(3):(endpnt(3)-startpnt(3))/(inc_size-1):endpnt(3)]'];
-                    end
-
-                    hold on;plot3(pointonline(:,1),pointonline(:,2),pointonline(:,3),'b.')
-
-                    points=[points;pointonline];
-%                     points=round(points/workspace.inc_size)*workspace.inc_size;
-%                     if rand>0.8
-%                         points=unique(points,'rows');
-%                     end
-                
-                end
-                end
-                points=unique(round(points/(workspace.inc_size/4))*(workspace.inc_size/4),'rows');
-                
-            end
+            obstaclepoints=points;        
         elseif testcase==2
-            points=workspace.indexedobsticles;
-            
-            
+            obstaclepoints=points_found;        
         end
+        
+        display('stopping here');keyboard;
 
-
-tic
+        %doing the valid challenge
+        tic
+        
         for i=qlimit(1,1):(incval*pi/180):qlimit(1,2)
             for j=qlimit(2,1):(incval*pi/180):qlimit(2,2)
                 for k=qlimit(3,1):(incval*pi/180):qlimit(3,2)
-                    if check_path_for_col([i,j,k,0,0,0],points)
+                    if check_path_for_col([i,j,k,0,0,0],obstaclepoints)
                         validcount(testcase)=validcount(testcase)+1;
+                    else
+                        failedcount(testcase)=failedcount(testcase)+1;
                     end
                 end
             end
         end
+        toc
     end
-toc
 
+    display(['Ideal Case: Valid=',num2str(validcount(1)),' Failed=',num2str(failedcount(1)),' which is ',num2str(validcount(1)/(failedcount(1)+validcount(1))*100),'%']);
+    display(['Ideal Case: Valid=',num2str(validcount(2)),' Failed=',num2str(failedcount(2)),' which is ',num2str(validcount(2)/(failedcount(2)+validcount(2))*100),'%']);
+    
     keyboard
-   
 
     
-
-
-
 end
 
 

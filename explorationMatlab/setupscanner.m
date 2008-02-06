@@ -53,6 +53,7 @@ scan.numpntsInCube=1; % this can be anything greater than 0, a value of 0.5 woul
 % we don't want to have to do the scan projection everytime so we will load
 % it, however if any of the parameters (alpha theta) change then it will be
 % incorrect. Also variables from workspace global var are used too
+% uiwait(msgbox('Not loading basic_scan exploration data'));
 try load('basic_scan_data.mat');
     % scan.basescan=-1*basic_scan_data;
     scan.basescan=basescan;
@@ -63,7 +64,8 @@ end
 %and is used in nbv_beta since this has predefined poses
 scan.done_bestviews_orfailed=[inf, inf, inf, inf, inf, inf];
 
-try load all_views.mat
-catch
-    display('Cant call or load all_views.mat');
-end
+uiwait(msgbox('Not loading all_views exploration data'));
+% try load all_views.mat
+% catch
+%     display('Cant call or load all_views.mat');
+% end

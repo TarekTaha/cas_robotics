@@ -172,11 +172,13 @@ set(gcf,'CurrentAxes',handles.axes3);
 
 setupworkspace(get(handles.show_unknownpoints_checkbox,'Value'));
 
+
 global all_views
 if isempty(all_views)
-    display('Having to calculate all_views for exploration, this happens ones only');
-    calc_all_views();
-    load all_views.mat
+    uiwait(msgbox('not calculating allviews even though it dosent exist'));
+%     display('Having to calculate all_views for exploration, this happens ones only');
+%     calc_all_views();
+%     load all_views.mat
 end
 
 clc;
@@ -970,7 +972,7 @@ zoom on;
 
 %this function is used to collect the data for exploration to compare new info
 function state_data=collectdata(state_data)
-global workspace
+global workspace Q
 if isempty(state_data)
     state_data.knownweight=calknownweight();
     state_data.unknownweight=calunknownweight();   
@@ -978,6 +980,7 @@ if isempty(state_data)
     state_data.size_unknown=size(setdiff(round(workspace.unknowncoords/workspace.inc_size),round(workspace.knowncoords/workspace.inc_size),'rows'),1);
     state_data.size_indexedobsticles=size(workspace.indexedobsticles,1);
     state_data.time=0;state_data.starttime=clock;
+    state_data.Q=Q;
 else
     state_data.knownweight=[state_data.knownweight,calknownweight()];
     state_data.unknownweight=[state_data.unknownweight,calunknownweight()];
@@ -985,6 +988,7 @@ else
     state_data.size_unknown=[state_data.size_unknown,size(setdiff(round(workspace.unknowncoords/workspace.inc_size),round(workspace.knowncoords/workspace.inc_size),'rows'),1)];
     state_data.size_indexedobsticles=[state_data.size_indexedobsticles,size(workspace.indexedobsticles,1)];
     state_data.time=[state_data.time,etime(clock,state_data.starttime)];
+    state_data.Q=[state_data.Q;Q];
 end    
 
 
