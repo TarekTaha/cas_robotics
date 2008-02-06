@@ -14,7 +14,7 @@ CAMD = CAMD/Lib
 METIS = /metis-4.0
 LINK = -L$(SUITESPARSE)$(CHOLMOD) -L$(SUITESPARSE)$(AMD) -L$(SUITESPARSE)$(COLAMD) -L$(SUITESPARSE)$(CCOLAMD) -L$(SUITESPARSE)$(CAMD) -L$(SUITESPARSE)$(METIS)
 
-all: st
+all: main
 
 st : sparse_test.o SparseMatrix.o SparseSymmMatrix.o Matrix.o DenseMatrix.o CholeskyFactor.o MatrixFunctions.o
 	$(CCC) $(CCCFLAGS) $(LINK) sparse_test.o SparseMatrix.o SparseSymmMatrix.o MatrixFunctions.o Matrix.o DenseMatrix.o CholeskyFactor.o -o main $(LIB)
