@@ -8,7 +8,7 @@
 #include "GlobalMap.h"
 #include "LocalMap.h"
 #include "MatrixFunctions.h"
-//#include "Timer.h"
+#include "Timer.h"
 
 
 using namespace std;
@@ -24,20 +24,22 @@ class MapFuser{
 		void add_new_beacons_and_robot_location_to_state(const SparseMatrix& obsX);
 		SparseMatrix get_part_of_X_for_assositation();
 		SparseMatrix restore_part_of_P_for_assositation();
+		SparseMatrix restore_part_of_P_for_assositation2();
 		SparseMatrix trans_cov_matrix_to_local_cordinate_system(const SparseMatrix& P, const SparseMatrix& X);
 		SparseMatrix trans_state_matrix_to_local_cordinate_system(const SparseMatrix& X);
 		void assosiate_beacons(const SparseMatrix& beacX, const SparseMatrix& beacP, const SparseMatrix& obsX, const SparseMatrix& obsP);
 		double submap_radius(const LocalMap& map);
 		double distance_to_submap(int map);
+		double distance_to_submap(int map, double x, double y);
 		void reorder_submaps();
-		//void compute_cholesky_factorization();
+		void compute_cholesky_factorization();
 		double wrap(double angle);
 
 		//void nearest_neightbour(SparseMatrix bec)
-		int potential_assosiation_beacons[100];
+		int potential_assosiation_beacons[1000];
 		int num_potential_assosiations;
-		int assosiations[100];
-		int assosiation_matches[30];
+		int assosiations[1000];
+		int assosiation_matches[300];
 		int num_matches;
 		int num_assositations;
 		int submaps_first_beacon[1000];
@@ -51,7 +53,7 @@ class MapFuser{
 		double local_robot_uncertainty[1000];
 		int num_elements_updated_in_I;
 		
-		//Timer timer;
+		Timer timer;
 };
 
 #endif

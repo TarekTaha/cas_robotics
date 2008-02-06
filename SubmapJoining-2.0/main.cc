@@ -25,26 +25,27 @@ int main(int argc, char * argv[])
 	LocalMap locMap;
 	load_map(locMap, 1);
 	fuser.fuse_first_map(locMap);
-	for(int i = 2; i <= 100; ++i){
+	for(int i = 2; i <= 200; ++i){
 		cout << "localmap: " << i <<endl;
 		load_map(locMap, i);
-		to_sparse_symm_matrix(locMap.P).write_to_file("SavedMatrices/Ploc");
+		//to_sparse_symm_matrix(locMap.P).write_to_file("SavedMatrices/Ploc");
 		fuser.fuse_map(locMap);
-		if(i == 27 || i == 34 || i == 43 || i == 57 || i == 87 || i == 91){
-			fuser.reorder_submaps();
-		}
-		stringstream out;
+		//if(i == 27 || i == 34 || i == 43 || i == 57 || i == 87 || i == 91){
+			//fuser.reorder_submaps();
+		//}
+		/*stringstream out;
 		out << i;
 		string tmp = "SavedMatrices/I" + out.str();
 		fuser.glb_map.I.write_to_file(tmp.c_str());
 		tmp = "SavedMatrices/i" + out.str();
 		fuser.glb_map.i.write_to_file(tmp.c_str());
 		tmp = "SavedMatrices/X" + out.str();
-		fuser.glb_map.X.write_to_file(tmp.c_str());
+		fuser.glb_map.X.write_to_file(tmp.c_str());*/
 	}
-	//fuser.timer.print();
+	fuser.timer.print();
 	fuser.glb_map.I.write_to_file("SavedMatrices/I1");
 	fuser.glb_map.i.write_to_file("SavedMatrices/i1");
+	fuser.glb_map.X.write_to_file("SavedMatrices/X1");
 	cout << "done fusing" << endl;
 
 
