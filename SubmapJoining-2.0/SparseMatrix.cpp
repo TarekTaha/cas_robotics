@@ -10,9 +10,7 @@ SparseMatrix::SparseMatrix(int rows, int cols, int zmax){
 }
 
 SparseMatrix::~SparseMatrix(){
-	//cout << "before free" << endl;
 	cholmod_free_sparse(&A, &c);
-	//cout << "after free" << endl;
 	cholmod_finish (&c);
 }
 
@@ -22,9 +20,8 @@ SparseMatrix::SparseMatrix(const SparseMatrix& md){
 }
 
 SparseMatrix& SparseMatrix::operator=(const SparseMatrix& md){
-	//cholmod_free_sparse(&A, &c);
 	if(this != &md){
-		//cholmod_free_sparse(&A, &c);
+		cholmod_free_sparse(&A, &c);
 		A =  cholmod_copy_sparse(md.A, &c);
 	}
 	return *this;
@@ -74,15 +71,27 @@ void SparseMatrix::set(int set_row, int set_col, double val){
 	}
 	++col[i];
 	start = col[set_col] - 2;
-	
-	while(start > col[set_col - 1] - 1 && set_row - 1 < row[start]){
+
+
+	while(start > -1 && start > col[set_col - 1] - 1 && set_row - 1 < row[start]){
 		--start;
 	}
-	if( set_row - 1 == row[start] && start != col[set_col - 1] - 1){
-		x[start] = val;
-		while(i >= set_col){
-			--col[i];
-			--i;
+
+	if(start >= 0){
+		if( set_row - 1 == row[start] && start != col[set_col - 1] - 1){
+			x[start] = val;
+			while(i >= set_col){
+				--col[i];
+				--i;
+			}
+		}
+		else{
+			for(int j = col[i]; j > start; --j){
+				x[j + 1] = x[j];
+				row[j + 1] = row[j];
+			}
+			x[start + 1] = val;
+			row[start + 1] = set_row - 1;
 		}
 	}
 	else{
@@ -97,6 +106,7 @@ void SparseMatrix::set(int set_row, int set_col, double val){
 
 SparseMatrix trn(const SparseMatrix& m){
 	SparseMatrix result;
+	cholmod_free_sparse(&result.A, &result.c);
 	result.A = cholmod_transpose(m.A, 1, &result.c);
 	return result;
 }
@@ -109,6 +119,7 @@ SparseMatrix operator+(const SparseMatrix& m1, const SparseMatrix& m2){
 	SparseMatrix result;
 	double alpha[2] = {1, 1};
 	double beta[2] = {1, 1};
+	cholmod_free_sparse(&result.A, &result.c);
 	result.A = cholmod_add(m1.A, m2.A, alpha, beta, true, true, &result.c);
 	return result;
 }
@@ -117,12 +128,14 @@ SparseMatrix operator-(const SparseMatrix& m1, const SparseMatrix& m2){
 	SparseMatrix result;
 	double alpha[2] = {1, 1};
 	double beta[2] = {-1, 1};
+	cholmod_free_sparse(&result.A, &result.c);
 	result.A = cholmod_add(m1.A, m2.A, alpha, beta, true, true, &result.c);
 	return result;
 }
 
 SparseMatrix operator*(const SparseMatrix& m1, const SparseMatrix& m2){
 	SparseMatrix result;
+	cholmod_free_sparse(&result.A, &result.c);
 	result.A = cholmod_ssmult(m1.A, m2.A, 0, true, true, &result.c);
 	return result;
 }
@@ -146,7 +159,9 @@ void SparseMatrix::read_from_delimited_file(const char* filename){
 	
 	while(!file.eof() && file.peek() != -1){
 		file >> read_double;
-		set(row_count,col_count,read_double);
+		if(read_double){
+			set(row_count,col_count,read_double);
+		}
 		file.get(ch);
 		++col_count;
 		if(ch == '\n'){
@@ -160,7 +175,7 @@ void SparseMatrix::read_from_delimited_file(const char* filename){
 
 SparseMatrix SparseMatrix::get_submatrix(int* rset, int rsize, int* cset, int csize) const{
 	SparseMatrix result;
-
+	cholmod_free_sparse(&result.A, &c);
 	result.A = cholmod_submatrix(A, rset, rsize, cset, csize, true, true, &c);
 	return result;
 }
@@ -168,19 +183,13 @@ SparseMatrix SparseMatrix::get_submatrix(int* rset, int rsize, int* cset, int cs
 SparseMatrix SparseMatrix::get_submatrix(int row_start, int col_start, int row_end, int col_end) const{
 	int rsize = row_end - row_start + 1;
 	int csize = col_end - col_start + 1;
-	//cout << col_end << " " << col_start << endl;
 	int rset[rsize];
 	int cset[csize];
 	for(int i = 0; i < rsize; ++i){
-		//cout << "i: " << i << endl;
 		rset[i] = row_start + i - 1;
-		//cout << rset[i] << endl;
 	}
-	//cout << "ha" << endl;
 	for(int i = 0; i < csize; ++i){
-		//cout << "i: " << i << " " << csize<< endl;
 		cset[i] = col_start + i - 1;
-		//cout << cset[i] << endl;
 	}
 	return get_submatrix(rset, rsize, cset, csize);
 }
@@ -200,28 +209,22 @@ int SparseMatrix::max_num_nonzero() const{
 
 SparseMatrix vertcat(const SparseMatrix& m1, const SparseMatrix& m2){
 	SparseMatrix result;
+	cholmod_free_sparse(&result.A, &result.c);
 	result.A = cholmod_vertcat(m1.A, m2.A, true, &result.c);
 	return result;
 }
 
 SparseMatrix horzcat(const SparseMatrix& m1, const SparseMatrix& m2){
 	SparseMatrix result;
+	cholmod_free_sparse(&result.A, &result.c);
 	result.A = cholmod_horzcat(m1.A, m2.A, true, &result.c);
 	return result;
 }
 
 SparseMatrix zeros(int rows, int cols){
 	SparseMatrix result;
-	result.A = cholmod_spzeros
-	(
-	    /* ---- input ---- */
-	    rows,        /* # of rows of A */
-	    cols,        /* # of columns of A */
-	    0,       /* max # of nonzeros of A */
-	    CHOLMOD_REAL,          /* CHOLMOD_PATTERN, _REAL, _COMPLEX, or _ZOMPLEX */
-	    /* --------------- */
-	    &result.c
-	) ;
+	cholmod_free_sparse(&result.A, &result.c);
+	result.A = cholmod_spzeros(rows, cols, 0, CHOLMOD_REAL, &result.c);
 	return result;
 }
 
@@ -247,4 +250,8 @@ bool operator==(const SparseMatrix& m1, const SparseMatrix& m2){
 		}
 	}
 	return true;
+}
+
+int SparseMatrix::num_nonzero() const{
+	return cholmod_nnz(A, &c);
 }

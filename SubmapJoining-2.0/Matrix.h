@@ -12,7 +12,7 @@
 using namespace std;
 
 
-class Matrix{	
+class Matrix{
   public:
     virtual double get(int, int) const = 0;
     virtual void set(int, int, double) = 0;
@@ -24,3 +24,4 @@ class Matrix{
 
 
 #endif
+

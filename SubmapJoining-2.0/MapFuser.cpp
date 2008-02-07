@@ -72,7 +72,7 @@ void MapFuser::fuse_map(LocalMap m){
 		reorder_submaps();
 		timer.stop(17);
 		timer.start(18);
-		glb_map.L = cholesky(glb_map.I);
+		glb_map.L = cholesky2(glb_map.I, timer);
 		timer.stop(18);
 		timer.start(19);
 		glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
@@ -175,14 +175,6 @@ void MapFuser::reorder_submaps(){
 		dist[i] = distance_to_submap(i); //, x, y);
 		order[i] = i;
 	}
-	for(int i = 0; i < num_submaps; ++i){
-		cout << dist[i] << " ";
-	}
-	cout << endl;
-	for(int i = 0; i < num_submaps; ++i){
-		cout << order[i] << " ";
-	}
-	cout << endl;
 	
 	for(int i = 0; i < num_submaps; ++i){
 		temp_dist = dist[i];
@@ -203,14 +195,7 @@ void MapFuser::reorder_submaps(){
 		dist[i] = temp_dist;
 	}
 
-	for(int i = 0; i < num_submaps; ++i){
-		cout << dist[i] << " ";
-	}
-	cout << endl;
-	for(int i = 0; i < num_submaps; ++i){
-		cout << order[i] << " ";
-	}
-	cout << endl;
+
 
 	
 	//make set
@@ -226,11 +211,6 @@ void MapFuser::reorder_submaps(){
 		}
 	}
 	
-	cout << "set" << endl;
-	for(int i = 0; i < col_num; ++i){
-		cout << set[i] << " ";
-	}
-	cout << endl;
 	int set2[1] = {0};
 	timer.stop(20);
 	timer.start(21);
@@ -245,15 +225,7 @@ void MapFuser::reorder_submaps(){
 	timer.stop(23);
 	
 	timer.start(24);
-	cout << "index before" << endl;
-	for(int i = 0; i < num_submaps; ++i){
-		cout << index_of_submap[i] << " ";
-	}
-	cout << endl;
-	for(int i = 0; i < num_beacons; ++i){
-		cout << place_of_beacon[i] << " ";
-	}
-	cout << endl;
+
 	int index = 1;
 	int index_diff;
 	//int index_of_submap[1000];
@@ -267,15 +239,6 @@ void MapFuser::reorder_submaps(){
 		index += 2 * num_beacons_in_submap[order[i]] + 3;
 	}
 	
-	cout << "index after" << endl;
-	for(int i = 0; i < num_submaps; ++i){
-		cout << index_of_submap[i] << " ";
-	}
-	cout << endl;
-	for(int i = 0; i < num_beacons; ++i){
-		cout << place_of_beacon[i] << " ";
-	}
-	cout << endl;
 	timer.stop(24);
 }
 
@@ -599,7 +562,7 @@ SparseMatrix MapFuser::restore_part_of_P_for_assositation2(){
 	//}
 	//cout << endl;
 	timer.start(51);
-	x = solve_cholesky(glb_map.L, rhs);
+	x = solve_cholesky2(glb_map.L, rhs, timer);
 	timer.stop(51);
 	timer.start(52);
 	result = x.get_submatrix(rset, index, cset, index);
