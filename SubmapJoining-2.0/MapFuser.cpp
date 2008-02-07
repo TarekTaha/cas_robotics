@@ -238,7 +238,7 @@ void MapFuser::reorder_submaps(){
 	glb_map.i = glb_map.i.get_submatrix(set, col_num, set2, 1);
 	timer.stop(21);
 	timer.start(22);
-	SparseMatrix temp_I = to_sparse_matrix2(glb_map.I);
+	SparseMatrix temp_I = to_sparse_matrix(glb_map.I);
 	timer.stop(22);
 	timer.start(23);
 	glb_map.I = to_sparse_symm_matrix( temp_I.get_submatrix(set, col_num, set, col_num));
