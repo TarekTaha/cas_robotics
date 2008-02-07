@@ -37,23 +37,34 @@ elseif patch==4
 %% ROOF    
 %right roof front 
 elseif patch==5 %moved slightly away from pure shiny metal
-    IntPs=[0.25,0.25,1.5];   
+%     IntPs=[0.25,0.25,1.4]; 
+    display('Changed patch 5');
+        IntPs=[0.30,0.30,1.5]; 
 %right roof back HAD TO BE MOVED FORWARD this is where the girder is at the back so it must be brought forward) 
 elseif patch==6 
-    IntPs=[-0.10,0.17,1.5];    
+%     IntPs=[-0.10,0.17,1.5];    
+display('Changed patch 6');
+    IntPs=[0.1,0.35,1.4];
+    
 %left roof front
 elseif patch==7 %moved slightly away from pure shiny metal
-    IntPs=[0.25,-0.35,1.5];    
+%     IntPs=[0.25,-0.35,1.5]; 
+    display('Changed patch 7');
+    IntPs=[0.25,-0.35,1.6];    
 %left roof back
 elseif patch==8
-    IntPs=[-0.20,-0.25,1.5];
+%     IntPs=[-0.20,-0.25,1.5];
+    display('Changed patch 8');
+    IntPs=[-0.20,-0.25,1.6];
 %% FLANGE
 %right bottom flange %HAVE TO MOVE since it was still getting the wall
 elseif patch==9
     IntPs=[0,0.4,0.85];    
 %left bottom flange
 elseif patch==10
-    IntPs=[0,-0.68,0.8];    
+%     IntPs=[0,-0.68,0.8];  
+    display('Changed patch 10');
+  IntPs=[0.25,-0.48,1];      
 %% OVERALL
 elseif patch==11
     IntPs=[0,0,0];
@@ -64,6 +75,7 @@ if patch<5
     sizeInt=0.21;
 elseif (patch <9 && patch >=5)
     sizeInt=0.16;
+%     sizeInt=0.13;
 elseif patch==11
     %just cover the whole thing
     sizeInt=10;
@@ -79,8 +91,8 @@ figure(1)
 load(['test',num2str(testnum),'hMesh.mat']);
 % plot3(hMeshdata.v(:,1),hMeshdata.v(:,2),hMeshdata.v(:,3),'b','marker','.','linestyle','none','markersize',0.05);axis equal; grid on;hold on
 
-cd ..
-index=GetImpLevInfo(hMeshdata.v);
+
+[nothing,index]=GetImpLevInfo(hMeshdata.v);
 index2=find(sqrt((hMeshdata.v(index,1)-IntPs(1)).^2+...
                  (hMeshdata.v(index,2)-IntPs(2)).^2+...
                  (hMeshdata.v(index,3)-IntPs(3)).^2)<sizeInt);
@@ -233,7 +245,9 @@ elseif patch==11
 %only interested in points where I can compare (so one the Ibeam)
 %above the min plane value + some error 0.02
 temppoints=points;
-points=points(find(points(:,3)>min(brSec.vertex.z)-0.02 & points(:,2)<max(brSec.vertex.y)+0.02),:);
+points=points(find(points(:,1)>min(brSec.vertex.x)-0.02 & points(:,1)<0.7 &...
+                   points(:,2)>min(brSec.vertex.y)-0.02 & points(:,2)<max(brSec.vertex.y)+0.02 & ...
+                   points(:,3)>min(brSec.vertex.z)-0.02 & points(:,3)<max(brSec.vertex.z)+0.02 ),:);
 
 
     for i=1:size(brSec.face.vertex_indices,1)
@@ -270,8 +284,10 @@ points=points(find(points(:,3)>min(brSec.vertex.z)-0.02 & points(:,2)<max(brSec.
     if doplots
         figure
         plot3(points(:,1),points(:,2),points(:,3),'r.','marker','.','linestyle','none','markersize',0.1);axis equal; grid on;hold on;
-        cd journal
-        CASESTUDY_bridgeSection    
+        try cd journal; end
+        try %CASESTUDY_bridgeSection  
+            feval(brSecfilename)
+        catch; keyboard; end
     end
 end
 

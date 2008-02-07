@@ -98,9 +98,10 @@ cartYoffset=0.11;
         %RIGHT crosbeam vert
         %41 is back right wall bottom end %42 is front right wall bottom end
         %so it is 7cm away from mid towards back
-%test 6 vertices(numverts+1,:)=(vertices(41,:)+vertices(42,:))/2+[-0.4,0,0];       
+% test 6 
+vertices(numverts+1,:)=(vertices(41,:)+vertices(42,:))/2+[-0.4,0,0];       
 %test10
-        vertices(numverts+1,:)=(vertices(41,:)+vertices(42,:))/2+[-0.2,0,0];       
+%         vertices(numverts+1,:)=(vertices(41,:)+vertices(42,:))/2+[-0.2,0,0];       
         %slightly back along x on right flange
         vertices(numverts+2,:)=vertices(numverts+1,:)-[0.07,0,0];       
         %slightly up (z) above front, on right flange
@@ -111,9 +112,10 @@ cartYoffset=0.11;
         %LEFT crosbeam verts
         %12 is back left wall bottom end %11 is front left wall bottom end
         %so it is 7cm away from mid towards back
-% test6  vertices(numverts+5,:)=(vertices(12,:)+vertices(11,:))/2 +[-0.4,0,0];       
+% test6  
+vertices(numverts+5,:)=(vertices(12,:)+vertices(11,:))/2 +[-0.4,0,0];       
 %test10
-        vertices(numverts+5,:)=(vertices(12,:)+vertices(11,:))/2 +[-0.2,0,0];       
+%       vertices(numverts+5,:)=(vertices(12,:)+vertices(11,:))/2 +[-0.2,0,0];       
         %slightly back along x on left flange
         vertices(numverts+6,:)=vertices(numverts+5,:)-[0.07,0,0];       
         %slightly up (z) above front, on right flange
