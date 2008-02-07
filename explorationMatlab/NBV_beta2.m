@@ -27,6 +27,19 @@ end
 save('Xsearchdata.mat','Xsearchdata');
 %%%%%%%%end saving file
 
+%since we are no longer loading with exGUi we put it here to load if it
+%hasn't already been/ or created if it dosen't exist
+if isempty(all_views)
+    try load all_views.mat
+    catch
+        display('Having to calculate all_views for exploration, this happens ones only');
+        calc_all_views();
+        load all_views.mat
+    end    
+end
+
+
+
 tic
 
 indexed_knowncoords=round(setdiff(workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:),workspace.indexedobsticles,'rows')/workspace.inc_size);

@@ -18,7 +18,7 @@ end
 
 if length(tests2do)<6
     tests2do=[tests2do,zeros([1,6-length(tests2do)])];
-    display(['You only passed a matrix of size ', length(tests2do), ' - make sure you pass it the size of number of KPIS (6)! Set other test to zero']);
+    display(['You only passed a matrix of size ', num2str(length(tests2do)), ' - make sure you pass it the size of number of KPIS (6)! Set other test to zero']);
 end
 
 
@@ -31,7 +31,10 @@ if ~strcmp(pwd,[matlabroot,'\work\explorationMatlab\journal'])
     try 
         cd ([matlabroot,'\work\explorationMatlab\journal']);
     catch
-        display('fucking fix it!!');
+        try cd ([matlabroot,'\work\Gavin\PhD\explorationMatlab\journal']);
+        catch
+            display('Cant get into correct directory!!');
+        end
     end
 end
 
@@ -104,30 +107,38 @@ load(['test',num2str(testnum),'robot_maxreach.mat']);
 
     
 for i=1:size(Xsearchdata,2)
-    global workspace Q
-                
+    global workspace Q r data
+    display(['At search position',num2str(i), 'Currently know (obs and free) =',...
+        num2str(size(Xsearchdata(i).workspace.indexedobsticles,1)+size(Xsearchdata(i).workspace.knowncoords,1))]);            
     %This makes the size of the search, cal with x^3*7*2
-    numNBVanglesteps=[5,6,7];
+    numNBVanglesteps=[6,7,8];
     for searchsizeIndex=1:length(numNBVanglesteps)
+        if i==1 && (searchsizeIndex==1 || searchsizeIndex==2) ;display('not doing for i==1 and first and second search');continue; end
+        
         %find out where the arm is
         try    use_real_robot_GETJs(); 
         catch display('couldnt get joints from robot- updating the Q in memory regardless');
         end   
         %move to the correct place and load workspace
         workspace=Xsearchdata(i).workspace;
+%         keyboard
+%             load test6Exhastive9seg_workspace.mat
+        
         %Set the supposed Q for here
         newQ=robot_maxreach.path(posefromRobMaxReach(i)).all_steps(end,:);
+%         newQ=data.bvs(2).bestviews(3).Q;
+        
         valid=0;invalidcount=0;
         while valid==0
             [valid,all_steps]=pathplanner(newQ,false,true,true,150);            
             if valid==-1
                 display('Im being told that this is a dangerous position when I know this is not the case-you have control, please use exGUI to move manually to the required newQ and remove selefscanning points al the way along')            
-                keyboard
+                break;
             elseif valid==0                
                 invalidcount=invalidcount+1;
                 if invalidcount>10
-                    display('REALLY! No Path found - you have control');
-                    break
+                    display('REALLY! No Path found - you have control - USE gui to move to correct newQ ');
+                    break;
                 else
                     display('No Path found to get to a possible position - trying again');
                 end
@@ -135,7 +146,7 @@ for i=1:size(Xsearchdata,2)
         end
         
         %make sure we have a path 
-        if invalidcount>=10 && valid==0
+        if invalidcount>=10 && valid~=1
             display(['Please use GUI to move to desired place which is ',num2str(newQ*180/pi),' degrees']);
             keyboard
         else
@@ -147,39 +158,55 @@ for i=1:size(Xsearchdata,2)
             end   
         end
         
+        
         %do appropriate search
-        [data(i).totaltime(searchsizeIndex),data(i).searchspace(searchsizeIndex)]= near_exhastive_NBV_search(numNBVanglesteps(searchsizeIndex));    
+        display(['Doing exhastive search with J1-J3 steps =',num2str(numNBVanglesteps(searchsizeIndex)),' where this is x total will be (x+1)^3*7*2']);
+%         if i==1 && searchsizeIndex==2;
+%             %do nothing
+%             display('doing nothing here')
+%         else
+            [data(i).totaltime(searchsizeIndex),data(i).searchspace(searchsizeIndex)]= near_exhastive_NBV_search(numNBVanglesteps(searchsizeIndex));
+%         end
+        
         global bestviews
         currentBview=1;
-        %try and get to the position told
-        while ~isfield(bestviews,'valid') || bestviews(currentBview).valid==false            
+        %PATH: try and get to the position told
+        while ~isfield(bestviews,'valid') || bestviews(currentBview).valid==false
             [bestviews(currentBview).valid,bestviews(currentBview).all_steps]=pathplanner(bestviews(currentBview).Q,false,true,true,30);            
-            if ~bestviews(currentBview).valid
-                display(['Couldnt find a path for best view num: ',num2str(currentBview)]);
+            if ~bestviews(currentBview).valid                
+                display(['Couldnt find a path for best view num: ',num2str(currentBview),' Removing self scannig points ever increasingly']);                
+                workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles,Q,2.5*(1+currentBview/1000));
                 currentBview=currentBview+1;
             end
         end 
 
         display(['Found a path to best view num: ',num2str(currentBview)]);
-        data(i).bvs(searchsizeIndex).bestviews=bestviews(currentBview:end);
+        %remake the best views var so the top on is the best
+        bestviews=bestviews(currentBview:end);
+        
 
         %EXPLORE
-        nopathcount=0;
-        for cur_scan=1:aftersearch_num_poses(searchsizeIndex)
+        
+        for cur_scan=1:aftersearch_num_poses(i) %If you want to start somewhere different eg...cur_scan=3
+            nopathcount=0;
             if cur_scan>1
-                while data(i).bvs(searchsizeIndex).bestviews(cur_scan+nopathcount).valid==false            
-                    [data(i).bvs(searchsizeIndex).bestviews(cur_scan+nopathcount).valid,...
-                     data(i).bvs(searchsizeIndex).bestviews(cur_scan+nopathcount).all_steps]=...
-                     pathplanner(data(i).bvs(searchsizeIndex).bestviews(cur_scan+nopathcount).Q,false,true,true,30);            
-                    if ~data(i).bvs(searchsizeIndex).bestviews(cur_scan+nopathcount).valid
-                        display(['Couldnt find a path for best view num: ',num2str(cur_scan+nopathcount)]);
+                while (isempty(bestviews(1+nopathcount).valid) || ...
+                       bestviews(1+nopathcount).valid~=true)          
+                    [bestviews(1+nopathcount).valid,bestviews(1+nopathcount).all_steps]=...
+                     pathplanner(bestviews(1+nopathcount).Q,false,true,true,30);            
+                 
+                    if ~bestviews(1+nopathcount).valid
+                        display(['At cur_scan = ',num2str(cur_scan),', Couldnt find a path for best view num: ',num2str(1+nopathcount),' Removing self scannig points ever increasingly']);                
+                        workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles,Q,2.5*(1+nopathcount/1000));
                         nopathcount=nopathcount+1;
                     end
                 end 
             end
-            
-            newQ=[data(i).bvs(searchsizeIndex).bestviews(cur_scan+nopathcount).Q(1:5),0];
-            all_steps=data(i).bvs(searchsizeIndex).bestviews(cur_scan+nopathcount).all_steps;
+
+            %the cur best view is always the top best views, view
+            data(i).bvs(searchsizeIndex).bestviews(cur_scan)=bestviews(1+nopathcount);
+            newQ=[data(i).bvs(searchsizeIndex).bestviews(cur_scan).Q(1:5),0];
+            all_steps=data(i).bvs(searchsizeIndex).bestviews(cur_scan).all_steps;
             
             % Change newQ so if scanning on the downside (+ angles) -> start from max place and goes to the center, 
             % Alternately,it goes to +30', and then scan to the max negative possible
@@ -212,14 +239,27 @@ for i=1:size(Xsearchdata,2)
             try organise_data();
             catch display('cant do anything without actual scan data here');
             end
-            data(i).size_allknown(searchsizeIndex).val(cur_scan)=size(workspace.knowncoords,1)+size(workspace.indexedobsticles,1);            
-        end            
+            data(i).size_allknown(searchsizeIndex).val(cur_scan)=size(workspace.knowncoords,1)+size(workspace.indexedobsticles,1);        
+            
+%             reoder best views from 2nd to last
+            for cur_view=2:size(bestviews,2); temp_bestviews(cur_view-1)=bestviews(cur_view);end
+            bestviews=temp_bestviews;
+            order_bestviews(true); %and redo NBV volumes
+            
+            %print out the results for this step of this scan at this
+            %Xposition
+            display(['Xsearch pos',num2str(i), '.  J1-J3 steps =',num2str(numNBVanglesteps(searchsizeIndex)),...
+                ' search space= ', num2str(numNBVanglesteps(searchsizeIndex)^3*7*2),...
+                ', After bestview ', num2str(cur_scan), ', Currently know (obs and free) =',...
+            num2str(size(workspace.indexedobsticles,1)+size(workspace.knowncoords,1))]);            
+
+        end        
     end    
 end
 
 display('Stopping here for results to be analysed'); 
 %save results to disk for later analysis
-save(['doKPItest',num2str(testnum),'.mat'],'data');
+save(['doKPItest',num2str(testnum),'-',num2str(date),'_Rand',num2str(rand),'.mat'],'data');
 
 %need some way to compare the overall search with AXBAM, but AXBAM 
 % at 3 possitions where we worked these out we have realistic exploration values 
@@ -237,11 +277,42 @@ save(['doKPItest',num2str(testnum),'.mat'],'data');
 
 keyboard
 
+%The BRUTE FORCE COMPARISONS
+try load(['test',num2str(testnum),'state_data.mat']);catch; keyboard;end
+
+plot(state_data.size_indexedobsticles+state_data.size_known)
+original=state_data.size_indexedobsticles+state_data.size_known;
+
+BF1=[original(1:4),data(1).size_allknown(1).val,data(2).size_allknown(1).val,data(3).size_allknown(1).val];
+interval=interp1([1,2,3,4,5,6,7,8,9,10,12,13,14],BF1,11);
+BF1=[BF1(1:11),interval,BF1(12:13)];
+hold on;plot(BF1)
+hold on;plot(BF1,'g')
+BF2=[original(1:4),data(1).size_allknown(2).val(1:3),data(2).size_allknown(2).val(1:4),data(3).size_allknown(2).val(1:3)];
+hold on;plot(BF2,'r')
+BF3=[original(1:4),data(1).size_allknown(3).val(1:3),data(2).size_allknown(3).val(1:3),data(3).size_allknown(2).val(1:3)];
+interval=interp1([1,2,3,4,5,6,7,8,9,10,12,13,14],BF3,11);
+BF3=[BF3(1:11),interval,BF3(12:13)];
+hold on;plot(BF3,'black')
 
 % 
+ORIGinfogain=original(7)+(original(11)-original(7))+original(end)-original(11)
+%This is how much info was "actually" gained at correct spots for test 6
+BF1infogain=BF1(7)+(BF1(11)-original(7))+BF1(end)-original(11)
+BF2infogain=BF2(7)+(BF2(11)-original(7))+BF2(end)-original(11)
+BF3infogain=BF3(7)+(BF3(11)-original(7))+BF3(end)-original(11)
+BF1infogain/max([BF1infogain,BF2infogain,BF3infogain])
+BF2infogain/max([BF1infogain,BF2infogain,BF3infogain])
+BF3infogain/max([BF1infogain,BF2infogain,BF3infogain])
 
-    
-
+%from text file (interpolating since the majority of time is for the nbv
+%cals and this is what was done 3,4,3 times for each one of these
+BF1time=[0,0,193,193,193,215.984,215.984,215.984,215.984,208.453,208.453,208.453];
+sum(BF1time)/length(BF1time)
+BF2time=[0,0,324.3,324.3,324.3, 345.203,345.203,345.203,345.203,327.516,327.516,327.516];
+sum(BF2time)/length(BF2time)
+BF3time=[0,0,507.296,507.296,507.296,501.343,501.343,501.343,501.343,466.125,466.125,466.125];
+sum(BF3time)/length(BF3time)
 
 
 
@@ -259,7 +330,8 @@ end
 %\subsubsection{KPI 2 - Look Around}
 if tests2do(2)==1
 display('KPI2 is a visual inspection, just look at it!');
-
+load(['test',num2str(testnum),'hMesh.mat']);
+plot3(hMeshdata.v(:,1),hMeshdata.v(:,2),hMeshdata.v(:,3),'r','marker','.','linestyle','none','markersize',0.1);axis equal; grid on
 end
 
 %% %%%%%
@@ -337,10 +409,12 @@ if tests2do(5)==1
     figure;       
     bar(u);
     title('Mean over 10 planes')
+    u*1000
     figure; 
     bar(sig)
     title('Standard deviation over 10 planes')
-
+    sig*1000
+    
     figure
     names=[];vals=[];
     for i=1:size(D,2)
@@ -396,9 +470,15 @@ if tests2do(6)==1
     %set empty var for points
             points=[];
 %             brSecfilename='bridgeSection';
+if testnum==6
             brSecfilename='CASESTUDY_bridgeSection';
-%             brSecfilename='AT1_bridgeSection';
-%             brSecfilename='AT2_bridgeSection';
+elseif testnum==9
+            brSecfilename='AT1_bridgeSection';
+elseif testnum==11
+            brSecfilename='AT2_bridgeSection';
+else
+    error('dont know which map to use');
+end
             
             brSec=plyread([brSecfilename,'.ply']);
     for i=1:size(brSec.face.vertex_indices,1)
@@ -504,7 +584,7 @@ if tests2do(6)==1
     [u,sig]=comparemaps(11,testnum,true,brSecfilename);
     display(['Mean is ', num2str(u),' and Standard deviation is',num2str(sig)]) ;
     
-    incval=15; %degrees between steps
+    incval=7; %degrees between steps
     numvals=floor((qlimit(:,2)-qlimit(:,1))/(incval*pi/180));
 
     %if do 100 check a second then this will take 
@@ -522,7 +602,7 @@ if tests2do(6)==1
             obstaclepoints=points_found;        
         end
         
-        display('stopping here');keyboard;
+%         display('stopping here before doing extensive search');keyboard;
 
         %doing the valid challenge
         tic
@@ -542,9 +622,14 @@ if tests2do(6)==1
     end
 
     display(['Ideal Case: Valid=',num2str(validcount(1)),' Failed=',num2str(failedcount(1)),' which is ',num2str(validcount(1)/(failedcount(1)+validcount(1))*100),'%']);
-    display(['Ideal Case: Valid=',num2str(validcount(2)),' Failed=',num2str(failedcount(2)),' which is ',num2str(validcount(2)/(failedcount(2)+validcount(2))*100),'%']);
-    
-    keyboard
+    display(['Actual Case: Valid=',num2str(validcount(2)),' Failed=',num2str(failedcount(2)),' which is ',num2str(validcount(2)/(failedcount(2)+validcount(2))*100),'%']);
+    if validcount(1)>validcount(2)
+        display(['Too many fails: Comparitively the ratio of what we got to what we should of got is ', num2str(validcount(2)/validcount(1))]);
+    else
+        display(['Not enough fails: Comparitively the ratio of what we got to what we should of got is ', num2str(validcount(1)/validcount(2))]);
+    end
+        
+%     keyboard
 
     
 end

@@ -33,6 +33,9 @@ else
     tempQ=all_steps(end,:)*180/pi;   
 end
 
+%can use the old way of updating the joint state
+please_use_GETjsFunc=true;
+
 %% Check that no steps exceed soft limits
 if ~joint_softlimit_check(all_steps)
     display('there is a possible bad position in the joint steps, this shouldnt be planned, giving you control')
@@ -97,7 +100,16 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
             rob_h.Start;pause(0.05);
             
             waitcoutner=0;
-            while max(abs((rob_h.JointState-current_step_DEG)))>7
+            
+            %if we want to update the joints the old way or the new way
+            if please_use_GETjsFunc
+                 use_real_robot_GETJs();
+            else
+                Q=rob_h.JointState*pi/180;
+            end
+         
+            %check we are where we want to be            
+            while max(abs((Q*180/pi-current_step_DEG)))>7
                 pause(0.15);
                 waitcoutner=waitcoutner+1;
                 if waitcoutner==75 %about 15 seconds                    
@@ -106,15 +118,25 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
                         releaserobot(rob_h)
                         error('emergency stop pressed - exiting');                    
                     else
-                        rob_h.Params=current_step_DEG;
-                        rob_h.Start;
+                        %try alternate method of getting joint state
+                        use_real_robot_GETJs()
+                        if ~isempty(find(abs((Q*180/pi)-rob_h.JointState)>eps,1)) && max(abs((Q*180/pi-current_step_DEG)))<7
+                            uiwait(msgbox('There is a problem with the rob_h.JointState function, I can use use_real_robot_GETJs but this is NOT a fix - EyeInHand.exe must die'));
+                            please_use_GETjsFunc=true;
+                            break
+                        else
+                            rob_h.Params=current_step_DEG;
+                            rob_h.Start;
+                        end
                     end
                 elseif waitcoutner>150 %about 30 seconds we have reissued the command and still no action
                     keyboard
                     releaserobot(rob_h)
                     error('Problem issuing commands to drive the robot');                    
                 end
-                %display(strcat('Joint state is currently:', num2str(rob_h.JointState)));                
+                %display(strcat('Joint state is currently:', num2str(rob_h.JointState)));  
+                %if we need to update the old way
+                if please_use_GETjsFunc;use_real_robot_GETJs();end
             end
         end
         %% Release movement object

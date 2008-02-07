@@ -1119,3 +1119,354 @@ test2Xsearchdata.mat      test6.fig                 test9workspace.mat
 test2hMesh.mat            test6Xsearchdata.mat      
 test2robot_maxreach.mat   test6hMesh.mat            
 test2state_data.mat       test6robot_maxreach.mat   
+
+
+
+
+---------------------
+test 12
+Move speed =20% on teach pendant, 
+This is the new case study, now we have data about the actual poses where exploration took place.
+-----------------------------------------
+
+
+Doing Exhastive search for 6 (case study)
+
+
+Average time per decision= 6.6511
+Total time= 13.5945 minutes
+Percentage of total time= 10.6005%
+At search position1Currently know (obs and free) =13567
+couldnt move robot - updating the Q in memory regardless
+Doing exhastive search with J1-J3 steps =6 where this is x total will be (x+1)^3*7*2
+Aver_joint=0.37335, Aver_info=3.6231, Max_joint=0.35503, Max_info=19.6114, TotalAv=3.9965...J_Contrib%:10.3046%
+TOTAL Time taken is: 193
+Search space=4802
+Found a path to best view num: 1
+Aver_joint=0.31803, Aver_info=2.8565, Max_joint=0.4487, Max_info=17.2035, TotalAv=3.1745...J_Contrib%:11.1335%
+Xsearch pos1.  J1-J3 steps =6 search space= 3024, After bestview 1, Currently know (obs and free) =17856
+Aver_joint=0.2769, Aver_info=2.8635, Max_joint=0.35211, Max_info=19.7346, TotalAv=3.1404...J_Contrib%:9.67%
+Xsearch pos1.  J1-J3 steps =6 search space= 3024, After bestview 2, Currently know (obs and free) =22940
+Aver_joint=0.27013, Aver_info=4.0887, Max_joint=0.22761, Max_info=17.5954, TotalAv=4.3588...J_Contrib%:6.6067%
+Xsearch pos1.  J1-J3 steps =6 search space= 3024, After bestview 3, Currently know (obs and free) =28148
+Doing exhastive search with J1-J3 steps =7 where this is x total will be (x+1)^3*7*2
+Aver_joint=0.36586, Aver_info=3.7032, Max_joint=0.30411, Max_info=18.0446, TotalAv=4.069...J_Contrib%:9.8796%
+TOTAL Time taken is: 324.36
+Search space=7168
+Found a path to best view num: 1
+Aver_joint=0.31738, Aver_info=2.5483, Max_joint=0.3574, Max_info=17.2705, TotalAv=2.8657...J_Contrib%:12.4548%
+Xsearch pos1.  J1-J3 steps =7 search space= 4802, After bestview 1, Currently know (obs and free) =18363
+Aver_joint=0.31091, Aver_info=2.4489, Max_joint=0.223, Max_info=18.3932, TotalAv=2.7598...J_Contrib%:12.6959%
+Xsearch pos1.  J1-J3 steps =7 search space= 4802, After bestview 2, Currently know (obs and free) =24131
+
+
+--FAILURE continued below------------------
+Xsearch pos1.  J1-J3 steps =7 search space= 4802, After bestview 3, Currently know (obs and free) =29396
+
+-----failed and continuuing
+
+>> doKPItest(6,1)
+You only passed a matrix of size 6 - make sure you pass it the size of number of KPIS (6)! Set other test to zero
+
+tot_time =
+
+   86.4649
+
+Average time per decision= 6.6511
+Total time= 13.5945 minutes
+Percentage of total time= 10.6005%
+At search position1Currently know (obs and free) =13567
+not doing for i==1 and first and second search
+not doing for i==1 and first and second search
+Doing exhastive search with J1-J3 steps =8 where this is x total will be (x+1)^3*7*2
+Aver_joint=0.36812, Aver_info=3.807, Max_joint=0.28544, Max_info=24.3198, TotalAv=4.1751...J_Contrib%:9.6695%
+TOTAL Time taken is: 507.296
+Search space=10206
+174         while ~isfield(bestviews,'valid') || bestviews(currentBview).valid==false
+Found a path to best view num: 1
+Currently not data coming back: waiting for laser to complete before retrying
+.
+.
+Data came back eventually
+Aver_joint=0.30662, Aver_info=4.4674, Max_joint=0.48255, Max_info=23.8799, TotalAv=4.774...J_Contrib%:6.8635%
+Xsearch pos1.  J1-J3 steps =8 search space= 7168, After bestview 1, Currently know (obs and free) =21187
+At cur_scan = 2, Couldnt find a path for best view num: 1 Removing self scannig points ever increasingly
+At cur_scan = 2, Couldnt find a path for best view num: 2 Removing self scannig points ever increasingly
+Currently not data coming back: waiting for laser to complete before retrying
+.
+.
+Data came back eventually
+Aver_joint=0.2085, Aver_info=3.6633, Max_joint=0.1016, Max_info=25.1205, TotalAv=3.8718...J_Contrib%:5.6916%
+Xsearch pos1.  J1-J3 steps =8 search space= 7168, After bestview 2, Currently know (obs and free) =25354
+Warning: Error occurred while evaluating listener callback.
+> In actxserver at 87
+  In use_real_robot_MOVE at 46
+  In doKPItest at 226
+??? Error using ==> winfun\private\comeventcallback at 25
+Error firing event 'ScanComplete' to 'myhandler'.
+
+Currently not data coming back: waiting for laser to complete before retrying
+.
+.
+Data came back eventually
+Aver_joint=0.28014, Aver_info=4.6714, Max_joint=0.23065, Max_info=25.087, TotalAv=4.9515...J_Contrib%:5.9969%
+Xsearch pos1.  J1-J3 steps =8 search space= 7168, After bestview 3, Currently know (obs and free) =30160
+At search position2Currently know (obs and free) =23346
+Warning: Error occurred while evaluating listener callback.
+> In actxserver at 87
+  In use_real_robot_GETJs at 18
+  In doKPItest at 119
+??? Error using ==> winfun\private\comeventcallback at 25
+Error firing event 'ScanComplete' to 'myhandler'.
+
+Doing exhastive search with J1-J3 steps =6 where this is x total will be (x+1)^3*7*2
+Aver_joint=0.30551, Aver_info=2.6352, Max_joint=0.5197, Max_info=24.1479, TotalAv=2.9408...J_Contrib%:11.5932%
+TOTAL Time taken is: 215.984
+Search space=4802
+Found a path to best view num: 1
+Currently not data coming back: waiting for laser to complete before retrying
+.
+.
+Data came back eventually
+Aver_joint=0.29093, Aver_info=2.0845, Max_joint=0.33954, Max_info=15.6238, TotalAv=2.3754...J_Contrib%:13.9568%
+Xsearch pos2.  J1-J3 steps =6 search space= 3024, After bestview 1, Currently know (obs and free) =29539
+Warning: Error occurred while evaluating listener callback.
+> In actxserver at 87
+  In use_real_robot_MOVE at 46
+  In doKPItest at 226
+??? Error using ==> winfun\private\comeventcallback at 25
+Error firing event 'ScanComplete' to 'myhandler'.
+
+Currently not data coming back: waiting for laser to complete before retrying
+.
+.
+Data came back eventually
+Aver_joint=0.29888, Aver_info=1.3671, Max_joint=0.33141, Max_info=10.2015, TotalAv=1.666...J_Contrib%:21.8622%
+Xsearch pos2.  J1-J3 steps =6 search space= 3024, After bestview 2, Currently know (obs and free) =31631
+Warning: Error occurred while evaluating listener callback.
+> In actxserver at 87
+  In use_real_robot_MOVE at 46
+  In doKPItest at 226
+??? Error using ==> winfun\private\comeventcallback at 25
+Error firing event 'ScanComplete' to 'myhandler'.
+
+Currently not data coming back: waiting for laser to complete before retrying
+.
+.
+Data came back eventually
+Aver_joint=0.30104, Aver_info=1.4936, Max_joint=0.18703, Max_info=9.6901, TotalAv=1.7946...J_Contrib%:20.1556%
+Xsearch pos2.  J1-J3 steps =6 search space= 3024, After bestview 3, Currently know (obs and free) =33737
+Doing exhastive search with J1-J3 steps =7 where this is x total will be (x+1)^3*7*2
+Aver_joint=0.30346, Aver_info=2.6827, Max_joint=0.42366, Max_info=28.5649, TotalAv=2.9861...J_Contrib%:11.312%
+TOTAL Time taken is: 345.203
+Search space=7168
+Found a path to best view num: 1
+Currently not data coming back: waiting for laser to complete before retrying
+.
+.
+Data came back eventually
+Aver_joint=0.24766, Aver_info=2.0257, Max_joint=0.17379, Max_info=13.9855, TotalAv=2.2734...J_Contrib%:12.2258%
+Xsearch pos2.  J1-J3 steps =7 search space= 4802, After bestview 1, Currently know (obs and free) =30511
+Warning: Error occurred while evaluating listener callback.
+> In actxserver at 87
+  In use_real_robot_MOVE at 46
+  In doKPItest at 226
+??? Error using ==> winfun\private\comeventcallback at 25
+Error firing event 'ScanComplete' to 'myhandler'.
+
+Currently not data coming back: waiting for laser to complete before retrying
+.
+.
+Data came back eventually
+Aver_joint=0.25482, Aver_info=1.5516, Max_joint=0.44268, Max_info=12.2889, TotalAv=1.8064...J_Contrib%:16.4231%
+Xsearch pos2.  J1-J3 steps =7 search space= 4802, After bestview 2, Currently know (obs and free) =31449
+Warning: Error occurred while evaluating listener callback.
+> In actxserver at 87
+  In use_real_robot_MOVE at 46
+  In doKPItest at 226
+??? Error using ==> winfun\private\comeventcallback at 25
+Error firing event 'ScanComplete' to 'myhandler'.
+
+Currently not data coming back: waiting for laser to complete before retrying
+.
+.
+Data came back eventually
+Aver_joint=0.32803, Aver_info=0.74217, Max_joint=0.34284, Max_info=8.2629, TotalAv=1.0702...J_Contrib%:44.1985%
+Xsearch pos2.  J1-J3 steps =7 search space= 4802, After bestview 3, Currently know (obs and free) =33551
+Warning: Error occurred while evaluating listener callback.
+> In actxserver at 87
+  In use_real_robot_MOVE at 46
+  In doKPItest at 226
+??? Error using ==> winfun\private\comeventcallback at 25
+Error firing event 'ScanComplete' to 'myhandler'.
+
+Currently not data coming back: waiting for laser to complete before retrying
+.
+.
+Data came back eventually
+Aver_joint=0.26085, Aver_info=0.59752, Max_joint=0.21216, Max_info=6.4361, TotalAv=0.85837...J_Contrib%:43.6555%
+Xsearch pos2.  J1-J3 steps =7 search space= 4802, After bestview 4, Currently know (obs and free) =34915
+Doing exhastive search with J1-J3 steps =8 where this is x total will be (x+1)^3*7*2
+Aver_joint=0.30259, Aver_info=2.7404, Max_joint=0.63861, Max_info=40.9306, TotalAv=3.043...J_Contrib%:11.0417%
+TOTAL Time taken is: 501.343
+Search space=10206
+Found a path to best view num: 1
+Currently not data coming back: waiting for laser to complete before retrying
+.
+.
+Data came back eventually
+Aver_joint=0.28316, Aver_info=3.2773, Max_joint=0.3958, Max_info=16.6237, TotalAv=3.5604...J_Contrib%:8.6403%
+Xsearch pos2.  J1-J3 steps =8 search space= 7168, After bestview 1, Currently know (obs and free) =29775
+Warning: Error occurred while evaluating listener callback.
+> In actxserver at 87
+  In use_real_robot_MOVE at 46
+  In doKPItest at 226
+??? Error using ==> winfun\private\comeventcallback at 25
+Error firing event 'ScanComplete' to 'myhandler'.
+
+Currently not data coming back: waiting for laser to complete before retrying
+.
+Data came back eventually
+Aver_joint=0.25446, Aver_info=1.9799, Max_joint=0.31135, Max_info=13.5055, TotalAv=2.2343...J_Contrib%:12.8523%
+Xsearch pos2.  J1-J3 steps =8 search space= 7168, After bestview 2, Currently know (obs and free) =31439
+Currently not data coming back: waiting for laser to complete before retrying
+.
+Data came back eventually
+Aver_joint=0.32011, Aver_info=1.9483, Max_joint=0.32288, Max_info=11.3083, TotalAv=2.2684...J_Contrib%:16.4302%
+Xsearch pos2.  J1-J3 steps =8 search space= 7168, After bestview 3, Currently know (obs and free) =33605
+At search position3Currently know (obs and free) =31342
+Warning: Error occurred while evaluating listener callback.
+> In actxserver at 87
+  In use_real_robot_GETJs at 18
+  In doKPItest at 119
+??? Error using ==> winfun\private\comeventcallback at 25
+Error firing event 'ScanComplete' to 'myhandler'.
+
+Doing exhastive search with J1-J3 steps =6 where this is x total will be (x+1)^3*7*2
+Aver_joint=0.35833, Aver_info=2.277, Max_joint=0.3467, Max_info=13.1575, TotalAv=2.6353...J_Contrib%:15.7371%
+TOTAL Time taken is: 208.453
+Search space=4802
+Found a path to best view num: 1
+Currently not data coming back: waiting for laser to complete before retrying
+.
+Data came back eventually
+Aver_joint=0.29763, Aver_info=2.0037, Max_joint=0.20909, Max_info=12.8305, TotalAv=2.3013...J_Contrib%:14.8541%
+Xsearch pos3.  J1-J3 steps =6 search space= 3024, After bestview 1, Currently know (obs and free) =34232
+Warning: Error occurred while evaluating listener callback.
+> In actxserver at 87
+  In use_real_robot_MOVE at 46
+  In doKPItest at 226
+??? Error using ==> winfun\private\comeventcallback at 25
+Error firing event 'ScanComplete' to 'myhandler'.
+
+Currently not data coming back: waiting for laser to complete before retrying
+.
+Data came back eventually
+Aver_joint=0.26371, Aver_info=0.87138, Max_joint=0.20909, Max_info=13.3892, TotalAv=1.1351...J_Contrib%:30.2634%
+Xsearch pos3.  J1-J3 steps =6 search space= 3024, After bestview 2, Currently know (obs and free) =35771
+Warning: Error occurred while evaluating listener callback.
+> In actxserver at 87
+  In use_real_robot_MOVE at 46
+  In doKPItest at 226
+??? Error using ==> winfun\private\comeventcallback at 25
+Error firing event 'ScanComplete' to 'myhandler'.
+
+Currently not data coming back: waiting for laser to complete before retrying
+.
+Data came back eventually
+Aver_joint=0.27997, Aver_info=0.9505, Max_joint=0.17646, Max_info=7.0488, TotalAv=1.2305...J_Contrib%:29.4547%
+Xsearch pos3.  J1-J3 steps =6 search space= 3024, After bestview 3, Currently know (obs and free) =36767
+Doing exhastive search with J1-J3 steps =7 where this is x total will be (x+1)^3*7*2
+Aver_joint=0.35919, Aver_info=2.4663, Max_joint=0.33863, Max_info=13.81, TotalAv=2.8255...J_Contrib%:14.5638%
+TOTAL Time taken is: 327.516
+Search space=7168
+Found a path to best view num: 1
+Currently not data coming back: waiting for laser to complete before retrying
+.
+Data came back eventually
+Aver_joint=0.27891, Aver_info=0.94454, Max_joint=0.24082, Max_info=8.5396, TotalAv=1.2234...J_Contrib%:29.5284%
+Xsearch pos3.  J1-J3 steps =7 search space= 4802, After bestview 1, Currently know (obs and free) =33929
+Warning: Error occurred while evaluating listener callback.
+> In actxserver at 87
+  In use_real_robot_MOVE at 46
+  In doKPItest at 226
+??? Error using ==> winfun\private\comeventcallback at 25
+Error firing event 'ScanComplete' to 'myhandler'.
+
+Currently not data coming back: waiting for laser to complete before retrying
+.
+Data came back eventually
+Aver_joint=0.28636, Aver_info=0.74968, Max_joint=0.32685, Max_info=8.2571, TotalAv=1.036...J_Contrib%:38.1985%
+Xsearch pos3.  J1-J3 steps =7 search space= 4802, After bestview 2, Currently know (obs and free) =34754
+Warning: Error occurred while evaluating listener callback.
+> In actxserver at 87
+  In use_real_robot_MOVE at 46
+  In doKPItest at 226
+??? Error using ==> winfun\private\comeventcallback at 25
+Error firing event 'ScanComplete' to 'myhandler'.
+
+Currently not data coming back: waiting for laser to complete before retrying
+.
+Data came back eventually
+Aver_joint=0.27916, Aver_info=0.65982, Max_joint=0.39242, Max_info=6.5477, TotalAv=0.93898...J_Contrib%:42.3077%
+Xsearch pos3.  J1-J3 steps =7 search space= 4802, After bestview 3, Currently know (obs and free) =35619
+Warning: Error occurred while evaluating listener callback.
+> In actxserver at 87
+  In use_real_robot_MOVE at 46
+  In doKPItest at 226
+??? Error using ==> winfun\private\comeventcallback at 25
+Error firing event 'ScanComplete' to 'myhandler'.
+
+Currently not data coming back: waiting for laser to complete before retrying
+.
+Data came back eventually
+Aver_joint=0.23631, Aver_info=0.2879, Max_joint=0.23006, Max_info=2.9807, TotalAv=0.52421...J_Contrib%:82.0797%
+Xsearch pos3.  J1-J3 steps =7 search space= 4802, After bestview 4, Currently know (obs and free) =35993
+Doing exhastive search with J1-J3 steps =8 where this is x total will be (x+1)^3*7*2
+Aver_joint=0.36421, Aver_info=2.4202, Max_joint=0.38478, Max_info=13.216, TotalAv=2.7844...J_Contrib%:15.0487%
+TOTAL Time taken is: 466.125
+Search space=10206
+Found a path to best view num: 1
+Currently not data coming back: waiting for laser to complete before retrying
+.
+Data came back eventually
+Aver_joint=0.32208, Aver_info=2.4331, Max_joint=0.20384, Max_info=13.4995, TotalAv=2.7551...J_Contrib%:13.2377%
+Xsearch pos3.  J1-J3 steps =8 search space= 7168, After bestview 1, Currently know (obs and free) =34200
+Currently not data coming back: waiting for laser to complete before retrying
+.
+Data came back eventually
+Aver_joint=0.24708, Aver_info=1.2037, Max_joint=0.1417, Max_info=7.005, TotalAv=1.4508...J_Contrib%:20.5264%
+Xsearch pos3.  J1-J3 steps =8 search space= 7168, After bestview 2, Currently know (obs and free) =35720
+Currently not data coming back: waiting for laser to complete before retrying
+.
+Data came back eventually
+Aver_joint=0.30004, Aver_info=0.8439, Max_joint=0.33, Max_info=8.4142, TotalAv=1.1439...J_Contrib%:35.5541%
+Xsearch pos3.  J1-J3 steps =8 search space= 7168, After bestview 3, Currently know (obs and free) =36485
+Stopping here for results to be analysed
+Warning: Error occurred while evaluating listener callback.
+> In doKPItest at 278
+??? Error using ==> winfun\private\comeventcallback at 25
+Error firing event 'ScanComplete' to 'myhandler'.
+
+------------------------------
+Doing KPI 6 for testnum 11 and then 9 AT2 and then AT1
+
+>> doKPItest(11,[0,0,0,0,0,1]);
+584     [u,sig]=comparemaps(11,testnum,true,brSecfilename);
+Loading AT2_bridgeSection
+Mean is -2.314e-005 and Standard deviation is0.01513
+if do 500 checks a second then search space of 52224 will take 1.7408minutes per test
+Elapsed time is 62.267890 seconds.
+Elapsed time is 63.402558 seconds.
+Ideal Case: Valid=38284 Failed=19928 which is 65.7665%
+Actual Case: Valid=40053 Failed=18159 which is 68.8054%
+Not enough fails: Comparitively the ratio of what we got to what we should of got is 0.95583
+>> doKPItest(9,[0,0,0,0,0,1]);
+Loading AT1_bridgeSection
+Mean is -0.0027934 and Standard deviation is0.025303
+if do 500 checks a second then search space of 52224 will take 1.7408minutes per test
+Elapsed time is 61.898973 seconds.
+Elapsed time is 63.922166 seconds.
+Ideal Case: Valid=38284 Failed=19928 which is 65.7665%
+Actual Case: Valid=39030 Failed=19182 which is 67.048%
+Not enough fails: Comparitively the ratio of what we got to what we should of got is 0.98089
