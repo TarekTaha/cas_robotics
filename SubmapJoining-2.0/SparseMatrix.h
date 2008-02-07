@@ -13,7 +13,7 @@ class SparseMatrix : public Matrix{
 	  SparseMatrix();
 	  SparseMatrix(int rows, int cols, int zmax);
 	  SparseMatrix(const SparseMatrix&);
-	  ~SparseMatrix();
+	  virtual ~SparseMatrix();
 	  SparseMatrix& operator=(const SparseMatrix& m);
 	  cholmod_sparse *A;
 	  mutable cholmod_common c;
@@ -27,8 +27,10 @@ class SparseMatrix : public Matrix{
 	  virtual void print_coord() const;
 	  SparseMatrix get_submatrix(int*,int, int*, int) const;
 	  SparseMatrix get_submatrix(int, int, int, int) const;
-    	void clear();
-    	int max_num_nonzero() const;
+	  void clear();
+	  int max_num_nonzero() const;
+	  int num_nonzero() const;
+    	
 };
 
 SparseMatrix operator+(const SparseMatrix&, const SparseMatrix&);

@@ -1,26 +1,48 @@
 #include "MatrixFunctions.h"
 
 CholeskyFactor cholesky(const SparseSymmMatrix& m){
-	CholeskyFactor result(m.get_rows());
+	CholeskyFactor result;
 	result.c.final_ll = true;
 	result.c.nmethods = 1 ;
 	result.c.method [0].ordering = CHOLMOD_NATURAL ;
 	result.c.postorder = false ;
-	//m.write_to_file("SavedMatrices/ill1");
 
-
-	//cholmod_reallocate_factor(2 * m.max_num_nonzero(), result.A, &result.c);
+	cholmod_free_factor(&result.A, &result.c);
 	result.A = cholmod_analyze(m.A, &result.c);
 	cholmod_factorize(m.A, result.A, &result.c);
 	cholmod_change_factor(CHOLMOD_REAL, true, false, true, false, result.A, &result.c);
 	return result;
 }
 
+CholeskyFactor cholesky2(const SparseSymmMatrix& m, Timer& timer){
+	CholeskyFactor result;
+	result.c.final_ll = true;
+	result.c.nmethods = 1 ;
+	result.c.method [0].ordering = CHOLMOD_NATURAL ;
+	result.c.postorder = false ;
+
+	cholmod_free_factor(&result.A, &result.c);
+	timer.start(68);
+	result.A = cholmod_analyze(m.A, &result.c);
+	cholmod_factorize(m.A, result.A, &result.c);
+	timer.stop(68);
+	cholmod_change_factor(CHOLMOD_REAL, true, false, true, false, result.A, &result.c);
+	return result;
+}
+
+SparseMatrix solve_cholesky2(const CholeskyFactor& L, const SparseMatrix& rhs, Timer& timer){
+	SparseMatrix result;
+	cholmod_free_sparse(&result.A, &result.c);
+	timer.start(71);
+	result.A = cholmod_spsolve(CHOLMOD_A, L.A, rhs.A, &result.c);
+	timer.stop(71);
+	return result;
+}
+
 SparseMatrix solve_cholesky(const CholeskyFactor& L, const SparseMatrix& rhs){
 	SparseMatrix result;
-	//cout << "bla" << endl;
-	result.A = cholmod_spsolve(CHOLMOD_LDLt, L.A, rhs.A, &result.c);
-	//cout << "bla2" << endl;
+	cholmod_free_sparse(&result.A, &result.c);
+	result.A = cholmod_spsolve(CHOLMOD_A, L.A, rhs.A, &result.c);
 	return result;
 }
 
@@ -35,22 +57,19 @@ SparseSymmMatrix inv(const SparseSymmMatrix& m){
 		return 1/temp*tva;
 	}
 	SparseMatrix result;
-	//result.c.final_ll = true;
-	//result.c.nmethods = 1 ;
-	//result.c.method [0].ordering = CHOLMOD_NATURAL ;
-	//result.c.postorder = false ;
 	CholeskyFactor L;
+	cholmod_free_factor(&L.A, &L.c);
 	L.A = cholmod_analyze(m.A, &result.c);
 	cholmod_factorize(m.A, L.A, &result.c);
+	cholmod_free_sparse(&result.A, &result.c);
 	result.A = cholmod_spsolve(CHOLMOD_A, L.A, eye(m.get_rows()).A, &result.c);
-	
-	//CholeskyFactor L = cholesky(m);
-	//return to_sparse_symm_matrix(solve_cholesky(L, eye(m.get_rows())));
+
 	return to_sparse_symm_matrix(result);
 }
 
 SparseSymmMatrix to_sparse_symm_matrix(const SparseMatrix& m){
 	SparseSymmMatrix result;
+	cholmod_free_sparse(&result.A, &result.c);
 	result.A =  cholmod_copy_sparse(m.A, &m.c);
 	result.A->stype = 1;
 	cholmod_sort(result.A, &result.c);
@@ -59,6 +78,7 @@ SparseSymmMatrix to_sparse_symm_matrix(const SparseMatrix& m){
 
 SparseMatrix to_sparse_matrix_fast(const SparseSymmMatrix& m){
 	SparseMatrix result;
+	cholmod_free_sparse(&result.A, &result.c);
 	result.A =  cholmod_copy_sparse(m.A, &m.c);
 	result.A->stype = 0;
 	return result;
@@ -66,6 +86,7 @@ SparseMatrix to_sparse_matrix_fast(const SparseSymmMatrix& m){
 
 SparseMatrix to_sparse_matrix(const CholeskyFactor& L){
 	SparseMatrix result;
+	cholmod_free_sparse(&result.A, &result.c);
 	result.A = cholmod_factor_to_sparse(L.A, &L.c);
 	return result;
 }
@@ -209,19 +230,6 @@ CholeskyFactor append(CholeskyFactor m1, const SparseMatrix& m2, const CholeskyF
 
 CholeskyFactor to_factor(const SparseMatrix& result){
 	CholeskyFactor result2(result.A->nrow);
-	//cholmod_free_factor(&result2.A, &result2.c);
-	//cout << "start: " <<  result2.A->nzmax << endl;
-    //cholmod_free(1, sizeof (int), result2.A->p,  &result2.c) ;
-    //cholmod_free(2, sizeof (int), result2.A->next,  &result2.c) ;
-    //cholmod_free(2, sizeof (int), result2.A->prev,  &result2.c) ;
-	//delete[] result2.A->x;
-	//delete[] result2.A->i;
-	//delete[] result2.A->p;
-	//result2.A->nzmax = result.A->nzmax;
-	//result2.A->n = result.A->nrow;
-	//result2.A->x = new double[result.A->nzmax];
-	//result2.A->i = new int[result.A->nzmax];
-	//cout << "Size: " << result.A->nzmax << endl;
 	cholmod_change_factor(CHOLMOD_REAL, true, false, true, false, result2.A, &result2.c);
 	cholmod_reallocate_factor(result.A->nzmax, result2.A, &result2.c);
 
@@ -232,20 +240,13 @@ CholeskyFactor to_factor(const SparseMatrix& result){
 	for(int i =0; i < result.A->ncol + 1; ++i){
 		((int*)result2.A->p)[i] = ((int*)result.A->p)[i];
 	}
-	/*for(int i = 0; i < result.A->nzmax; ++i){
-		cout << ((int*)result.A->i)[i] << " / " << ((int*)temp_in.A->i)[i] << endl;
-	}*/
-	//result2.A->x = temp_in.A->x;
-	//((int*)(result2.A->i))[9] = 3;
-	//result2.A->i = temp_in.A->i;
-	//result2.A->p = temp_in.A->p;
+
 	int *nex = ((int*)result2.A->next);
 	for(int i = 0; i < result.get_cols(); ++i){
 		nex[i] = i + 1;
 	}
 	nex[result.get_cols()] = -1;
 	nex[result.get_cols() + 1] = 0;
-	//nex[0] = 1; nex[1] = 2; nex[2] = 3; nex[3] = 4; nex[4] = -1; nex[5] = 0;//{1 , 2, 3, 4, -1, 0};
 	int *pre = ((int*)result2.A->prev);
 	for(int i = 1; i < result.get_cols() + 1; ++i){
 		pre[i] = i  - 1;
@@ -253,27 +254,20 @@ CholeskyFactor to_factor(const SparseMatrix& result){
 	pre[0] = result.get_cols() + 1;
 	pre[result.get_cols() + 1] = -1;
 
-	//pre[0] = 5; pre[1] = 0; pre[2] = 1; pre[3] = 2; pre[4] = 3; pre[5] = -1;//{5, 0, 1, 2, 3, -1};
 	int *colco = ((int*)result2.A->ColCount);
 	for(int i = 0; i < result.get_cols(); ++i){
 		colco[i] = ((int*)result.A->p)[i + 1] - ((int*)result.A->p)[i];
 	}
-	//colco[0] = 4; colco[1] = 3; colco[2] = 1; colco[3] = 1; //{4, 3, 2, 1};
+	
 	int *perm = ((int*)result2.A->Perm);
 	for(int i = 0; i < result.get_cols(); ++i){
 		perm[i] = i;
 	}
-	//perm[0] = 0; perm[1] = 1; perm[2] = 2; perm[3] = 3; //{0, 1, 2, 3};
+
 	int *nz = ((int*)result2.A->nz);
 	for(int i = 0; i < result.get_cols(); ++i){
 		nz[i] = ((int*)result.A->p)[i + 1] - ((int*)result.A->p)[i];
 	}
-	//nz[0] = 4; nz[1] = 3; nz[2] = 1; nz[3] = 1; //{4, 3, 2, 1};
-	/*result2.A->next = nex;
-	result2.A->prev = pre;
-	result2.A->ColCount = colco;
-	result2.A->Perm = perm;
-	result2.A->nz = nz;*/
 	
 	result2.A->ordering = 0;
 	result2.A->is_ll = 1;
@@ -283,32 +277,20 @@ CholeskyFactor to_factor(const SparseMatrix& result){
 	result2.A->xtype = 1;
 	result2.A->dtype = 0;
 	result2.A->minor= result.get_cols();
-	
-	//compare(result2, temp_in);
-	//result2.print();
-	/*cholmod_change_factor
-	(
-	    CHOLMOD_REAL,
-	    true, 
-	    false, 
-	    true,
-	    false,
-	    result2.A,
-	    &result2.c
-	) ;*/
-	//cout << " end" << endl;
+
 	return result2;
 }
 
 void set_cols(int* ar1, int* ar2, int num_cols, int size){
 	int index = 0;
-	for(int i = 0; i < num_cols; ++i){
-		ar2[i] = index;
+	ar2[0] = 0;
+	for(int i = 0; i < num_cols - 1; ++i){
 		while(ar1[index] == i){
 			++index;
 		}
+		ar2[i + 1] = index;
 	}
-	ar2[num_cols] = index;
+	ar2[num_cols] = size;
 }
 
 int partition(int* ar1, int* ar2, double* ar3, int top, int bottom)
@@ -335,25 +317,20 @@ int partition(int* ar1, int* ar2, double* ar3, int top, int bottom)
   			swap(ar1[i], ar1[j]);
   			swap(ar2[i], ar2[j]);
   			swap(ar3[i], ar3[j]);
-                 /*temp = array[i];    // switch elements at positions i and j
-                 array[i] = array[j];
-                 array[j] = temp;*/
+
          }
      }while (i < j);    
-     return j;           // returns middle index
+     return j;
 }
 
 void quicksort(int* ar1, int* ar2, double* ar3, int top, int bottom)
 {
-      // top = subscript of beginning of vector being considered
-      // bottom = subscript of end of vector being considered
-      // this process uses recursion - the process of calling itself
      int middle;
      if (top < bottom)
     {
           middle = partition(ar1, ar2, ar3, top, bottom);
-          quicksort(ar1, ar2, ar3, top, middle);   // sort top partition
-          quicksort(ar1, ar2, ar3, middle+1, bottom);    // sort bottom partition
+          quicksort(ar1, ar2, ar3, top, middle);
+          quicksort(ar1, ar2, ar3, middle+1, bottom);
      }
      return;
 }
@@ -412,48 +389,9 @@ SparseMatrix to_sparse_matrix(const SparseSymmMatrix& m){
 				cols[index] = rowM[j];
 				++index;
 			}
-			//result.set(i + 1, row[j] + 1, x[j]);
 		}
 	}
-	/*cout << "Cols: ";
-	for(int i = 0; i < index; ++i){
-		cout << cols[i] << " ";
-	}
-	cout << endl;
-	
-	cout << "Rows: ";
-	for(int i = 0; i < index; ++i){
-		cout << rowR[i] << " ";
-	}
-	cout << endl;
-	
-	cout << "Values: ";
-	for(int i = 0; i < index; ++i){
-		cout << xR[i] << " ";
-	}
-	cout << endl;*/
-	//timer.start(30);
 	quicksort(cols, rowR, xR, 0, index - 1);
-	//timer.stop(30);
-	/*cout << " ----------- " << endl;
-	cout << "Cols: ";
-	for(int i = 0; i < index; ++i){
-		cout << cols[i] << " ";
-	}
-	cout << endl;
-	
-	cout << "Rows: ";
-	for(int i = 0; i < index; ++i){
-		cout << rowR[i] << " ";
-	}
-	cout << endl;
-	cout << "Values: ";
-	for(int i = 0; i < index; ++i){
-		cout << xR[i] << " ";
-	}
-	cout << endl;*/
-	
-	
 	set_cols(cols, colR, result.get_cols(), index);
 	return result;
 }

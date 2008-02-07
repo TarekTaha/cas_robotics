@@ -12,7 +12,7 @@ class CholeskyFactor : public Matrix{
   public:
     CholeskyFactor(int size = 0);
     CholeskyFactor(const CholeskyFactor&);
-    ~CholeskyFactor();
+    virtual ~CholeskyFactor();
     CholeskyFactor& operator=(const CholeskyFactor& m);
 	cholmod_factor *A;
 	mutable cholmod_common c;
@@ -24,3 +24,4 @@ class CholeskyFactor : public Matrix{
 };
 
 #endif
+

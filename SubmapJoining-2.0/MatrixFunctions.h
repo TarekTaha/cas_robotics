@@ -4,12 +4,15 @@
 #include "SparseSymmMatrix.h"
 #include "CholeskyFactor.h"
 #include "cholmod.h"
+#include "Timer.h"
 
 #define EXHIBIT_SYMPTOM 0
 
 
 CholeskyFactor cholesky(const SparseSymmMatrix& m);
+CholeskyFactor cholesky2(const SparseSymmMatrix& m, Timer& timer);
 SparseMatrix solve_cholesky(const CholeskyFactor& L, const SparseMatrix& rhs);
+SparseMatrix solve_cholesky2(const CholeskyFactor& L, const SparseMatrix& rhs, Timer& timer);
 SparseSymmMatrix inv(const SparseSymmMatrix&);
 SparseSymmMatrix to_sparse_symm_matrix(const SparseMatrix& m);
 SparseMatrix to_sparse_matrix_fast(const SparseSymmMatrix& m);
