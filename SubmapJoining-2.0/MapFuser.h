@@ -10,6 +10,10 @@
 #include "MatrixFunctions.h"
 #include "Timer.h"
 
+static int MAX_L22_DIMENSION;
+static double SIGMA_MULTIPLIER;
+static double EST_BIAS;
+static double CHI2_CONFIDENCE_NN;
 
 using namespace std;
 
@@ -30,10 +34,10 @@ class MapFuser{
 		void assosiate_beacons(const SparseMatrix& beacX, const SparseMatrix& beacP, const SparseMatrix& obsX, const SparseMatrix& obsP);
 		double submap_radius(const LocalMap& map);
 		double distance_to_submap(int map);
-		double distance_to_submap(int map, double x, double y);
 		void reorder_submaps();
 		void compute_cholesky_factorization();
 		double wrap(double angle);
+		void load_params();
 
 		//void nearest_neightbour(SparseMatrix bec)
 		int potential_assosiation_beacons[1000];

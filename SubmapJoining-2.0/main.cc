@@ -8,7 +8,19 @@
 
 using namespace std;
 
+int NUM_OF_SUBMAPS;
 
+void load_params(){
+	string temp;
+	ifstream file("params");
+
+	while(!file.eof()){
+		file >> temp;
+		if(temp == "NumOfSubmaps"){
+			file >> NUM_OF_SUBMAPS;
+		}
+	}
+}
 
 void load_map(LocalMap& map, int index){
 	stringstream out;
@@ -24,8 +36,12 @@ int main(int argc, char * argv[])
 	MapFuser fuser;
 	LocalMap locMap;
 	load_map(locMap, 1);
+	Timer timer;
+	timer.start(1);
+	load_params();
 	fuser.fuse_first_map(locMap);
-	for(int i = 2; i <= 400; ++i){
+
+	for(int i = 2; i <= NUM_OF_SUBMAPS; ++i){
 		cout << "localmap: " << i <<endl;
 		load_map(locMap, i);
 		//to_sparse_symm_matrix(locMap.P).write_to_file("SavedMatrices/Ploc");
@@ -43,10 +59,12 @@ int main(int argc, char * argv[])
 		fuser.glb_map.X.write_to_file(tmp.c_str());*/
 		//cout << "Factor entries: " << to_sparse_matrix(fuser.glb_map.L).num_nonzero() << " " << to_sparse_matrix(fuser.glb_map.L).max_num_nonzero() << endl;
 	}
-	//fuser.timer.print();
-	//fuser.glb_map.I.write_to_file("SavedMatrices/I1");
-	//fuser.glb_map.i.write_to_file("SavedMatrices/i1");
-	//fuser.glb_map.X.write_to_file("SavedMatrices/X1");
+	timer.stop(1);
+	fuser.timer.print();
+	timer.print();
+	fuser.glb_map.I.write_to_file("SavedMatrices/I1");
+	fuser.glb_map.i.write_to_file("SavedMatrices/i1");
+	fuser.glb_map.X.write_to_file("SavedMatrices/X1");
 	cout << "done fusing" << endl;
 
 

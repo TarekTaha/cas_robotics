@@ -1,0 +1,6 @@
+NumOfSubmaps 500
+MaxL22dimension 500
+SigmaMultiplier 3
+EstBias 8
+%Chi2ConfidenceNN 9.21034037197618 for 0.99% confidence
+Chi2ConfidenceNN 13.81551055796433 for 0.999% confidence
