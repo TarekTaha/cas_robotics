@@ -1,5 +1,6 @@
 CCC = g++
-CCCFLAGS = -Wno-deprecated -m64 -g -O0
+#CCCFLAGS = -Wno-deprecated -m64 -g -O0      #for valgrind
+CCCFLAGS = -Wno-deprecated -m64 -O3
 LDFLAGS = -IMatrixLib -I/home/casuser/Desktop/SuiteSparse/CHOLMOD/Include/ -I/home/casuser/Desktop/SuiteSparse/UFconfig/ -L/home/casuser/Desktop/SuiteSparse/CHOLMOD/Lib/
 #MOBJECTS = ./MatrixLib/SparseMatrix.o ./MatrixLib/Matrix.o ./MatrixLib/SparseMatrixElement.o ./MatrixLib/MatrixLib.o
 INCLUDE =
@@ -68,6 +69,9 @@ MapFuser.o: MapFuser.h MapFuser.cpp
 
 Timer.o: Timer.h Timer.cpp
 	$(CCC) $(CCCFLAGS) -c Timer.cpp $(LDFLAGS)
-
+	
+Params.o: Params.h Params.cpp
+	$(CCC) $(CCCFLAGS) -c Params.cpp $(LDFLAGS)
+	
 clean:
 	rm *.o
