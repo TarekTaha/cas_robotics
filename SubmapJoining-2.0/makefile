@@ -1,6 +1,8 @@
 CCC = g++
-#CCCFLAGS = -Wno-deprecated -m64 -g -O0      #for valgrind
-CCCFLAGS = -Wno-deprecated -m64 -O3
+#for valgrind
+CCCFLAGS = -Wno-deprecated -m64 -g -O0      
+#optimized
+#CCCFLAGS = -Wno-deprecated -m64 -O3
 LDFLAGS = -IMatrixLib -I/home/casuser/Desktop/SuiteSparse/CHOLMOD/Include/ -I/home/casuser/Desktop/SuiteSparse/UFconfig/ -L/home/casuser/Desktop/SuiteSparse/CHOLMOD/Lib/
 #MOBJECTS = ./MatrixLib/SparseMatrix.o ./MatrixLib/Matrix.o ./MatrixLib/SparseMatrixElement.o ./MatrixLib/MatrixLib.o
 INCLUDE =

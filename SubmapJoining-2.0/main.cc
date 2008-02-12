@@ -46,6 +46,7 @@ int main(int argc, char * argv[])
 		load_map(locMap, i);
 		//to_sparse_symm_matrix(locMap.P).write_to_file("SavedMatrices/Ploc");
 		fuser.fuse_map(locMap);
+		
 		//if(i == 27 || i == 34 || i == 43 || i == 57 || i == 87 || i == 91){
 			//fuser.reorder_submaps();
 		//}
@@ -62,9 +63,12 @@ int main(int argc, char * argv[])
 	timer.stop(1);
 	fuser.timer.print();
 	timer.print();
+	fuser.order_for_comparision();
 	fuser.glb_map.I.write_to_file("SavedMatrices/I1");
 	fuser.glb_map.i.write_to_file("SavedMatrices/i1");
 	fuser.glb_map.X.write_to_file("SavedMatrices/X1");
+	fuser.glb_map.I_small.write_to_file("SavedMatrices/Ismall1");
+
 	cout << "done fusing" << endl;
 
 

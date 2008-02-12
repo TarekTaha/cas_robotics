@@ -10,6 +10,9 @@ class GlobalMap{
 		SparseSymmMatrix I;
 		CholeskyFactor L;
 		SparseMatrix X;
+		//for AMD reordering
+		SparseSymmMatrix I_small;
+		SparseMatrix order;
 };
 
 #endif
