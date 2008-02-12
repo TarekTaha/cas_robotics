@@ -8,7 +8,7 @@
 
 #define EXHIBIT_SYMPTOM 0
 
-
+int* reorder_AMD(const SparseSymmMatrix& m);
 CholeskyFactor cholesky(const SparseSymmMatrix& m);
 CholeskyFactor cholesky2(const SparseSymmMatrix& m, Timer& timer);
 SparseMatrix solve_cholesky(const CholeskyFactor& L, const SparseMatrix& rhs);

@@ -221,10 +221,10 @@ SparseMatrix horzcat(const SparseMatrix& m1, const SparseMatrix& m2){
 	return result;
 }
 
-SparseMatrix zeros(int rows, int cols){
+SparseMatrix zeros(int rows, int cols, int nznew){
 	SparseMatrix result;
 	cholmod_free_sparse(&result.A, &result.c);
-	result.A = cholmod_spzeros(rows, cols, 0, CHOLMOD_REAL, &result.c);
+	result.A = cholmod_spzeros(rows, cols, nznew, CHOLMOD_REAL, &result.c);
 	return result;
 }
 
@@ -254,4 +254,8 @@ bool operator==(const SparseMatrix& m1, const SparseMatrix& m2){
 
 int SparseMatrix::num_nonzero() const{
 	return cholmod_nnz(A, &c);
+}
+
+void reallocate(SparseMatrix& m, int nznew){
+	cholmod_reallocate_sparse(nznew, m.A, &m.c);
 }

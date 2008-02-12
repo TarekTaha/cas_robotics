@@ -48,7 +48,7 @@ int main(int argc, char *argv[]){
 	CholeskyFactor L_large, L_small;
 	//Timer timer;
   
-	for(int i = 0; i < 1000; ++i){
+	for(int i = 0; i < 0; ++i){
 		if(i%1 == 0){
 			cout << i<< endl;
 		}
@@ -205,7 +205,11 @@ int main(int argc, char *argv[]){
 	cout << endl;*/
 	//cout <<"end" << endl;
 	
-	
+	SparseSymmMatrix T = random_symm_matrix(4, 4, 9);
+	SparseSymmMatrix R = reorder_AMD(T);
+	T.print();
+	cout << endl;
+	R.print();
 	
 	
 	
