@@ -2,6 +2,7 @@
 #include <iostream.h>
 #include "MatrixFunctions.h"
 #include <sstream>
+#include "Permutation.h"
 
 using namespace std;
 
@@ -119,98 +120,17 @@ int main(int argc, char *argv[]){
 	cout << "finish! The test took (clock):" <<endl;
 	cout << (double)(1000 * (clock() - clock_start))<< endl;
 
-/*	symmA = random_symm_matrix(4,4,16);
-	symmA.set(1, 1, 4);
-	symmA.set(2, 1, 1);
-	symmA.set(3, 1, 1);
-	symmA.set(1, 2, 1);
-	symmA.set(2, 2, 4);
-	symmA.set(3, 2, 1);
-	symmA.set(1, 3, 1);
-	symmA.set(2, 3, 1);
-	symmA.set(3, 3, 4);
-
-	symmB = random_symm_matrix(2,2,4);
-	symmB.set(1, 1, 4);
-	symmB.set(2, 1, 1);
-	symmB.set(1, 2, 1);
-	symmB.set(2, 2, 4);
-	SparseMatrix hej(1, 3, 3);
-	spaA = hej;
-
-	CholeskyFactor L = cholesky(symmB);
-	CholeskyFactor Lb = cholesky(symmA);*/
-	/*for(int i = 1; i <= 2; ++i){
-		for(int j = 1; j <= 4; ++j){
-			if(j != 4 || i != 1){
-				spaA.set(i, j, Lb.get(i + 2, j));
-			}
-		}
-	}*/
-	/*for(int i = 1; i <= 3; ++i){
-		spaA.set(1, i, Lb.get(3, i));
-	}*/
-	/*cout << "Lb" << endl;
-	Lb.print();
+	SparseMatrix m = random_matrix(5, 5, 10);
 	
-	cout << "L stuff" << endl;
-	int *colcou = (int*)L.A->ColCount;
-	for(int i = 0; i < L.A->n; ++i){
-		cout << colcou[i] << endl;
-	}
-	cout <<"nz" << endl;
-	int *nz = (int*)L.A->nz;
-	for(int i = 0; i < L.A->n; ++i){
-		cout << nz[i] << endl;
-	}
-	cout << "ordering" << endl;
-	cout << L.A->ordering << endl;
-	cout << "is_ll" << endl;
-	cout << L.A->is_ll << endl;
-	cout << "is_super" << endl;
-	cout << L.A->is_super << endl;
-	cout << "is_monotonic" << endl;
-	cout << L.A->is_monotonic << endl;
-	cout << "itype" << endl;
-	cout << L.A->itype << endl;
-	cout << "xtype" << endl;
-	cout << L.A->xtype << endl;
-	cout << "dtype" << endl;
-	cout << L.A->dtype << endl;
-	cout << "Valid Lb: " << cholmod_check_factor(Lb.A, &Lb.c)  << endl;*/
-/*	CholeskyFactor Lc = append(L, spaA, Lb);
-	
-	SparseMatrix x_temp = solve_cholesky(Lc, ones(3,1));
-	x_temp.print();*/
-	
-
-	/*int *row = (int*)L.A->i;
-	int *col = (int*)L.A->p;
-	double *x2 = (double*)L.A->x;
-	int *next = (int*)L.A->next;
-	int *prev = (int*)L.A->prev;
-	cout << "info" << endl;
-	for(int i = 0; i < L.A->n + 2; ++i){
-		cout << col[i] << " ";
-	}
+	int ip1[5] = {1, 2, 3, 4, 0};
+	int ip2[5] = {3, 4, 1, 0, 2};
+	Permutation p(5, ip1);
+	Permutation p2(5, ip2);
+	m.print();
 	cout << endl;
-	
-	for(int i = 0; i < L.A->n + 2; ++i){
-		cout << next[i] << " ";
-	}
+	m.get_submatrix(p, p).get_submatrix(p2, p2).print();
 	cout << endl;
-	for(int i = 0; i < L.A->n + 2; ++i){
-		cout << prev[i] << " ";
-	}
-	cout << endl;*/
-	//cout <<"end" << endl;
-	
-	SparseSymmMatrix T = random_symm_matrix(4, 4, 9);
-	SparseSymmMatrix R = reorder_AMD(T);
-	T.print();
-	cout << endl;
-	R.print();
-	
+	m.get_submatrix(p2 + p, p2 + p).print();
 	
 	
 	return 1;

@@ -1,6 +1,6 @@
 #include "MatrixFunctions.h"
 
-int* reorder_AMD(const SparseSymmMatrix& m){
+Permutation reorder_AMD(const SparseSymmMatrix& m){
 	CholeskyFactor result;
 	result.c.nmethods = 1;
 	result.c.method [0].ordering = CHOLMOD_AMD;
@@ -8,10 +8,7 @@ int* reorder_AMD(const SparseSymmMatrix& m){
 	cholmod_free_factor(&result.A, &result.c);
 	result.A = cholmod_analyze(m.A, &result.c);
 	
-	int *ret = new int[m.get_rows()];
-	for(int i = 0; i < m.get_rows(); ++i){
-		ret[i] = ((int*)result.A->Perm)[i];
-	}
+	Permutation ret(m.get_rows(), ((int*)result.A->Perm));
 	return ret;
 	//return to_sparse_symm_matrix(to_sparse_matrix(m).get_submatrix((int*)result.A->Perm, result.get_rows(), (int*)result.A->Perm, result.get_cols()));
 }
@@ -308,70 +305,6 @@ void set_cols(int* ar1, int* ar2, int num_cols, int size){
 	ar2[num_cols] = size;
 }
 
-int partition(int* ar1, int* ar2, double* ar3, int top, int bottom)
-{
-     int x1 = ar1[top];
-     int x2 = ar2[top];
-     int i = top - 1;
-     int j = bottom + 1;
-     int temp;
-     do
-     {
-           do     
-           {
-        	   --j;
-           }while ((x1 < ar1[j]) || (x1 == ar1[j] && x2 < ar2[j]));
-
-          do  
-         {
-        	  ++i;
-          } while ((x1 > ar1[i]) || (x1 == ar1[i] && x2 > ar2[i]));
-
-          if (i < j)
-         { 
-  			swap(ar1[i], ar1[j]);
-  			swap(ar2[i], ar2[j]);
-  			swap(ar3[i], ar3[j]);
-
-         }
-     }while (i < j);    
-     return j;
-}
-
-void quicksort(int* ar1, int* ar2, double* ar3, int top, int bottom)
-{
-     int middle;
-     if (top < bottom)
-    {
-          middle = partition(ar1, ar2, ar3, top, bottom);
-          quicksort(ar1, ar2, ar3, top, middle);
-          quicksort(ar1, ar2, ar3, middle+1, bottom);
-     }
-     return;
-}
-
-void sort(int* ar1, int* ar2, double* ar3, int size){
-	int change_index;
-	for(int i = 0; i < size; ++i){
-		change_index = i;
-		for(int j = i; j < size; ++j){
-			if(ar1[j] < ar1[change_index]){
-				change_index = j;
-			}
-			else if(ar1[j] == ar1[change_index]){
-				if(ar2[j] < ar2[change_index]){
-					change_index = j;
-				}
-			}
-		}
-		if(change_index != i){
-			swap(ar1[i], ar1[change_index]);
-			swap(ar2[i], ar2[change_index]);
-			swap(ar3[i], ar3[change_index]);
-		}
-	}
-}
-
 SparseMatrix to_sparse_matrix(const SparseSymmMatrix& m){
 
 	SparseMatrix result;
@@ -406,7 +339,7 @@ SparseMatrix to_sparse_matrix(const SparseSymmMatrix& m){
 			}
 		}
 	}
-	quicksort(cols, rowR, xR, 0, index - 1);
+	quicksort_d2_c1(cols, rowR, xR, 0, index - 1);
 	set_cols(cols, colR, result.get_cols(), index);
 	return result;
 }

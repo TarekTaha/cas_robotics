@@ -5,6 +5,7 @@
 #include "cholmod.h"
 #include <fstream>
 #include "Matrix.h"
+#include "Permutation.h"
 
 using namespace std;
 
@@ -25,6 +26,7 @@ class SparseMatrix : public Matrix{
 	  virtual void read_from_file(const char* filename);
 	  void read_from_delimited_file(const char* filename);
 	  virtual void print_coord() const;
+	  SparseMatrix get_submatrix(const Permutation&, const Permutation&) const;
 	  SparseMatrix get_submatrix(int*,int, int*, int) const;
 	  SparseMatrix get_submatrix(int, int, int, int) const;
 	  void clear();

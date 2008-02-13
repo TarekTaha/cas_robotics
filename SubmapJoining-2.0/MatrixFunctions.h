@@ -5,10 +5,11 @@
 #include "CholeskyFactor.h"
 #include "cholmod.h"
 #include "Timer.h"
+#include "sorting.h"
 
 #define EXHIBIT_SYMPTOM 0
 
-int* reorder_AMD(const SparseSymmMatrix& m);
+Permutation reorder_AMD(const SparseSymmMatrix& m);
 CholeskyFactor cholesky(const SparseSymmMatrix& m);
 CholeskyFactor cholesky2(const SparseSymmMatrix& m, Timer& timer);
 SparseMatrix solve_cholesky(const CholeskyFactor& L, const SparseMatrix& rhs);

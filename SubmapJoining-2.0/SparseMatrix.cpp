@@ -172,6 +172,9 @@ void SparseMatrix::read_from_delimited_file(const char* filename){
 	rows = row_count;
 	file.close();
 }
+SparseMatrix SparseMatrix::get_submatrix(const Permutation& p1, const Permutation& p2) const{
+	return get_submatrix(p1.p, p1.size, p2.p, p2.size);
+}
 
 SparseMatrix SparseMatrix::get_submatrix(int* rset, int rsize, int* cset, int csize) const{
 	SparseMatrix result;
