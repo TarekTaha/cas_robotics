@@ -122,15 +122,15 @@ void MapFuser::reorder_submaps_AMD_distance(){
 	double temp_dist;
 	int temp_order;
 	Permutation perm(glb_map.I_small.get_rows());
-	//cout << "order start" << endl;
-	//trn(glb_map.order).print();
+
 	timer.start(4);
 	for(int i = 0; i < num_submaps; ++i){
 		dist[i] = distance_to_submap(i);
 		order_submaps[i] = i;
 	}
+	inc_quicksort_dd1_ci1(dist, order_submaps, 0, num_submaps - 1);
 	
-	for(int i = 0; i < num_submaps; ++i){
+	/*for(int i = 0; i < num_submaps; ++i){
 		temp_dist = dist[i];
 		temp_index = i;
 		for(int j = i + 1; j < num_submaps; ++j){
@@ -147,10 +147,9 @@ void MapFuser::reorder_submaps_AMD_distance(){
 		}
 		order_submaps[i] = temp_order;
 		dist[i] = temp_dist;
-	}
+	}*/
 
 	index_detail = 0;
-	//cout << "Num beac: " << num_beacons_in_submap[order_submaps[1]] << " " << order_submaps[1] << endl;
 	for(int i = 0; i < num_submaps; ++i){
 		for(int j = 0; j < num_beacons_in_submap[order_submaps[i]]; ++j){
 			order_detail[index_detail] = submaps_first_beacon[order_submaps[i]] + j;
@@ -160,37 +159,19 @@ void MapFuser::reorder_submaps_AMD_distance(){
 		++index_detail;
 	}
 	timer.stop(4);
-	//cout << "Order_detail: ";
-	//for(int i = 0; i < glb_map.I_small.get_rows(); ++i){
-		//cout << order_detail[i] << " ";
-	//}
+
 	timer.start(3);
-	for(int i = 0; i < num_submaps + num_beacons; ++i){
-		for(int j = 0; j < num_submaps + num_beacons; ++j){
-			//cout << order_detail[i] << " " << (int)glb_map.order.get(j + 1, 1) << endl;
-			if(order_detail[i] == (int)glb_map.order.get(j + 1, 1)){
-				//cout << "j: " << j << endl;
-				perm.p[i] = j;
-			}
-		}
-	}
-	timer.stop(3);
-	//cout << endl;
-	//cout << "Perm: ";
-	//for(int i = 0; i < glb_map.I_small.get_rows(); ++i){
-		//cout << perm[i] << " ";
-	//}
+	perm = sorting_permutation((double*)glb_map.order.A->x, num_submaps + num_beacons) + inv(sorting_permutation(order_detail, num_submaps + num_beacons));
 	Permutation p2 = no_reorder(1); 
-	//cout << "here" << endl;
+	timer.stop(3);
 
 	timer.start(2);
 	glb_map.I_small = to_sparse_symm_matrix(to_sparse_matrix(glb_map.I_small).get_submatrix(perm, perm));
 	timer.stop(2);
 	glb_map.order = glb_map.order.get_submatrix(perm, p2);
 
-	//trn(glb_map.order).print();
-	//cout << "after" << endl;
 	if(glb_map.I_small.get_rows() - MAX_L22_DIMENSION/2 > 1){
+		timer.start(5);
 		SparseSymmMatrix part_I_small = to_sparse_symm_matrix(to_sparse_matrix(glb_map.I_small).get_submatrix(1,1, glb_map.I_small.get_rows() - MAX_L22_DIMENSION/2, glb_map.I_small.get_rows() - MAX_L22_DIMENSION/2));
 		Permutation p = reorder_AMD(part_I_small);
 		for(int i = 0; i < part_I_small.get_rows(); ++i){
@@ -199,22 +180,15 @@ void MapFuser::reorder_submaps_AMD_distance(){
 		for(int i = part_I_small.get_rows(); i < glb_map.I_small.get_rows(); ++i){
 			perm.p[i] = i;
 		}
-		//cout << "Perm: ";
-		//for(int i = 0; i < glb_map.I_small.get_rows(); ++i){
-			//cout << perm[i] << " ";
-		//}
-		//cout << endl;
-		//cout << "here2" << endl;
+		timer.stop(5);
 		timer.start(2);
 		glb_map.I_small = to_sparse_symm_matrix(to_sparse_matrix(glb_map.I_small).get_submatrix(perm, perm));
 		timer.stop(2);
 		glb_map.order = glb_map.order.get_submatrix(perm, p2);
 	}
-	//cout << "here3" << endl;
-	//cout << glb_map.I_small.get_rows() << " " << num_submaps + num_beacons << " " << endl;
-	//trn(glb_map.order).print();
+	timer.start(6);
 	reorder_submaps((double*)glb_map.order.A->x, glb_map.I_small.get_rows());
-	//cout << "after" << endl;
+	timer.stop(6);
 }
 
 void MapFuser::reorder_submaps_AMD(){

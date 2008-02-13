@@ -26,7 +26,7 @@ Permutation::~Permutation(){
 	delete[] p;
 }
 
-Permutation& Permutation::operator=(Permutation& perm){
+Permutation& Permutation::operator=(const Permutation& perm){
 	if(&perm != this){
 		int *p_new = new int[perm.size];
 		size = perm.size;
@@ -69,7 +69,27 @@ Permutation no_reorder(int size){
 	return result;
 }
 
+Permutation sorting_permutation(const Permutation& perm){
+	Permutation result = no_reorder(perm.size);
+	Permutation temp(perm);
+	quicksort_di1_ci1(temp.p, result.p, 0, temp.size - 1);
+	return result;
+}
+
 Permutation sorting_permutation(int *array, int size){
 	Permutation result = no_reorder(size);
-	
+	Permutation temp(size, array);
+	quicksort_di1_ci1(temp.p, result.p, 0, temp.size - 1);
+	return result;
+}
+
+Permutation sorting_permutation(double *array, int size){
+	Permutation result = no_reorder(size);
+	double *temp = new double[size];
+	for(int i = 0; i < size; ++i){
+		temp[i] = array[i];
+	}
+	quicksort_dd1_ci1(temp, result.p, 0, size - 1);
+	delete[] temp;
+	return result;
 }
