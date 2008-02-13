@@ -19,8 +19,8 @@ LINK = -L$(SUITESPARSE)$(CHOLMOD) -L$(SUITESPARSE)$(AMD) -L$(SUITESPARSE)$(COLAM
 
 all: main
 
-st : sparse_test.o SparseMatrix.o SparseSymmMatrix.o Matrix.o DenseMatrix.o CholeskyFactor.o MatrixFunctions.o Timer.o
-	$(CCC) $(CCCFLAGS) $(LINK) sparse_test.o SparseMatrix.o SparseSymmMatrix.o MatrixFunctions.o Matrix.o DenseMatrix.o Timer.o CholeskyFactor.o -o main $(LIB)
+st : sparse_test.o SparseMatrix.o SparseSymmMatrix.o Matrix.o DenseMatrix.o CholeskyFactor.o MatrixFunctions.o Timer.o Permutation.o
+	$(CCC) $(CCCFLAGS) $(LINK) sparse_test.o SparseMatrix.o SparseSymmMatrix.o MatrixFunctions.o Matrix.o DenseMatrix.o Permutation.o Timer.o CholeskyFactor.o -o main $(LIB)
 	 
 sparse_test.o : sparse_test.cpp
 	$(CCC) $(CCCFLAGS) -c sparse_test.cpp $(LDFLAGS)
@@ -51,8 +51,8 @@ MatrixFunctions.o : MatrixFunctions.cpp MatrixFunctions.h
 
 
 
-main : main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o MapFuser.o Timer.o CholeskyFactor.o
-	$(CCC) $(CCCFLAGS) $(LINK) -o main main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o MapFuser.o Timer.o CholeskyFactor.o $(LIB)
+main : main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o MapFuser.o Timer.o CholeskyFactor.o Permutation.o sorting.o
+	$(CCC) $(CCCFLAGS) $(LINK) -o main main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o Permutation.o sorting.o MapFuser.o Timer.o CholeskyFactor.o $(LIB)
 
 main.o : main.cc
 	$(CCC) $(CCCFLAGS) -c main.cc $(LDFLAGS)
@@ -74,6 +74,12 @@ Timer.o: Timer.h Timer.cpp
 	
 Params.o: Params.h Params.cpp
 	$(CCC) $(CCCFLAGS) -c Params.cpp $(LDFLAGS)
+	
+Permutation.o: Permutation.h Permutation.cpp
+	$(CCC) $(CCCFLAGS) -c Permutation.cpp $(LDFLAGS)
+	
+sorting.o: sorting.h sorting.cpp
+	$(CCC) $(CCCFLAGS) -c sorting.cpp $(LDFLAGS)
 	
 clean:
 	rm *.o

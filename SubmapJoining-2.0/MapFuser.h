@@ -11,10 +11,11 @@
 #include "Timer.h"
 
 static int MAX_L22_DIMENSION;
+static int REORDER_AMD;
 static double SIGMA_MULTIPLIER;
 static double EST_BIAS;
 static double CHI2_CONFIDENCE_NN;
-
+static int REORDER_AMD_FREQUENCY;
 using namespace std;
 
 class MapFuser{
@@ -35,6 +36,7 @@ class MapFuser{
 		void assosiate_beacons(const SparseMatrix& beacX, const SparseMatrix& beacP, const SparseMatrix& obsX, const SparseMatrix& obsP);
 		double submap_radius(const LocalMap& map);
 		double distance_to_submap(int map);
+		void reorder_submaps_AMD_distance();
 		void reorder_submaps_AMD();
 		void reorder_submaps_distance();
 		void reorder_submaps(int*, int);
