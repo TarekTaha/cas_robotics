@@ -125,12 +125,9 @@ int main(int argc, char *argv[]){
 	int ip1[5] = {1, 2, 3, 4, 0};
 	int ip2[5] = {3, 4, 1, 0, 2};
 	Permutation p(5, ip1);
-	Permutation p2(5, ip2);
-	m.print();
-	cout << endl;
-	m.get_submatrix(p, p).get_submatrix(p2, p2).print();
-	cout << endl;
-	m.get_submatrix(p2 + p, p2 + p).print();
+	Permutation p2 = sorting_permutation(p);
+	p.print();
+	p2.print();
 	
 	
 	return 1;

@@ -19,8 +19,8 @@ LINK = -L$(SUITESPARSE)$(CHOLMOD) -L$(SUITESPARSE)$(AMD) -L$(SUITESPARSE)$(COLAM
 
 all: main
 
-st : sparse_test.o SparseMatrix.o SparseSymmMatrix.o Matrix.o DenseMatrix.o CholeskyFactor.o MatrixFunctions.o Timer.o Permutation.o
-	$(CCC) $(CCCFLAGS) $(LINK) sparse_test.o SparseMatrix.o SparseSymmMatrix.o MatrixFunctions.o Matrix.o DenseMatrix.o Permutation.o Timer.o CholeskyFactor.o -o main $(LIB)
+st : sparse_test.o SparseMatrix.o SparseSymmMatrix.o Matrix.o DenseMatrix.o CholeskyFactor.o MatrixFunctions.o Timer.o Permutation.o sorting.o
+	$(CCC) $(CCCFLAGS) $(LINK) sparse_test.o SparseMatrix.o SparseSymmMatrix.o MatrixFunctions.o Matrix.o DenseMatrix.o Permutation.o sorting.o Timer.o CholeskyFactor.o -o main $(LIB)
 	 
 sparse_test.o : sparse_test.cpp
 	$(CCC) $(CCCFLAGS) -c sparse_test.cpp $(LDFLAGS)

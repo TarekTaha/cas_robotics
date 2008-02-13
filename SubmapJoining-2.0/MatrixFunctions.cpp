@@ -339,7 +339,7 @@ SparseMatrix to_sparse_matrix(const SparseSymmMatrix& m){
 			}
 		}
 	}
-	quicksort_d2_c1(cols, rowR, xR, 0, index - 1);
+	quicksort_di2_cd1(cols, rowR, xR, 0, index - 1);
 	set_cols(cols, colR, result.get_cols(), index);
 	return result;
 }
