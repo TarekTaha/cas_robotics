@@ -8,6 +8,8 @@
 
 using namespace std;
 
+void dec_extremesort_di1_ci1(int* ar1, int* ar2, int lower_value, int upper_value);
+
 void inc_quicksort_dd1_ci1(double* ar1, int* ar2, int top, int bottom);
 
 void quicksort_di1_ci1(int* ar1, int* ar2, int top, int bottom);
