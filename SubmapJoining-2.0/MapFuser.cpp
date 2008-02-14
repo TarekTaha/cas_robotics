@@ -18,31 +18,41 @@ void MapFuser::fuse_map(LocalMap m){
 	SparseMatrix obsP = m.P.get_submatrix(4,4, m.P.get_rows(), m.P.get_cols());
 	SparseMatrix obsX = m.X.get_submatrix(4, 1, m.X.get_rows(), 1);
 	set_potential_assosiations();
+	timer.start(7);
 	SparseMatrix P = restore_part_of_P_for_assositation2();
+	timer.stop(7);
 	global_robot_uncertainty[num_submaps] = SIGMA_MULTIPLIER * max_eig(sqrt(to_sparse_symm_matrix(P.get_submatrix(1, 1, 2, 2))));
 	local_robot_uncertainty[num_submaps] = SIGMA_MULTIPLIER * max_eig(sqrt(to_sparse_symm_matrix(m.P.get_submatrix(1, 1, 2, 2))));
 
+	
+	timer.start(6);
 	SparseMatrix X = get_part_of_X_for_assositation();
 	SparseMatrix beacP = trans_cov_matrix_to_local_cordinate_system(P,X);
 	SparseMatrix beacX = trans_state_matrix_to_local_cordinate_system(X);
+	timer.stop(6);
 	
+	timer.start(5);
 	assosiate_beacons(beacX, beacP, obsX, obsP);
-
+	timer.stop(5);
+	
+	timer.start(4);
 	add_new_beacons_and_robot_location_to_state(m.X);
+	timer.stop(4);
 
+	timer.start(3);
 	update_map(m.X, m.P);
-
+	timer.stop(3);
 	
 	if(REORDER_AMD == 0){
 		if(num_elements_updated_in_I > MAX_L22_DIMENSION){
 			cout << "Reorder distance " << num_elements_updated_in_I << endl;
 			reorder_submaps_distance();
-			glb_map.L = cholesky(glb_map.I);
-			glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
+			glb_map.L = cholesky2(glb_map.I, timer);
+			glb_map.X = solve_cholesky2(glb_map.L, glb_map.i, timer);
 		}
 		else{
 			compute_cholesky_factorization();
-			glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
+			glb_map.X = solve_cholesky2(glb_map.L, glb_map.i, timer);
 		}
 	}
 	else if(REORDER_AMD == 1){
@@ -50,26 +60,28 @@ void MapFuser::fuse_map(LocalMap m){
 			cout << "Reorder AMD" << endl;
 			reorder_submaps_AMD();
 		}
-		glb_map.L = cholesky(glb_map.I);
-		glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
+		glb_map.L = cholesky2(glb_map.I, timer);
+		glb_map.X = solve_cholesky2(glb_map.L, glb_map.i, timer);
 	}
 	else if(REORDER_AMD == 2){
 		if(num_elements_updated_in_I > MAX_L22_DIMENSION){
+			timer.start(2);
 			cout << "Reorder AMD distance" << endl;
-			timer.start(1);
 			reorder_submaps_AMD_distance();
-			timer.stop(1);
-			glb_map.L = cholesky(glb_map.I);
-			glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
+			glb_map.L = cholesky2(glb_map.I, timer);
+			glb_map.X = solve_cholesky2(glb_map.L, glb_map.i, timer);
+			timer.stop(2);
 		}
 		else{
+			timer.start(1);
 			compute_cholesky_factorization();
-			glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
+			timer.stop(1);
+			glb_map.X = solve_cholesky2(glb_map.L, glb_map.i, timer);
 		}
 	}
 }
 
-SparseMatrix MapFuser::order_for_comparision(){
+void MapFuser::order_for_comparision(){
 	int order[10000];
 	int index = 0;
 	for(int i = 0; i < num_submaps; ++i){
@@ -80,10 +92,16 @@ SparseMatrix MapFuser::order_for_comparision(){
 		order[index] = i;
 		++index;
 	}
-	reorder_submaps(order, index);
-	glb_map.L = cholesky(glb_map.I);
-	glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
-	return solve_cholesky(glb_map.L, eye(glb_map.I.get_rows()));
+	cout << "reoder" << endl;
+	Permutation p = reorder_submaps(order, index);
+	glb_map.X = glb_map.X.get_submatrix(p, no_reorder(1));
+	//reorder_submaps(order, index);
+	//cout << "after" << endl;
+	//glb_map.L = cholesky(glb_map.I);
+	//cout << "here" << endl;
+	//glb_map.X = solve_cholesky(glb_map.L, glb_map.i);
+	//cout << "here2" << endl;
+	//return solve_cholesky(glb_map.L, eye(glb_map.I.get_rows()));
 }
 
 void MapFuser::compute_cholesky_factorization(){
@@ -93,11 +111,11 @@ void MapFuser::compute_cholesky_factorization(){
 		spaL21 = vertcat(spaL21, zeros(num_elements_updated_in_I - spaL21.get_rows(), spaL21.get_cols()));
 		SparseMatrix spaL11 = spaL.get_submatrix(1, 1, glb_map.I.get_rows() - num_elements_updated_in_I, glb_map.I.get_rows() - num_elements_updated_in_I);
 		SparseMatrix I22 = to_sparse_matrix_fast(glb_map.I).get_submatrix(glb_map.I.get_rows() -  num_elements_updated_in_I + 1, glb_map.I.get_cols() -  num_elements_updated_in_I + 1, glb_map.I.get_rows(), glb_map.I.get_cols());
-		SparseMatrix spaL22 = to_sparse_matrix(cholesky(to_sparse_symm_matrix(I22 - spaL21 * trn(spaL21))));
+		SparseMatrix spaL22 = to_sparse_matrix(cholesky2(to_sparse_symm_matrix(I22 - spaL21 * trn(spaL21)), timer));
 		glb_map.L = to_factor(vertcat(horzcat(spaL11, zeros(spaL11.get_rows(), glb_map.I.get_cols() - spaL11.get_cols())), horzcat(spaL21, spaL22)));
 	}
 	else{
-		glb_map.L = cholesky(glb_map.I);
+		glb_map.L = cholesky2(glb_map.I, timer);
 	}
 }
 
@@ -123,7 +141,6 @@ void MapFuser::reorder_submaps_AMD_distance(){
 	int temp_order;
 	Permutation perm(glb_map.I_small.get_rows());
 
-	timer.start(4);
 	for(int i = 0; i < num_submaps; ++i){
 		dist[i] = distance_to_submap(i);
 		order_submaps[i] = i;
@@ -158,20 +175,14 @@ void MapFuser::reorder_submaps_AMD_distance(){
 		order_detail[index_detail] = -order_submaps[i] - 1;
 		++index_detail;
 	}
-	timer.stop(4);
 
-	timer.start(3);
 	perm = sorting_permutation((double*)glb_map.order.A->x, num_submaps + num_beacons) + inv(sorting_permutation(order_detail, num_submaps + num_beacons));
 	Permutation p2 = no_reorder(1); 
-	timer.stop(3);
 
-	timer.start(2);
 	glb_map.I_small = to_sparse_symm_matrix(to_sparse_matrix(glb_map.I_small).get_submatrix(perm, perm));
-	timer.stop(2);
 	glb_map.order = glb_map.order.get_submatrix(perm, p2);
 
 	if(glb_map.I_small.get_rows() - MAX_L22_DIMENSION/2 > 1){
-		timer.start(5);
 		SparseSymmMatrix part_I_small = to_sparse_symm_matrix(to_sparse_matrix(glb_map.I_small).get_submatrix(1,1, glb_map.I_small.get_rows() - MAX_L22_DIMENSION/2, glb_map.I_small.get_rows() - MAX_L22_DIMENSION/2));
 		Permutation p = reorder_AMD(part_I_small);
 		for(int i = 0; i < part_I_small.get_rows(); ++i){
@@ -180,15 +191,10 @@ void MapFuser::reorder_submaps_AMD_distance(){
 		for(int i = part_I_small.get_rows(); i < glb_map.I_small.get_rows(); ++i){
 			perm.p[i] = i;
 		}
-		timer.stop(5);
-		timer.start(2);
 		glb_map.I_small = to_sparse_symm_matrix(to_sparse_matrix(glb_map.I_small).get_submatrix(perm, perm));
-		timer.stop(2);
 		glb_map.order = glb_map.order.get_submatrix(perm, p2);
 	}
-	timer.start(6);
 	reorder_submaps((double*)glb_map.order.A->x, glb_map.I_small.get_rows());
-	timer.stop(6);
 }
 
 void MapFuser::reorder_submaps_AMD(){
@@ -254,10 +260,9 @@ void MapFuser::reorder_submaps_distance(){
 
 }
 
-void MapFuser::reorder_submaps(double* order, int size){
+Permutation MapFuser::reorder_submaps(double* order, int size){
 	int set[10000];
 	int index = 0;
-	int set2[1] = {0};
 	//cout << index_of_beacon[order[1]] << " " << order[1] << endl;
 	for(int i = 0; i < size; ++i){
 		if(order[i] >= 0){
@@ -277,13 +282,15 @@ void MapFuser::reorder_submaps(double* order, int size){
 			index_of_robot[-(int)order[i] - 1] = index - 2;
 		}
 	}
-
-	glb_map.i = glb_map.i.get_submatrix(set, index, set2, 1);
+	Permutation p(index, set);
+	Permutation p2 = no_reorder(1);
+	glb_map.i = glb_map.i.get_submatrix(p, p2);
 	SparseMatrix temp_I = to_sparse_matrix(glb_map.I);
-	glb_map.I = to_sparse_symm_matrix( temp_I.get_submatrix(set, index, set, index));
+	glb_map.I = to_sparse_symm_matrix( temp_I.get_submatrix(p, p));
+	return p;
 }
 
-void MapFuser::reorder_submaps(int* order, int size){
+Permutation MapFuser::reorder_submaps(int* order, int size){
 	int set[10000];
 	int index = 0;
 	int set2[1] = {0};
@@ -306,10 +313,13 @@ void MapFuser::reorder_submaps(int* order, int size){
 			index_of_robot[-order[i] - 1] = index - 2;
 		}
 	}
-
-	glb_map.i = glb_map.i.get_submatrix(set, index, set2, 1);
+	
+	Permutation p(index, set);
+	Permutation p2 = no_reorder(1);
+	glb_map.i = glb_map.i.get_submatrix(p, p2);
 	SparseMatrix temp_I = to_sparse_matrix(glb_map.I);
-	glb_map.I = to_sparse_symm_matrix( temp_I.get_submatrix(set, index, set, index));
+	glb_map.I = to_sparse_symm_matrix( temp_I.get_submatrix(p, p));
+	return p;
 }
 
 
@@ -411,7 +421,7 @@ SparseMatrix MapFuser::restore_part_of_P_for_assositation(){
 			rhs.clear();
 			rhs.set(index_of_beacon[potential_assosiation_beacons[i]] + k, 1, 1);
 
-			x = solve_cholesky(glb_map.L, rhs);
+			x = solve_cholesky2(glb_map.L, rhs, timer);
 			for(int j = 0; j < 3; ++j){
 				result.set(j + 1, 2 * i + k + 4, x.get(rhs.get_rows() - 2 + j, 1));
 			}
@@ -426,7 +436,7 @@ SparseMatrix MapFuser::restore_part_of_P_for_assositation(){
 	for(int i = 0; i < 3; ++i){
 		rhs.clear();
 		rhs.set(rhs.get_rows() - 2 + i, 1, 1);
-		x = solve_cholesky(glb_map.L, rhs);
+		x = solve_cholesky2(glb_map.L, rhs, timer);
 		for(int j = 0; j < 3; ++j){
 			//result.values[j][i] = x.first_in_row[rhs.rows - 2 + j]->value;
 			result.set(j + 1, i + 1, x.get(rhs.get_rows() - 2 + j, 1));
@@ -443,7 +453,7 @@ SparseMatrix MapFuser::restore_part_of_P_for_assositation(){
 }
 
 SparseMatrix MapFuser::restore_part_of_P_for_assositation2(){
-
+	timer.start(70);
 	int size = num_potential_assosiations;
 	SparseMatrix result;
 	SparseMatrix rhs(glb_map.I.get_rows(), 2 * num_potential_assosiations + 3, 2 * num_potential_assosiations + 3);
@@ -466,16 +476,20 @@ SparseMatrix MapFuser::restore_part_of_P_for_assositation2(){
 			++index;
 		}
 	}
+	timer.stop(70);
 
 	//cout << "rset: ";
 	//for(int i = 0; i < index; ++i){
 	//	cout << rset[i] << " ";
 	//}
 	//cout << endl;
-
-	x = solve_cholesky(glb_map.L, rhs);
-
+	timer.start(71);
+	x = solve_cholesky2(glb_map.L, rhs, timer);
+	timer.stop(71);
+	
+	timer.start(72);
 	result = x.get_submatrix(rset, index, cset, index);
+	timer.stop(72);
 
 	return result;
 }
@@ -507,7 +521,7 @@ void MapFuser::fuse_first_map(LocalMap m){
 	
     glb_map.I = inv(to_sparse_symm_matrix(m.P));
     glb_map.i = inv(to_sparse_symm_matrix(m.P))* m.X;
-    glb_map.L = cholesky(glb_map.I);
+    glb_map.L = cholesky2(glb_map.I, timer);
     
 
     glb_map.X = m.X;
@@ -588,11 +602,14 @@ void MapFuser::assosiate_beacons(const SparseMatrix& beacX, const SparseMatrix& 
 	double r_obs, b_obs, r_beac, b_beac;
 	SparseSymmMatrix cov_obs, cov_beac, totalcov;
 	SparseMatrix innov(2,1, 2);
-	double mahadist, mahadist_new;
+	double mahadist_min, mahadist_new;
+	int mahadist_min_index;
+	double dist_min, dist_new;
 	num_matches = 0;
 	//cout << "num_obs: " << num_obs << endl;
 	for(int j = 1; j <= num_obs; ++j){
-		mahadist = 1e8;
+		mahadist_min = 1e8;
+		dist_min = 1e8;
 
 	    r_obs = obsX.get(j*2-1, 1);
 	    b_obs = obsX.get(j*2, 1);
@@ -618,6 +635,7 @@ void MapFuser::assosiate_beacons(const SparseMatrix& beacX, const SparseMatrix& 
 	        innov.set(2,1, b_beac-b_obs);
 	        totalcov = cov_beac + cov_obs;
 
+	        dist_new = (trn(innov)*innov).get(1,1);
 	        mahadist_new  = (trn(innov)*inv(totalcov)*innov).get(1,1);
 	        //cout << "j: " << j << " " << mahadist_new << endl;
         	//if(j == 10){
@@ -631,19 +649,33 @@ void MapFuser::assosiate_beacons(const SparseMatrix& beacX, const SparseMatrix& 
 	        	//cov_obs.print();
 	        	//totalcov.print();
 	        //}
-	        if(mahadist_new < mahadist){
+        	if(num_submaps == 375 - 1){
+        		cout << "Maha dist: "  << mahadist_new << endl;
+        	}
+	        if(mahadist_new < mahadist_min){
 	        	//cout << "obs: " << j << " old: " << i  << " new dist " << mahadist_new << " old dist: " << mahadist << endl;
-	        	mahadist = mahadist_new;
+	        	mahadist_min = mahadist_new;
+	        	mahadist_min_index = i;
 	        	//9.2103 is the chi-square invers for 99% with 2 degrees of freedom
 
-	        	if(mahadist < CHI2_CONFIDENCE_NN){
-	        		assosiations[j - 1] = i - 1;
-	        	}
-	        	else{
-	        		assosiations[j - 1] = -100;
-	        	}
+	        }
+	        if(dist_new < dist_min){
+	        	//cout << "obs: " << j << " old: " << i  << " new dist " << mahadist_new << " old dist: " << mahadist << endl;
+	        	dist_min = dist_new;
+	        	//9.2103 is the chi-square invers for 99% with 2 degrees of freedom
+
 	        }
 	    }
+    	if(mahadist_min < CHI2_CONFIDENCE_NN){
+    		++num_matches;
+    		assosiations[j - 1] = mahadist_min_index - 1;
+    	}
+    	else if(dist_min < 1.5){ //true dist
+    		assosiations[j - 1] = -1;
+    	}
+    	else{
+    		assosiations[j - 1] = -100;
+    	}
 
 	}
    // for(int j = 0; j < num_obs; ++j){
@@ -737,8 +769,10 @@ void MapFuser::add_new_beacons_and_robot_location_to_state(const SparseMatrix& o
 	//}
 }
 
-void MapFuser::update_map(const SparseMatrix& obsX, const SparseMatrix& obsP){
+void MapFuser::update_map(SparseMatrix& obsX, SparseMatrix& obsP){
+	timer.start(30);
 	int num_obs = (obsX.get_rows() - 3)/2;
+	//cout << "obs: " << num_obs << " " << num_matches << endl;
 	//int index_robot1 = glb_map.X.get_rows() - 2 * num_beacons_in_submap[num_submaps - 1] - 5;
 	//int index_robot2 = glb_map.X.get_rows() - 2;
 	int index_robot1 = index_of_robot[num_submaps - 2];
@@ -752,9 +786,27 @@ void MapFuser::update_map(const SparseMatrix& obsX, const SparseMatrix& obsP){
 	double fir2 = glb_map.X.get(index_robot2 + 2, 1);
 	//cout << xr1 << " "<< yr1 << " "<< fir1 << " "<< xr2 << " "<< yr2 << " "<< fir2 << " " << endl;
 	
-	
-	SparseMatrix jh(2 * num_obs + 3, glb_map.I.get_rows(), (2 + 3) * (2 * num_obs + 3) + 9);
-	SparseMatrix H(2 * num_obs + 3, 1, 2 * num_obs + 3);
+	int ind = 0;
+	if(num_obs != num_matches){
+		Permutation p(2 * num_matches + 3);
+		for(int i = 0; i < 3; ++i){
+			p.p[ind] = i;
+			++ind;
+		}
+		for(int i = 0; i < num_obs; ++i){
+			if(assosiations[i] >= 0){
+				p.p[ind] = 3 + 2 * i;
+				++ind;
+				p.p[ind] = 4 + 2 * i;
+				++ind;
+			}
+		}
+		obsX = obsX.get_submatrix(p, no_reorder(1));
+		obsP = obsP.get_submatrix(p, p);
+	}
+
+	SparseMatrix jh(2 * num_matches + 3, glb_map.I.get_rows(), (2 + 3) * (2 * num_matches + 3) + 9);
+	SparseMatrix H(2 * num_matches + 3, 1, 2 * num_matches + 3);
 	
 	//the first three rows (robot) of jacobian
 	jh.set(1, index_robot1		, -cos(fir1));
@@ -778,29 +830,32 @@ void MapFuser::update_map(const SparseMatrix& obsX, const SparseMatrix& obsP){
 	H.set(3, 1, fir2 - fir1);
 	
 	// the other rows (beacons) of jacobian and predicted measurement
+	ind = 0;
 	for(int i = 0; i < num_obs; ++i){
-		//if(assosiations[i] >= 0){
+		if(assosiations[i] >= 0){
 			xi = glb_map.X.get(index_of_beacon[assosiations[i]]		, 1);
 			yi = glb_map.X.get(index_of_beacon[assosiations[i]] + 1	, 1);
 			//cout << xi << " " << yi <<  " " << index_of_beacon[assosiations[i]] <<" " << assosiations[i] <<endl;
-			jh.set(2 * i + 4, index_of_beacon[assosiations[i]], cos(fir1));
-			jh.set(2 * i + 4, index_of_beacon[assosiations[i]] + 1, sin(fir1));
-			jh.set(2 * i + 5, index_of_beacon[assosiations[i]], -sin(fir1));
-			jh.set(2 * i + 5, index_of_beacon[assosiations[i]] + 1, cos(fir1));
+			jh.set(2 * ind + 4, index_of_beacon[assosiations[i]], cos(fir1));
+			jh.set(2 * ind + 4, index_of_beacon[assosiations[i]] + 1, sin(fir1));
+			jh.set(2 * ind + 5, index_of_beacon[assosiations[i]], -sin(fir1));
+			jh.set(2 * ind + 5, index_of_beacon[assosiations[i]] + 1, cos(fir1));
 		
-			jh.set(2 * i + 4, index_robot1		, -cos(fir1));
-			jh.set(2 * i + 4, index_robot1 + 1	, -sin(fir1));
-			jh.set(2 * i + 4, index_robot1 + 2	, -(xi - xr1) * sin(fir1) + (yi - yr1) * cos(fir1));
-			jh.set(2 * i + 5, index_robot1		, sin(fir1));
-			jh.set(2 * i + 5, index_robot1 + 1	, -cos(fir1));
-			jh.set(2 * i + 5, index_robot1 + 2	, -(xi - xr1) * cos(fir1) - (yi - yr1) * sin(fir1));
+			jh.set(2 * ind + 4, index_robot1		, -cos(fir1));
+			jh.set(2 * ind + 4, index_robot1 + 1	, -sin(fir1));
+			jh.set(2 * ind + 4, index_robot1 + 2	, -(xi - xr1) * sin(fir1) + (yi - yr1) * cos(fir1));
+			jh.set(2 * ind + 5, index_robot1		, sin(fir1));
+			jh.set(2 * ind + 5, index_robot1 + 1	, -cos(fir1));
+			jh.set(2 * ind + 5, index_robot1 + 2	, -(xi - xr1) * cos(fir1) - (yi - yr1) * sin(fir1));
 		
-			H.set(2 * i + 4, 1, (xi - xr1) * cos(fir1) + (yi - yr1) * sin(fir1));
-			H.set(2 * i + 5, 1, -(xi - xr1) * sin(fir1) + (yi - yr1) * cos(fir1));
-		//}
+			H.set(2 * ind + 4, 1, (xi - xr1) * cos(fir1) + (yi - yr1) * sin(fir1));
+			H.set(2 * ind + 5, 1, -(xi - xr1) * sin(fir1) + (yi - yr1) * cos(fir1));
+			++ind;
+		}
 	}
-
-
+	timer.stop(30);
+	
+	timer.start(31);
 	SparseSymmMatrix I_new = to_sparse_symm_matrix(trn(jh) * inv(to_sparse_symm_matrix(obsP)) * jh);
 
 	glb_map.I = glb_map.I + I_new;
@@ -809,21 +864,31 @@ void MapFuser::update_map(const SparseMatrix& obsX, const SparseMatrix& obsP){
 		++i;
 	}
 	num_elements_updated_in_I = glb_map.I.get_rows() - i + 1;
-
 	SparseMatrix z = obsX - H;
 	z.set(3, 1, wrap(z.get(3,1)));
 	glb_map.i = glb_map.i + trn(jh) * inv(to_sparse_symm_matrix(obsP)) * (z + jh * glb_map.X);
+	timer.stop(31);
 	
+	timer.start(32);
 	int index_local[50];
 	int index, index_loc;
 	index_loc = 0;
-	for(int i = 0; i < num_obs; ++i){
-		index = 1;
-		while(assosiations[i] != glb_map.order.get(index, 1)){
-			++index;
+	/*for(int i = 0; i < num_obs; ++i){
+		if(assosiations[i] != -1){
+			index = 1;
+			while(assosiations[i] != glb_map.order.get(index, 1)){
+				++index;
+			}
+			index_local[index_loc] = index;
+			++index_loc;
 		}
-		index_local[index_loc] = index;
-		++index_loc;
+	}*/
+	Permutation p_order = sorting_permutation((double*)glb_map.order.A->x, glb_map.order.get_rows());
+	for(int i = 0; i < num_obs; ++i){
+		if(assosiations[i] != -1){
+			index_local[index_loc] = p_order.p[ num_submaps + assosiations[i]] + 1;
+			++index_loc;
+		}
 	}
 	index_local[index_loc] = glb_map.I_small.get_rows();
 	++index_loc;
@@ -833,12 +898,13 @@ void MapFuser::update_map(const SparseMatrix& obsX, const SparseMatrix& obsP){
 	}
 	index_local[index_loc] = index;
 	++index_loc;
-	
+	timer.stop(32);
 	//cout << "Index: ";
 	//for(int i = 0; i < index_loc; ++i){
 		//cout << index_local[i] << " ";
 	//}
 	//cout << endl;
+	timer.start(33);
 	for(int i = 0; i < index_loc; ++i){
 		for(int j = i; j < index_loc; ++j){
 			//cout << "Loop: " << glb_map.I_small.max_num_nonzero() << " " << glb_map.I_small.num_nonzero() << endl;
@@ -850,6 +916,8 @@ void MapFuser::update_map(const SparseMatrix& obsX, const SparseMatrix& obsP){
 			}
 		}
 	}
+	timer.stop(33);
+
 }
 
 double MapFuser::submap_radius(const LocalMap& map){

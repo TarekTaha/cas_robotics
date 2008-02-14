@@ -50,24 +50,23 @@ int main(int argc, char * argv[])
 		//if(i == 27 || i == 34 || i == 43 || i == 57 || i == 87 || i == 91){
 			//fuser.reorder_submaps();
 		//}
-		/*stringstream out;
-		out << i;
-		string tmp = "SavedMatrices/I" + out.str();
-		fuser.glb_map.I.write_to_file(tmp.c_str());
-		tmp = "SavedMatrices/i" + out.str();
-		fuser.glb_map.i.write_to_file(tmp.c_str());
-		tmp = "SavedMatrices/X" + out.str();
-		fuser.glb_map.X.write_to_file(tmp.c_str());*/
+
 		//cout << "Factor entries: " << to_sparse_matrix(fuser.glb_map.L).num_nonzero() << " " << to_sparse_matrix(fuser.glb_map.L).max_num_nonzero() << endl;
 	}
 	timer.stop(1);
 	fuser.timer.print();
 	timer.print();
 	fuser.order_for_comparision();
-	fuser.glb_map.I.write_to_file("SavedMatrices/I1");
-	fuser.glb_map.i.write_to_file("SavedMatrices/i1");
-	fuser.glb_map.X.write_to_file("SavedMatrices/X1");
-	fuser.glb_map.I_small.write_to_file("SavedMatrices/Ismall1");
+	
+	stringstream out;
+	out << NUM_OF_SUBMAPS;
+	string tmp = "SavedMatrices/I" + out.str();
+	fuser.glb_map.I.write_to_file(tmp.c_str());
+	cout << "after write I " << endl;
+	tmp = "SavedMatrices/i" + out.str();
+	fuser.glb_map.i.write_to_file(tmp.c_str());
+	tmp = "SavedMatrices/X" + out.str();
+	fuser.glb_map.X.write_to_file(tmp.c_str());
 
 	cout << "done fusing" << endl;
 

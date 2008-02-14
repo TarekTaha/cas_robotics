@@ -36,10 +36,10 @@ CholeskyFactor cholesky2(const SparseSymmMatrix& m, Timer& timer){
 	result.c.postorder = false ;
 
 	cholmod_free_factor(&result.A, &result.c);
-	timer.start(68);
+	timer.start(91);
 	result.A = cholmod_analyze(m.A, &result.c);
 	cholmod_factorize(m.A, result.A, &result.c);
-	timer.stop(68);
+	timer.stop(91);
 	cholmod_change_factor(CHOLMOD_REAL, true, false, true, false, result.A, &result.c);
 	return result;
 }
@@ -47,7 +47,9 @@ CholeskyFactor cholesky2(const SparseSymmMatrix& m, Timer& timer){
 SparseMatrix solve_cholesky2(const CholeskyFactor& L, const SparseMatrix& rhs, Timer& timer){
 	SparseMatrix result;
 	cholmod_free_sparse(&result.A, &result.c);
+	timer.start(90);
 	result.A = cholmod_spsolve(CHOLMOD_A, L.A, rhs.A, &result.c);
+	timer.stop(90);
 	return result;
 }
 

@@ -22,8 +22,8 @@ class MapFuser{
 	public:
 		MapFuser();
 		GlobalMap glb_map;
-		SparseMatrix order_for_comparision();
-		void update_map(const SparseMatrix& obsX, const SparseMatrix& obsP);
+		void order_for_comparision();
+		void update_map(SparseMatrix& obsX, SparseMatrix& obsP);
 		void fuse_map(LocalMap m);
 		void fuse_first_map(LocalMap m);
 		void set_potential_assosiations();
@@ -39,8 +39,8 @@ class MapFuser{
 		void reorder_submaps_AMD_distance();
 		void reorder_submaps_AMD();
 		void reorder_submaps_distance();
-		void reorder_submaps(int*, int);
-		void reorder_submaps(double*, int);
+		Permutation reorder_submaps(int*, int);
+		Permutation reorder_submaps(double*, int);
 		void compute_cholesky_factorization();
 		double wrap(double angle);
 		void load_params();

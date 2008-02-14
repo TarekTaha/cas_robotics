@@ -1,5 +1,15 @@
 #include "sorting.h"
 
+//extreme sort requires that the array to be sorted only includes all numbers between lower_value and upper_value and only one of each, the algorithm is linear.
+void dec_extremesort_di1_ci1(int* ar1, int* ar2, int lower_value, int upper_value){
+	for(int i = 0; i < upper_value - lower_value + 1; ++i){
+		swap(ar2[i], ar2[ar1[i] - lower_value]);
+		swap(ar1[i], ar1[ar1[i] - lower_value]);
+	}
+}
+
+
+
 int inc_partition_dd1_ci1(double* ar1, int* ar2, int top, int bottom)
 {
      double x1 = ar1[top];
