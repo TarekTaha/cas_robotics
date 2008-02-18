@@ -23,6 +23,8 @@ Permutation operator+(const Permutation&, const Permutation&);
 Permutation no_reorder(int size);
 Permutation sorting_permutation(const Permutation& perm);
 Permutation sorting_permutation(int *array, int size);
+Permutation sorting_permutation(int *array, int lower_value, int upper_value);
 Permutation sorting_permutation(double *array, int size);
+void permute(int *array, const Permutation& p);
 
 #endif

@@ -27,8 +27,10 @@ void load_map(LocalMap& map, int index){
 	out << index;
 	string st_str = "SimulationData/localmap_"+ out.str() + "_st";
 	string P_str = "SimulationData/localmap_"+ out.str() + "_P";
+	string true_index_str = "SimulationData/localmap_"+ out.str() + "_ind";
 	map.P.read_from_delimited_file(P_str.c_str());
 	map.X.read_from_delimited_file(st_str.c_str());
+	map.true_index.read_from_delimited_file(true_index_str.c_str());
 }
 
 int main(int argc, char * argv[])
@@ -40,21 +42,30 @@ int main(int argc, char * argv[])
 	timer.start(1);
 	load_params();
 	fuser.fuse_first_map(locMap);
+	
+	  ofstream file;
+	  file.open("AMDdistance");
 
 	for(int i = 2; i <= NUM_OF_SUBMAPS; ++i){
+		/*for(int j = 0; j< fuser.num_beacons; ++j){
+			cout << fuser.true_index_of_beacon[j] << " ";
+		}
+		cout << endl;*/
 		cout << "localmap: " << i <<endl;
 		load_map(locMap, i);
 		//to_sparse_symm_matrix(locMap.P).write_to_file("SavedMatrices/Ploc");
 		fuser.fuse_map(locMap);
+		//cout << "True index: ";
+
 		
 		//if(i == 27 || i == 34 || i == 43 || i == 57 || i == 87 || i == 91){
 			//fuser.reorder_submaps();
 		//}
-
-		//cout << "Factor entries: " << to_sparse_matrix(fuser.glb_map.L).num_nonzero() << " " << to_sparse_matrix(fuser.glb_map.L).max_num_nonzero() << endl;
+		file << i << " " << to_sparse_matrix(CholeskyFactor(fuser.glb_map.L)).num_nonzero() << endl;
+		//cout << "Factor entries: " << to_sparse_matrix(CholeskyFactor(fuser.glb_map.L)).num_nonzero() << " " << to_sparse_matrix(CholeskyFactor(fuser.glb_map.L)).max_num_nonzero() << endl;
 	}
 	timer.stop(1);
-	fuser.timer.print();
+	//fuser.timer.print();
 	timer.print();
 	fuser.order_for_comparision();
 	

@@ -2,11 +2,12 @@
 
 Permutation reorder_AMD(const SparseSymmMatrix& m){
 	CholeskyFactor result;
-	result.c.nmethods = 1;
-	result.c.method [0].ordering = CHOLMOD_AMD;
+	result.c.nmethods = 0;
+	//result.c.method [0].ordering = CHOLMOD_AMD;
 
 	cholmod_free_factor(&result.A, &result.c);
 	result.A = cholmod_analyze(m.A, &result.c);
+	cout << "Meathod selected: " << result.c.selected << endl;
 	
 	Permutation ret(m.get_rows(), ((int*)result.A->Perm));
 	return ret;

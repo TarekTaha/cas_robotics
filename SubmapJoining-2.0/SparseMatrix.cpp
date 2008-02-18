@@ -262,3 +262,22 @@ int SparseMatrix::num_nonzero() const{
 void reallocate(SparseMatrix& m, int nznew){
 	cholmod_reallocate_sparse(nznew, m.A, &m.c);
 }
+
+SparseMatrix aat(const SparseMatrix& m){
+	SparseMatrix result;
+	cholmod_free_sparse(&result.A, &result.c);
+	
+	result.A = cholmod_aat
+		(
+		    /* ---- input ---- */
+		    m.A, /* input matrix; C=A*A’ is constructed */
+		    NULL,          /* subset of 0:(A->ncol)-1 */
+		    0,       /* size of fset */
+		    1,           /* >0: numerical, 0: pattern, <0: pattern (no diag),
+		                         * -2: pattern only, no diagonal, add 50%+n extra
+		                         * space to C */
+		    /* --------------- */
+		    &result.c
+		) ;
+	return result;
+}

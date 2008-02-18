@@ -47,5 +47,6 @@ SparseMatrix horzcat(const SparseMatrix&, const SparseMatrix&);
 SparseMatrix zeros(int rows, int cols, int nznew = 0);
 SparseMatrix ones(int rows, int cols);
 void reallocate(SparseMatrix&, int nznew);
+SparseMatrix aat(const SparseMatrix&);
 
 #endif

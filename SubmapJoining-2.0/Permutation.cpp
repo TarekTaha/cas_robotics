@@ -19,6 +19,7 @@ Permutation::Permutation(const Permutation& perm){
 	for(int i = 0; i < size; ++i){
 		p_new[i] = perm.p[i];
 	}
+	delete[] p;
 	p = p_new;
 }
 
@@ -33,6 +34,7 @@ Permutation& Permutation::operator=(const Permutation& perm){
 		for(int i = 0; i < size; ++i){
 			p_new[i] = perm.p[i];
 		}
+		delete[] p;
 		p = p_new;
 	}
 	return *this;
@@ -83,6 +85,14 @@ Permutation sorting_permutation(int *array, int size){
 	return result;
 }
 
+Permutation sorting_permutation(int *array, int lower_value, int upper_value){
+	int size = upper_value - lower_value + 1;
+	Permutation result = no_reorder(size);
+	Permutation temp(size, array);
+	dec_extremesort_di1_ci1(temp.p, result.p, lower_value, upper_value);
+	return result;
+}
+
 Permutation sorting_permutation(double *array, int size){
 	Permutation result = no_reorder(size);
 	double *temp = new double[size];
@@ -92,4 +102,15 @@ Permutation sorting_permutation(double *array, int size){
 	quicksort_dd1_ci1(temp, result.p, 0, size - 1);
 	delete[] temp;
 	return result;
+}
+
+void permute(int *array, const Permutation& p){
+	int *temp_array = new int[p.size];
+	for(int i = 0; i < p.size; ++i){
+		temp_array[i] = array[p.p[i]];
+	}
+	for(int i = 0; i < p.size; ++i){
+		array[i] = temp_array[i];
+	}
+	delete[] temp_array;
 }
