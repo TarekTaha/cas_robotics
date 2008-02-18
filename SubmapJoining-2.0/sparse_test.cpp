@@ -3,6 +3,7 @@
 #include "MatrixFunctions.h"
 #include <sstream>
 #include "Permutation.h"
+#include "Timer.h"
 
 using namespace std;
 
@@ -47,7 +48,7 @@ int main(int argc, char *argv[]){
 	SparseMatrix spaA, spaB, spaC, spaL;
 	SparseMatrix sb, x;
 	CholeskyFactor L_large, L_small;
-	//Timer timer;
+	Timer timer;
   
 	for(int i = 0; i < 0; ++i){
 		if(i%1 == 0){
@@ -120,14 +121,35 @@ int main(int argc, char *argv[]){
 	cout << "finish! The test took (clock):" <<endl;
 	cout << (double)(1000 * (clock() - clock_start))<< endl;
 
-	SparseMatrix m = random_matrix(5, 5, 10);
 	
-	int ip1[5] = {1, 2, 3, 4, 0};
-	int ip2[5] = {3, 4, 1, 0, 2};
-	Permutation p(5, ip1);
-	Permutation p2 = sorting_permutation(p);
-	p.print();
+	int ip1[5] = {1, 3, 2, 4, 0};
+	int ip2[5] = {0, 1, 2, 3, 4};
+	//for(int i = 0; i < 100; ++i){
+		//ip1[i] = 100 - i - 1;
+		//ip2[i] = i;
+	//}
+
+	
+	dec_extremesort_di1_ci1(ip1, ip2, 0, 4);
+	//quicksort_di1_ci1(ip1, ip2, 0, 99);
+	Permutation p1(5, ip1);
+	Permutation p2(5, ip2);
+	p1.print();
 	p2.print();
+	
+	/*timer.start(1);
+	for(int i = 0; i < 10000; ++i){
+		m.get_submatrix(p, p2);
+	}
+	timer.stop(1);
+	timer.start(2);
+	for(int i = 0; i < 10000; ++i){
+		permute(ip1, p);
+	}
+	timer.stop(2);
+	timer.print();*/
+	SparseMatrix spaF = random_matrix(100, 100, 1000);
+	SparseSymmMatrix symmF = to_sparse_symm_matrix(spaF);
 	
 	
 	return 1;

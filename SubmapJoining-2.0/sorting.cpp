@@ -2,9 +2,27 @@
 
 //extreme sort requires that the array to be sorted only includes all numbers between lower_value and upper_value and only one of each, the algorithm is linear.
 void dec_extremesort_di1_ci1(int* ar1, int* ar2, int lower_value, int upper_value){
-	for(int i = 0; i < upper_value - lower_value + 1; ++i){
+	/*for(int i = 0; i < upper_value - lower_value + 1; ++i){
+		cout << "ar1: ";
+		for(int i = 0; i < upper_value - lower_value + 1; ++i){
+			cout << ar1[i] << " ";
+		}
+		cout << endl;
+		//if(i != ar1[i] - lower_value){
 		swap(ar2[i], ar2[ar1[i] - lower_value]);
 		swap(ar1[i], ar1[ar1[i] - lower_value]);
+		//}
+
+	}*/
+	int i = 0;
+	while(i < upper_value - lower_value + 1){
+		if(i != ar1[i] - lower_value){
+			swap(ar2[i], ar2[ar1[i] - lower_value]);
+			swap(ar1[i], ar1[ar1[i] - lower_value]);
+		}
+		else{
+			++i;
+		}
 	}
 }
 

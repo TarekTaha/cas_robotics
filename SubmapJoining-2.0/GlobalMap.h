@@ -12,7 +12,7 @@ class GlobalMap{
 		SparseMatrix X;
 		//for AMD reordering
 		SparseSymmMatrix I_small;
-		SparseMatrix order;
+		int order[10000];
 };
 
 #endif

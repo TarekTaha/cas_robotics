@@ -1,8 +1,8 @@
-NumOfSubmaps 500
-MaxL22dimension 500
+NumOfSubmaps 100
+MaxL22dimension 490
 SigmaMultiplier 3
 EstBias 8
-ReorderAMD 2
-ReorderAMDFrequency 10
+ReorderAMD 1
+ReorderAMDFrequency 5
 %Chi2ConfidenceNN 9.21034037197618 for 0.99% confidence
 Chi2ConfidenceNN 13.81551055796433 for 0.999% confidence
