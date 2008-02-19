@@ -2,16 +2,14 @@
 
 Permutation reorder_AMD(const SparseSymmMatrix& m){
 	CholeskyFactor result;
-	result.c.nmethods = 0;
-	//result.c.method [0].ordering = CHOLMOD_AMD;
+	result.c.nmethods = 1;
+	result.c.method [0].ordering = CHOLMOD_AMD;
 
 	cholmod_free_factor(&result.A, &result.c);
 	result.A = cholmod_analyze(m.A, &result.c);
-	cout << "Meathod selected: " << result.c.selected << endl;
 	
 	Permutation ret(m.get_rows(), ((int*)result.A->Perm));
 	return ret;
-	//return to_sparse_symm_matrix(to_sparse_matrix(m).get_submatrix((int*)result.A->Perm, result.get_rows(), (int*)result.A->Perm, result.get_cols()));
 }
 
 CholeskyFactor cholesky(const SparseSymmMatrix& m){
@@ -114,13 +112,11 @@ SparseSymmMatrix sqrt(const SparseSymmMatrix& m){
 		temp_Y = Y;
 		Y = 0.5*(Y + inv(Z));
 		Z = 0.5*(Z + inv(temp_Y));
-		//cout << "after inv" << endl;
 	}
 	return Y;
 }
 
 double max_eig(const SparseSymmMatrix& m){
-	//cout <<"Max eig" << endl;
 	return (m.get(1,1) + m.get(2,2))/2 + sqrt(4 * m.get(1,2) * m.get(2,1) + (m.get(1,1) - m.get(2,2)) * (m.get(1,1) - m.get(2,2)))/2;
 }
 
@@ -342,7 +338,7 @@ SparseMatrix to_sparse_matrix(const SparseSymmMatrix& m){
 			}
 		}
 	}
-	quicksort_di2_cd1(cols, rowR, xR, 0, index - 1);
+	inc_quicksort_di2_cd1(cols, rowR, xR, 0, index - 1);
 	set_cols(cols, colR, result.get_cols(), index);
 	return result;
 }

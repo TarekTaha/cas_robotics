@@ -51,8 +51,8 @@ MatrixFunctions.o : MatrixFunctions.cpp MatrixFunctions.h
 
 
 
-main : main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o MapFuser.o Timer.o CholeskyFactor.o Permutation.o sorting.o
-	$(CCC) $(CCCFLAGS) $(LINK) -o main main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o Permutation.o sorting.o MapFuser.o Timer.o CholeskyFactor.o $(LIB)
+main : main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o MapFuser.o Timer.o CholeskyFactor.o Permutation.o sorting.o association.o
+	$(CCC) $(CCCFLAGS) $(LINK) -o main main.o LocalMap.o LocalMapList.o GlobalMap.o SparseMatrix.o SparseSymmMatrix.o SparseMatrixElement.o Matrix.o MatrixFunctions.o MatrixException.o Permutation.o sorting.o association.o MapFuser.o Timer.o CholeskyFactor.o $(LIB)
 
 main.o : main.cc
 	$(CCC) $(CCCFLAGS) -c main.cc $(LDFLAGS)
@@ -80,6 +80,9 @@ Permutation.o: Permutation.h Permutation.cpp
 	
 sorting.o: sorting.h sorting.cpp
 	$(CCC) $(CCCFLAGS) -c sorting.cpp $(LDFLAGS)
+	
+association.o: association.h association.cpp
+	$(CCC) $(CCCFLAGS) -c association.cpp $(LDFLAGS)
 	
 clean:
 	rm *.o

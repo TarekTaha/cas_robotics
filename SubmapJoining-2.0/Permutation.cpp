@@ -8,7 +8,6 @@ Permutation::Permutation(int size, int *p){
 			p_new[i] = p[i];
 		}
 	}
-	//p = p_new;
 	this->p = p_new;
 }
 
@@ -74,14 +73,14 @@ Permutation no_reorder(int size){
 Permutation sorting_permutation(const Permutation& perm){
 	Permutation result = no_reorder(perm.size);
 	Permutation temp(perm);
-	quicksort_di1_ci1(temp.p, result.p, 0, temp.size - 1);
+	inc_quicksort_di1_ci1(temp.p, result.p, 0, temp.size - 1);
 	return result;
 }
 
 Permutation sorting_permutation(int *array, int size){
 	Permutation result = no_reorder(size);
 	Permutation temp(size, array);
-	quicksort_di1_ci1(temp.p, result.p, 0, temp.size - 1);
+	inc_quicksort_di1_ci1(temp.p, result.p, 0, temp.size - 1);
 	return result;
 }
 
@@ -89,7 +88,7 @@ Permutation sorting_permutation(int *array, int lower_value, int upper_value){
 	int size = upper_value - lower_value + 1;
 	Permutation result = no_reorder(size);
 	Permutation temp(size, array);
-	dec_extremesort_di1_ci1(temp.p, result.p, lower_value, upper_value);
+	inc_extremesort_di1_ci1(temp.p, result.p, lower_value, upper_value);
 	return result;
 }
 
@@ -99,7 +98,7 @@ Permutation sorting_permutation(double *array, int size){
 	for(int i = 0; i < size; ++i){
 		temp[i] = array[i];
 	}
-	quicksort_dd1_ci1(temp, result.p, 0, size - 1);
+	inc_quicksort_dd1_ci1(temp, result.p, 0, size - 1);
 	delete[] temp;
 	return result;
 }

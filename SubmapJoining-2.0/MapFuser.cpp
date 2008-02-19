@@ -20,7 +20,7 @@ void MapFuser::fuse_map(LocalMap m){
 
 	SparseMatrix obsP = m.P.get_submatrix(4,4, m.P.get_rows(), m.P.get_cols());
 	SparseMatrix obsX = m.X.get_submatrix(4, 1, m.X.get_rows(), 1);
-	set_potential_assosiations();
+	set_potential_associations();
 	SparseMatrix P = restore_part_of_P_for_assositation();
 	global_robot_uncertainty[num_submaps] = SIGMA_MULTIPLIER * max_eig(sqrt(to_sparse_symm_matrix(P.get_submatrix(1, 1, 2, 2))));
 	local_robot_uncertainty[num_submaps] = SIGMA_MULTIPLIER * max_eig(sqrt(to_sparse_symm_matrix(m.P.get_submatrix(1, 1, 2, 2))));
@@ -30,7 +30,7 @@ void MapFuser::fuse_map(LocalMap m){
 	SparseMatrix beacX = trans_state_matrix_to_local_cordinate_system(X);
 	
 	assosiate_beacons(beacX, beacP, obsX, obsP);
-	check_data_assosiation(m.true_index);
+	check_data_association(m.true_index);
 	
 	add_new_beacons_and_robot_location_to_state(m.X, m.true_index);
 
@@ -76,23 +76,23 @@ void MapFuser::fuse_map(LocalMap m){
 checks if the data assisiation is correct. Can only be used in 
 simulations where the true indexes of the beacons are provided.
 */
-void MapFuser::check_data_assosiation(const SparseMatrix& true_index){
+void MapFuser::check_data_association(const SparseMatrix& true_index){
 	int num_obs = (true_index.get_rows() - 3)/2;
 	for(int i = 0; i < num_obs; ++i){
-		if(assosiations[i] == -100){
+		if(associations[i] == -100){
 			for(int j = 0; j < num_beacons; ++j){
 				if(true_index_of_beacon[ j] == true_index.get(2*i + 4, 1)){
-					cout << "Wrong data assosiation: the beacon with index " << true_index.get(2*i + 4, 1) << " has already been observed but was assosiated as a new beacon" << endl;
+					cout << "Wrong data association: the beacon with index " << true_index.get(2*i + 4, 1) << " has already been observed but was assosiated as a new beacon" << endl;
 					break;
 				}
 			}
 		}
-		else if(assosiations[i] == -1){
-			cout << "Wrong data assosiation: poor obeservation" << endl;
+		else if(associations[i] == -1){
+			cout << "Wrong data association: poor obeservation" << endl;
 		}
 		else{
-			if(true_index_of_beacon[ assosiations[i]] != true_index.get(2*i + 4, 1)){
-				cout << "Wrong data assosiatio: wrong match, beacon with true index " << true_index.get(2*i + 4, 1) << " was matched with beacon with true index "<< true_index_of_beacon[ assosiations[i]] << endl;
+			if(true_index_of_beacon[ associations[i]] != true_index.get(2*i + 4, 1)){
+				cout << "Wrong data assosiatio: wrong match, beacon with true index " << true_index.get(2*i + 4, 1) << " was matched with beacon with true index "<< true_index_of_beacon[ associations[i]] << endl;
 			}
 		}
 	}
@@ -185,7 +185,7 @@ void MapFuser::reorder_submaps_AMD_distance(){
 	}
 	
 	//sort the submaps by distance
-	inc_quicksort_dd1_ci1(dist, order_submaps, 0, num_submaps - 1);
+	dec_quicksort_dd1_ci1(dist, order_submaps, 0, num_submaps - 1);
 
 	/*
 	Create an array describing the new order of the state vector. The submaps are 
@@ -275,7 +275,7 @@ void MapFuser::reorder_submaps_distance(){
 	}
 	
 	//sort the submaps by distance
-	inc_quicksort_dd1_ci1(dist, order_submaps, 0, num_submaps - 1);
+	dec_quicksort_dd1_ci1(dist, order_submaps, 0, num_submaps - 1);
 
 	/*
 	Create an array describing the new order of the state vector. The submaps are 
@@ -309,6 +309,12 @@ from 0 to "number of beacons" - 1.
 */
 
 Permutation MapFuser::reorder_submaps(int* order, int size){
+	
+	/*
+	Create the permutation to change the state and information matrix to the
+	new order described in "order". Also change the index of beacons 
+	and robots.
+	*/
 	int set[10000];
 	int index = 0;
 	int set2[1] = {0};
@@ -365,9 +371,12 @@ Selects the subset of the beacons from the global map
 to perform data association. It's first using the radius
 and distances to submaps and then checking the distance
 to individual beacons.
+
+The output is the array "potential_association_beacons" which contains the 
+numbers of the beacons interesting for the association.
 */
-void MapFuser::set_potential_assosiations(){
-	num_potential_assosiations = 0;
+void MapFuser::set_potential_associations(){
+	num_potential_associations = 0;
 	double x_beac, y_beac, dist_beac;
 	double rx = glb_map.X.get( index_of_robot[num_submaps - 1], 1);
 	double ry = glb_map.X.get( index_of_robot[num_submaps - 1] + 1, 1);
@@ -379,8 +388,8 @@ void MapFuser::set_potential_assosiations(){
 		        y_beac= glb_map.X.get(index_of_beacon[ submaps_first_beacon[i] + j] + 1, 1);     
 		        dist_beac = sqrt((x_beac - rx) * (x_beac - rx) + (y_beac - ry) * (y_beac - ry));
 		        if(dist_beac < radius_of_submap[num_submaps] + EST_BIAS){
-					potential_assosiation_beacons[num_potential_assosiations] = submaps_first_beacon[i] + j;
-					++num_potential_assosiations;
+					potential_association_beacons[num_potential_associations] = submaps_first_beacon[i] + j;
+					++num_potential_associations;
 		        }
 			}
 		}
@@ -390,17 +399,17 @@ void MapFuser::set_potential_assosiations(){
 /*
 run this after select beacon for data association
  
-output: the part of global map state matrix needed for the data assosiation
+output: the part of global map state matrix needed for the data association
 */
 SparseMatrix MapFuser::get_part_of_X_for_assositation(){
-	int size = num_potential_assosiations;
+	int size = num_potential_associations;
 	SparseMatrix result(2*size + 3, 1, 2*size + 3);
 	result.set(1, 1, glb_map.X.get(index_of_robot[num_submaps - 1]	  , 1));
 	result.set(2, 1, glb_map.X.get(index_of_robot[num_submaps - 1] + 1, 1));
 	result.set(3, 1, glb_map.X.get(index_of_robot[num_submaps - 1] + 2, 1));
 	for(int i = 0; i < size; ++i){
 		for(int k = 0; k < 2; ++k){
-			result.set(2 * i + k + 4, 1, glb_map.X.get(index_of_beacon[potential_assosiation_beacons[i]] + k, 1));
+			result.set(2 * i + k + 4, 1, glb_map.X.get(index_of_beacon[potential_association_beacons[i]] + k, 1));
 		}
 	}
 	return result;
@@ -412,15 +421,14 @@ covariance sub-matrix recovery for map joining
 
 recover this after select beacon for data association
 
-output: the part of global map covariance matrix needed for the data assosiation
+output: the part of global map covariance matrix needed for the data association
 */
 SparseMatrix MapFuser::restore_part_of_P_for_assositation(){
-	int size = num_potential_assosiations;
 	SparseMatrix result;
-	SparseMatrix rhs(glb_map.I.get_rows(), 2 * num_potential_assosiations + 3, 2 * num_potential_assosiations + 3);
+	SparseMatrix rhs(glb_map.I.get_rows(), 2 * num_potential_associations + 3, 2 * num_potential_associations + 3);
 	SparseMatrix x;
-	int rset[2 * num_potential_assosiations + 3];
-	int cset[2 * num_potential_assosiations + 3];
+	int rset[2 * num_potential_associations + 3];
+	int cset[2 * num_potential_associations + 3];
 	int index = 0;
 
 	for(int i = 0; i < 3; ++i){
@@ -429,10 +437,10 @@ SparseMatrix MapFuser::restore_part_of_P_for_assositation(){
 		cset[index] = index;
 		++index;
 	}
-	for(int i = 0; i < size; ++i){
+	for(int i = 0; i < num_potential_associations; ++i){
 		for(int k = 0; k < 2; ++k){
-			rhs.set(index_of_beacon[potential_assosiation_beacons[i]] + k, index + 1, 1);
-			rset[index] = index_of_beacon[potential_assosiation_beacons[i]] + k - 1;
+			rhs.set(index_of_beacon[potential_association_beacons[i]] + k, index + 1, 1);
+			rset[index] = index_of_beacon[potential_association_beacons[i]] + k - 1;
 			cset[index] = index;
 			++index;
 		}
@@ -459,6 +467,8 @@ void MapFuser::fuse_first_map(LocalMap m){
 	}
 	
 	radius_of_submap[0] = submap_radius(m);
+	
+	//move the robot position last
 	int set[m.P.get_rows()];
 	int set2[1] = {0};
 	for(int i = 0; i < m.P.get_rows() - 3; ++i){
@@ -476,10 +486,9 @@ void MapFuser::fuse_first_map(LocalMap m){
     glb_map.I = inv(to_sparse_symm_matrix(m.P));
     glb_map.i = inv(to_sparse_symm_matrix(m.P))* m.X;
     glb_map.L = cholesky(glb_map.I);
-    
-
     glb_map.X = m.X;
     
+    //Initialize the small information matrix used for AMD reordering
     //if(AMD)
     glb_map.I_small = to_sparse_symm_matrix(ones((glb_map.I.get_rows() - 1)/2, (glb_map.I.get_rows() - 1)/2));
     for(int i = 1; i <= (glb_map.I.get_rows() - 1)/2; ++i){
@@ -490,7 +499,7 @@ void MapFuser::fuse_first_map(LocalMap m){
     }
     glb_map.order[glb_map.I_small.get_rows() - 1] = -1;
     
-    
+    //Initialize index variables
     num_submaps = 1;
     num_beacons = (m.P.get_rows() - 3)/2;
     num_beacons_in_submap[0] = num_beacons;
@@ -566,7 +575,7 @@ SparseMatrix MapFuser::trans_state_matrix_to_local_cordinate_system(const Sparse
 
 void MapFuser::assosiate_beacons(const SparseMatrix& beacX, const SparseMatrix& beacP, const SparseMatrix& obsX, const SparseMatrix& obsP){
 	int num_obs = obsP.get_rows()/2;
-	int num_beac = beacP.get_rows()/2;
+	/*int num_beac = beacP.get_rows()/2;
 	double r_obs, b_obs, r_beac, b_beac;
 	SparseSymmMatrix cov_obs, cov_beac, totalcov;
 	SparseMatrix innov(2,1, 2);
@@ -612,31 +621,32 @@ void MapFuser::assosiate_beacons(const SparseMatrix& beacX, const SparseMatrix& 
 	    }
     	if(mahadist_min < CHI2_CONFIDENCE_NN && dist_min < 3 && mahadist_min_index == dist_min_index){
     		++num_matches;
-    		assosiations[j - 1] = mahadist_min_index - 1;
+    		associations[j - 1] = mahadist_min_index - 1;
     	}
     	else if(dist_min < 0.5 && mahadist_min_index == dist_min_index){
     		++num_matches;
-    		assosiations[j - 1] = mahadist_min_index - 1;
+    		associations[j - 1] = mahadist_min_index - 1;
     	}
     	else if(dist_min < 1.5){ //true dist
-    		assosiations[j - 1] = -1;
+    		associations[j - 1] = -1;
     	}
     	else{
-    		assosiations[j - 1] = -100;
+    		associations[j - 1] = -100;
     	}
-	}
+	}*/
 	
-	//transfer assosiations to global index
+	num_matches = associate_beacons(associations, beacX, beacP, obsX, obsP);
+	//transfer associations to global index
 	for(int j = 0; j < num_obs; ++j){
-		if(assosiations[j] >= 0)
-			assosiations[j] = potential_assosiation_beacons[assosiations[j]];
+		if(associations[j] >= 0)
+			associations[j] = potential_association_beacons[associations[j]];
 	}
 }
 
 /*
-Adds the new beacons (beacons that got assosiation -100) to the state. 
+Adds the new beacons (beacons that got association -100) to the state. 
 If it is a simulation the "true" index of the beacons can be provided 
-to make it possible to check the data assosiation. 
+to make it possible to check the data association. 
 
 Input: State of the observed beacons. The robot posistion must be last. Optionaly the "true" index of the beacons.
 */
@@ -648,19 +658,28 @@ void MapFuser::add_new_beacons_and_robot_location_to_state(const SparseMatrix& o
 	double fir1 = glb_map.X.get(index_of_robot[num_submaps - 1]	+ 2	, 1);
 	double xj;
 	double yj;
+
+	
+	//derive the number of new beacons
 	int num_new = 0;
 	for(int i = 0; i < num_obs; ++i){
-		if(assosiations[i] == -100){
+		if(associations[i] == -100){
 			++num_new;
 		}
 	}
 	SparseMatrix newX(2 * num_new + 3, 1, 2 * num_new + 3);
-
+	
 	submaps_first_beacon[num_submaps] = num_beacons;
 	num_beacons_in_submap[num_submaps] = 0;
+	
+	/*
+	For all the new beacons (associations == -100), transfer the 
+	coordinates to the global coordinate system and add them to newX which
+	later will be appended to the global state.
+	*/
 	int j = 0;
 	for(int i = 0; i < num_obs; ++i){
-		if(assosiations[i] == -100){
+		if(associations[i] == -100){
 			xj = obsX.get(2*i + 4, 1);
 			yj =  obsX.get(2*i + 5, 1);
 			newX.set(2 * j + 1, 1, xr1 + xj * cos(fir1) - yj * sin(fir1));
@@ -669,7 +688,7 @@ void MapFuser::add_new_beacons_and_robot_location_to_state(const SparseMatrix& o
 			if(true_index.get_rows() > 0){
 				true_index_of_beacon[num_beacons] = (int)true_index.get(2*i + 4, 1);
 			}
-			assosiations[i] = num_beacons;
+			associations[i] = num_beacons;
 			
 			glb_map.order[glb_map.I_small.get_rows() + j] = num_beacons;
 			++num_matches;
@@ -679,6 +698,8 @@ void MapFuser::add_new_beacons_and_robot_location_to_state(const SparseMatrix& o
 		}
 	}
 	glb_map.order[glb_map.I_small.get_rows() + j] = -(num_submaps + 1);
+	
+	//add the new robot position to newX
 	double xr2 = obsX.get(1	, 1);
 	double yr2 = obsX.get(2	, 1);
 	double fir2 = obsX.get(3, 1);
@@ -686,12 +707,17 @@ void MapFuser::add_new_beacons_and_robot_location_to_state(const SparseMatrix& o
 	newX.set(2 * num_new + 2, 1, yr1 + yr2 * cos(fir1) + xr2 * sin(fir1));
 	newX.set(2 * num_new + 3, 1, wrap(fir1 + fir2));
 
+	/*
+	append the newX to the global state and zeroes to the information vector
+	and information matrix.
+	*/
 	glb_map.X = vertcat(glb_map.X, newX);
 	glb_map.i = vertcat(glb_map.i, zeros(2 * num_new + 3, 1));
 	
 	SparseMatrix temp = vertcat(to_sparse_matrix_fast(glb_map.I), zeros(2 * num_new + 3, glb_map.I.get_cols()));
 	glb_map.I = to_sparse_symm_matrix(horzcat(temp, zeros(temp.get_rows(), 2 * num_new + 3)));
 	
+	//Append zeroes to the small information matrix used for AMD reordering
 	//if(AMD)
 	SparseMatrix temp_small = vertcat(to_sparse_matrix_fast(glb_map.I_small), zeros(num_new + 1, glb_map.I_small.get_cols()));
 	glb_map.I_small = to_sparse_symm_matrix(horzcat(temp_small, zeros(temp_small.get_rows(), num_new + 1)));
@@ -718,6 +744,7 @@ void MapFuser::update_map(SparseMatrix& obsX, SparseMatrix& obsP){
 	double yr2 = glb_map.X.get(index_robot2 + 1	, 1);
 	double fir2 = glb_map.X.get(index_robot2 + 2, 1);
 	
+	//remove poor observations
 	int ind = 0;
 	if(num_obs != num_matches){
 		Permutation p(2 * num_matches + 3);
@@ -726,7 +753,7 @@ void MapFuser::update_map(SparseMatrix& obsX, SparseMatrix& obsP){
 			++ind;
 		}
 		for(int i = 0; i < num_obs; ++i){
-			if(assosiations[i] >= 0){
+			if(associations[i] >= 0){
 				p.p[ind] = 3 + 2 * i;
 				++ind;
 				p.p[ind] = 4 + 2 * i;
@@ -737,6 +764,7 @@ void MapFuser::update_map(SparseMatrix& obsX, SparseMatrix& obsP){
 		obsP = obsP.get_submatrix(p, p);
 	}
 
+	
 	SparseMatrix jh(2 * num_matches + 3, glb_map.I.get_rows(), (2 + 3) * (2 * num_matches + 3) + 9);
 	SparseMatrix H(2 * num_matches + 3, 1, 2 * num_matches + 3);
 	
@@ -763,13 +791,13 @@ void MapFuser::update_map(SparseMatrix& obsX, SparseMatrix& obsP){
 	// the other rows (beacons) of jacobian and predicted measurement
 	ind = 0;
 	for(int i = 0; i < num_obs; ++i){
-		if(assosiations[i] >= 0){
-			xi = glb_map.X.get(index_of_beacon[assosiations[i]]		, 1);
-			yi = glb_map.X.get(index_of_beacon[assosiations[i]] + 1	, 1);
-			jh.set(2 * ind + 4, index_of_beacon[assosiations[i]], cos(fir1));
-			jh.set(2 * ind + 4, index_of_beacon[assosiations[i]] + 1, sin(fir1));
-			jh.set(2 * ind + 5, index_of_beacon[assosiations[i]], -sin(fir1));
-			jh.set(2 * ind + 5, index_of_beacon[assosiations[i]] + 1, cos(fir1));
+		if(associations[i] >= 0){
+			xi = glb_map.X.get(index_of_beacon[associations[i]]		, 1);
+			yi = glb_map.X.get(index_of_beacon[associations[i]] + 1	, 1);
+			jh.set(2 * ind + 4, index_of_beacon[associations[i]], cos(fir1));
+			jh.set(2 * ind + 4, index_of_beacon[associations[i]] + 1, sin(fir1));
+			jh.set(2 * ind + 5, index_of_beacon[associations[i]], -sin(fir1));
+			jh.set(2 * ind + 5, index_of_beacon[associations[i]] + 1, cos(fir1));
 		
 			jh.set(2 * ind + 4, index_robot1		, -cos(fir1));
 			jh.set(2 * ind + 4, index_robot1 + 1	, -sin(fir1));
@@ -784,8 +812,12 @@ void MapFuser::update_map(SparseMatrix& obsX, SparseMatrix& obsP){
 		}
 	}
 	
+	/*
+	Do the update step in IKF
+	I(k + 1) = I(k) + trn(jh) * inv(P) * jh
+	i(k + 1) = i(k) + trn(jh) * inv(P) * (z(k + 1) - H + jh * X)
+	*/
 	SparseSymmMatrix I_new = to_sparse_symm_matrix(trn(jh) * inv(to_sparse_symm_matrix(obsP)) * jh);
-
 	glb_map.I = glb_map.I + I_new;
 	int i = 0;
 	while(((int*)I_new.A->p)[i] == 0){
@@ -797,14 +829,16 @@ void MapFuser::update_map(SparseMatrix& obsX, SparseMatrix& obsP){
 	glb_map.i = glb_map.i + trn(jh) * inv(to_sparse_symm_matrix(obsP)) * (z + jh * glb_map.X);
 	
 
+	//update the small inforation matrix for AMD reodering
+	//if(AMD)
 	int index_local[50];
 	int index, index_loc;
 	index_loc = 0;
 
 	Permutation p_order = sorting_permutation(glb_map.order, -num_submaps, num_beacons - 1);
 	for(int i = 0; i < num_obs; ++i){
-		if(assosiations[i] != -1){
-			index_local[index_loc] = p_order.p[ num_submaps + assosiations[i]] + 1;
+		if(associations[i] != -1){
+			index_local[index_loc] = p_order.p[ num_submaps + associations[i]] + 1;
 			++index_loc;
 		}
 	}
@@ -876,9 +910,6 @@ void MapFuser::load_params(){
 		}
 		else if(temp == "EstBias"){
 			file >> EST_BIAS;
-		}
-		else if(temp == "Chi2ConfidenceNN"){
-			file >> CHI2_CONFIDENCE_NN;
 		}
 		else if(temp == "ReorderAMD"){
 			file >> REORDER_AMD;
