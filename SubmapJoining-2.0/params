@@ -1,8 +1,7 @@
-NumOfSubmaps 100
-MaxL22dimension 490
-SigmaMultiplier 3
-EstBias 8
-ReorderAMD 1
-ReorderAMDFrequency 5
-%Chi2ConfidenceNN 9.21034037197618 for 0.99% confidence
-Chi2ConfidenceNN 13.81551055796433 for 0.999% confidence
+NumOfSubmaps 700						The number of submaps to fuse
+MaxL22dimension 490						The maximum size of the right lower part when incremental cholesky is used.
+SigmaMultiplier 3 						Sigma bound for computing the radius of submap
+EstBias 8								The estimation error in the association
+ReorderAMD 2							0 for distance, 1 for AMD only, 2 for distance and AMD
+ReorderAMDFrequency 5					The frequency used for AMD reordering
+

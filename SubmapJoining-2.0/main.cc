@@ -73,7 +73,6 @@ int main(int argc, char * argv[])
 	out << NUM_OF_SUBMAPS;
 	string tmp = "SavedMatrices/I" + out.str();
 	fuser.glb_map.I.write_to_file(tmp.c_str());
-	cout << "after write I " << endl;
 	tmp = "SavedMatrices/i" + out.str();
 	fuser.glb_map.i.write_to_file(tmp.c_str());
 	tmp = "SavedMatrices/X" + out.str();
