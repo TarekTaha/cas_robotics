@@ -617,12 +617,13 @@ void Navigator::run()
 		
 		trail.push_back(currentPose.p);
 		
-		printf("\n Debug Location 2"); fflush(stdout);		
-		laserScan = robotManager->commManager->getLaserScan();
-		cout<<"\n Current Location X:"<<currentPose.p.x()<<" Y:"<<currentPose.p.y()<<" Theta:"<<currentPose.phi;
+//		printf("\n Debug Location 2"); fflush(stdout);		
+//		laserScan = robotManager->commManager->getLaserScan();
+//		cout<<"\n Current Location X:"<<currentPose.p.x()<<" Y:"<<currentPose.p.y()<<" Theta:"<<currentPose.phi;
 		/* If this location is new, then use it. Otherwise
 		 * estimate the location based on the last reading.
 		 */
+/*		
 		if(old_amcl != currentPose)
 		{
 			// Recording the last time Data changed
@@ -646,9 +647,11 @@ void Navigator::run()
 				velocity = speed;
 			//cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
 		}
+*/		
 		/* if we were following a local path and crossed the boundaried of the local
 		 * area without reaching the local destination then go back to the global path
 		 */
+/*		
 		if (path2Follow == local_path)
 		{
 			if(Dist(EstimatedPos.p,local_planner->pathPlanner->map->global_pose.p)>local_dist)
@@ -658,19 +661,20 @@ void Navigator::run()
 				path2Draw = GLOBALPATH;
 			}
 		}
+*/		
 //		first = ClosestPathSeg(EstimatedPos.p,path2Follow);
-		qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);		
-		printf("\n Debug Location 3"); fflush(stdout);
+//		qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);		
+//		printf("\n Debug Location 3"); fflush(stdout);
 
 		/* If we chose to follow a virtual point on the path then calculate that point
 		 * It will not be used most of the time, but it adds accuracy in control for
 		 * long line paths.
 		 */
 		//qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",speed,EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
-		tracking_point.setX(EstimatedPos.p.x() + tracking_dist*cos(EstimatedPos.phi) - 0*sin(EstimatedPos.phi));
-		tracking_point.setY(EstimatedPos.p.y() + tracking_dist*sin(EstimatedPos.phi) + 0*cos(EstimatedPos.phi)); 
-		first = closestPathSeg(EstimatedPos.p,path2Follow);
-//		first = closestPathSeg(tracking_point,global_path);
+//		tracking_point.setX(EstimatedPos.p.x() + tracking_dist*cos(EstimatedPos.phi) - 0*sin(EstimatedPos.phi));
+//		tracking_point.setY(EstimatedPos.p.y() + tracking_dist*sin(EstimatedPos.phi) + 0*cos(EstimatedPos.phi)); 
+//		first = closestPathSeg(EstimatedPos.p,path2Follow);
+		first = closestPathSeg(tracking_point,global_path);
 		if(!first)
 		{
 			qDebug("Path Doesn't contain any segment to follow !!!");
@@ -682,15 +686,15 @@ void Navigator::run()
 		{
 			if(Dist(first->next->pose.p,EstimatedPos.p)<=0.4)
 			{
-				if (local_planner->pathPlanner->path)
-				{
-					qDebug("--->>> Local Path Traversed !!!");					
-					local_planner->pathPlanner->freePath();
-					path2Follow = global_path;
-					usleep(100000);
-					continue;
-				}
-				else
+//				if (local_planner->pathPlanner->path)
+//				{
+//					qDebug("--->>> Local Path Traversed !!!");					
+//					local_planner->pathPlanner->freePath();
+//					path2Follow = global_path;
+//					usleep(100000);
+//					continue;
+//				}
+//				else
 				{
 					qDebug("--->>> Destination Reached !!!"); fflush(stdout);
 					emit addMsg(0,INFO,QString("--->>> Destination Reached !!!"));
@@ -711,8 +715,8 @@ void Navigator::run()
 		// Distance to the path Segment
 		distance = Dist(SegmentEnd,tracking_point);
 		Line l(SegmentStart,SegmentEnd);
-		displacement = Dist2Seg(l,tracking_point);
-//		displacement =  distance;
+//		displacement = Dist2Seg(l,tracking_point);
+		displacement =  distance;
 		y1 = Dist2Seg(l,tracking_point);
 //		assert (distance > y1);
 //		s1 = sqrt(distance*distance- y1*y1);
@@ -729,8 +733,10 @@ void Navigator::run()
 		 * 5- Follow that path
 		 */
 
-		QTime local_planning_time,icp_time;
-		closest_obst = nearestObstacle(laserScan);
+//		QTime local_planning_time,icp_time;
+//		closest_obst = nearestObstacle(laserScan);
+		// ICP PART - When approaching obstacles
+		/*
 		qDebug("\n Closest Distance to Obstacles is:%f",closest_obst);
 		if(closest_obst < safety_dist)
 		{
@@ -809,7 +815,7 @@ void Navigator::run()
 				 * to be modified to translate the laser location to the 
 				 * robot's coordinate : TODO
 				 */
-				 
+				/* 
 			 	printf("\n Debug Location 7"); fflush(stdout);
 			 	start.p.setX(local_planner->pathPlanner->map->center.x());
 			 	start.p.setY(local_planner->pathPlanner->map->center.y()); 	
@@ -853,7 +859,7 @@ void Navigator::run()
 			mapPatch = mapManager.provideLaserOG(laserScan,2.0,0.05,EstimatedPos);	
 			 	emit glRender();
 		 	redraw_timer.restart();	
-		}
+		}*/
 		/* Get the control Action to be applied, in this case it's a
 		 * simple linear control. It's accurate enough for traversing 
 		 * the generated paths.

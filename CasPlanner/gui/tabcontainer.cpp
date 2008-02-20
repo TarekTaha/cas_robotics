@@ -32,7 +32,10 @@ TabContainer::TabContainer(QWidget *parent,PlayGround *playG)
    	  
 	playGroundTab = new PlayGroundTab(parent,playGround);    
     addTab(playGroundTab, "PlayGround");
-
+    
+    planningParametersTab = new PlanningParametersTab(parent,playGround);
+    addTab(planningParametersTab, "Path Planning");
+    
     updateGeometry();
 }
 void TabContainer::setPlayGround(PlayGround *playG)
