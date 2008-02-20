@@ -446,9 +446,15 @@ Pose PlayerInterface::getLocation()
     dataLock.lockForRead();
     Pose retval;
     if(localizerType == AMCL)
+    {
     	retval = amclLocation;
+//    	printf("\n AMCL localizer");
+    }
    	else
+   	{
    		retval = odomLocation;
+// 		printf("\n ODOM localizer");
+   	}
     dataLock.unlock(); 
     return retval; 		
 }
@@ -532,6 +538,8 @@ void PlayerInterface::clearResources()
 		delete localizer;
 	if(pc)
 		delete pc;	
+	if(speechP)
+		delete speechP;
 }
 
 void PlayerInterface::connectDevices()
@@ -542,6 +550,7 @@ void PlayerInterface::connectDevices()
     }
     pc = new PlayerClient(qPrintable(playerHost),playerPort);
     pc->SetDataMode(PLAYER_DATAMODE_PULL);
+    //pc->SetDataMode(PLAYER_DATAMODE_PUSH);
 	pc->SetReplaceRule(true,-1,-1,-1);
     /* TODO: Proper check for the successfullness of the proxy creation
      */
@@ -573,12 +582,14 @@ void PlayerInterface::connectDevices()
     }
     if(ptzEnabled)
     {
-		ptz = new PtzProxy(pc, ptzId); 
+		ptz = new PtzProxy(pc, ptzId);
 		logMsg.append(QString("\n\t\t - Pan Tilt unit initialized Successfully ID:%1").arg(ptzId));			
     }
     if(localizerEnabled)
     {
     	localizer 	  = new LocalizeProxy(pc,0);
+    	double po[] ={0,0,0}, cov[]={0,0,0};
+    	localizer->SetPose(po,cov);
     	localizerType = AMCL; 
 		logMsg.append(QString("\n\t\t - Localizer Started Successfully ID:%1").arg(0));	    	
     }
@@ -598,7 +609,7 @@ void PlayerInterface::connectDevices()
     joyStickId = 3;
 	joyStick = new Position2dProxy(pc,joyStickId);
 //	speechP  = new SpeechProxy(pc,0);
-//	speechP->Say("I am ready Mate");
+//	speechP->Say("I am ready Mate, Heloooooooooooooooooooo");
 	sleep(1);
 	logMsg.append(QString("\n\t Testing Player Server for Data Read:"));  	
 	logMsg.append(QString("\n\t\t - Test Passed, You can read Data from Player Server Now"));
@@ -618,10 +629,10 @@ void PlayerInterface::run ()
 		Timer timer;
 	    while(true)
 	    {
-	    	//qDebug("Loop Time is:%f QTimer:%d",timer.elapsed(),tt.elapsed()); fflush(stdout);
+//	    	qDebug("Loop Time is:%f %d",timer.msecElapsed()); fflush(stdout);
 	    	timer.restart();
-	    	// Read Only if new Data is Available
-			//pc->ReadIfWaiting();
+	    	/* Read Only if new Data is Available*/
+//			pc->ReadIfWaiting();
 //			if(!pc->Peek(50))
 //				continue;
 			pc->Read();		
@@ -638,7 +649,7 @@ void PlayerInterface::run ()
 			        {
 				    	laserScan.points.push_back(QPointF(lasers[laser_indx].lp->GetPoint(i).px, lasers[laser_indx].lp->GetPoint(i).py));    
 					}
-			  	} 
+			  	}
 		        if(ctrEnabled)
 		        {
 		        	player_pose_t ps;
@@ -681,6 +692,8 @@ void PlayerInterface::run ()
 				    amclLocation.p.setX(localizer->GetHypoth(0).mean.px);
 				    amclLocation.p.setY(localizer->GetHypoth(0).mean.py);
 				    amclLocation.phi =  localizer->GetHypoth(0).mean.pa;
+//				    printf("\nHypo:%d",localizer->GetNumHypoths());
+				    //printf("AMCL location %f %f %f",amclLocation.p.x(),amclLocation.p.y(),amclLocation.phi);
 				    if(localizer->GetHypoth(0).alpha>=0.9)
 				    	localized = true;
 				    else

@@ -17,10 +17,11 @@ HEADERS += modules/CommManager/commmanager.h \
     modules/CommManager/interfaceprovider.h \
     modules/Rendering/laserrender.h \
     gui/mainwindow.h \
+    gui/navigationtab.h \
+    gui/planningparameterstab.h \
     modules/MapManager/map.h \
     modules/Rendering/mapviewer.h \
     modules/MapManager/mapmanager.h \
-    gui/navigationtab.h \
     modules/Navigator/navigator.h \
     modules/Rendering/ogrender.h \
     modules/CommManager/playerinterface.h \
@@ -122,9 +123,10 @@ SOURCES += modules/CommManager/commmanager.cpp \
     modules/Rendering/laserrender.cpp \
     gui/main.cpp \
     gui/mainwindow.cpp \
+    gui/navigationtab.cpp \
+    gui/planningparameterstab.cpp \    
     modules/Rendering/mapviewer.cpp \
     modules/MapManager/mapmanager.cpp \
-    gui/navigationtab.cpp \
     modules/Navigator/navigator.cpp \
     modules/Rendering/ogrender.cpp \
     modules/CommManager/playerinterface.cpp \
