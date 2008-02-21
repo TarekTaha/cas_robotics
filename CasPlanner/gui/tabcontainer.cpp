@@ -33,8 +33,11 @@ TabContainer::TabContainer(QWidget *parent,PlayGround *playG)
 	playGroundTab = new PlayGroundTab(parent,playGround);    
     addTab(playGroundTab, "PlayGround");
     
-    planningParametersTab = new PlanningParametersTab(parent,playGround);
-    addTab(planningParametersTab, "Path Planning");
+    planningTab = new PlanningTab(parent,playGround);
+    addTab(planningTab, "Path Planning");
+
+    hriTab = new HriTab(parent,playGround);
+    addTab(hriTab, "HRI Settings");
     
     updateGeometry();
 }

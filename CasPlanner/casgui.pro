@@ -16,9 +16,13 @@ HEADERS += modules/CommManager/commmanager.h \
     modules/Rendering/glrender.h \
     modules/CommManager/interfaceprovider.h \
     modules/Rendering/laserrender.h \
+    gui/hritab.h \
     gui/mainwindow.h \
     gui/navigationtab.h \
-    gui/planningparameterstab.h \
+    gui/planningtab.h \
+    gui/playgroundtab.h \
+    gui/statusbar.h \
+    gui/tabcontainer.h \
     modules/MapManager/map.h \
     modules/Rendering/mapviewer.h \
     modules/MapManager/mapmanager.h \
@@ -33,9 +37,6 @@ HEADERS += modules/CommManager/commmanager.h \
     modules/TasksManager/task.h \
     modules/TasksManager/tasksgui.h \
     modules/Rendering/speedrender.h \
-    gui/playgroundtab.h \
-    gui/statusbar.h \
-    gui/tabcontainer.h \
     modules/PathPlanner/astar.h \
     modules/GeometricTools/C2DMatrix.h \
     modules/Controller/common.h \
@@ -121,10 +122,14 @@ SOURCES += modules/CommManager/commmanager.cpp \
     modules/Parser/configfile.cc \
     modules/Navigator/controller.cpp \
     modules/Rendering/laserrender.cpp \
+    gui/hritab.cpp \
     gui/main.cpp \
     gui/mainwindow.cpp \
     gui/navigationtab.cpp \
-    gui/planningparameterstab.cpp \    
+    gui/planningtab.cpp \    
+    gui/playgroundtab.cpp \
+    gui/statusbar.cpp \
+    gui/tabcontainer.cpp \
     modules/Rendering/mapviewer.cpp \
     modules/MapManager/mapmanager.cpp \
     modules/Navigator/navigator.cpp \
@@ -138,9 +143,6 @@ SOURCES += modules/CommManager/commmanager.cpp \
     modules/TasksManager/task.cpp \
     modules/TasksManager/tasksgui.cpp \
     modules/Rendering/speedrender.cpp \
-    gui/playgroundtab.cpp \
-    gui/statusbar.cpp \
-    gui/tabcontainer.cpp \
     modules/PathPlanner/astar.cpp \
     modules/ObstacleAvoidance/forcefield.cpp \
     modules/ScanMatching/geometry2D.cpp \

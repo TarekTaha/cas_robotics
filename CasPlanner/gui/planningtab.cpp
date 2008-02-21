@@ -1,15 +1,10 @@
-#include "planningparameterstab.h"
+#include "planningtab.h"
 
-PlanningParametersTab::~PlanningParametersTab()
+PlanningTab::~PlanningTab()
 {
 }
 
-//void PlanningParametersTab::suckMyBalls()
-//{
-//	
-//}
-
-PlanningParametersTab::PlanningParametersTab(QWidget *parent, PlayGround *playG):
+PlanningTab::PlanningTab(QWidget *parent, PlayGround *playG):
 	QWidget(parent),
 	playGround(playG),
 	planningGB("Planning"),
@@ -166,7 +161,7 @@ PlanningParametersTab::PlanningParametersTab(QWidget *parent, PlayGround *playG)
     robotsGB.setLayout(robotsL); 	
 }
 
-void PlanningParametersTab::updateSelectedObject(double)
+void PlanningTab::updateSelectedObject(double)
 {
 	if(!robotInitialization)
 	{
@@ -187,7 +182,7 @@ void PlanningParametersTab::updateSelectedObject(double)
 	}
 }
 
-void PlanningParametersTab::updateRobotSetting()
+void PlanningTab::updateRobotSetting()
 {
 	if(!currRobot)
 		return;
@@ -248,7 +243,7 @@ void PlanningParametersTab::updateRobotSetting()
 	robotInitialization = false;
 }
 
-void PlanningParametersTab::updateSelectedAvoidanceAlgo(bool)
+void PlanningTab::updateSelectedAvoidanceAlgo(bool)
 {
 	if(!robotInitialization)
 	{
@@ -279,7 +274,7 @@ void PlanningParametersTab::updateSelectedAvoidanceAlgo(bool)
 	}
 }
 
-void PlanningParametersTab::updateSelectedRobot(bool)
+void PlanningTab::updateSelectedRobot(bool)
 {
 	for(int i=0;i<availableRobots.size();i++)
 	{
