@@ -31,23 +31,27 @@
 #include <QTreeWidget>
 #include <QPushButton>
 #include <QHash>
+#include <QGroupBox>
+#include <QRadioButton>
 #include "playground.h"
-#include "configfile.h"
 
+class PlanningParametersTab;
 class RobotManager;
-class MapViewer;
 class PlayGround;
-class NavContainer;
 
-using namespace CasPlanner;
-
-class PlanningParametersTab: public QWidget
+class PlanningParametersTab : public QWidget
 {
+Q_OBJECT
+
 	public:
-		PlanningParametersTab(QWidget *parent ,PlayGround *playGround);
-		virtual ~PlanningParametersTab();
-	private:
-		NavContainer *navContainer;
+		~PlanningParametersTab();
+		PlanningParametersTab(QWidget *parent=0, PlayGround *playGroun=0);
+	public slots:
+		void updateSelectedObject(double);
+		void updateSelectedAvoidanceAlgo(bool);
+		void updateSelectedRobot(bool);		
+		void updateRobotSetting();
+	public:
 		PlayGround * playGround;
 		// Planning Steps
 		QGroupBox planningGB;
@@ -70,9 +74,9 @@ class PlanningParametersTab: public QWidget
 		// Obstacle Avoidance
 		QGroupBox obstavoidGB;
 		QRadioButton noavoidRadBtn;
-			QRadioButton forceFieldRadBtn;
-			QRadioButton configSpaceRadBtn;
-			QRadioButton vfhRadBtn;
+		QRadioButton forceFieldRadBtn;
+		QRadioButton configSpaceRadBtn;
+		QRadioButton vfhRadBtn;
 		QVector <QRadioButton *> availableRobots;
 		// Command Actions
 		QGroupBox actionGB;
@@ -88,12 +92,10 @@ class PlanningParametersTab: public QWidget
 		RobotManager *currRobot;
 		QTreeWidgetItem *robotItem;
 		bool robotInitialization;
-		friend class NavContainer;
-		static unsigned *image, *null;
-	   	Node * path;
-	    static int width, height, components;
-		static const int AutonomousNav = QTreeWidgetItem::UserType+1;
-		static const int ManualNav     = QTreeWidgetItem::UserType+2;	
+//		static unsigned *image, *null;
+//	    static int width, height, components;
+//		static const int AutonomousNav = QTreeWidgetItem::UserType+1;
+//		static const int ManualNav     = QTreeWidgetItem::UserType+2;	
 };
 
 #endif /*PLANNINGPARAMETERSTAB_H_*/
