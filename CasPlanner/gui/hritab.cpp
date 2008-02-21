@@ -18,36 +18,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
-#ifndef TABCONTAINER_H
-#define TABCONTAINER_H
-
-#include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
-
-#include <QTabWidget>
-#include "playgroundtab.h"
-#include "playground.h"
-#include "tasksgui.h"
-#include "navigationtab.h"
-#include "mapviewer.h"
-#include "planningtab.h"
 #include "hritab.h"
 
-class TabContainer : public QTabWidget
+HriTab::HriTab(QWidget *parent, PlayGround *playG):
+	QWidget(parent),
+	playGround(playG)
 {
-Q_OBJECT
-    public:
-		TabContainer(QWidget *parent=0,PlayGround *rob=0);
-		void setPlayGround(PlayGround *playG);
-		~TabContainer();
-    public:
-    	PlayGroundTab*playGroundTab;
-	    PlanningTab *planningTab;
-	    HriTab		*hriTab;
-    	PlayGround   *playGround;
-		NavContainer *navCon;
-		TasksGui *tasksGui;
-		MapViewer *mapViewer;
-};
+}
 
-#endif
+HriTab::~HriTab()
+{
+}

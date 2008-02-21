@@ -18,8 +18,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
-#ifndef PLANNINGPARAMETERSTAB_H_
-#define PLANNINGPARAMETERSTAB_H_
+#ifndef PLANNINGTAB_H_
+#define PLANNINGTAB_H_
 
 #include <libplayerc++/playerc++.h>
 #include <libplayercore/player.h>
@@ -35,17 +35,17 @@
 #include <QRadioButton>
 #include "playground.h"
 
-class PlanningParametersTab;
+class PlanningTab;
 class RobotManager;
 class PlayGround;
 
-class PlanningParametersTab : public QWidget
+class PlanningTab : public QWidget
 {
 Q_OBJECT
 
 	public:
-		~PlanningParametersTab();
-		PlanningParametersTab(QWidget *parent=0, PlayGround *playGroun=0);
+		~PlanningTab();
+		PlanningTab(QWidget *parent=0, PlayGround *playGroun=0);
 	public slots:
 		void updateSelectedObject(double);
 		void updateSelectedAvoidanceAlgo(bool);
@@ -98,4 +98,4 @@ Q_OBJECT
 //		static const int ManualNav     = QTreeWidgetItem::UserType+2;	
 };
 
-#endif /*PLANNINGPARAMETERSTAB_H_*/
+#endif /*PLANNINGTAB_H_*/
