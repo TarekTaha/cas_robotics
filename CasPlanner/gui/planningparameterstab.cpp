@@ -1,8 +1,17 @@
 #include "planningparameterstab.h"
 
-PlanningParametersTab::PlanningParametersTab(QWidget *parent ,PlayGround *playGround):
+PlanningParametersTab::~PlanningParametersTab()
+{
+}
+
+//void PlanningParametersTab::suckMyBalls()
+//{
+//	
+//}
+
+PlanningParametersTab::PlanningParametersTab(QWidget *parent, PlayGround *playG):
 	QWidget(parent),
-	playGround(playGround),
+	playGround(playG),
 	planningGB("Planning"),
 	bridgeTest("Bridge Test"),
 	connectNodes("Connect Nodes"), 
@@ -31,8 +40,7 @@ PlanningParametersTab::PlanningParametersTab(QWidget *parent ,PlayGround *playGr
 	intentionRecognitionBtn("Start IRecognition"),
 	robotsGB("Select your Robot"),
 	currRobot(NULL),
-	robotInitialization(true),
-	path(0)
+	robotInitialization(true)
 {
 	RobotManager *temp= NULL;
 	QRadioButton *rob;
@@ -158,6 +166,130 @@ PlanningParametersTab::PlanningParametersTab(QWidget *parent ,PlayGround *playGr
     robotsGB.setLayout(robotsL); 	
 }
 
-PlanningParametersTab::~PlanningParametersTab()
+void PlanningParametersTab::updateSelectedObject(double)
 {
+	if(!robotInitialization)
+	{
+		if(!currRobot)
+			return;
+		if(!currRobot->planningManager)
+			return;		
+		if(currRobot->planningManager->pathPlanner==NULL)
+		{
+			currRobot->startPlanner();
+		}
+		currRobot->planningManager->setBridgeTestValue(bridgeSegLenSB.value());
+		currRobot->planningManager->setConnNodesValue(nodeConRadSB.value());
+		currRobot->planningManager->setRegGridValue(regGridResSB.value());
+		currRobot->planningManager->setObstPenValue(obstPenRadSB.value());
+		currRobot->planningManager->setExpObstValue(obstExpRadSB.value());
+		currRobot->planningManager->setBridgeResValue(bridgeTestResSB.value());
+	}
 }
+
+void PlanningParametersTab::updateRobotSetting()
+{
+	if(!currRobot)
+		return;
+	if(!currRobot->planningManager)
+		return;		
+	if(!currRobot->planningManager->pathPlanner)
+		currRobot->startPlanner();
+	robotInitialization = true;
+	obstExpRadSB.setValue(currRobot->planningManager->pathPlanner->obstacle_radius);	
+	bridgeTestResSB.setValue(currRobot->planningManager->pathPlanner->bridge_res);
+	bridgeSegLenSB.setValue(currRobot->planningManager->pathPlanner->bridge_length);
+	regGridResSB.setValue(currRobot->planningManager->pathPlanner->regGridDist);	
+	nodeConRadSB.setValue(currRobot->planningManager->pathPlanner->reg_grid_conn_rad);
+	obstPenRadSB.setValue(currRobot->planningManager->pathPlanner->obst_dist);
+	
+    connect(&bridgeTest, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setBridgeTest( int ))); 
+    connect(&connectNodes, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setConnNodes( int ))); 
+    connect(&regGrid, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setRegGrid( int ))); 
+    connect(&obstPenalty, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setObstPen( int ))); 
+    connect(&expandObst, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setExpObst( int )));
+    connect(&showTree, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setShowTree( int )));
+
+	connect(currRobot->navigator,SIGNAL(pathTraversed()),this,SLOT(pathTraversed()));
+	switch(currRobot->navigator->getObstAvoidAlgo())
+	{
+		case VFH:
+		    vfhRadBtn.setChecked(true);		
+		    break;
+		case FORCE_FIELD:
+		    forceFieldRadBtn.setChecked(true);
+		    break;
+		case CONFIG_SPACE:
+		    configSpaceRadBtn.setChecked(true);
+		    break;
+		case NO_AVOID:
+		    noavoidRadBtn.setChecked(true);		
+		    break;
+		default:
+			qDebug("Unkown ALGO");
+	}
+	
+	if(currRobot->notFollowing)
+	{
+		pathFollowBtn.setText("Path Follow");
+	}
+	else
+	{
+		pathFollowBtn.setText("Stop");		
+	}
+	if(currRobot->notPaused)
+	{
+		pauseBtn.setText("Pause");
+	}
+	else
+	{
+		pauseBtn.setText("Continue");		
+	}
+	robotInitialization = false;
+}
+
+void PlanningParametersTab::updateSelectedAvoidanceAlgo(bool)
+{
+	if(!robotInitialization)
+	{
+		if(currRobot->navigator==NULL)
+		{
+			currRobot->startNavigator();
+		}
+		if(vfhRadBtn.isChecked())
+		{
+			qDebug("VFH");
+			currRobot->navigator->setObstAvoidAlgo(VFH);
+		}
+		else if(forceFieldRadBtn.isChecked())
+		{
+			qDebug("Force Field");		
+			currRobot->navigator->setObstAvoidAlgo(FORCE_FIELD);	
+		}
+		else if(configSpaceRadBtn.isChecked())
+		{
+			qDebug("Config Space");		
+			currRobot->navigator->setObstAvoidAlgo(CONFIG_SPACE);	
+		}
+		else if(noavoidRadBtn.isChecked())
+		{
+			qDebug("NO Avoidace");		
+			currRobot->navigator->setObstAvoidAlgo(NO_AVOID);	
+		}
+	}
+}
+
+void PlanningParametersTab::updateSelectedRobot(bool)
+{
+	for(int i=0;i<availableRobots.size();i++)
+	{
+		if(availableRobots[i]->isChecked())
+		{
+			currRobot = playGround->robotPlatforms[i];
+//			qDebug("Seleted Robot is:%s",qPrintable(currRobot->robot->robotName));	fflush(stdout);
+			updateRobotSetting();
+			return;
+		}
+	}
+}
+
