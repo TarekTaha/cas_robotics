@@ -31,7 +31,8 @@ mapManager(NULL)
 PlayGround::PlayGround(QStringList configFiles,QStatusBar *in_statusBar):
 navCon(NULL),
 mapViewer(NULL),
-mapManager(NULL)
+mapManager(NULL),
+activeRobot(NULL)
 {
 	statusLogger = new StatusLogger(in_statusBar);
     for(int j=0; j < configFiles.size(); j++)

@@ -77,7 +77,6 @@ Q_OBJECT
 
 		//Pointers to the currently selected Robot
 		QGroupBox robotsGB;
-		RobotManager *currRobot;
 		QTreeWidgetItem *robotItem;
 		bool robotInitialization;
 		friend class NavContainer;
@@ -97,7 +96,6 @@ Q_OBJECT
 		MapViewer  * mapViewer;
     private:
     	PlayGround * playGround;
-		RobotManager *currRobot;
 		NavControlPanel navControlPanel;
 		friend class NavControlPanel;
 };
