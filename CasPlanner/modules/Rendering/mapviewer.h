@@ -100,7 +100,6 @@ Q_OBJECT
 		void yawMONeg();
 		virtual void  setStart(Pose);
 		virtual void    setEnd(Pose);
-
     private:
 		int screenWidth,count,step;
 		PlayGround *playGround;
@@ -122,7 +121,7 @@ Q_OBJECT
 		freetype::font_data font2Render;
 		bool start_initialized,end_initialized,mainMapBuilt;
 	    MapManager mapManager;
-	    Pose start,end,wayPoint;
+	    Pose start,end,wayPoint,newLocation;
 	    QVector <Pose> robotsLocation;
 	    Map * ogMap;
 	    QColor clearColor;

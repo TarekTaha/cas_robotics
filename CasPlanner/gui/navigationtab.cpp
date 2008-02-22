@@ -28,8 +28,7 @@ NavContainer::~NavContainer()
 
 NavContainer::NavContainer(QWidget *parent,PlayGround *playGround_in)
  : QWidget(parent),
-   playGround(playGround_in),   
-   currRobot(NULL),
+   playGround(playGround_in),
    navControlPanel(this,playGround_in)
 {
     QHBoxLayout *vLayout = new QHBoxLayout;
@@ -42,7 +41,7 @@ NavContainer::NavContainer(QWidget *parent,PlayGround *playGround_in)
 	if(playGround)
 	{
 		if(playGround->robotPlatforms.size()>0)
-			currRobot = playGround->robotPlatforms[0];
+			playGround->activeRobot = playGround->robotPlatforms[0];
 	}
 }
 
@@ -58,7 +57,6 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
 	captureImage("Capture Image"),
 	intentionRecognitionBtn("Start IRecognition"),
 	robotsGB("Select your Robot"),
-	currRobot(NULL),
 	robotInitialization(true),
 	path(0)
 {
@@ -73,7 +71,7 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
 			availableRobots.push_back(rob);
 		}
 		if(playGround->robotPlatforms.size()>0)
-			currRobot = playGround->robotPlatforms[0];
+			playGround->activeRobot = playGround->robotPlatforms[0];
 	}
 	
     QVBoxLayout *hlayout = new QVBoxLayout;
@@ -111,9 +109,9 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
 
 void NavControlPanel::startIntentionRecognition()
 {
-	if(this->currRobot)
+	if(this->playGround->activeRobot)
 	{
-		currRobot->startIntentionRecognizer();
+		playGround->activeRobot->startIntentionRecognizer();
 	}
 	else
 	{
@@ -123,32 +121,32 @@ void NavControlPanel::startIntentionRecognition()
 
 void NavControlPanel::pathTraversed()
 {
-	if(currRobot->navigator->isRunning())
+	if(playGround->activeRobot->navigator->isRunning())
 	{
-		currRobot->navigator->StopNavigating();
-		currRobot->navigator->quit();	
+		playGround->activeRobot->navigator->StopNavigating();
+		playGround->activeRobot->navigator->quit();	
 		qDebug("Quitting Thread");
 	}
 	pathFollowBtn.setText("Path Follow");
 	pauseBtn.setText("Pause");
-	currRobot->notFollowing = true;
+	playGround->activeRobot->notFollowing = true;
 }
 
 void NavControlPanel::pathFollow()
 {
-	if(!currRobot->commManager)
+	if(!playGround->activeRobot->commManager)
 	{
 		qDebug("\t NavTab: Communication Manager Not Initialized");
 		return;
 	}
-	if(!currRobot->commManager->connected)
+	if(!playGround->activeRobot->commManager->connected)
 	{
 		QMessageBox msgBox(QMessageBox::Warning,QString("Warning"),QString("Your not Connected to the Robot, do you want me to connect?"),QMessageBox::Ok|QMessageBox::Cancel,this,Qt::Dialog);
 		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
 		switch (msgBox.exec()) 
 		{
 		case QMessageBox::Yes:
-			currRobot->startComms();
+			playGround->activeRobot->startComms();
 		    break;
 		case QMessageBox::No:
 		    return;
@@ -158,30 +156,30 @@ void NavControlPanel::pathFollow()
 		    break;
 		}			
 	}
-	if(currRobot->notFollowing)
+	if(playGround->activeRobot->notFollowing)
 	{
-		if(currRobot->navigator->isRunning())
+		if(playGround->activeRobot->navigator->isRunning())
 		{
-			currRobot->navigator->quit();
+			playGround->activeRobot->navigator->quit();
 		}
 		if(path)
 		{
-			currRobot->navigator->setPath(path);
-			currRobot->navigator->start();
+			playGround->activeRobot->navigator->setPath(path);
+			playGround->activeRobot->navigator->start();
 			pathFollowBtn.setText("Stop");
-			currRobot->notFollowing = false;
+			playGround->activeRobot->notFollowing = false;
 		}
 	}
 	else
 	{
-		if(currRobot->navigator->isRunning())
+		if(playGround->activeRobot->navigator->isRunning())
 		{
-			currRobot->navigator->StopNavigating();
-			currRobot->navigator->quit();	
+			playGround->activeRobot->navigator->StopNavigating();
+			playGround->activeRobot->navigator->quit();	
 			qDebug("Quitting Thread");
 		}
 		pathFollowBtn.setText("Path Follow");
-		currRobot->notFollowing = true;
+		playGround->activeRobot->notFollowing = true;
 	}
 }
 
@@ -191,14 +189,14 @@ void NavControlPanel::updateSelectedRobot(bool)
 	{
 		if(availableRobots[i]->isChecked())
 		{
-			currRobot = playGround->robotPlatforms[i];
-//			qDebug("Seleted Robot is:%s",qPrintable(currRobot->robot->robotName));	fflush(stdout);
-//			if(!currRobot)
+			playGround->activeRobot = playGround->robotPlatforms[i];
+//			qDebug("Seleted Robot is:%s",qPrintable(playGround->activeRobot->robot->robotName));	fflush(stdout);
+//			if(!playGround->activeRobot)
 //				return;
-//			if(!currRobot->planningManager)
+//			if(!playGround->activeRobot->planningManager)
 //				return;		
-//			if(!currRobot->planningManager->pathPlanner)
-//				currRobot->startPlanner();
+//			if(!playGround->activeRobot->planningManager->pathPlanner)
+//				playGround->activeRobot->startPlanner();
 			return;
 		}
 	}
@@ -206,29 +204,29 @@ void NavControlPanel::updateSelectedRobot(bool)
 
 void NavControlPanel::setNavigation()
 {
-	if(currRobot->notPaused)
+	if(playGround->activeRobot->notPaused)
 	{
-		currRobot->navigator->setPause(true);
-		currRobot->notPaused = false;
+		playGround->activeRobot->navigator->setPause(true);
+		playGround->activeRobot->notPaused = false;
 		pauseBtn.setText("Continue");
 	}
 	else
 	{
-		currRobot->navigator->setPause(false);		
-		currRobot->notPaused = true;
+		playGround->activeRobot->navigator->setPause(false);		
+		playGround->activeRobot->notPaused = true;
 		pauseBtn.setText("Pause");		
 	}
 }
 
 void NavControlPanel::pathPlan()
 {
-	currRobot->planningManager->setMap(playGround->mapManager->globalMap);
-	path = currRobot->planningManager->findPath(METRIC);						
+	playGround->activeRobot->planningManager->setMap(playGround->mapManager->globalMap);
+	path = playGround->activeRobot->planningManager->findPath(METRIC);						
 }
 
 void NavControlPanel::generateSpace()
 {
-	currRobot->planningManager->generateSpace();
+	playGround->activeRobot->planningManager->generateSpace();
 }
 
 void NavControlPanel::loadMap()
@@ -243,9 +241,9 @@ void NavControlPanel::save()
 
 void NavControlPanel::setStart(Pose startLoc)
 {
-	if(this->currRobot)
+	if(this->playGround->activeRobot)
 	{
-		currRobot->planningManager->setStart(startLoc);
+		playGround->activeRobot->planningManager->setStart(startLoc);
 	}
 	else
 	{
@@ -255,9 +253,9 @@ void NavControlPanel::setStart(Pose startLoc)
 
 void NavControlPanel::setEnd(Pose endLoc)
 {
-	if(this->currRobot)
+	if(this->playGround->activeRobot)
 	{
-		currRobot->planningManager->setEnd(endLoc);
+		playGround->activeRobot->planningManager->setEnd(endLoc);
 	}
 	else
 	{
@@ -267,9 +265,9 @@ void NavControlPanel::setEnd(Pose endLoc)
 
 void NavControlPanel::setMap(Map * map)
 {
-	if(this->currRobot)
+	if(this->playGround->activeRobot)
 	{
-		currRobot->planningManager->setMap(map);
+		playGround->activeRobot->planningManager->setMap(map);
 	}
 	else
 	{

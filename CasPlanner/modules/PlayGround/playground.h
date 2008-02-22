@@ -50,6 +50,7 @@ class PlayGround: public QObject
 		MapManager   *mapManager;
 		StatusLogger *statusLogger;	
 		QVector <RobotManager* > robotPlatforms;
+		RobotManager *activeRobot;
 		int  setNavContainer(NavContainer* con);
 	public slots:	
 		void startRobotsComm();

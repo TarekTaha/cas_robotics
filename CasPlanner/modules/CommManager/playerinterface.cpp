@@ -588,8 +588,6 @@ void PlayerInterface::connectDevices()
     if(localizerEnabled)
     {
     	localizer 	  = new LocalizeProxy(pc,0);
-    	double po[] ={0,0,0}, cov[]={0,0,0};
-    	localizer->SetPose(po,cov);
     	localizerType = AMCL; 
 		logMsg.append(QString("\n\t\t - Localizer Started Successfully ID:%1").arg(0));	    	
     }

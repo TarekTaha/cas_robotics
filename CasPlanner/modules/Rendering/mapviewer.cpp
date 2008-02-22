@@ -567,7 +567,7 @@ void MapViewer::drawCircle(QPointF center,float radius)
 
 void MapViewer::renderObservation()
 {
-	if(!playGround->mapManager || !playGround->robotPlatforms[0]->intentionRecognizer||!playGround->robotPlatforms[0]->commManager)
+	if(!playGround->mapManager || !playGround->activeRobot->intentionRecognizer||!playGround->activeRobot->commManager)
 		return;
 	glPushMatrix();
 		glLineWidth(1);	
@@ -576,7 +576,7 @@ void MapViewer::renderObservation()
 		glScalef(1/15.0, 1/15.0, 1.0);
 		renderTextFont(-0.99,0.95, BITMAP_FONT_TYPE_HELVETICA_12,"Joystick");		
 		drawCircle(1.0);
-		int obs = playGround->robotPlatforms[0]->intentionRecognizer->lastObs;
+		int obs = playGround->activeRobot->intentionRecognizer->lastObs;
 		glLineWidth(2);
 		switch (obs)
 		{
@@ -641,16 +641,16 @@ void MapViewer::renderObservation()
 
 void MapViewer::renderAction()
 {
-	if(!playGround->mapManager || !playGround->robotPlatforms[0]->intentionRecognizer||!playGround->robotPlatforms[0]->commManager)
+	if(!playGround->mapManager || !playGround->activeRobot->intentionRecognizer||!playGround->activeRobot->commManager)
 		return;	
 }
 
 void MapViewer::renderSpatialStates()
 {
-	if(!playGround->mapManager || !playGround->robotPlatforms[0]->intentionRecognizer||!playGround->robotPlatforms[0]->commManager)
+	if(!playGround->mapManager || !playGround->activeRobot->intentionRecognizer||!playGround->activeRobot->commManager)
 		return;
 	// This is not the general Case now and i might need to change it
-	Pose l = playGround->robotPlatforms[0]->commManager->getLocation();
+	Pose l = playGround->activeRobot->commManager->getLocation();
 	for(int i=0; i < playGround->mapManager->mapSkeleton.verticies.size() ;i++)
 	{
 		int d;
@@ -662,7 +662,7 @@ void MapViewer::renderSpatialStates()
 	    	glColor4f(1,0,0,0.5);
 //	    	renderTextFont(0,0, BITMAP_FONT_TYPE_HELVETICA_10,"Current");
 	    }
-	    else if (i == playGround->robotPlatforms[0]->intentionRecognizer->nextState)
+	    else if (i == playGround->activeRobot->intentionRecognizer->nextState)
 	    {
 	    	glColor4f(0,0,1,1);
 	    	renderTextFont(-0.5,0.5, BITMAP_FONT_TYPE_HELVETICA_10,"Next");
@@ -682,24 +682,24 @@ void MapViewer::renderSpatialStates()
 
 void MapViewer::renderDestIndicators()
 {
-	if(!playGround->mapManager || !playGround->robotPlatforms[0]->intentionRecognizer ||!playGround->robotPlatforms[0]->commManager)
+	if(!playGround->mapManager || !playGround->activeRobot->intentionRecognizer ||!playGround->activeRobot->commManager)
 		return;
 		
 //	This is not the general Case now and i might need to change it
-//	Pose l = playGround->robotPlatforms[0]->commManager->getOdomLocation();
-	Pose l = playGround->robotPlatforms[0]->commManager->getLocation();
+//	Pose l = playGround->activeRobot->commManager->getOdomLocation();
+	Pose l = playGround->activeRobot->commManager->getLocation();
 	glColor4f(1.0f,0.0f,0.0f,1.0f);
 	renderTextFont(-0.83,0.87, BITMAP_FONT_TYPE_HELVETICA_18,"Probs:");
-	for(int i=0; i < playGround->robotPlatforms[0]->intentionRecognizer->numDestinations ;i++)
+	for(int i=0; i < playGround->activeRobot->intentionRecognizer->numDestinations ;i++)
 	{
 		int r;
 		r = playGround->mapManager->mapSkeleton.destIndexes[i];
-//		drawProbHisto(playGround->mapManager->mapSkeleton.verticies[r].location, playGround->robotPlatforms[0]->intentionRecognizer->destBelief[i]);
+//		drawProbHisto(playGround->mapManager->mapSkeleton.verticies[r].location, playGround->activeRobot->intentionRecognizer->destBelief[i]);
 		glPushMatrix();
 			glColor4f(RGB_COLOR[i%9][0],RGB_COLOR[i%9][1],RGB_COLOR[i%9][2],1.0f);	
 			renderTextFont(-0.65,0.93 - i*0.035, BITMAP_FONT_TYPE_HELVETICA_12,(char*)qPrintable(QString("Dest %1:").arg(i+1)));
 			glTranslatef(-0.5,0.93 - i*0.035 ,0.0);			
-			glScalef(playGround->robotPlatforms[0]->intentionRecognizer->destBelief[i]*4.0f,1.0f, 1.0f);
+			glScalef(playGround->activeRobot->intentionRecognizer->destBelief[i]*4.0f,1.0f, 1.0f);
 			glRectf(0.0,0.025f, 0.025f, 0.0f);
 		glPopMatrix();
 	}	
@@ -764,67 +764,64 @@ void MapViewer::drawProbHisto(QPointF pos, double prob)
 
 void MapViewer::showIndicators()
 {
-	//if(!hideGoals)
-	{
-	    if(start_initialized)
+    if(start_initialized)
+    {
+	    glPushMatrix();
+	    glTranslatef(start.p.x(),start.p.y(),0);
+	    glRotated(RTOD(start.phi),0,0,1);
+	    glColor4f(1,1,1,0.8);
+	    glShadeModel(GL_FLAT);
+	    // Path Start
+	    glBegin(GL_TRIANGLE_FAN);
+			glColor4f(0,1,0,1);
+		    glVertex3f(-0.2,0.15,0);
+		    glVertex3f(0.3,0,0);
+		    glVertex3f(-0.2,-0.15,0);
+	    glEnd();
+		glPopMatrix();
+	    glPushMatrix();
+	    if(step == 2)
 	    {
-		    glPushMatrix();
-		    glTranslatef(start.p.x(),start.p.y(),0);
-		    glRotated(RTOD(start.phi),0,0,1);
-		    glColor4f(1,1,1,0.8);
-		    glShadeModel(GL_FLAT);
-		    // Path Start
-		    glBegin(GL_TRIANGLE_FAN);
-				glColor4f(0,1,0,1);
-			    glVertex3f(-0.2,0.15,0);
-			    glVertex3f(0.3,0,0);
-			    glVertex3f(-0.2,-0.15,0);
+		    glBegin(GL_LINE_LOOP);
+				glColor4f(1,1,1,1);
+			    glVertex3f(start.p.x(),start.p.y(),0);
+			    glVertex3f(mousePos.x(),mousePos.y(),0);
 		    glEnd();
-			glPopMatrix();
-		    glPushMatrix();
-		    if(step == 2)
-		    {
-			    glBegin(GL_LINE_LOOP);
-					glColor4f(1,1,1,1);
-				    glVertex3f(start.p.x(),start.p.y(),0);
-				    glVertex3f(mousePos.x(),mousePos.y(),0);
-			    glEnd();
-		    }
-		    glColor4f(0,0,0,0.8);
+	    }
+	    glColor4f(0,0,0,0.8);
 //	        QFont font40; font40.setPointSize(14);
 //	        renderText(0.2,0,0,QString("Start"), font40);
-			glPopMatrix();
-	    }
-	    if(end_initialized)
+		glPopMatrix();
+    }
+    if(end_initialized)
+    {
+	    glPushMatrix();
+	    glTranslatef(end.p.x(),end.p.y(),0);
+	    glRotated(RTOD(end.phi),0,0,1);
+	    glColor4f(1,1,1,0.8);
+	    glShadeModel(GL_FLAT);
+	    // Path End
+	    glBegin(GL_TRIANGLE_FAN);
+			glColor4f(0,1,0,1);
+		    glVertex3f(-0.2,0.15,0);
+		    glVertex3f(0.3,0,0);
+		    glVertex3f(-0.2,-0.15,0);
+	    glEnd();
+		glPopMatrix();
+	    glPushMatrix();
+	    if(step == 4)
 	    {
-		    glPushMatrix();
-		    glTranslatef(end.p.x(),end.p.y(),0);
-		    glRotated(RTOD(end.phi),0,0,1);
-		    glColor4f(1,1,1,0.8);
-		    glShadeModel(GL_FLAT);
-		    // Path End
-		    glBegin(GL_TRIANGLE_FAN);
-				glColor4f(0,1,0,1);
-			    glVertex3f(-0.2,0.15,0);
-			    glVertex3f(0.3,0,0);
-			    glVertex3f(-0.2,-0.15,0);
+		    glBegin(GL_LINE_LOOP);
+				glColor4f(1,1,1,1);
+			    glVertex3f(end.p.x(),end.p.y(),0);
+			    glVertex3f(mousePos.x(),mousePos.y(),0);
 		    glEnd();
-			glPopMatrix();
-		    glPushMatrix();
-		    if(step == 4)
-		    {
-			    glBegin(GL_LINE_LOOP);
-					glColor4f(1,1,1,1);
-				    glVertex3f(end.p.x(),end.p.y(),0);
-				    glVertex3f(mousePos.x(),mousePos.y(),0);
-			    glEnd();
-		    }
-		    glColor4f(0,0,0,0.8);
+	    }
+	    glColor4f(0,0,0,0.8);
 //	        QFont font40; font40.setPointSize(14);
 //	        renderText(0.2,0,0,QString("End"), font40);
-			glPopMatrix();
-	    }
-	}
+		glPopMatrix();
+    }
 }
 
 void MapViewer::paintGL()
@@ -992,11 +989,15 @@ void MapViewer::wheelEvent( QWheelEvent * event )
 
 void MapViewer::mouseDoubleClickEvent(QMouseEvent *me)
 {
-//	updateMap(playGround->robotPlatforms[0]->planningManager->pathPlanner->map);	
+//	updateMap(playGround->activeRobot->planningManager->pathPlanner->map);	
 	QPointF p(me->x(),me->y());
 	//qDebug("Mouse Double click x: %f y: %f",p.x(),p.y());
     p = getOGLPos(p.x(),p.y());
-	if(step == 1)
+    if(me->buttons()==Qt::RightButton)
+    {
+    	newLocation.p = p;
+    }
+    else if(step == 1)
 	{
 		start.p = p;
 		step++;
@@ -1011,7 +1012,6 @@ void MapViewer::mouseDoubleClickEvent(QMouseEvent *me)
 		step++;
 		setMouseTracking(true);
 	}
-
 }
 
 void MapViewer::mousePressEvent(QMouseEvent *me)
@@ -1019,7 +1019,12 @@ void MapViewer::mousePressEvent(QMouseEvent *me)
 	QPointF p(me->x(),me->y());
     p = getOGLPos(me->x(),me->y());
     //qDebug("Mouse pressed x: %f y: %f",x,y);
-	if(step ==2)
+    if(me->buttons()==Qt::RightButton)
+    {
+    	newLocation.phi = atan2(p.y() - newLocation.p.y(),p.x() - newLocation.p.x());
+    	playGround->activeRobot->commManager->setLocation(newLocation);
+    }    
+    else if(step ==2)
 	{
 		start.phi = atan2(p.y() - start.p.y(),p.x() - start.p.x());
 		emit setStart(start);
@@ -1209,6 +1214,7 @@ QImage MapViewer::captureMap()
 {
     return grabFrameBuffer();
 }
+
 void MapViewer::saveImage()
 {
     bool ok;
@@ -1222,6 +1228,7 @@ void MapViewer::saveImage()
 		capturedMap.save(filename,type,-1);
     }
 }
+
 MapViewer::~MapViewer()
 {
 
