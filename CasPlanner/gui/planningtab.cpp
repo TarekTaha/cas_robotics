@@ -1,3 +1,23 @@
+/***************************************************************************
+ *   Copyright (C) 2006 - 2007 by                                          *
+ *      Tarek Taha, CAS-UTS  <tataha@tarektaha.com>                        *
+ *                                                                         *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
+ ***************************************************************************/
 #include "planningtab.h"
 
 PlanningTab::~PlanningTab()
@@ -26,13 +46,6 @@ PlanningTab::PlanningTab(QWidget *parent, PlayGround *playG):
 	forceFieldRadBtn("Force Field"),
 	configSpaceRadBtn("Local Config Space"),
 	vfhRadBtn("VFH"),
-	actionGB("Action"),
-	pauseBtn("Pause"), 
-	pathPlanBtn("Path Plan"),
-	generateSpaceBtn("Generate Space"), 
-	pathFollowBtn("Path Follow"),
-	captureImage("Capture Image"),
-	intentionRecognitionBtn("Start IRecognition"),
 	robotsGB("Select your Robot"),
 	currRobot(NULL),
 	robotInitialization(true)
@@ -55,8 +68,8 @@ PlanningTab::PlanningTab(QWidget *parent, PlayGround *playG):
     hlayout->addWidget(&robotsGB,1);
     hlayout->addWidget(&planningGB,1);
     hlayout->addWidget(&parametersGB,1);
-//    hlayout->addWidget(&obstavoidGB,1);    
-    hlayout->addWidget(&actionGB,1); 
+    hlayout->addWidget(&obstavoidGB,1);    
+ 
     this->setLayout(hlayout);
     QVBoxLayout *showLayout = new QVBoxLayout; 
     showLayout->addWidget(&bridgeTest);
@@ -131,14 +144,6 @@ PlanningTab::PlanningTab(QWidget *parent, PlayGround *playG):
 	    connect(availableRobots[i],        SIGNAL(toggled(bool )), this,SLOT(updateSelectedRobot(bool)));    	
     }
        
-    QVBoxLayout *actionLayout = new QVBoxLayout; 
-    actionLayout->addWidget(&pauseBtn); 
-    actionLayout->addWidget(&captureImage);     
-    actionLayout->addWidget(&pathPlanBtn);
-    actionLayout->addWidget(&generateSpaceBtn); 
-    actionLayout->addWidget(&pathFollowBtn); 
-    actionLayout->addWidget(&intentionRecognitionBtn);
-    actionGB.setLayout(actionLayout); 
     connect(&bridgeTestResSB,  SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
     connect(&bridgeSegLenSB,   SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
     connect(&regGridResSB,     SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
@@ -149,12 +154,6 @@ PlanningTab::PlanningTab(QWidget *parent, PlayGround *playG):
     connect(&forceFieldRadBtn, SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));    
     connect(&configSpaceRadBtn,SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));    
     connect(&noavoidRadBtn,    SIGNAL(toggled(bool )), this,SLOT(updateSelectedAvoidanceAlgo(bool)));            
-	connect(&pathPlanBtn,      SIGNAL(pressed()),this, SLOT(pathPlan()));
-	connect(&generateSpaceBtn, SIGNAL(pressed()),this, SLOT(generateSpace()));
-	connect(&captureImage,     SIGNAL(pressed()),this, SLOT(save()));	
-	connect(&pathFollowBtn,    SIGNAL(pressed()),this, SLOT(pathFollow()));
-	connect(&pauseBtn,         SIGNAL(pressed()),this, SLOT(setNavigation()));	
-	connect(&intentionRecognitionBtn, SIGNAL(pressed()),this, SLOT(startIntentionRecognition()));
 
     if(availableRobots.size()>0)
     	availableRobots[0]->setChecked(true);
@@ -205,7 +204,6 @@ void PlanningTab::updateRobotSetting()
     connect(&expandObst, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setExpObst( int )));
     connect(&showTree, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setShowTree( int )));
 
-	connect(currRobot->navigator,SIGNAL(pathTraversed()),this,SLOT(pathTraversed()));
 	switch(currRobot->navigator->getObstAvoidAlgo())
 	{
 		case VFH:
@@ -224,22 +222,6 @@ void PlanningTab::updateRobotSetting()
 			qDebug("Unkown ALGO");
 	}
 	
-	if(currRobot->notFollowing)
-	{
-		pathFollowBtn.setText("Path Follow");
-	}
-	else
-	{
-		pathFollowBtn.setText("Stop");		
-	}
-	if(currRobot->notPaused)
-	{
-		pauseBtn.setText("Pause");
-	}
-	else
-	{
-		pauseBtn.setText("Continue");		
-	}
 	robotInitialization = false;
 }
 

@@ -92,7 +92,8 @@ HEADERS += modules/CommManager/commmanager.h \
     modules/MapManager/mapskeleton.h \
     modules/HumanRobotInterface/IntentionRecognizer.h \
     modules/HumanRobotInterface/activityLogger.h \
-    modules/Rendering/FreeType.h
+    modules/Rendering/FreeType.h 
+    
 SOURCES += modules/CommManager/commmanager.cpp \
     modules/CommonTools/bandmat.cpp \
     modules/CommonTools/cholesky.cpp \
@@ -126,7 +127,7 @@ SOURCES += modules/CommManager/commmanager.cpp \
     gui/main.cpp \
     gui/mainwindow.cpp \
     gui/navigationtab.cpp \
-    gui/planningtab.cpp \    
+    gui/planningtab.cpp \
     gui/playgroundtab.cpp \
     gui/statusbar.cpp \
     gui/tabcontainer.cpp \
@@ -183,7 +184,8 @@ SOURCES += modules/CommManager/commmanager.cpp \
     modules/HumanRobotInterface/IntentionRecognizer.cpp \
     modules/HumanRobotInterface/activityLogger.cpp \
     modules/Controller/wheelchairproxy.cpp \
-    modules/Rendering/FreeType.cpp
+    modules/Rendering/FreeType.cpp 
+    
 INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     /usr/local/Trolltech/Qt-4.2.2/include/QtGui \
     /usr/local/high/include \
@@ -215,6 +217,9 @@ INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     modules/PomdpCore \
     modules/HumanRobotInterface \
     /usr/include/freetype2
+
+FORMS += gui/hritab.ui
+    
 RESOURCES = resources/icons.qrc
 QT += opengl
 QMAKE_CFLAGS_RELEASE += -g \
@@ -231,7 +236,7 @@ QMAKE_CXXFLAGS_RELEASE += -g \
 
 # QMAKE_CFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
 # QMAKE_LFLAGS_RELEASE += -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
-LIBS += $$system(pkg-config --cflags --libs gthread-2.0 playerc++ playercore) \ # -lCGAL
+LIBS += $$system(pkg-config --cflags --libs gthread-2.0 playerc++ playercore) \
     -lfreetype
 MOC_DIR = .tmp
 OBJECTS_DIR = .tmp

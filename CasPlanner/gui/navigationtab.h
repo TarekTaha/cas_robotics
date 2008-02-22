@@ -48,14 +48,9 @@ class NavControlPanel: public QWidget
 Q_OBJECT
     public:
 		NavControlPanel(NavContainer *container,PlayGround *playG);
-		void updateRobotSetting();
 	public slots:
-		void updateSelectedObject(double);
-		void updateSelectedAvoidanceAlgo(bool);
-		void updateSelectedRobot(bool);
 		void save();
 		void setNavigation();
-		void exportHtml();
 		void pathPlan();
 		void loadMap();
 		void generateSpace();
@@ -65,33 +60,11 @@ Q_OBJECT
 		void setEnd(Pose);
 		void setMap(Map * map);
 		void startIntentionRecognition();
+		void updateSelectedRobot(bool);
     private:
 		NavContainer *navContainer;
 		PlayGround * playGround;
-		// Planning Steps
-		QGroupBox planningGB;
-		QCheckBox bridgeTest;
-		QCheckBox connectNodes;
-		QCheckBox regGrid;
-		QCheckBox obstPenalty;
-		QCheckBox expandObst;
-		QCheckBox showTree;
 
-		// Planning Parameters
-		QGroupBox parametersGB;
-		QDoubleSpinBox obstExpRadSB;
-		QDoubleSpinBox bridgeTestResSB;
-		QDoubleSpinBox bridgeSegLenSB;
-		QDoubleSpinBox regGridResSB;
-		QDoubleSpinBox nodeConRadSB;
-		QDoubleSpinBox obstPenRadSB;
-
-		// Obstacle Avoidance
-		QGroupBox obstavoidGB;
-		QRadioButton noavoidRadBtn;
- 		QRadioButton forceFieldRadBtn;
- 		QRadioButton configSpaceRadBtn;
- 		QRadioButton vfhRadBtn;
 		QVector <QRadioButton *> availableRobots;
 		// Command Actions
 		QGroupBox actionGB;
@@ -122,10 +95,6 @@ Q_OBJECT
 		~NavContainer();
 		NavContainer(QWidget *parent ,PlayGround *playGround);
 		MapViewer  * mapViewer;
-	public slots:
-//		void renderPath();
-//		void setStart();
-//		void setEnd();
     private:
     	PlayGround * playGround;
 		RobotManager *currRobot;
