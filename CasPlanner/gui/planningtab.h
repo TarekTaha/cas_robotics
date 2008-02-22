@@ -50,8 +50,8 @@ Q_OBJECT
 		void updateSelectedObject(double);
 		void updateSelectedAvoidanceAlgo(bool);
 		void updateSelectedRobot(bool);		
-		void updateRobotSetting();
 	public:
+		void updateRobotSetting();
 		PlayGround * playGround;
 		// Planning Steps
 		QGroupBox planningGB;
@@ -78,24 +78,12 @@ Q_OBJECT
 		QRadioButton configSpaceRadBtn;
 		QRadioButton vfhRadBtn;
 		QVector <QRadioButton *> availableRobots;
-		// Command Actions
-		QGroupBox actionGB;
-		QPushButton pauseBtn;
-		QPushButton pathPlanBtn;
-		QPushButton generateSpaceBtn;
-		QPushButton pathFollowBtn;
-		QPushButton captureImage;
-		QPushButton intentionRecognitionBtn;
 	
 		//Pointers to the currently selected Robot
 		QGroupBox robotsGB;
 		RobotManager *currRobot;
 		QTreeWidgetItem *robotItem;
 		bool robotInitialization;
-//		static unsigned *image, *null;
-//	    static int width, height, components;
-//		static const int AutonomousNav = QTreeWidgetItem::UserType+1;
-//		static const int ManualNav     = QTreeWidgetItem::UserType+2;	
 };
 
 #endif /*PLANNINGTAB_H_*/

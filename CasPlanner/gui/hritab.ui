@@ -1,0 +1,19 @@
+<ui version="4.0" >
+ <class>HriTab</class>
+ <widget class="QWidget" name="HriTab" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>682</width>
+    <height>538</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>HriTab</string>
+  </property>
+ </widget>
+ <layoutdefault spacing="6" margin="11" />
+ <resources/>
+ <connections/>
+</ui>
