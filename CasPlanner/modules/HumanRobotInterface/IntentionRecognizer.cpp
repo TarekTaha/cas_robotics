@@ -22,7 +22,7 @@
 
 IntentionRecognizer::IntentionRecognizer(PlayGround * playG, RobotManager *rManager):
 runRecognition(false),
-useNavigator(true),
+useNavigator(false),
 beliefInitialized(false),
 destBelief(playG->mapManager->mapSkeleton.numDestinations,0),
 goToState(-1,-1,-1),
@@ -32,6 +32,7 @@ observation(4),
 action(4),
 spatialState(-1),
 oldSpatialState(-2),
+interactionStrategy(CONTINIOUS_INPUT),
 playGround(playG),
 robotManager(rManager),
 path(NULL)
@@ -65,6 +66,22 @@ void IntentionRecognizer::InitializePOMDP()
   	em->initReadFiles(pomdpFileName,policyFileName, *config);	
 }
 
+void IntentionRecognizer::setInteractionStrategy(int strategy)
+{
+	if(strategy != CONTINIOUS_INPUT && strategy != MINIMAL_INPUT)
+	{
+		qDebug("\n Undefined Interaction Method");
+		return;
+	}
+	this->interactionStrategy = strategy;
+	return;
+}
+
+int IntentionRecognizer::getInteractionStrategy()
+{
+	return this->interactionStrategy;
+}
+
 void IntentionRecognizer::navigateToWayPoint(Pose startLoc,Pose destLoc)
 {
 	robotManager->planningManager->setStart(startLoc);
@@ -72,7 +89,7 @@ void IntentionRecognizer::navigateToWayPoint(Pose startLoc,Pose destLoc)
 	path = robotManager->planningManager->findPath(METRIC);	
 
 	robotManager->navigator->setPause(false);
-	robotManager->navigator->setObstAvoidAlgo(VFH);
+	robotManager->navigator->setObstAvoidAlgo(ND);
 	
 	printf("\n---IR:Commanded the Navigator");fflush(stdout);
 	if(path)
@@ -176,6 +193,8 @@ void IntentionRecognizer::resetBelief()
 {
   	belief_vector b;
   	initialBeliefD.resize(((Pomdp*)em->mdp)->getBeliefSize());
+  	if(robotManager->commManager)
+  		robotManager->commManager->stop();
   	/*
   	 * Distribute belief Evenly accross destinations
   	 */ 

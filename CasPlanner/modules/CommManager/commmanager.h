@@ -43,7 +43,6 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
         ~CommManager(); 
         virtual int readConfigs(ConfigFile *cf,int secId);
         virtual int start(); 
-        virtual int stop();
         virtual LaserScan getLaserScan();
         virtual double getSpeed(); 
         virtual double getTurnRate();
@@ -68,8 +67,9 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
     public slots: 
         virtual void setSpeed(double speed, double turnRate); 
         virtual void setLocation(Pose location);
-        virtual void emergencyStop();
-        virtual void emergencyRelease();
+        virtual void stop();
+        virtual void stopRelease();        
+        virtual void disconnect();         
     signals:
 	    void dataUpdated();
 	    void addMsg(int,int, QString);

@@ -52,7 +52,8 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
 	actionGB("Action"),
 	pauseBtn("Pause"), 
 	pathPlanBtn("Path Plan"),
-	generateSpaceBtn("Generate Space"), 
+//	generateSpaceBtn("Generate Space"), 
+	resetBeliefBtn("Reset Belief"),
 	pathFollowBtn("Path Follow"),
 	captureImage("Capture Image"),
 	intentionRecognitionBtn("Start IRecognition"),
@@ -91,26 +92,73 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
     actionLayout->addWidget(&pauseBtn); 
     actionLayout->addWidget(&captureImage);     
     actionLayout->addWidget(&pathPlanBtn);
-    actionLayout->addWidget(&generateSpaceBtn); 
+//    actionLayout->addWidget(&generateSpaceBtn); 
     actionLayout->addWidget(&pathFollowBtn); 
     actionLayout->addWidget(&intentionRecognitionBtn);
+    actionLayout->addWidget(&resetBeliefBtn);
     actionGB.setLayout(actionLayout); 
 	connect(&pathPlanBtn,      SIGNAL(pressed()),this, SLOT(pathPlan()));
-	connect(&generateSpaceBtn, SIGNAL(pressed()),this, SLOT(generateSpace()));
+//	connect(&generateSpaceBtn, SIGNAL(pressed()),this, SLOT(generateSpace()));
 	connect(&captureImage,     SIGNAL(pressed()),this, SLOT(save()));	
 	connect(&pathFollowBtn,    SIGNAL(pressed()),this, SLOT(pathFollow()));
 	connect(&pauseBtn,         SIGNAL(pressed()),this, SLOT(setNavigation()));	
 	connect(&intentionRecognitionBtn, SIGNAL(pressed()),this, SLOT(startIntentionRecognition()));
-
+	connect(&resetBeliefBtn, 	   SIGNAL(pressed()),this, SLOT(resetDestinationBelief()));	
     if(availableRobots.size()>0)
     	availableRobots[0]->setChecked(true);
     robotsGB.setLayout(robotsL); 	
+}
+
+void NavControlPanel::resetDestinationBelief()
+{
+	if(this->playGround->activeRobot)
+	{
+		if(!playGround->activeRobot->intentionRecognizer)
+		{
+			QMessageBox msgBox(QMessageBox::Warning,QString("Warning"),QString("Intention Recognition not started, you want to start it now?"),QMessageBox::Ok|QMessageBox::Cancel,this,Qt::Dialog);
+			msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+			switch (msgBox.exec()) 
+			{
+			case QMessageBox::Yes:
+				startIntentionRecognition();
+			    break;
+			case QMessageBox::No:
+			    return;
+			   break;
+			default:
+			    return;
+			    break;
+			}	
+		}
+		playGround->activeRobot->intentionRecognizer->resetBelief();
+	}
+	else
+	{
+		qDebug("Select a Robot and Start the intention Recognizer First !!!");
+	}	
 }
 
 void NavControlPanel::startIntentionRecognition()
 {
 	if(this->playGround->activeRobot)
 	{
+		if(!playGround->activeRobot->commManager->connected)
+		{
+			QMessageBox msgBox(QMessageBox::Warning,QString("Warning"),QString("Your not Connected to the Robot, do you want me to connect?"),QMessageBox::Ok|QMessageBox::Cancel,this,Qt::Dialog);
+			msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+			switch (msgBox.exec()) 
+			{
+			case QMessageBox::Yes:
+				playGround->activeRobot->startComms();
+			    break;
+			case QMessageBox::No:
+			    return;
+			   break;
+			default:
+			    return;
+			    break;
+			}			
+		}		
 		playGround->activeRobot->startIntentionRecognizer();
 	}
 	else

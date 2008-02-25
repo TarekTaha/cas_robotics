@@ -59,12 +59,15 @@ public:
 	int nextState;
 	int numDestinations;
 	int numStates;
+	int  getInteractionStrategy();
+	void setInteractionStrategy(int strategy);
 	QVector <double> destBelief;	
 	Pose currentState,currentPose,goToState,oldGoToState;
 	ActivityLogger activityLogger;
 	int  lastObs,observation,action,spatialState,oldSpatialState;
 private:
 	dvector initialBeliefD;
+	int interactionStrategy;
 	string pomdpFileName, policyFileName;
 	ZMDPConfig* config;
 	BoundPairExec* em;

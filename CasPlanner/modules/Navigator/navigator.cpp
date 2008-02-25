@@ -492,9 +492,8 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
 	bool retval = false;
 	Pose robotLocation = robotManager->robot->robotLocation;
 	double angleToWayPoint,prev_angle=0,angle=robotLocation.phi, longestDist=0.2,d,maxAllowedTurn=60;
+//	temp = global_path;
 	temp = closestPathNode(robotLocation.p,global_path);
-	temp = global_path;
-
  	while(temp)
  	{
 		prev_angle = angle;
@@ -560,7 +559,9 @@ void Navigator::run()
 	path2Draw = GLOBALPATH;
 	redraw_timer.restart();
 	control_timer.restart();
-	
+	lastWayPoint.p.setX(-10);
+	lastWayPoint.p.setY(-10);
+	lastWayPoint.phi= -10;
 	//Set our Initial Location Estimation in case AMCL is used
 	if(robotManager->commManager->getLocalizerType() == AMCL)
 	{
@@ -600,7 +601,7 @@ void Navigator::run()
 		delta_t = delta_timer.secElapsed();
 		delta_timer.restart();
 		usleep(30000);
-//		printf("\n Debug Location 1"); fflush(stdout);
+		printf("\n Debug Location 1"); fflush(stdout);
 		// Get current Robot Location
 		currentPose = robotManager->commManager->getLocation();
 		
@@ -617,7 +618,7 @@ void Navigator::run()
 		
 		trail.push_back(currentPose.p);
 		
-//		printf("\n Debug Location 2"); fflush(stdout);		
+		printf("\n Debug Location 2"); fflush(stdout);		
 //		laserScan = robotManager->commManager->getLaserScan();
 //		cout<<"\n Current Location X:"<<currentPose.p.x()<<" Y:"<<currentPose.p.y()<<" Theta:"<<currentPose.phi;
 		/* If this location is new, then use it. Otherwise
@@ -664,7 +665,7 @@ void Navigator::run()
 */		
 //		first = ClosestPathSeg(EstimatedPos.p,path2Follow);
 //		qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);		
-//		printf("\n Debug Location 3"); fflush(stdout);
+		printf("\n Debug Location 3"); fflush(stdout);
 
 		/* If we chose to follow a virtual point on the path then calculate that point
 		 * It will not be used most of the time, but it adds accuracy in control for
@@ -864,18 +865,22 @@ void Navigator::run()
 		 * simple linear control. It's accurate enough for traversing 
 		 * the generated paths.
 		 */
-//		Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
-		Pose goal;
+		Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
+//		Pose goal;
 		laserScan = robotManager->commManager->getLaserScan();
 		if(!getGoal(laserScan,goal))
 		{
-			robotManager->commManager->setSpeed(0);
-			robotManager->commManager->setTurnRate(0);			
-			robotManager->planningManager->setStart(robotManager->robot->robotLocation);
-			//TODO: ICP with the local Area and give the Corrected Location to the function Below
-			robotManager->planningManager->updateMap(laserScan,local_dist,robotManager->robot->robotLocation);
-			robotManager->planningManager->findPath(METRIC);
-			continue;
+//			robotManager->commManager->setSpeed(0);
+//			robotManager->commManager->setTurnRate(0);			
+//			robotManager->planningManager->setStart(robotManager->robot->robotLocation);
+//			//TODO: ICP with the local Area and give the Corrected Location to the function Below
+//			robotManager->planningManager->updateMap(laserScan,local_dist,robotManager->robot->robotLocation);
+//			robotManager->planningManager->findPath(METRIC);
+//			continue;
+			printf("\nCouldn't find a visible waypoint using Segment End instead");
+			wayPoint.p.setX(SegmentEnd.x());
+			wayPoint.p.setY(SegmentEnd.y());
+			wayPoint.phi = angle;
 		}
 		else
 		{
@@ -931,8 +936,12 @@ void Navigator::run()
 					robotManager->commManager->setSpeed(first->direction*cntrl.linear_velocity);
 					robotManager->commManager->setTurnRate(cntrl.angular_velocity);							
 					break;
+				case ND:
 				case VFH:
-
+					if(wayPoint == lastWayPoint)
+						continue;
+					else
+						lastWayPoint = wayPoint;
 					laserScan = robotManager->commManager->getLaserScan();
 					if(!getGoal(laserScan,goal))
 					{
@@ -942,7 +951,7 @@ void Navigator::run()
 					}
 					wayPoint = goal;	
 					// Vector Field Histogram
-					qDebug("\nSending to VFH goto X:%f Y:%f Phi:%f",goal.p.x(),goal.p.y(),RTOD(goal.phi));
+//					qDebug("\nSending to VFH goto X:%f Y:%f Phi:%f",goal.p.x(),goal.p.y(),RTOD(goal.phi));
 					robotManager->commManager->vfhGoto(wayPoint);	
 					break;		
 				default:
@@ -955,7 +964,7 @@ void Navigator::run()
 			robotManager->commManager->setTurnRate(0);
 		}
 		loc = EstimatedPos;
-//		printf("\n Debug Location 7"); fflush(stdout);
+		printf("\n Debug Location 10"); fflush(stdout);
 	}
 	robotManager->commManager->setSpeed(0);
 	robotManager->commManager->setTurnRate(0);

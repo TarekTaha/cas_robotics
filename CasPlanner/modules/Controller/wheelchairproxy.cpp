@@ -1,23 +1,3 @@
-/***************************************************************************
- *   Copyright (C) 2006 - 2007 by                                          *
- *      Tarek Taha, CAS-UTS  <tataha@tarektaha.com>                        *
- *                                                                         *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
- ***************************************************************************/
 #include "wheelchairproxy.h"
 
 #if HAVE_CONFIG_H
@@ -63,7 +43,7 @@ WheelChairProxy::Subscribe(uint aIndex)
 }
 
 void
-WheelChairProxy::sendCmd(player_opaque_data_t* aData)
+WheelChairProxy::SendCmd(player_opaque_data_t* aData)
 {
   playerc_opaque_cmd(mDevice, aData);
 }
@@ -78,7 +58,7 @@ WheelChairProxy::Unsubscribe()
   mDevice = NULL;
 };
 
-int WheelChairProxy::getPower()
+int WheelChairProxy::GetPower()
 {
 	scoped_lock_t lock(mPc->mMutex);	
 	memset(config, 0, sizeof(config) );
@@ -92,7 +72,7 @@ int WheelChairProxy::getPower()
 /*****************************************************************************
  **           Get JOYSTICK  X Position Request Starts                       **
  *****************************************************************************/
-double WheelChairProxy::getJoyX()
+double WheelChairProxy::JoyX()
 {
 	scoped_lock_t lock(mPc->mMutex);		
 	memset( config, 0, sizeof(config) );
@@ -106,7 +86,7 @@ double WheelChairProxy::getJoyX()
 /*****************************************************************************
  **           Get JOYSTICK  Y Position Request Starts                       **
  *****************************************************************************/
-double WheelChairProxy::getJoyY()
+double WheelChairProxy::JoyY()
 {
 	scoped_lock_t lock(mPc->mMutex);		
 	memset(config, 0, sizeof(config) );
@@ -120,7 +100,7 @@ double WheelChairProxy::getJoyY()
 /*****************************************************************************
  **                      Sound Horn Request Starts                          **
  *****************************************************************************/
-int WheelChairProxy::soundHorn()
+int WheelChairProxy::SoundHorn(unsigned int duration)
 {
 	scoped_lock_t lock(mPc->mMutex);		
 	config->value = 100; // 100ms
@@ -133,24 +113,9 @@ int WheelChairProxy::soundHorn()
 }
 
 /*****************************************************************************
- **                      Sound Horn Request Starts                          **
- *****************************************************************************/
-int WheelChairProxy::soundHorn(unsigned int duration)
-{
-	scoped_lock_t lock(mPc->mMutex);		
-	config->value = duration;
-	config->request = PLAYER_WHEELCHAIR_SOUND_HORN_REQ;	
-	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                             reinterpret_cast<void*>(&mData),reinterpret_cast<void*>(&mData),size) < 0)	
-		return -1;
-	else
-		return 0;
-}
-
-/*****************************************************************************
  **                      Get Mode   Reguest Starts                          **
  *****************************************************************************/
-int WheelChairProxy::getMode()
+int WheelChairProxy::GetMode()
 {
 	scoped_lock_t lock(mPc->mMutex);		
 	memset(config, 0, sizeof(config) );
@@ -161,7 +126,7 @@ int WheelChairProxy::getMode()
 	else
 		return config->value; 
 }
-int WheelChairProxy::incrementGear(int gears)
+int WheelChairProxy::IncrementGear(int gears)
 {
 	scoped_lock_t lock(mPc->mMutex);		
 	if (gears >5 || gears < 1) 
@@ -180,7 +145,7 @@ int WheelChairProxy::incrementGear(int gears)
 /*****************************************************************************
  **                  Decrement Gear  Reguest Starts                          **
  *****************************************************************************/
-int WheelChairProxy::decrementGear(int gears)
+int WheelChairProxy::DecrementGear(int gears)
 {
 	scoped_lock_t lock(mPc->mMutex);		
 	if (gears >5 || gears < 1) 
@@ -199,7 +164,7 @@ int WheelChairProxy::decrementGear(int gears)
 /*****************************************************************************
  **                      Set Power  Reguest Starts                          **
  *****************************************************************************/
-int WheelChairProxy::setPower(int state_to_set)
+int WheelChairProxy::SetPower(int state_to_set)
 {
 	scoped_lock_t lock(mPc->mMutex);		
 	config->value = state_to_set;
@@ -214,7 +179,7 @@ int WheelChairProxy::setPower(int state_to_set)
 /*****************************************************************************
  **                      Set Mode   Reguest Starts                          **
  *****************************************************************************/
-int WheelChairProxy::setMode(int mode_to_set)
+int WheelChairProxy::SetMode(int mode_to_set)
 { 	
 	scoped_lock_t lock(mPc->mMutex);		
 	config->value = mode_to_set;

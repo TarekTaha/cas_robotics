@@ -30,9 +30,9 @@ PlayerInterface::PlayerInterface(QString host, int port):
     mapEnabled(false),
     localizerEnabled(false),
     localized(false),
-    emergencyStopped(false),
     velControl(true),
     vfhEnabled(false),
+    stopped(false),
     positionId(0), 
 	drive(NULL),
 	vfh(NULL),
@@ -175,9 +175,9 @@ void PlayerInterface::checkForWheelChair()
 				delete wheelChairCommander;
 			wheelChairCommander = new WheelChairProxy(pc,0);
 		  	printf("\n Turning ON WheelChair"); fflush(stdout);
-		  	wheelChairCommander->setPower(ON);
-		  	wheelChairCommander->setMode(AUTO);
-//		  	wheelChairCommander->soundHorn(1000);
+		  	wheelChairCommander->SetPower(ON);
+		  	wheelChairCommander->SetMode(AUTO);
+		  	wheelChairCommander->SoundHorn(100);
 		  	printf("\n WheelChair is on"); fflush(stdout);			
 		  	logMsg.append(QString("\n\t\t - Wheelchair Driver Engaged"));
 		}
@@ -249,23 +249,27 @@ QVector<DeviceType> * PlayerInterface::getDevices()
   	return devices;
 }
 
-void PlayerInterface::emergencyStop()
-{
-    dataLock.lockForWrite(); 
-    emergencyStopped = true; 
-    dataLock.unlock();
-}
-
-void PlayerInterface::emergencyRelease()
+void PlayerInterface::stopRelease()
 {
     dataLock.lockForWrite();
-    emergencyStopped = false; 
-    dataLock.unlock();
+    	stopped = false;
+    dataLock.unlock();    
 }
-
 void PlayerInterface::stop()
 {
-    // Do nothing.  
+    dataLock.lockForWrite();
+    stopped = true;
+	if(velControl)
+	{
+		if(drive)
+			drive->SetSpeed(0,0);
+	}
+	else
+	{
+		if(vfhEnabled)
+			vfh->SetMotorEnable(false);
+	}
+    dataLock.unlock();		
 }
 
 void PlayerInterface::setPtz( double in_pan, double in_tilt)
@@ -285,7 +289,7 @@ int PlayerInterface::getLocalizerType()
 void PlayerInterface::setSpeed(double i_speed, double i_turnRate)
 {
     dataLock.lockForWrite();
-	velControl = true;    
+	velControl = true;	ctrEnabled = true;
     speed = i_speed;
     turnRate = i_turnRate;
     dataLock.unlock(); 
@@ -294,7 +298,7 @@ void PlayerInterface::setSpeed(double i_speed, double i_turnRate)
 void PlayerInterface::setSpeed(double i_speed)
 {
     dataLock.lockForWrite();
-	velControl = true;        
+	velControl = true; 	ctrEnabled = true;       
     speed = i_speed; 
     dataLock.unlock();
 }
@@ -302,7 +306,7 @@ void PlayerInterface::setSpeed(double i_speed)
 void PlayerInterface::setTurnRate(double i_turnRate)
 {
     dataLock.lockForWrite();
-	velControl = true;    
+	velControl = true;  ctrEnabled = true;
     turnRate = i_turnRate;
     dataLock.unlock();
 }
@@ -319,6 +323,8 @@ void PlayerInterface::gotoGoal(Pose goal)
 {
     dataLock.lockForWrite();
 	velControl = false;
+	if(vfhEnabled)
+		vfh->SetMotorEnable(true);
 	this->goal = goal;
     dataLock.unlock();
 }
@@ -344,8 +350,10 @@ Pose PlayerInterface::localizeToPosition(Pose localizerWayPoint)
 
 void PlayerInterface::vfhGoto(Pose goal)
 {
-    dataLock.lockForWrite();
+    dataLock.lockForWrite();  ctrEnabled = true;
 	velControl = false;
+	if(vfhEnabled)
+		vfh->SetMotorEnable(true);	
 	/*
 	 * In case we are localizing Globally then the waypoint should be
 	 * translated from the global frame to the frame of the underlying
@@ -536,10 +544,10 @@ void PlayerInterface::clearResources()
 		delete ptz;
 	if(localizer)
 		delete localizer;
-	if(pc)
-		delete pc;	
 	if(speechP)
 		delete speechP;
+	if(pc)
+		delete pc;	
 }
 
 void PlayerInterface::connectDevices()
@@ -604,8 +612,11 @@ void PlayerInterface::connectDevices()
 		logMsg.append(QString("\n\t\t - Vfh Started Successfully ID:%1").arg(vfhId));	    	
     }	   
     /* This is temp until the wheelchair interface is added.*/
-    joyStickId = 3;
-	joyStick = new Position2dProxy(pc,joyStickId);
+    if(!wheelChairCommander)
+    {
+    	joyStickId = 3;
+    	joyStick = new Position2dProxy(pc,joyStickId);
+    }
 //	speechP  = new SpeechProxy(pc,0);
 //	speechP->Say("I am ready Mate, Heloooooooooooooooooooo");
 	sleep(1);
@@ -624,6 +635,7 @@ void PlayerInterface::run ()
     try
     {
     	connectDevices();
+    	//pc->Run();
 		Timer timer;
 	    while(true)
 	    {
@@ -634,81 +646,71 @@ void PlayerInterface::run ()
 //			if(!pc->Peek(50))
 //				continue;
 			pc->Read();		
-	    	if(!emergencyStopped)
-	    	{
-			    for(int laser_indx=0; laser_indx < lasers.size(); laser_indx++)
-			    {
-			    	if (laserScan.points.size())
-			    		laserScan.points.clear();
-			    	laserScan.laserPose.p.setX(lasers[laser_indx].pose.p.x());
-			    	laserScan.laserPose.p.setY(lasers[laser_indx].pose.p.y());		    	
-			    	laserScan.laserPose.phi =  lasers[laser_indx].pose.phi;		    	
-			        for(uint i=0; i< lasers[laser_indx].lp->GetCount(); i++)
-			        {
-				    	laserScan.points.push_back(QPointF(lasers[laser_indx].lp->GetPoint(i).px, lasers[laser_indx].lp->GetPoint(i).py));    
-					}
-			  	}
-		        if(ctrEnabled)
-		        {
-		        	player_pose_t ps;
-		        	if(velControl)
-		        	{
-			            drive->SetSpeed(speed,turnRate);
-		        	}
-		        	else
-		        	{
-		        		vfh->GoTo(vfhGoal.p.x(),vfhGoal.p.y(),vfhGoal.phi);	        		
-		        	}
-		            getspeed = drive->GetXSpeed();
-		            getturnrate = drive->GetYawSpeed();	            
-		            ps = drive->GetPose();
-		            odomLocation.p.setX(drive->GetXPos());
-		            odomLocation.p.setY(drive->GetYPos());
-		            odomLocation.phi =  drive->GetYaw();
-		            if(joyStick)
-		            {
-			            joyAxes.setX(joyStick->GetXPos());
-			            joyAxes.setY(joyStick->GetYPos());
-		            }
-	//	            int dir = getJoyStickDir();
-	//	            int globalDir = getJoyStickGlobalDir();
-	//	            printf("\nDirection=%d Global Dir=%d",dir,globalDir);
-	//	            cout<<"\n Current Location X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();
-	//				cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<RTOD(odom_location.phi);	            
-		        }
-				if(ptzEnabled)
-				{
-			    	ptz->SetCam(pan,tilt, 1);
-				}
-				if(mapEnabled)
-				{
-	//				map->GetMap();
-				    //qDebug("Map width %d, height %d resolution %f",map->width,map->height,map->resolution);
-				}
-			    if(localizer)
-			    {
-				    amclLocation.p.setX(localizer->GetHypoth(0).mean.px);
-				    amclLocation.p.setY(localizer->GetHypoth(0).mean.py);
-				    amclLocation.phi =  localizer->GetHypoth(0).mean.pa;
-//				    printf("\nHypo:%d",localizer->GetNumHypoths());
-				    //printf("AMCL location %f %f %f",amclLocation.p.x(),amclLocation.p.y(),amclLocation.phi);
-				    if(localizer->GetHypoth(0).alpha>=0.9)
-				    	localized = true;
-				    else
-				    	localized = false;
-			    }			
-	    	}
-		    else
+		    for(int laser_indx=0; laser_indx < lasers.size(); laser_indx++)
 		    {
-		        qDebug("	--->>> Stopping Robot NOW <<<---");
-				if(ctrEnabled)
-		       	{
-		        	drive->SetSpeed(0,0);
-		        }
-		        pc->Stop();
-		        qDebug("	--->>> Robot Stopped <<<---");
-		        // temporary fix, needs more thinking once i finalize things
-		        emergencyStopped = true;
+		    	if (laserScan.points.size())
+		    		laserScan.points.clear();
+		    	laserScan.laserPose.p.setX(lasers[laser_indx].pose.p.x());
+		    	laserScan.laserPose.p.setY(lasers[laser_indx].pose.p.y());		    	
+		    	laserScan.laserPose.phi =  lasers[laser_indx].pose.phi;		    	
+		        for(uint i=0; i< lasers[laser_indx].lp->GetCount(); i++)
+		        {
+			    	laserScan.points.push_back(QPointF(lasers[laser_indx].lp->GetPoint(i).px, lasers[laser_indx].lp->GetPoint(i).py));    
+				}
+		  	}
+	        if(ctrEnabled && !stopped)
+	        {
+	        	player_pose_t ps;
+	        	if(velControl)
+	        	{
+		            drive->SetSpeed(speed,turnRate);
+	        	}
+	        	else
+	        	{
+	        		vfh->GoTo(vfhGoal.p.x(),vfhGoal.p.y(),vfhGoal.phi);	        		
+	        	}
+	            getspeed = drive->GetXSpeed();
+	            getturnrate = drive->GetYawSpeed();	            
+	            ps = drive->GetPose();
+	            odomLocation.p.setX(drive->GetXPos());
+	            odomLocation.p.setY(drive->GetYPos());
+	            odomLocation.phi =  drive->GetYaw();
+	            if(!wheelChairCommander)
+	            {
+		            joyAxes.setX(joyStick->GetXPos());
+		            joyAxes.setY(joyStick->GetYPos());
+	            }
+	            else
+	            {
+		            joyAxes.setX(wheelChairCommander->JoyX());
+		            joyAxes.setY(wheelChairCommander->JoyY());
+	            }
+	            int dir = getJoyStickDir();
+	            int globalDir = getJoyStickGlobalDir();
+	            printf("\nDirection=%d Global Dir=%d",dir,globalDir);
+//	            cout<<"\n Current Location X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();
+//				cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<RTOD(odom_location.phi);	            
+	        }
+			if(ptzEnabled)
+			{
+		    	ptz->SetCam(pan,tilt, 1);
+			}
+			if(mapEnabled)
+			{
+//				map->GetMap();
+			    //qDebug("Map width %d, height %d resolution %f",map->width,map->height,map->resolution);
+			}
+		    if(localizer)
+		    {
+			    amclLocation.p.setX(localizer->GetHypoth(0).mean.px);
+			    amclLocation.p.setY(localizer->GetHypoth(0).mean.py);
+			    amclLocation.phi =  localizer->GetHypoth(0).mean.pa;
+//				    printf("\nHypo:%d",localizer->GetNumHypoths());
+			    //printf("AMCL location %f %f %f",amclLocation.p.x(),amclLocation.p.y(),amclLocation.phi);
+			    if(localizer->GetHypoth(0).alpha>=0.9)
+			    	localized = true;
+			    else
+			    	localized = false;
 		    }
 	    	emit newData();
 	    }

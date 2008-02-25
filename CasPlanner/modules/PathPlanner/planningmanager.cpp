@@ -254,7 +254,7 @@ Node * PlanningManager::findPath(int coord)
 
 	if(retval)
 	{
-		pathPlanner->printNodeList();
+//		pathPlanner->printNodeList();
 	}
 	else
 	{

@@ -120,7 +120,7 @@ void Astar::findRoot()
 	root->pose.phi = start.phi;
 	root->direction = FORWARD;
 	//Translate(root->pose,start.phi);
-	qDebug("	---->>>Root is Set to be X=%f Y=%f Phi=%f",root->pose.p.x(),root->pose.p.y(),RTOD(root->pose.phi));
+//	qDebug("	---->>>Root is Set to be X=%f Y=%f Phi=%f",root->pose.p.x(),root->pose.p.y(),RTOD(root->pose.phi));
 };
 
 Node *  Astar::startSearch(Pose start,Pose end, int coord)
@@ -158,9 +158,9 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
 	this->end.phi = end.phi;
 	qDebug("	--->>> Search Started <<<---");
 	findRoot();
-	qDebug("	---->>>Target is Set to be X=%f Y=%f Phi=%f<<<---",end.p.x(),end.p.y(),RTOD(end.phi));
+//	qDebug("	---->>>Target is Set to be X=%f Y=%f Phi=%f<<<---",end.p.x(),end.p.y(),RTOD(end.phi));
   	openList->Add(root);				// Add the root to OpenList
-	qDebug("	--->>> Root Added <<<---");
+//	qDebug("	--->>> Root Added <<<---");
 	
 	// while openList is not empty 
 	while (openList->Start != NULL) 
@@ -172,10 +172,10 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
     	if (goalReached(current) && current!= root)                     
 		{
 			// build the complete path to return
-			qDebug("Last Node destination: %f %f",current->pose.p.x(),current->pose.p.y());
+//			qDebug("Last Node destination: %f %f",current->pose.p.x(),current->pose.p.y());
       		current->next = NULL;
-    		qDebug("	--->>> Goal state reached with :%d nodes created and :%d nodes expanded <<<---",ID,NodesExpanded);
-			qDebug("	--->>> General Clean UP <<<---");
+//    		qDebug("	--->>> Goal state reached with :%d nodes created and :%d nodes expanded <<<---",ID,NodesExpanded);
+//			qDebug("	--->>> General Clean UP <<<---");
 			fflush(stdout);
 //			int m=0;
 //	   		while (p != NULL) 
@@ -206,12 +206,12 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
 				p = p->parent;
 			}
         	// now delete all nodes on OPEN and Closed Lists
-			qDebug("	--->>> Freeing open list <<<---");	fflush(stdout);
+//			qDebug("	--->>> Freeing open list <<<---");	fflush(stdout);
 			openList->Free();
-			qDebug("	--->>> DONE  <<<---");				fflush(stdout);
-			qDebug("	--->>> Freeing closed list <<<---");	fflush(stdout);
+//			qDebug("	--->>> DONE  <<<---");				fflush(stdout);
+//			qDebug("	--->>> Freeing closed list <<<---");	fflush(stdout);
 			closedList->Free();
-			qDebug("	--->>> DONE  <<<---");
+//			qDebug("	--->>> DONE  <<<---");
       		return path; 	// Path Found Successfully
     	}
     	

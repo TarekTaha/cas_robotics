@@ -60,6 +60,7 @@ Q_OBJECT
 		void setEnd(Pose);
 		void setMap(Map * map);
 		void startIntentionRecognition();
+		void resetDestinationBelief();
 		void updateSelectedRobot(bool);
     private:
 		NavContainer *navContainer;
@@ -70,7 +71,8 @@ Q_OBJECT
 		QGroupBox actionGB;
 		QPushButton pauseBtn;
 		QPushButton pathPlanBtn;
-		QPushButton generateSpaceBtn;
+		//QPushButton generateSpaceBtn;
+		QPushButton resetBeliefBtn;
 		QPushButton pathFollowBtn;
 		QPushButton captureImage;
 		QPushButton intentionRecognitionBtn;

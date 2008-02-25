@@ -40,7 +40,8 @@ class MapViewer;
 class PlayGround;
 class IntentionRecognizer;
 
-enum{FORCE_FIELD,VFH,CONFIG_SPACE,NO_AVOID};
+enum{FORCE_FIELD,VFH,CONFIG_SPACE,NO_AVOID,ND};
+enum{MINIMAL_INPUT,CONTINIOUS_INPUT};
 
 class RobotManager : public QObject//public CommManager, public PlanningManager ,public Navigator
 {

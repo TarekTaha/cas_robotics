@@ -71,7 +71,7 @@ class Navigator : public Controller
         void stop();
         void run();
         void setupLocalPlanner();
-        Pose wayPoint;
+        Pose wayPoint,lastWayPoint;
         PlayGround * playGround;
         RobotManager *robotManager;
         QVector<QPointF> trail;
