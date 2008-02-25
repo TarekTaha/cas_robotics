@@ -31,7 +31,6 @@ class Comms: public QObject
     public:
         virtual int readConfigs(ConfigFile *cf,int secId)=0;
         virtual int start()=0;
-        virtual int stop()=0;
         bool connected,localized;
 		virtual QString getName()
 		{
@@ -41,8 +40,9 @@ class Comms: public QObject
         void newData();
 		void statusMsg(int,int,QString); 
     public slots:
-        virtual void emergencyStop()=0; 
-        virtual void emergencyRelease()=0; 
+        virtual void stop()=0;
+        virtual void stopRelease()=0;
+        virtual void disconnect()=0; 
     protected:
 		bool startConnected,activateControl,ptzEnabled,occMapEnabled,localizerEnabled,laserEnabled
 			 ,vfhEnabled;

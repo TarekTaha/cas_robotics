@@ -133,7 +133,7 @@ int RobotManager::stop()
 	if(navigator)
 		navigator->StopNavigating();
 	if(commManager)
-		commManager->emergencyStop();
+		commManager->stop();
 	return 1;
 }
 

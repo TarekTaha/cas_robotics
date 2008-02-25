@@ -98,6 +98,7 @@ Q_OBJECT
         PlayerInterface(QString playerHost, int playerPort);
         ~PlayerInterface();
         void stop();
+        void stopRelease();        
         void run();
         void checkForWheelChair();
         void enableControl(int driveId);
@@ -124,8 +125,6 @@ Q_OBJECT
         void setSpeed(double speed, double turnRate); 
 		void setOdometry(Pose odom);
         void setLocation(Pose location);
-        void emergencyStop();
-        void emergencyRelease();
         void connectDevices();
         void clearResources();
 		int  getLocalizerType();        
@@ -145,8 +144,7 @@ Q_OBJECT
         PlayerClient *pc;
        	playerc_client_t *client;
        	QVector <DeviceType> *devices;
-        bool ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized,emergencyStopped,
-        	 velControl,vfhEnabled;
+        bool ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized, velControl,vfhEnabled,stopped;
         int positionId,ptzId,mapId,localizerId,vfhId,joyStickId;
         QVector <Laser> lasers;
         Position2dProxy *drive, *vfh, *joyStick;
