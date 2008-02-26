@@ -40,12 +40,11 @@ public:
     HriTab(QWidget *parent = 0,PlayGround *playG=0);
     ~HriTab();
 public slots:
-	void updateairi();
+	void updateairi(int);
 
 private:
     Ui::HriTab ui;
     PlayGround *playGround;
-    virtual void dick();    
 };
 
 #endif // HRITAB_H

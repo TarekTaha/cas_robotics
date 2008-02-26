@@ -106,6 +106,7 @@ Q_OBJECT
 		void enablePtz(int ptzId);
 		void enableVfh(int vfhId);
 		void enableMap(int mapId);
+		void enableSpeech(int speechId);		
 		void enableLocalizer(int localizerId);
         LaserScan getLaserScan();
         void provideLocation(Pose location);
@@ -120,13 +121,16 @@ Q_OBJECT
         QVector<DeviceType> * getDevices();
         void gotoGoal(Pose);
         void vfhGoto(Pose);
-        void setSpeed(double speed);
+        void setSpeed(double speed); 
         void setTurnRate(double turnRate); 
-        void setSpeed(double speed, double turnRate); 
+        void setSpeed(double speed, double turnRate);
+        void setSpeechNotification(bool state);        
 		void setOdometry(Pose odom);
+		void speechSay(QString voiceM);
         void setLocation(Pose location);
         void connectDevices();
         void clearResources();
+        void setCtrEnabled(bool);
 		int  getLocalizerType();        
         int  getJoyStickGlobalDir();
         int  getJoyStickDir();
@@ -139,13 +143,14 @@ Q_OBJECT
     private:
         QString playerHost; 
         QString logMsg;
+        QString voiceMessage;
         int playerPort; 
         int localizerType;
         PlayerClient *pc;
        	playerc_client_t *client;
        	QVector <DeviceType> *devices;
-        bool ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized, velControl,vfhEnabled,stopped;
-        int positionId,ptzId,mapId,localizerId,vfhId,joyStickId;
+        bool ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized, velControl,vfhEnabled,stopped,speechNotificationEnabled,speechEnabled;
+        int positionId,ptzId,mapId,localizerId,vfhId,joyStickId,speechId;
         QVector <Laser> lasers;
         Position2dProxy *drive, *vfh, *joyStick;
         WheelChairProxy *wheelChairCommander;

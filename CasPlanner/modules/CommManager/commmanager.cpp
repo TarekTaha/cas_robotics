@@ -62,12 +62,35 @@ void CommManager::stop()
   		emit addMsg(0,ERROR,QString("\n1 Communication Interface Not started YET!!!"));
 }
 
+void CommManager::stopMotors()
+{
+	if(player)
+		player->setCtrEnabled(false);
+}
+
+
 void CommManager::stopRelease()
 {
 	if(player)
   		player->stopRelease();
   	else
-  		emit addMsg(0,ERROR,QString("\n1 Communication Interface Not started YET!!!"));
+  		emit addMsg(0,ERROR,QString("\n1a Communication Interface Not started YET!!!"));
+}
+
+void CommManager::setSpeechNotification(bool state)
+{
+	if(player)
+  		player->setSpeechNotification(state);
+  	else
+  		emit addMsg(0,ERROR,QString("\n1b Communication Interface Not started YET!!!"));
+}
+
+void CommManager::speechSay(QString voiceM)
+{
+	if(player)
+  		player->speechSay(voiceM);
+  	else
+  		emit addMsg(0,ERROR,QString("\n1c Communication Interface Not started YET!!!"));
 }
 
 void CommManager::disconnect()
@@ -150,6 +173,11 @@ double CommManager::getSpeed()
   		emit addMsg(0,ERROR,QString("\n10 Communication Interface Not started YET!!!"));  		
   		return 0;
   	}  		
+}
+
+bool   CommManager::getSpeechNotificaionStatus()
+{
+	return this->speechEnabled;
 }
 
 double CommManager::getTurnRate()
@@ -277,8 +305,9 @@ int CommManager::readConfigs( ConfigFile *cf,int secId)
 {
 	int cnt;
    	name =                   cf->ReadString(secId, "name", "No-Name");
-   	startConnected =  (bool) cf->ReadInt   (secId, "startConnected", 1);
+   	startConnected  = (bool) cf->ReadInt   (secId, "startConnected", 1);
   	activateControl = (bool) cf->ReadInt   (secId, "activateControl", 1);
+  	speechEnabled   = (bool) cf->ReadInt   (secId, "speechEnabled", 0);
 	playerIp =               cf->ReadString(secId, "playerIp", "127.0.0.1");
 	playerPort =             cf->ReadInt   (secId, "playerPort", 6665);
 	cnt = cf->GetTupleCount(secId,"lasers");
@@ -327,7 +356,18 @@ int CommManager::readConfigs( ConfigFile *cf,int secId)
 		}
 	}
 	else
-		localizerEnabled = false;		
+		localizerEnabled = false;
+	cnt = cf->GetTupleCount(secId,"speech");				
+	if (cnt==1)
+	{
+		speechEnabled = true;
+		for(int c=0; c<cnt; c++)
+		{
+			speechId = cf->ReadTupleInt(secId,"speech",c ,0);							
+		}
+	}
+	else
+		speechEnabled = false;		
 	cnt = cf->GetTupleCount(secId,"vfh");				
 	if (cnt==1)
 	{
@@ -383,6 +423,11 @@ int CommManager::start()
 		logMsg.append(QString("\n\t\t	- VFH Navigator."));  			
   		player->enableVfh(vfhId);
   	}
+  	if(speechEnabled)
+  	{  
+		logMsg.append(QString("\n\t\t	- VFH Navigator."));  			
+  		player->enableSpeech(0);
+  	}  	
   	if(player)
   	{
  		if(player->isRunning())

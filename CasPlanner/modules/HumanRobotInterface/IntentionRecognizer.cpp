@@ -160,18 +160,28 @@ void IntentionRecognizer::followActionToNextState()
 	{
 		case North:
 			goToState.phi = DTOR(90);
+			if(robotManager->commManager->getSpeechNotificaionStatus())
+				robotManager->commManager->speechSay(QString("Going North"));
 			break;
 		case South:
 			goToState.phi = DTOR(270);
+			if(robotManager->commManager->getSpeechNotificaionStatus())
+				robotManager->commManager->speechSay(QString("Going South"));			
 			break;
 		case East:
 			goToState.phi = DTOR(0);
+			if(robotManager->commManager->getSpeechNotificaionStatus())
+				robotManager->commManager->speechSay(QString("Going East"));			
 			break;
 		case West:
 			goToState.phi = DTOR(180);
+			if(robotManager->commManager->getSpeechNotificaionStatus())
+				robotManager->commManager->speechSay(QString("Going West"));			
 			break;
 		case Nothing:
 			goToState.phi = DTOR(0);
+			if(robotManager->commManager->getSpeechNotificaionStatus())
+				robotManager->commManager->speechSay(QString("Staying in Location"));			
 			break;
 		default:
 			goToState.phi = DTOR(0);
@@ -180,6 +190,10 @@ void IntentionRecognizer::followActionToNextState()
 	{
 		printf("\n Going to State:%d",nextState);
 		printf("\noldGoto X=%f, Y=%f, GoTo X=%f, Y=%f Action=%d Obs=%d",oldGoToState.p.x(),oldGoToState.p.y(),goToState.p.x(),goToState.p.y(),action,observation);
+
+		if(robotManager->commManager)
+	  		robotManager->commManager->stopRelease();
+
 		if(!useNavigator)
 			robotManager->commManager->vfhGoto(goToState);
 		else
@@ -207,6 +221,7 @@ void IntentionRecognizer::resetBelief()
 //  	destBelief[2] = initialBeliefD((numStates*2) + spatialState) = 0;
 //  	destBelief[3] = initialBeliefD((numStates*3) + spatialState) = 0.75;
   	copy(b, initialBeliefD);
+  	oldSpatialState = -2;
   	em->setBelief(b);
 }
 
@@ -248,6 +263,8 @@ void IntentionRecognizer::run()
 		{
 			currentPose = robotManager->commManager->getLocation();
 			qDebug("\n---IR:NO Accurate Estimation yet, best current is: x:%f y:%f phi:%f",currentPose.p.x(),currentPose.p.y(),RTOD(currentPose.phi));
+		  	if(robotManager->commManager)
+		  		robotManager->commManager->stop();
 			usleep(300000);
 		}
 		currentPose = robotManager->commManager->getLocation();

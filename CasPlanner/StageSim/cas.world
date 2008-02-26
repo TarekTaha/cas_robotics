@@ -98,9 +98,10 @@ wheelchair
   localization_origin [ 0 0 0 ]
    name "robot"
    pose [ 6.12 -4.5 180]
-   sick_laser
+#   sick_laser
+  hokuyo_laser
 	(
-		pose [0.30 0.000 0.000 ]
+		pose [0.7 0.20 0.000 ]
 	)
 )
 
