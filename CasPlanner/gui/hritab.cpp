@@ -25,6 +25,7 @@ HriTab::HriTab(QWidget *parent,PlayGround * playG)
     playGround(playG)
 {
 	ui.setupUi(this);
+    connect(ui.toggleSpeech,  SIGNAL(stateChanged (int)), this, SLOT(updateairi(int)));
 }
 
 HriTab::~HriTab()
@@ -32,12 +33,10 @@ HriTab::~HriTab()
 
 }
 
-void HriTab::updateairi()
+void HriTab::updateairi(int state)
 {
-	
+	if(playGround)
+		if(playGround->robotPlatforms[0]->commManager)
+			playGround->robotPlatforms[0]->commManager->setSpeechNotification(state);
 }
 
-void HriTab::dick()
-{
-	
-}

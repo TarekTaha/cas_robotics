@@ -204,29 +204,31 @@ void MapViewer::renderLaser()
 	    glRotated(RTOD(loc.phi),0,0,1);
 
 	    //glColor3f(0.623,0.811,0.3);
-	    glColor4f(0,1.0f/double(i+1),0.2,1.0f/double(i+1));
-//	    glBegin(GL_TRIANGLE_FAN);
-//	    	glVertex2f(0,0);
-//		    if(laserScan.points.size() > 0)
-//	    	{
-//	        	for(int m=0; m < laserScan.points.size(); m++)
-//		        {
-//					laserScan.points[m] = Trans2Global(laserScan.points[m],laserScan.laserPose);
-//	    	        glVertex2f(laserScan.points[m].x(), laserScan.points[m].y());
-//	        	}
-//		    }
-//	    	glVertex2f(0,0);
-//	    glEnd();
-	    glBegin(GL_LINE_LOOP);
+//	    glColor4f(0,1.0f/double(i+1),0.2,1.0f/double(i+1));
+	    glColor4f(140/double(255.0),231/double(255.0),237/double(255.0),0.8);
+	    glBegin(GL_TRIANGLE_FAN);
+			glVertex2f(laserScan.laserPose.p.x(), laserScan.laserPose.p.y());
 		    if(laserScan.points.size() > 0)
-	    	{
+	    	{   
 	        	for(int m=0; m < laserScan.points.size(); m++)
 		        {
 					laserScan.points[m] = Trans2Global(laserScan.points[m],laserScan.laserPose);
 	    	        glVertex2f(laserScan.points[m].x(), laserScan.points[m].y());
 	        	}
 		    }
+			glVertex2f(laserScan.laserPose.p.x(), laserScan.laserPose.p.y());
 	    glEnd();
+//	    glBegin(GL_LINE_LOOP);
+//		    if(laserScan.points.size() > 0)
+//	    	{
+//		    	glVertex2f(laserScan.laserPose.p.x(), laserScan.laserPose.p.y());
+//	        	for(int m=0; m < laserScan.points.size(); m++)
+//		        {
+//					laserScan.points[m] = Trans2Global(laserScan.points[m],laserScan.laserPose);
+//	    	        glVertex2f(laserScan.points[m].x(), laserScan.points[m].y());
+//	        	}
+//		    }
+//	    glEnd();
 	    glPopMatrix();
 	}
 }
@@ -581,11 +583,11 @@ void MapViewer::renderObservation()
 		switch (obs)
 		{
 			case 0:
-//   				glBegin(GL_LINES);			
-//					glVertex2f( 0.0, 0.0);
-//					glVertex2f( 0.0, 1.0);
-//				glEnd();
-				glRectf(-0.1,0.0f,0.1f, 0.7f);
+				glLineWidth(2);				
+   				glBegin(GL_LINES);			
+					glVertex2f( 0.0, 0.0);
+					glVertex2f( 0.0, 1.0);
+				glEnd();
 				glBegin(GL_TRIANGLE_FAN);
 					glVertex2f(-0.2, 0.7);
 					glVertex2f( 0.0, 1.0);

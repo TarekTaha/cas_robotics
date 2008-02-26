@@ -22,6 +22,7 @@
 
 PlayerInterface::PlayerInterface(QString host, int port):
     playerHost(host),
+    voiceMessage(""),
     playerPort(port),   
     pc(0), 
     devices(NULL),
@@ -33,7 +34,8 @@ PlayerInterface::PlayerInterface(QString host, int port):
     velControl(true),
     vfhEnabled(false),
     stopped(false),
-    positionId(0), 
+    speechEnabled(false),
+    positionId(0),
 	drive(NULL),
 	vfh(NULL),
 	joyStick(NULL),
@@ -251,12 +253,14 @@ QVector<DeviceType> * PlayerInterface::getDevices()
 
 void PlayerInterface::stopRelease()
 {
+	printf("\nStarted");fflush(stdout);
     dataLock.lockForWrite();
     	stopped = false;
     dataLock.unlock();    
 }
 void PlayerInterface::stop()
 {
+	printf("\nStopped");fflush(stdout);
     dataLock.lockForWrite();
     stopped = true;
 	if(velControl)
@@ -270,6 +274,13 @@ void PlayerInterface::stop()
 			vfh->SetMotorEnable(false);
 	}
     dataLock.unlock();		
+}
+
+void PlayerInterface::speechSay(QString voiceM)
+{
+    dataLock.lockForRead();
+    	this->voiceMessage = voiceM;
+    dataLock.unlock(); 
 }
 
 void PlayerInterface::setPtz( double in_pan, double in_tilt)
@@ -292,6 +303,13 @@ void PlayerInterface::setSpeed(double i_speed, double i_turnRate)
 	velControl = true;	ctrEnabled = true;
     speed = i_speed;
     turnRate = i_turnRate;
+    dataLock.unlock(); 
+}
+
+void PlayerInterface::setSpeechNotification(bool state)
+{
+    dataLock.lockForWrite();
+    	speechNotificationEnabled = state;
     dataLock.unlock(); 
 }
 
@@ -390,6 +408,12 @@ void PlayerInterface::setLocation(Pose loc)
 	}
 }
 
+void PlayerInterface::enableSpeech(int spd)
+{
+	speechEnabled = true;
+	speechId = spd;
+}
+
 void PlayerInterface::enableControl(int posId)
 {
     ctrEnabled = true;
@@ -473,6 +497,11 @@ Pose PlayerInterface::getAmclLocation()
     Pose retval = amclLocation; 
     dataLock.unlock(); 
     return retval; 	
+}
+
+void PlayerInterface::setCtrEnabled(bool status)
+{
+	this->ctrEnabled = status;
 }
 
 Pose PlayerInterface::getOdomLocation()
@@ -576,11 +605,13 @@ void PlayerInterface::connectDevices()
     {
     	player_pose_t 	lp_pose;
     	lasers[i].lp = new LaserProxy(pc,lasers[i].index);
+    	lasers[i].lp->RequestConfigure();
+    	lasers[i].lp->RequestGeom();	
     	lp_pose = lasers[i].lp->GetPose();
     	lasers[i].pose.p.setX(lp_pose.px);
     	lasers[i].pose.p.setY(lp_pose.py);	    	
     	lasers[i].pose.phi = lp_pose.pa;
-    	qDebug("Laser Pose X:%f Y:%f Phi:%f",lasers[i].pose.p.x(),lasers[i].pose.p.y(),lasers[i].pose.phi);	    	
+//    	qDebug("Laser Pose X:%f Y:%f Phi:%f",lasers[i].pose.p.x(),lasers[i].pose.p.y(),lasers[i].pose.phi);	    	
 		logMsg.append(QString("\n\t\t - Laser interface:%1 Interface Added Successfully").arg(lasers[i].index));  
     }
     if(mapEnabled)
@@ -617,8 +648,13 @@ void PlayerInterface::connectDevices()
     	joyStickId = 3;
     	joyStick = new Position2dProxy(pc,joyStickId);
     }
-//	speechP  = new SpeechProxy(pc,0);
-//	speechP->Say("I am ready Mate, Heloooooooooooooooooooo");
+    
+    if(speechEnabled)
+    {
+    	speechP  = new SpeechProxy(pc,speechId);
+    	speechP->Say("Started");
+    }
+    
 	sleep(1);
 	logMsg.append(QString("\n\t Testing Player Server for Data Read:"));  	
 	logMsg.append(QString("\n\t\t - Test Passed, You can read Data from Player Server Now"));
@@ -635,7 +671,6 @@ void PlayerInterface::run ()
     try
     {
     	connectDevices();
-    	//pc->Run();
 		Timer timer;
 	    while(true)
 	    {
@@ -658,16 +693,19 @@ void PlayerInterface::run ()
 			    	laserScan.points.push_back(QPointF(lasers[laser_indx].lp->GetPoint(i).px, lasers[laser_indx].lp->GetPoint(i).py));    
 				}
 		  	}
-	        if(ctrEnabled && !stopped)
+	        if(ctrEnabled)
 	        {
 	        	player_pose_t ps;
-	        	if(velControl)
+	        	if (!stopped)
 	        	{
-		            drive->SetSpeed(speed,turnRate);
-	        	}
-	        	else
-	        	{
-	        		vfh->GoTo(vfhGoal.p.x(),vfhGoal.p.y(),vfhGoal.phi);	        		
+		        	if(velControl)
+		        	{
+			            drive->SetSpeed(speed,turnRate);
+		        	}
+		        	else
+		        	{
+		        		vfh->GoTo(vfhGoal.p.x(),vfhGoal.p.y(),vfhGoal.phi);	        		
+		        	}
 	        	}
 	            getspeed = drive->GetXSpeed();
 	            getturnrate = drive->GetYawSpeed();	            
@@ -688,7 +726,7 @@ void PlayerInterface::run ()
 	            int dir = getJoyStickDir();
 	            int globalDir = getJoyStickGlobalDir();
 	            printf("\nDirection=%d Global Dir=%d",dir,globalDir);
-//	            cout<<"\n Current Location X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();
+	            cout<<"\n Current Joystick X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();
 //				cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<RTOD(odom_location.phi);	            
 	        }
 			if(ptzEnabled)
@@ -707,10 +745,19 @@ void PlayerInterface::run ()
 			    amclLocation.phi =  localizer->GetHypoth(0).mean.pa;
 //				    printf("\nHypo:%d",localizer->GetNumHypoths());
 			    //printf("AMCL location %f %f %f",amclLocation.p.x(),amclLocation.p.y(),amclLocation.phi);
-			    if(localizer->GetHypoth(0).alpha>=0.9)
+			    if(localizer->GetHypoth(0).alpha>=0.8)
 			    	localized = true;
 			    else
 			    	localized = false;
+		    }
+		    if(speechNotificationEnabled)
+		    {
+		    	if(speechP && !voiceMessage.isEmpty())
+		    	{
+		    		speechP->Say(qPrintable(voiceMessage));
+		    		printf("\n I said :%s",qPrintable(voiceMessage));
+		    		voiceMessage.clear();
+		    	}
 		    }
 	    	emit newData();
 	    }

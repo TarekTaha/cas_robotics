@@ -52,11 +52,14 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
         virtual Pose   getLocation();               
         virtual Pose   getAmclLocation();
         virtual Pose   getOdomLocation();
+        virtual bool   getSpeechNotificaionStatus();
         virtual void   gotoGoal(Pose);
         virtual void   vfhGoto(Pose);
         virtual void   setSpeed(double speed);
         virtual void   setPtz(double pan, double tilt);
         virtual void   setTurnRate(double turnRate);
+        virtual void   speechSay(QString voiceM);
+        virtual void   setSpeechNotification(bool state);
         virtual void   setOdometry(Pose odom);
 	    virtual Map    provideMap(); 
 	    virtual void   provideSpeed(double &speed, double &turnRate);
@@ -68,6 +71,7 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
         virtual void setSpeed(double speed, double turnRate); 
         virtual void setLocation(Pose location);
         virtual void stop();
+    	virtual void stopMotors();        
         virtual void stopRelease();        
         virtual void disconnect();         
     signals:
