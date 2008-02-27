@@ -723,10 +723,10 @@ void PlayerInterface::run ()
 		            joyAxes.setX(wheelChairCommander->JoyX());
 		            joyAxes.setY(wheelChairCommander->JoyY());
 	            }
-	            int dir = getJoyStickDir();
-	            int globalDir = getJoyStickGlobalDir();
-	            printf("\nDirection=%d Global Dir=%d",dir,globalDir);
-	            cout<<"\n Current Joystick X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();
+//	            int dir = getJoyStickDir();
+//	            int globalDir = getJoyStickGlobalDir();
+//	            printf("\nDirection=%d Global Dir=%d",dir,globalDir);
+//	            cout<<"\n Current Joystick X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();
 //				cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<RTOD(odom_location.phi);	            
 	        }
 			if(ptzEnabled)
@@ -745,7 +745,7 @@ void PlayerInterface::run ()
 			    amclLocation.phi =  localizer->GetHypoth(0).mean.pa;
 //				    printf("\nHypo:%d",localizer->GetNumHypoths());
 			    //printf("AMCL location %f %f %f",amclLocation.p.x(),amclLocation.p.y(),amclLocation.phi);
-			    if(localizer->GetHypoth(0).alpha>=0.8)
+			    if(localizer->GetHypoth(0).alpha >= 0.7)
 			    	localized = true;
 			    else
 			    	localized = false;

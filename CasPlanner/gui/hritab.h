@@ -40,8 +40,8 @@ public:
     HriTab(QWidget *parent = 0,PlayGround *playG=0);
     ~HriTab();
 public slots:
-	void updateairi(int);
-
+	void toggleVoiceNotification(int);
+	void toggleStrategy(bool);
 private:
     Ui::HriTab ui;
     PlayGround *playGround;

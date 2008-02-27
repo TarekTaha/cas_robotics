@@ -25,7 +25,9 @@ HriTab::HriTab(QWidget *parent,PlayGround * playG)
     playGround(playG)
 {
 	ui.setupUi(this);
-    connect(ui.toggleSpeech,  SIGNAL(stateChanged (int)), this, SLOT(updateairi(int)));
+    connect(ui.toggleSpeech,  		SIGNAL(stateChanged (int)), this, SLOT(toggleVoiceNotification(int)));
+    connect(ui.continiousStrategy,  SIGNAL(toggled(bool)), this, SLOT(toggleStrategy(bool)));
+    connect(ui.minimalStrategy,  	SIGNAL(toggled(bool)), this, SLOT(toggleStrategy(bool)));    
 }
 
 HriTab::~HriTab()
@@ -33,7 +35,27 @@ HriTab::~HriTab()
 
 }
 
-void HriTab::updateairi(int state)
+void HriTab::toggleStrategy(bool)
+{
+	if(ui.continiousStrategy->isChecked())
+	{
+		if(playGround)
+			if(playGround->robotPlatforms[0]->intentionRecognizer)
+				playGround->robotPlatforms[0]->intentionRecognizer->setInteractionStrategy(CONTINIOUS_INPUT);
+	}
+	else
+	{
+		if(playGround)
+			if(playGround->robotPlatforms[0]->intentionRecognizer)
+			{
+				playGround->robotPlatforms[0]->intentionRecognizer->setInteractionStrategy(MINIMAL_INPUT);
+			}
+			else
+				printf("\n Start Intention Recognizer First !!!");
+	}
+}
+
+void HriTab::toggleVoiceNotification(int state)
 {
 	if(playGround)
 		if(playGround->robotPlatforms[0]->commManager)

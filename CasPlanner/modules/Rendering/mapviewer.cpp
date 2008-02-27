@@ -145,9 +145,9 @@ void MapViewer::renderPaths()
 		if(playGround->robotPlatforms[i]->planningManager->pathPlanner->path)
 		{
 			Node * path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;
-	    	glColor4f(RGB_COLOR[3][0],RGB_COLOR[3][1],RGB_COLOR[3][2],1);
+	    	glColor4f(RGB_COLOR[3][0],RGB_COLOR[3][1],RGB_COLOR[3][2],0.5);
 	    	glLineWidth(2);
-	    	glColor4f(0,0,1,1);
+	    	glColor4f(0,0,1,0.5);
 		    glBegin(GL_LINE_STRIP);
 			while(path)
 			{
@@ -163,10 +163,10 @@ void MapViewer::renderPaths()
 		    glPushMatrix();
 			    glTranslatef(wayPoint.p.x(),wayPoint.p.y(),0);
 			    glRotated(RTOD(wayPoint.phi),0,0,1);
-			    glColor4f(1,0,0,0.8);
+			    glColor4f(1,0,0,0.5);
 			    glShadeModel(GL_FLAT);
 			    glBegin(GL_TRIANGLE_FAN);
-					glColor4f(1,0,0,1);
+					glColor4f(1,0,0,0.5);
 				    glVertex3f(0,0.1,0);
 				    glVertex3f(0.3,0,0);
 				    glVertex3f(0,-0.1,0);
@@ -198,18 +198,15 @@ void MapViewer::renderLaser()
 	    LaserScan laserScan = playGround->robotPlatforms[i]->commManager->getLaserScan();
 	    //Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;
 	    Pose loc = robotsLocation[i];
-	    glPushMatrix();
-	    //qDebug("Laser Pose X:%f Y:%f Phi:%f",laserScan.laserPose.p.x(),laserScan.laserPose.p.y(),laserScan.laserPose.phi);
-	    glTranslatef(loc.p.x(),loc.p.y(),0);
-	    glRotated(RTOD(loc.phi),0,0,1);
 
-	    //glColor3f(0.623,0.811,0.3);
-//	    glColor4f(0,1.0f/double(i+1),0.2,1.0f/double(i+1));
-	    glColor4f(140/double(255.0),231/double(255.0),237/double(255.0),0.8);
-	    glBegin(GL_TRIANGLE_FAN);
+	    glPushMatrix();
+	    glTranslatef(loc.p.x(),loc.p.y(),0);
+	    glRotated(RTOD(loc.phi),0,0,1);	    
+	    glColor4f(140/double(255.0),231/double(255.0),237/double(255.0),0.5);
+	    glBegin(GL_POLYGON);
 			glVertex2f(laserScan.laserPose.p.x(), laserScan.laserPose.p.y());
 		    if(laserScan.points.size() > 0)
-	    	{   
+	    	{
 	        	for(int m=0; m < laserScan.points.size(); m++)
 		        {
 					laserScan.points[m] = Trans2Global(laserScan.points[m],laserScan.laserPose);
@@ -218,17 +215,21 @@ void MapViewer::renderLaser()
 		    }
 			glVertex2f(laserScan.laserPose.p.x(), laserScan.laserPose.p.y());
 	    glEnd();
-//	    glBegin(GL_LINE_LOOP);
-//		    if(laserScan.points.size() > 0)
-//	    	{
-//		    	glVertex2f(laserScan.laserPose.p.x(), laserScan.laserPose.p.y());
-//	        	for(int m=0; m < laserScan.points.size(); m++)
-//		        {
-//					laserScan.points[m] = Trans2Global(laserScan.points[m],laserScan.laserPose);
-//	    	        glVertex2f(laserScan.points[m].x(), laserScan.points[m].y());
-//	        	}
-//		    }
-//	    glEnd();
+
+	    glColor4f(41/double(255.0),107/double(255.0),112/double(255.0),0.5);	    
+	    glBegin(GL_LINE_LOOP);
+		    if(laserScan.points.size() > 0)
+	    	{
+		    	glVertex2f(laserScan.laserPose.p.x(), laserScan.laserPose.p.y());
+	        	for(int m=0; m < laserScan.points.size(); m++)
+	    	        glVertex2f(laserScan.points[m].x(), laserScan.points[m].y());
+		    }
+	    glEnd();
+	    
+	    glTranslatef(laserScan.laserPose.p.x(), laserScan.laserPose.p.y(),0);
+	    glColor4f(255/double(255.0),50/double(255.0),50/double(255.0),0.8);
+	    glRectf(-0.025,0.025f, 0.025f, -0.025f);
+	    
 	    glPopMatrix();
 	}
 }
@@ -242,10 +243,10 @@ void MapViewer::renderSearchTree()
 			continue;
 		temp =  playGround->robotPlatforms[i]->planningManager->pathPlanner->search_space;
 	    glPushMatrix();
-	    glColor3f(1,0,0);
+	    glColor4f(1,0,0,0.5);
 		while(temp)
 		{
-			glColor3f(1,0,0);
+			glColor4f(1,0,0,0.5);
 			glLineWidth(2);
 			for(int j=0;j<temp->children.size();j++)
 			{
@@ -276,7 +277,7 @@ void MapViewer::renderExpandedTree()
 		QPointF child;
 		tree =  playGround->robotPlatforms[i]->planningManager->pathPlanner->tree;
 	    glPushMatrix();
-	    glColor3f(0,1,0);
+	    glColor4f(0,1,0,0.5);
 		for(unsigned int k=0;k<tree.size();k++)
 		{
 			for(int j=0;j<tree[k].children.size();j++)
@@ -315,7 +316,7 @@ void MapViewer::renderRobot()
 		    glTranslated(loc.p.x(),loc.p.y(),0);
 		    glRotated(RTOD(loc.phi),0,0,1);
 		    glShadeModel(GL_FLAT);
-			glColor4f(1,0,0,1);
+			glColor4f(1,0,0,0.5);
 			glBegin(GL_TRIANGLE_FAN);
 			for(int m=0;m<playGround->robotPlatforms[i]->robot->local_edge_points.size();m++)
 			{
@@ -327,7 +328,7 @@ void MapViewer::renderRobot()
 	    }
 		if(playGround->robotPlatforms[i]->navigator->trail.size()>1)
 		{
-	    	glColor4f(RGB_COLOR[i][0],RGB_COLOR[i][1],RGB_COLOR[i][2],1);
+	    	glColor4f(RGB_COLOR[i][0],RGB_COLOR[i][1],RGB_COLOR[i][2],0.5);
 		    glBegin(GL_LINE_STRIP);
 			    for(int k =0;k<playGround->robotPlatforms[i]->navigator->trail.size();k++)
 			    {
@@ -339,11 +340,11 @@ void MapViewer::renderRobot()
 	    glPushMatrix();
 	    glTranslatef(loc.p.x(),loc.p.y(),0);
 	    glRotated(RTOD(loc.phi),0,0,1);
-	    glShadeModel(GL_FLAT);
-	    // Robot Boundaries BOX
-//		glColor4f(0.63,0.58,0.22,1.0f/double(i+1));
-//		glColor4f(0.5,0.5/double(i+1),0.5,1.0f/double(i+1));
-		glColor4f(RGB_COLOR[i][0],RGB_COLOR[i][1],RGB_COLOR[i][2],1);
+//	    glShadeModel(GL_FLAT);
+	    // Robot Boundaries BOX 83b3c7
+//		glColor4f(RGB_COLOR[i][0],RGB_COLOR[i][1],RGB_COLOR[i][2],0.8);
+	    double colorRatio = 255.0;
+	    glColor4f(90/colorRatio,90/colorRatio,90/colorRatio,0.8);	    
 		glBegin(GL_TRIANGLE_FAN);
 		for(int m=0;m<playGround->robotPlatforms[i]->robot->local_edge_points.size();m++)
 		{
@@ -357,11 +358,12 @@ void MapViewer::renderRobot()
 	    glColor4f(0,0,1,0.5);
 //	    freetype::print(font2Render,1.6,0, "Active FreeType Text");
 	    
-	    glBegin(GL_LINE_LOOP);
+	    glBegin(GL_TRIANGLE_FAN);
 			glColor4f(0,0,1,0.5);
 		    glVertex3f(1.3, 0.15,0);
 		    glVertex3f(1.5,0,0);
 		    glVertex3f(1.3,-0.15,0);
+		    glVertex3f(1.3, 0.15,0);
 	    glEnd();
 
 	    glBegin(GL_LINE_LOOP);
@@ -369,12 +371,12 @@ void MapViewer::renderRobot()
 		    glVertex3f(0,0,0);
 		    glVertex3f(1.5,0,0);
 	    glEnd();
-
-		glColor4f(0,1,0,1);
-		for (int k=0;k<playGround->robotPlatforms[i]->robot->check_points.size();k++)
-		{
-			drawCircle(playGround->robotPlatforms[i]->robot->check_points[k],playGround->robotPlatforms[i]->robot->expansionRadius);
-		}
+	    // This will display the circles covering the robot for Obstacle Avoidance reasons
+//		glColor4f(0,1,0,1);
+//		for (int k=0;k<playGround->robotPlatforms[i]->robot->check_points.size();k++)
+//		{
+//			drawCircle(playGround->robotPlatforms[i]->robot->check_points[k],playGround->robotPlatforms[i]->robot->expansionRadius);
+//		}
 
 	    glPopMatrix();
 	}
@@ -414,7 +416,7 @@ void MapViewer::loadTexture()
 				imgData[(j*ogMap->width+i)*4]   = 255;
 				imgData[(j*ogMap->width+i)*4+1] = 255;
 				imgData[(j*ogMap->width+i)*4+2] = 255;
-				imgData[(j*ogMap->width+i)*4+3] = 255;
+				imgData[(j*ogMap->width+i)*4+3] = 50;
 		    }
 		}
     }
@@ -666,12 +668,12 @@ void MapViewer::renderSpatialStates()
 	    }
 	    else if (i == playGround->activeRobot->intentionRecognizer->nextState)
 	    {
-	    	glColor4f(0,0,1,1);
+	    	glColor4f(0,0,1,0.5);
 	    	renderTextFont(-0.5,0.5, BITMAP_FONT_TYPE_HELVETICA_10,"Next");
 	    }
 		else if( (d = playGround->mapManager->mapSkeleton.destIndexes.indexOf((i%playGround->mapManager->mapSkeleton.numStates)))!=-1 )
 		{
-			glColor4f(RGB_COLOR[d%9][0],RGB_COLOR[d%9][1],RGB_COLOR[d%9][2],1.0f);
+			glColor4f(RGB_COLOR[d%9][0],RGB_COLOR[d%9][1],RGB_COLOR[d%9][2],0.5f);
 			renderTextFont(-0.1,0.3, BITMAP_FONT_TYPE_HELVETICA_12,(char*)qPrintable(QString("%1").arg(d+1)));
 		}
 	    else
@@ -714,47 +716,40 @@ void MapViewer::drawProbHisto(QPointF pos, double prob)
 		return;
 	glPushMatrix();
 	glTranslatef(pos.x(),pos.y(),0.0f);
-  glColor4f(1.0f,0.5f,0.0f,1.0f);
+    glColor4f(1.0f,0.5f,0.0f,0.5f);
 // 	renderText(0 ,0 + 0.2, prob+ 0.2, str);
 //	glScalef(1/12.0, 1/12.0, prob);
   	//glRotatef(rotqube,0.0f,1.0f,0.0f);	// Rotate The cube around the Y axis
   	//glRotatef(rotqube,1.0f,1.0f,1.0f);
   	glBegin(GL_QUADS);		// Draw The Cube Using quads  
 	
- 		//glColor3f(1.0f,0.0f,1.0f);	// Color Violet
-		glColor4f(0.0f,1.0f,0.0f,1.0f); 		
+		glColor4f(0.0f,1.0f,0.0f,0.5f); 		
 	    
-//	    glColor3f(0.0f,1.0f,0.0f);	// Color Blue
 	    glVertex3f( 1.0f, 1.0f,-0.0f);	// Top Right Of The Quad (Top)
 	    glVertex3f(-1.0f, 1.0f,-0.0f);	// Top Left Of The Quad (Top)
 	    glVertex3f(-1.0f, 1.0f, 1.0f);	// Bottom Left Of The Quad (Top)
 	    glVertex3f( 1.0f, 1.0f, 1.0f);	// Bottom Right Of The Quad (Top)
 	    
-//	    glColor3f(1.0f,0.5f,0.0f);	// Color Orange
 	    glVertex3f( 1.0f,-1.0f, 1.0f);	// Top Right Of The Quad (Bottom)
 	    glVertex3f(-1.0f,-1.0f, 1.0f);	// Top Left Of The Quad (Bottom)
 	    glVertex3f(-1.0f,-1.0f,-0.0f);	// Bottom Left Of The Quad (Bottom)
 	    glVertex3f( 1.0f,-1.0f,-0.0f);	// Bottom Right Of The Quad (Bottom)
 	    
-//	    glColor3f(1.0f,0.0f,0.0f);	// Color Red	
 	    glVertex3f( 1.0f, 1.0f, 1.0f);	// Top Right Of The Quad (Front)
 	    glVertex3f(-1.0f, 1.0f, 1.0f);	// Top Left Of The Quad (Front)
 	    glVertex3f(-1.0f,-1.0f, 1.0f);	// Bottom Left Of The Quad (Front)
 	    glVertex3f( 1.0f,-1.0f, 1.0f);	// Bottom Right Of The Quad (Front)
 	    
-//	    glColor3f(1.0f,1.0f,0.0f);	// Color Yellow
 	    glVertex3f( 1.0f,-1.0f,-0.0f);	// Top Right Of The Quad (Back)
 	    glVertex3f(-1.0f,-1.0f,-0.0f);	// Top Left Of The Quad (Back)
 	    glVertex3f(-1.0f, 1.0f,-0.0f);	// Bottom Left Of The Quad (Back)
 	    glVertex3f( 1.0f, 1.0f,-0.0f);	// Bottom Right Of The Quad (Back)
 	    
-//	    glColor3f(0.0f,0.0f,1.0f);	// Color Blue
 	    glVertex3f(-1.0f, 1.0f, 1.0f);	// Top Right Of The Quad (Left)
 	    glVertex3f(-1.0f, 1.0f,-0.0f);	// Top Left Of The Quad (Left)
 	    glVertex3f(-1.0f,-1.0f,-0.0f);	// Bottom Left Of The Quad (Left)
 	    glVertex3f(-1.0f,-1.0f, 1.0f);	// Bottom Right Of The Quad (Left)
 	    
-//	    glColor3f(1.0f,0.0f,1.0f);	// Color Violet
 	    glVertex3f( 1.0f, 1.0f,-0.0f);	// Top Right Of The Quad (Right)
 	    glVertex3f( 1.0f, 1.0f, 1.0f);	// Top Left Of The Quad (Right)
 	    glVertex3f( 1.0f,-1.0f, 1.0f);	// Bottom Left Of The Quad (Right)
@@ -771,11 +766,11 @@ void MapViewer::showIndicators()
 	    glPushMatrix();
 	    glTranslatef(start.p.x(),start.p.y(),0);
 	    glRotated(RTOD(start.phi),0,0,1);
-	    glColor4f(1,1,1,0.8);
+	    glColor4f(1,1,1,0.5);
 	    glShadeModel(GL_FLAT);
 	    // Path Start
 	    glBegin(GL_TRIANGLE_FAN);
-			glColor4f(0,1,0,1);
+			glColor4f(0,1,0,0.5);
 		    glVertex3f(-0.2,0.15,0);
 		    glVertex3f(0.3,0,0);
 		    glVertex3f(-0.2,-0.15,0);
@@ -785,7 +780,7 @@ void MapViewer::showIndicators()
 	    if(step == 2)
 	    {
 		    glBegin(GL_LINE_LOOP);
-				glColor4f(1,1,1,1);
+				glColor4f(1,1,1,0.5);
 			    glVertex3f(start.p.x(),start.p.y(),0);
 			    glVertex3f(mousePos.x(),mousePos.y(),0);
 		    glEnd();
@@ -800,11 +795,11 @@ void MapViewer::showIndicators()
 	    glPushMatrix();
 	    glTranslatef(end.p.x(),end.p.y(),0);
 	    glRotated(RTOD(end.phi),0,0,1);
-	    glColor4f(1,1,1,0.8);
+	    glColor4f(1,1,1,0.5);
 	    glShadeModel(GL_FLAT);
 	    // Path End
 	    glBegin(GL_TRIANGLE_FAN);
-			glColor4f(0,1,0,1);
+			glColor4f(0,1,0,0.5);
 		    glVertex3f(-0.2,0.15,0);
 		    glVertex3f(0.3,0,0);
 		    glVertex3f(-0.2,-0.15,0);
@@ -814,12 +809,12 @@ void MapViewer::showIndicators()
 	    if(step == 4)
 	    {
 		    glBegin(GL_LINE_LOOP);
-				glColor4f(1,1,1,1);
+				glColor4f(1,1,1,0.5);
 			    glVertex3f(end.p.x(),end.p.y(),0);
 			    glVertex3f(mousePos.x(),mousePos.y(),0);
 		    glEnd();
 	    }
-	    glColor4f(0,0,0,0.8);
+	    glColor4f(0,0,0,0.5);
 //	        QFont font40; font40.setPointSize(14);
 //	        renderText(0.2,0,0,QString("End"), font40);
 		glPopMatrix();
@@ -831,6 +826,7 @@ void MapViewer::paintGL()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//    glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 //    glDisable(GL_BLEND);
 //    glBlendFunc(GL_ONE, GL_ONE);
 //    glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_ONE_MINUS_SRC_ALPHA);
@@ -840,23 +836,25 @@ void MapViewer::paintGL()
 
 
 	glEnable(GL_DEPTH_TEST);
+//    glDisable( GL_DEPTH_TEST );
+//    glDisable( GL_LIGHTING );	
 //    glDisable(GL_DEPTH_TEST);
 //    glEnable(GL_POINT_SMOOTH);
 //    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
 //    glEnable(GL_LINE_SMOOTH);
 //    glEnable(GL_POLYGON_SMOOTH);
-    glColor4f(0.0f,0.0f,0.0f,1.0f);
+    glColor4f(0.0f,0.0f,0.0f,0.5f);
     renderTextFont(0.65,-0.95, BITMAP_FONT_TYPE_HELVETICA_18, "Scale:1m/Tile" );
-    glColor4f(0.78f,0.78f,0.78f,1.0f);
+    glColor4f(0.78f,0.78f,0.78f,0.5f);
     glRectf(0.64,-0.9f,aspectRatio-0.03,-0.96f);
     
     renderObservation();
 	renderDestIndicators();
 	
-	glColor4f(0.78f,0.78f,0.78f,1.0f);
+	glColor4f(0.78f,0.78f,0.78f,0.5f);
 	glRectf(-aspectRatio+0.01,0.8f,-0.4f, 1.0f-0.01);
 	
-	glColor4f(0.0f,0.0f,0.0f,1.0f);
+	glColor4f(0.0f,0.0f,0.0f,0.5f);
 	glLineWidth(3);
 	glBegin(GL_LINE_STRIP);
 		glVertex3f(-aspectRatio+0.01,0.8,0);
@@ -880,21 +878,23 @@ void MapViewer::paintGL()
 
 	if(this->ogMap)
 	{
-		displayGrid();
-		showIndicators();
-		renderPaths();
-	    renderRobot();	    
-		setRobotsLocation();	
-	    renderLaser();      
-	    renderSpatialStates();
-	    renderAction();
-//		renderExpandedTree();
-//		renderSearchTree();
+		glDisable( GL_DEPTH_TEST );		
 		if(!mainMapBuilt)
 		{
 			loadTexture();
 			renderMap();
 		}
+		displayGrid();		
+		showIndicators();
+		renderPaths();
+	    renderLaser();
+		renderRobot();	    
+		glEnable(GL_DEPTH_TEST);
+		setRobotsLocation();
+	    renderSpatialStates();
+	    renderAction();
+//		renderExpandedTree();
+//		renderSearchTree();
 	}
     glCallList(mapList);
         

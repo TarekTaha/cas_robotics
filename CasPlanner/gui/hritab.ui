@@ -84,7 +84,7 @@
         <item>
          <layout class="QVBoxLayout" >
           <item>
-           <widget class="QRadioButton" name="MinimalStrategy" >
+           <widget class="QRadioButton" name="minimalStrategy" >
             <property name="sizePolicy" >
              <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
               <horstretch>0</horstretch>
