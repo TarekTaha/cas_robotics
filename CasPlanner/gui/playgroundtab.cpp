@@ -350,7 +350,7 @@ void PlayGroundTab::createIcons()
 {
 	QListWidgetItem *configButton = new QListWidgetItem(contentsWidget);
     configButton->setIcon(QIcon(":/robot.jpg"));
- 	configButton->setText(("Robot Configurations"));
+ 	configButton->setText(("Robots"));
  	configButton->setTextAlignment(Qt::AlignHCenter);
  	configButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 

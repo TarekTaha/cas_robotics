@@ -74,6 +74,7 @@ void IntentionRecognizer::setInteractionStrategy(int strategy)
 		return;
 	}
 	this->interactionStrategy = strategy;
+	printf("\n Strategy:%d",strategy);
 	return;
 }
 
