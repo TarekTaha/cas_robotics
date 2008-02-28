@@ -20,10 +20,19 @@
  ***************************************************************************/
 #include "activityLogger.h"
 
-ActivityLogger::ActivityLogger()
+ActivityLogger::ActivityLogger():
+logFile(NULL)
 {
-	logFile.open ("tasks.list", ios::out | ios::app | ios::binary);
-	if (logFile.is_open())
+//	QDate date;
+//	QTime time;
+//	date = date.currentDate();
+//	time = time.currentTime();
+//	
+//	QString suffex = QString("-%1%2%3%4%5.txt").arg(time.minute()).arg(time.hour()).arg(date.day()).arg(date.month()).arg(date.year());
+//	logFile = fopen(qPrintable(QString("logs/tasks_list%1").arg(suffex)),"wb+");
+	logFile = fopen("logs/tasks_list.txt","a+");
+	fprintf(logFile,"\n# Values: State, Observation, State, Observation ....\n");	
+	if (logFile)
 	{
 		printf("\nLogger File Opened");
 	}
@@ -33,27 +42,29 @@ ActivityLogger::ActivityLogger()
 
 ActivityLogger::~ActivityLogger()
 {
-	logFile.close();
+	fclose(logFile);
 }
 
 void ActivityLogger::addState(int state, int observation)
 {
+	fprintf(logFile,"%d",state);
 	switch(observation)
 	{
 		case 0:
-			logFile << "%d"<<state<<" Up ";
+			fprintf(logFile," UP ");
 			break;
 		case 1:
-			logFile << "%d"<<state<<" Down ";
+			fprintf(logFile," Down ");
+			printf("\n YES");
 			break;
 		case 2:
-			logFile << "%d"<<state<<" Right ";
+			fprintf(logFile," Right ");
 			break;
 		case 3:
-			logFile << "%d"<<state<<" Left ";
+			fprintf(logFile," Left ");
 			break;
 		case 4:
-			logFile << "%d"<<state<<" Nothing ";
+			fprintf(logFile," Nothing ");
 			break;
 		default:
 			perror("ActivityLogger: Unknown Observation!!!");
@@ -62,10 +73,10 @@ void ActivityLogger::addState(int state, int observation)
 
 void ActivityLogger::endCurrentTask()
 {
-	logFile << "\n";
+	fprintf(logFile,"\n");
 }
 
 void ActivityLogger::startNewTask()
 {
-	logFile << "\n";
+	fprintf(logFile,"\n");
 }
