@@ -23,14 +23,17 @@
 
 #include <iostream>
 #include <fstream>
+#include <QString>
+#include <QTime>
+#include <QDate>
 using namespace std;
 
 class ActivityLogger
 {
 public:
 	ActivityLogger();
-	virtual ~ActivityLogger();
-	fstream logFile;
+	~ActivityLogger();
+	FILE *logFile;
 	void addState(int state, int Observation);
 	void endCurrentTask();
 	void startNewTask(); 

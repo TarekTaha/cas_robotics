@@ -44,11 +44,12 @@ path(NULL)
 	}
 	numStates = playGround->mapManager->mapSkeleton.numStates;
 	numDestinations = playGround->mapManager->mapSkeleton.numDestinations;
+	activityLogger = new ActivityLogger;
 }
 
 IntentionRecognizer::~IntentionRecognizer()
 {
-	activityLogger.logFile.close();
+	delete activityLogger;
 	fclose(file);
 	fclose(odom);
 }
@@ -242,7 +243,7 @@ void IntentionRecognizer::run()
 	QTime time;
 	date = date.currentDate();
 	time = time.currentTime();
-	QString suffex=QString("-%1%2%3%4%5%6.txt").arg(time.second()).arg(time.minute()).arg(time.hour()).arg(date.day()).arg(date.month()).arg(date.year());
+	QString suffex=QString("-%1%2%3%4%5.txt").arg(time.minute()).arg(time.hour()).arg(date.day()).arg(date.month()).arg(date.year());
 	file=fopen(qPrintable(QString("logs/irLog%1").arg(suffex)),"wb");
 	odom=fopen(qPrintable(QString("logs/odom%1").arg(suffex)),"wb");
 	fprintf(file,"# Values: State, Observation, Belief Dest1 ...n, Action, Next State\n");	
@@ -309,15 +310,16 @@ void IntentionRecognizer::run()
 			if (currentStateIsDestination())//em->getStateIsTerminal())
 		    {
 		    	resetBelief();
-				printf("\n[belief is terminal, Resetting Belief\n");
-				activityLogger.startNewTask();
+				printf("\n[belief is terminal, Resetting Belief]\n");
+				activityLogger->addState(spatialState,NoInput);
+				activityLogger->startNewTask();
 		    }
 
 		    oldSpatialState = spatialState;
 		    em->advanceToNextState(action,observation);
 		    belief_vector newB = em->currentState;
 		    
-			activityLogger.addState(spatialState,observation);
+			activityLogger->addState(spatialState,observation);
 			fprintf(file,"%d %d ",spatialState,observation);
 			
 		    QVector<double> max(numDestinations,0.0);

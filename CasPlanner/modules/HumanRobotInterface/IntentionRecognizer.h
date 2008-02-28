@@ -63,7 +63,7 @@ public:
 	void setInteractionStrategy(int strategy);
 	QVector <double> destBelief;	
 	Pose currentState,currentPose,goToState,oldGoToState;
-	ActivityLogger activityLogger;
+	ActivityLogger *activityLogger;
 	int  lastObs,observation,action,spatialState,oldSpatialState;
 private:
 	dvector initialBeliefD;
