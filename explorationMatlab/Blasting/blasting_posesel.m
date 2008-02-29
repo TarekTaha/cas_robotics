@@ -80,6 +80,15 @@ function [qt,solutionvalid,dist_val,targetdist,used_sol] = blasting_posesel(robo
     else
         q = q(:);
     end
+    
+%     %check to see we are not starting parallel with plane normal
+%     tr=fkine(r,q);
+%     r_var=-tr(1:3,3)';
+% 
+%     %find intersection point between surface and the scan line between scan origin and point
+%     if (plane_equ(1)*r_var(1)+plane_equ(2)*r_var(2)+plane_equ(3)*r_var(3)<eps)
+%     end
+               
     q_input=q; %save the input q (or made up q) for later
 
     options = optimset('Display', 'off', 'Largescale', 'off', 'TolFun', optimise.stol,'MaxFunEvals', optimise.iLimit);
@@ -118,12 +127,15 @@ function [qt,solutionvalid,dist_val,targetdist,used_sol] = blasting_posesel(robo
         end
             
 %% Extended find (2 extra starting qs)    
-        %Try a guess which starts at 90' off the current Q, this might find a solution 
-        q=q_input+((sqrt(q_input.^2)~=q_input)*2-1)*pi;
-        [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
-        qt = q + dq; all_qts(3).val=qt;
-        [valid,dist(3),targetdist(3).val]=check_newQ(qt,qlimits,pt,t,Links,numlinks,plane_equ);
-        if valid; used_sol=3; dist_val= dist(3); qt=qt'; return; end
+        %Try a guess which starts at 90' off the current Q, this might find
+        %a solution (as long as first 3 joints are no all zeros)
+         if ~isempty(find(q_input(1:3)~=0, 1))
+             q=q_input+((sqrt(q_input.^2)~=q_input)*2-1)*pi;
+            [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
+            qt = q + dq; all_qts(3).val=qt;
+            [valid,dist(3),targetdist(3).val]=check_newQ(qt,qlimits,pt,t,Links,numlinks,plane_equ);
+            if valid; used_sol=3; dist_val= dist(3); qt=qt'; return; end
+         end
 
         %Try randomly guessing a starting point
         q=[0;0;0;0;0;0];
@@ -191,9 +203,9 @@ theta = acos(plane_equ(1:3)*unit((tr(1:3,3)+tr(1:3,4))));
 % plot(r,q_temp')
 % drawnow
 
-    streamStart=tr(1:3,4);
-    streamEnd=tr(1:3,3)'+tr(1:3,4)';
-    r_var=[streamStart(1)-streamEnd(1),streamStart(2)-streamEnd(2),streamStart(3)-streamEnd(3)];
+%     streamStart=tr(1:3,4);
+%     streamEnd=tr(1:3,3)'+tr(1:3,4)';
+%     r_var=[streamStart(1)-streamEnd(1),streamStart(2)-streamEnd(2),streamStart(3)-streamEnd(3)];
     r_var=-tr(1:3,3)';
 
     %find intersection point between surface and the scan line between scan origin and point
