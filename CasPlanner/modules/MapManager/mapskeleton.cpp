@@ -23,7 +23,7 @@
 MapSkeleton::MapSkeleton()
 {
 	numStates = 49;
-	numDestinations = 4;
+	numDestinations = 6;
 	verticies.resize(numStates);
 	verticies[0].setLocation(-13.65,5.68);
 	verticies[1].setLocation(-13.65,1.53);
@@ -74,14 +74,17 @@ MapSkeleton::MapSkeleton()
 	verticies[46].setLocation(-5.33,-1.43);
 	verticies[47].setLocation(-8.67,1.53);
 	verticies[48].setLocation(-8.72,-1.2);
-	/* Specify which verticies are considered destinations */	
+	/* 
+	 * Specify which verticies are considered destinations 
+	 * Order is very Important and it should be the same as
+	 * In the Pomdp Model Definition
+	 */	
 	destIndexes.push_back(0);
 	destIndexes.push_back(5);
-	destIndexes.push_back(25);
-//	destIndexes.push_back(29);
-//	destIndexes.push_back(30);
-//	destIndexes.push_back(37);
 	destIndexes.push_back(43);
+	destIndexes.push_back(29);
+	destIndexes.push_back(25);
+	destIndexes.push_back(37);
 }
 
 MapSkeleton::~MapSkeleton()

@@ -61,6 +61,7 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
   	RGB_COLOR[1][0] = 1.0; RGB_COLOR[1][1] = 0.51;  RGB_COLOR[1][2] = 0.278; // Sienna1
   	RGB_COLOR[2][0] = 0.0; RGB_COLOR[2][1] = 0.7;   RGB_COLOR[2][2] = 0.0;   // Green
   	RGB_COLOR[3][0] = 0.7; RGB_COLOR[3][1] = 0.7;   RGB_COLOR[3][2] = 0.0;   // Yellow
+  	RGB_COLOR[4][0] = 0.8; RGB_COLOR[4][1] = 0.0;   RGB_COLOR[4][2] = 0.0;   // Red
   	RGB_COLOR[5][0] = 1.0; RGB_COLOR[5][1] = 0.0;   RGB_COLOR[5][2] = 1.0;   // Magenta
   	RGB_COLOR[6][0] = 0.0; RGB_COLOR[6][1] = 0.0;   RGB_COLOR[6][2] = 0.7;   // Blue
   	RGB_COLOR[7][0] = 1.0; RGB_COLOR[7][1] = 0.65;  RGB_COLOR[7][2] = 0.0;   // Orange
@@ -688,12 +689,8 @@ void MapViewer::renderDestIndicators()
 {
 	if(!playGround->mapManager || !playGround->activeRobot->intentionRecognizer ||!playGround->activeRobot->commManager)
 		return;
-		
-//	This is not the general Case now and i might need to change it
-//	Pose l = playGround->activeRobot->commManager->getOdomLocation();
-	Pose l = playGround->activeRobot->commManager->getLocation();
 	glColor4f(1.0f,0.0f,0.0f,1.0f);
-	renderTextFont(-0.83,0.87, BITMAP_FONT_TYPE_HELVETICA_18,"Probs:");
+	//renderTextFont(-0.83,0.87, BITMAP_FONT_TYPE_HELVETICA_18,"Probs:");
 	for(int i=0; i < playGround->activeRobot->intentionRecognizer->numDestinations ;i++)
 	{
 		int r;
@@ -701,8 +698,8 @@ void MapViewer::renderDestIndicators()
 //		drawProbHisto(playGround->mapManager->mapSkeleton.verticies[r].location, playGround->activeRobot->intentionRecognizer->destBelief[i]);
 		glPushMatrix();
 			glColor4f(RGB_COLOR[i%9][0],RGB_COLOR[i%9][1],RGB_COLOR[i%9][2],1.0f);	
-			renderTextFont(-0.65,0.93 - i*0.035, BITMAP_FONT_TYPE_HELVETICA_12,(char*)qPrintable(QString("Dest %1:").arg(i+1)));
-			glTranslatef(-0.5,0.93 - i*0.035 ,0.0);			
+			renderTextFont(-0.9 + floor(i/3.0)*0.25,0.91 - (i%3)*0.035, BITMAP_FONT_TYPE_HELVETICA_12,(char*)qPrintable(QString("Dest %1:").arg(i+1)));
+			glTranslatef(-0.75  + floor(i/3.0)*0.25,0.91 - (i%3)*0.035 ,0.0);			
 			glScalef(playGround->activeRobot->intentionRecognizer->destBelief[i]*4.0f,1.0f, 1.0f);
 			glRectf(0.0,0.025f, 0.025f, 0.0f);
 		glPopMatrix();

@@ -715,7 +715,7 @@ void PlayerInterface::run ()
 		Timer timer;
 	    while(true)
 	    {
-	    	qDebug("Loop Time is:%f %d",timer.msecElapsed()); fflush(stdout);
+//	    	qDebug("Loop Time is:%f %d",timer.msecElapsed()); fflush(stdout);
 	    	timer.restart();
 	    	/* Read Only if new Data is Available*/
 //			pc->ReadIfWaiting();
