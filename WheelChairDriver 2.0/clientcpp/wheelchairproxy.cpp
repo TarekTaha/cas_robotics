@@ -74,28 +74,17 @@ int WheelChairProxy::GetPower()
  *****************************************************************************/
 double WheelChairProxy::JoyX()
 {
-	scoped_lock_t lock(mPc->mMutex);		
-	memset( config, 0, sizeof(config) );
-	config->request = PLAYER_WHEELCHAIR_GET_JOYX_REQ;
-	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                             reinterpret_cast<void*>(&mData),reinterpret_cast<void*>(&mData),size) < 0)	
-		return -1;
-	else
-		return config->value; 
+	player_wheelchair_data_t *test  = reinterpret_cast<player_wheelchair_data_t*>(mDevice->data);
+	return test->joyx;
 }
 /*****************************************************************************
  **           Get JOYSTICK  Y Position Request Starts                       **
  *****************************************************************************/
 double WheelChairProxy::JoyY()
 {
-	scoped_lock_t lock(mPc->mMutex);		
-	memset(config, 0, sizeof(config) );
-	config->request = PLAYER_WHEELCHAIR_GET_JOYY_REQ;		
-	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                             reinterpret_cast<void*>(&mData),reinterpret_cast<void*>(&mData),size) < 0)	
-		return -1;
-	else
-		return config->value; 
+	player_wheelchair_data_t *test  = reinterpret_cast<player_wheelchair_data_t*>(mDevice->data);
+	return test->joyy;
+//	cout<<"\nData Count:"<<mDevice->data_count<<"Joyx:"<<test->joyx<<" JoyY:"<<test->joyy<<" Power:"<<test->power;
 }
 /*****************************************************************************
  **                      Sound Horn Request Starts                          **
@@ -103,7 +92,7 @@ double WheelChairProxy::JoyY()
 int WheelChairProxy::SoundHorn(unsigned int duration)
 {
 	scoped_lock_t lock(mPc->mMutex);		
-	config->value = 100; // 100ms
+	config->value = duration; // 100ms
 	config->request = PLAYER_WHEELCHAIR_SOUND_HORN_REQ;	
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
                              reinterpret_cast<void*>(&mData),reinterpret_cast<void*>(&mData),size) < 0)	

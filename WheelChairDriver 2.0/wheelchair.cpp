@@ -9,13 +9,14 @@ WheelChair::WheelChair(ConfigFile* cf, int section)
 	leftEncoder = NULL; rightEncoder = NULL;
 	strncpy(leftEncoderPort ,cf->ReadString(section, "Left_Encoder_Port", ENCL_DEFAULT_PORT), sizeof(leftEncoderPort));
 	strncpy(rightEncoderPort,cf->ReadString(section, "Right_Encoder_Port", ENCR_DEFAULT_PORT), sizeof(rightEncoderPort));
-	strncpy(serialPort,      cf->ReadString(section, "Serial_Port", SHRD_DEFAULT_PORT), sizeof(serialPort));
-	this->encoderRate =		 cf->ReadInt(section, "Encoder_Baud_Rate", ENC_DEFAULT_RATE);
+	strncpy(serialPortName,      cf->ReadString(section, "Serial_Port", SHRD_DEFAULT_PORT), sizeof(serialPortName));
+	this->encoderRate =	 cf->ReadInt(section, "Encoder_Baud_Rate", ENC_DEFAULT_RATE);
 	this->serialRate  =      cf->ReadInt(section, "Serial_Baud_Rate", SHRD_DEFAULT_RATE);
 
 	leftEncoder  = new WheelEncoder(leftEncoderPort , encoderRate);
 	rightEncoder = new WheelEncoder(rightEncoderPort, encoderRate);
-	controlUnit  = new SerialCom(serialPort,serialRate);	
+	controlUnit  = new SerialCom(serialPortName,serialRate);
+	this->power = false;
 }
 
 int WheelChair::getLeftTicks()
@@ -31,8 +32,9 @@ int WheelChair::getRightTicks()
 WheelChair::~WheelChair()
 {
 	puts("\n- Shutting Down WheelChair Driver");
-	unsigned int retbyte;
+//	unsigned int retbyte;
 	//Resetting Motor and Joystick Voltages//
+/*
 	controlUnit->Write("O0000\r", 6);
 	controlUnit->ReadByte(&retbyte);
 	controlUnit->ReadByte(&retbyte);
@@ -42,8 +44,9 @@ WheelChair::~WheelChair()
 	controlUnit->Write("L1800\r", 6);
 	controlUnit->ReadByte(&retbyte);
 	controlUnit->ReadByte(&retbyte);
+*/
 	driveMotors(0.0f,0.0f);	
-	sendCommand(POWER,OFF);	
+	sendCommand(POWER,OFF);
 	cout <<"\n--->> WheelChair's Power is turned OFF\n";
 	fflush(stdout);		
 	delete controlUnit;
@@ -89,39 +92,36 @@ int WheelChair::sendCommand(int WCcmd, bool param)
 	static unsigned char status;
 	char cmd[7];
 	unsigned int retbyte, retbyte2;
-	bool power = false;
+	int x, voltageReadings,a,e;
 	switch (WCcmd) 
 	{
-		case POWER:  
-				if ((getReading('A') + getReading('E')) > 1500)
-				{ 
+		case POWER:
+				while((a=getReading('A'))==-1);
+				while((e=getReading('E'))==-1);
+				voltageReadings = a + e;
+				//printf("\n Voltage Readings=%d",voltageReadings);
+				if ( voltageReadings > 1500)
 					power = true;
-					//this->power=ON;
-				}
-//				else
-//					this->power=OFF;
-				printf("\n	+-->Processing Power Request ");
-				if ((param && !power) || (!param && power)) 
+				else
+					power = false;
+				if ((power && param) || (!power && !param)) // Same power state -> nothing to change
+					break;
+				if(power && !param)
 				{
-					printf("\n	+-->Trying to toggle the power");
-					// Toggle wheelchair power on
-					if (controlUnit->SendCommand("O0008") != 0) 
-					{
-						PLAYER_ERROR("Failed to set power\n");
-						controlUnit->SendCommand("O0000");
-						return -1;
-					}
+					while(controlUnit->SendCommand("O0000") != 0) {usleep(SLEEP);}
 					usleep(SLEEP);
-					if (controlUnit->SendCommand("O0000") != 0)
-					{
-						PLAYER_ERROR("Failed to set power\n");
-						return -1;
-					}
+					while(controlUnit->SendCommand("O0008") != 0) {usleep(SLEEP);}
+				}
+				else if(!power && param)
+				{
+					while(controlUnit->SendCommand("O0008") != 0) {usleep(SLEEP);}
+					usleep(SLEEP);
+					while(controlUnit->SendCommand("O0000") != 0) {usleep(SLEEP);}
 				}
 			break;
 		
 		case SETMODE:
-				sprintf(cmd, "U8\r");
+				/*sprintf(cmd, "U8\r");
 				controlUnit->Write(cmd, 3);
 				printf("\n	+-->Processing Set Mode Request !!!");
 				controlUnit->ReadByte(&retbyte);
@@ -136,25 +136,27 @@ int WheelChair::sendCommand(int WCcmd, bool param)
 				controlUnit->ReadByte(&retbyte);
 				controlUnit->ReadByte(&retbyte);
 				controlUnit->ReadByte(&retbyte);
-				
-				if (((char)retbyte2 == '0' && param) || ((char)retbyte2 != '0' && !param)) 
+				*/
+				x = getReading('8');
+				//if (((char)retbyte2 == '0' && param) || ((char)retbyte2 != '0' && !param)) 
+				if (( x < 255 && param) || (x >255 && !param))
 				{
 					// we need to toggle the mode
-					if (controlUnit->SendCommand("O0020") != 0) 
-					{	
+					while(controlUnit->SendCommand("O0020") != 0) {}
+					/*{	
 						PLAYER_ERROR("Failed to set mode\n");
 						controlUnit->SendCommand("O0000");
 						return -1;
-					}
+					}*/
 					usleep(LATCHDELAY);
-					if (controlUnit->SendCommand("O0000") != 0) 
-					{
+					while (controlUnit->SendCommand("O0000") != 0) {}
+					/*{
 						PLAYER_ERROR("Failed to set mode\n");
 						return -1;
-					}
+					}*/
 				}
 				break;
-		case GEAR:   
+		case GEAR:
 				printf("\n	+-->Processing Gear Request /");
 				if (param) 
 				{
@@ -263,64 +265,41 @@ int WheelChair::sendCommand(int WCcmd, bool param)
 	
 };
 
-int WheelChair::getReading(char Channel) 
+int WheelChair::getReading(char Channel)
 {
-	int Count = 0;
+	int count = 0;
+	unsigned int readingValue[8];
 	unsigned int temp;
-	int ret;
 	unsigned int Position = 0;
-		controlUnit->WriteByte(0x55);
-		controlUnit->WriteByte(Channel);
-		controlUnit->WriteByte(13);
 
-		temp = 0;
-		ret = controlUnit->ReadByte(&temp); 
-		if (ret > 0) Count++; 
-		if (ret < 0) fprintf(stderr,"Wheelchair: error reading data (%d - %s)\n",errno,strerror(errno));
-		if (temp != 0x55)			
-			return -1;
-
-		temp = 0;
-		ret = controlUnit->ReadByte(&temp); 
-		if (ret > 0) Count++; 
-		if (ret < 0) fprintf(stderr,"Wheelchair: error reading data (%d - %s)\n",errno,strerror(errno));
-		if ((char)temp != Channel)			
-			return -1;
-		
-		temp = 0;
-		ret = controlUnit->ReadByte(&temp);
-		if (ret > 0) Count++;
-		if (ret < 0) fprintf(stderr,"Wheelchair: error reading data (%d - %s)\n",errno,strerror(errno));
-		temp -= 48;
-		if (temp > 9)
-			temp -= 7; 
-		temp = temp << 8;
-		Position = temp;
-	
-		temp = 0;
-		ret = controlUnit->ReadByte(&temp); 
-		if (ret > 0) Count++; 
-		if (ret < 0) fprintf(stderr,"Wheelchair: error reading data (%d - %s)\n",errno,strerror(errno));
-		temp -= 48;
-		if (temp > 9)
-			temp -= 7; 
-		temp = temp << 4;
-		Position |= temp;
-	
-		temp = 0;
-		ret = controlUnit->ReadByte(&temp); 
-		if (ret > 0) Count++; 
-		if (ret < 0) fprintf(stderr,"Wheelchair: error reading data (%d - %s)\n",errno,strerror(errno));
-		temp -= 48;
-		if (temp > 9)
-			temp -= 7;
-		Position |= temp;
-	
-		ret = controlUnit->ReadByte(&temp); 
-	if (Count == 5)
-		return Position;
-	else
+	controlUnit->WriteByte('U');
+	controlUnit->WriteByte(Channel);
+	controlUnit->WriteByte(13);
+	usleep(1000);
+	//printf("\n");
+	while(controlUnit->ReadByte(&temp)>0)
+	{
+	//	printf("%c",temp);
+		readingValue[count] = temp;
+		count++;
+		if (count>7) break;
+	}
+	if(count!=6 || (readingValue[0]&=0x000000ff)!='U')
 		return -1;
+
+	readingValue[2]&=0x000000ff;readingValue[3]&=0x000000ff;readingValue[4]&=0x000000ff;
+//	printf("\nBefore Conv %d %d %d",readingValue[2],readingValue[3],readingValue[4]);
+	readingValue[2]-=48; if(readingValue[2]>9) readingValue[2]-=7;
+	Position |= (readingValue[2]<<8);
+//	printf("\n Converted Value is:%d",Position);
+	readingValue[3]-=48; if(readingValue[3]>9) readingValue[3]-=7;
+	Position |= (readingValue[3]<<4);
+//	printf(" Converted Value is:%d",Position);
+	readingValue[4]-=48; if(readingValue[4]>9) readingValue[4]-=7;
+	Position |= (readingValue[4]);
+//	printf(" Converted Value is:%d",Position);
+
+	return Position;
 };
 
 /*!

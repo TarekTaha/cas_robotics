@@ -243,11 +243,14 @@ void WheelchairDriver::Stop_Velocity_Thread(void)
 {
 	void* dummy;
 	pthread_cancel(velocity_thread_id);
-  	if(pthread_join(velocity_thread_id,&dummy))
-    	perror("WheelchairDriver::Stop_Velocity_Thread:pthread_join()");
-    if(wheelChair)
-    	delete wheelChair;
-    printf("\n Velocity Control Thread Terminated !!!");
+	if(pthread_join(velocity_thread_id,&dummy))
+	perror("WheelchairDriver::Stop_Velocity_Thread:pthread_join()");
+	if(wheelChair)
+	{
+    		delete wheelChair;
+		printf("\n WHEEL CHAIR CLASS CLOSED AND CONNECTION LOST !!!");fflush(stdout);
+	}
+	printf("\n Velocity Control Thread Terminated !!!\n\n");fflush(stdout);
 };
 
 void * WheelchairDriver::Run_Velocity_Control (void *driver)
@@ -328,7 +331,7 @@ void  WheelchairDriver :: Velocity_Controller(void)
 
 WheelchairDriver::WheelchairDriver(ConfigFile* cf, int section)  : Driver(cf, section)
 {
-	w_data.data_count = sizeof(wheelchair_data);
+	w_data.data_count = sizeof(player_wheelchair_data_t);
 	wheelchair_data = reinterpret_cast<player_wheelchair_data_t *>(w_data.data);	
 	memset(&this->position_addr, 0, sizeof(position_addr));
 	memset(&this->opaque_addr,   0, sizeof(position_addr));
@@ -341,15 +344,15 @@ WheelchairDriver::WheelchairDriver(ConfigFile* cf, int section)  : Driver(cf, se
 	    	return;
 	  	}
   	}  
-    // Adding position interface
-    // Do we create a robot position interface?
-    if(cf->ReadDeviceAddr(&(this->position_addr), section, "provides", PLAYER_POSITION2D_CODE, -1, NULL) == 0)
-    {
+	// Adding position interface
+	// Do we create a robot position interface?
+	if(cf->ReadDeviceAddr(&(this->position_addr), section, "provides", PLAYER_POSITION2D_CODE, -1, NULL) == 0)
+	{
 		if (this->AddInterface(this->position_addr))
-	  	{
-	    	this->SetError(-1);    
-	    	return;
-	  	}
+		{
+			this->SetError(-1);    
+			return;
+		}
   	}
 	
 	this->PoseX=		cf->ReadFloat(section,"geom_pose_x",0);
@@ -374,7 +377,7 @@ int WheelchairDriver::Setup()
 		exit(1);
 	}
 	stall = false;
-	last_ltics = wheelChair->getLeftTicks();  
+	last_ltics = wheelChair->getLeftTicks();
 	last_rtics = wheelChair->getRightTicks();
 	gettimeofday(&lasttime,NULL);
 	gettimeofday(&last_position_update,NULL);
@@ -399,90 +402,95 @@ int WheelchairDriver::Shutdown()
 	if(log)
 		fclose(file);
 	// Stop and join the driver thread
-	Stop_Velocity_Thread();
 	StopThread();
+	usleep(100000);
+	if(wheelChair)
+	{
+		wheelChair->sendCommand(POWER,OFF);
+		wheelChair->sendCommand(SETMODE,MANUAL);
+	}
+	usleep(100000);
+	Stop_Velocity_Thread();
 	return(0);
 }
 
 int WheelchairDriver::Subscribe(player_devaddr_t addr)
 {
 	int retval;
-  	// do the subscription
- 	if((retval = Driver::Subscribe(addr)) == 0)
-  	{	
-    	// also increment the appropriate subscription counter
-    	if(Device::MatchDeviceAddress(addr, this->position_addr))
-    	{
-  		  	cout<<"\n Subscribing to position Device"; fflush(stdout);    		  	
-      		this->position_subscriptions++;
-      		if ((position_subscriptions == 1) && !driverInitialized)
-      		{
-      			driverInitialized = true;
-				wheelChair->sendCommand(POWER,ON);
-				wheelChair->sendCommand(SETMODE,AUTO);
-				wheelChair->driveMotors(0.0f,0.0f);	
-				cout <<"\n--->> WheelChair's Power is turned ON, Mode is AUTONOMOUS\n";
-				fflush(stdout);      			
-      		}
-    	}
-    	else 
-    	if(Device::MatchDeviceAddress(addr, this->opaque_addr))
-  		{
-  		cout<<"\n Subscribing to Opaque Device"; fflush(stdout);
+	// do the subscription
+	if((retval = Driver::Subscribe(addr)) == 0)
+	{	
+	// also increment the appropriate subscription counter
+	if(Device::MatchDeviceAddress(addr, this->position_addr))
+	{
+		cout<<"\n Subscribing to position Device"; fflush(stdout);    		  	
+		this->position_subscriptions++;
+		if ((position_subscriptions == 1) && !driverInitialized)
+		{
+			driverInitialized = true;
+			wheelChair->sendCommand(POWER,ON);
+			wheelChair->sendCommand(SETMODE,AUTO);
+			wheelChair->driveMotors(0.0f,0.0f);	
+			cout <<"\n--->> WheelChair's Power is turned ON, Mode is AUTONOMOUS\n";
+			fflush(stdout);      			
+		}
+	}
+	else 
+	if(Device::MatchDeviceAddress(addr, this->opaque_addr))
+	{
+		cout<<"\n Subscribing to Opaque Device"; fflush(stdout);
 		last_opaque_subscrcount = this->opaque_subscriptions;	  		  	  			
-      		this->opaque_subscriptions++;
-      		if ((opaque_subscriptions == 1) && !driverInitialized)
-      		{
-      			driverInitialized = true;
-				wheelChair->sendCommand(POWER,ON);
-				wheelChair->sendCommand(SETMODE,AUTO);	
-				cout <<"\n--->> WheelChair's Power is turned ON, Mode is AUTONOMOUS\n";
-				fflush(stdout);      			
-      		}      		
-  		}
-  	}
-  	return(retval);
+		this->opaque_subscriptions++;
+		if ((opaque_subscriptions == 1) && !driverInitialized)
+		{
+			driverInitialized = true;
+			wheelChair->sendCommand(POWER,ON);
+			wheelChair->sendCommand(SETMODE,AUTO);	
+			cout <<"\n--->> WheelChair's Power is turned ON, Mode is AUTONOMOUS\n";
+			fflush(stdout);      			
+		}	
+	}
+	}
+	return(retval);
 }
 
 int WheelchairDriver::Unsubscribe(player_devaddr_t addr)
 {
 	int retval;
-
-  	// do the unsubscription
-  	if((retval = Driver::Unsubscribe(addr)) == 0)
-  	{
+	// do the unsubscription
+	if((retval = Driver::Unsubscribe(addr)) == 0)
+	{
 	    // also decrement the appropriate subscription counter
 	    if(Device::MatchDeviceAddress(addr, this->position_addr))
 	    {
-	    	this->position_subscriptions--;
-	    	cout<<"\n UnSubscribing from a position Device, Subscriptions Left:\n"<<position_subscriptions; fflush(stdout);
-	      	assert(this->position_subscriptions >= 0);
-      		if ((position_subscriptions == 0) && (opaque_subscriptions == 0))
-      		{
-      			driverInitialized = false;
-      			wheelChair->driveMotors(0.0f,0.0f);
-				wheelChair->sendCommand(SETMODE,MANUAL);      			
-				wheelChair->sendCommand(POWER,OFF);
-				cout <<"\n--->> WheelChair's Power is turned OFF, Mode is MANUAL\n";
-				fflush(stdout);      			
-      		}   	      	
+		this->position_subscriptions--;
+		cout<<"\n UnSubscribing from a position Device, Subscriptions Left:"<<position_subscriptions; fflush(stdout);
+		assert(this->position_subscriptions >= 0);
+		if ((position_subscriptions == 0) && (opaque_subscriptions == 0))
+		{
+			driverInitialized = false;
+			wheelChair->driveMotors(0.0f,0.0f);
+			wheelChair->sendCommand(SETMODE,MANUAL);
+			wheelChair->sendCommand(POWER,OFF);
+			cout <<"\n--->> WheelChair's Power is turned OFF, Mode is MANUAL\n";
+			fflush(stdout);
+		}
 	    }
 	    else if(Device::MatchDeviceAddress(addr, this->opaque_addr))
 	    {
-	      	this->opaque_subscriptions--;
-			cout<<"\n UnSubscribing from an opaque Device, Subscriptions Left:\n"<<opaque_subscriptions; fflush(stdout);	      	
-	      	assert(this->opaque_subscriptions >= 0);
-      		if ((position_subscriptions == 0) && (opaque_subscriptions == 0))
-      		{
-      			driverInitialized = false;
-				wheelChair->sendCommand(SETMODE,MANUAL);      			
-				wheelChair->sendCommand(POWER,OFF);
-				cout <<"\n--->> WheelChair's Power is turned OFF, Mode is MANUAL\n";
-      		}	      	
+		this->opaque_subscriptions--;
+			cout<<"\n UnSubscribing from an opaque Device, Subscriptions Left:"<<opaque_subscriptions; fflush(stdout);	      	
+		assert(this->opaque_subscriptions >= 0);
+		if ((position_subscriptions == 0) && (opaque_subscriptions == 0))
+		{
+			driverInitialized = false;
+			wheelChair->sendCommand(SETMODE,MANUAL);
+			wheelChair->sendCommand(POWER,OFF);
+			cout <<"\n--->> WheelChair's Power is turned OFF, Mode is MANUAL\n";
+		}	
 	    }
-  	}
-
-  return(retval);
+	}
+	return(retval);
 };
 
 // this function will be run in a separate thread
@@ -494,13 +502,24 @@ void WheelchairDriver::Main()
 	{
 	    // Sleep for 1ms (will actually take longer than this).
 		sleeptime.tv_sec = 0;
-	    sleeptime.tv_nsec = 1000000L;
-	    nanosleep(&sleeptime, NULL);		
-	    // Thread cancellation point.
+		sleeptime.tv_nsec = 1000000L;
+		nanosleep(&sleeptime, NULL);
+		// Thread cancellation point.
 		pthread_testcancel();
-	    this->ProcessMessages();		
-		usleep(20000);        // repeat frequency (default to 100 Hz)
+		this->ProcessMessages();		
 		RefreshData();         // Update posdata
+		struct timeval time_before,time_after;
+		double time_between;
+		gettimeofday(&time_before,NULL);
+		this->joyx = wheelChair->getReading('A');
+		usleep(20000);        // repeat frequency (default to 100 Hz)
+		this->joyy = wheelChair->getReading('B');
+		if(debug)
+			cout<<"\nJoyX readings="<<this->joyx<<" Joy Y:"<<this->joyy;
+		gettimeofday(&time_after,NULL);
+		time_between = (time_after.tv_sec + time_after.tv_usec/1e6) - (time_before.tv_sec + time_before.tv_usec/1e6);
+		if(debug)
+			cout<<"Time took to get a Reading is:"<<time_between*1000;
 	}
 	pthread_exit(NULL);
 }
@@ -534,10 +553,10 @@ int WheelchairDriver::HandleCommands(player_msghdr *hdr,void * data)
 	    // get and send the latest motor command
 //	    cout<<"\n\t\t - Command Is  Velocity"; fflush(stdout);
 		this->Lock();
-	    player_position2d_cmd_vel_t position_cmd;
-	    position_cmd = *(player_position2d_cmd_vel_t*)data;
-        vdem_new = position_cmd.vel.px;
-  		wdem_new = position_cmd.vel.pa;
+		player_position2d_cmd_vel_t position_cmd;
+		position_cmd = *(player_position2d_cmd_vel_t*)data;
+		vdem_new = position_cmd.vel.px;
+		wdem_new = position_cmd.vel.pa;
 		if (vdem_new != vdem_last || wdem_new != wdem_last)
 		{
 			// Very Dirty Patch here, this has to be modified later on
@@ -567,7 +586,7 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 	   (hdr->addr.robot  == position_addr.robot) &&  (hdr->addr.interf == position_addr.interf) &&
        (hdr->addr.index  == position_addr.index)
        )
-    {
+	{
 		switch (hdr->subtype)
 		{
 			case PLAYER_POSITION2D_REQ_GET_GEOM:  
@@ -667,33 +686,44 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
        (hdr->addr.index  == opaque_addr.index))//  && (hdr->subtype == (uint8_t)PLAYER_OPAQUE_REQ))
     {
     	player_wheelchair_config_t  * config;
-    	player_opaque_data_t  mData;
-   	    mData = *((player_opaque_data_t*)data);    	
-   	    config = ((player_wheelchair_config_t*)&mData.data);
-	  	uint size ;
-	 	size = sizeof(mData) - sizeof(mData.data) + mData.data_count;	    
-	  	cout<<" Opaque Interface Req->";	fflush(stdout);
+    	player_opaque_data_t  mData = * reinterpret_cast<player_opaque_data_t*>(data);
+	mData.data_count = 7;//sizeof(player_wheelchair_config_t);
+   	config = reinterpret_cast<player_wheelchair_config_t*>(mData.data);
+	uint size ;
+	size = sizeof(mData) - sizeof(mData.data) + mData.data_count;	    
+	if(this->debug)
+		cout<<" Opaque Interface Req->";	fflush(stdout);
 	    switch(config->request)
 	    {
 	     	case PLAYER_WHEELCHAIR_GET_JOYX_REQ:
-			  	cout<<" Got JOYX Request Req"; fflush(stdout);     				
+				struct timeval time_before,time_after;
+				double time_between;
+				gettimeofday(&time_before,NULL);
+
 				this->joyx = wheelChair->getReading('A');
-			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
-			    			  reinterpret_cast<void*>(&mData), size, NULL);    
+				cout<<"\nJoyX readings="<<this->joyx;
+
+				gettimeofday(&time_after,NULL);
+				time_between = (time_after.tv_sec + time_after.tv_usec/1e6) - (time_before.tv_sec + time_before.tv_usec/1e6);
+				cout<<"Time took to get a Reading is:"<<time_between*1000;
+
+				config->value = this->joyx;
+			    	this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ);    
 				return 0;
 	     	case PLAYER_WHEELCHAIR_GET_JOYY_REQ:
-			  	cout<<" Got JOYY Req"; fflush(stdout);     				
+			  	//cout<<" Got JOYY Req"; fflush(stdout);     				
 				this->joyy = wheelChair->getReading('B');
-			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
-			    			  reinterpret_cast<void*>(&mData), size, NULL);    
+				//cout<<"JoyY readings="<<this->joyy;
+				config->value = this->joyy;
+				this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ);    
 				return 0;	
-			case PLAYER_WHEELCHAIR_GET_MODE_REQ:
+		case PLAYER_WHEELCHAIR_GET_MODE_REQ:
 			  	cout<<" Got GET Mode Req"; fflush(stdout);     				
 				int mm;
 				if( (mm = wheelChair->sendCommand(GETMODE,0))!=-1 )
 					this->mode = mm ;
-			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
-			    			  reinterpret_cast<void*>(&mData), size, NULL);    
+				config->value = mm;
+			    	this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ, reinterpret_cast<void *>(&mData), size, NULL);
 				return 0;
 	    	case PLAYER_WHEELCHAIR_SET_MODE_REQ:
 			  	cout<<" Got Set Mode Req"; fflush(stdout);     				
@@ -725,18 +755,18 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 	     	case PLAYER_WHEELCHAIR_GET_POWER_REQ:
 			  	cout<<" Got Get Power Req"; fflush(stdout);     				
 				this->power = ((wheelChair->getReading('A') + wheelChair->getReading('E')) > 1500)?ON:OFF;
-			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
+			    	this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ,
 			    			  reinterpret_cast<void*>(&mData), size, NULL);    
 			  	cout<<" ACK reply SENT"; fflush(stdout);     							    			  
 				return 0;
-			case PLAYER_WHEELCHAIR_SET_POWER_REQ:
+		case PLAYER_WHEELCHAIR_SET_POWER_REQ:
 			  	cout<<" Got Set Power Req"; fflush(stdout);     				
 				wheelChair->sendCommand(POWER, config->value);
-			    this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ);    
+			    	this->Publish(this->opaque_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK, PLAYER_OPAQUE_REQ);    
 			  	cout<<" ACK reply SENT"; fflush(stdout);     							    			  
 				return 0;
 				break;
-			default:
+		default:
 			  	cout<<" Got UNKNOWN Req"; fflush(stdout);     							
 				return -1;				
 		}
@@ -851,7 +881,8 @@ void WheelchairDriver::RefreshData()
   	wheelchair_data->mode  = this->mode;
   	wheelchair_data->power = this->power;
   	uint size = sizeof(w_data) - sizeof(w_data.data) + w_data.data_count;
-    Publish(this->opaque_addr, NULL,PLAYER_MSGTYPE_DATA, PLAYER_OPAQUE_DATA_STATE,reinterpret_cast<void*>(&w_data), size, NULL);  	
+	// cout<<"\nData Count:"<<size<<"Joyx:"<<wheelchair_data->joyx<<" JoyY:"<<wheelchair_data->joyy<<" Power:"<<wheelchair_data->power;
+    	Publish(this->opaque_addr, NULL,PLAYER_MSGTYPE_DATA, PLAYER_OPAQUE_DATA_STATE,reinterpret_cast<void*>(&w_data), size, NULL);  	
 
 	posdata.vel.px = this->vact;
 	posdata.vel.py = this->wact;

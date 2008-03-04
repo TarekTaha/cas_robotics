@@ -5,31 +5,130 @@ SerialCom::SerialCom(char * port, int rate)
 	fd = -1;
 	
 	// open the serial port
-	fd = open(port, O_RDWR | O_NOCTTY);// | O_NDELAY | O_NONBLOCK);
+	fd = open(port, O_RDWR | O_NOCTTY | O_NONBLOCK);//| O_NDELAY
 	if ( fd<0 )
 	{
 		fprintf(stderr, "Could not open serial device %s\n",port);
 		return;
 	}
+/*
+	int flags = fcntl(fd, F_GETFL, 0) ;
+    	if( -1 == fcntl(fd, F_SETFL, flags | O_NONBLOCK ) ) 
+	{
+//        	return -1 ;
+	}
+    	//
+    	// Flush out any garbage left behind in the buffers associated
+    	// with the port from any previous operations. 
+    	//
+    	if( -1 == tcflush(fd, TCIOFLUSH) ) 
+	{
+//	       	return -1 ;
+    	}
+    	//
+    	// Set up the default configuration for the serial port. 
+    	//
+	struct termios tio;
+	tio.c_iflag = IGNBRK;
+	tio.c_oflag = 0;
+	tio.c_cflag = B19200 | CS8 | CLOCAL | CREAD;
+	tio.c_lflag = 0;
+	//
+	// :TRICKY:
+	// termios.c_line is not a standard element of the termios structure (as 
+	// per the Single Unix Specification 2. This is only present under Linux.
+	//
+	#ifdef __linux__
+	tio.c_line = '\0';
+	#endif
+	bzero( &tio.c_cc, sizeof(tio.c_cc) );
+	tio.c_cc[VTIME] = 0;
+	tio.c_cc[VMIN]  = 0;
+    	if ( -1 == tcsetattr(fd,TCSANOW,&tio) ) 
+	{
+//		return -1 ;
+	}
+	cfsetispeed(&tio, rate);
+	cfsetospeed(&tio, rate);
+      	if( -1 == tcsetattr(fd, TCSANOW, &tio) ) 
+	{
+//		return -1 ;
+        }
+	// 8 Char size
+        tio.c_iflag &= ~ISTRIP ; // clear the ISTRIP flag.
+        tio.c_cflag &= ~CSIZE ;     // clear all the CSIZE bits.
+       	tio.c_cflag |= 8 ;  // set the character size. 
+       	//
+       	// Set the new settings for the serial port. 
+       	//
+       	if( -1 == tcsetattr(fd, TCSANOW, &tio) ) 
+	{
+//		return -1;
+       	} 
+	// 1 Stop Bit
+        tio.c_cflag &= ~CSTOPB ;
+	//
+	// Set the new settings for the serial port. 
+	//
+	if( -1 == tcsetattr(fd, TCSANOW, &tio) ) 
+	{
+//		return -1 ;
+	}
+	// No Parity
+       	tio.c_cflag &= ~PARENB ;
+    	//
+	// Write the settings back to the serial port. 
+	//
+	if( -1 == tcsetattr(fd, TCSANOW, &tio) ) 
+	{
+//		return -1 ;
+	} 
+	// Set the flow control. Hardware flow control uses the RTS (Ready
+	// To Send) and CTS (clear to Send) lines. Software flow control
+	// uses IXON|IXOFF
+	// Hardware
+	tio.c_iflag &= ~ (IXON|IXOFF);
+        tio.c_cflag |= CRTSCTS;
+       	tio.c_cc[VSTART] = _POSIX_VDISABLE;
+       	tio.c_cc[VSTOP] = _POSIX_VDISABLE;
+	if (-1 ==tcsetattr(fd, TCSANOW, &tio)) 
+	{
+//        	return -1;
+    	}
+    	//
+    	// Allow all further communications to happen in blocking 
+    	// mode. 
+    	//
+    	flags = fcntl(fd, F_GETFL, 0) ;
+    	if( -1 == fcntl(fd, F_SETFL,flags & ~O_NONBLOCK ) ) 
+	{
+//        	return -1 ;
+    	}
 	
 	// save the current io settings
-	tcgetattr(fd, &oldtio);
+	//tcgetattr(fd, &oldtio);
 
 	// rtv - CBAUD is pre-POSIX and doesn't exist on OS X
 	// should replace this with ispeed and ospeed instead.
-	
+*/
+
 	// set up new settings
 	struct termios newtio;
 	bzero(&newtio, sizeof(newtio));
 	newtio.c_cflag = CS8 | CLOCAL | CREAD;
+	newtio.c_cflag &= ~CSTOPB;
+	newtio.c_iflag &= ~ISTRIP;
+        newtio.c_iflag &= ~ (IXON|IXOFF);
+        newtio.c_cflag |= CRTSCTS;
+        newtio.c_cc[VSTART] = _POSIX_VDISABLE;
+        newtio.c_cc[VSTOP] = _POSIX_VDISABLE;
 	newtio.c_iflag = IGNPAR;
 	newtio.c_oflag = 0;
 	newtio.c_lflag = 0;
-	newtio.c_cc[VTIME] = 10;
+	newtio.c_cc[VTIME] = 0;
 	newtio.c_cc[VMIN] = 0;
-
 	// activate new settings
-	tcflush(fd, TCIFLUSH);
+	tcflush(fd, TCIOFLUSH);
 	if (cfsetispeed(&newtio, rate) < 0 || cfsetospeed(&newtio, rate) < 0) {
 		fprintf(stderr,"Failed to set serial baud rate: %d\n", rate);
 		tcsetattr(fd, TCSANOW, &oldtio);	
@@ -66,6 +165,14 @@ int SerialCom::ReadByte(unsigned int *buf)
 	return temp;
 }
 
+int SerialCom::Read(unsigned int *buf,int size) 
+{
+	char temp;
+	for(int i=0;i<size;i++)
+		temp = read(fd,&buf[i],1);
+	return temp;
+}
+
 void SerialCom::WriteByte(char buf) 
 {
 	write(fd,&buf,1);
@@ -80,16 +187,30 @@ void SerialCom::Write(char buf[], int numChars)
 // This is not generic but it is convienient to have located here.
 int SerialCom::SendCommand(char cmd[]) 
 {
-	char cmd2[7];
-	unsigned int retbyte, retbyte2;
-		sprintf (cmd2, "%s\r", cmd);
-		Write(cmd2, 6);
-		ReadByte(&retbyte);
-		ReadByte(&retbyte2);
-	if ((char)retbyte == 'O' || (char)retbyte == 'L') 
+	unsigned int retbyte[8];
+	int count =0;
+	//printf("\nSending Chars:");
+	for(unsigned int i=0; i< 5;i++)
+	{
+		WriteByte(cmd[i]);
+	//	printf("%c",cmd[i]);
+	}
+	WriteByte(13);
+	usleep(1000);
+	//printf("\nRecieved Chars:");
+	while(ReadByte(&retbyte[count]))
+	{ 
+	//	printf("%c",retbyte[count]); 
+		count++; 
+		if(count>7) 
+			break;
+	}
+	
+	if ((char)retbyte[0] == 'O' || (char)retbyte[0] == 'L') 
 	{
 		return 0;
-	} else 
+	}
+	else 
 	{
 		return -1;
 	}

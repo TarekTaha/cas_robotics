@@ -18,6 +18,7 @@ public:
 		SerialCom(char * port, int rate);
 		~SerialCom();
 		int ReadByte(unsigned int *buf);
+		int Read(unsigned int *buf,int numChars);
 		void WriteByte(char buf);
 		void Write(char buf[], int numChars);
 		int SendCommand(char cmd[]);
