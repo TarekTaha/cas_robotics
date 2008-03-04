@@ -58,7 +58,8 @@ void IntentionRecognizer::InitializePOMDP()
 {
   	MatrixUtils::init_matrix_utils();
  	pomdpFileName  = "modules/PomdpModels/paperexperiment.pomdp";
-  	policyFileName = "modules/PomdpModels/mod11.policy";
+  	//policyFileName = "modules/PomdpModels/mod11.policy";
+ 	policyFileName = "modules/PomdpModels/6dest.policy";
   	config = new ZMDPConfig();
   	config->readFromFile("modules/PomdpCore/zmdp.conf");
   	config->setString("policyOutputFile", "none");
