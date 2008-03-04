@@ -3,6 +3,8 @@
 
 #include "defs.h"
 #include <libplayercore/playercore.h>
+#include <cstdlib>
+
 using namespace std;
 
 class WheelChair
@@ -20,11 +22,12 @@ class WheelChair
 	private:
 		WheelEncoder * leftEncoder, * rightEncoder;
 	 	SerialCom * controlUnit;
-		char serialPort[MAX_FILENAME_SIZE];
+		char serialPortName[MAX_FILENAME_SIZE];
 		int  serialRate,encoderRate;	 	
 		char leftEncoderPort[MAX_FILENAME_SIZE];
 		char rightEncoderPort[MAX_FILENAME_SIZE];	
 		double oldxspeed,oldyaw;
+		bool power;
 };
 
 #endif /*WHEELCHAIR_H_*/
