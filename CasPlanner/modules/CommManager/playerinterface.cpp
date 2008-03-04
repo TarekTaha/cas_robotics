@@ -63,19 +63,45 @@ PlayerInterface::~PlayerInterface()
 
 int PlayerInterface::getJoyStickGlobalDir()
 {
+	double x=joyAxes.x(),y=joyAxes.y();
+	Pose P;
 	dataLock.lockForRead();
 	/* the -90 is because the Joystick's coodrinate is rotated 90 in a way that it's
 	 * Y-Axis coordinate aligns with the Robot's X-Axis */
-	Pose P(joyAxes.x(),joyAxes.y(),NORMALIZE(atan2(joyAxes.y(),joyAxes.x())-DTOR(90)));
+	if(wheelChairCommander)
+	{
+		if(x>1900 && x<2150) 
+			x= 0;
+		else
+			x = 2050 - x;
+		if(y>1900 && y<2100)
+			y= 0;		
+		else
+			y = y - 2000;	
+		P.p.setX(y);
+		P.p.setY(x);
+		P.phi = NORMALIZE(NORMALIZE(atan2(P.p.y(),P.p.x())-DTOR(90)));
+		//printf("\nThe Angle is:%f",RTOD(P.phi));
+	}
+	else
+	{
+		P.p.setX(x);
+		P.p.setY(y);
+		P.phi = NORMALIZE(NORMALIZE(atan2(y,x)-DTOR(90)));		
+	}
 	dataLock.unlock();
 	if (localizerType == ODOM)
 		P = Trans2Global(P,odomLocation);
 	else
 		P = Trans2Global(P,amclLocation);	
 	double angle = RTOD(P.phi), dirTolerance = 45;//45 degrees means that we will get only N,S,E,W
+
 	if(angle < 0)
-		angle += 360;	
-	if( joyAxes.x() == 0 && joyAxes.y() == 0)
+		angle += 360;
+	
+//	printf("\nThe Angle is:%f",angle);	
+	
+	if( x == 0 && y == 0)
 	{
 		return Nothing;
 	}
@@ -125,8 +151,23 @@ int PlayerInterface::getJoyStickDir()
 	double x = joyAxes.x(), y = joyAxes.y();
 	dataLock.unlock();
 	double angle;
+	if(wheelChairCommander)
+	{
+		x = joyAxes.y(), y = joyAxes.x();
+		if(y>1900 && y<2150) 
+			y= 0;
+		else
+			y = 2050 - y;
+		if(x>1900 && x<2100)
+			x= 0;		
+		else
+			x = x - 2000;
+	}
+
 	angle = RTOD(atan2(y,x));
+
 //	printf("\nThe Angle is:%f",angle);
+	
 	if(x==0 && y==0)
 	{
 		return NoInput;
@@ -179,7 +220,7 @@ void PlayerInterface::checkForWheelChair()
 		  	printf("\n Turning ON WheelChair"); fflush(stdout);
 		  	wheelChairCommander->SetPower(ON);
 		  	wheelChairCommander->SetMode(AUTO);
-		  	wheelChairCommander->SoundHorn(100);
+//		  	wheelChairCommander->SoundHorn(100);
 		  	printf("\n WheelChair is on"); fflush(stdout);			
 		  	logMsg.append(QString("\n\t\t - Wheelchair Driver Engaged"));
 		}
@@ -674,7 +715,7 @@ void PlayerInterface::run ()
 		Timer timer;
 	    while(true)
 	    {
-//	    	qDebug("Loop Time is:%f %d",timer.msecElapsed()); fflush(stdout);
+	    	qDebug("Loop Time is:%f %d",timer.msecElapsed()); fflush(stdout);
 	    	timer.restart();
 	    	/* Read Only if new Data is Available*/
 //			pc->ReadIfWaiting();
