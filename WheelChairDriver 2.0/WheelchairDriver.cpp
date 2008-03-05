@@ -295,7 +295,7 @@ void  WheelchairDriver :: Velocity_Controller(void)
 			gettimeofday(&currtime,NULL);
 			timediff = (currtime.tv_sec + currtime.tv_usec/1e6) - (stall_time.tv_sec + stall_time.tv_usec/1e6);
 			if(timediff > 1.0) // no responce for more than 1 sec
-			{			
+			{
 				printf("\n Stall DETECTED!!!");
 				posdata.stall = 1; 
 				wheelChair->sendCommand(POWER,OFF);
@@ -324,6 +324,17 @@ void  WheelchairDriver :: Velocity_Controller(void)
 		if (vdem_last == 0) vset=0;
 		if (wdem_last == 0) wset=0;
 		wheelChair->driveMotors(vset,wset);
+		struct timeval time_before,time_after;
+		double time_between;
+		gettimeofday(&time_before,NULL);
+		this->joyx = wheelChair->getReading('A');
+		this->joyy = wheelChair->getReading('B');
+		if(debug)
+			cout<<"\nJoyX readings="<<this->joyx<<" Joy Y:"<<this->joyy;
+		gettimeofday(&time_after,NULL);
+		time_between = (time_after.tv_sec + time_after.tv_usec/1e6) - (time_before.tv_sec + time_before.tv_usec/1e6);
+		if(debug)
+			cout<<"Time took to get a Reading is:"<<time_between*1000;
 		usleep(10000);
 	}
 	pthread_exit(NULL);
@@ -508,18 +519,19 @@ void WheelchairDriver::Main()
 		pthread_testcancel();
 		this->ProcessMessages();		
 		RefreshData();         // Update posdata
-		struct timeval time_before,time_after;
+		usleep(20000);        // repeat frequency (default to 100 Hz)
+/*		struct timeval time_before,time_after;
 		double time_between;
 		gettimeofday(&time_before,NULL);
 		this->joyx = wheelChair->getReading('A');
 		usleep(20000);        // repeat frequency (default to 100 Hz)
 		this->joyy = wheelChair->getReading('B');
-		if(debug)
+		//if(debug)
 			cout<<"\nJoyX readings="<<this->joyx<<" Joy Y:"<<this->joyy;
 		gettimeofday(&time_after,NULL);
 		time_between = (time_after.tv_sec + time_after.tv_usec/1e6) - (time_before.tv_sec + time_before.tv_usec/1e6);
-		if(debug)
-			cout<<"Time took to get a Reading is:"<<time_between*1000;
+		//if(debug)
+			cout<<"Time took to get a Reading is:"<<time_between*1000;*/
 	}
 	pthread_exit(NULL);
 }
