@@ -2,21 +2,21 @@
 
 SerialCom::SerialCom(char * port, int rate) 
 {
-	fd = -1;
-	
 	// open the serial port
-	fd = open(port, O_RDWR | O_NOCTTY | O_NONBLOCK);//| O_NDELAY
+	//printf("\n HERE begin");  fflush(stdout);
+	fd = open(port, O_RDWR | O_NOCTTY );//| O_NONBLOCK| O_NDELAY);
 	if ( fd<0 )
 	{
 		fprintf(stderr, "Could not open serial device %s\n",port);
 		return;
 	}
-/*
+
 	int flags = fcntl(fd, F_GETFL, 0) ;
     	if( -1 == fcntl(fd, F_SETFL, flags | O_NONBLOCK ) ) 
 	{
 //        	return -1 ;
 	}
+/*
     	//
     	// Flush out any garbage left behind in the buffers associated
     	// with the port from any previous operations. 
@@ -104,32 +104,44 @@ SerialCom::SerialCom(char * port, int rate)
 	{
 //        	return -1 ;
     	}
-	
+*/
 	// save the current io settings
-	//tcgetattr(fd, &oldtio);
+	tcgetattr(fd, &oldtio);
 
 	// rtv - CBAUD is pre-POSIX and doesn't exist on OS X
 	// should replace this with ispeed and ospeed instead.
-*/
+
 
 	// set up new settings
 	struct termios newtio;
 	bzero(&newtio, sizeof(newtio));
 	newtio.c_cflag = CS8 | CLOCAL | CREAD;
+	
+	// No Parity
+	newtio.c_cflag &= ~PARENB;
+	// One Stop Bit	
 	newtio.c_cflag &= ~CSTOPB;
+	// for 8-bit char, this prevents setting the MSB to zero
 	newtio.c_iflag &= ~ISTRIP;
-        newtio.c_iflag &= ~ (IXON|IXOFF);
-        newtio.c_cflag |= CRTSCTS;
-        newtio.c_cc[VSTART] = _POSIX_VDISABLE;
-        newtio.c_cc[VSTOP] = _POSIX_VDISABLE;
+	
+	// For soft Flow
+        newtio.c_iflag |= IXON|IXOFF;
+        newtio.c_cflag &= ~ CRTSCTS;
+	// Start and stop characters
+        newtio.c_cc[VSTART] = 0x11; // ^q
+        newtio.c_cc[VSTOP]  = 0x13; // ^s
+	
+	// Ignore Parity errors
 	newtio.c_iflag = IGNPAR;
+
 	newtio.c_oflag = 0;
 	newtio.c_lflag = 0;
-	newtio.c_cc[VTIME] = 0;
-	newtio.c_cc[VMIN] = 0;
+	newtio.c_cc[VTIME] = 1;
+	newtio.c_cc[VMIN]  = 1;
 	// activate new settings
-	tcflush(fd, TCIOFLUSH);
-	if (cfsetispeed(&newtio, rate) < 0 || cfsetospeed(&newtio, rate) < 0) {
+	tcflush(fd, TCIFLUSH);
+	if (cfsetispeed(&newtio, rate) < 0 || cfsetospeed(&newtio, rate) < 0) 
+	{
 		fprintf(stderr,"Failed to set serial baud rate: %d\n", rate);
 		tcsetattr(fd, TCSANOW, &oldtio);	
 		close(fd);
@@ -138,10 +150,15 @@ SerialCom::SerialCom(char * port, int rate)
 	}
 	tcsetattr(fd, TCSANOW, &newtio);
 	tcflush(fd, TCIOFLUSH);
-	
 	// clear the input buffer in case junk data is on the port
 	usleep(10000);
 	tcflush(fd, TCIFLUSH);
+    	flags = fcntl(fd, F_GETFL, 0) ;
+    	if( -1 == fcntl(fd, F_SETFL,flags & ~O_NONBLOCK ) ) 
+	{
+//        	return -1 ;
+    	}
+	//printf("\n HERE begin");  fflush(stdout);
 }
 
 SerialCom::~SerialCom() 
@@ -169,8 +186,11 @@ int SerialCom::Read(unsigned int *buf,int size)
 {
 	char temp;
 	for(int i=0;i<size;i++)
-		temp = read(fd,&buf[i],1);
-	return temp;
+	{
+		if((temp = read(fd,&buf[i],1))==-1)
+			return -1;
+	}
+	return size;
 }
 
 void SerialCom::WriteByte(char buf) 
@@ -187,8 +207,7 @@ void SerialCom::Write(char buf[], int numChars)
 // This is not generic but it is convienient to have located here.
 int SerialCom::SendCommand(char cmd[]) 
 {
-	unsigned int retbyte[8];
-	int count =0;
+	unsigned int retbyte[2];
 	//printf("\nSending Chars:");
 	for(unsigned int i=0; i< 5;i++)
 	{
@@ -196,16 +215,20 @@ int SerialCom::SendCommand(char cmd[])
 	//	printf("%c",cmd[i]);
 	}
 	WriteByte(13);
-	usleep(1000);
+	//usleep(1000);
+	fflush(stdout);
 	//printf("\nRecieved Chars:");
-	while(ReadByte(&retbyte[count]))
-	{ 
-	//	printf("%c",retbyte[count]); 
-		count++; 
-		if(count>7) 
-			break;
-	}
-	
+	if(Read(retbyte,2) !=2)
+		return -1;
+	//while(ReadByte(&retbyte[count]))
+	//for(int i=0;i<2;i++)
+	//{ 
+	//	printf("%c",retbyte[i]); 
+	//	count++; 
+	//	if(count>19) 
+	//		break;
+	//}
+	//fflush(stdout);
 	if ((char)retbyte[0] == 'O' || (char)retbyte[0] == 'L') 
 	{
 		return 0;

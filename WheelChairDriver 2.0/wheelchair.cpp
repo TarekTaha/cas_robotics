@@ -60,7 +60,7 @@ WheelChair::~WheelChair()
 int WheelChair :: resetUnit()
 {
 	unsigned int retbyte;
-
+	printf("\nResetting unit"); fflush(stdout);
 	if (controlUnit->SendCommand("O0000") != 0) //Reset output and wait response
 	{
 		PLAYER_ERROR("\n	-->Failed to find Wheelchair Interface Unit");
@@ -84,76 +84,68 @@ int WheelChair :: resetUnit()
 	}
 	else
 		puts("		+ Left/Right Voltage was successfully set to 2.5V");
+	printf("-->Unit Reset"); fflush(stdout);
 	return 0;
 };
 
 int WheelChair::sendCommand(int WCcmd, bool param) 
 {
 	static unsigned char status;
+	unsigned int retBytes[7];
 	char cmd[7];
 	unsigned int retbyte, retbyte2;
-	int x, voltageReadings,a,e;
+	int voltageReadings,a,e;
 	switch (WCcmd) 
 	{
 		case POWER:
-				while((a=getReading('A'))==-1);
-				while((e=getReading('E'))==-1);
+				while((a=getReading('A'))==-1);{usleep(SLEEP);}
+				while((e=getReading('E'))==-1);{usleep(SLEEP);}
 				voltageReadings = a + e;
-				//printf("\n Voltage Readings=%d",voltageReadings);
-				if ( voltageReadings > 1500)
+				//printf("\n Voltage Readings=%d",voltageReadings); fflush(stdout);
+				if ( voltageReadings > 2000)
 					power = true;
 				else
 					power = false;
+
 				if ((power && param) || (!power && !param)) // Same power state -> nothing to change
 					break;
-				if(power && !param)
-				{
-					while(controlUnit->SendCommand("O0000") != 0) {usleep(SLEEP);}
-					usleep(SLEEP);
-					while(controlUnit->SendCommand("O0008") != 0) {usleep(SLEEP);}
-				}
-				else if(!power && param)
+				if((!power && param) || (power && !param))
 				{
 					while(controlUnit->SendCommand("O0008") != 0) {usleep(SLEEP);}
 					usleep(SLEEP);
 					while(controlUnit->SendCommand("O0000") != 0) {usleep(SLEEP);}
+					(power)?power = false:power = true;
 				}
+				//printf("\nPower is:%d",power); fflush(stdout);
 			break;
 		
 		case SETMODE:
-				/*sprintf(cmd, "U8\r");
+				sprintf(cmd, "U8\r");
 				controlUnit->Write(cmd, 3);
 				printf("\n	+-->Processing Set Mode Request !!!");
-				controlUnit->ReadByte(&retbyte);
-				if ((char)retbyte != 'U') 
+				controlUnit->Read(retBytes,6);
+				if ((char)retBytes[0] != 'U') 
 				{
 					printf("\nReturned: .%c.\n",(char)retbyte);
 					PLAYER_ERROR("Failed to read auto/man status from Wheelchair Interface Unit\n");
 					return -1;
 				}
-				controlUnit->ReadByte(&retbyte);
-				controlUnit->ReadByte(&retbyte2);
-				controlUnit->ReadByte(&retbyte);
-				controlUnit->ReadByte(&retbyte);
-				controlUnit->ReadByte(&retbyte);
-				*/
-				x = getReading('8');
-				//if (((char)retbyte2 == '0' && param) || ((char)retbyte2 != '0' && !param)) 
-				if (( x < 255 && param) || (x >255 && !param))
+
+				if (((char)retBytes[2] == '0' && param) || ((char)retBytes[2] != '0' && !param)) 
 				{
 					// we need to toggle the mode
-					while(controlUnit->SendCommand("O0020") != 0) {}
-					/*{	
+					if(controlUnit->SendCommand("O0020") != 0)
+					{	
 						PLAYER_ERROR("Failed to set mode\n");
 						controlUnit->SendCommand("O0000");
 						return -1;
-					}*/
+					}
 					usleep(LATCHDELAY);
-					while (controlUnit->SendCommand("O0000") != 0) {}
-					/*{
+					if(controlUnit->SendCommand("O0000") != 0)
+					{
 						PLAYER_ERROR("Failed to set mode\n");
 						return -1;
-					}*/
+					}
 				}
 				break;
 		case GEAR:
@@ -265,25 +257,17 @@ int WheelChair::sendCommand(int WCcmd, bool param)
 	
 };
 
-int WheelChair::getReading(char Channel)
+int WheelChair::getReading(char channel)
 {
 	int count = 0;
 	unsigned int readingValue[8];
-	unsigned int temp;
 	unsigned int Position = 0;
-
-	controlUnit->WriteByte('U');
-	controlUnit->WriteByte(Channel);
-	controlUnit->WriteByte(13);
-	usleep(1000);
-	//printf("\n");
-	while(controlUnit->ReadByte(&temp)>0)
+	controlUnit->WriteByte('U'); controlUnit->WriteByte(channel); controlUnit->WriteByte(13);
+	count = controlUnit->Read(readingValue,6);
+	/*for(int i=0;i<count;i++)
 	{
-	//	printf("%c",temp);
-		readingValue[count] = temp;
-		count++;
-		if (count>7) break;
-	}
+		printf("%c",readingValue[i]);
+	}*/
 	if(count!=6 || (readingValue[0]&=0x000000ff)!='U')
 		return -1;
 
@@ -298,7 +282,6 @@ int WheelChair::getReading(char Channel)
 	readingValue[4]-=48; if(readingValue[4]>9) readingValue[4]-=7;
 	Position |= (readingValue[4]);
 //	printf(" Converted Value is:%d",Position);
-
 	return Position;
 };
 
