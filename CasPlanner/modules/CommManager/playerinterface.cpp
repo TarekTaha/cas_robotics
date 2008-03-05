@@ -99,7 +99,7 @@ int PlayerInterface::getJoyStickGlobalDir()
 	if(angle < 0)
 		angle += 360;
 	
-//	printf("\nThe Angle is:%f",angle);	
+//	printf(" : The Global Angle is:%f",angle);	
 	
 	if( x == 0 && y == 0)
 	{
@@ -166,7 +166,7 @@ int PlayerInterface::getJoyStickDir()
 
 	angle = RTOD(atan2(y,x));
 
-//	printf("\nThe Angle is:%f",angle);
+//	printf("\nThe Local Angle is:%f",angle);
 	
 	if(x==0 && y==0)
 	{

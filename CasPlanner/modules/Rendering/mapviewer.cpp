@@ -572,8 +572,10 @@ void MapViewer::drawCircle(QPointF center,float radius)
 
 void MapViewer::renderObservation()
 {
-	if(!playGround->mapManager || !playGround->activeRobot->intentionRecognizer||!playGround->activeRobot->commManager)
+	playGround->activeRobot->commManager->getJoyStickGlobalDir();
+	if(!playGround->mapManager ||!playGround->activeRobot->commManager)//|| !playGround->activeRobot->intentionRecognizer)
 		return;
+	
 	glPushMatrix();
 		glLineWidth(1);	
 		glColor4f(0.0f,0.0f,1.0f,1.0f);
@@ -581,7 +583,9 @@ void MapViewer::renderObservation()
 		glScalef(1/15.0, 1/15.0, 1.0);
 		renderTextFont(-0.99,0.95, BITMAP_FONT_TYPE_HELVETICA_12,"Joystick");		
 		drawCircle(1.0);
-		int obs = playGround->activeRobot->intentionRecognizer->lastObs;
+		//int obs = playGround->activeRobot->intentionRecognizer->lastObs;
+		int obs = playGround->activeRobot->commManager->getJoyStickGlobalDir();
+		//int obs = playGround->activeRobot->commManager->getJoyStickDir();
 		glLineWidth(2);
 		switch (obs)
 		{
