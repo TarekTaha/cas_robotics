@@ -68,6 +68,7 @@ public:
 private:
 	dvector initialBeliefD;
 	int interactionStrategy;
+	bool actionAmbiguity;
 	string pomdpFileName, policyFileName;
 	ZMDPConfig* config;
 	BoundPairExec* em;

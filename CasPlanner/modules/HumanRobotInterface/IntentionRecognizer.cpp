@@ -33,6 +33,8 @@ action(4),
 spatialState(-1),
 oldSpatialState(-2),
 interactionStrategy(CONTINIOUS_INPUT),
+//interactionStrategy(MINIMAL_INPUT),
+actionAmbiguity(false),
 playGround(playG),
 robotManager(rManager),
 path(NULL)
@@ -57,15 +59,17 @@ IntentionRecognizer::~IntentionRecognizer()
 void IntentionRecognizer::InitializePOMDP()
 {
   	MatrixUtils::init_matrix_utils();
+  	//pomdpFileName  = "modules/PomdpModels/minimal_interaction.pomdp";
  	pomdpFileName  = "modules/PomdpModels/paperexperiment.pomdp";
   	//policyFileName = "modules/PomdpModels/mod11.policy";
  	policyFileName = "modules/PomdpModels/6dest.policy";
+  	//policyFileName = "modules/PomdpModels/minimal_interaction.policy";
   	config = new ZMDPConfig();
   	config->readFromFile("modules/PomdpCore/zmdp.conf");
   	config->setString("policyOutputFile", "none");
   	em = new BoundPairExec();
   	printf("initializing\n");
-  	em->initReadFiles(pomdpFileName,policyFileName, *config);	
+  	em->initReadFiles(pomdpFileName,policyFileName, *config);
 }
 
 void IntentionRecognizer::setInteractionStrategy(int strategy)
@@ -136,9 +140,9 @@ void IntentionRecognizer::followActionToNextState()
     double maxTrans = 0;
 	for (int sp=0; sp < ((Pomdp*)em->mdp)->getBeliefSize(); sp++) 
     {
-    	if(((Pomdp*)em->mdp)->T[action](spatialState,sp) > maxTrans)
+    	if(((Pomdp*)em->mdp)->T[action](spatialState,sp) >= maxTrans)
     	{
-//			printf("Index=%d %5.3f ",sp,((Pomdp*)em->mdp)->T[action](spatialState,sp));
+//    		printf("\nIndex=%d %5.3f ",sp,((Pomdp*)em->mdp)->T[action](spatialState,sp));
 			maxTrans = ((Pomdp*)em->mdp)->T[action](spatialState,sp);
 			nextState = sp;
     	}
@@ -149,7 +153,7 @@ void IntentionRecognizer::followActionToNextState()
     	printf("\nIR: This action is not applicable to this state."); fflush(stdout);
     	return;
     }
-    
+  
 	goToState.p.setX(playGround->mapManager->mapSkeleton.verticies[nextState].location.x());
 	goToState.p.setY(playGround->mapManager->mapSkeleton.verticies[nextState].location.y());
 	
@@ -189,10 +193,11 @@ void IntentionRecognizer::followActionToNextState()
 		default:
 			goToState.phi = DTOR(0);
 	}
-	if( (oldGoToState!=goToState && observation!=NoInput) || !beliefInitialized)
+//	if( (oldGoToState!=goToState && observation!=NoInput) || !beliefInitialized)
+	if( (oldGoToState!=goToState) || !beliefInitialized)
 	{
 		printf("\n Going to State:%d",nextState);
-		printf("\noldGoto X=%f, Y=%f, GoTo X=%f, Y=%f Action=%d Obs=%d",oldGoToState.p.x(),oldGoToState.p.y(),goToState.p.x(),goToState.p.y(),action,observation);
+		printf(" oldGoto X=%f, Y=%f, GoTo X=%f, Y=%f Action=%d Obs=%d",oldGoToState.p.x(),oldGoToState.p.y(),goToState.p.x(),goToState.p.y(),action,observation);
 
 		if(robotManager->commManager)
 	  		robotManager->commManager->stopRelease();
@@ -226,6 +231,7 @@ void IntentionRecognizer::resetBelief()
   	copy(b, initialBeliefD);
   	oldSpatialState = -2;
   	em->setBelief(b);
+  	printf("\n Belief Reset !!!");
 }
 
 bool IntentionRecognizer::currentStateIsDestination()
@@ -249,9 +255,10 @@ void IntentionRecognizer::run()
 	odom=fopen(qPrintable(QString("logs/odom%1").arg(suffex)),"wb");
 	fprintf(file,"# Values: State, Observation, Belief Dest1 ...n, Action, Next State\n");	
 	fprintf(odom,"# Values: X, Y, Theta, Spatial State \n");
+	bool justStarted = true;
 	while(runRecognition)
 	{
-		msleep(50);
+		msleep(10);
 		if(!robotManager->commManager)
 		{
 			qDebug("\t - (IR): Communication Manager Not Initialized");
@@ -284,17 +291,13 @@ void IntentionRecognizer::run()
 			sleep(1);
 			currentPose = robotManager->commManager->getLocation();
 			spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(currentPose);			
-			
 			resetBelief();
-//		  	em->setToInitialState();
-		  	/* Chose Initial Action */
-//		  	action = em->chooseAction();
-//		  	followActionToNextState();
 		  	beliefInitialized = true;
 		}
-//		printf("\nJoyStick Global Direction=%d Current Location X=%f, Y=%f CurrentState=%d",robotManager->commManager->getJoyStickGlobalDir(),location.p.x(),location.p.y(),spatialState);   
+  
 		/* Take observations and update Beliefs only in discrete states*/
-		if(oldSpatialState != spatialState)
+		double dist = playGround->mapManager->mapSkeleton.getDist2SpatialState(currentPose,spatialState);
+		if(oldSpatialState != spatialState && (dist<=0.5 || justStarted))
 		{
 			/* We are now in action new State so Save it as visited */
 		    // Get an Observation
@@ -303,10 +306,16 @@ void IntentionRecognizer::run()
 		     * Get an observation and if it's directional(not NoInput) then don't
 		     * take any more observations from this state.
 		     */
-		    if(observation==NoInput)
-		    {
+		    
+			if(observation == NoInput && interactionStrategy == CONTINIOUS_INPUT) 
 		    	continue;
-		    }
+			if(interactionStrategy == MINIMAL_INPUT)
+			{
+				if(observation != NoInput)
+					actionAmbiguity = false;
+				else if (actionAmbiguity)	//observation == NoInput
+					continue;					
+			}
 
 			if (currentStateIsDestination())//em->getStateIsTerminal())
 		    {
@@ -316,10 +325,60 @@ void IntentionRecognizer::run()
 				activityLogger->startNewTask();
 		    }
 
+		    belief_vector prevB = em->currentState;
+		    int s=0;
+			for(unsigned int j=0; j < prevB.size();j++)
+			{
+				s = (int)(j/numStates);
+				if( prevB(j))
+				{
+					printf("\n Belief:%d is=%f",j,prevB(j));
+				}
+			}		    
+		    QVector <int> possibleActions;		    
+		    possibleActions.clear();
+		    if(interactionStrategy == MINIMAL_INPUT && observation == NoInput)
+		    {
+		    	actionAmbiguity = false;
+			    for(int whatIfObs=0;whatIfObs<5;whatIfObs++)
+			    {
+			    	// See What the result of obtaining this observation would be
+			    	em->advanceToNextState(action,whatIfObs);
+			    	/* 
+			    	 * Add the action to be excuted to the set of actions if
+			    	 * it's not already in the list 
+			    	 */
+			    	if(possibleActions.indexOf(em->chooseAction())==-1)
+			    	{
+			    		possibleActions.push_back(em->chooseAction());
+			    		if(possibleActions.size()>1)
+					    {
+					    	printf("\n I need an input, i don't know where you are going !!!");
+					    	actionAmbiguity = true;
+					    	em->setBelief(prevB);
+					    	break;
+					    }
+			    	}
+			    	// Get Back to original Belief and try another observation
+			    	em->setBelief(prevB);
+			    }
+			    for(int i =0;i<possibleActions.size();i++)
+			    {
+			    	printf("\nPossible action:[%d]",possibleActions[i]);
+			    }
+		    }
+		    if (actionAmbiguity)
+		    	continue;
+		    if(possibleActions.size()==1)
+		    	observation = possibleActions[0];
 		    oldSpatialState = spatialState;
 		    em->advanceToNextState(action,observation);
 		    belief_vector newB = em->currentState;
 		    
+		    action = em->chooseAction();
+			fprintf(file,"%d ",action);
+		    printf("\n New Chosen Action is:%d",action);			
+
 			activityLogger->addState(spatialState,observation);
 			fprintf(file,"%d %d ",spatialState,observation);
 			
@@ -340,10 +399,8 @@ void IntentionRecognizer::run()
 				printf("\n Belief is now Updated to Dest:%d with %f",i,destBelief[i]);				
 				fprintf(file,"%.5f ",destBelief[i]);
 			}
-		  	action = em->chooseAction();
-			fprintf(file,"%d ",action);		  				
 			followActionToNextState();
-		    printf("\n New Chosen Action is:%d",action);
+			justStarted = false;
 		}
 	}	
 }

@@ -90,6 +90,7 @@ class MapSkeleton
 		bool convertGridToLineWithVoronoi(float minThreshold, float maxThreshold, bool filterByCellValue, float valueToSet);
 		void generateInnerSkeleton();
 		int  getCurrentSpatialState(Pose p);
+		double  getDist2SpatialState(Pose P,int stateIndex);
 		int numStates;
 		int numDestinations;
 		void clear();

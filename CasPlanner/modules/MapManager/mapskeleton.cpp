@@ -97,6 +97,11 @@ void MapSkeleton::clear()
 
 }
 
+double MapSkeleton::getDist2SpatialState(Pose P,int stateIndex)
+{
+	return Dist(P.p,verticies[stateIndex].location);
+}
+
 int MapSkeleton::getCurrentSpatialState(Pose P)
 {
 	double dist,closest = Dist(P.p,verticies[0].location);
