@@ -74,13 +74,22 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     statusBar()->showMessage("Initialization Done.");
 	// Data Logging Timer
     QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(logData()));
-    timer->start(60000);
+    //connect(timer, SIGNAL(timeout()), this, SLOT(logData()));
+    //connect(timer, SIGNAL(timeout()), this, SLOT(captureScreenShot()));
+    imageCounter = 0;
+    timer->start(200);
 }
 void MainWindow::logData()
 {
 	QApplication::beep();
     return;
+}
+
+void MainWindow::captureScreenShot()
+{
+	originalPixmap = QPixmap::grabWindow(QMainWindow::centralWidget()->winId());
+    fileName = QString("./logs/screenshots/shot%1").arg(imageCounter++).append(".jpeg");
+    originalPixmap.save(fileName,"JPEG",50);
 }
 
 void MainWindow::commStart()

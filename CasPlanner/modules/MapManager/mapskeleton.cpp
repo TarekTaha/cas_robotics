@@ -48,11 +48,11 @@ MapSkeleton::MapSkeleton()
 	verticies[20].setLocation(1.72,-4.48);
 	verticies[21].setLocation(3.27,-4.48);
 	verticies[22].setLocation(3.36,-6.32);
-	verticies[23].setLocation(4.96,-4.48);
-	verticies[24].setLocation(9.42,-4.53);
+	verticies[23].setLocation(4.96,-4.1);
+	verticies[24].setLocation(9.1,-4.8);
 	verticies[25].setLocation(9.61,-1.62);
 	verticies[26].setLocation(4.96,-1.34);
-	verticies[27].setLocation(4.96,1.48);
+	verticies[27].setLocation(4.7,1.48);
 	verticies[28].setLocation(4.96,3.7);
 	verticies[29].setLocation(4.96,7.36);
 	verticies[30].setLocation(8.62,3.51);

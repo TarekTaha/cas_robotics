@@ -137,8 +137,7 @@ Q_OBJECT
 		GLuint texId;
 		double RGB_COLOR[10][3];
 		float ratioW, ratioH;
-		int newWidth,newHeight,imageCounter;
-		QTime fps;
+		int newWidth,newHeight;
 };
 
 
