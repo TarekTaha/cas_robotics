@@ -258,7 +258,7 @@ void IntentionRecognizer::run()
 	bool justStarted = true;
 	while(runRecognition)
 	{
-		msleep(10);
+		msleep(50);
 		if(!robotManager->commManager)
 		{
 			qDebug("\t - (IR): Communication Manager Not Initialized");
@@ -326,20 +326,30 @@ void IntentionRecognizer::run()
 		    }
 
 		    belief_vector prevB = em->currentState;
-		    int s=0;
-			for(unsigned int j=0; j < prevB.size();j++)
-			{
-				s = (int)(j/numStates);
-				if( prevB(j))
-				{
-					printf("\n Belief:%d is=%f",j,prevB(j));
-				}
-			}		    
+//		    int s=0;
+//			for(unsigned int j=0; j < prevB.size();j++)
+//			{
+//				s = (int)(j/numStates);
+//				if( prevB(j))
+//				{
+//					printf("\n Belief:%d is=%f",j,prevB(j));
+//				}
+//			}		   
 		    QVector <int> possibleActions;		    
 		    possibleActions.clear();
+		    int maxBeliefAction=-1;
+		    double currentMaxBelief=0;
 		    if(interactionStrategy == MINIMAL_INPUT && observation == NoInput)
 		    {
+		    	belief_vector thisMaxBelief = em->currentState;
+		    	currentMaxBelief = 0;
+		    	for(unsigned int j=0; j < thisMaxBelief.size();j++)
+		    	{
+		    		if(thisMaxBelief(j)>currentMaxBelief)
+		    			currentMaxBelief = thisMaxBelief(j);
+		    	}			    	
 		    	actionAmbiguity = false;
+		    	double maxBelief=0;
 			    for(int whatIfObs=0;whatIfObs<5;whatIfObs++)
 			    {
 			    	// See What the result of obtaining this observation would be
@@ -348,12 +358,25 @@ void IntentionRecognizer::run()
 			    	 * Add the action to be excuted to the set of actions if
 			    	 * it's not already in the list 
 			    	 */
-			    	if(possibleActions.indexOf(em->chooseAction())==-1)
+			    	belief_vector thisMaxBelief = em->currentState;
+			    	maxBelief = 0;
+			    	for(unsigned int j=0; j < thisMaxBelief.size();j++)
+			    	{
+			    		if(thisMaxBelief(j) > 0.5)
+			    		{
+			    			maxBelief = thisMaxBelief(j);
+			    			break;
+			    		}
+			    		if(thisMaxBelief(j)>maxBelief)
+			    			maxBelief = thisMaxBelief(j);
+			    	}
+			    	if(possibleActions.indexOf(em->chooseAction())==-1 && maxBelief>currentMaxBelief)
 			    	{
 			    		possibleActions.push_back(em->chooseAction());
+			    		maxBeliefAction = whatIfObs;
 			    		if(possibleActions.size()>1)
 					    {
-					    	printf("\n I need an input, i don't know where you are going !!!");
+					    	printf("\n I need an input, i don't know where you are going !!!");fflush(stdout);
 					    	actionAmbiguity = true;
 					    	em->setBelief(prevB);
 					    	break;
@@ -364,13 +387,13 @@ void IntentionRecognizer::run()
 			    }
 			    for(int i =0;i<possibleActions.size();i++)
 			    {
-			    	printf("\nPossible action:[%d]",possibleActions[i]);
+			    	printf("\nPossible action:[%d]",possibleActions[i]); fflush(stdout);
 			    }
 		    }
 		    if (actionAmbiguity)
 		    	continue;
-		    if(possibleActions.size()==1)
-		    	observation = possibleActions[0];
+		    if(possibleActions.size()> 0)
+		    	observation = maxBeliefAction;
 		    oldSpatialState = spatialState;
 		    em->advanceToNextState(action,observation);
 		    belief_vector newB = em->currentState;

@@ -40,10 +40,13 @@ public:
     public slots:
 		void logData();
 		void commStart(); 
+		void captureScreenShot();
 private: 
     TabContainer * tabcontainer;
 	PlayGround   * playGround;
-	int logCount; 
+	int logCount,imageCounter;
+	QPixmap originalPixmap; 
+	QString fileName;
 };
 #endif
 
