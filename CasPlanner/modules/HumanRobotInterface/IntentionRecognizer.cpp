@@ -297,7 +297,7 @@ void IntentionRecognizer::run()
   
 		/* Take observations and update Beliefs only in discrete states*/
 		double dist = playGround->mapManager->mapSkeleton.getDist2SpatialState(currentPose,spatialState);
-		if(oldSpatialState != spatialState && (dist<=0.5 || justStarted))
+		if(oldSpatialState != spatialState && (dist<=1.0 || justStarted))
 		{
 			/* We are now in action new State so Save it as visited */
 		    // Get an Observation

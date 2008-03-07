@@ -68,6 +68,7 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
   	RGB_COLOR[8][0] = 1.0; RGB_COLOR[8][1] = 0.078; RGB_COLOR[8][2] = 0.576; // DeepPink
   	RGB_COLOR[9][0] = 0.8; RGB_COLOR[9][1] = 0.0;   RGB_COLOR[9][2] = 0.0;   // Red
 //	qDebug("OpenGL Initialized"); fflush(stdout);
+  	imageCounter =0;
 }
 
 QSize MapViewer::sizeHint()
@@ -877,7 +878,7 @@ void MapViewer::paintGL()
     glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
     glGetIntegerv(GL_VIEWPORT,viewport);
 
-	if(this->ogMap)
+    if(this->ogMap)
 	{
 		glDisable( GL_DEPTH_TEST );		
 		if(!mainMapBuilt)
@@ -898,8 +899,18 @@ void MapViewer::paintGL()
 //		renderSearchTree();
 	}
     glCallList(mapList);
-        
 	glPopMatrix();
+	/*
+    if(fps.elapsed()>100)
+    {
+	    QString filename;
+	    filename = QString("./images/image-%1").arg(imageCounter++).append(".png");
+	    const char * type = "JPEG";
+	    QImage capturedMap = this->captureMap();
+	    capturedMap.save(filename,type,50);
+	    fps.start();
+    }
+    */	
 }
 
 void MapViewer::setShowOGs(int state)
