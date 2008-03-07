@@ -26,6 +26,7 @@
 
 #include <QtOpenGL>
 #include <GL/glut.h>
+#include <QTime>
 #include "interfaceprovider.h"
 #include "mapmanager.h"
 #include "playground.h"
@@ -136,7 +137,8 @@ Q_OBJECT
 		GLuint texId;
 		double RGB_COLOR[10][3];
 		float ratioW, ratioH;
-		int newWidth,newHeight;
+		int newWidth,newHeight,imageCounter;
+		QTime fps;
 };
 
 
