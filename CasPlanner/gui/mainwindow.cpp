@@ -75,9 +75,9 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
 	// Data Logging Timer
     QTimer *timer = new QTimer(this);
     //connect(timer, SIGNAL(timeout()), this, SLOT(logData()));
-    //connect(timer, SIGNAL(timeout()), this, SLOT(captureScreenShot()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(captureScreenShot()));
     imageCounter = 0;
-    timer->start(200);
+    timer->start(500);
 }
 void MainWindow::logData()
 {
