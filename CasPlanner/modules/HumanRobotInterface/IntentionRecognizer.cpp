@@ -297,8 +297,10 @@ void IntentionRecognizer::run()
   
 		/* Take observations and update Beliefs only in discrete states*/
 		double dist = playGround->mapManager->mapSkeleton.getDist2SpatialState(currentPose,spatialState);
-		if(oldSpatialState != spatialState && (dist<=1.0 || justStarted))
+		if(oldSpatialState != spatialState)
 		{
+			if(!(dist<=1.0 || justStarted))
+				continue;
 			/* We are now in action new State so Save it as visited */
 		    // Get an Observation
 			lastObs = observation = robotManager->commManager->getJoyStickGlobalDir();
@@ -309,6 +311,7 @@ void IntentionRecognizer::run()
 		    
 			if(observation == NoInput && interactionStrategy == CONTINIOUS_INPUT) 
 		    	continue;
+			
 			if(interactionStrategy == MINIMAL_INPUT)
 			{
 				if(observation != NoInput)
@@ -326,15 +329,6 @@ void IntentionRecognizer::run()
 		    }
 
 		    belief_vector prevB = em->currentState;
-//		    int s=0;
-//			for(unsigned int j=0; j < prevB.size();j++)
-//			{
-//				s = (int)(j/numStates);
-//				if( prevB(j))
-//				{
-//					printf("\n Belief:%d is=%f",j,prevB(j));
-//				}
-//			}		   
 		    QVector <int> possibleActions;		    
 		    possibleActions.clear();
 		    int maxBeliefAction=-1;
