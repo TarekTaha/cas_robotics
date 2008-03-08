@@ -87,8 +87,10 @@ void MainWindow::logData()
 
 void MainWindow::captureScreenShot()
 {
+	char counter[8];
+	sprintf(counter,"%06d",imageCounter++);
 	originalPixmap = QPixmap::grabWindow(QMainWindow::centralWidget()->winId());
-    fileName = QString("./logs/screenshots/shot%1").arg(imageCounter++).append(".jpeg");
+    fileName = QString("./logs/screenshots/shot%1").arg(counter).append(".jpeg");
     originalPixmap.save(fileName,"JPEG",50);
 }
 
