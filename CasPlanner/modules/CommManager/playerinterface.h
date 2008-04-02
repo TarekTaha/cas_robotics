@@ -36,6 +36,7 @@
 #include "timer.h"
 #include "statusbar.h"
 #include "wheelchairproxy.h"
+#include "accelerometer.h"
 
 #define MAX_LASERS 4
 
@@ -164,5 +165,6 @@ Q_OBJECT
         LaserScan laserScan;
         double speed,turnRate,getspeed,getturnrate;
         QReadWriteLock dataLock;       
+        //Accelerometer n95Acc;
 };
 #endif 
