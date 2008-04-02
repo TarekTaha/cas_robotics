@@ -721,7 +721,21 @@ void PlayerInterface::run ()
 //			pc->ReadIfWaiting();
 //			if(!pc->Peek(50))
 //				continue;
-			pc->Read();		
+			pc->Read();
+			
+		    n95Acc.readBT();
+		    printf("\n Accel X:%d Y:%d Z:%d",n95Acc.getX(),n95Acc.getY(),n95Acc.getZ());
+		    double maxSpeed = 1, maxTurnRate=DTOR(50), forwardSpeed, steeringTurnRate;
+		    forwardSpeed = -1*n95Acc.getZ()/60.0*maxSpeed;
+		    steeringTurnRate =  -1*n95Acc.getY()/60.0*maxTurnRate;
+		    
+		    if(abs(n95Acc.getZ())<7 )
+		    	forwardSpeed =0;
+		    if(abs(n95Acc.getY())<7 )
+		    	steeringTurnRate =0;
+		    
+		    drive->SetSpeed(forwardSpeed,steeringTurnRate);
+		    
 		    for(int laser_indx=0; laser_indx < lasers.size(); laser_indx++)
 		    {
 		    	if (laserScan.points.size())
@@ -734,8 +748,6 @@ void PlayerInterface::run ()
 			    	laserScan.points.push_back(QPointF(lasers[laser_indx].lp->GetPoint(i).px, lasers[laser_indx].lp->GetPoint(i).py));    
 				}
 		  	}
-//		    n95Acc.readBT();
-//		    printf("\nDid i extract then properly X:%d Y:%d Z:%d",n95Acc.getX(),n95Acc.getY(),n95Acc.getZ());		    
 	        if(ctrEnabled)
 	        {
 	        	player_pose_t ps;
