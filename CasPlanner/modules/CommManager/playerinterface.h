@@ -165,6 +165,6 @@ Q_OBJECT
         LaserScan laserScan;
         double speed,turnRate,getspeed,getturnrate;
         QReadWriteLock dataLock;       
-        //Accelerometer n95Acc;
+        Accelerometer n95Acc;
 };
 #endif 
