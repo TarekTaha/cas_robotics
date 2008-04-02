@@ -734,6 +734,8 @@ void PlayerInterface::run ()
 			    	laserScan.points.push_back(QPointF(lasers[laser_indx].lp->GetPoint(i).px, lasers[laser_indx].lp->GetPoint(i).py));    
 				}
 		  	}
+//		    n95Acc.readBT();
+//		    printf("\nDid i extract then properly X:%d Y:%d Z:%d",n95Acc.getX(),n95Acc.getY(),n95Acc.getZ());		    
 	        if(ctrEnabled)
 	        {
 	        	player_pose_t ps;

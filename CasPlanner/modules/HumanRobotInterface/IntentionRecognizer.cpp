@@ -299,8 +299,8 @@ void IntentionRecognizer::run()
 		double dist = playGround->mapManager->mapSkeleton.getDist2SpatialState(currentPose,spatialState);
 		if(oldSpatialState != spatialState)
 		{
-			if(!(dist<=1.0 || justStarted))
-				continue;
+//			if(!(dist<=1.0 || justStarted))
+//				continue;
 			/* We are now in action new State so Save it as visited */
 		    // Get an Observation
 			lastObs = observation = robotManager->commManager->getJoyStickGlobalDir();
@@ -335,13 +335,19 @@ void IntentionRecognizer::run()
 		    double currentMaxBelief=0;
 		    if(interactionStrategy == MINIMAL_INPUT && observation == NoInput)
 		    {
-		    	belief_vector thisMaxBelief = em->currentState;
+//		    	belief_vector thisMaxBelief = em->currentState;
+//		    	currentMaxBelief = 0;
+//		    	for(unsigned int j=0; j < thisMaxBelief.size();j++)
+//		    	{
+//		    		if(thisMaxBelief(j)>currentMaxBelief)
+//		    			currentMaxBelief = thisMaxBelief(j);
+//		    	}
 		    	currentMaxBelief = 0;
-		    	for(unsigned int j=0; j < thisMaxBelief.size();j++)
+		    	for(int j=0; j < destBelief.size();j++)
 		    	{
-		    		if(thisMaxBelief(j)>currentMaxBelief)
-		    			currentMaxBelief = thisMaxBelief(j);
-		    	}			    	
+		    		if(destBelief[j]>currentMaxBelief)
+		    			currentMaxBelief = destBelief[j];
+		    	}
 		    	actionAmbiguity = false;
 		    	double maxBelief=0;
 			    for(int whatIfObs=0;whatIfObs<5;whatIfObs++)
