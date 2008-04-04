@@ -2,13 +2,13 @@ function pomdpModel = modelDefinitions(outputFile,obsDataFile)
 
 pomdpModel.outputFile  = outputFile;
 pomdpModel.obsDataFile = obsDataFile;
-pomdpModel.discount = 0.7;
+pomdpModel.discount = 0.90;
 pomdpModel.numSpatialStates = 49;
 pomdpModel.obsCrossFeature  = 0;
 pomdpModel.destCrossFeature = 1;
 
 % define the destinations
-pomdpModel.destinations = {'s1d1','s6d2','s26d3','s44d4'};
+pomdpModel.destinations = {'s1d1','s6d2','s44d3','s30d4','s26d5','s38d6'};
 pomdpModel.actions = {'North','South','East','West','Stop'};
 pomdpModel.obsStrings = {'Up','Down','Right','Left','Nothing'};
 
@@ -18,7 +18,7 @@ pomdpModel.actionsUncertainty = [0,0,0,0,0];
 
 % Percentage Uncertainty in the Observations
 %pomdpModel.observationsUncertainty = [0,0,0,0,0];
-pomdpModel.observationsUncertainty = [10,5,15,10,20];
+pomdpModel.observationsUncertainty = [5,5,5,5,5];
 
 % Construct the Graph network by defining the number of states and the
 % translation inbetween the states. This will be used to build the
