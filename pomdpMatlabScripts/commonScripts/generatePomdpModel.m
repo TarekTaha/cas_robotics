@@ -72,8 +72,15 @@ for i=1:length(pomdpModel.observations)
     fprintf(fid,' %s',pomdpModel.observations{i});
 end
 startBelief = 1.0/pomdpModel.mapTopology.nnodes;
+% startBelief = zeros(1,pomdpModel.mapTopology.nnodes);
+% state = 1;
+% startBelief(1,0*49 + state) = 0.25;
+% startBelief(1,1*49 + state) = 0.25;
+% startBelief(1,2*49 + state) = 0.25;
+% startBelief(1,3*49 + state) = 0.25;
 fprintf(fid,'\nstart:');
 for i=1:pomdpModel.mapTopology.nnodes
+    %fprintf(fid,' %.12f',startBelief(1,i));
     fprintf(fid,' %.12f',startBelief);
 end
 

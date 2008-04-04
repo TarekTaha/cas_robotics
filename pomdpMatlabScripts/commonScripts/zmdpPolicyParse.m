@@ -5,9 +5,8 @@ function policy = zmdpPolicyParse(filename)
 % out.policy. 
 % belief  : a (1,n) vector with the probability belief of states where n is
 % the number of states in the POMDP model. 
-
+display('Reading Policy File');
 file = textread(filename,'%s','commentstyle','shell','delimiter','\n','whitespace',' \b\t');
-display('HERE 0');
 
 %remove un-necessary info
 k=0; maxEnteris=0;
@@ -57,7 +56,6 @@ for i=1:length(file)
       end      
   end
 end
-display('HERE 1');
 
 k=1;
 policy.numPlanes = sscanf(lines{k},'%*s %d');
@@ -76,10 +74,10 @@ for i=1:policy.numPlanes
         k=k+1;
     end
     if mod(i,5000) == 0
-        display(i);
+    %    display(i);
     end
 end
+display('Policy File Read');
 toc
 clear lines;
-
 end
