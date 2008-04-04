@@ -40,7 +40,10 @@ function [maxValue action] = RTBSS(pomdp,currentBelief,d)
 D = 2;
 if d == 0
     maxValue = getUtilityFunctionValue(pomdp,currentBelief);
-    %display(sprintf('U:=%f',maxValue));
+    display(sprintf('U:=%f',maxValue));
+    for i=1:length(currentBelief)
+        display(sprintf('Belief in s%d:=%f',i,currentBelief(i).value));
+    end    
     return 
 end
 
@@ -49,7 +52,9 @@ maxValue = -1000;
 actions = sortPromisingActions(pomdp,currentBelief);
 n = length(actions);
 
-%display(sprintf('Belief in s1:=%f in s2:=%f',currentBelief(1).value,currentBelief(2).value));
+for i=1:length(currentBelief)
+    display(sprintf('Belief in s%d:=%f',i,currentBelief(i).value));
+end
 
 for i=1:n 
     %Get the action from the sorted actions list

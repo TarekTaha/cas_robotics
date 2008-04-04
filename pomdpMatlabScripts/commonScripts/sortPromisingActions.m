@@ -37,13 +37,6 @@ m=length(beliefSpace);
 reward = 0;
 maxReward = -1000;
 
-for a=1:pomdp.nrActions
-    for i=1:m
-        s = beliefSpace(i).state;
-        pomdp.reward(s,a) = pomdp.transition(:,s,a)'*pomdp.reward3(:,s,a);
-    end
-end  
-
 for i=1:m
     for a=1:pomdp.nrActions
         s = beliefSpace(i).state;
