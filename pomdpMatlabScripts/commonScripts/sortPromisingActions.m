@@ -35,14 +35,20 @@ function [actions] = sortPromisingActions(pomdp,beliefSpace)
 
 m=length(beliefSpace);
 reward = 0;
-maxReward = -1000;
 
 for i=1:m
     for a=1:pomdp.nrActions
         s = beliefSpace(i).state;
         reward = beliefSpace(i).value*pomdp.reward(s,a);
-        actions(a).action = a;
-        actions(a).reward = reward;
+        if exist('actions','var') && (a <= length(actions))
+            if(reward>actions(a).reward)
+                actions(a).action = a;
+                actions(a).reward = reward;
+            end
+        else
+            actions(a).action = a;
+            actions(a).reward = reward;        
+        end
     end
 end
 

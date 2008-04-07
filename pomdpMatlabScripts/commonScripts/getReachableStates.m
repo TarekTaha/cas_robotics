@@ -35,28 +35,29 @@ function [reachableStates] = getReachableStates(pomdp,currnetfactoredBelief,o,a)
 % ************************************************************************/
 
 n = length(currnetfactoredBelief);
-m = pomdp.nrStates;
 k = 0;
+alreadyExist = 0;
+reachableStates(1).state = 0;
+reachableStates(1).value = 0;
 for i=1:n
     s = currnetfactoredBelief(i).state;
-    for j=1:m
+    m = find(pomdp.transition(:,s,a));
+    for sp=1:length(m)
         alreadyExist = 0;
-        if pomdp.transition(j,s,a) ~= 0 
-            if pomdp.observation(j,a,o) ~= 0
-                if exist('reachableStates')
-                    for s=1:length(reachableStates)
-                        if reachableStates(s).state == j
-                            alreadyExist = 1;
-                            break;
-                        end
-                    end
-                end
-                if ~alreadyExist
-                    k = k+1;
-                    reachableStates(k).state = j;
-                    reachableStates(k).value = 0;
-                end
-            end
+        if(pomdp.observation(sp,a,o))
+           for r=1:length(reachableStates)
+               if reachableStates(r).state == sp
+                   alreadyExist = 1;
+                   break;
+               end
+           end
+           if  ~alreadyExist
+                k = k+1;
+                reachableStates(k).state = sp;
+                reachableStates(k).value = 0;                
+           end
         end
     end
+end
+
 end
