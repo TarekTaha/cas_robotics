@@ -31,7 +31,7 @@ function [maxRewardValue] = getUtilityFunctionValue(pomdp,factoredBelief)
 % * 51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
 % ************************************************************************/
 
-maxRewardValue = 0;
+maxRewardValue = -1000;
 
 for a=1:pomdp.nrActions
     reward = rewardB(pomdp,factoredBelief,a);
