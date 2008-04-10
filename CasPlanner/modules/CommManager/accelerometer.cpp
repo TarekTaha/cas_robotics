@@ -3,6 +3,7 @@
 Accelerometer::Accelerometer():
 connected(false)
 {
+	// My N95's BTooth's MAC address
 	connectBT(5,"00:1A:DC:CF:B8:08");
 }
 
@@ -52,7 +53,6 @@ void Accelerometer::readBT()
 	if(n>0 && connected)
 	{
 		buffer[n]='\0';
-		//printf("\n%s Number of charachters:%d",buffer,n);
 		sscanf(buffer,"%d %d %d",&x,&y,&z);
 		//printf("\nDid i extract then properly X:%d Y:%d Z:%d",x,y,z);
 	}
