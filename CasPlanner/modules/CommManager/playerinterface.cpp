@@ -686,8 +686,8 @@ void PlayerInterface::connectDevices()
     /* This is temp until the wheelchair interface is added.*/
     if(!wheelChairCommander)
     {
-    	joyStickId = 3;
-    	joyStick = new Position2dProxy(pc,joyStickId);
+//    	joyStickId = 3;
+//    	joyStick = new Position2dProxy(pc,joyStickId);
     }
     
     if(speechEnabled)
@@ -724,10 +724,10 @@ void PlayerInterface::run ()
 			pc->Read();
 			
 		    n95Acc.readBT();
-		    printf("\n Accel X:%d Y:%d Z:%d",n95Acc.getX(),n95Acc.getY(),n95Acc.getZ());
+//		    printf("\n Accel X:%d Y:%d Z:%d",n95Acc.getX(),n95Acc.getY(),n95Acc.getZ());
 		    double maxSpeed = 1, maxTurnRate=DTOR(50), forwardSpeed, steeringTurnRate;
-		    forwardSpeed = -1*n95Acc.getZ()/60.0*maxSpeed;
-		    steeringTurnRate =  -1*n95Acc.getY()/60.0*maxTurnRate;
+		    forwardSpeed = -1*n95Acc.getZ()/70.0*maxSpeed;
+		    steeringTurnRate =  n95Acc.getY()/70.0*maxTurnRate;
 		    
 		    if(abs(n95Acc.getZ())<7 )
 		    	forwardSpeed =0;
@@ -768,16 +768,16 @@ void PlayerInterface::run ()
 	            odomLocation.p.setX(drive->GetXPos());
 	            odomLocation.p.setY(drive->GetYPos());
 	            odomLocation.phi =  drive->GetYaw();
-	            if(!wheelChairCommander)
-	            {
-		            joyAxes.setX(joyStick->GetXPos());
-		            joyAxes.setY(joyStick->GetYPos());
-	            }
-	            else
-	            {
-		            joyAxes.setX(wheelChairCommander->JoyX());
-		            joyAxes.setY(wheelChairCommander->JoyY());
-	            }
+//	            if(!wheelChairCommander)
+//	            {
+//		            joyAxes.setX(joyStick->GetXPos());
+//		            joyAxes.setY(joyStick->GetYPos());
+//	            }
+//	            else
+//	            {
+//		            joyAxes.setX(wheelChairCommander->JoyX());
+//		            joyAxes.setY(wheelChairCommander->JoyY());
+//	            }
 //	            int dir = getJoyStickDir();
 //	            int globalDir = getJoyStickGlobalDir();
 //	            printf("\nDirection=%d Global Dir=%d",dir,globalDir);
