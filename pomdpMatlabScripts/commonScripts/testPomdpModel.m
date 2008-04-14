@@ -78,7 +78,8 @@ for i=1:length(fileTemp)
 end
 failure = 0;
 success = 0;
-for i=1:length(obs)
+totalReward = 0;
+for i=1:30%length(obs)
     % first state is assumed to be known
     currentBelief=zeros(1,n);
     currentBelief(1,obs{i}.pos{1}) = 1;   
@@ -87,6 +88,7 @@ for i=1:length(obs)
 %         keyboard
 %     end
     display(sprintf('Task:%d',i));
+    rewardValue(i) = 0;
     for j=1:size(obs{i}.obs,2)   
         % Take an Observation
         currentObs = strfind(obsStrings,obs{i}.obs{j});
@@ -99,7 +101,9 @@ for i=1:length(obs)
         updatedBelief = updateBelief(pomdp,currentBelief,obsIndx,prevAction);
         [value , mostProbableCurrentLocation] = max(updatedBelief);
         % Determine the action
-        action = findPolicyAction(policy,updatedBelief);
+        [action reward] = findPolicyAction(policy,updatedBelief);
+        rewardValue(i) = rewardValue(i) + reward;
+        display(sprintf('Max Reward for this Belief:=%f',reward));
         prevAction = action; 
         [value , mostProbableCurrentLocation] = max(updatedBelief);
         % See where this action will take us
@@ -109,14 +113,15 @@ for i=1:length(obs)
         currentBelief(index) = value;
     end
     destIndx = floor(index/m) + 1;
+    totalReward = totalReward + rewardValue(i);
+    success = success + 1;    
     if destIndx == obs{i}.dest{1}
-        display(sprintf('\tSuccess in Task:%d Destination:%d',i,destIndx));
-        success = success + 1;
+        display(sprintf('\tSuccess in Task:%d Destination:%d Total Task Reward:=%f',i,destIndx,rewardValue(i)));
     else
         display(sprintf('\tFailure in Task:%d Dest reached:%d Intended:%d ',i,destIndx,obs{i}.dest{1}));
         failure = failure +1 ;
     end
     display(sprintf('Failure percentage = %f',failure/success));
 end
-
+    display(sprintf('Reward Average for the %d Tasks:= %f',i,totalReward/i));
 end

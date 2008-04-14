@@ -27,7 +27,7 @@ file = textread(tasksFile,'%s','delimiter','\n','whitespace',' \b\t','bufsize',1
 k=0;
 % i know it's stupid this way but i will find a proper way later 
 obsStrings  = {'Up','Down','Right','Left','Nothing'};
-destStrings = {'s1d1','s6d2','s26d3','s30d4','s31d5','s38d6'};
+destStrings = {'s1d1','s6d2','s44d3','s30d4','s26d5','s38d6'};
 
 global pomdp;
 pomdp  = readPOMDP(pomdpFileModelName,0);
@@ -80,17 +80,21 @@ for i=1:length(fileTemp)
 end
 failure = 0;
 success = 0;
-D = 2;
-for i=1:5%length(obs)
+% Maximuim Depth
+D = 3;
+d = 3;
+totalReward = 0;
+for i=1:100%length(obs)
     % first state is assumed to be known
     currentBelief=zeros(1,n);
     currentBelief(1,obs{i}.pos{1}) = 1;
+%     for k=0:(length(destStrings)-1)
+%         currentBelief(1,mod(obs{i}.pos{1},49)+k*49) = 1/length(destStrings);
+%     end
     factoredBelief = factorStateSpace(pomdp,currentBelief);
     prevAction = 5; % Nothing Action
-%     if i==4
-%         keyboard
-%     end
     display(sprintf('Task:%d',i));
+    rewardValue(i) = 0;
     for j=1:size(obs{i}.obs,2)   
         % Take an Observation
         currentObs = strfind(obsStrings,obs{i}.obs{j});
@@ -101,22 +105,30 @@ for i=1:5%length(obs)
         end      
         % Update the Belief
         updatedBelief = updateFactoredBelief(pomdp,factoredBelief,obsIndx,prevAction);
-        [value , mostProbableCurrentLocation] = max(updatedBelief(:).value);
+        [value , index] = max(updatedBelief(:).value);
+        mostProbableCurrentLocation = updatedBelief(index).state;
         % Determine the action
-        [value action] = RTBSS(pomdp,factoredBelief,2,D);
+        tic;
+        [value action] = RTBSS(pomdp,updatedBelief,d,D);
+        toc;
+        rewardValue(i) = rewardValue(i) + value;
         %action
         prevAction = action; 
-        [value , mostProbableCurrentLocation] = max(updatedBelief(:).value);
         % See where this action will take us
         [value, index] = max(pomdp.transition(:,mostProbableCurrentLocation,action));
+        %[value, index] = max(pomdp.transition(:,mod(updatedBelief(1).state,49),action));
         %x = mod(index,49)
         currentBelief=zeros(1,n);
         currentBelief(index) = value;
-        factordBelief = factorStateSpace(pomdp,currentBelief);
+%         for k=0:(length(destStrings)-1)
+%             currentBelief(1,index+k*49) = 1/length(destStrings);
+%         end        
+        factoredBelief = factorStateSpace(pomdp,currentBelief);
     end
     destIndx = floor(index/m) + 1;
+    totalReward = totalReward + rewardValue(i);
     if destIndx == obs{i}.dest{1}
-        display(sprintf('\tSuccess in Task:%d Destination:%d',i,destIndx));
+        display(sprintf('\tSuccess in Task:%d Destination:%d with Reward Value:=%f',i,destIndx,rewardValue(i)));
         success = success + 1;
     else
         display(sprintf('\tFailure in Task:%d Dest reached:%d Intended:%d ',i,destIndx,obs{i}.dest{1}));
@@ -124,5 +136,5 @@ for i=1:5%length(obs)
     end
     display(sprintf('Failure percentage = %f',failure/success));
 end
-
+    display(sprintf('Total Reward Average = %f',totalReward/i));
 end

@@ -32,9 +32,16 @@ function [heuristicValue] = getHeuristicValue(pomdp,factoredBelief,action,depth)
 % ************************************************************************/
 
 heuristicValue = 0;
-
-maxR = max(max(pomdp.reward(:,:)));
+%maxR = max(max(pomdp.reward(:,:)));
 for i=1:depth
+    maxR = -10000;
+    for j=1:length(factoredBelief)
+        s = factoredBelief(j).state;
+        temp = pomdp.reward(s,action);
+        if temp > maxR
+            maxR = temp;
+        end
+    end
     heuristicValue = heuristicValue + pomdp.gamma.^i*maxR;
 end
 

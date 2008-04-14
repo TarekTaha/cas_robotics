@@ -42,8 +42,10 @@ n = length(reachableStates);
 m = length(factoredBelief);
 totalBelief =0;
 for i=1:n % next state
-    for j=1:m % current 
-        totalBelief = totalBelief + factoredBelief(j).value*pomdp.transition(i,j,prevAction)*pomdp.observation(i,prevAction,currentObs);
+    sp = reachableStates(i).state;
+    for j=1:m % current
+        s = factoredBelief(j).state;
+        totalBelief = totalBelief + factoredBelief(j).value*pomdp.transition(sp,s,prevAction)*pomdp.observation(sp,prevAction,currentObs);
     end
 end
 

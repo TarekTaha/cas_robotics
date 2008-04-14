@@ -39,7 +39,7 @@ function [maxValue action] = RTBSS(pomdp,currentBelief,d,D)
 % get the number of states from the model
 if d == 0
     maxValue = getUtilityFunctionValue(pomdp,currentBelief);
-%     addstr = '';
+     addstr = '';
 %     for j=1:(D-d)
 %         addstr = strcat(addstr,'    -');
 %     end    
@@ -58,16 +58,21 @@ for i=1:n
     %Get the action from the sorted actions list
     a = actions(i).action;
     currReward = rewardB(pomdp,currentBelief,a);
-    upperBound = currReward + getHeuristicValue(pomdp,currentBelief,a,d);
+    H = getHeuristicValue(pomdp,currentBelief,a,d);
+    %display(sprintf('Heuristic Value =:%f',H));
+    upperBound = currReward + H;
     %display(sprintf('Upper Bound =:%f Current Reward:=%f Heuristic:=%f',upperBound,currReward,getHeuristicValue(pomdp,currentBelief,a,d)));
     if upperBound > maxValue
-        for o=1:pomdp.nrObservations
+        for o=1:pomdp.nrObservations     
 %             addstr = '';
 %             for j=1:(D-d)
 %                 addstr = strcat(addstr,'    =');
 %             end
 %             addstr = strcat(addstr,'>'); 
-            %display(sprintf('%sDepth is:%d  Action is:%d Obs:=%d Belief S1:=%f S2:=%f',addstr,d,a,o,currentBelief(1).value,currentBelief(2).value));            
+%             display(sprintf('%sDepth is:%d  Action is:%d Obs:=%d',addstr,d,a,o));            
+%             for b=1:length(currentBelief)
+%                 display(sprintf('%s Belief in State%d:=%f',addstr,currentBelief(b).state,currentBelief(b).value));
+%             end
             currReward = currReward + pomdp.gamma*updateFactoredStateBelief(pomdp,currentBelief,o,a)*RTBSS(pomdp,updateFactoredBelief(pomdp,currentBelief,o,a),d-1,D);
         end
         %display(sprintf('Actual CurrentReward :=%f Max:=%f',currReward,maxValue));
