@@ -1,4 +1,4 @@
-function [reward] = rewardB(pomdp,beliefSpace,action)
+function [reward] = rewardB(pomdp,factoredBelief,action)
 % This function takes the factored belief space and returns the reward 
 % function after executing an action a
 % -Inputs
@@ -33,12 +33,12 @@ function [reward] = rewardB(pomdp,beliefSpace,action)
 % ************************************************************************/
 
 
-m=length(beliefSpace);
+m=length(factoredBelief);
 reward = 0;
 
 for i=1:m
-    s = beliefSpace(i).state;
-    reward = reward + beliefSpace(i).value*pomdp.reward(s,action);
+    s = factoredBelief(i).state;
+    reward = reward + factoredBelief(i).value*pomdp.reward(s,action);
 end
 
 end

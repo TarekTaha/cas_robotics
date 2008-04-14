@@ -40,24 +40,45 @@ reachableStates = getReachableStates(pomdp,factoredBelief,currentObs,prevAction)
 n = length(reachableStates);
 m = length(factoredBelief);
 
-for i=1:n % next state
-    updatedFactoredBelief(i).state = factoredBelief(i).state;
-    updatedFactoredBelief(i).value = 0;
-    for j=1:m % current 
-        updatedFactoredBelief(i).value = updatedFactoredBelief(i).value + factoredBelief(j).value*pomdp.transition(i,j,prevAction)*pomdp.observation(i,prevAction,currentObs);
+% for i=1:length(reachableStates)
+%     if reachableStates(i).state == 0 
+%         display('WTF: ???');
+%     end
+% end
+updatedFactoredBelief(1).value =0;
+updatedFactoredBelief(1).state =0;
+
+for i=1:n % end state
+    tempFactoredBelief(i).state = reachableStates(i).state;
+    sp = reachableStates(i).state;
+    tempFactoredBelief(i).value = 0;
+    for j=1:m % start state 
+        s = factoredBelief(j).state;
+        tempFactoredBelief(i).value = tempFactoredBelief(i).value + factoredBelief(j).value*pomdp.transition(sp,s,prevAction)*pomdp.observation(sp,prevAction,currentObs);
     end
 end
 
 % Normalize probabilites
 denom = 0;
 for i=1:n
-    denom = denom +  updatedFactoredBelief(i).value;
+    denom = denom +  tempFactoredBelief(i).value;
 end
 
+k=0;
 if denom ~= 0
     for i=1:n
-        updatedFactoredBelief(i).value = updatedFactoredBelief(i).value/denom;
+        if(tempFactoredBelief(i).value~=0)
+            k=k+1;
+            updatedFactoredBelief(k).value = tempFactoredBelief(i).value/denom;
+            updatedFactoredBelief(k).state = tempFactoredBelief(i).state;
+        end
     end
 end
+
+% for i=1:length(updatedFactoredBelief)
+%     if updatedFactoredBelief(i).state == 0 
+%         display('WTF: ???');
+%     end
+% end
 
 end
