@@ -1,17 +1,3 @@
-function [reachableStates] = getReachableStates(pomdp,currnetfactoredBelief,o,a)
-% This function takes the belief space and returns only the 
-% possible successor states
-% -Inputs
-% pomdp = the POMDP model read from a file that usually ends with .pomdp, this
-%   model is used to extract the translation and the observation
-%   probabilities needed for the update.
-% currentBelief = the current belief vector of length (1,n) where n is the
-%   number of states in the POMDP model.
-% a = action performed
-% o = observation recieved
-% -Outputs
-% reachableStates = the next accessible states
-
 % ************************************************************************\
 % * Copyright (C) 2007 - 2008 by:                                         *
 % *    Tarek Taha, Jaime Valls Miro, Gamini Dissanayake                   *
@@ -33,34 +19,12 @@ function [reachableStates] = getReachableStates(pomdp,currnetfactoredBelief,o,a)
 % * Free Software Foundation, Inc.,                                       *
 % * 51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
 % ************************************************************************/
+global pomdp;
+pomdp = readPOMDP('testmodel.pomdp');
+simplifyReward;
+belief = zeros(1,2);
+belief(1,1) = 0.1; belief(1,2) = 0.9; 
 
-reachableStates = [];
-
-n = length(currnetfactoredBelief);
-k = 0;
-alreadyExist = 0;
-for i=1:n
-    if currnetfactoredBelief(i).value == 0
-        continue;
-    end
-    s = currnetfactoredBelief(i).state;
-    m = find(pomdp.transition(:,s,a));
-     for sp=1:length(m)
-         alreadyExist = 0;
-         if(pomdp.observation(sp,a,o))
-             for r=1:length(reachableStates)
-                if reachableStates(r).state == m(sp)
-                    alreadyExist = 1;
-                    break;
-                end
-             end
-             if  ~alreadyExist
-                k = k+1;
-                reachableStates(k).state = m(sp);
-                reachableStates(k).value = 0;                
-             end
-         end
-     end
-end
-
-end
+factoredBelief = factorStateSpace(pomdp,belief);
+debug = true;
+[maxValue action] = RTBSS(pomdp,factoredBelief,2,2,debug)
