@@ -1,0 +1,699 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>classunk_posesel</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2008-05-05">
+      <meta name="m-file" content="classunk_posesel"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>classunk_posesel</h1>
+         <introduction>
+            <p><b>Description:</b> based on streamOnto - specially made for blasting given a start q it will try and plast a point pt in space within an angle
+               to the normal to the plane. It will try and minimise the distance between where the blast hits the plane and the center of
+               the given plane. It may use various start positions if not using quick version Returns the joint coordinates corresponding
+               to the end-effector at pt Note that the inverse kinematic solution is generally not unique, and depends on the initial guess
+               Q (which defaults to 0). Also returns whether solution is valid and which method used and the dist_val to the required tr
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Function Call</a></li>
+               <li><a href="#2">Variables</a></li>
+               <li><a href="#3">%check to see we are not starting parallel with plane normal</a></li>
+               <li><a href="#4">Do the least squared optimisation function using q passed in</a></li>
+               <li><a href="#5">Check the optimisation results, change start to all Zeros if necessary</a></li>
+               <li><a href="#6">EMBEDDED FUNCTION: Run iteratively changing delta q (dq)</a></li>
+               <li><a href="#7">Error Vector (being minimised) in embedded cost calc function</a></li>
+               <li><a href="#8">FUNCTION: checks pose validity, if valid but dist&gt;min, return distance</a></li>
+            </ul>
+         </div>
+         <h2>Function Call<a name="1"></a></h2>
+         <p><b>Inputs:</b></p>
+         <p><i>pt</i> (1*3 double) cartitian point where we want end effector <a href="br">br</a></p>
+         <p><i>targetNormal</i> (1*3 double) the desired target normal at the point
+         </p>
+         <p><i>q</i> (1*6 double) radians - The joint config starting guess
+         </p>
+         <p><b>Returns:</b></p>
+         <p><i>qt</i> (1*6 double) radians - The recommended joint config
+         </p>
+         <p><i>solutionvalid</i> (binary) whether the returned qt gives a valid solution within optimisation parameters
+         </p>
+         <p><i>dist_val</i> (double) Distance between where the plane is hit with blast stream and pt
+         </p>
+         <p><i>targetdist</i> (structure) 2 values, (1)Distance between end effector and plane, (2) Distance between end effector (nozzel) and pt
+         </p><pre class="codeinput"><span class="keyword">function</span> [qt,solutionvalid,dist_val,targetdist] = classunk_posesel(pt, plane_equ, q)
+</pre><h2>Variables<a name="2"></a></h2>
+         <p><img vspace="5" hspace="5" src="classunk_posesel_eq120752.png"> </p><pre class="codeinput">    <span class="keyword">global</span> classunkn_optimise densoobj workspace r;
+
+    <span class="comment">%default is true, unless proven otherwise</span>
+    solutionvalid=true;
+
+    <span class="comment">%display on</span>
+    displayon=true;
+    maxdistguess=6;
+
+    <span class="keyword">if</span> size(pt, 1) == 1
+        pt = pt(:); <span class="comment">% make sure pt is a column vector</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">%need to normalise plane equation (should be already)</span>
+    plane_equ(1:3)=plane_equ(1:3)/norm(plane_equ(1:3));
+
+    numlinks = r.n;
+    Links = r.link;
+    t = r.base;
+    qlimits=r.qlim;
+
+    <span class="comment">%make sure the q is correct</span>
+    <span class="keyword">if</span> nargin &lt; 3
+        q = zeros(numlinks, 1);
+    <span class="keyword">else</span>
+        q = q(:);
+    <span class="keyword">end</span>
+</pre><h2>%check to see we are not starting parallel with plane normal<a name="3"></a></h2><pre class="codeinput">    <span class="comment">%a temp variable to hold the joint fix</span>
+    newQ=q;
+
+    [valid,dist_val,targetdist(1).val,theta,correctway]=classunkcheck_newQ(newQ,qlimits,pt,t,Links,numlinks,plane_equ);
+    <span class="keyword">if</span> dist_val&gt;maxdistguess
+        <span class="keyword">if</span> newQ(5)&gt;0; newQ(5)=q(5)-pi/2;
+        <span class="keyword">else</span> newQ(5)=q(5)+pi/2;
+        <span class="keyword">end</span>
+        <span class="keyword">if</span> displayon; display(<span class="string">'changing joint 5 only'</span>);<span class="keyword">end</span>
+        [valid,dist_val,targetdist(1).val,theta,correctway]=classunkcheck_newQ(newQ,qlimits,pt,t,Links,numlinks,plane_equ);
+
+        <span class="keyword">if</span> dist_val&gt;maxdistguess
+            newQ=q;
+            <span class="keyword">if</span> newQ(4)&gt;0; newQ(4)=q(4)-pi/2;
+            <span class="keyword">else</span> newQ(4)=q(4)+pi/2;
+            <span class="keyword">end</span>
+            <span class="keyword">if</span> displayon; display(<span class="string">'changing joint 4 only'</span>);<span class="keyword">end</span>
+            [valid,dist_val,targetdist(1).val,theta,correctway]=classunkcheck_newQ(newQ,qlimits,pt,t,Links,numlinks,plane_equ);
+
+            <span class="keyword">if</span> dist_val&gt;maxdistguess
+                newQ=q;
+                <span class="keyword">if</span> newQ(4)&gt;0; newQ(4)=newQ(4)-pi/2;
+                <span class="keyword">else</span> newQ(4)=newQ(4)+pi/2;
+                <span class="keyword">end</span>
+                <span class="keyword">if</span> newQ(5)&gt;0; newQ(5)=newQ(5)-pi/2;
+                <span class="keyword">else</span> newQ(5)=newQ(5)+pi/2;
+                <span class="keyword">end</span>
+                <span class="keyword">if</span> displayon; display(<span class="string">'changing joint 4 and 5'</span>);<span class="keyword">end</span>
+                [valid,dist_val,targetdist(1).val,theta,correctway]=classunkcheck_newQ(newQ,qlimits,pt,t,Links,numlinks,plane_equ);
+
+                <span class="keyword">if</span> dist_val&gt;maxdistguess
+                    <span class="keyword">if</span> displayon; display(<span class="string">'Still not good enough even after different starts of 4 and 5'</span>);<span class="keyword">end</span>
+                    <span class="comment">%probably could make a better guess</span>
+                <span class="keyword">end</span>
+            <span class="keyword">else</span> <span class="keyword">if</span> displayon; display(<span class="string">'close enough without moving 4 and 5 together'</span>);<span class="keyword">end</span>
+            <span class="keyword">end</span>
+        <span class="keyword">else</span> <span class="keyword">if</span> displayon; display(<span class="string">'close enough without moving 4'</span>);<span class="keyword">end</span>
+        <span class="keyword">end</span>
+    <span class="keyword">else</span> <span class="keyword">if</span> displayon; display(<span class="string">'close enough without moving 4 or 5'</span>);<span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    <span class="comment">%if we are aligned ok but we are around the opposite way then fix this</span>
+    <span class="keyword">if</span> ~correctway
+        <span class="keyword">if</span> newQ(4)&gt;0; newQ(4)=newQ(4)-pi;
+        <span class="keyword">else</span> newQ(4)=newQ(4)+pi;
+        <span class="keyword">end</span>
+        <span class="keyword">if</span> displayon; display(<span class="string">'Switching directing by changing joint 4 only'</span>); <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    q=newQ;
+</pre><h2>Do the least squared optimisation function using q passed in<a name="4"></a></h2><pre class="codeinput">    options = optimset(<span class="string">'Display'</span>, <span class="string">'off'</span>, <span class="string">'Largescale'</span>, <span class="string">'off'</span>, <span class="string">'TolFun'</span>, classunkn_optimise.stol,<span class="string">'MaxFunEvals'</span>, classunkn_optimise.iLimit);
+
+    xGuess = zeros([size(q,1)-1,size(q,2)]);lb = []; ub = [];
+
+    [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
+
+    <span class="comment">% Update the configuration</span>
+    qt = [q(1:5) + real(dq(1:5));q(6)];
+
+    <span class="comment">%if there is a collision or out of joint limit then no distance is returned</span>
+    dist_val=inf;
+</pre><h2>Check the optimisation results, change start to all Zeros if necessary<a name="5"></a></h2><pre class="codeinput">    <span class="keyword">try</span> [solutionvalid,dist_val,targetdist.val]=classunkcheck_newQ(qt,qlimits,pt,t,Links,numlinks,plane_equ);
+    <span class="keyword">catch</span>; keyboard; <span class="keyword">end</span>
+</pre><h2>EMBEDDED FUNCTION: Run iteratively changing delta q (dq)<a name="6"></a></h2><pre class="codeinput">    <span class="keyword">function</span> [e]=costComponents(dq)
+        tr=t;
+
+        <span class="keyword">if</span> ~isempty(find(isnan(dq(1:5))==1,1))
+            error(<span class="string">'Nan found'</span>);
+        <span class="keyword">end</span>
+
+        q_temp=[q(1:5)+real(dq(1:5));q(6)];
+
+        result_row=[1,1,1,1,1,1];
+        <span class="comment">%check each joint and link for collisions and exceeding limits</span>
+        <span class="keyword">for</span> i=1:numlinks;
+            tr = tr * Links{i}(q_temp(i));
+            <span class="keyword">if</span> i&gt;2
+                tempresult=check_FF(tr,densoobj(i+1).ellipse,workspace.indexedobsticles);
+                result_row(i)=tempresult;
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+</pre><h2>Error Vector (being minimised) in embedded cost calc function<a name="7"></a></h2>
+         <p><img vspace="5" hspace="5" src="classunk_posesel_eq23349393.png"> </p><pre class="codeinput">    <span class="comment">% Distance from pt aimed at to end effector</span>
+    streamlength=dist_pt2tr(pt,tr);
+    <span class="comment">%Angle between ray and plane</span>
+    theta = acos(plane_equ(1:3)*unit(tr(1:3,3)));
+    theta(theta&gt;pi/2)=pi-theta(theta&gt;pi/2);
+
+<span class="comment">%      streamStart=tr(1:3,4);</span>
+     streamEnd=tr(1:3,4)'+tr(1:3,3)';
+     streamEndOp=tr(1:3,4)'-tr(1:3,3)';
+<span class="comment">%     r_var=[streamStart(1)-streamEnd(1),streamStart(2)-streamEnd(2),streamStart(3)-streamEnd(3)];</span>
+    r_var=-tr(1:3,3)';
+
+    <span class="comment">%find intersection point between surface and the scan line between scan origin and point</span>
+    bottomof_t_var=plane_equ(1)*r_var(1)+<span class="keyword">...</span>
+                   plane_equ(2)*r_var(2)+<span class="keyword">...</span>
+                   plane_equ(3)*r_var(3);
+    <span class="comment">%make sure it is not 0 otherwise change it so it is simply a very small</span>
+    <span class="comment">%number (epsilon)</span>
+    <span class="keyword">if</span> ~isempty(find(bottomof_t_var==0, 1)); bottomof_t_var(bottomof_t_var==0)=eps; <span class="keyword">end</span>
+    t_var=( plane_equ(1)*tr(1,4)+<span class="keyword">...</span>
+            plane_equ(2)*tr(2,4)+<span class="keyword">...</span>
+            plane_equ(3)*tr(3,4)+<span class="keyword">...</span>
+            plane_equ(4)<span class="keyword">...</span>
+           )./ bottomof_t_var;
+
+    <span class="comment">% Get the intersection points</span>
+    intersectionPNT=[t_var.*-r_var(1)+tr(1,4),<span class="keyword">...</span>
+                     t_var.*-r_var(2)+tr(2,4),<span class="keyword">...</span>
+                     t_var.*-r_var(3)+tr(3,4)];
+
+        e = [exp(-5*(classunkn_optimise.maxSurfToEF-streamlength));
+             exp(-5*(streamlength-classunkn_optimise.minSurfToEF));
+             exp(2*(sqrt((pt(1)-intersectionPNT(1))^2+<span class="keyword">...</span>
+                          (pt(2)-intersectionPNT(2))^2+<span class="keyword">...</span>
+                          (pt(3)-intersectionPNT(3))^2)-classunkn_optimise.distAwayfromTarget));
+             exp(2*(((intersectionPNT(1)-streamEnd(1))^2+<span class="keyword">...</span>
+                  (intersectionPNT(2)-streamEnd(2))^2+<span class="keyword">...</span>
+                  (intersectionPNT(3)-streamEnd(3))^2)-<span class="keyword">...</span>
+                  ((intersectionPNT(1)-streamEndOp(1))^2+<span class="keyword">...</span>
+                   (intersectionPNT(2)-streamEndOp(2))^2+<span class="keyword">...</span>
+                   (intersectionPNT(3)-streamEndOp(3))^2)));
+             exp(5*(theta-classunkn_optimise.maxAngle*pi/180));
+             exp(q_temp(1)-qlimits(1,2))+exp(qlimits(1,1)-q_temp(1));
+             exp(q_temp(2)-qlimits(2,2))+exp(qlimits(2,1)-q_temp(2));
+             exp(q_temp(3)-qlimits(3,2))+exp(qlimits(3,1)-q_temp(3));
+             exp(q_temp(4)-qlimits(4,2))+exp(qlimits(4,1)-q_temp(4));
+             exp(2*(q_temp(5)-qlimits(5,2)))+exp(2*(qlimits(5,1)-q_temp(5)));
+             exp(5*(6-sum(result_row)))-1];
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><h2>FUNCTION: checks pose validity, if valid but dist&gt;min, return distance<a name="8"></a></h2><pre class="codeinput"><span class="keyword">function</span> [valid,dist,targetdist,theta,correctway]=classunkcheck_newQ(qt,qlimits,pt,tr,Links,numlinks,plane_equ)
+    <span class="keyword">global</span> classunkn_optimise densoobj workspace;
+    <span class="comment">%returns infinite distance by default</span>
+    dist=inf;
+    correctway=true;
+    basetr=tr;
+
+    <span class="comment">%distance from tr to target pt, distance from tr to target plane</span>
+    targetdist=[inf,inf];
+
+    <span class="comment">%it is not valid by default so we can return at anytime and return invalid</span>
+    valid=false;
+
+    <span class="comment">%from base transform of the robot check each joint and fkine through</span>
+    <span class="keyword">for</span> i=1:numlinks;
+        tr = tr * Links{i}(qt(i));
+        <span class="keyword">if</span> qt(i)&lt;qlimits(i,1) || qt(i)&gt;qlimits(i,2); <span class="keyword">return</span>; <span class="keyword">end</span>;
+        <span class="keyword">if</span> ~check_FF(tr,densoobj(i+1).ellipse,workspace.indexedobsticles); <span class="keyword">return</span>; <span class="keyword">end</span>;
+    <span class="keyword">end</span>
+
+    <span class="comment">% Check the actual distance from end effector to target point</span>
+    targetdist(1)=dist_pt2tr(pt,tr);
+
+    <span class="comment">%the end stream and the end stream in opposite direction</span>
+    streamEnd=tr(1:3,4)'+tr(1:3,3)';
+    streamEndOp=tr(1:3,4)'-tr(1:3,3)';
+
+    r_var=-tr(1:3,3);
+
+    <span class="comment">%find intersection point between surface and the scan line between scan origin and point</span>
+    bottomof_t_var=plane_equ(1)*r_var(1)+<span class="keyword">...</span>
+                   plane_equ(2)*r_var(2)+<span class="keyword">...</span>
+                   plane_equ(3)*r_var(3);
+    <span class="comment">%make sure it is not 0 otherwise change it so it is simply a very small</span>
+    <span class="comment">%number (epsilon)</span>
+    <span class="keyword">if</span> ~isempty(find(bottomof_t_var==0, 1)); bottomof_t_var(bottomof_t_var==0)=eps; <span class="keyword">end</span>
+    t_var=( plane_equ(1)*tr(1,4)+<span class="keyword">...</span>
+            plane_equ(2)*tr(2,4)+<span class="keyword">...</span>
+            plane_equ(3)*tr(3,4)+<span class="keyword">...</span>
+            plane_equ(4)<span class="keyword">...</span>
+           )./ bottomof_t_var;
+
+    <span class="comment">% Get the intersection points</span>
+    intersectionPNT=[t_var.*-r_var(1)+tr(1,4),<span class="keyword">...</span>
+                     t_var.*-r_var(2)+tr(2,4),<span class="keyword">...</span>
+                     t_var.*-r_var(3)+tr(3,4)];
+
+    targetdist(2)=dist_pt2tr(intersectionPNT,tr);
+
+    <span class="comment">%the distance on the plane between where we aimed and where it hit is</span>
+    dist=sqrt((pt(1)-intersectionPNT(1))^2+<span class="keyword">...</span>
+              (pt(2)-intersectionPNT(2))^2+<span class="keyword">...</span>
+              (pt(3)-intersectionPNT(3))^2);
+
+    <span class="comment">%angle between line (lots of possibilities) and plane</span>
+    theta=[];
+
+    <span class="keyword">for</span> angs=-pi/2:10*pi/180:pi/2
+        tr=basetr;
+        <span class="keyword">for</span> i=1:numlinks;
+            <span class="keyword">if</span> i==5
+                tr = tr * Links{i}(angs);
+            <span class="keyword">else</span>
+                tr = tr * Links{i}(qt(i));
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+        theta = [theta;acos(plane_equ(1:3)*unit(tr(1:3,3)))];
+    <span class="keyword">end</span>
+
+    theta(theta&gt;pi/2)=pi-theta(theta&gt;pi/2);
+
+    <span class="comment">%if it is allowable then it is valid and change this to return</span>
+    <span class="comment">% note the angle test MUST be first since it checks that it is facing</span>
+    <span class="comment">% correct way</span>
+    <span class="keyword">if</span> (intersectionPNT(1)-streamEnd(1))^2+(intersectionPNT(2)-streamEnd(2))^2+(intersectionPNT(3)-streamEnd(3))^2&gt;(intersectionPNT(1)-streamEndOp(1))^2+(intersectionPNT(2)-streamEndOp(2))^2+(intersectionPNT(3)-streamEndOp(3))^2
+        display(<span class="string">'Stream is facing the wrong way'</span>);
+        correctway=false;
+        valid=false;
+    <span class="keyword">elseif</span> targetdist(1)&lt;classunkn_optimise.minSurfToEF
+        display(<span class="string">'End Effector is TOO CLOSE to aimed at point'</span>);
+        valid=false;
+    <span class="keyword">elseif</span> targetdist(1)&gt;classunkn_optimise.maxSurfToEF
+        display(<span class="string">'End Effector is TOO FAR AWAY from aimed at point'</span>);
+        valid=false;
+    <span class="keyword">elseif</span> dist&gt;classunkn_optimise.distAwayfromTarget
+        display(<span class="string">'The actual INTERSECTION point shot is TOO FAR AWAY from aimed at point'</span>);
+        valid=false;
+    <span class="keyword">elseif</span> isempty(find(theta&lt;classunkn_optimise.maxAngle,1))
+        display(<span class="string">'The angle to the surface is too great'</span>);
+        valid=false;
+    <span class="keyword">else</span>
+        <span class="comment">%if we get to here it is valid</span>
+        valid=true;
+<span class="comment">%         display('Found a solution');</span>
+    <span class="keyword">end</span>;
+<span class="keyword">end</span>
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% classunk_posesel
+%
+% *Description:* based on streamOnto - specially made for blasting
+% given a start q it will try and plast a point pt in space within an angle
+% to the normal to the plane. It will try and minimise the distance between
+% where the blast hits the plane and the center of the given plane. 
+% It may use various start positions if not using quick version
+% Returns the joint coordinates corresponding to the end-effector at pt
+% Note that the inverse kinematic solution is generally not unique, and 
+% depends on the initial guess Q (which defaults to 0).
+% Also returns whether solution is valid and which method used and the
+% dist_val to the required tr
+
+
+%% Function Call
+% *Inputs:* 
+%
+% _pt_ (1*3 double) cartitian point where we want end effector <br>
+%
+% _targetNormal_ (1*3 double) the desired target normal at the point
+%
+% _q_ (1*6 double) radians - The joint config starting guess 
+%
+% *Returns:*
+%
+% _qt_ (1*6 double) radians - The recommended joint config
+%
+% _solutionvalid_ (binary) whether the returned qt gives a valid solution
+% within optimisation parameters
+%
+% _dist_val_ (double) Distance between where the plane is hit with blast stream and pt
+%
+% _targetdist_ (structure) 2 values, (1)Distance between end effector and
+% plane, (2) Distance between end effector (nozzel) and pt 
+
+
+function [qt,solutionvalid,dist_val,targetdist] = classunk_posesel(pt, plane_equ, q)
+
+
+%% Variables
+% $$ \begin{array}{lc}
+% \mbox{targetNormal...} & V_{tn} \\
+% \end{array}$$
+    global classunkn_optimise densoobj workspace r;
+    
+    %default is true, unless proven otherwise
+    solutionvalid=true;
+    
+    %display on
+    displayon=true;
+    maxdistguess=6;
+    
+    if size(pt, 1) == 1
+        pt = pt(:); % make sure pt is a column vector
+    end
+
+    %need to normalise plane equation (should be already)
+    plane_equ(1:3)=plane_equ(1:3)/norm(plane_equ(1:3));
+    
+    numlinks = r.n;
+    Links = r.link; 
+    t = r.base;
+    qlimits=r.qlim; 
+   
+    %make sure the q is correct
+    if nargin < 3
+        q = zeros(numlinks, 1);
+    else
+        q = q(:);
+    end
+
+%%     %check to see we are not starting parallel with plane normal
+    %a temp variable to hold the joint fix
+    newQ=q;
+    
+    [valid,dist_val,targetdist(1).val,theta,correctway]=classunkcheck_newQ(newQ,qlimits,pt,t,Links,numlinks,plane_equ); 
+    if dist_val>maxdistguess        
+        if newQ(5)>0; newQ(5)=q(5)-pi/2;            
+        else newQ(5)=q(5)+pi/2;          
+        end   
+        if displayon; display('changing joint 5 only');end
+        [valid,dist_val,targetdist(1).val,theta,correctway]=classunkcheck_newQ(newQ,qlimits,pt,t,Links,numlinks,plane_equ); 
+        
+        if dist_val>maxdistguess            
+            newQ=q;
+            if newQ(4)>0; newQ(4)=q(4)-pi/2;                              
+            else newQ(4)=q(4)+pi/2;               
+            end
+            if displayon; display('changing joint 4 only');end
+            [valid,dist_val,targetdist(1).val,theta,correctway]=classunkcheck_newQ(newQ,qlimits,pt,t,Links,numlinks,plane_equ); 
+            
+            if dist_val>maxdistguess
+                newQ=q;
+                if newQ(4)>0; newQ(4)=newQ(4)-pi/2;
+                else newQ(4)=newQ(4)+pi/2;
+                end                
+                if newQ(5)>0; newQ(5)=newQ(5)-pi/2;
+                else newQ(5)=newQ(5)+pi/2;
+                end
+                if displayon; display('changing joint 4 and 5');end
+                [valid,dist_val,targetdist(1).val,theta,correctway]=classunkcheck_newQ(newQ,qlimits,pt,t,Links,numlinks,plane_equ); 
+                
+                if dist_val>maxdistguess
+                    if displayon; display('Still not good enough even after different starts of 4 and 5');end
+                    %probably could make a better guess
+                end
+            else if displayon; display('close enough without moving 4 and 5 together');end
+            end
+        else if displayon; display('close enough without moving 4');end
+        end
+    else if displayon; display('close enough without moving 4 or 5');end
+    end
+    
+    %if we are aligned ok but we are around the opposite way then fix this
+    if ~correctway         
+        if newQ(4)>0; newQ(4)=newQ(4)-pi;                              
+        else newQ(4)=newQ(4)+pi;               
+        end
+        if displayon; display('Switching directing by changing joint 4 only'); end
+    end 
+    
+    q=newQ;
+    
+%% Do the least squared optimisation function using q passed in       
+    options = optimset('Display', 'off', 'Largescale', 'off', 'TolFun', classunkn_optimise.stol,'MaxFunEvals', classunkn_optimise.iLimit);
+
+    xGuess = zeros([size(q,1)-1,size(q,2)]);lb = []; ub = [];
+
+    [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
+
+    % Update the configuration
+    qt = [q(1:5) + real(dq(1:5));q(6)];
+    
+    %if there is a collision or out of joint limit then no distance is returned
+    dist_val=inf;    
+        
+%% Check the optimisation results, change start to all Zeros if necessary
+    try [solutionvalid,dist_val,targetdist.val]=classunkcheck_newQ(qt,qlimits,pt,t,Links,numlinks,plane_equ); 
+    catch; keyboard; end
+
+    
+        
+%% EMBEDDED FUNCTION: Run iteratively changing delta q (dq)
+    function [e]=costComponents(dq)
+        tr=t;
+        
+        if ~isempty(find(isnan(dq(1:5))==1,1))
+            error('Nan found');
+        end
+        
+        q_temp=[q(1:5)+real(dq(1:5));q(6)];
+        
+        result_row=[1,1,1,1,1,1];
+        %check each joint and link for collisions and exceeding limits
+        for i=1:numlinks; 
+            tr = tr * Links{i}(q_temp(i));
+            if i>2
+                tempresult=check_FF(tr,densoobj(i+1).ellipse,workspace.indexedobsticles);                
+                result_row(i)=tempresult;
+            end
+        end
+
+
+%% Error Vector (being minimised) in embedded cost calc function
+% $$e=\left( \begin{array}{c}
+% e^{4( \sqrt{(P_{dt,x}-P_{at,x})^2+(P_{dt,y}-P_{at,y})^2+(P_{dt,z}-P_{at,z})^2}-C_{maxtargetdis})}\\
+% e^{4( \sqrt{(P_{z,x}-P_{az,x})^2+(P_{z,y}-P_{az,y})^2+(P_{z,z}-P_{az,z})^2}-C_{maxtargetdis})}\\
+% e^{10( dist_pt2tr(pt,tr)-C_{minAccepDis})}\\
+% \frac{e^{5( |Q_{5th}|-C_{maxDeflectionError})}}{100}\\
+% e^{5\times \sum{Jlimitresult}}-1\\
+% e^{5(6-\sum{result\_row}}-1\\
+% \end{array} \right)$$
+    
+    % Distance from pt aimed at to end effector
+    streamlength=dist_pt2tr(pt,tr);
+    %Angle between ray and plane 
+    theta = acos(plane_equ(1:3)*unit(tr(1:3,3)));
+    theta(theta>pi/2)=pi-theta(theta>pi/2);
+
+%      streamStart=tr(1:3,4);
+     streamEnd=tr(1:3,4)'+tr(1:3,3)';
+     streamEndOp=tr(1:3,4)'-tr(1:3,3)';
+%     r_var=[streamStart(1)-streamEnd(1),streamStart(2)-streamEnd(2),streamStart(3)-streamEnd(3)];
+    r_var=-tr(1:3,3)';
+
+    %find intersection point between surface and the scan line between scan origin and point
+    bottomof_t_var=plane_equ(1)*r_var(1)+...
+                   plane_equ(2)*r_var(2)+...
+                   plane_equ(3)*r_var(3);
+    %make sure it is not 0 otherwise change it so it is simply a very small
+    %number (epsilon)
+    if ~isempty(find(bottomof_t_var==0, 1)); bottomof_t_var(bottomof_t_var==0)=eps; end                                                                               
+    t_var=( plane_equ(1)*tr(1,4)+...
+            plane_equ(2)*tr(2,4)+...
+            plane_equ(3)*tr(3,4)+...
+            plane_equ(4)...
+           )./ bottomof_t_var;                 
+
+    % Get the intersection points
+    intersectionPNT=[t_var.*-r_var(1)+tr(1,4),...
+                     t_var.*-r_var(2)+tr(2,4),...
+                     t_var.*-r_var(3)+tr(3,4)];
+                
+        e = [exp(-5*(classunkn_optimise.maxSurfToEF-streamlength));
+             exp(-5*(streamlength-classunkn_optimise.minSurfToEF));
+             exp(2*(sqrt((pt(1)-intersectionPNT(1))^2+...
+                          (pt(2)-intersectionPNT(2))^2+...  
+                          (pt(3)-intersectionPNT(3))^2)-classunkn_optimise.distAwayfromTarget));
+             exp(2*(((intersectionPNT(1)-streamEnd(1))^2+...
+                  (intersectionPNT(2)-streamEnd(2))^2+...  
+                  (intersectionPNT(3)-streamEnd(3))^2)-...
+                  ((intersectionPNT(1)-streamEndOp(1))^2+...
+                   (intersectionPNT(2)-streamEndOp(2))^2+...  
+                   (intersectionPNT(3)-streamEndOp(3))^2)));
+             exp(5*(theta-classunkn_optimise.maxAngle*pi/180));
+             exp(q_temp(1)-qlimits(1,2))+exp(qlimits(1,1)-q_temp(1));
+             exp(q_temp(2)-qlimits(2,2))+exp(qlimits(2,1)-q_temp(2));
+             exp(q_temp(3)-qlimits(3,2))+exp(qlimits(3,1)-q_temp(3));
+             exp(q_temp(4)-qlimits(4,2))+exp(qlimits(4,1)-q_temp(4));
+             exp(2*(q_temp(5)-qlimits(5,2)))+exp(2*(qlimits(5,1)-q_temp(5)));   
+             exp(5*(6-sum(result_row)))-1];
+    end
+end
+
+
+%% FUNCTION: checks pose validity, if valid but dist>min, return distance 
+function [valid,dist,targetdist,theta,correctway]=classunkcheck_newQ(qt,qlimits,pt,tr,Links,numlinks,plane_equ)
+    global classunkn_optimise densoobj workspace;
+    %returns infinite distance by default
+    dist=inf;
+    correctway=true;
+    basetr=tr;
+    
+    %distance from tr to target pt, distance from tr to target plane
+    targetdist=[inf,inf];
+    
+    %it is not valid by default so we can return at anytime and return invalid
+    valid=false;
+    
+    %from base transform of the robot check each joint and fkine through
+    for i=1:numlinks; 
+        tr = tr * Links{i}(qt(i));
+        if qt(i)<qlimits(i,1) || qt(i)>qlimits(i,2); return; end;
+        if ~check_FF(tr,densoobj(i+1).ellipse,workspace.indexedobsticles); return; end;                      
+    end
+    
+    % Check the actual distance from end effector to target point
+    targetdist(1)=dist_pt2tr(pt,tr);  
+    
+    %the end stream and the end stream in opposite direction
+    streamEnd=tr(1:3,4)'+tr(1:3,3)';
+    streamEndOp=tr(1:3,4)'-tr(1:3,3)';
+
+    r_var=-tr(1:3,3);
+
+    %find intersection point between surface and the scan line between scan origin and point
+    bottomof_t_var=plane_equ(1)*r_var(1)+...
+                   plane_equ(2)*r_var(2)+...
+                   plane_equ(3)*r_var(3);
+    %make sure it is not 0 otherwise change it so it is simply a very small
+    %number (epsilon)
+    if ~isempty(find(bottomof_t_var==0, 1)); bottomof_t_var(bottomof_t_var==0)=eps; end                                                                               
+    t_var=( plane_equ(1)*tr(1,4)+...
+            plane_equ(2)*tr(2,4)+...
+            plane_equ(3)*tr(3,4)+...
+            plane_equ(4)...
+           )./ bottomof_t_var;                 
+
+    % Get the intersection points
+    intersectionPNT=[t_var.*-r_var(1)+tr(1,4),...
+                     t_var.*-r_var(2)+tr(2,4),...
+                     t_var.*-r_var(3)+tr(3,4)];
+
+    targetdist(2)=dist_pt2tr(intersectionPNT,tr);
+    
+    %the distance on the plane between where we aimed and where it hit is  
+    dist=sqrt((pt(1)-intersectionPNT(1))^2+...
+              (pt(2)-intersectionPNT(2))^2+...
+              (pt(3)-intersectionPNT(3))^2);
+
+    %angle between line (lots of possibilities) and plane
+    theta=[];
+    
+    for angs=-pi/2:10*pi/180:pi/2
+        tr=basetr;
+        for i=1:numlinks; 
+            if i==5
+                tr = tr * Links{i}(angs);
+            else
+                tr = tr * Links{i}(qt(i));
+            end
+        end
+        theta = [theta;acos(plane_equ(1:3)*unit(tr(1:3,3)))];
+    end
+    
+    theta(theta>pi/2)=pi-theta(theta>pi/2);
+     
+    %if it is allowable then it is valid and change this to return
+    % note the angle test MUST be first since it checks that it is facing
+    % correct way
+    if (intersectionPNT(1)-streamEnd(1))^2+(intersectionPNT(2)-streamEnd(2))^2+(intersectionPNT(3)-streamEnd(3))^2>(intersectionPNT(1)-streamEndOp(1))^2+(intersectionPNT(2)-streamEndOp(2))^2+(intersectionPNT(3)-streamEndOp(3))^2
+        display('Stream is facing the wrong way'); 
+        correctway=false;        
+        valid=false; 
+    elseif targetdist(1)<classunkn_optimise.minSurfToEF
+        display('End Effector is TOO CLOSE to aimed at point');
+        valid=false;
+    elseif targetdist(1)>classunkn_optimise.maxSurfToEF
+        display('End Effector is TOO FAR AWAY from aimed at point');
+        valid=false;
+    elseif dist>classunkn_optimise.distAwayfromTarget
+        display('The actual INTERSECTION point shot is TOO FAR AWAY from aimed at point');
+        valid=false;
+    elseif isempty(find(theta<classunkn_optimise.maxAngle,1)) 
+        display('The angle to the surface is too great');
+        valid=false;   
+    else
+        %if we get to here it is valid
+        valid=true;
+%         display('Found a solution');
+    end;       
+end
+
+##### SOURCE END #####
+-->
+   </body>
+</html>

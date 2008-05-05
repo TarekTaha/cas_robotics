@@ -1,0 +1,296 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>Pose Selection To Classify Unknown</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2008-05-05">
+      <meta name="m-file" content="poseclassunknown"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>Pose Selection To Classify Unknown</h1>
+         <introduction>
+            <p>Description: This function is used to identiy areas which have unknown classification and attempt to look at them in such
+               a way that we can do a classification function poseclassunknown()
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Load data or classify a scan</a></li>
+               <li><a href="#2">Setup and Variables</a></li>
+               <li><a href="#3">put classification data in one big matrix</a></li>
+               <li><a href="#4">plot and make surfaces out of these</a></li>
+               <li><a href="#5">Find the planes covering most unknown points</a></li>
+               <li><a href="#6">Go through the number of planese we are interested in</a></li>
+            </ul>
+         </div>
+         <h2>Load data or classify a scan<a name="1"></a></h2><pre class="codeinput">load <span class="string">GavData</span>
+</pre><h2>Setup and Variables<a name="2"></a></h2><pre class="codeinput">close <span class="string">all</span>
+<span class="keyword">global</span> r Q
+<span class="comment">% the classifier reterns a classification of this number is unknown</span>
+unknownclass=8;
+<span class="comment">%size of the surfaces which is 1/2 of 20' scan at ideal distance 0.5*tan(20*pi/180)</span>
+mew=0.1;
+<span class="comment">% This is how many sets of data we will classify</span>
+numofintplanes=30;
+<span class="comment">%how many solutions and failures</span>
+solsfound=0;
+noposefound=0;
+<span class="comment">%set start pose</span>
+Q=[0,0,0,0,0,0];
+
+<span class="comment">%optimisataion variables</span>
+<span class="keyword">global</span> classunkn_optimise
+classunkn_optimise.minSurfToEF=0.3;
+classunkn_optimise.maxSurfToEF=0.8;
+classunkn_optimise.distAwayfromTarget=0.6;
+classunkn_optimise.maxAngle=20*pi/180;
+
+classunkn_optimise.iLimit=100;
+classunkn_optimise.stol=1e-4;
+</pre><h2>put classification data in one big matrix<a name="3"></a></h2><pre class="codeinput">pointswithclass=zeros([size(PointData,1)*size(PointData,2),4]);
+<span class="keyword">for</span> i=1:size(PointData,1);
+    pointswithclass((i-1)*size(PointData,2)+1:i*size(PointData,2),:)=[squeeze(PointData(i,:,:)),ClassifiedDatawEdges(i,:)'];
+<span class="keyword">end</span>;
+
+<span class="comment">%find unknown points</span>
+unknownindex=find(pointswithclass(:,4)==unknownclass);
+</pre><h2>plot and make surfaces out of these<a name="4"></a></h2><pre class="codeinput">plot3(pointswithclass(unknownindex,1),pointswithclass(unknownindex,2),pointswithclass(unknownindex,3),<span class="string">'r.'</span>)
+
+surface_making_simple(pointswithclass(unknownindex,1:3),mew)
+<span class="keyword">global</span> plane
+
+<span class="comment">% plot_planes(plane,mew);</span>
+axis([-1,1,-1,1,0,1.5]);
+<span class="comment">% axis equal</span>
+camlight
+</pre><h2>Find the planes covering most unknown points<a name="5"></a></h2>
+         <p>these are desirable places to look</p><pre class="codeinput">sizemat=zeros([length(plane),1]);
+<span class="keyword">for</span> i=1:length(plane)
+    sizemat(i)=size(plane(i).points,1);
+<span class="keyword">end</span>
+
+<span class="comment">% order these</span>
+[nothing,index]=sort(sizemat,<span class="string">'descend'</span>);
+<span class="comment">%make sure we have at max, the specified numofintplanes</span>
+<span class="keyword">if</span> length(index)&lt;numofintplanes
+    numofintplanes=index;
+<span class="keyword">end</span>
+</pre><h2>Go through the number of planese we are interested in<a name="6"></a></h2><pre class="codeinput"><span class="keyword">for</span> i=1:numofintplanes
+
+<span class="comment">% plot plane and points</span>
+    <span class="keyword">try</span> <span class="keyword">for</span> j=1:length(planeplotHa);  delete(planeplotHa(j));<span class="keyword">end</span>; <span class="keyword">end</span>
+    planeplotHa=plot_planes(plane(index(i)),mew);
+
+    hold <span class="string">on</span>;
+    planeplotHa(2)=plot3(plane(index(i)).home_point(1),plane(index(i)).home_point(2),plane(index(i)).home_point(3),<span class="string">'b*'</span>);
+    planeplotHa(3)=plot3([plane(index(i)).home_point(1),plane(index(i)).home_point(1)+plane(index(i)).normal_by_eigenval(1)/10],<span class="keyword">...</span>
+                         [plane(index(i)).home_point(2),plane(index(i)).home_point(2)+plane(index(i)).normal_by_eigenval(2)/10],<span class="keyword">...</span>
+                         [plane(index(i)).home_point(3),plane(index(i)).home_point(3)+plane(index(i)).normal_by_eigenval(3)/10],<span class="string">'b'</span>);
+
+
+
+    pt=plane(index(i)).home_point;
+    plane_equ=plane(index(i)).equ;
+
+    <span class="keyword">try</span> [qt,solutionvalid,dist_val,targetdist]=classunk_posesel(pt, plane_equ, Q);
+        <span class="keyword">if</span> solutionvalid
+            solsfound=solsfound+1;
+            display([<span class="string">'Solution found = '</span>,num2str(solsfound)]);
+            title([<span class="string">'Solution found = '</span>,num2str(solsfound)]);
+            plotdenso(r,qt);drawnow;
+            Q=qt;
+        <span class="keyword">else</span>
+            noposefound=noposefound+1;
+            display([<span class="string">'no pose found = '</span>, num2str(noposefound)]);
+            title([<span class="string">'no pose found = '</span>, num2str(noposefound)]);
+        <span class="keyword">end</span>
+    <span class="keyword">catch</span>
+        noposefound=noposefound+1;
+        display(<span class="string">'Some error'</span>);
+        title([<span class="string">'Some error:no pose found = '</span>, num2str(noposefound)]);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% Pose Selection To Classify Unknown
+% Description: This function is used to identiy areas which have unknown
+% classification and attempt to look at them in such a way that we can do a
+% classification
+% function poseclassunknown()
+
+%% Load data or classify a scan
+load GavData
+
+%% Setup and Variables
+close all
+global r Q
+% the classifier reterns a classification of this number is unknown
+unknownclass=8;
+%size of the surfaces which is 1/2 of 20' scan at ideal distance 0.5*tan(20*pi/180)
+mew=0.1;
+% This is how many sets of data we will classify
+numofintplanes=30;
+%how many solutions and failures
+solsfound=0;
+noposefound=0;
+%set start pose
+Q=[0,0,0,0,0,0];
+
+%optimisataion variables
+global classunkn_optimise
+classunkn_optimise.minSurfToEF=0.3;
+classunkn_optimise.maxSurfToEF=0.8;
+classunkn_optimise.distAwayfromTarget=0.6;
+classunkn_optimise.maxAngle=20*pi/180;
+
+classunkn_optimise.iLimit=100;
+classunkn_optimise.stol=1e-4;
+
+%% put classification data in one big matrix
+pointswithclass=zeros([size(PointData,1)*size(PointData,2),4]);
+for i=1:size(PointData,1);
+    pointswithclass((i-1)*size(PointData,2)+1:i*size(PointData,2),:)=[squeeze(PointData(i,:,:)),ClassifiedDatawEdges(i,:)'];
+end;
+
+%find unknown points
+unknownindex=find(pointswithclass(:,4)==unknownclass);
+
+%% plot and make surfaces out of these
+plot3(pointswithclass(unknownindex,1),pointswithclass(unknownindex,2),pointswithclass(unknownindex,3),'r.')
+
+surface_making_simple(pointswithclass(unknownindex,1:3),mew)
+global plane
+
+% plot_planes(plane,mew);
+axis([-1,1,-1,1,0,1.5]);
+% axis equal
+camlight
+
+%% Find the planes covering most unknown points
+% these are desirable places to look
+sizemat=zeros([length(plane),1]);
+for i=1:length(plane)
+    sizemat(i)=size(plane(i).points,1);
+end
+
+% order these
+[nothing,index]=sort(sizemat,'descend');
+%make sure we have at max, the specified numofintplanes
+if length(index)<numofintplanes
+    numofintplanes=index;
+end
+
+%% Go through the number of planese we are interested in
+for i=1:numofintplanes
+
+% plot plane and points 
+    try for j=1:length(planeplotHa);  delete(planeplotHa(j));end; end
+    planeplotHa=plot_planes(plane(index(i)),mew);    
+
+    hold on;
+    planeplotHa(2)=plot3(plane(index(i)).home_point(1),plane(index(i)).home_point(2),plane(index(i)).home_point(3),'b*');
+    planeplotHa(3)=plot3([plane(index(i)).home_point(1),plane(index(i)).home_point(1)+plane(index(i)).normal_by_eigenval(1)/10],...
+                         [plane(index(i)).home_point(2),plane(index(i)).home_point(2)+plane(index(i)).normal_by_eigenval(2)/10],...
+                         [plane(index(i)).home_point(3),plane(index(i)).home_point(3)+plane(index(i)).normal_by_eigenval(3)/10],'b');    
+                     
+    
+     
+    pt=plane(index(i)).home_point;
+    plane_equ=plane(index(i)).equ;
+    
+    try [qt,solutionvalid,dist_val,targetdist]=classunk_posesel(pt, plane_equ, Q);
+        if solutionvalid
+            solsfound=solsfound+1;
+            display(['Solution found = ',num2str(solsfound)]);
+            title(['Solution found = ',num2str(solsfound)]);
+            plotdenso(r,qt);drawnow;
+            Q=qt;
+        else
+            noposefound=noposefound+1;            
+            display(['no pose found = ', num2str(noposefound)]);
+            title(['no pose found = ', num2str(noposefound)]);
+        end
+    catch   
+        noposefound=noposefound+1;
+        display('Some error');
+        title(['Some error:no pose found = ', num2str(noposefound)]);
+    end
+end
+
+
+
+
+
+
+##### SOURCE END #####
+-->
+   </body>
+</html>

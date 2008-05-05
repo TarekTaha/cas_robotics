@@ -126,7 +126,8 @@ for current_path=1:size(pathdata,2)
             %add plot handle to the stack so that it can be deleted
             pointsH=[pointsH;temppointsH];        
 
-            drawnow;        
+            drawnow;   
+            pause(0.2)
         end
         
         %it will go through an check either side (completely) of the
@@ -182,7 +183,7 @@ for current_path=1:size(pathdata,2)
         axis([-1 1 -1 1 0 1.5]);
 %         grid on;
 %         rotate3d on;
-        %pause(3)
+%         pause(3)
 %         rotate3d off;
         %print('-dpng', sprintf('%s_%03.0f_%03.0f.png', 'demopath',current_path, current_step));
         
