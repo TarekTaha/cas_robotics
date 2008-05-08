@@ -9,55 +9,80 @@
 %
 % *Inputs:* 
 %
-% _handles_ (array double) GUI variables
+% _handles_ (array double) GUI variables (pass '0' if you dont have one)
 %
 % _newQ_(1*6 double) newQ in DEGREES
 %
 % _all_steps_ (many*6) path of all 6 joints in RADs
 %
+% _NOhandleOPTIONS_ (Struc) MUST FILL IN ALL FIELDS:
+% useRealRobot, show_robot, animate_move, remv_unkn_in_mv
+%
 % *Returns:* 
 %
 % _pathfound_ (binary) if a path was found or not
 
-function pathfound=movetonewQ(handles,newQ,all_steps)
+function pathfound=movetonewQ(handles,newQ,all_steps,NOhandleOPTIONS)
 
 %% Variables
 global r Q guiglobal workspace robot_maxreach;
 
 % check we have got passed a newQ otherwise use from the GUI
-if nargin<3
-    all_steps=[];
-    if nargin<2
-        %get the desired destination from the GUI
-        newQ(1)=str2double(get(handles.move_to_J1_edit,'String'));
-        newQ(2)=str2double(get(handles.move_to_J2_edit,'String'));
-        newQ(3)=str2double(get(handles.move_to_J3_edit,'String'));
-        newQ(4)=str2double(get(handles.move_to_J4_edit,'String'));
-        newQ(5)=str2double(get(handles.move_to_J5_edit,'String'));
-        newQ(6)=str2double(get(handles.move_to_J6_edit,'String'));
-        if find(isnan(newQ))>0
-            error('Some values you are requesting to move to are not valid - all must be numbers')
+if nargin<4
+    if handles==0 && size(fieldnames(NOhandleOPTIONS),1)~=4
+        error('You must pass the handle to exGUI or set boolean parameters (useRealRobot, show_robot, animate_move, remv_unkn_in_mv) in NOhandleOPTIONS');
+    end
+    if nargin<3
+        all_steps=[];
+        if nargin<2
+            %get the desired destination from the GUI
+            newQ(1)=str2double(get(handles.move_to_J1_edit,'String'));
+            newQ(2)=str2double(get(handles.move_to_J2_edit,'String'));
+            newQ(3)=str2double(get(handles.move_to_J3_edit,'String'));
+            newQ(4)=str2double(get(handles.move_to_J4_edit,'String'));
+            newQ(5)=str2double(get(handles.move_to_J5_edit,'String'));
+            newQ(6)=str2double(get(handles.move_to_J6_edit,'String'));
+            if find(isnan(newQ))>0
+                error('Some values you are requesting to move to are not valid - all must be numbers')
+            end
         end
     end
 end
 
-
+%if we don't have any handles
+if handles==0
+    display('Handles not passed in so not updating the GUI');
+    scanwhilemove=false;
+    tryalternate=true;
+    if NOhandleOPTIONS.useRealRobot; useRealRobot=true;else useRealRobot=false;end
+    if NOhandleOPTIONS.show_robot; show_robot=true;else show_robot=false;end
+    if NOhandleOPTIONS.animate_move; animate_move=true;else animate_move=false;end
+    if NOhandleOPTIONS.remv_unkn_in_mv; remv_unkn_in_mv=true;else remv_unkn_in_mv=false;end    
+else
+    scanwhilemove=get(handles.scanwhilemove_checkbox,'value');
+%% Check if we only want to go to the exact destination
+    if get(handles.exact_joints_only_checkbox,'Value')
+        tryalternate=false;
+    else
+        tryalternate=true;
+    end
+    if 	get(handles.useRealRobot_checkbox,'Value'); useRealRobot=true; else useRealRobot=false; end
+    if 	get(handles.show_robot_checkbox,'Value'); show_robot=true; else show_robot=false; end
+    if 	get(handles.animate_move_checkbox,'Value'); animate_move=true; else animate_move=false; end
+    if 	get(handles.remv_unkn_in_mv_checkbox,'Value'); remv_unkn_in_mv=true; else remv_unkn_in_mv=false; end    
+end
+    
 %change to rads
 newQ=newQ*pi/180;
 
-scanwhilemove=get(handles.scanwhilemove_checkbox,'value');
 
-%% Check if we only want to go to the exact destination
-if get(handles.exact_joints_only_checkbox,'Value')
-    tryalternate=false;
-else
-    tryalternate=true;
-end
+
 
 %% Get the latest Q from the robot if we are using it
-if 	get(handles.useRealRobot_checkbox,'Value')
+if 	useRealRobot
     use_real_robot_GETJs();
 end
+
 
 %% Check if we are already at destination or very close (rounding error)
 %check if we are already at the destination and return if we are
@@ -65,8 +90,10 @@ end
 %we disregard this and say it is at the same place
 if isempty(find(abs(Q-newQ)>eps, 1));
     %since we are already at the correct path
-    set(handles.dialog_text,'String','Already at destination');drawnow;
-    if get(handles.show_robot_checkbox,'Value');
+    try set(handles.dialog_text,'String','Already at destination');drawnow;
+    catch; display('Already at destination'); end
+    
+    if show_robot
         plotdenso(r, newQ, guiglobal.checkFF, guiglobal.plot_ellipse);
     end
     %since we are already there
@@ -88,48 +115,45 @@ if ~isempty(all_steps) && ...
         try [pathfound,all_steps]=pathplanner_new(newQ,guiglobal.plotpath,tryalternate);end
     end     
 else % no valid path has been passed
-    try %set(handles.dialog_text,'String','Calculating Path......');drawnow;
-    %     [pathfound,all_steps]=pathplanner(newQ,guiglobal.plotpath,tryalternate);
-tic
+    try tic; 
         [pathfound,all_steps]=pathplanner_new(newQ,guiglobal.plotpath,tryalternate);
-display(['Additional Path Planning time is: ',num2str(toc)]);
+        display(['Additional Path Planning time is: ',num2str(toc)]);
     catch; keyboard
     end
 end
 
 %if it is an error returned means that the end is not valid
 if pathfound==-1
-    set(handles.dialog_text,'String','Impossible Path - Collision avoided! Ignoring command!');
+    try set(handles.dialog_text,'String','Impossible Path - Collision avoided! Ignoring command!');
+    catch; display('Impossible Path - Collision avoided! Ignoring command!');end
     error('It is not safe/possible to move here');
 end
 
 %% If there is a path then do the actual move(and plot) else do nothing
 if pathfound && size(all_steps,1)>0
     %if animate has been selected it will go through each step of the path
-    if get(handles.animate_move_checkbox,'Value')
-        set(handles.dialog_text,'String','Path found - animating....');
-%         demopath(all_steps);       
+    if animate_move
+        try set(handles.dialog_text,'String','Path found - animating....');
+        catch; display('Path found - animating....');end
         demopath_new(all_steps);
     end
     %plot the end effector in place
-    if get(handles.show_robot_checkbox,'Value');
+    if show_robot
         plotdenso(r, all_steps(end,:), guiglobal.checkFF, guiglobal.plot_ellipse);
     end
-    set(handles.dialog_text,'String','Path found - animation updated');
+    try set(handles.dialog_text,'String','Path found - animation updated');
+    catch; display('Path found - animation updated'); end
     %If using real robot try and move it
-    if get(handles.useRealRobot_checkbox,'Value')
+    if useRealRobot
         try if ~scanwhilemove
                 use_real_robot_MOVE(all_steps); 
-                set(handles.dialog_text,'String','Actual robot movement complete');
+                try set(handles.dialog_text,'String','Actual robot movement complete');
+                catch; display('Actual robot movement complete');end                    
             else
-% tic
                 use_real_robot_SCANandMOVE(all_steps);
-% toc
-                %try but if no data because already at the end then don't worry
-% tic
                 try organise_data(); end;
-% toc
-                set(handles.dialog_text,'String','Scan N Move completed');
+                try set(handles.dialog_text,'String','Scan N Move completed');
+                catch; display('Scan N Move completed'); end
             end
             %save the successfull path incase we need to retrace our steps
             if (size(all_steps,1)>3 && ~isempty(find(abs(all_steps(1,1:4)-all_steps(end,1:4))>pi/180,1))) ||...
@@ -139,18 +163,18 @@ if pathfound && size(all_steps,1)>0
                 robot_maxreach.path(end).all_steps=[robot_maxreach.path(end).all_steps;all_steps];
             end
             
-        catch set(handles.dialog_text,'String','Error: Did not complete movement - Emergency Stop Probably Hit');
+        catch try set(handles.dialog_text,'String','Error: Did not complete movement - Emergency Stop Probably Hit');
+            catch display('Error: Did not complete movement - Emergency Stop Probably Hit'); end
             lasterr;
             error('Did not complete movement');
         end
     end
-% tic
+
     %remove obstacle points that are recorded but were in the path    
     insidepoints=[];
     for step=1:size(all_steps,1)           
         insidepoints = [insidepoints;find_points_in_FF(workspace.unknowncoords(workspace.lev1unknown,:),all_steps(step,:),1)];
         if scanwhilemove
-%             workspace.Nobsticlepoints=remove_self_scanning(workspace.Nobsticlepoints,all_steps(step,:),1);
              workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles,all_steps(step,:),1);
         end
         if rand>0.7            
@@ -159,26 +183,18 @@ if pathfound && size(all_steps,1)>0
     end
     %if we are asked to remove unknown point by moving through space
     robot_maxreach.pointcarvedout=unique([robot_maxreach.pointcarvedout;insidepoints],'rows');
-    
-    %since later on we are using only the obstacle points so we need to
-    %update this set
-%     if scanwhilemove
-%         workspace.indexedobsticles=unique(round(workspace.Nobsticlepoints/workspace.inc_size)*workspace.inc_size,'rows');
-%         %update the obstacle points with only obstacles that weren't in any
-%         workspace.indexedobsticles=setdiff(workspace.indexedobsticles,robot_maxreach.pointcarvedout,'rows');        
-%     end
-    
-    if get(handles.remv_unkn_in_mv_checkbox,'value')
+      
+    if remv_unkn_in_mv
        workspace.knowncoords=unique([workspace.knowncoords;insidepoints],'rows');
     end
-% toc
 
     %set overall Q to be the last step in path
     Q=all_steps(end,:);
 else %no path found, update GUI accordingly
       
-    if get(handles.show_robot_checkbox,'Value');
+    if show_robot
         plotdenso(r, Q, guiglobal.checkFF, guiglobal.plot_ellipse);
     end
-    set(handles.dialog_text,'String','End valid but no path found');
+    try set(handles.dialog_text,'String','End valid but no path found');
+    catch; display('End valid but no path found');end
 end

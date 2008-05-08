@@ -430,7 +430,8 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
 %             rotated_scan.rangeXFlipped(1:end,1) = rotated_scan.rangeX(end:-1:1,1);
 %             rotated_scan.rangeYFlipped(1:end,1) = rotated_scan.rangeY(end:-1:1,1);
 %             rotated_scan.intensityXFlipped(1:end,1) = rotated_scan.intensityX(end:-1:1,1);
-%             rotated_scan.intensityYFlipped(1:end,1) = rotated_scan.intensityY(end:-1:1,1);
+%             rotated_scan.intensityYFlipped(1:end,1) =
+%             rotated_scan.intensityY(end:-1:1,1);
             
             % writes orignal data from far low to SP as is
             rotated_scan.rangeYM = rotated_scan.rangeYFlipped;
@@ -514,43 +515,110 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
 %    waitforbuttonpress()
 % end  
 
-%% GUESSER
-%  Original Guesser Parameters
-%     if mean(mse_range) >= 1 & mean(mse_range) < 40 & mean(mse_intensity) > 6000 & mean(mse_intensity) < 100000
-%         guess = 1; 
-%     elseif mean(mse_range) > 48 & mean(mse_range) < 250 & mean(mse_intensity) > 1200 & mean(mse_intensity) < 5000
-%         guess = 2;
-%     elseif mean(mse_range) > 2 & mean(mse_range) < 40 & mean(mse_intensity) > 200 & mean(mse_intensity) < 2000
-%         guess = 3;
-%     else
-%         guess = 4;
-%     end
-    
-%CALC of the AOI works... just what do I do with it? I need to get better responseVangle data to determine this
-%angle_of_incidence =  LRV(PointData, RangeData, PointsPlaneData, surface_plane_coefs, i, found_lines);
+%% Probability Based Classifier
+    load('.\Classification_Criteria.mat');
 
-    if mean(mse_range) < 100 & mean(mse_intensity) > 6000 & mean(mse_intensity) < 100000
-        guess = 1; 
-    elseif (mean(mse_range) > 48 & mean(mse_range) < 250 & mean(mse_intensity) > 1200 & mean(mse_intensity) < 5000) %This is a bullshit hack --> | ( mean(mse_range < 20) & mean(mse_intensity) > 100000)
-        guess = 2;
-    elseif mean(mse_range) < 100 & mean(mse_intensity) > 50 & mean(mse_intensity) < 700
-        guess = 3;
-    else
-        guess = 4;
+    lhoods.liki_ratio_varis = [];
+
+    %likelihood based on intensity
+    lhoods.I.GSteel = normpdf(mse_intensity, HParas.I.GSteel_mean, HParas.I.GSteel_std);
+    lhoods.I.Alumin = normpdf(mse_intensity, HParas.I.Alumin_mean, HParas.I.Alumin_std);
+    lhoods.I.GMetal = normpdf(mse_intensity, HParas.I.GMetal_mean, HParas.I.GMetal_std);
+    lhoods.I.MSteel = normpdf(mse_intensity, HParas.I.MSteel_mean, HParas.I.MSteel_std);
+    lhoods.I.Copper = normpdf(mse_intensity, HParas.I.Copper_mean, HParas.I.Copper_std);
+    lhoods.I.DPlyWd = normpdf(mse_intensity, HParas.I.DPlyWd_mean, HParas.I.DPlyWd_std);
+    lhoods.I.BCloth = normpdf(mse_intensity, HParas.I.BCloth_mean, HParas.I.BCloth_std);
+
+    %likelihood based on range
+    lhoods.R.GSteel = normpdf(mse_range, HParas.R.GSteel_mean, HParas.R.GSteel_std);
+    lhoods.R.Alumin = normpdf(mse_range, HParas.R.Alumin_mean, HParas.R.Alumin_std);
+    lhoods.R.GMetal = normpdf(mse_range, HParas.R.GMetal_mean, HParas.R.GMetal_std);
+    lhoods.R.MSteel = normpdf(mse_range, HParas.R.MSteel_mean, HParas.R.MSteel_std);
+    lhoods.R.Copper = normpdf(mse_range, HParas.R.Copper_mean, HParas.R.Copper_std);
+    lhoods.R.DPlyWd = normpdf(mse_range, HParas.R.DPlyWd_mean, HParas.R.DPlyWd_std);
+    lhoods.R.BCloth = normpdf(mse_range, HParas.R.BCloth_mean, HParas.R.BCloth_std);
+
+    %likelihood based on both 
+    lhoods.combined.GSteel = lhoods.I.GSteel * lhoods.R.GSteel;
+    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.GSteel , 1];
+
+    lhoods.combined.Alumin = lhoods.I.Alumin * lhoods.R.Alumin;
+    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.Alumin , 2];
+
+    lhoods.combined.GMetal = lhoods.I.GMetal * lhoods.R.GMetal;
+    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.GMetal , 3];
+
+    lhoods.combined.MSteel = lhoods.I.MSteel * lhoods.R.MSteel;
+    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.MSteel , 4];
+
+    lhoods.combined.Copper = lhoods.I.Copper * lhoods.R.Copper;
+    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.Copper , 5];
+
+    lhoods.combined.DPlyWd = lhoods.I.DPlyWd * lhoods.R.DPlyWd;
+    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.DPlyWd , 6];
+
+    lhoods.combined.BCloth = lhoods.I.BCloth * lhoods.R.BCloth;
+    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.BCloth , 7];
+
+    %order to most likely first
+    lhoods.liki_ratio_varis = sortrows(lhoods.liki_ratio_varis, 1);
+
+    %likelihood ratio
+    lhoods.ratio = lhoods.liki_ratio_varis(end,1)/lhoods.liki_ratio_varis(end-1,1);
+
+    %Classification
+    material_to_class = lhoods.liki_ratio_varis(end,2);
+    PClass.Confidence = lhoods.ratio/(1+lhoods.ratio);
+
+    switch(material_to_class)
+        case 1
+            PClass.Material = 'GSteel';
+            guess = 1;
+        case 2
+            PClass.Material = 'Alumin';
+            guess = 2;
+        case 3
+            PClass.Material = 'GMetal';
+            guess = 3;
+        case 4
+            PClass.Material = 'MSteel';  
+            guess = 4;
+        case 5
+            PClass.Material = 'Copper';
+            guess = 5;
+        case 6
+            PClass.Material = 'DPlyWd';
+            guess = 6;
+        case 7
+            PClass.Material = 'BCloth'; 
+            guess = 7;
     end
-    
-    %for user output
+
+
+%%  User Output
     switch (guess)
         case 1
-            output = 'Grey Metal ';
-            output_color = [.35 .35 .35]; % GREY
+            output = 'Galv Steel ';
+            output_color = [1 1 0]; % Yellow
         case 2
-            output = 'Shiny Metal';
-            output_color = [.8 .8 .8]; % Silver
+            output = 'Aluminium  ';
+            output_color = [1 0 1]; % Magenta
         case 3
-            output = 'Cloth/Wood'; % OR RED OR WHITE --- JUST CLOTH or WOOD!!!
-            output_color = [1 0 0]; % RED
+            output = 'GMetal     '; % Cyan
+            output_color = [0 1 1]; 
         case 4
+            output = 'Mild Steel ';
+            output_color = [1 0 0]; % Red 
+        case 5
+            output = 'Copper     ';
+            output_color = [0 1 0]; % Green 
+        case 6
+            output = 'Plywood    ';
+            output_color = [0 0 1]; % Blue 
+        case 7
+            output = 'Cloth      ';
+            output_color = [0 0 0]; % Black 
+        case 8
             output = 'Do not know';
             output_color = [1 1 1]; % WHITE 
     end 
