@@ -129,7 +129,7 @@ function [qt,solutionvalid,dist_val,targetdist] = classunk_posesel(pt, plane_equ
     [dq] = lsqnonlin(@costComponents, xGuess, lb, ub, options);
 
     % Update the configuration
-    qt = [q(1:5) + real(dq(1:5));q(6)];
+    qt = [q(1:5)' + real(dq(1:5))',q(6)];
     
     %if there is a collision or out of joint limit then no distance is returned
     dist_val=inf;    

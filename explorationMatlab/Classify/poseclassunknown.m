@@ -2,14 +2,29 @@
 % Description: This function is used to identiy areas which have unknown
 % classification and attempt to look at them in such a way that we can do a
 % classification
-% function poseclassunknown()
-
-%% Load data or classify a scan
-load GavData
+function poseclassunknown()
 
 %% Setup and Variables
 close all
 global r Q
+
+%% Load data or classify a scan
+doload_not_scan=true;
+
+if doload_not_scan
+    load GavData
+else
+    NOhandleOPTIONS.useRealRobot=false;
+    NOhandleOPTIONS.show_robot=true;
+    NOhandleOPTIONS.animate_move=true;
+    NOhandleOPTIONS.remv_unkn_in_mv=false;    
+    movetonewQ(0,newQ,all_steps,NOhandleOPTIONS);
+    % or do a scan and classify
+    use_real_robot_SCAN(deg2scan)
+end
+
+%%
+
 % the classifier reterns a classification of this number is unknown
 unknownclass=8;
 %size of the surfaces which is 1/2 of 20' scan at ideal distance 0.5*tan(20*pi/180)
