@@ -66,7 +66,7 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
         rob_h.Type='MoveJointAbs';
         % NOTE THE 6th JOINT IS OVERRIDEN TO 0 EARLIER in NBV so that it is perpendicular to the angle of rotations of joint 5 throughout the scan
         rob_h.Params=tempQ;
-        uiwait(msgbox(strcat('The robot is currently at:', num2str(rob_h.JointState),' and is planning to move to:',num2str(rob_h.Params),'. Note 6th Joint may have been changed to 0 if using NBV. Please get ready to push EMERGENCY STOP')));
+        display(strcat('The robot is currently at:', num2str(rob_h.JointState),' and is planning to move to:',num2str(rob_h.Params),'. Note 6th Joint may have been changed to 0 if using NBV. Please get ready to push EMERGENCY STOP'));
         % Additional Soft motion check - shouldn't be needed
         if (rob_h.JointState(2)<-60 || tempQ(2)<-60)
             if (rob_h.JointState(2)<-7/3*rob_h.JointState(3)-130 || tempQ(2)<-7/3*tempQ(3)-130)
@@ -103,13 +103,11 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
             
             %if we want to update the joints the old way or the new way
             if please_use_GETjsFunc
-                 use_real_robot_GETJs();
             else
-                Q=rob_h.JointState*pi/180;
             end
          
             %check we are where we want to be            
-            while max(abs((Q*180/pi-current_step_DEG)))>7
+            while max(abs((Q*180/pi-current_step_DEG)))>5
                 pause(0.15);
                 waitcoutner=waitcoutner+1;
                 if waitcoutner==75 %about 15 seconds                    
