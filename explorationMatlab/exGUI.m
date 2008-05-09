@@ -228,7 +228,8 @@ for stepcount=2:size(robot_maxreach.default_Q,1)+1
             want_to_continue=~get(handles.stopflag_checkbox,'Value');
             if want_to_continue==0; error('User chose to exit');end
             break;             
-        catch; display(lasterr); 
+        catch
+            display(lasterr);
             want_to_continue=input('Type (1) to continue, (2) for keyboard command, (0) to exit\n');            
             if want_to_continue==2; keyboard; end
             if want_to_continue==0; error('User chose to exit');end
@@ -476,12 +477,6 @@ if ~get(handles.useRealRobot_checkbox,'Value')
     scan.IntensityData=IntensityData;
     scan.PointData=PointData;
     scan.RangeData=RangeData;
-else
-%     movetonewQ(handles,[90,-30,80,0,-25,0]);
-     movetonewQ(handles,[0,-30,80,0,-15,0]);
-     use_real_robot_SCAN(-70);
-%     figure;imshow(scan.RangeData/max(max(scan.RangeData)));
-%     figure;imshow(scan.IntensityData/max(max(scan.IntensityData)));
 end
 
 %check that PointData exists and is valid
@@ -512,13 +507,15 @@ end
 display('Classifying the LATEST set of data that has been scanned');
 scan.ClassificationData=[];
 try
-    scan.ClassificationData=Block_Classifier(scan.PointData, scan.IntensityData,scan.RangeData);
-    axis equal
+%     scan.ClassificationData=Block_Classifier(scan.PointData, scan.IntensityData,scan.RangeData);
+    %run the classification function    
+    poseclassunknown_Imp()
     display('....Classification completed successfully');    
 catch
     display('....Problems in Classification');
     keyboard
 end
+
 
 
 
