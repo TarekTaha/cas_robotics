@@ -1,14 +1,9 @@
 %% WHEN USING STEVENS/GAVINS MATLAB LASER DATA COLLECTION
 
-function [found_lines] = Classifier(PointData, IntensityData, RangeData, Scan_to_Class, Iedges, PointsPlaneData, surface_plane_coefs) % this one uses edges from IntensityData Image
+function [found_lines] = Classifier(PointData, IntensityData, RangeData, Scan_to_Class, Iedges) % this one uses edges from IntensityData Image
 
-if (exist('Iedges')) == 0 % this is so you can call Classifier without Iedges
+if (exist('Iedges','var')) == 0 % this is so you can call Classifier without Iedges
     Iedges(size(PointData,1),size(PointData,2)) = 0;
-end
-
-dont_use_AOI_to_scale_classifications = 0;
-if (exist('PointsPlaneData')) == 0 % this is so you can call Classifier without AOI
-    dont_use_AOI_to_scale_classifications = 1;
 end
 
 main_plot_figure = 1;
@@ -29,7 +24,7 @@ wait_for_clicks = 1;% 0 to make classifier wait for mouse clicks to continue
     scans_cart.rangeY = PointData(Scan_to_Class,:,3)'*1000;
     scans_cart.rangeZ = PointData(Scan_to_Class,:,1)'*1000;
     %intenstiy
-    [size_data rubbish ] = size(IntensityData);
+    size_data = size(IntensityData, 1);
     angle = size_data * 0.351 * 2;
     theta = ((-angle/2)/180)*pi():(0.352*2/180)*pi():((+angle/2)/180)*pi();
     scans_cart.intensityX(Scan_to_Class,:) = sin(theta(Scan_to_Class)) * IntensityData(Scan_to_Class,:);
@@ -58,14 +53,15 @@ end
     line_segment_smoothing_threshold = 0.5; %allows adjacent lines to be joined if there gradients are similar 
     line_join_dist_threshold = 30; %allows adjacent lines to be joined if they are located near each other 
     min_number_of_points_for_a_line = 10; %min number of points that are needed for a line to regester
-    [number_of_points rubbish] = size(scans_cart.rangeX); %number of range points and intensity points. number of rays used is double this
+    number_of_points = size(scans_cart.rangeX, 1); %number of range points and intensity points. number of rays used is double this
     
     found_lines.line_start_end_points = []; %list of the start and end ray numbers for all lines
     found_lines.line_start_end_points_smoothed = []; %list of the start and end ray numbers for all smoothed lines 
     found_lines.found_lines_gradients = []; % list of the gradients of the found lines
     found_lines.number_of_lines_smoothed = 0;
     
-%% TEST FOR LINES - THIS HAS BEEN TEMP REPLACED WITH ASSUME FLAT SURFACES
+%% TEST FOR LINES (RANSAC) 
+
     % This function creats a poly fit of x number of points and sees if the
     % next point lies on that line
     max_line_length = 3500; % maximum physical length of any line - mm Helps solve the problem of lines that go back to the scanner origin
@@ -76,17 +72,18 @@ end
 
 % ---------------------------------------
 %     %SPEED BOOST This makes the lines a little less acurate but speed up the classifier
-%     on_line_threshold = 70; %allows noisey points to be considered to be on the line 
-%     line_parameters = polyfit(scans_cart.rangeX(3-number_of_points_on_line:3),scans_cart.rangeY(3-number_of_points_on_line:3),1);
-%     for i = 3:number_of_points
-%         if mod(i,10) == 0 %This makes the lines a little less acurate but speed up the classifier
-%             line_parameters = polyfit(scans_cart.rangeX(i-number_of_points_on_line:i),scans_cart.rangeY(i-number_of_points_on_line:i),1);
-%         end
-    
-    %SLOWER BUT MORE ACCURATE        
-    on_line_threshold = 20; %allows noisey points to be considered to be on the line 
+    use_points_set_sizes_of = 8+(floor(rand()*6));
+    on_line_threshold = 70; %allows noisey points to be considered to be on the line 
+    line_parameters = polyfit(scans_cart.rangeX(3-number_of_points_on_line:3),scans_cart.rangeY(3-number_of_points_on_line:3),1);
     for i = 3:number_of_points
-        line_parameters = polyfit(scans_cart.rangeX(i-number_of_points_on_line:i),scans_cart.rangeY(i-number_of_points_on_line:i),1);
+        if mod(i,use_points_set_sizes_of) == 0 %This makes the lines a little less acurate but speed up the classifier
+            line_parameters = polyfit(scans_cart.rangeX(i-number_of_points_on_line:i),scans_cart.rangeY(i-number_of_points_on_line:i),1);
+        end
+    
+    %SLOWER BUT MORE ACCURATE - But emphasises RANSAC's vertical line problem       
+%     on_line_threshold = 20; %allows noisey points to be considered to be on the line 
+%     for i = 3:number_of_points
+%         line_parameters = polyfit(scans_cart.rangeX(i-number_of_points_on_line:i),scans_cart.rangeY(i-number_of_points_on_line:i),1);
 % ---------------------------------------
         d(i-1) = scans_cart.rangeY(i) - (line_parameters(1)*scans_cart.rangeX(i) + line_parameters(2));
         if abs(d(i-1)) <= on_line_threshold & number_of_points_on_line < max_points_on_line & Iedges(Scan_to_Class,i-2) ~= 1
@@ -159,7 +156,6 @@ end
         lines(3,:) = scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2));
         found_lines.found_lines_gradients = [found_lines.found_lines_gradients; line_parameters(1)];
         %waitforbuttonpress();    
-%         if line_parameters(2) >= on_line_threshold
 
 % plots found lines
 if dont_plot == 0
@@ -169,37 +165,6 @@ if dont_plot == 0
 %     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(i,2)),scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(i,2)),'oc','markerfacecolor','c','markersize',1.5,'EraseMode',erase_mode );
 end
     end
-    
-%% ASSUME FLAT SURFACES
-% % This doesn't work very well - although it is quicker and partcially solves the vert
-% % line find problem
-% length_of_assumed_flat_surface = 2*(10+floor(10*rand())); % This creates a EVEN random number between 20 and 40
-% found_lines.line_start_end_points = [];
-% found_lines.number_of_lines_smoothed = floor(number_of_points / length_of_assumed_flat_surface);
-% for i = 1: found_lines.number_of_lines_smoothed
-%     found_lines.line_start_end_points_smoothed(i,1) = 1+(i-1)*length_of_assumed_flat_surface;
-%     found_lines.line_start_end_points_smoothed(i,2) = (i)*length_of_assumed_flat_surface;
-% end
-% 
-%     %Draws on detected lines and SHOULD check for any none valid lines (lines that go through the lasers (0,0)
-%     for i = 1:found_lines.number_of_lines_smoothed
-%         clear lines;
-%         line_parameters = polyfit(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)),1);
-%         lines(1,:) = scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)); % fitted line X values
-%         lines(2,:) = line_parameters(1)*scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)) + line_parameters(2); % fitted line Y values
-%         lines(3,:) = scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2));
-%         found_lines.found_lines_gradients = [found_lines.found_lines_gradients; line_parameters(1)];
-%         %waitforbuttonpress();    
-% %         if line_parameters(2) >= on_line_threshold
-% 
-% % plots found lines
-% if dont_plot == 0
-%     figure(main_plot_figure);
-%     line(i) = plot3(lines(1,:),lines(2,:),lines(3,:),'c','linestyle','-','EraseMode',erase_mode );
-% %     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(i,1)),scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(i,2)),'oc','markerfacecolor','c','markersize',1.5,'EraseMode',erase_mode );
-% %     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(i,2)),scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(i,2)),'oc','markerfacecolor','c','markersize',1.5,'EraseMode',erase_mode );
-% end
-%     end
     
 %% INITIALISE VARIABLE - THIS ONES' USED IN THE LOOP
     found_lines.perpindicular_intersecting_ray_numbers = [];
@@ -474,7 +439,7 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
     %poly fit for the range data
     polyfit_coefs_range = polyfit(rotated_scan.rangeXM(:), rotated_scan.rangeYM(:), order);
     fitted_line_vals_range = [polyval(polyfit_coefs_range, rotated_scan.rangeXM(:)) , rotated_scan.rangeXM(:)];
-    [rubbish fitted_line_vals_width] = size(fitted_line_vals_range);
+    fitted_line_vals_width = size(fitted_line_vals_range, 2);
 
     %poly fit for the intensity data
     polyfit_coefs_intensity = polyfit(rotated_scan.intensityXM(:), rotated_scan.intensityYM(:), order);
@@ -696,67 +661,3 @@ end
     end
 end
     
-%% THIS FUNCTION FINDS THE AOI BETWEEN LASER SCANNER PLANE AND SURFACE PLANE
-
-% -----------------------------------
-% THIS FUNCTION IS NOT CURRENTLY USED
-% -----------------------------------
-
-        function angle_of_incidence = LRV(PointData, RangeData, PointsPlaneData, surface_plane_coefs, scan_being_used, found_lines);
-        
-        dont_plot = 1;    
-            
-        %% Determining the lasers_home_position
-        laser_position_index_col = ceil(find(~RangeData(:,:),1)/size(PointData,1));
-        laser_position_index_row = mod(find(~RangeData(:,:),1),size(PointData,1));
-        laser_position = [PointData(laser_position_index_row,laser_position_index_col,1), PointData(laser_position_index_row,laser_position_index_col,2), PointData(laser_position_index_row,laser_position_index_col,3)];
-
-        %% This is the details of the line being tested
-        points_on_class_line_start =  found_lines.line_start_end_points_smoothed(scan_being_used,1);
-        points_on_class_line_end =  found_lines.line_start_end_points_smoothed(scan_being_used,2);
-
-        %% This finds what surface_plane most of the points on the line being tested belong too
-        points_of_line_being_used_to_find_surface_plane = PointsPlaneData(scan_being_used, points_on_class_line_start:points_on_class_line_end);
-        [planes_distribution, plane_index] = hist(points_of_line_being_used_to_find_surface_plane,1+(max(points_of_line_being_used_to_find_surface_plane)-min(points_of_line_being_used_to_find_surface_plane)));
-        plane_index = ceil(plane_index);
-        line_is_on_surface_plane_number = plane_index(find(planes_distribution == max(planes_distribution), 1));
-        surface_plane_coefs_for_test_line = surface_plane_coefs(line_is_on_surface_plane_number,:);
-
-        %% Find plane through class line and laser home
-        p1 = [PointData(scan_being_used, points_on_class_line_start,1), PointData(scan_being_used, points_on_class_line_start,2), PointData(scan_being_used, points_on_class_line_start,3)];
-        p2 = [PointData(scan_being_used, points_on_class_line_end,1), PointData(scan_being_used, points_on_class_line_end,2), PointData(scan_being_used, points_on_class_line_end,3)];
-        p3 = laser_position;
-
-        % Ax + By + Cz + D = 0
-        equ_of_plane_of_class_line_and_laser_home(1) = p1(2) *(p2(3) - p3(3)) + p2(2) *(p3(3) - p1(3)) + p3(2) *(p1(3) - p2(3));
-        equ_of_plane_of_class_line_and_laser_home(2) = p1(3) *(p2(1) - p3(1)) + p2(3) *(p3(1) - p1(1)) + p3(3) *(p1(1) - p2(1));
-        equ_of_plane_of_class_line_and_laser_home(3) = p1(1) *(p2(2) - p3(2)) + p2(1) *(p3(2) - p1(2)) + p3(1) *(p1(2) - p2(2));
-        equ_of_plane_of_class_line_and_laser_home(4) = -(p1(1) * (p2(2 )* p3(3) - p3(2) * p2(3)) + p2(1) * (p3(2) * p1(3) - p1(2) * p3(3)) + p3(1) * (p1(2) * p2(3) - p2(2) * p1(3)));
-
-        %% Find angle between plane through class line and laser home and surface plane
-        % cos(theta) = a1a2 + b1b2 +c1c2 / ( (a1^2+b1^2+c1^2)^(1/2) * (a2^2 + b2^2 + c2^2)^(1/2) )
-        a1 = surface_plane_coefs_for_test_line(1);
-        b1 = surface_plane_coefs_for_test_line(2);
-        c1 = surface_plane_coefs_for_test_line(3);
-        a2 = equ_of_plane_of_class_line_and_laser_home(1);
-        b2 = equ_of_plane_of_class_line_and_laser_home(2);
-        c2 = equ_of_plane_of_class_line_and_laser_home(3);
-        angle_of_incidence = acosd( a1*a2 + b1*b2 +c1*c2 / ( (a1^2 + b1^2 + c1^2)^(1/2) * (a2^2 + b2^2 + c2^2)^(1/2) ) );
-
-        %% Plot laser home, class line and some surrounding points
-        if dont_plot == 0
-            figure(7);
-            hold on;
-            plot3(PointData(scan_being_used-4:scan_being_used+3, points_on_class_line_start:points_on_class_line_end, 1), PointData(scan_being_used-4:scan_being_used+3, points_on_class_line_start:points_on_class_line_end, 2), PointData(scan_being_used-4:scan_being_used+3, points_on_class_line_start:points_on_class_line_end, 3),'.b'); 
-            plot3(PointData(scan_being_used, points_on_class_line_start:points_on_class_line_end, 1), PointData(scan_being_used, points_on_class_line_start:points_on_class_line_end, 2), PointData(scan_being_used, points_on_class_line_start:points_on_class_line_end, 3),'.y'); 
-            plot3(laser_position(1),laser_position(2),laser_position(3),'.r');
-
-        %% Plot plane through class line and laser home
-            ppx = -.16:0.16/10:0;
-            ppy = -.04:.1/10:.06; 
-            for i = 1:10
-                for j = 1:10
-                    plot3(ppx(i), ppy(j) , (equ_of_plane_of_class_line_and_laser_home(1)*ppx(i) + equ_of_plane_of_class_line_and_laser_home(2)*ppy(j) + equ_of_plane_of_class_line_and_laser_home(4))/-equ_of_plane_of_class_line_and_laser_home(3),'.c');
-                end
-            end
-        end

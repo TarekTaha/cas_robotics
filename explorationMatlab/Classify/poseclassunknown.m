@@ -3,14 +3,15 @@
 % classification and attempt to look at them in such a way that we can do a
 % classification
 function poseclassunknown()
+error('This dosent work, it is for reference only');
 
 %% Setup and Variables
 close all
-global r Q
+global r Q scan workspace
 
 %% Load data or classify a scan
-doload_not_scan=true;
-
+doload_not_scan=false;
+keyboard
 if doload_not_scan
     load GavData
 else
@@ -18,9 +19,18 @@ else
     NOhandleOPTIONS.show_robot=true;
     NOhandleOPTIONS.animate_move=true;
     NOhandleOPTIONS.remv_unkn_in_mv=false;    
-    movetonewQ(0,newQ,all_steps,NOhandleOPTIONS);
-    % or do a scan and classify
-    use_real_robot_SCAN(deg2scan)
+%     movetonewQ(0,newQ,all_steps,NOhandleOPTIONS);
+    % or get scan data from exGUI
+    if isstruct(scan)
+       try 
+           ClassifiedData=scan.ClassificationData;
+            PointData=scan.PointData;
+       catch
+           error('Scan variable does not have the required fields');
+       end
+    else
+        error('For now you need to run with exGUI');
+    end
 end
 
 %%
@@ -50,7 +60,7 @@ classunkn_optimise.stol=1e-4;
 %% put classification data in one big matrix
 pointswithclass=zeros([size(PointData,1)*size(PointData,2),4]);
 for i=1:size(PointData,1);
-    pointswithclass((i-1)*size(PointData,2)+1:i*size(PointData,2),:)=[squeeze(PointData(i,:,:)),ClassifiedDatawEdges(i,:)'];
+    pointswithclass((i-1)*size(PointData,2)+1:i*size(PointData,2),:)=[squeeze(PointData(i,:,:)),ClassifiedData(i,:)'];
 end;
 
 %find unknown points

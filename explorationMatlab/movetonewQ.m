@@ -29,7 +29,7 @@ global r Q guiglobal workspace robot_maxreach;
 
 % check we have got passed a newQ otherwise use from the GUI
 if nargin<4
-    if handles==0 && size(fieldnames(NOhandleOPTIONS),1)~=4
+    if isstruct(handles)==0
         error('You must pass the handle to exGUI or set boolean parameters (useRealRobot, show_robot, animate_move, remv_unkn_in_mv) in NOhandleOPTIONS');
     end
     if nargin<3
@@ -50,7 +50,7 @@ if nargin<4
 end
 
 %if we don't have any handles
-if handles==0
+if isstruct(handles)==0
     display('Handles not passed in so not updating the GUI');
     scanwhilemove=false;
     tryalternate=true;
@@ -118,7 +118,8 @@ else % no valid path has been passed
     try tic; 
         [pathfound,all_steps]=pathplanner_new(newQ,guiglobal.plotpath,tryalternate);
         display(['Additional Path Planning time is: ',num2str(toc)]);
-    catch; keyboard
+    catch
+        keyboard
     end
 end
 

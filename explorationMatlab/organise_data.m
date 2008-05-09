@@ -173,7 +173,7 @@ for i=[valid_rows]'
 % \lfloor \frac{inbetweenpoint}{inc\_size} \rfloor \\
 % \frac{inbetweenpoint}{inc\_size}
 % \end{array}\right]$$
-    cubes_checked=[int16(floor(inbetweenpoint/workspace.inc_size));int16(inbetweenpoint/workspace.inc_size)];
+    cubes_checked=[int16(floor(inbetweenpoint/workspace.inc_size));int16(round(inbetweenpoint/workspace.inc_size))];
     % Concaternate the cubes check which are in workspace with current list    
     markedcubes=[markedcubes;int16(cubes_checked((cubes_checked(:,1)>=space_min_and_max(1) &...
                                                  cubes_checked(:,2)>=space_min_and_max(2) &...
