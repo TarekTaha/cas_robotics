@@ -49,6 +49,7 @@ classfierthreshhold=1.5;
 mew=0.1;
 % This is how many sets of data we will classify
 numofintplanes=20;
+
 %how many solutions and failures
 solsfound=0;
 noposefound=0;
@@ -100,6 +101,7 @@ end
 
 %% Go through the number of planese we are interested in
 indextoblast=0;
+keyboard
 for i=1:numofintplanes
     indextoblast=indextoblast+1;
 % plot plane and points 
@@ -113,8 +115,7 @@ for i=1:numofintplanes
                          [plane(index(indextoblast)).home_point(2),plane(index(indextoblast)).home_point(2)+plane(index(indextoblast)).normal_by_eigenval(2)/10],...
                          [plane(index(indextoblast)).home_point(3),plane(index(indextoblast)).home_point(3)+plane(index(indextoblast)).normal_by_eigenval(3)/10],'b');    
                      
-    
-     
+         
     pt=plane(index(indextoblast)).home_point;
     plane_equ=plane(index(indextoblast)).equ;
     
@@ -147,10 +148,12 @@ for i=1:numofintplanes
                 use_real_robot_GETJs();
                 % and do a scan to classify           
                 global PointData IntensityData RangeData
-                try [ClassifiedData] = Block_Classifier(PointData, IntensityData, RangeData); catch; error('Couldnt classify');end
+                try [ClassifiedData] = Block_Classifier(PointData, IntensityData, RangeData); catch; error('Couldnt classify');end                                
             end
             
             UNclassifiedvoxels=update_ocstatus(class_cubesize,ClassifiedData,minclassifications,classfierthreshhold);
+            display('press any key to continue');
+            pause;
             
             surface_making_simple(workspace.ocgrid(UNclassifiedvoxels,:)*class_cubesize,mew)
             global plane
