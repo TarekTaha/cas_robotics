@@ -62,9 +62,11 @@ for i=1:length(plane)
      %fill in the points which are considered to describe the plane.
      %From some angle this will appear as a circle, but it is a circle
      %rotated to fit on the plane
-        plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'b');        
+%         plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'b');        
+        plot_handles(i)=plot3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'k');        
      else
          pts_to_plot=find(abs(pts_to_check)<plane_sphere_threshold*5);
-         plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'b');        
+%          plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'b');        
+         plot_handles(i)=plot3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'k');        
      end
 end

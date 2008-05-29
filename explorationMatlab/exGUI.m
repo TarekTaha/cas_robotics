@@ -149,7 +149,7 @@ set(handles.useRealRobot_checkbox,'Value',0);
 drawnow;
 
 %clear the globals for scan, workspace, robot(r,Q), bestviews, PointData, RangeData
-clear global workspace scan bestviews Q r PointData RangeData guiglobal densoobj all_views robot_maxreach;
+clear global workspace scan bestviews Q r PointData RangeData guiglobal densoobj all_views robot_maxreach classunkn_optimise;
 
 %Sets up the robot
 setuprobot()
@@ -852,6 +852,7 @@ end
 % --- Executes on button press in rotate_pushbutton.
 function rotate_pushbutton_Callback(hObject, eventdata, handles)%#ok<INUSD,DEFNU>
 rotate3d;
+% view
 
 % --- Executes on button press in ResetView.
 function ResetView_Callback(hObject, eventdata, handles)%#ok<INUSD,DEFNU>
@@ -965,7 +966,8 @@ end
 
 % --- Executes on button press in zoom_pushbutton.
 function zoom_pushbutton_Callback(hObject, eventdata, handles)
-zoom on;
+% zoom on;
+view(116,18)
 
 %this function is used to collect the data for exploration to compare new info
 function state_data=collectdata(state_data)
