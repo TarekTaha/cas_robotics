@@ -197,15 +197,27 @@ function [qt,solutionvalid,dist_val,targetdist,used_sol] = blasting_posesel(robo
 % e^{5(6-\sum{result\_row}}-1\\
 % \end{array} \right)$$
 streamlength=dist_pt2tr(pt,tr);
-theta = acos(plane_equ(1:3)*unit((tr(1:3,3)+tr(1:3,4))));
 % theta=acos(dot(targetNormal,unit(tr(1:3,3)+tr(1:3,4))));
+% theta = acos(plane_equ(1:3)*unit((tr(1:3,3)+tr(1:3,4))));
+theta = acos(plane_equ(1:3)*unit(tr(1:3,3)));
+%make sure it is only 0->pi/2'
+if theta>pi/2 theta=pi-theta;end
+
 % theta*180/pi
 % plot(r,q_temp')
 % drawnow
 
+<<<<<<< .mine
+    streamStart=tr(1:3,4);
+    streamEnd=tr(1:3,3)'+tr(1:3,4)';
+    streamOPisEnd=tr(1:3,3)'-tr(1:3,4)';
+    
+    r_var=[streamStart(1)-streamEnd(1),streamStart(2)-streamEnd(2),streamStart(3)-streamEnd(3)];
+=======
 %     streamStart=tr(1:3,4);
 %     streamEnd=tr(1:3,3)'+tr(1:3,4)';
 %     r_var=[streamStart(1)-streamEnd(1),streamStart(2)-streamEnd(2),streamStart(3)-streamEnd(3)];
+>>>>>>> .r457
     r_var=-tr(1:3,3)';
 
     %find intersection point between surface and the scan line between scan origin and point
@@ -228,13 +240,19 @@ theta = acos(plane_equ(1:3)*unit((tr(1:3,3)+tr(1:3,4))));
 
                  
         e = [exp(-5*(optimise.maxtargetdis-streamlength));
+            exp(10*(sqrt((intersectionPNT(1)-streamEnd(1))^2+...
+                          (intersectionPNT(2)-streamEnd(2))^2+...  
+                          (intersectionPNT(3)-streamEnd(3))^2)-...
+                    sqrt((intersectionPNT(1)-streamOPisEnd(1))^2+...
+                          (intersectionPNT(2)-streamOPisEnd(2))^2+...  
+                          (intersectionPNT(3)-streamOPisEnd(3))^2)))
              exp(-10*(streamlength-optimise.mintargetdis));
              exp(10*(sqrt((pt(1)-intersectionPNT(1))^2+...
                           (pt(2)-intersectionPNT(2))^2+...  
                           (pt(3)-intersectionPNT(3))^2)-optimise.minAccepDis));
              exp(5*(theta-optimise.maxDeflectionError));
              exp(5*sum(Jlimitresult))-1;
-             exp(5*(6-sum(result_row)))-1];
+             exp(5*(6-sum(result_row)))-1]
     end
 end
 
@@ -294,7 +312,10 @@ function [valid,dist,targetdist]=check_newQ(qt,qlimits,pt,tr,Links,numlinks,plan
               (pt(3)-intersectionPNT(3))^2);
 
     %angle between line and plane
-    theta = acos(plane_equ(1:3)*unit((tr(1:3,3)+tr(1:3,4))));
+%     theta = acos(plane_equ(1:3)*unit((tr(1:3,3)+tr(1:3,4))));
+    theta = acos(plane_equ(1:3)*unit(tr(1:3,3)));
+    %make sure it is only 0->pi/2'
+    if theta>pi/2 theta=pi-theta;end
     
     %if it is allowable then it is valid and change this to return
     if targetdist(2)<optimise.mintargetdis||...
