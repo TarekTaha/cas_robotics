@@ -1,4 +1,4 @@
-%% classunk_posesel
+%% blasting_posesel051408
 %
 % *Description:* based on streamOnto - specially made for blasting
 % given a start q it will try and plast a point pt in space within an angle
@@ -34,7 +34,7 @@
 % plane, (2) Distance between end effector (nozzel) and pt 
 
 
-function [qt,solutionvalid,dist_val,targetdist] = classunk_posesel(pt, plane_equ, q)
+function [qt,solutionvalid,dist_val,targetdist] = blasting_posesel051408(pt, plane_equ, q)
 
 
 %% Variables
