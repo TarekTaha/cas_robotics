@@ -191,3 +191,12 @@ if showunknownpnts
 end
 
 workspace.spec_pnts=[];
+
+%the classification cube size
+workspace.class_cubesize=workspace.inc_size/4;
+
+%variables for the classification threshholds
+%minimum number of classifications in voxel to make it valid
+workspace.minclassifications=35;
+% minimmum majority classification to make it useful
+workspace.classfierthreshhold=1.5;
