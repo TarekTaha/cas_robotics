@@ -149,7 +149,7 @@ set(handles.useRealRobot_checkbox,'Value',0);
 drawnow;
 
 %clear the globals for scan, workspace, robot(r,Q), bestviews, PointData, RangeData
-clear global workspace scan bestviews Q r PointData RangeData guiglobal densoobj all_views robot_maxreach classunkn_optimise;
+clear global workspace scan bestviews Q r PointData RangeData guiglobal densoobj all_views robot_maxreach classunkn_optimise alldirectedpoints;
 
 %Sets up the robot
 setuprobot()
@@ -467,7 +467,7 @@ threeDMedianFilt();
 %% Classification
 % --- Executes on button press in classify_scan_pushbutton.
 function classify_scan_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global scan 
+global scan PointData IntensityData RangeData workspace
 %case 1 = 'Grey Metal '; case 2 = 'Shiny Metal'; case 3 = 'Cloth/Wood'; OR RED OR WHITE --- JUST CLOTH or WOOD!!! case 4 = 'Do not know';
 
 %if NOT USING real robot load data
@@ -506,80 +506,82 @@ end
 %do classification with data
 display('Classifying the LATEST set of data that has been scanned');
 scan.ClassificationData=[];
-try
-    %num of planes to tryand get to of interest
-    numofintplanes=20;
-    %     scan.ClassificationData=Block_Classifier(scan.PointData, scan.IntensityData,scan.RangeData);
-    %run the classification function    
 
-    poseclassunknown_Imp(numofintplanes)
-    display('....Classification completed successfully');    
-catch
-    display('....Problems in Classification');
-    keyboard
-end
+try [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData); 
+    try UNclassifiedvoxels=update_ocstatus(ClassifiedData); 
+        display(['You still have not classified ', num2str(size(UNclassifiedvoxels,1)/size(workspace.ocgrid,1)*100),' percent of known voxels']);
+        display('....Classification completed successfully');    
+    catch; display('Couldnt update voxels'); keyboard; end        
+catch; display('Couldnt classify');keyboard; end
+    
+    
 
-
+% --- Executes on button press in AXBAMnClassify_pushbutton.
+function AXBAMnClassify_pushbutton_Callback(hObject, eventdata, handles)
+%num of planes to tryand get to of interest
+numofintplanes=str2double(get(handles.numofdir_AXBAMnC_edit,'string'));
+%run the classification function    
+poseclassunknown_Imp(numofintplanes)
 
 
 
 % --- Executes on button press in plot_classified_pushbutton.
-function plot_classified_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global scan
-
-if ~isfield(scan,'ClassificationData') || size(scan.ClassificationData,1)==0
-    error('Classification has not happened correctly');
-end
-%case 1 = 'Grey Metal '; case 2 = 'Shiny Metal'; case 3 = 'Cloth/Wood'; % OR RED OR WHITE --- JUST CLOTH or WOOD!!! case 4 = 'Do not know';
-
-maxclasval=max(scan.ClassificationData(:,4))
-
-%Go through and plot the different data
-figure(2);hold on;axis equal;
-%set(gcf,'CurrentAxes',handles.axes3);
-for current_mat=1:maxclasval
-    temp=find(scan.ClassificationData(:,4)==current_mat);
-    if ~isempty(temp)
-        switch(current_mat)
-            case (1) 
-                plotcolor=[.6 .6 .6];
-            case (2) 
-                plotcolor=[.4 .4 .4];
-            case (3) 
-                plotcolor=[1 0 0];
-            case (4) 
-                plotcolor=[0.8 0.8 1];
-        end        
-        if current_mat~=5 plot3(scan.ClassificationData(temp,1),scan.ClassificationData(temp,2),scan.ClassificationData(temp,3),'Marker','.','Color',[plotcolor],'LineStyle','none');end;
-    end
-end
-
-ClassifiedData=[];
-colsiz=size(scan.ClassificationData,1)/size(scan.PointData,1);
-
-for current_row=1:size(scan.PointData,1)
-    ClassifiedData=[ClassifiedData;(scan.ClassificationData((current_row-1)*colsiz+1:current_row*colsiz,4)/maxclasval)'];
-end
-
-%figure, imshow(ClassifiedData);
-
-%Median filtering
-I2=medfilt2(ClassifiedData,[14 14]);
-figure, imshow(I2);
-
-Iedges=edge(I2,'canny');
-%figure, imshow(Iedges);
-
-[row,col]=ginput(1);  
-while col>0 && col<size(Iedges,1) && row>0 && row<size(Iedges,2)        
-    if col>0 && col<size(Iedges,1) && row>0 && row<size(Iedges,2)
-        row=round(row)-1+find(Iedges(round(col),round(row):end)>0,1);
-        boundary=bwtraceboundary(Iedges,[round(col), round(row)],'N');
-        hold on;
-        plot(boundary(:,2),boundary(:,1),'r','LineWidth',3);
-    end
-    [row,col]=ginput(1);
-end
+% function plot_classified_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
+% global scan
+% 
+% if ~isfield(scan,'ClassificationData') || size(scan.ClassificationData,1)==0
+%     error('Classification has not happened correctly');
+% end
+% %case 1 = 'Grey Metal '; case 2 = 'Shiny Metal'; case 3 = 'Cloth/Wood'; % OR RED OR WHITE --- JUST CLOTH or WOOD!!! case 4 = 'Do not know';
+% 
+% maxclasval=max(scan.ClassificationData(:,4))
+% 
+% %Go through and plot the different data
+% figure(2);hold on;axis equal;
+% %set(gcf,'CurrentAxes',handles.axes3);
+% for current_mat=1:maxclasval
+%     temp=find(scan.ClassificationData(:,4)==current_mat);
+%     if ~isempty(temp)
+%         switch(current_mat)
+%             case (1) 
+%                 plotcolor=[.6 .6 .6];
+%             case (2) 
+%                 plotcolor=[.4 .4 .4];
+%             case (3) 
+%                 plotcolor=[1 0 0];
+%             case (4) 
+%                 plotcolor=[0.8 0.8 1];
+%         end        
+%         if current_mat~=5 plot3(scan.ClassificationData(temp,1),scan.ClassificationData(temp,2),scan.ClassificationData(temp,3),'Marker','.','Color',[plotcolor],'LineStyle','none');end;
+%     end
+% end
+% 
+% ClassifiedData=[];
+% colsiz=size(scan.ClassificationData,1)/size(scan.PointData,1);
+% 
+% for current_row=1:size(scan.PointData,1)
+%     ClassifiedData=[ClassifiedData;(scan.ClassificationData((current_row-1)*colsiz+1:current_row*colsiz,4)/maxclasval)'];
+% end
+% 
+% %figure, imshow(ClassifiedData);
+% 
+% %Median filtering
+% I2=medfilt2(ClassifiedData,[14 14]);
+% figure, imshow(I2);
+% 
+% Iedges=edge(I2,'canny');
+% %figure, imshow(Iedges);
+% 
+% [row,col]=ginput(1);  
+% while col>0 && col<size(Iedges,1) && row>0 && row<size(Iedges,2)        
+%     if col>0 && col<size(Iedges,1) && row>0 && row<size(Iedges,2)
+%         row=round(row)-1+find(Iedges(round(col),round(row):end)>0,1);
+%         boundary=bwtraceboundary(Iedges,[round(col), round(row)],'N');
+%         hold on;
+%         plot(boundary(:,2),boundary(:,1),'r','LineWidth',3);
+%     end
+%     [row,col]=ginput(1);
+% end
 
 
 %% Robot Functionality
@@ -855,7 +857,6 @@ end
 % --- Executes on button press in rotate_pushbutton.
 function rotate_pushbutton_Callback(hObject, eventdata, handles)%#ok<INUSD,DEFNU>
 rotate3d;
-% view
 
 % --- Executes on button press in ResetView.
 function ResetView_Callback(hObject, eventdata, handles)%#ok<INUSD,DEFNU>
@@ -910,6 +911,52 @@ else
         end
         guiglobal=rmfield(guiglobal,'obsticleplot');
     end
+end
+
+% --- Executes on button press in plot_classified_checkbox.
+function plot_classified_checkbox_Callback(hObject, eventdata, handles)
+global workspace classifiedplotHa
+
+if get(hObject,'Value')
+    display('Drawing plot')  
+    classifiedplotHa=[];
+    class_cubesize=workspace.class_cubesize;
+    
+    %determine the unknown places and the know metal or wood
+    sumofclass=workspace.ocgrid(:,4)+workspace.ocgrid(:,5);
+    warning('off','MATLAB:divideByZero')
+    try classifiedvoxels=find(sumofclass>=workspace.minclassifications &...
+                         (workspace.ocgrid(:,4)./workspace.ocgrid(:,5)>workspace.classfierthreshhold |...
+                          workspace.ocgrid(:,5)./workspace.ocgrid(:,4)>workspace.classfierthreshhold));end
+    try UNclassifiedvoxels=find(sumofclass<workspace.minclassifications | ...
+                         (workspace.ocgrid(:,4)./workspace.ocgrid(:,5)<=workspace.classfierthreshhold &...
+                          workspace.ocgrid(:,5)./workspace.ocgrid(:,4)<=workspace.classfierthreshhold));end
+    warning('on','MATLAB:divideByZero')
+    
+    %now plot this
+    hold on;
+    try classifiedplotHa(end+1)=plot3(workspace.ocgrid(UNclassifiedvoxels,1)*class_cubesize,...
+          workspace.ocgrid(UNclassifiedvoxels,2)*class_cubesize,...
+          workspace.ocgrid(UNclassifiedvoxels,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');end
+    %plot metal and wood voxels
+
+    metalvoxels=workspace.ocgrid(classifiedvoxels(workspace.ocgrid(classifiedvoxels,4)>workspace.ocgrid(classifiedvoxels,5)),1:3);
+    if size(metalvoxels,1)>0
+        try classifiedplotHa(end+1)=plot3(metalvoxels(:,1)*class_cubesize,metalvoxels(:,2)*class_cubesize,metalvoxels(:,3)*class_cubesize,'r.');end
+    end
+
+    woodvoxels=workspace.ocgrid(classifiedvoxels(workspace.ocgrid(classifiedvoxels,4)<workspace.ocgrid(classifiedvoxels,5)),1:3);
+    if size(woodvoxels,1)>0
+        try classifiedplotHa(end+1)=plot3(woodvoxels(:,1)*class_cubesize,woodvoxels(:,2)*class_cubesize,woodvoxels(:,3)*class_cubesize,'b.');end
+    end
+
+    drawnow
+
+else
+    display('Removing plot')
+    for i=1:length(classifiedplotHa);  try delete(classifiedplotHa(i));end; end
+    clear global classifiedplotHa
+    
 end
 
 % --- Executes on button press in show_unknownpoints_checkbox.
@@ -971,6 +1018,8 @@ end
 function zoom_pushbutton_Callback(hObject, eventdata, handles)
 % zoom on;
 view(116,18)
+keyboard
+
 
 %this function is used to collect the data for exploration to compare new info
 function state_data=collectdata(state_data)
@@ -993,7 +1042,9 @@ else
     state_data.Q=[state_data.Q;Q];
 end    
 
-
+% --- Executes on button press in savefig_pushbutton.
+function savefig_pushbutton_Callback(hObject, eventdata, handles)
+AXBAMnCtesting();
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Not Used By Me
@@ -1082,57 +1133,21 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+%this is for the edit box of how many planes of interest we are going to go
+%through
+function AXBAMnC_directs_edit_Callback(hObject, eventdata, handles)
+function AXBAMnC_directs_edit_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
 
-% --------------------------------------------------------------------
-function Untitled_1_Callback(hObject, eventdata, handles)
-% hObject    handle to Untitled_1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function Untitled_2_Callback(hObject, eventdata, handles)
-% hObject    handle to Untitled_2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function Untitled_3_Callback(hObject, eventdata, handles)
-% hObject    handle to Untitled_3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function Untitled_4_Callback(hObject, eventdata, handles)
-% hObject    handle to Untitled_4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function Untitled_5_Callback(hObject, eventdata, handles)
-% hObject    handle to Untitled_5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in all_mesh_checkbox.
-function all_mesh_checkbox_Callback(hObject, eventdata, handles)
-% hObject    handle to all_mesh_checkbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of all_mesh_checkbox
-
-
-
-
+function numofdir_AXBAMnC_edit_Callback(hObject, eventdata, handles)
+function numofdir_AXBAMnC_edit_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
 
 function rot_scan_deg_edit_Callback(hObject, eventdata, handles)
-
-
 % --- Executes during object creation, after setting all properties.
 function rot_scan_deg_edit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
@@ -1147,47 +1162,15 @@ function scanwhilemove_checkbox_Callback(hObject, eventdata, handles)
 function remv_unkn_in_mv_checkbox_Callback(hObject, eventdata, handles)
 
 
-% --- Executes on button press in plot_classified_checkbox.
-function plot_classified_checkbox_Callback(hObject, eventdata, handles)
-global workspace classifiedplotHa
-if get(hObject,'Value')
-    display('Drawing plot')  
-    classifiedplotHa=[];
-    
-    %determine the unknown places and the know metal or wood
-    sumofclass=workspace.ocgrid(:,4)+workspace.ocgrid(:,5);
-    warning('off','MATLAB:divideByZero')
-    try classifiedvoxels=find(sumofclass>=workspace.minclassifications &...
-                         (workspace.ocgrid(:,4)./workspace.ocgrid(:,5)>workspace.classfierthreshhold |...
-                          workspace.ocgrid(:,5)./workspace.ocgrid(:,4)>workspace.classfierthreshhold));end
-    try UNclassifiedvoxels=find(sumofclass<workspace.minclassifications | ...
-                         (workspace.ocgrid(:,4)./workspace.ocgrid(:,5)<=workspace.classfierthreshhold &...
-                          workspace.ocgrid(:,5)./workspace.ocgrid(:,4)<=workspace.classfierthreshhold));end
-    warning('on','MATLAB:divideByZero')
-    
-    %now plot this
-    hold on;
-    try classifiedplotHa(end+1)=plot3(workspace.ocgrid(UNclassifiedvoxels,1)*class_cubesize,...
-          workspace.ocgrid(UNclassifiedvoxels,2)*class_cubesize,...
-          workspace.ocgrid(UNclassifiedvoxels,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');end
-    %plot metal and wood voxels
+% --- Executes on button press in doclassification_checkbox.
+function doclassification_checkbox_Callback(hObject, eventdata, handles)
+% hObject    handle to doclassification_checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
 
-    metalvoxels=workspace.ocgrid(classifiedvoxels(workspace.ocgrid(classifiedvoxels,4)>workspace.ocgrid(classifiedvoxels,5)),1:3);
-    if size(metalvoxels,1)>0
-        try classifiedplotHa(end+1)=plot3(metalvoxels(:,1)*class_cubesize,metalvoxels(:,2)*class_cubesize,metalvoxels(:,3)*class_cubesize,'r.');end
-    end
+% Hint: get(hObject,'Value') returns toggle state of doclassification_checkbox
 
-    woodvoxels=workspace.ocgrid(classifiedvoxels(workspace.ocgrid(classifiedvoxels,4)<workspace.ocgrid(classifiedvoxels,5)),1:3);
-    if size(woodvoxels,1)>0
-        try classifiedplotHa(end+1)=plot3(woodvoxels(:,1)*class_cubesize,woodvoxels(:,2)*class_cubesize,woodvoxels(:,3)*class_cubesize,'b.');end
-    end
 
-    drawnow
 
-else
-    display('Removing plot')
-    for i=1:length(classifiedplotHa);  try delete(classifiedplotHa(i));end; end
-    clear global classifiedplotHa
-    
-end
 
+function Untitled_1_Callback(hObject, eventdata, handles)

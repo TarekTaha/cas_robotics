@@ -6,7 +6,7 @@ function poseclassunknown_Imp(numofintplanes)
 
 %% Setup and Variables
 % close all
-global r Q PointData RangeData IntensityData workspace classPlanePlotHa
+global r Q PointData RangeData IntensityData workspace classPlanePlotHa AXBAMnCtestdata alldirectedpoints
 
 % figure(1)
 % plot_planes(plane,mew);
@@ -55,7 +55,7 @@ noposefound=0;
 
 
 %optimisataion variables
-global classunkn_optimise
+global classunkn_optimise 
 classunkn_optimise.minSurfToEF=0.25;
 classunkn_optimise.maxSurfToEF=0.8;
 classunkn_optimise.distAwayfromTarget=0.47;
@@ -65,20 +65,37 @@ classunkn_optimise.iLimit=500;
 classunkn_optimise.stol=1e-6;
 
 %% Classify
-try [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData); catch; display('Couldnt classify');end
+% try [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData); catch; display('Couldnt classify');end
 % load tempdata.mat
 
 %% put classification data in one big matrix
 % display('TEMP LOADING DATA');load GavData;ClassifiedData=ClassifiedDatawEdges;
-try UNclassifiedvoxels=update_ocstatus(ClassifiedData);
-catch; keyboard;
-end
+% try UNclassifiedvoxels=update_ocstatus(ClassifiedData);
+% catch; keyboard;
+% end
 
 
+%determine the unknown places and the know metal or wood
+sumofclass=workspace.ocgrid(:,4)+workspace.ocgrid(:,5);
+warning('off','MATLAB:divideByZero')
+% a voxel is unknown if 1&2 OR 3&4
+% 1) the sum of actual classifications is less than minclassifications 
+% and 2) the unknown classifications is still less than minclassifications (else its too hard to classify(like corners)
+% 3) Wood classifgications are not significantly more than metal
+% 4) Methal classifications are not significantly more than wood
+
+try UNclassifiedvoxels=find((sumofclass<workspace.minclassifications &...
+                            workspace.ocgrid(:,6)<workspace.minclassifications)...
+                        | ...
+                     (workspace.ocgrid(:,4)./workspace.ocgrid(:,5)<=workspace.classfierthreshhold &...
+                      workspace.ocgrid(:,5)./workspace.ocgrid(:,4)<=workspace.classfierthreshhold));end
+warning('on','MATLAB:divideByZero')
+
+    
 %% plot and make surfaces out of these
 % plot3(pointswithclass(unknownindex,1),pointswithclass(unknownindex,2),pointswithclass(unknownindex,3),'r.')
 
-surface_making_simple(workspace.ocgrid(UNclassifiedvoxels,:)*class_cubesize,mew)
+surface_making_simple(workspace.ocgrid(UNclassifiedvoxels,1:3)*class_cubesize,mew)
 global plane
 
 
@@ -87,7 +104,16 @@ global plane
 % these are desirable places to look
 sizemat=zeros([length(plane),1]);
 for i=1:length(plane)
-    sizemat(i)=size(plane(i).points,1);
+    [level1,level2]=GetImpLevInfo(plane(i).home_point);
+    if ~isempty(level2)
+        if ~isempty(alldirectedpoints)
+            if isempty(find(sqrt((plane(i).home_point(1)-alldirectedpoints(:,1)).^2+(plane(i).home_point(2)-alldirectedpoints(:,2)).^2+(plane(i).home_point(3)-alldirectedpoints(:,3)).^2)<2*mew,1))
+                sizemat(i)=size(plane(i).points,1);
+            end
+        else
+            sizemat(i)=size(plane(i).points,1);
+        end
+    end
 end
 
 % order these
@@ -101,12 +127,11 @@ end
 indextoblast=0;
 
 while solsfound<numofintplanes
+    global plane;
     indextoblast=indextoblast+1;
 % plot plane and points 
     for j=1:length(classPlanePlotHa);  try delete(classPlanePlotHa(j));end; end
-    clear global classPlanePlotHa;
-    classPlanePlotHa=plot_planes(plane(index(indextoblast)),mew);    
-
+    classPlanePlotHa=plot_planes(plane(index(indextoblast)),mew);        
     hold on;
     classPlanePlotHa(2)=plot3(plane(index(indextoblast)).home_point(1),plane(index(indextoblast)).home_point(2),plane(index(indextoblast)).home_point(3),'b*');
     classPlanePlotHa(3)=plot3([plane(index(indextoblast)).home_point(1),plane(index(indextoblast)).home_point(1)+plane(index(indextoblast)).normal_by_eigenval(1)/10],...
@@ -121,12 +146,22 @@ while solsfound<numofintplanes
         if solutionvalid            
             %make sure vector is correct
             newQ=newQ(:)';
-                       
+
             %move to the next place if possible, else continue with the
             %next plane
             if movetonewQ(0,rad2deg(newQ),[],NOhandleOPTIONS);            
                 solsfound=solsfound+1;
                 display(['Solution found and found a path successfully there = ',num2str(solsfound)]);
+                
+%% for testing/plotting purposes
+                AXBAMnCtestdata.plane_aimed_at=plane(index(indextoblast));
+                AXBAMnCtestdata.mew=mew;
+                AXBAMnCtestdata.newQ=newQ;
+                AXBAMnCtestdata.Pworkspace=workspace;
+%% end fortesting
+
+                
+                
             else
                 continue;
             end
@@ -154,18 +189,30 @@ while solsfound<numofintplanes
             
             UNclassifiedvoxels=update_ocstatus(ClassifiedData);
             uiwait(msgbox('press OK button to continue'));
+            try AXBAMnCtesting(true);end
+            alldirectedpoints=[alldirectedpoints;pt];
             
-            
-            surface_making_simple(workspace.ocgrid(UNclassifiedvoxels,:)*class_cubesize,mew)
+            surface_making_simple(workspace.ocgrid(UNclassifiedvoxels,1:3)*class_cubesize,mew)
             global plane
             if size(plane,2)<1
                 display('There are no more points to look at - returning');
                 return
             end
-            %% Find the planes covering most unknown pointsthese are desirable places to look
+
+%% Find the planes covering most unknown points
+            % these are desirable places to look
             sizemat=zeros([length(plane),1]);
-            for j=1:length(plane)
-                sizemat(j)=size(plane(j).points,1);
+            for i=1:length(plane)
+                [level1,level2]=GetImpLevInfo(plane(i).home_point);
+                if ~isempty(level2)
+                    if ~isempty(alldirectedpoints)
+                        if isempty(find(sqrt((plane(i).home_point(1)-alldirectedpoints(:,1)).^2+(plane(i).home_point(2)-alldirectedpoints(:,2)).^2+(plane(i).home_point(3)-alldirectedpoints(:,3)).^2)<4*mew,1))
+                            sizemat(i)=size(plane(i).points,1);
+                        end
+                    else
+                        sizemat(i)=size(plane(i).points,1);
+                    end
+                end
             end
 
             % order these

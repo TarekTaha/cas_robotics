@@ -82,9 +82,8 @@ if run_classifier == 1
     end
         try % I use try as sometimes the classifier crashes for an unknown reason
             found_lines = Classifier(PointData, IntensityDatatoUse, RangeData, i, Iedges); % this one uses edges from IntensityData Image
- 
-        % This creates the classfier output matrix. The matrix is in the same
-                % format as PointData, IntensityData, etc      
+            % This creates the classfier output matrix. The matrix is in the same
+            % format as PointData, IntensityData, etc      
             number_of_lines = size(found_lines.line_start_end_points_smoothed,1); 
             for j = 1:number_of_lines
                 if found_lines.line_start_end_points_smoothed(j,1) > 0

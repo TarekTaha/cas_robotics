@@ -481,7 +481,7 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
 % end  
 
 %% Probability Based Classifier
-    load('.\Classification_Criteria.mat');
+    load('Classification_Criteria.mat');
 
     lhoods.liki_ratio_varis = [];
 

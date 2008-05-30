@@ -6,7 +6,7 @@
 
 function UNclassifiedvoxels=update_ocstatus(ClassifiedData)
 
-global workspace PointData RangeData
+global workspace PointData RangeData robmap_h
 %get the variables from the workspace 
 class_cubesize=workspace.class_cubesize;
 minclassifications=workspace.minclassifications;
@@ -26,8 +26,8 @@ pointswithclass=pointswithclass(CorrespondingRange>20,:);
 
 %discreatise into grid
 class_ocgrid=[round(pointswithclass(:,1:3)/class_cubesize),pointswithclass(:,4)];
-[level1,level2]=GetImpLevInfo(class_ocgrid(:,1:3)*class_cubesize);
-class_ocgrid=class_ocgrid(level2,:);
+[level1]=GetImpLevInfo(class_ocgrid(:,1:3)*class_cubesize);
+class_ocgrid=class_ocgrid(level1,:);
 
 % hold on;
 % try planeplotHa(end+1)=plot3(class_ocgrid(:,1)*class_cubesize,class_ocgrid(:,2)*class_cubesize,class_ocgrid(:,3)*class_cubesize,'y','marker','.','markersize',0.1,'linestyle','none');end
@@ -52,10 +52,12 @@ else
     tempocgrid=setdiff(class_ocgrid(:,1:3),workspace.ocgrid(:,1:3),'rows');
 end
 workspace.ocgrid=[workspace.ocgrid;tempocgrid,zeros([size(tempocgrid,1),3])];
-[level1,level2]=GetImpLevInfo(workspace.ocgrid(:,1:3)*class_cubesize);
-workspace.ocgrid=workspace.ocgrid(level2,:);
+[level1]=GetImpLevInfo(workspace.ocgrid(:,1:3)*class_cubesize);
+workspace.ocgrid=workspace.ocgrid(level1,:);
+newoc_toupdate=unique(class_ocgrid(:,1:3),'rows');
+[vals,indexa,indexb]=intersect(newoc_toupdate,workspace.ocgrid(:,1:3),'rows');
 
-for i=1:size(workspace.ocgrid,1)
+for i=1:indexb
     tempdata=class_ocgrid(class_ocgrid(:,1)==workspace.ocgrid(i,1) &...
                           class_ocgrid(:,2)==workspace.ocgrid(i,2) & ...
                           class_ocgrid(:,3)==workspace.ocgrid(i,3),4);
@@ -67,6 +69,17 @@ for i=1:size(workspace.ocgrid,1)
     workspace.ocgrid(i,6)=workspace.ocgrid(i,6)+unknownnum;
 end
 
+
+%we only want to hold the voxels which correspond with the current map
+aabb = [-2, -2, -1; 2, 2, 2.4];
+% aabb = [-inf, -inf, -inf; inf, inf, inf];
+hMesh = robmap_h.Mesh(aabb);
+f = hMesh.FaceData;
+v = hMesh.VertexData;
+[level1]=GetImpLevInfo(v);
+v_decrete=unique(round(v(level1,:)/class_cubesize),'rows');
+[vals,indexa,indexb]=intersect(v_decrete,workspace.ocgrid(:,1:3),'rows');
+workspace.ocgrid=workspace.ocgrid(indexb,:);
 
 % figure(2)
 sumofclass=workspace.ocgrid(:,4)+workspace.ocgrid(:,5);
