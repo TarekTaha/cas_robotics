@@ -92,13 +92,15 @@ for i=1:2:size(diffCol,1)
     end
 end
 
-%make it not an index anymore by real points
-workspace.spec_pnts=unique([ALLspec_pnts_ind*workspace.inc_size;workspace.spec_pnts],'rows');
+%if we have any special points to add
+if size(ALLspec_pnts_ind,1)>0
+    %make it not an index anymore by real points
+    workspace.spec_pnts=unique([ALLspec_pnts_ind*workspace.inc_size;workspace.spec_pnts],'rows');
 
-%normalise to the workspace size
-workspace.spec_pnts=round(workspace.spec_pnts/workspace.inc_size)*workspace.inc_size;
-workspace.spec_pnts=setdiff(workspace.spec_pnts,[workspace.knowncoords;workspace.indexedobsticles],'rows');
-
+    %normalise to the workspace size
+    workspace.spec_pnts=round(workspace.spec_pnts/workspace.inc_size)*workspace.inc_size;
+    workspace.spec_pnts=setdiff(workspace.spec_pnts,[workspace.knowncoords;workspace.indexedobsticles],'rows');
+end
 % plot3(workspace.spec_pnts(:,1),workspace.spec_pnts(:,2),workspace.spec_pnts(:,3),'k*');
 % hold on;
 % plot3(PointData(:,:,1),PointData(:,:,2),PointData(:,:,3),'g.')
