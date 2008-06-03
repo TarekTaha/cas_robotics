@@ -188,8 +188,13 @@ while solsfound<numofintplanes
             end
             
             UNclassifiedvoxels=update_ocstatus(ClassifiedData);
-            uiwait(msgbox('press OK button to continue'));
-            try AXBAMnCtesting(true);end
+%%
+            %either pause here of save data
+%             uiwait(msgbox('press OK button to continue'));
+            try AXBAMnCtesting(true);
+            catch display('Some error when saving testing data');
+            end
+            
             alldirectedpoints=[alldirectedpoints;pt];
             
             surface_making_simple(workspace.ocgrid(UNclassifiedvoxels,1:3)*class_cubesize,mew)
@@ -206,7 +211,7 @@ while solsfound<numofintplanes
                 [level1,level2]=GetImpLevInfo(plane(i).home_point);
                 if ~isempty(level2)
                     if ~isempty(alldirectedpoints)
-                        if isempty(find(sqrt((plane(i).home_point(1)-alldirectedpoints(:,1)).^2+(plane(i).home_point(2)-alldirectedpoints(:,2)).^2+(plane(i).home_point(3)-alldirectedpoints(:,3)).^2)<4*mew,1))
+                        if isempty(find(sqrt((plane(i).home_point(1)-alldirectedpoints(:,1)).^2+(plane(i).home_point(2)-alldirectedpoints(:,2)).^2+(plane(i).home_point(3)-alldirectedpoints(:,3)).^2)<2*mew,1))
                             sizemat(i)=size(plane(i).points,1);
                         end
                     else
@@ -224,6 +229,7 @@ while solsfound<numofintplanes
         end
     catch   
         noposefound=noposefound+1;
-        display('Some error');
+        display('An Error occured in pose selection for directed classification');
+        lasterr
     end
 end

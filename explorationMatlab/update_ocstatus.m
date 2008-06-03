@@ -26,8 +26,8 @@ pointswithclass=pointswithclass(CorrespondingRange>20,:);
 
 %discreatise into grid
 class_ocgrid=[round(pointswithclass(:,1:3)/class_cubesize),pointswithclass(:,4)];
-[level1]=GetImpLevInfo(class_ocgrid(:,1:3)*class_cubesize);
-class_ocgrid=class_ocgrid(level1,:);
+[level1,level2]=GetImpLevInfo(class_ocgrid(:,1:3)*class_cubesize);
+class_ocgrid=class_ocgrid(level2,:);
 
 % hold on;
 % try planeplotHa(end+1)=plot3(class_ocgrid(:,1)*class_cubesize,class_ocgrid(:,2)*class_cubesize,class_ocgrid(:,3)*class_cubesize,'y','marker','.','markersize',0.1,'linestyle','none');end
@@ -52,8 +52,8 @@ else
     tempocgrid=setdiff(class_ocgrid(:,1:3),workspace.ocgrid(:,1:3),'rows');
 end
 workspace.ocgrid=[workspace.ocgrid;tempocgrid,zeros([size(tempocgrid,1),3])];
-[level1]=GetImpLevInfo(workspace.ocgrid(:,1:3)*class_cubesize);
-workspace.ocgrid=workspace.ocgrid(level1,:);
+[level1,level2]=GetImpLevInfo(workspace.ocgrid(:,1:3)*class_cubesize);
+workspace.ocgrid=workspace.ocgrid(level2,:);
 newoc_toupdate=unique(class_ocgrid(:,1:3),'rows');
 [vals,indexa,indexb]=intersect(newoc_toupdate,workspace.ocgrid(:,1:3),'rows');
 
@@ -71,13 +71,13 @@ end
 
 
 %we only want to hold the voxels which correspond with the current map
-aabb = [-2, -2, -1; 2, 2, 2.4];
+aabb = [-1.5, -1.5, 0.2; 1.5, 1.5, 1.8];
 % aabb = [-inf, -inf, -inf; inf, inf, inf];
 hMesh = robmap_h.Mesh(aabb);
-f = hMesh.FaceData;
+% f = hMesh.FaceData;
 v = hMesh.VertexData;
-[level1]=GetImpLevInfo(v);
-v_decrete=unique(round(v(level1,:)/class_cubesize),'rows');
+[level1,level2]=GetImpLevInfo(v);
+v_decrete=unique(round(v(level2,:)/class_cubesize),'rows');
 [vals,indexa,indexb]=intersect(v_decrete,workspace.ocgrid(:,1:3),'rows');
 workspace.ocgrid=workspace.ocgrid(indexb,:);
 

@@ -13,8 +13,9 @@ end
 
 testnum= input('Please enter TEST number','s');
 scannum= input('Please enter SCAN number','s');
-
-testdir='C:\Documents and Settings\RTA computer\My Documents\My Pictures\080530\';
+plotunknown=input('Do you want to plot the unknown voxels 1=yes, 0=no');
+    
+testdir='C:\Documents and Settings\RTA computer\My Documents\My Pictures\';
 
 %% plot the current mesh and robot
 figure
@@ -49,9 +50,11 @@ warning('on','MATLAB:divideByZero')
     
     %now plot this
 hold on;
-try plot3(workspace.ocgrid(UNclassifiedvoxels,1)*class_cubesize,...
-      workspace.ocgrid(UNclassifiedvoxels,2)*class_cubesize,...
-      workspace.ocgrid(UNclassifiedvoxels,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');end
+if plotunknown
+    try plot3(workspace.ocgrid(UNclassifiedvoxels,1)*class_cubesize,...
+          workspace.ocgrid(UNclassifiedvoxels,2)*class_cubesize,...
+          workspace.ocgrid(UNclassifiedvoxels,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');end
+end
 %plot metal and wood voxels
 
 metalvoxels=workspace.ocgrid(classifiedvoxels(workspace.ocgrid(classifiedvoxels,4)>workspace.ocgrid(classifiedvoxels,5)),1:3);
@@ -87,9 +90,11 @@ if plotdirectedC && ~isempty(AXBAMnCtestdata)
     plot3([AXBAMnCtestdata.plane_aimed_at.home_point(1),AXBAMnCtestdata.plane_aimed_at.home_point(1)+AXBAMnCtestdata.plane_aimed_at.normal_by_eigenval(1)/10],...
           [AXBAMnCtestdata.plane_aimed_at.home_point(2),AXBAMnCtestdata.plane_aimed_at.home_point(2)+AXBAMnCtestdata.plane_aimed_at.normal_by_eigenval(2)/10],...
           [AXBAMnCtestdata.plane_aimed_at.home_point(3),AXBAMnCtestdata.plane_aimed_at.home_point(3)+AXBAMnCtestdata.plane_aimed_at.normal_by_eigenval(3)/10],'b');                                   
-    try plot3(workspace.ocgrid(UNclassifiedvoxels,1)*class_cubesize,...
-      workspace.ocgrid(UNclassifiedvoxels,2)*class_cubesize,...
-      workspace.ocgrid(UNclassifiedvoxels,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');end
+    if plotunknown   
+        try plot3(workspace.ocgrid(UNclassifiedvoxels,1)*class_cubesize,...
+          workspace.ocgrid(UNclassifiedvoxels,2)*class_cubesize,...
+          workspace.ocgrid(UNclassifiedvoxels,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');end
+    end
     if size(metalvoxels,1)>0;try plot3(metalvoxels(:,1)*class_cubesize,metalvoxels(:,2)*class_cubesize,metalvoxels(:,3)*class_cubesize,'r.');end; end
     if size(woodvoxels,1)>0;try plot3(woodvoxels(:,1)*class_cubesize,woodvoxels(:,2)*class_cubesize,woodvoxels(:,3)*class_cubesize,'b.');end; end
 
@@ -124,9 +129,11 @@ if plotdirectedC && ~isempty(AXBAMnCtestdata)
 
     %now plot this
     hold on;
-    try plot3(Pworkspace.ocgrid(UNclassifiedvoxelsP,1)*class_cubesize,...
-          Pworkspace.ocgrid(UNclassifiedvoxelsP,2)*class_cubesize,...
-          Pworkspace.ocgrid(UNclassifiedvoxelsP,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');end
+    if plotunknown
+        try plot3(Pworkspace.ocgrid(UNclassifiedvoxelsP,1)*class_cubesize,...
+              Pworkspace.ocgrid(UNclassifiedvoxelsP,2)*class_cubesize,...
+              Pworkspace.ocgrid(UNclassifiedvoxelsP,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');end
+    end
     %plot metal and wood voxels
 
     metalvoxels=Pworkspace.ocgrid(classifiedvoxelsP(Pworkspace.ocgrid(classifiedvoxelsP,4)>Pworkspace.ocgrid(classifiedvoxelsP,5)),1:3);
