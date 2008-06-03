@@ -94,7 +94,8 @@ if run_classifier == 1
                 end
             end
         catch
-            display('There was an error');
+            display('Error in block classifier');
+            lasterr
         end
         
 

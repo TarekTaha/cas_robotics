@@ -508,7 +508,8 @@ display('Classifying the LATEST set of data that has been scanned');
 scan.ClassificationData=[];
 
 try [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData); 
-    try UNclassifiedvoxels=update_ocstatus(ClassifiedData); 
+% profile clear;profile on;    
+try UNclassifiedvoxels=update_ocstatus(ClassifiedData); %profile off; profile viewer;
         display(['You still have not classified ', num2str(size(UNclassifiedvoxels,1)/size(workspace.ocgrid,1)*100),' percent of known voxels']);
         display('....Classification completed successfully');    
     catch; display('Couldnt update voxels'); keyboard; end        
@@ -803,6 +804,7 @@ catch
     % aabb = [-2, -1, 0; 2, 0.6, 2];
     
     aabb = [-1.5, -1.5, -1; 2, 1.5, 2];
+%     aabb = [-1.5, 0.3, -1; 2, 0.7, 2];
 %     if we want to show the whole environment
     if get(handles.all_mesh_checkbox,'value')==1
         aabb = [-20, -20, -20; 20, 20, 20];
@@ -1044,7 +1046,13 @@ end
 
 % --- Executes on button press in savefig_pushbutton.
 function savefig_pushbutton_Callback(hObject, eventdata, handles)
-AXBAMnCtesting();
+try 
+    AXBAMnCtesting();
+catch
+    lasterr
+    keyboard
+end
+            
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Not Used By Me
@@ -1154,23 +1162,33 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-
 % --- Executes on button press in scanwhilemove_checkbox.
 function scanwhilemove_checkbox_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in remv_unkn_in_mv_checkbox.
 function remv_unkn_in_mv_checkbox_Callback(hObject, eventdata, handles)
 
-
 % --- Executes on button press in doclassification_checkbox.
 function doclassification_checkbox_Callback(hObject, eventdata, handles)
-% hObject    handle to doclassification_checkbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of doclassification_checkbox
+% --- Executes during object creation, after setting all properties.
+function minClassifications_edit_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+function minClassifications_edit_Callback(hObject, eventdata, handles)
+global workspace
+workspace.minclassifications=str2double(get(hObject,'String'));
+
+% --- Executes during object creation, after setting all properties.
+function classification_ration_edit_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+function classification_ration_edit_Callback(hObject, eventdata, handles)
+global workspace
+workspace.classfierthreshhold=str2double(get(hObject,'String'));
 
 
-
-
+%% dont know why this is needed, can't find the button for it
 function Untitled_1_Callback(hObject, eventdata, handles)

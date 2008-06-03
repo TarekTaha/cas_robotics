@@ -197,6 +197,6 @@ workspace.class_cubesize=workspace.inc_size/4;
 
 %variables for the classification threshholds
 %minimum number of classifications in voxel to make it valid
-workspace.minclassifications=35;
+workspace.minclassifications=30;
 % minimmum majority classification to make it useful
 workspace.classfierthreshhold=1.5;
