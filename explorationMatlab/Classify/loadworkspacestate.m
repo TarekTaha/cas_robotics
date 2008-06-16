@@ -2,7 +2,7 @@ function loadworkspacestate()
 close all;
 testnum='8';
 testdate='080603';
-testdir='.';
+testdir='D:\Documents and Settings\gpaul\Desktop';
 % testdir='C:\Documents and Settings\RTA computer\My Documents\My Pictures\';
 cd([testdir,'\',testdate]);
 for scannum=1:27
