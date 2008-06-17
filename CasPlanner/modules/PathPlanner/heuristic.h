@@ -18,54 +18,48 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
-#ifndef INTERFACEPROVIDER_H
-#define INTERFACEPROVIDER_H
+#ifndef HEURISTICT_H_
+#define HEURISTICT_H_
 
-#include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
+#include <QString>
+#include "exceptionhandler.h"
+#include "node.h"
 
-#include <QImage>
-#include <QVector> 
-#include <QPointF>
-#include <QBitArray>
-#include <math.h>
-#include <QMetaType>
-#include "utils.h"
-#include "map.h"
-#include "playerinterface.h"
-//"Design by contract"
+using namespace std;
 
-using namespace PlayerCc;
-
-class MapProvider
+namespace CasPlanner
 {
-    public:
-        virtual void provideMap(Map&)=0; 
-        virtual ~MapProvider(){};
+
+class Heuristic
+{
+public:
+	virtual ~Heuristic(){};
+	virtual double gCost(Node *)=0;
+	virtual double hCost(Node *,Pose )=0;;
+	static Heuristic * factory(QString type) throw(ExceptionHandler);
 };
 
-class LaserProvider 
+class SocialHeuristic : public Heuristic
 {
-    public:
-        virtual void getLaserScan(LaserScan&)=0; 
-        virtual ~LaserProvider(){}; 
+public:
+	SocialHeuristic(){};
+	friend class Heuristic;
+public:
+	double gCost(Node *n);
+	double hCost(Node *n, Pose end);
+	~SocialHeuristic(){};
 };
 
-class SpeedProvider 
+class DistanceHeuristic : public Heuristic
 {
-    public:
-        virtual void provideSpeed(double &speed, double &turnRate)=0;
-        virtual ~SpeedProvider(){};
-}; 
-
-class LocationProvider
-{
-	public:
-		virtual void provideLocation(Pose &location)=0;
-		virtual ~LocationProvider(){};
+public:
+	DistanceHeuristic(){};
+	friend class Heuristic;
+public:
+	double gCost(Node *n);
+	double hCost(Node *n, Pose end);
+	~DistanceHeuristic(){};
 };
 
-#endif
-
-
-
+}
+#endif /*HEURISTICT_H_*/

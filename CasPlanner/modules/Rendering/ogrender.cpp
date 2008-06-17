@@ -44,7 +44,7 @@ void OGRenderer::setProvider( MapProvider *prov)
 
 void OGRenderer::updateData()
 {
-      mapData = provider->provideMap();
+      provider->provideMap(mapData);
       w->updateGL();
 }
 

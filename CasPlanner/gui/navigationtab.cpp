@@ -41,7 +41,7 @@ NavContainer::NavContainer(QWidget *parent,PlayGround *playGround_in)
 	if(playGround)
 	{
 		if(playGround->robotPlatforms.size()>0)
-			playGround->activeRobot = playGround->robotPlatforms[0];
+			playGround->activeRobot = playGround->robotPlatforms[0];	
 	}
 }
 

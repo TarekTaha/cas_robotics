@@ -105,6 +105,7 @@ Q_OBJECT
         void enableControl(int driveId);
         void setLasers(QVector<Laser> lasers); 
 		void enablePtz(int ptzId);
+		void enableJoyStick(int joyId);		
 		void enableVfh(int vfhId);
 		void enableMap(int mapId);
 		void enableSpeech(int speechId);		
@@ -150,7 +151,7 @@ Q_OBJECT
         PlayerClient *pc;
        	playerc_client_t *client;
        	QVector <DeviceType> *devices;
-        bool ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized, velControl,vfhEnabled,stopped,speechNotificationEnabled,speechEnabled;
+        bool joyStickEnabled,ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized, velControl,vfhEnabled,stopped,speechNotificationEnabled,speechEnabled;
         int positionId,ptzId,mapId,localizerId,vfhId,joyStickId,speechId;
         QVector <Laser> lasers;
         Position2dProxy *drive, *vfh, *joyStick;

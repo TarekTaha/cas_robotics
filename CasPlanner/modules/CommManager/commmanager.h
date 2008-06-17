@@ -20,8 +20,6 @@
  ***************************************************************************/
 #ifndef COMMMANAGER_H
 #define COMMMANAGER_H
-//#include <libplayerc++/playerc++.h>
-//#include <libplayercore/player.h>
 #include "playerinterface.h"
 
 class CommManager;
@@ -43,7 +41,6 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
         ~CommManager(); 
         virtual int readConfigs(ConfigFile *cf,int secId);
         virtual int start(); 
-        virtual LaserScan getLaserScan();
         virtual double getSpeed(); 
         virtual double getTurnRate();
         virtual int    getJoyStickGlobalDir();
@@ -61,7 +58,8 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
         virtual void   speechSay(QString voiceM);
         virtual void   setSpeechNotification(bool state);
         virtual void   setOdometry(Pose odom);
-	    virtual Map    provideMap(); 
+        virtual void   getLaserScan(LaserScan &scan);
+        virtual void   provideMap(Map &map); 
 	    virtual void   provideSpeed(double &speed, double &turnRate);
 	    virtual void   provideLocation(Pose & location);
 	    virtual bool   getLocalized();

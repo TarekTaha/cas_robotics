@@ -43,7 +43,7 @@ void LaserRender::setProvider( LaserProvider *i_prov)
 
 void LaserRender::updateData()
 {
-      laserData = provider->getLaserScan();
+      provider->getLaserScan(laserData);
       w->updateGL(); 
 }
 

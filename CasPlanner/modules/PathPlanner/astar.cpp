@@ -23,7 +23,7 @@
 namespace CasPlanner
 {
 
-Astar::Astar(Robot *rob,double dG):
+Astar::Astar(Robot *rob,double dG,QString heuristicType):
 	distGoal(dG),
 	map(NULL),
 	robot(rob),		
@@ -32,12 +32,22 @@ Astar::Astar(Robot *rob,double dG):
 	path(NULL),
 	p(NULL)
 {
+	try
+	{
+		//heuristic = Heuristic::factory(heuristicType);
+		heuristic = new DistanceHeuristic;
+	}
+	catch(ExceptionHandler e)
+	{
+		cout<<e.what()<<endl;
+	}
 	openList   = new LList;
 	closedList = new LList; 
 }
 
 Astar::Astar():
 	distGoal(0.01),
+	//heuristic(NULL),
 	map(NULL),
 	root(NULL),
 	test(NULL),
@@ -113,7 +123,7 @@ void Astar::findRoot()
 	root->next = NULL;
 	root->prev = NULL;
 	root->g_value = 0;;
-	root->h_value = gCost(root);
+	root->h_value = //heuristic->gCost(root);
 	root->f_value = root->g_value + root->h_value;
 	root->id = 0;
 	root->depth = 0;
@@ -232,8 +242,8 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
   			//qDebug("ID is:%d",ID);
   			curChild->next = NULL;
   			curChild->prev = NULL;
-  			curChild->g_value = gCost(curChild);
-      		curChild->h_value = hCost(curChild);
+  			curChild->g_value = //heuristic->gCost(curChild);
+      		curChild->h_value = //heuristic->hCost(curChild,end);
   			curChild->f_value = curChild->g_value + curChild->h_value;
 			Node * p;
 			// check if the child is already in the open list
@@ -315,7 +325,7 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
   	qDebug("	--->>>No Path Found<<<---");
   	return NULL; // No Path Found
 };
-
+/*
 // define the g function as parent plus 1 step
 double Astar:: gCost(Node *n) 
 {
@@ -325,8 +335,9 @@ double Astar:: gCost(Node *n)
 	cost = n->parent->g_value + Dist(n->pose.p,n->parent->pose.p);
 	return cost;
 };
-
+*/
 //define the h function as the Euclidean distance to the goal + turning penalty
+/*
 double Astar::hCost(Node *n) 
 {
 	double h=0,angle_cost=0,obstacle_penalty=0,reverse_penalty=0,delta_d=0;
@@ -351,7 +362,7 @@ double Astar::hCost(Node *n)
 	return ( h*(1 + reverse_penalty ) + 0.555 * angle_cost + obstacle_penalty*delta_d);
 //	return ( 1 + reverse_penalty )*( h + delta_d + 0.555 * angle_cost + 0.555*angle_cost*obstacle_penalty*delta_d );
 };
-
+*/
 bool Astar :: goalReached (Node *n) 
 {
 	double angle_diff, delta_d;
@@ -417,12 +428,14 @@ Node *Astar :: makeChildrenNodes(Node *parent)
 		// How much it differs from our current orientations ?
 		angle_difference = anglediff(angle,parent->pose.phi);
 		// Are we gonna turn too much ? if yes then why not go backwards ?
+		/*
 		if (angle_difference > DTOR(120))
 		{
 			//cout<<"\n Angle difference ="<<RTOD(angle_difference)<<" parent angle="<<RTOD(parent->angle)<<" destination angle="<<RTOD(angle);
 			direction = parent->direction * -1;
 		}
 		else
+		*/
 		{
 			direction = parent->direction;
 		}
@@ -453,7 +466,7 @@ Node *Astar :: makeChildrenNodes(Node *parent)
 		}
     	discrete_angle =  start_angle;
 		//cout<<"\n Start is"<<RTOD(start_angle)<<" End angle="<<RTOD(end_angle);
-//		angle_difference = anglediff(start_angle,end_angle);
+		angle_difference = anglediff(start_angle,end_angle);
 		for (int s=0 ; s <= ceil(angle_difference/angle_resolution); s++)
 		{
 			if (inObstacle(temp->children[i]->location,discrete_angle))
@@ -476,7 +489,7 @@ Node *Astar :: makeChildrenNodes(Node *parent)
 					discrete_angle = end_angle;
 			}
 		}
-		if (!collides) // if after discretization the child still doens't collide then add it
+		//if (!collides) // if after discretization the child still doens't collide then add it
 		{
 			p = new Node;
 			p->pose.p.setX(temp->children[i]->location.x());

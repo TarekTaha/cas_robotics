@@ -93,7 +93,10 @@ HEADERS += modules/CommManager/commmanager.h \
     modules/HumanRobotInterface/IntentionRecognizer.h \
     modules/HumanRobotInterface/activityLogger.h \
     modules/Rendering/FreeType.h \
-    modules/CommManager/accelerometer.h
+    modules/CommManager/accelerometer.h \
+    modules/PathPlanner/socialplanner.h \
+    modules/ExceptionHandling/exceptionhandler.h \
+    modules/PathPlanner/heuristic.h
 SOURCES += modules/CommManager/commmanager.cpp \
     modules/CommonTools/bandmat.cpp \
     modules/CommonTools/cholesky.cpp \
@@ -185,7 +188,10 @@ SOURCES += modules/CommManager/commmanager.cpp \
     modules/HumanRobotInterface/activityLogger.cpp \
     modules/Controller/wheelchairproxy.cpp \
     modules/Rendering/FreeType.cpp \
-    modules/CommManager/accelerometer.cpp
+    modules/CommManager/accelerometer.cpp \
+    modules/PathPlanner/socialplanner.cpp \
+    modules/ExceptionHandling/exceptionhandler.cpp \
+    modules/PathPlanner/heuristic.cpp
 INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     /usr/local/Trolltech/Qt-4.2.2/include/QtGui \
     /usr/local/high/include \
@@ -213,6 +219,7 @@ INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     modules/Rendering \
     modules/Sensors \
     modules/TasksManager \
+    modules/ExceptionHandling \
     gui \
     modules/PomdpCore \
     modules/HumanRobotInterface \
@@ -221,10 +228,12 @@ FORMS += gui/hritab.ui
 RESOURCES = resources/icons.qrc
 QT += opengl
 QMAKE_CFLAGS_RELEASE += -g \
-    -O3 \
+#    -O3 \
+    -O0 \
     -o
 QMAKE_CXXFLAGS_RELEASE += -g \
-    -O3 \
+#    -O3 \
+    -O0 \
     -o \
     -ffast-math \
     -march=pentium-m \

@@ -196,7 +196,9 @@ void MapViewer::renderLaser()
 	{
 		if(!playGround->robotPlatforms[i]->commManager->connected)
 			continue;		
-	    LaserScan laserScan = playGround->robotPlatforms[i]->commManager->getLaserScan();
+	    LaserScan laserScan ;
+	    //laserScan =playGround->robotPlatforms[i]->commManager->getLaserScan();
+	    playGround->robotPlatforms[i]->commManager->getLaserScan(laserScan);
 	    //Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;
 	    Pose loc = robotsLocation[i];
 
@@ -240,9 +242,13 @@ void MapViewer::renderSearchTree()
 	for(int i=0;i<1;i++)
 	{
 		SearchSpaceNode * temp,*child;
-		if(!playGround->robotPlatforms[i]->planningManager->renderTree)
+		//if(!playGround->robotPlatforms[i]->planningManager->renderTree)
+		//	continue;
+		//temp =  playGround->robotPlatforms[i]->planningManager->pathPlanner->search_space;
+		if(playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner)
+			temp =  playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->search_space;
+		else
 			continue;
-		temp =  playGround->robotPlatforms[i]->planningManager->pathPlanner->search_space;
 	    glPushMatrix();
 	    glColor4f(1,0,0,0.5);
 		while(temp)
@@ -276,7 +282,12 @@ void MapViewer::renderExpandedTree()
 	{
 		vector <Tree> tree;
 		QPointF child;
-		tree =  playGround->robotPlatforms[i]->planningManager->pathPlanner->tree;
+		//tree =  playGround->robotPlatforms[i]->planningManager->pathPlanner->tree;
+		if(playGround->robotPlatforms[i]->intentionRecognizer)
+			if(playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner)
+				tree =  playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->tree;
+			else
+				continue;		
 	    glPushMatrix();
 	    glColor4f(0,1,0,0.5);
 		for(unsigned int k=0;k<tree.size();k++)
@@ -663,7 +674,21 @@ void MapViewer::renderSpatialStates()
 	for(int i=0; i < playGround->mapManager->mapSkeleton.verticies.size() ;i++)
 	{
 		int d;
-	    glPushMatrix();
+		/*
+		glLineWidth(2);
+	    for(int k =0; k<playGround->mapManager->mapSkeleton.verticies[i].connections.size();k++)
+	    {
+	    	QPointF s = playGround->mapManager->mapSkeleton.verticies[i].location;
+	    	int index = playGround->mapManager->mapSkeleton.verticies[i].connections[k].nodeIndex;
+	    	QPointF e = playGround->mapManager->mapSkeleton.verticies[index].location;
+			glBegin(GL_LINES);
+				glVertex2f(s.x(),s.y());
+				glVertex2f(e.x(),e.y());   					
+			glEnd();	    	
+	    }
+	    glLineWidth(1);
+	    */
+		glPushMatrix();
 	    glTranslated(playGround->mapManager->mapSkeleton.verticies[i].location.x(),playGround->mapManager->mapSkeleton.verticies[i].location.y(),0);
 	    glShadeModel(GL_FLAT);
 	    if(i==playGround->mapManager->mapSkeleton.getCurrentSpatialState(l))
@@ -684,7 +709,7 @@ void MapViewer::renderSpatialStates()
 	    else
 	    	glColor4f(0.33,0.33,0.33,0.5);
 		glRectf(-0.2f,0.2f, 0.2f, -0.2f);
-		glPopMatrix();
+	    glPopMatrix();
 	}
 
 }
@@ -894,7 +919,7 @@ void MapViewer::paintGL()
 		setRobotsLocation();
 	    renderSpatialStates();
 	    renderAction();
-//		renderExpandedTree();
+		renderExpandedTree();
 //		renderSearchTree();
 	}
     glCallList(mapList);

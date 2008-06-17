@@ -28,7 +28,7 @@
 #include <QBitArray>
 #include <QVector>
 #include <QImage>
-//#include <QList>
+#include <QString>
 #include <math.h>
 #include "llist.h"
 #include "node.h"
@@ -36,6 +36,7 @@
 #include "robot.h"
 #include "searchspace.h"
 #include "interfaceprovider.h"
+#include "heuristic.h"
 
 enum{METRIC,PIXEL};
 namespace CasPlanner
@@ -45,14 +46,13 @@ class Astar: public SearchSpace
 {
 	private:
 		void   findRoot();
-		double gCost(Node *n);
-		double hCost(Node *n);
 		Node  *makeChildrenNodes(Node *parent) ;
 	public:
-		Astar(Robot *,double dG);
+		Astar(Robot *,double dG, QString heuristicType);
 		Astar();
 		long int MAXNODES;
 		double	distGoal;
+		Heuristic *heuristic;
 		Map    * map;
 		Pose start,end;
 		Robot *robot;
