@@ -25,17 +25,13 @@ namespace CasPlanner
 
 Heuristic *  Heuristic::factory(QString type) throw(ExceptionHandler)
 {
-	cout<<"HERE 1\n"; fflush(stdout);
 	if (type == "Social")
 	{
-		cout<<"HERE 2\n"; fflush(stdout);
 		return new SocialHeuristic;
 	}
 	if (type == "Distance")
 	{
-		cout<<"HERE 3\n"; fflush(stdout);
-		return new DistanceHeuristic;
-		cout<<"HERE 4\n"; fflush(stdout);		
+		return new DistanceHeuristic;	
 	}
 	throw (ExceptionHandler("Bad Heuristic Type"));
 }

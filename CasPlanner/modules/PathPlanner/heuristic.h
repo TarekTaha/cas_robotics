@@ -53,12 +53,12 @@ public:
 class DistanceHeuristic : public Heuristic
 {
 public:
-	DistanceHeuristic(){cout<<"constructor"; fflush(stdout);};
+	DistanceHeuristic(){};
 	friend class Heuristic;
 public:
 	double gCost(Node *n);
 	double hCost(Node *n, Pose end);
-	~DistanceHeuristic(){cout<<"Destructor"; fflush(stdout);};
+	~DistanceHeuristic(){};
 };
 
 }

@@ -28,7 +28,6 @@ class SocialPlanner : public Astar
 		void setMapSkeleton(MapSkeleton *mapSke);
 		SocialPlanner();
 		SocialPlanner(Map *m, Robot *r,MapSkeleton *mapS);
-		SocialPlanner(MapSkeleton *mapS);
    	 	~SocialPlanner();
 
 };

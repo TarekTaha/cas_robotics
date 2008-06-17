@@ -59,6 +59,18 @@ Astar::Astar():
 
 Astar::~Astar()
 {
+	if(heuristic)
+		delete heuristic;
+	if(openList)
+	{
+		openList->Free();
+		delete openList;
+	}
+	if(closedList)
+	{
+		closedList->Free();
+		delete closedList;
+	}
 }
 
 // transfers from pixel coordinate to the main coordinate system
@@ -324,44 +336,7 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
   	qDebug("	--->>>No Path Found<<<---");
   	return NULL; // No Path Found
 };
-/*
-// define the g function as parent plus 1 step
-double Astar:: gCost(Node *n) 
-{
-	double cost;
-	if(n == NULL || n->parent==NULL)
-		return 0.0;
-	cost = n->parent->g_value + Dist(n->pose.p,n->parent->pose.p);
-	return cost;
-};
-*/
-//define the h function as the Euclidean distance to the goal + turning penalty
-/*
-double Astar::hCost(Node *n) 
-{
-	double h=0,angle_cost=0,obstacle_penalty=0,reverse_penalty=0,delta_d=0;
-	if(n == NULL)
-		return(0);
-	// Using the Euclidean distance
-	h = Dist(end.p,n->pose.p);
-	//h = 0;
-	if (n->parent != NULL) // Adding the Angle cost, we have to uniform the angle representation to the +ve rep or we well get a non sense result
-	{
-		double a,b;
-		a = n->pose.phi;
-		b = n->parent->pose.phi;
-		angle_cost = fabs(anglediffs(a,b)); // in radians
-		delta_d = Dist(n->pose.p,n->parent->pose.p);
-	}
-	obstacle_penalty = n->nearest_obstacle;
-	if(n->direction == BACKWARD)
-		reverse_penalty = delta_d;
-	
-	// 0.555 is the AXLE Length 
-	return ( h*(1 + reverse_penalty ) + 0.555 * angle_cost + obstacle_penalty*delta_d);
-//	return ( 1 + reverse_penalty )*( h + delta_d + 0.555 * angle_cost + 0.555*angle_cost*obstacle_penalty*delta_d );
-};
-*/
+
 bool Astar :: goalReached (Node *n) 
 {
 	double angle_diff, delta_d;

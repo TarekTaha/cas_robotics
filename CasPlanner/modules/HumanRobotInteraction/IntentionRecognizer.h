@@ -65,7 +65,7 @@ public:
 	QVector <double> destBelief;	
 	Pose currentState,currentPose,goToState,oldGoToState;
 	ActivityLogger *activityLogger;
-	//CasPlanner::SocialPlanner *socialPlanner;
+	CasPlanner::SocialPlanner *socialPlanner;
 	int  lastObs,observation,action,spatialState,oldSpatialState;
 private:
 	dvector initialBeliefD;
