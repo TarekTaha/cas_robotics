@@ -23,15 +23,12 @@
 namespace CasPlanner
 {
 
-SocialPlanner::SocialPlanner(Map *m, Robot *r,MapSkeleton *mapS):mapSkeleton(mapS)
+SocialPlanner::SocialPlanner(Map *m, Robot *r,MapSkeleton *mapS):Astar(r,0.2,"Social"),mapSkeleton(mapS)
 {
 	map = m;
 	robot =  r;
 }
-SocialPlanner::SocialPlanner(MapSkeleton *mapS):mapSkeleton(mapS)
-{
 
-}
 SocialPlanner::SocialPlanner():mapSkeleton(NULL)
 {
 

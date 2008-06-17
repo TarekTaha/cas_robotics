@@ -27,7 +27,7 @@ beliefInitialized(false),
 destBelief(playG->mapManager->mapSkeleton.numDestinations,0),
 goToState(-1,-1,-1),
 oldGoToState(0,0,0),
-//socialPlanner(NULL),
+socialPlanner(NULL),
 lastObs(4),
 observation(4),
 action(4),
@@ -48,31 +48,29 @@ path(NULL)
 	numStates = playGround->mapManager->mapSkeleton.numStates;
 	numDestinations = playGround->mapManager->mapSkeleton.numDestinations;
 	activityLogger = new ActivityLogger;
-	/*
+
 	socialPlanner = new SocialPlanner(playGround->mapManager->globalMap,robotManager->robot,&playGround->mapManager->mapSkeleton);
 	socialPlanner->buildSpace();
 	socialPlanner->showConnections();
-
 	Pose s(playGround->mapManager->mapSkeleton.verticies[37].location.x(),playGround->mapManager->mapSkeleton.verticies[37].location.y(),0);
 	socialPlanner->setStart(s);
 	Pose e(playGround->mapManager->mapSkeleton.verticies[0].location.x(),playGround->mapManager->mapSkeleton.verticies[0].location.y(),DTOR(90));
 	socialPlanner->setEnd(e);
 	Node * retval = socialPlanner->startSearch(s,e,METRIC);
-	if(retval)
-	{
-		socialPlanner->printNodeList();
-	}
-	else
-	{
-		qDebug("No path Found");
-	}
-	 */
+//	if(retval)
+//	{
+//		socialPlanner->printNodeList();
+//	}
+//	else
+//	{
+//		qDebug("No path Found");
+//	}
 }
 
 IntentionRecognizer::~IntentionRecognizer()
 {
-//	if(socialPlanner)
-//		delete socialPlanner;
+	if(socialPlanner)
+		delete socialPlanner;
 	delete activityLogger;
 	fclose(file);
 	fclose(odom);
