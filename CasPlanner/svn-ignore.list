@@ -1,0 +1,11 @@
+.project
+.settings
+.tmp
+.project
+.cdtproject
+.cproject
+.checkstyle
+/StageSim/.player
+/modules/PomdpModels/*
+CasPlanner
+Makefile
