@@ -289,16 +289,18 @@ void CommManager::provideLocation(Pose &location)
 	location = getLocation();
 }
 
-Map CommManager::provideMap()
+void CommManager::provideMap(Map &map)
 {
 	if(player)
-		return player->provideMap();
+		map = player->provideMap();
+
 }
 
-LaserScan CommManager::getLaserScan()
+void CommManager::getLaserScan(LaserScan &laserScan)
 {
 	if(player)
-  		return player->getLaserScan();
+		laserScan = player->getLaserScan();
+
 }
 
 int CommManager::readConfigs( ConfigFile *cf,int secId)
@@ -310,6 +312,7 @@ int CommManager::readConfigs( ConfigFile *cf,int secId)
   	speechEnabled   = (bool) cf->ReadInt   (secId, "speechEnabled", 0);
 	playerIp =               cf->ReadString(secId, "playerIp", "127.0.0.1");
 	playerPort =             cf->ReadInt   (secId, "playerPort", 6665);
+	joyStickId =             cf->ReadInt   (secId, "joyStick", -1);
 	cnt = cf->GetTupleCount(secId,"lasers");
 	if (cnt)
 	{
@@ -427,7 +430,11 @@ int CommManager::start()
   	{  
 		logMsg.append(QString("\n\t\t	- VFH Navigator."));  			
   		player->enableSpeech(0);
-  	}  	
+  	}
+	if(joyStickId!=-1)
+	{
+		player->enableJoyStick(joyStickId);		
+	}
   	if(player)
   	{
  		if(player->isRunning())

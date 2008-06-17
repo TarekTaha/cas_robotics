@@ -38,6 +38,7 @@
 #include "BoundPairExec.h"
 #include "zmdpMainConfig.h"
 #include "activityLogger.h"
+#include "socialplanner.h"
 
 #include "Pomdp.h"
 using namespace std;
@@ -64,6 +65,7 @@ public:
 	QVector <double> destBelief;	
 	Pose currentState,currentPose,goToState,oldGoToState;
 	ActivityLogger *activityLogger;
+	//CasPlanner::SocialPlanner *socialPlanner;
 	int  lastObs,observation,action,spatialState,oldSpatialState;
 private:
 	dvector initialBeliefD;

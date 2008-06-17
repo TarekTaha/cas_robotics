@@ -30,14 +30,10 @@ int NodeEquality(Node *a, Node *b)
 	return 0;
 }
 
-PathPlanner :: PathPlanner()
-{
-	
-};
 
 PathPlanner::PathPlanner(Robot *rob,double dG,double bridge_len,
 			double bridge_r,double reg_g,double obst_exp,double conn_rad,double obst_pen,double bridge_conn_rad_in):
-			Astar(rob,dG),
+			Astar(rob,dG,"Distance"),
 			map_initialized(false),
 			obstacle_radius(rob->expansionRadius),
 			bridge_length(bridge_len),

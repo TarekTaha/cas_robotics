@@ -867,7 +867,8 @@ void Navigator::run()
 		 */
 		Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
 //		Pose goal;
-		laserScan = robotManager->commManager->getLaserScan();
+		//laserScan = robotManager->commManager->getLaserScan();
+		robotManager->commManager->getLaserScan(laserScan);
 		if(!getGoal(laserScan,goal))
 		{
 //			robotManager->commManager->setSpeed(0);
@@ -942,7 +943,8 @@ void Navigator::run()
 						continue;
 					else
 						lastWayPoint = wayPoint;
-					laserScan = robotManager->commManager->getLaserScan();
+					//laserScan = robotManager->commManager->getLaserScan();
+					robotManager->commManager->getLaserScan(laserScan);
 					if(!getGoal(laserScan,goal))
 					{
 						goal.p.setX(SegmentEnd.x());

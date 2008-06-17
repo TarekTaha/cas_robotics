@@ -26,6 +26,7 @@ PlayerInterface::PlayerInterface(QString host, int port):
     playerPort(port),   
     pc(0), 
     devices(NULL),
+    joyStickEnabled(false),
     ptzEnabled(false),
     ctrEnabled(false),
     mapEnabled(false),
@@ -461,6 +462,12 @@ void PlayerInterface::enableControl(int posId)
     positionId = posId;
 }
 
+void PlayerInterface::enableJoyStick(int joyID)
+{
+    joyStickEnabled = true;
+    joyStickId = joyID;
+}
+
 void PlayerInterface::enablePtz(int in_ptzId)
 {
     ptzEnabled=true;
@@ -684,12 +691,17 @@ void PlayerInterface::connectDevices()
 		logMsg.append(QString("\n\t\t - Vfh Started Successfully ID:%1").arg(vfhId));	    	
     }	   
     /* This is temp until the wheelchair interface is added.*/
-    if(!wheelChairCommander)
+    if(joyStickEnabled)
     {
-//    	joyStickId = 3;
-//    	joyStick = new Position2dProxy(pc,joyStickId);
+	    if(!wheelChairCommander)
+	    {
+	    	joyStick = new Position2dProxy(pc,joyStickId);
+	    }
+	    else
+	    {
+			logMsg.append(QString("\nNo Joystick Found on ID:%1").arg(joyStickId));	    	
+	    }
     }
-    
     if(speechEnabled)
     {
     	speechP  = new SpeechProxy(pc,speechId);
@@ -722,9 +734,13 @@ void PlayerInterface::run ()
 //			if(!pc->Peek(50))
 //				continue;
 			pc->Read();
-			
+			/*
+			 * Here Goes the Accelerometer Part, it reads via bluetooth the acc xyz
+			 * and generates a turnrate and velocity.
+			 */
+/*			
 		    n95Acc.readBT();
-//		    printf("\n Accel X:%d Y:%d Z:%d",n95Acc.getX(),n95Acc.getY(),n95Acc.getZ());
+		    printf("\n Accel X:%d Y:%d Z:%d",n95Acc.getX(),n95Acc.getY(),n95Acc.getZ());
 		    double maxSpeed = 1, maxTurnRate=DTOR(50), forwardSpeed, steeringTurnRate;
 		    forwardSpeed = -1*n95Acc.getZ()/70.0*maxSpeed;
 		    steeringTurnRate =  n95Acc.getY()/70.0*maxTurnRate;
@@ -735,7 +751,7 @@ void PlayerInterface::run ()
 		    	steeringTurnRate =0;
 		    
 		    drive->SetSpeed(forwardSpeed,steeringTurnRate);
-		    
+*/	    
 		    for(int laser_indx=0; laser_indx < lasers.size(); laser_indx++)
 		    {
 		    	if (laserScan.points.size())
@@ -748,6 +764,23 @@ void PlayerInterface::run ()
 			    	laserScan.points.push_back(QPointF(lasers[laser_indx].lp->GetPoint(i).px, lasers[laser_indx].lp->GetPoint(i).py));    
 				}
 		  	}
+		    if(joyStickEnabled)
+		    {
+	            if(!wheelChairCommander)
+	            {
+		            joyAxes.setX(joyStick->GetXPos());
+		            joyAxes.setY(joyStick->GetYPos());
+	            }
+	            else
+	            {
+		            joyAxes.setX(wheelChairCommander->JoyX());
+		            joyAxes.setY(wheelChairCommander->JoyY());
+	            }
+//	            int dir = getJoyStickDir();
+//	            int globalDir = getJoyStickGlobalDir();
+//	            printf("\nDirection=%d Global Dir=%d",dir,globalDir);
+//	            cout<<"\n Current Joystick X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();		    	
+		    }
 	        if(ctrEnabled)
 	        {
 	        	player_pose_t ps;
@@ -768,20 +801,6 @@ void PlayerInterface::run ()
 	            odomLocation.p.setX(drive->GetXPos());
 	            odomLocation.p.setY(drive->GetYPos());
 	            odomLocation.phi =  drive->GetYaw();
-//	            if(!wheelChairCommander)
-//	            {
-//		            joyAxes.setX(joyStick->GetXPos());
-//		            joyAxes.setY(joyStick->GetYPos());
-//	            }
-//	            else
-//	            {
-//		            joyAxes.setX(wheelChairCommander->JoyX());
-//		            joyAxes.setY(wheelChairCommander->JoyY());
-//	            }
-//	            int dir = getJoyStickDir();
-//	            int globalDir = getJoyStickGlobalDir();
-//	            printf("\nDirection=%d Global Dir=%d",dir,globalDir);
-//	            cout<<"\n Current Joystick X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();
 //				cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<RTOD(odom_location.phi);	            
 	        }
 			if(ptzEnabled)

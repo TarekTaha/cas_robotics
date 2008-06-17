@@ -56,7 +56,7 @@ class PathPlanner : public Astar
 		bool   saveSpace2File(const char *filename);
 		PathPlanner(Robot *,double dG,double bridge_len,
 					double bridge_res,double regGridDist,double obst_exp,double reg_grid_conn_rad,double obst_pen,double bridge_conn_rad);
-		PathPlanner();
+		//PathPlanner();
 		~PathPlanner();
 };
 

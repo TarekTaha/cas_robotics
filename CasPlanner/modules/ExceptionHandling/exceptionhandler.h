@@ -18,54 +18,19 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
-#ifndef INTERFACEPROVIDER_H
-#define INTERFACEPROVIDER_H
+#ifndef EXCEPTIONHANDLER_H_
+#define EXCEPTIONHANDLER_H_
 
-#include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
+#include <exception>
+using namespace std;
 
-#include <QImage>
-#include <QVector> 
-#include <QPointF>
-#include <QBitArray>
-#include <math.h>
-#include <QMetaType>
-#include "utils.h"
-#include "map.h"
-#include "playerinterface.h"
-//"Design by contract"
-
-using namespace PlayerCc;
-
-class MapProvider
+class ExceptionHandler : public exception
 {
-    public:
-        virtual void provideMap(Map&)=0; 
-        virtual ~MapProvider(){};
-};
-
-class LaserProvider 
-{
-    public:
-        virtual void getLaserScan(LaserScan&)=0; 
-        virtual ~LaserProvider(){}; 
-};
-
-class SpeedProvider 
-{
-    public:
-        virtual void provideSpeed(double &speed, double &turnRate)=0;
-        virtual ~SpeedProvider(){};
-}; 
-
-class LocationProvider
-{
+	private:
+		char * eMsg;
 	public:
-		virtual void provideLocation(Pose &location)=0;
-		virtual ~LocationProvider(){};
+		ExceptionHandler(char * eMsg);
+		virtual const char* what() const throw();
 };
 
-#endif
-
-
-
+#endif /*EXCEPTIONHANDLER_H_*/

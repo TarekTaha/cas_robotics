@@ -25,6 +25,10 @@
 #include <QStringList>
 #include <QVector>
 #include "configfile.h"
+/* 
+ * This class specifies the must have operation that every
+ * robot should have in their comminication management.
+ */
 class Comms: public QObject 
 {
     Q_OBJECT 
@@ -48,7 +52,7 @@ class Comms: public QObject
 		bool startConnected,activateControl,ptzEnabled,occMapEnabled,localizerEnabled,laserEnabled
 			 ,vfhEnabled,speechEnabled;
     	QString name,playerIp; 
-        int playerPort,positionControlId,ptzId,mapId,localizerId,vfhId,speechId;
+        int playerPort,positionControlId,ptzId,mapId,localizerId,vfhId,speechId,joyStickId;
 };
 
 #endif 

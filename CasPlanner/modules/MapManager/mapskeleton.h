@@ -41,12 +41,21 @@
  * concept. But the next step will be to be able to automatically generate
  * the Voronoi Structure of the Map
  */
- 
+
+enum {U,D,R,L};
+
+typedef struct _connection
+{
+	unsigned int nodeIndex; 
+	unsigned int direction;
+} Connection;
+
 class Vertex
 {
 	public:	
 		QPointF location;
 		QVector <Vertex> neighbours;
+		QVector <Connection> connections;
 		double prob;
 		int visits;
 		Vertex()
@@ -70,6 +79,11 @@ class Vertex
 			location.setX(x);
 			location.setY(y);
 		};
+		void connect(unsigned int indx,unsigned int direction )
+		{
+			Connection con; con.direction = direction; con.nodeIndex = indx;
+			this->connections.push_back(con);
+		};
 		QPointF getLocation()
 		{
 			return this->location;
@@ -83,7 +97,7 @@ class Vertex
 };
 
 class MapSkeleton
-{ 
+{
 	public:
 		MapSkeleton();
 		virtual ~MapSkeleton();
