@@ -30,32 +30,31 @@ Astar::Astar(Robot *rob,double dG,QString heuristicType):
 	root(NULL),
 	test(NULL),
 	path(NULL),
-	p(NULL)
+	p(NULL),
+	openList(NULL),
+	closedList(NULL)
 {
 	try
 	{
-		//heuristic = Heuristic::factory(heuristicType);
-		heuristic = new DistanceHeuristic;
+		heuristic = Heuristic::factory(heuristicType);
 	}
 	catch(ExceptionHandler e)
 	{
 		cout<<e.what()<<endl;
 	}
-	openList   = new LList;
-	closedList = new LList; 
 }
 
 Astar::Astar():
 	distGoal(0.01),
-	//heuristic(NULL),
+	heuristic(NULL),
 	map(NULL),
 	root(NULL),
 	test(NULL),
 	path(NULL),
-	p(NULL)
+	p(NULL),
+	openList(NULL),
+	closedList(NULL)	
 {
-	openList   = new LList;
-	closedList = new LList; 
 }
 
 Astar::~Astar()
@@ -123,7 +122,7 @@ void Astar::findRoot()
 	root->next = NULL;
 	root->prev = NULL;
 	root->g_value = 0;;
-	root->h_value = //heuristic->gCost(root);
+	root->h_value = heuristic->gCost(root);
 	root->f_value = root->g_value + root->h_value;
 	root->id = 0;
 	root->depth = 0;
@@ -242,8 +241,8 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
   			//qDebug("ID is:%d",ID);
   			curChild->next = NULL;
   			curChild->prev = NULL;
-  			curChild->g_value = //heuristic->gCost(curChild);
-      		curChild->h_value = //heuristic->hCost(curChild,end);
+  			curChild->g_value = heuristic->gCost(curChild);
+      		curChild->h_value = heuristic->hCost(curChild,end);
   			curChild->f_value = curChild->g_value + curChild->h_value;
 			Node * p;
 			// check if the child is already in the open list

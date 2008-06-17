@@ -90,8 +90,8 @@ HEADERS += modules/CommManager/commmanager.h \
     modules/PomdpCore/zmdpMainConfig.h \
     modules/PomdpCore/embedFiles.h \
     modules/MapManager/mapskeleton.h \
-    modules/HumanRobotInterface/IntentionRecognizer.h \
-    modules/HumanRobotInterface/activityLogger.h \
+    modules/HumanRobotInteraction/IntentionRecognizer.h \
+    modules/HumanRobotInteraction/activityLogger.h \
     modules/Rendering/FreeType.h \
     modules/CommManager/accelerometer.h \
     modules/PathPlanner/socialplanner.h \
@@ -184,8 +184,8 @@ SOURCES += modules/CommManager/commmanager.cpp \
     modules/PomdpCore/BlindLBInitializer.cc \
     modules/MapManager/mapskeleton.cpp \
     modules/MapManager/map.cpp \
-    modules/HumanRobotInterface/IntentionRecognizer.cpp \
-    modules/HumanRobotInterface/activityLogger.cpp \
+    modules/HumanRobotInteraction/IntentionRecognizer.cpp \
+    modules/HumanRobotInteraction/activityLogger.cpp \
     modules/Controller/wheelchairproxy.cpp \
     modules/Rendering/FreeType.cpp \
     modules/CommManager/accelerometer.cpp \
@@ -222,7 +222,7 @@ INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     modules/ExceptionHandling \
     gui \
     modules/PomdpCore \
-    modules/HumanRobotInterface \
+    modules/HumanRobotInteraction \
     /usr/include/freetype2
 FORMS += gui/hritab.ui
 RESOURCES = resources/icons.qrc
