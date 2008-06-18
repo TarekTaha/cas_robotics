@@ -155,9 +155,9 @@ void VoronoiPathPlanner::showConnections()
 		for(int i=0; i < temp->children.size();i++)
 		{
 			loc1 = temp->location;
-			convert2Pix(&loc1);
+			map->convert2Pix(&loc1);
 			loc2 = temp->children[i]->location;
-			convert2Pix(&loc2);
+			map->convert2Pix(&loc2);
 			m++;
 		}
 		temp = temp->next;
@@ -223,7 +223,7 @@ void VoronoiPathPlanner::saveSearchSpace()
 	while (temp != NULL)
 	{
 		p = temp->location;
-		this->convert2Pix(&p);
+		map->convert2Pix(&p);
 		this->map->grid[int(p.x())][(int)p.y()]= true ;
 		temp =temp->next;
 	}

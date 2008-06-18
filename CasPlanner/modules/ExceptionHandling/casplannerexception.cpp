@@ -18,19 +18,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
-#ifndef EXCEPTIONHANDLER_H_
-#define EXCEPTIONHANDLER_H_
+#include "casplannerexception.h"
 
-#include <exception>
-using namespace std;
-
-class ExceptionHandler : public exception
+CasPlannerException::CasPlannerException(char * eMsg)
 {
-	private:
-		char * eMsg;
-	public:
-		ExceptionHandler(char * eMsg);
-		virtual const char* what() const throw();
-};
+	this->eMsg = eMsg;
+}
 
-#endif /*EXCEPTIONHANDLER_H_*/
+const char * CasPlannerException::what() const throw()
+{
+	return eMsg;
+}

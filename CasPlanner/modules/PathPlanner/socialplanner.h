@@ -11,7 +11,6 @@ namespace CasPlanner
 class SocialPlanner : public Astar
 {
 	private :
-		Map *map;
 		Robot *robot;
 		MapSkeleton *mapSkeleton;
 	public :

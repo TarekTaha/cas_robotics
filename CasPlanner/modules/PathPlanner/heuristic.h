@@ -22,7 +22,7 @@
 #define HEURISTICT_H_
 
 #include <QString>
-#include "exceptionhandler.h"
+#include "casplannerexception.h"
 #include "node.h"
 
 using namespace std;
@@ -36,7 +36,7 @@ public:
 	virtual ~Heuristic(){};
 	virtual double gCost(Node *)=0;
 	virtual double hCost(Node *,Pose )=0;;
-	static Heuristic * factory(QString type) throw(ExceptionHandler);
+	static Heuristic * factory(QString type) throw(CasPlannerException);
 };
 
 class SocialHeuristic : public Heuristic

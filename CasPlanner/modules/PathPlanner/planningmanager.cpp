@@ -309,26 +309,14 @@ int PlanningManager::setupPlanner()
 		logMsg.append(QString("\n\t\t\t Connection Radius = %1").arg(reg_grid_conn_rad));
 		logMsg.append(QString("\n\t\t\t Obstacle Penalty = %1").arg(obst_pen));
 																	
-//		qDebug("-> Starting Planner."); 
-//		qDebug("\tPlanning Parameters:"); 
-//    	qDebug("\t\t\t Pixel Resolution = %f",pixel_res); 
-//    	qDebug("\t\t\t Distance to Goal = %f",dist_goal); 
-//    	qDebug("\t\t\t Bridge Test Lenght = %f",bridge_len); 
-//    	qDebug("\t\t\t Bridge Test Res = %f",bridge_res); 
-//    	qDebug("\t\t\t Reg Grid Res  = %f",reg_grid); 
-//    	qDebug("\t\t\t Obstacle Expansion Radius = %f",obst_exp);         
-//    	qDebug("\t\t\t Connection Radius = %f",conn_rad);         
-//    	qDebug("\t\t\t Obstacle Penalty = %f",obst_pen);	
 		pathPlanner = new PathPlanner(robotManager->robot,
 									  dist_goal,
 									  bridge_len,
 									  bridge_res,
 									  reg_grid,
-									  obst_exp,
 									  reg_grid_conn_rad,
 									  obst_pen,
 									  bridge_conn_rad);
-//		qDebug("->Planner Started.");
 		logMsg.append("\n->Planner Started.");	
 		emit addMsg(0,INFO,logMsg);	
 	}

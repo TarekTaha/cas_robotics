@@ -95,7 +95,7 @@ HEADERS += modules/CommManager/commmanager.h \
     modules/Rendering/FreeType.h \
     modules/CommManager/accelerometer.h \
     modules/PathPlanner/socialplanner.h \
-    modules/ExceptionHandling/exceptionhandler.h \
+    modules/ExceptionHandling/casplannerexception.h \
     modules/PathPlanner/heuristic.h
 SOURCES += modules/CommManager/commmanager.cpp \
     modules/CommonTools/bandmat.cpp \
@@ -190,7 +190,7 @@ SOURCES += modules/CommManager/commmanager.cpp \
     modules/Rendering/FreeType.cpp \
     modules/CommManager/accelerometer.cpp \
     modules/PathPlanner/socialplanner.cpp \
-    modules/ExceptionHandling/exceptionhandler.cpp \
+    modules/ExceptionHandling/casplannerexception.cpp \
     modules/PathPlanner/heuristic.cpp
 INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     /usr/local/Trolltech/Qt-4.2.2/include/QtGui \
