@@ -320,7 +320,7 @@ void Navigator::generateLocalMap(LaserScan laserScan, Pose rob_location)
 	dist = sqrt(pow(laserScan.laserPose.p.x(),2)+pow(laserScan.laserPose.p.y(),2)); 
 	num_pixels = (dist + farest_laser_dist + 10)/global_planner->pathPlanner->map->mapRes;
 
- 	global_planner->pathPlanner->convert2Pix(&rob_location.p);
+	mapManager.globalMap->convert2Pix(&rob_location.p);
 
 	grid_start.setX(rob_location.p.x() - num_pixels);
 	if(grid_start.x() < 0) 
@@ -338,7 +338,7 @@ void Navigator::generateLocalMap(LaserScan laserScan, Pose rob_location)
 				{
 					temp.setX(i);
 					temp.setY(j);
-					global_planner->pathPlanner->convertPix(&temp);
+					mapManager.globalMap->convertPix(&temp);
 					local_map.push_back(temp);
 				}
 		}

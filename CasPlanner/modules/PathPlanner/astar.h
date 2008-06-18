@@ -37,6 +37,7 @@
 #include "searchspace.h"
 #include "interfaceprovider.h"
 #include "heuristic.h"
+#include "casplannerexception.h"
 
 enum{METRIC,PIXEL};
 namespace CasPlanner
@@ -45,7 +46,7 @@ namespace CasPlanner
 class Astar: public SearchSpace
 {
 	private:
-		void   findRoot();
+		void   findRoot() throw(CasPlannerException);
 		Node  *makeChildrenNodes(Node *parent) ;
 	public:
 		Astar(Robot *,double dG, QString heuristicType);

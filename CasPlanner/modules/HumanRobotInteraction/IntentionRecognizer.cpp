@@ -57,14 +57,14 @@ path(NULL)
 	Pose e(playGround->mapManager->mapSkeleton.verticies[0].location.x(),playGround->mapManager->mapSkeleton.verticies[0].location.y(),DTOR(90));
 	socialPlanner->setEnd(e);
 	Node * retval = socialPlanner->startSearch(s,e,METRIC);
-//	if(retval)
-//	{
-//		socialPlanner->printNodeList();
-//	}
-//	else
-//	{
-//		qDebug("No path Found");
-//	}
+	if(retval)
+	{
+		socialPlanner->printNodeList();
+	}
+	else
+	{
+		qDebug("No path Found");
+	}
 }
 
 IntentionRecognizer::~IntentionRecognizer()

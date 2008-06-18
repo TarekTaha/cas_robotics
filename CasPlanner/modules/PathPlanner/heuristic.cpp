@@ -23,7 +23,7 @@
 namespace CasPlanner
 {
 
-Heuristic *  Heuristic::factory(QString type) throw(ExceptionHandler)
+Heuristic *  Heuristic::factory(QString type) throw(CasPlannerException)
 {
 	if (type == "Social")
 	{
@@ -33,7 +33,7 @@ Heuristic *  Heuristic::factory(QString type) throw(ExceptionHandler)
 	{
 		return new DistanceHeuristic;	
 	}
-	throw (ExceptionHandler("Bad Heuristic Type"));
+	throw (CasPlannerException("Bad Heuristic Type"));
 }
 
 double SocialHeuristic::gCost(Node *n)

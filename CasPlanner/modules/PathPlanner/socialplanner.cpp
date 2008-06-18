@@ -27,12 +27,13 @@ SocialPlanner::SocialPlanner(Map *m, Robot *r,MapSkeleton *mapS):Astar(r,0.2,"So
 {
 	map = m;
 	robot =  r;
-}
+};
 
 SocialPlanner::SocialPlanner():mapSkeleton(NULL)
 {
 
-}
+};
+
 SocialPlanner :: ~SocialPlanner()
 {
 	freeResources();
@@ -65,6 +66,7 @@ void SocialPlanner::setEnd(Pose end)
 {
 	this->end= end;
 };
+
 bool SocialPlanner::readSpaceFromFile(const char *filename)
 {
   	double locationx,locationy,obstacle_cost;

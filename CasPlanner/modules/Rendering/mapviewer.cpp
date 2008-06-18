@@ -239,7 +239,6 @@ void MapViewer::renderLaser()
 
 void MapViewer::renderSearchTree()
 {
-	/*
 	for(int i=0;i<1;i++)
 	{
 		SearchSpaceNode * temp,*child;
@@ -276,11 +275,9 @@ void MapViewer::renderSearchTree()
 		glLineWidth(2);
 	    glPopMatrix();
 	}
-	*/
 }
 void MapViewer::renderExpandedTree()
 {
-	/*
 	for(int i=0;i<1;i++)
 	{
 		vector <Tree> tree;
@@ -307,7 +304,6 @@ void MapViewer::renderExpandedTree()
 		}
 	    glPopMatrix();
 	}
-	*/
 }
 void MapViewer::renderRobot()
 {

@@ -22,17 +22,8 @@
 namespace CasPlanner
 {
 
-// Test for node equality
-int NodeEquality(Node *a, Node *b) 
-{
-	if (a->pose.p.x() == b->pose.p.x() && a->pose.p.y() == b->pose.p.y())
-		return 1;
-	return 0;
-}
-
-
 PathPlanner::PathPlanner(Robot *rob,double dG,double bridge_len,
-			double bridge_r,double reg_g,double obst_exp,double conn_rad,double obst_pen,double bridge_conn_rad_in):
+			double bridge_r,double reg_g,double conn_rad,double obst_pen,double bridge_conn_rad_in):
 			Astar(rob,dG,"Distance"),
 			map_initialized(false),
 			obstacle_radius(rob->expansionRadius),
@@ -258,7 +249,7 @@ void PathPlanner::generateRegularGrid()
 					temp = new SearchSpaceNode;
 					temp->location.setX(i);
 					temp->location.setY(j);
-					this->convertPix(&temp->location);
+					map->convertPix(&temp->location);
 					temp->parent   = NULL;
 					temp->next     = NULL;
 					temp->type     = RegGridNode;
@@ -268,7 +259,7 @@ void PathPlanner::generateRegularGrid()
 				{
 					p.setX(i);
 					p.setY(j);
-					this->convertPix(&p);
+					map->convertPix(&p);
 					if (checkShortestDistance(p.x(),p.y(),regGridDist))
 					{
 						temp = new SearchSpaceNode;
@@ -323,7 +314,7 @@ void PathPlanner::bridgeTest()
 					{
 						p.setX(i);
 						p.setY(j);
-						this->convertPix(&p);
+						map->convertPix(&p);
 						if (search_space == NULL ) // Constructing the ROOT NODE
 						{
 							temp = new SearchSpaceNode;
@@ -398,7 +389,7 @@ void PathPlanner::addCostToNodes()
 		//fflush(stdout);
 		point.setX(S->location.x());
 		point.setY(S->location.y());
-		this->convert2Pix(&point);
+		map->convert2Pix(&point);
 		nearest_obstacle = 0;
 		for(radius = (int)number_of_pixels ; radius >0 ; radius --)
 			{
@@ -496,9 +487,9 @@ void PathPlanner::showConnections()
 		for(int i=0; i < temp->children.size();i++)
 		{
 			loc1 = temp->location;
-			convert2Pix(&loc1);
+			map->convert2Pix(&loc1);
 			loc2 = temp->children[i]->location;
-			convert2Pix(&loc2);
+			map->convert2Pix(&loc2);
 			m++;
 		}
 		temp = temp->next;
@@ -515,7 +506,7 @@ void PathPlanner::saveSearchSpace()
 	while (temp != NULL)
 	{
 		p = temp->location;
-		this->convert2Pix(&p);
+		map->convert2Pix(&p);
 		this->map->grid[int(p.x())][(int)p.y()]= true ;
 		temp =temp->next;
 	}
@@ -527,7 +518,7 @@ void PathPlanner::updateMap(Map *mapPatch)
 	for(int i=0;i<mapPatch->pointCloud.size();i++)
 	{
 		p = mapPatch->pointCloud[i];
-		this->convert2Pix(&p);		
+		map->convert2Pix(&p);		
 		if(this->map->grid[int(p.x())][(int)p.y()] == false)
 			this->map->grid[int(p.x())][(int)p.y()]= false;
 	}
@@ -535,7 +526,7 @@ void PathPlanner::updateMap(Map *mapPatch)
 	while (temp != NULL)
 	{
 		p = temp->location;
-		this->convert2Pix(&p);
+		map->convert2Pix(&p);
 		this->map->grid[int(p.x())][(int)p.y()]= true ;
 		temp =temp->next;
 	}

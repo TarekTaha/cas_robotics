@@ -38,7 +38,7 @@ Astar::Astar(Robot *rob,double dG,QString heuristicType):
 	{
 		heuristic = Heuristic::factory(heuristicType);
 	}
-	catch(ExceptionHandler e)
+	catch(CasPlannerException e)
 	{
 		cout<<e.what()<<endl;
 	}
@@ -73,20 +73,6 @@ Astar::~Astar()
 	}
 }
 
-// transfers from pixel coordinate to the main coordinate system
-void Astar :: convertPix(QPointF  *p) 
-{
-	p->setX( p->x()*map->mapRes - map->mapRes*map->center.x());
-	p->setY(-p->y()*map->mapRes + map->mapRes*map->center.y());
-};
-
-// transfers from main coordinate to the pixel coordinate system
-void Astar :: convert2Pix(QPointF *p)
-{
-	p->setX(( p->x() + map->mapRes*map->center.x())/map->mapRes);
-	p->setY((-p->y() + map->mapRes*map->center.y())/map->mapRes);
-}
-
 // Tests for whether a node is in an obstacle or not
 int Astar :: inObstacle(QPointF P, double theta)
 {
@@ -98,7 +84,7 @@ int Astar :: inObstacle(QPointF P, double theta)
 		det_point.setX((robot->check_points[i].x()*cos(theta) - robot->check_points[i].y()*sin(theta) + P.x()));
 		det_point.setY((robot->check_points[i].x()*sin(theta) + robot->check_points[i].y()*cos(theta) + P.y()));
 		
-		this->convert2Pix(&det_point);
+		map->convert2Pix(&det_point);
 		m = (int)(round(det_point.x()));
 		n = (int)(round(det_point.y()));
 		if (m <= 0 || n <= 0 || m >=map->width || n >=this->map->height)
@@ -109,11 +95,14 @@ int Astar :: inObstacle(QPointF P, double theta)
 	return 0;
 };
 // find the nearest node to the start
-void Astar::findRoot() 
+void Astar::findRoot() throw (CasPlannerException)
 {
 	SearchSpaceNode * temp;
 	if(!this->search_space)
+	{
+		throw(CasPlannerException("No SearchSpace Defined"));
 		return;
+	}
 	double distance,shortest_distance = 100000;
 	// allocate and setup the root node
 	root = new Node;	
@@ -168,8 +157,8 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
 	}
 	if(coord == PIXEL)
 	{
-		this->convertPix(&start.p);
-		this->convertPix(&end.p);
+		map->convertPix(&start.p);
+		map->convertPix(&end.p);
 	}
 	this->start.p.setX(start.p.x());
 	this->start.p.setY(start.p.y());
@@ -473,7 +462,6 @@ Node *Astar :: makeChildrenNodes(Node *parent)
 			p->nearest_obstacle = temp->children[i]->obstacle_cost;
 			p->parent = parent;
 			p->pose.phi = angle;
-			//p->wheelchair.SetCheckPoints(this->number_of_point_to_check,this->points_to_check);
 			p->next = q;
 			q = p;
 	    	//cout<<"\n NEW CHILD ADDED";
