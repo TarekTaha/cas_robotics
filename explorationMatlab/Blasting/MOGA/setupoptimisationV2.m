@@ -21,9 +21,9 @@ optimise.mintargetdis=0.15;
 optimise.maxtargetdis=0.50;
 %this is the min distance between where stream hits target the target and
 %where we desire it to hit (plane.home_point)
-optimise.minAccepDis=0.012;
+optimise.minAccepDis=0.02;
 % This is how many max iterations for the optimisation
-optimise.iLimit=150;%used to be 1000
+optimise.iLimit=500;%used to be 1000
 % This is the acceptable value for the cost funciton minimisation
 optimise.stol = 1e-10;%used to be 1e-13
 % This is weighting for the jointmoveweight - which we want to minimise 
@@ -31,9 +31,7 @@ optimise.jointmoveweight=1;
 % and the additional info which we want to maximise
 optimise.addinfoweight=50;  
 %the max angular deflection (in rads) from requested in pose selection
-optimise.maxDeflectionError = pi/5;%used to be pi/8;
-% Min joint resolution (guess) 0.0005 of a degree
-optimise.jointresolution=1e-5;
+optimise.maxDeflectionError = pi/6;%used to be pi/8;
 
 %% Path plannning
 %How many times we try and find a path before stopping
