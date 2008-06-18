@@ -85,6 +85,10 @@ do_clear(handles);
 % this is the do_clear function sets up most stuff
 function do_clear(handles)
 
+%add path 
+% keyboard
+% addpath('./EnvironmentalData')
+
 %MANUAL CHECKS: To do before start work
 display('Make sure you have done the following');
 display('1) Checked the laser is on by running the checklaser.exe file (power cycle if necessary)');
