@@ -207,7 +207,7 @@ set(handles.stopflag_checkbox,'Value',0)
 set(handles.stopflag_checkbox,'Visible','on')
 
 %%%CHOOSE THE CURRENT TEST CASE
-current_test_case=2;
+current_test_case=2; %1 = random, 2 = Next best view search
 show_new_info_details=false;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -290,13 +290,8 @@ elseif current_test_case>1 && want_to_continue
     %now go through and get NBV and then use them to explore
     for stepcount=stepcount+1:15;
         if ~get(handles.stopflag_checkbox,'Value')
-            %which exploration method to use
-%             if current_test_case==2;NBV_beta();
-            if current_test_case==2;NBV_beta2();
-            elseif current_test_case==3; NBV();
-            end
-            %Prompt to let user know next scans are ready
-%             uiwait(msgbox('Next scans ready to be taken, press ok when ready'))
+            %do next best view exploration search
+            NBV_beta2();
 
             current_bestview=1;
             max_bestviews_togothrough=optimise.valid_max*1/4;
@@ -435,8 +430,6 @@ end
 % --- Executes on button press in find_best_view_pushbutton.
 function find_best_view_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 %  profile clear;profile on;
-% NBV();
-% NBV_beta();
 NBV_beta2();
 %  profile off;profile viewer;
 
