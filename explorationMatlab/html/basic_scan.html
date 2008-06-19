@@ -1,0 +1,479 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>basic_scan</title>
+      <meta name="generator" content="MATLAB 7.4">
+      <meta name="date" content="2008-06-19">
+      <meta name="m-file" content="basic_scan"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows. */ 
+p,h1,h2,div.content div {
+  max-width: 600px;
+  /* Hack for IE6 */
+  width: auto !important; width: 600px;
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">FUNCTION: Basic scan</a></li>
+               <li><a href="#2">Take the scan - work out end points</a></li>
+               <li><a href="#3">Find cubes which are intersected with and fill them with a point</a></li>
+               <li><a href="#4">FUNCTION: delete_scan_lines</a></li>
+            </ul>
+         </div>
+         <h2>FUNCTION: Basic scan<a name="1"></a></h2>
+         <p>Description: this traces out the lines and gets a group of points as the basic scan</p><pre class="codeinput"><span class="keyword">function</span> [points,ice_cream_bounds]=basic_scan(cube_size)
+
+<span class="comment">% global scan workspace</span>
+
+<span class="comment">%starttime=clock;</span>
+
+<span class="comment">%this will actually be x or y axis from end effector but not sure which</span>
+<span class="comment">%have to find out which axis the 5th joint rotates around</span>
+laser_pos=[0,0,0];
+bear=[1,0,1]; <span class="comment">%used to be [0,0,1]</span>
+tilt_rotate_vec=[0,1,0];
+
+<span class="comment">%max range of laser</span>
+<span class="comment">% las_range=scan.size;</span>
+las_range=0.4;
+
+<span class="comment">%Laser Angualar VARIABLES</span>
+<span class="comment">%this is the angle either side of the bearing of the center of the scan \|/</span>
+<span class="comment">% theta=scan.theta;</span>
+theta=70*pi/180;
+<span class="comment">%the increment angle used in both</span>
+<span class="comment">%theta_incr=scan.theta_incr;</span>
+<span class="comment">%this is the angle from the tilt, - is up, + is down, angle must be from -2pi to 2pi</span>
+<span class="comment">% alpha=-scan.alpha;</span>
+alpha=-20*pi/180;
+
+<span class="comment">% %SETUP WORKSPACE</span>
+
+<span class="comment">%since we want to know what is the max angle we can use HERE only so that</span>
+<span class="comment">%at the furthest point we have resolution enough to cover our cubes at</span>
+<span class="comment">%least 3 times at the point of longest laser range, so we use that angular</span>
+<span class="comment">%resolution for this simulation</span>
+theta_incr=atan((cube_size/3)/las_range);
+<span class="comment">%we have an actual min resoltion in hardware so this is the minmum</span>
+<span class="keyword">if</span> theta_incr&lt;0.36*(pi/180);
+    theta_incr=0.36*(pi/180);;
+<span class="keyword">end</span>
+</pre><h2>Take the scan - work out end points<a name="2"></a></h2>
+         <p>This is the most important vector it describes the center of the first laser pan scan we will rotate to ge the pan scan</p><pre class="codeinput">dir_vec=las_range*(bear);
+<span class="comment">%this is the vector that we will pan rotate around, it is always at origin</span>
+<span class="comment">%so we get cross product of the two vectors on the plane to get normal</span>
+<span class="comment">%pan_rotate_vec=cross(dir_vec,tilt_rotate_vec);</span>
+pan_rotate_vec=tilt_rotate_vec  * [0 -dir_vec(3) dir_vec(2);<span class="keyword">...</span>
+                                   dir_vec(3) 0 -dir_vec(1);<span class="keyword">...</span>
+                                   -dir_vec(2) dir_vec(1) 0];
+
+
+<span class="comment">%this works out through pan rotation of the ice cream cone from the origin</span>
+<span class="comment">%work out how many increments based on lasers lowest steps</span>
+increments=round(2*theta/theta_incr);
+single_pan=[];
+<span class="keyword">for</span> j=-theta:(2*theta)/(increments-1):theta
+    single_pan=[single_pan;rot_vec(dir_vec,pan_rotate_vec,j)];
+<span class="keyword">end</span>
+current_row=1;
+ice_cream_bounds=zeros([increments^2,3]);
+
+<span class="comment">%this tilt rotates and transforms to come form laser position</span>
+<span class="keyword">for</span> i=0:alpha/(increments-1):alpha
+    tilt_rot_res=rot_vec(single_pan,tilt_rotate_vec,i);
+    new_current_row=current_row+size(tilt_rot_res,1);
+    ice_cream_bounds(current_row:new_current_row-1,:)=[tilt_rot_res(:,1)+laser_pos(1),<span class="keyword">...</span>
+        tilt_rot_res(:,2)+laser_pos(2),<span class="keyword">...</span>
+        tilt_rot_res(:,3)+laser_pos(3)];
+    current_row=new_current_row;
+<span class="keyword">end</span>
+</pre><h2>Find cubes which are intersected with and fill them with a point<a name="3"></a></h2><pre class="codeinput">markedcubes=[];
+
+dist=sqrt((laser_pos(1)-ice_cream_bounds(:,1)).^2+<span class="keyword">...</span>
+          (laser_pos(2)-ice_cream_bounds(:,2)).^2+<span class="keyword">...</span>
+          (laser_pos(3)-ice_cream_bounds(:,3)).^2);
+valid_rows=find(dist);
+
+tempstarter=(ice_cream_bounds(:,1)-laser_pos(1))./(2*dist(:)/cube_size);
+
+
+<span class="keyword">for</span> i=[valid_rows]'
+
+    <span class="comment">%check each one of the segements for zero distance and fill with that planes value for inbetweens</span>
+    <span class="keyword">if</span> laser_pos(1)==ice_cream_bounds(i,1)
+        inbetweenpoint=[laser_pos(1)*ones([round((2*dist(i)/cube_size))+1,1])];
+    <span class="keyword">else</span>
+        <span class="comment">%inbetweenpoint=[(laser_pos(1):(ice_cream_bounds(i,1)-laser_pos(1))/(2*dist(i)/cube_size):ice_cream_bounds(i,1))'];</span>
+        inbetweenpoint=[(laser_pos(1):tempstarter(i):ice_cream_bounds(i,1))'];
+
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> laser_pos(2)==ice_cream_bounds(i,2)
+        inbetweenpoint=[inbetweenpoint,(laser_pos(2)*ones([size(inbetweenpoint,1),1]))];
+    <span class="keyword">else</span>
+        inbetweenpoint=[inbetweenpoint,(laser_pos(2):(ice_cream_bounds(i,2)-laser_pos(2))/(size(inbetweenpoint,1)-1):ice_cream_bounds(i,2))'];
+    <span class="keyword">end</span>
+    <span class="keyword">if</span> laser_pos(3)==ice_cream_bounds(i,3)
+        inbetweenpoint=[inbetweenpoint,(laser_pos(3)*ones([size(inbetweenpoint,1),1]))];
+    <span class="keyword">else</span>
+        inbetweenpoint=[inbetweenpoint,(laser_pos(3):(ice_cream_bounds(i,3)-laser_pos(3))/(size(inbetweenpoint,1)-1):ice_cream_bounds(i,3))'];
+    <span class="keyword">end</span>
+  <span class="comment">%end</span>
+  <span class="comment">%workspace_origin</span>
+  cubes_checked=floor(inbetweenpoint/cube_size);
+
+    <span class="comment">%Note: since this may be rotated we don't want to delete potential</span>
+    <span class="comment">%infomation (deleted the statement which did this</span>
+
+    <span class="comment">%had to add this</span>
+    markedcubes=[markedcubes;cubes_checked];
+
+    <span class="comment">%this balances out with the above adding rows to a matrix</span>
+    <span class="keyword">if</span> rand&gt;0.98
+        markedcubes=unique(markedcubes,<span class="string">'rows'</span>);
+    <span class="keyword">end</span>
+<span class="comment">%  end</span>
+<span class="keyword">end</span>
+
+<span class="comment">% final step of saving the unique points</span>
+<span class="keyword">if</span> size(markedcubes)&gt;0
+    markedcubes=unique(markedcubes,<span class="string">'rows'</span>);
+    points=markedcubes.*cube_size;
+<span class="keyword">end</span>
+
+<span class="comment">%etime(clock,starttime)</span>
+
+<span class="comment">% %% Plot the ice cream on the pyrimid cone</span>
+<span class="comment">% %This works out the bounds of the pyramid (only needed for plotting)</span>
+<span class="comment">% pan_pos_max=rot_vec(dir_vec,pan_rotate_vec,theta)+laser_pos;</span>
+<span class="comment">% pan_neg_max=rot_vec(dir_vec,pan_rotate_vec,-theta)+laser_pos;</span>
+<span class="comment">% tilt_pos_max=rot_vec(pan_pos_max-laser_pos,tilt_rotate_vec,alpha)+laser_pos;</span>
+<span class="comment">% tilt_neg_max=rot_vec(pan_neg_max-laser_pos,tilt_rotate_vec,alpha)+laser_pos;</span>
+<span class="comment">%</span>
+<span class="comment">% hold on;axis equal;</span>
+<span class="comment">% scan_line_handles=[];</span>
+<span class="comment">% for k=1:round(increments/10):increments</span>
+<span class="comment">%     %col</span>
+<span class="comment">%     col_lines=(k-1)*increments+(1:increments);</span>
+<span class="comment">%     scan_line_handles=[scan_line_handles;...</span>
+<span class="comment">%         plot3(ice_cream_bounds(col_lines,1),ice_cream_bounds(col_lines,2),ice_cream_bounds(col_lines,3));...</span>
+<span class="comment">%         plot3([ice_cream_bounds(col_lines(1),1),laser_pos(1),ice_cream_bounds(col_lines(end),1)],...</span>
+<span class="comment">%               [ice_cream_bounds(col_lines(1),2),laser_pos(2),ice_cream_bounds(col_lines(end),2)],...</span>
+<span class="comment">%               [ice_cream_bounds(col_lines(1),3),laser_pos(3),ice_cream_bounds(col_lines(end),3)])];</span>
+<span class="comment">%</span>
+<span class="comment">%      %hor</span>
+<span class="comment">%     row_lines=k:increments:size(ice_cream_bounds,1);</span>
+<span class="comment">%     scan_line_handles=[scan_line_handles;...</span>
+<span class="comment">%         plot3(ice_cream_bounds(row_lines,1),ice_cream_bounds(row_lines,2),ice_cream_bounds(row_lines,3));...</span>
+<span class="comment">%         plot3([ice_cream_bounds(row_lines(1),1),laser_pos(1),ice_cream_bounds(row_lines(end),1)],...</span>
+<span class="comment">%               [ice_cream_bounds(row_lines(1),2),laser_pos(2),ice_cream_bounds(row_lines(end),2)],...</span>
+<span class="comment">%               [ice_cream_bounds(row_lines(1),3),laser_pos(3),ice_cream_bounds(row_lines(end),3)])];</span>
+<span class="comment">%</span>
+<span class="comment">% end</span>
+<span class="comment">%</span>
+<span class="comment">% scan_point_handles=[];</span>
+<span class="comment">% scan_point_handles=[scan_point_handles;...</span>
+<span class="comment">%     plot3(laser_pos(1),laser_pos(2),laser_pos(3),'r*');...</span>
+<span class="comment">%     plot3(dir_vec(1)+laser_pos(1),dir_vec(2)+laser_pos(2),dir_vec(3)+laser_pos(3),'y*');...</span>
+<span class="comment">%     ...</span>
+<span class="comment">%     plot3(pan_pos_max(1),pan_pos_max(2),pan_pos_max(3),'b*');...</span>
+<span class="comment">%     plot3(pan_neg_max(1),pan_neg_max(2),pan_neg_max(3),'b*');...</span>
+<span class="comment">%     plot3([laser_pos(1),pan_pos_max(1)],[laser_pos(2),pan_pos_max(2)],[laser_pos(3),pan_pos_max(3)]);...</span>
+<span class="comment">%     plot3([laser_pos(1),pan_neg_max(1)],[laser_pos(2),pan_neg_max(2)],[laser_pos(3),pan_neg_max(3)]);...</span>
+<span class="comment">%     ...</span>
+<span class="comment">%     plot3(tilt_pos_max(1),tilt_pos_max(2),tilt_pos_max(3),'g*');...</span>
+<span class="comment">%     plot3(tilt_neg_max(1),tilt_neg_max(2),tilt_neg_max(3),'g*');...</span>
+<span class="comment">%     plot3([laser_pos(1),tilt_pos_max(1)],[laser_pos(2),tilt_pos_max(2)],[laser_pos(3),tilt_pos_max(3)]);...</span>
+<span class="comment">%     plot3([laser_pos(1),tilt_neg_max(1)],[laser_pos(2),tilt_neg_max(2)],[laser_pos(3),tilt_neg_max(3)])];</span>
+<span class="comment">%</span>
+<span class="comment">% xlabel('x - Pan around');ylabel('y - Tilt Around');zlabel('z - stream point');grid on;hold on;</span>
+<span class="comment">%</span>
+<span class="comment">%</span>
+<span class="comment">% %mark the point of the cube as the closest point in cube to workspace origin</span>
+<span class="comment">% if size(markedcubes)&gt;0</span>
+<span class="comment">% figure(2)</span>
+<span class="comment">% plot3(markedcubes(:,1)*cube_size,markedcubes(:,2)*cube_size,markedcubes(:,3)*cube_size,'r.');</span>
+<span class="comment">% keyboard</span>
+<span class="comment">% end</span>
+<span class="comment">%</span>
+<span class="comment">% % Delete the scan handles</span>
+<span class="comment">% delete_scan_lines(scan_line_handles,scan_point_handles)</span>
+<span class="comment">% clear scan_line_handles scan_point_handles</span>
+</pre><h2>FUNCTION: delete_scan_lines<a name="4"></a></h2><pre class="codeinput"><span class="comment">%This cleans up the lines from a scan</span>
+
+<span class="keyword">function</span> delete_scan_lines(scan_line_handles,scan_point_handles)
+
+<span class="keyword">for</span> i=1:size(scan_point_handles,1)
+    delete(scan_point_handles(i));
+<span class="keyword">end</span>
+<span class="keyword">for</span> i=1:size(scan_line_handles,1)
+    delete(scan_line_handles(i));
+<span class="keyword">end</span>
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.4<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% FUNCTION: Basic scan
+% Description: this traces out the lines and gets a group of points as the
+% basic scan 
+function [points,ice_cream_bounds]=basic_scan(cube_size)
+
+% global scan workspace
+
+%starttime=clock;
+
+%this will actually be x or y axis from end effector but not sure which
+%have to find out which axis the 5th joint rotates around
+laser_pos=[0,0,0];
+bear=[1,0,1]; %used to be [0,0,1]
+tilt_rotate_vec=[0,1,0];
+
+%max range of laser
+% las_range=scan.size;
+las_range=0.4;
+
+%Laser Angualar VARIABLES
+%this is the angle either side of the bearing of the center of the scan \|/
+% theta=scan.theta;
+theta=70*pi/180;
+%the increment angle used in both 
+%theta_incr=scan.theta_incr;
+%this is the angle from the tilt, - is up, + is down, angle must be from -2pi to 2pi
+% alpha=-scan.alpha;
+alpha=-20*pi/180;
+
+% %SETUP WORKSPACE
+
+%since we want to know what is the max angle we can use HERE only so that
+%at the furthest point we have resolution enough to cover our cubes at
+%least 3 times at the point of longest laser range, so we use that angular
+%resolution for this simulation
+theta_incr=atan((cube_size/3)/las_range);
+%we have an actual min resoltion in hardware so this is the minmum
+if theta_incr<0.36*(pi/180);
+    theta_incr=0.36*(pi/180);;
+end
+    
+%% Take the scan - work out end points
+% This is the most important vector
+% it describes the center of the first laser pan scan 
+% we will rotate to ge the pan scan
+dir_vec=las_range*(bear);
+%this is the vector that we will pan rotate around, it is always at origin
+%so we get cross product of the two vectors on the plane to get normal
+%pan_rotate_vec=cross(dir_vec,tilt_rotate_vec);
+pan_rotate_vec=tilt_rotate_vec  * [0 -dir_vec(3) dir_vec(2);...
+                                   dir_vec(3) 0 -dir_vec(1);...
+                                   -dir_vec(2) dir_vec(1) 0];
+
+
+%this works out through pan rotation of the ice cream cone from the origin
+%work out how many increments based on lasers lowest steps
+increments=round(2*theta/theta_incr);
+single_pan=[]; 
+for j=-theta:(2*theta)/(increments-1):theta
+    single_pan=[single_pan;rot_vec(dir_vec,pan_rotate_vec,j)];
+end
+current_row=1;
+ice_cream_bounds=zeros([increments^2,3]);
+
+%this tilt rotates and transforms to come form laser position
+for i=0:alpha/(increments-1):alpha
+    tilt_rot_res=rot_vec(single_pan,tilt_rotate_vec,i);
+    new_current_row=current_row+size(tilt_rot_res,1);
+    ice_cream_bounds(current_row:new_current_row-1,:)=[tilt_rot_res(:,1)+laser_pos(1),...
+        tilt_rot_res(:,2)+laser_pos(2),...
+        tilt_rot_res(:,3)+laser_pos(3)];
+    current_row=new_current_row;    
+end
+
+%% Find cubes which are intersected with and fill them with a point
+markedcubes=[];
+
+dist=sqrt((laser_pos(1)-ice_cream_bounds(:,1)).^2+...
+          (laser_pos(2)-ice_cream_bounds(:,2)).^2+...
+          (laser_pos(3)-ice_cream_bounds(:,3)).^2);
+valid_rows=find(dist);
+
+tempstarter=(ice_cream_bounds(:,1)-laser_pos(1))./(2*dist(:)/cube_size);
+
+
+for i=[valid_rows]'
+    
+    %check each one of the segements for zero distance and fill with that planes value for inbetweens  
+    if laser_pos(1)==ice_cream_bounds(i,1)
+        inbetweenpoint=[laser_pos(1)*ones([round((2*dist(i)/cube_size))+1,1])];
+    else
+        %inbetweenpoint=[(laser_pos(1):(ice_cream_bounds(i,1)-laser_pos(1))/(2*dist(i)/cube_size):ice_cream_bounds(i,1))'];
+        inbetweenpoint=[(laser_pos(1):tempstarter(i):ice_cream_bounds(i,1))'];
+
+    end
+    if laser_pos(2)==ice_cream_bounds(i,2)
+        inbetweenpoint=[inbetweenpoint,(laser_pos(2)*ones([size(inbetweenpoint,1),1]))];
+    else
+        inbetweenpoint=[inbetweenpoint,(laser_pos(2):(ice_cream_bounds(i,2)-laser_pos(2))/(size(inbetweenpoint,1)-1):ice_cream_bounds(i,2))'];
+    end
+    if laser_pos(3)==ice_cream_bounds(i,3)
+        inbetweenpoint=[inbetweenpoint,(laser_pos(3)*ones([size(inbetweenpoint,1),1]))];
+    else
+        inbetweenpoint=[inbetweenpoint,(laser_pos(3):(ice_cream_bounds(i,3)-laser_pos(3))/(size(inbetweenpoint,1)-1):ice_cream_bounds(i,3))'];
+    end   
+  %end 
+  %workspace_origin
+  cubes_checked=floor(inbetweenpoint/cube_size);
+
+    %Note: since this may be rotated we don't want to delete potential
+    %infomation (deleted the statement which did this
+
+    %had to add this
+    markedcubes=[markedcubes;cubes_checked];      
+
+    %this balances out with the above adding rows to a matrix
+    if rand>0.98
+        markedcubes=unique(markedcubes,'rows'); 
+    end
+%  end           
+end
+
+% final step of saving the unique points
+if size(markedcubes)>0
+    markedcubes=unique(markedcubes,'rows');
+    points=markedcubes.*cube_size;
+end
+
+%etime(clock,starttime)
+
+% %% Plot the ice cream on the pyrimid cone
+% %This works out the bounds of the pyramid (only needed for plotting)
+% pan_pos_max=rot_vec(dir_vec,pan_rotate_vec,theta)+laser_pos;
+% pan_neg_max=rot_vec(dir_vec,pan_rotate_vec,-theta)+laser_pos;
+% tilt_pos_max=rot_vec(pan_pos_max-laser_pos,tilt_rotate_vec,alpha)+laser_pos;
+% tilt_neg_max=rot_vec(pan_neg_max-laser_pos,tilt_rotate_vec,alpha)+laser_pos;
+% 
+% hold on;axis equal;
+% scan_line_handles=[];
+% for k=1:round(increments/10):increments
+%     %col
+%     col_lines=(k-1)*increments+(1:increments);       
+%     scan_line_handles=[scan_line_handles;...
+%         plot3(ice_cream_bounds(col_lines,1),ice_cream_bounds(col_lines,2),ice_cream_bounds(col_lines,3));...
+%         plot3([ice_cream_bounds(col_lines(1),1),laser_pos(1),ice_cream_bounds(col_lines(end),1)],...
+%               [ice_cream_bounds(col_lines(1),2),laser_pos(2),ice_cream_bounds(col_lines(end),2)],...
+%               [ice_cream_bounds(col_lines(1),3),laser_pos(3),ice_cream_bounds(col_lines(end),3)])];
+%     
+%      %hor
+%     row_lines=k:increments:size(ice_cream_bounds,1);    
+%     scan_line_handles=[scan_line_handles;...
+%         plot3(ice_cream_bounds(row_lines,1),ice_cream_bounds(row_lines,2),ice_cream_bounds(row_lines,3));...    
+%         plot3([ice_cream_bounds(row_lines(1),1),laser_pos(1),ice_cream_bounds(row_lines(end),1)],...
+%               [ice_cream_bounds(row_lines(1),2),laser_pos(2),ice_cream_bounds(row_lines(end),2)],...
+%               [ice_cream_bounds(row_lines(1),3),laser_pos(3),ice_cream_bounds(row_lines(end),3)])];
+% 
+% end
+% 
+% scan_point_handles=[];
+% scan_point_handles=[scan_point_handles;...
+%     plot3(laser_pos(1),laser_pos(2),laser_pos(3),'r*');...
+%     plot3(dir_vec(1)+laser_pos(1),dir_vec(2)+laser_pos(2),dir_vec(3)+laser_pos(3),'y*');...
+%     ...
+%     plot3(pan_pos_max(1),pan_pos_max(2),pan_pos_max(3),'b*');...
+%     plot3(pan_neg_max(1),pan_neg_max(2),pan_neg_max(3),'b*');...
+%     plot3([laser_pos(1),pan_pos_max(1)],[laser_pos(2),pan_pos_max(2)],[laser_pos(3),pan_pos_max(3)]);...
+%     plot3([laser_pos(1),pan_neg_max(1)],[laser_pos(2),pan_neg_max(2)],[laser_pos(3),pan_neg_max(3)]);...
+%     ...
+%     plot3(tilt_pos_max(1),tilt_pos_max(2),tilt_pos_max(3),'g*');...
+%     plot3(tilt_neg_max(1),tilt_neg_max(2),tilt_neg_max(3),'g*');...
+%     plot3([laser_pos(1),tilt_pos_max(1)],[laser_pos(2),tilt_pos_max(2)],[laser_pos(3),tilt_pos_max(3)]);...
+%     plot3([laser_pos(1),tilt_neg_max(1)],[laser_pos(2),tilt_neg_max(2)],[laser_pos(3),tilt_neg_max(3)])];
+% 
+% xlabel('x - Pan around');ylabel('y - Tilt Around');zlabel('z - stream point');grid on;hold on;
+% 
+% 
+% %mark the point of the cube as the closest point in cube to workspace origin 
+% if size(markedcubes)>0 
+% figure(2)
+% plot3(markedcubes(:,1)*cube_size,markedcubes(:,2)*cube_size,markedcubes(:,3)*cube_size,'r.');
+% keyboard
+% end  
+% 
+% % Delete the scan handles
+% delete_scan_lines(scan_line_handles,scan_point_handles)
+% clear scan_line_handles scan_point_handles
+
+
+%% FUNCTION: delete_scan_lines
+%This cleans up the lines from a scan
+
+function delete_scan_lines(scan_line_handles,scan_point_handles)
+
+for i=1:size(scan_point_handles,1)
+    delete(scan_point_handles(i));
+end
+for i=1:size(scan_line_handles,1)
+    delete(scan_line_handles(i));
+end
+
+##### SOURCE END #####
+-->
+   </body>
+</html>
