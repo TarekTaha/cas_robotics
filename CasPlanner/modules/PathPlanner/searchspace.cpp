@@ -39,6 +39,37 @@ SearchSpace::~SearchSpace()
 	};
 }
 
+SearchSpaceNode * SearchSpace::insertNode(QPointF loc,int id)
+{
+  	SearchSpaceNode *temp;	
+  	if(!(temp=nodeExists(loc)))
+  	{
+		if (search_space == NULL ) // Constructing the ROOT NODE
+		{
+			temp = new SearchSpaceNode;
+			temp->location.setX(loc.x());
+			temp->location.setY(loc.y());
+			temp->obstacle_cost = 0;
+			temp->parent   	= NULL;
+			temp->next     	= NULL;
+			temp->id 		= id;
+			search_space 	= temp;
+		}
+		else
+		{
+			temp = new SearchSpaceNode;
+			temp->location.setX(loc.x());
+			temp->location.setY(loc.y());
+			temp->obstacle_cost = 0;
+			temp->parent 	= NULL; 
+			temp->next   	= search_space;
+			temp->id 		= id;			
+			search_space 	= temp;
+		}	
+  	}
+	return temp;
+}
+
 SearchSpaceNode * SearchSpace::insertNode(QPointF loc)
 {
   	SearchSpaceNode *temp;	

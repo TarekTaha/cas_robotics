@@ -22,6 +22,7 @@
 #define HEURISTICT_H_
 
 #include <QString>
+#include <QHash>
 #include "casplannerexception.h"
 #include "node.h"
 
@@ -37,12 +38,14 @@ public:
 	virtual double gCost(Node *)=0;
 	virtual double hCost(Node *,Pose )=0;;
 	static Heuristic * factory(QString type) throw(CasPlannerException);
+	static Heuristic * factory(QString type,QHash<QString, int> *) throw(CasPlannerException);
 };
 
 class SocialHeuristic : public Heuristic
 {
 public:
-	SocialHeuristic(){};
+	QHash<QString, int> *socialRewards;
+	SocialHeuristic(QHash<QString, int> *socRew){this->socialRewards=socRew;};
 	friend class Heuristic;
 public:
 	double gCost(Node *n);

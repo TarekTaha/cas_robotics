@@ -34,7 +34,7 @@ class SearchSpaceNode
 	public :
 		QPointF location;
 		SearchSpaceNode * parent, * next;
-		int type;
+		int type,id;
 		double obstacle_cost;
 		QVector <SearchSpaceNode *>  children;
 		 SearchSpaceNode ();

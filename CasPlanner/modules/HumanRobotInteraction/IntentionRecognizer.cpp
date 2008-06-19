@@ -52,6 +52,7 @@ path(NULL)
 	socialPlanner = new SocialPlanner(playGround->mapManager->globalMap,robotManager->robot,&playGround->mapManager->mapSkeleton);
 	socialPlanner->buildSpace();
 	socialPlanner->showConnections();
+	socialPlanner->loadActivities("logs/tasks_log.txt");
 	Pose s(playGround->mapManager->mapSkeleton.verticies[37].location.x(),playGround->mapManager->mapSkeleton.verticies[37].location.y(),0);
 	socialPlanner->setStart(s);
 	Pose e(playGround->mapManager->mapSkeleton.verticies[0].location.x(),playGround->mapManager->mapSkeleton.verticies[0].location.y(),DTOR(90));
