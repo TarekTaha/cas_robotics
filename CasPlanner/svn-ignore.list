@@ -7,5 +7,6 @@
 .checkstyle
 /StageSim/.player
 /modules/PomdpModels/*
+ui_hritab.h
 CasPlanner
 Makefile

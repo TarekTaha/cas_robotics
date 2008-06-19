@@ -31,6 +31,7 @@ public:
 	SearchSpaceNode * search_space;
 	void freeSearchSpace();
 	SearchSpaceNode * insertNode(QPointF loc);
+	SearchSpaceNode * insertNode(QPointF loc,int id);	
 	SearchSpaceNode * nodeExists(QPointF loc);
 	bool              removeNode(QPointF loc);
 	SearchSpace();

@@ -25,6 +25,7 @@
 #include <libplayercore/player.h>
 
 #include <QPointF>
+#include <QHash>
 #include <QBitArray>
 #include <QVector>
 #include <QImage>
@@ -52,6 +53,7 @@ class Astar: public SearchSpace
 		Astar(Robot *,double dG, QString heuristicType);
 		Astar();
 		long int MAXNODES;
+		QString hType;
 		double	distGoal;
 		Heuristic *heuristic;
 		Map    * map;
@@ -60,12 +62,11 @@ class Astar: public SearchSpace
 		Node *root, *current, *childList, *curChild, *q, * test,*path, *p;
 		LList *openList,*closedList;
 		vector <Tree> tree;
-		void   freeNode      (Node *);
-		void   convertPix  (QPointF *p);
-		void   convert2Pix (QPointF *p);
-		int    inObstacle    (QPointF p, double angle);
-		bool   goalReached   (Node *n);
-		Node*  startSearch   (Pose start,Pose end,int);
+		void   setSocialReward(QHash<QString, int>*);
+		void   freeNode     (Node *);
+		int    inObstacle   (QPointF p, double angle);
+		bool   goalReached  (Node *n);
+		Node*  startSearch  (Pose start,Pose end,int);
 		virtual ~Astar();
 };
 

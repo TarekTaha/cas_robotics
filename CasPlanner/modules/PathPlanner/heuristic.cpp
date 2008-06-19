@@ -25,13 +25,18 @@ namespace CasPlanner
 
 Heuristic *  Heuristic::factory(QString type) throw(CasPlannerException)
 {
-	if (type == "Social")
-	{
-		return new SocialHeuristic;
-	}
 	if (type == "Distance")
 	{
 		return new DistanceHeuristic;	
+	}
+	throw (CasPlannerException("Bad Heuristic Type"));
+}
+
+Heuristic *  Heuristic::factory(QString type,QHash<QString, int> *soRe) throw(CasPlannerException)
+{
+	if (type == "Social")
+	{
+		return new SocialHeuristic(soRe);
 	}
 	throw (CasPlannerException("Bad Heuristic Type"));
 }
@@ -42,6 +47,7 @@ double SocialHeuristic::gCost(Node *n)
 	if(n == NULL || n->parent==NULL)
 		return 0.0;
 	cost = n->parent->g_value + Dist(n->pose.p,n->parent->pose.p);
+	cout<<qPrintable(QString("%1-%2").arg(n->parent->id).arg(n->id))<<":="<<this->socialRewards->value(QString("%1-%2").arg(n->parent->id).arg(n->id))<<endl;
 	return cost;
 }
 

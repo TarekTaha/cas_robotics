@@ -23,7 +23,7 @@
 namespace CasPlanner
 {
 
-Astar::Astar(Robot *rob,double dG,QString heuristicType):
+Astar::Astar(Robot *rob,double dG,QString heuristicT):
 	distGoal(dG),
 	map(NULL),
 	robot(rob),		
@@ -34,13 +34,16 @@ Astar::Astar(Robot *rob,double dG,QString heuristicType):
 	openList(NULL),
 	closedList(NULL)
 {
-	try
+	if (heuristicT == "Distance")
 	{
-		heuristic = Heuristic::factory(heuristicType);
-	}
-	catch(CasPlannerException e)
-	{
-		cout<<e.what()<<endl;
+		try
+		{
+			heuristic = Heuristic::factory(heuristicT);
+		}
+		catch(CasPlannerException e)
+		{
+			cout<<e.what()<<endl;
+		}
 	}
 }
 
@@ -70,6 +73,18 @@ Astar::~Astar()
 	{
 		closedList->Free();
 		delete closedList;
+	}
+}
+
+void   Astar ::setSocialReward(QHash<QString, int>* soRew)
+{
+	try
+	{
+		heuristic = Heuristic::factory("Social",soRew);
+	}
+	catch(CasPlannerException e)
+	{
+		cout<<e.what()<<endl;
 	}
 }
 
@@ -116,6 +131,7 @@ void Astar::findRoot() throw (CasPlannerException)
 			shortest_distance = distance;
 			root->pose.p.setX(temp->location.x());
 			root->pose.p.setY(temp->location.y());
+			root->id = temp->id;
 		}
 		temp = temp->next;
 	}
@@ -125,7 +141,6 @@ void Astar::findRoot() throw (CasPlannerException)
 	root->g_value = 0;;
 	root->h_value = heuristic->gCost(root);
 	root->f_value = root->g_value + root->h_value;
-	root->id = 0;
 	root->depth = 0;
 	root->pose.phi = start.phi;
 	root->direction = FORWARD;
@@ -457,6 +472,7 @@ Node *Astar :: makeChildrenNodes(Node *parent)
 			p = new Node;
 			p->pose.p.setX(temp->children[i]->location.x());
 			p->pose.p.setY(temp->children[i]->location.y());
+			p->id = temp->children[i]->id;
 			p->direction  =	direction ;
 			t.children.push_back(p->pose.p);
 			p->nearest_obstacle = temp->children[i]->obstacle_cost;
