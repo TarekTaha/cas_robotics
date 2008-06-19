@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>exGUI</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2008-01-14">
+      <meta name="date" content="2008-06-19">
       <meta name="m-file" content="exGUI"><style>
 
 body {
@@ -92,6 +92,7 @@ p.footer {
                <li><a href="#9">Robot Functionality</a></li>
                <li><a href="#10">Plotting and display simple functions</a></li>
                <li><a href="#11">Not Used By Me</a></li>
+               <li><a href="#12">dont know why this is needed, can't find the button for it</a></li>
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
@@ -165,6 +166,10 @@ do_clear(handles);
 <span class="comment">% this is the do_clear function sets up most stuff</span>
 <span class="keyword">function</span> do_clear(handles)
 
+<span class="comment">%add path</span>
+<span class="comment">% keyboard</span>
+<span class="comment">% addpath('./EnvironmentalData')</span>
+
 <span class="comment">%MANUAL CHECKS: To do before start work</span>
 display(<span class="string">'Make sure you have done the following'</span>);
 display(<span class="string">'1) Checked the laser is on by running the checklaser.exe file (power cycle if necessary)'</span>);
@@ -229,7 +234,7 @@ set(handles.useRealRobot_checkbox,<span class="string">'Value'</span>,0);
 drawnow;
 
 <span class="comment">%clear the globals for scan, workspace, robot(r,Q), bestviews, PointData, RangeData</span>
-clear <span class="string">global</span> <span class="string">workspace</span> <span class="string">scan</span> <span class="string">bestviews</span> <span class="string">Q</span> <span class="string">r</span> <span class="string">PointData</span> <span class="string">RangeData</span> <span class="string">guiglobal</span> <span class="string">densoobj</span> <span class="string">all_views</span> <span class="string">robot_maxreach</span>;
+clear <span class="string">global</span> <span class="string">workspace</span> <span class="string">scan</span> <span class="string">bestviews</span> <span class="string">Q</span> <span class="string">r</span> <span class="string">PointData</span> <span class="string">RangeData</span> <span class="string">guiglobal</span> <span class="string">densoobj</span> <span class="string">all_views</span> <span class="string">robot_maxreach</span> <span class="string">classunkn_optimise</span> <span class="string">alldirectedpoints</span>;
 
 <span class="comment">%Sets up the robot</span>
 setuprobot()
@@ -252,11 +257,13 @@ set(gcf,<span class="string">'CurrentAxes'</span>,handles.axes3);
 
 setupworkspace(get(handles.show_unknownpoints_checkbox,<span class="string">'Value'</span>));
 
+
 <span class="keyword">global</span> all_views
 <span class="keyword">if</span> isempty(all_views)
-    display(<span class="string">'Having to calculate all_views for exploration, this happens ones only'</span>);
-    calc_all_views();
-    load <span class="string">all_views.mat</span>
+    uiwait(msgbox(<span class="string">'not calculating allviews even though it dosent exist'</span>));
+<span class="comment">%     display('Having to calculate all_views for exploration, this happens ones only');</span>
+<span class="comment">%     calc_all_views();</span>
+<span class="comment">%     load all_views.mat</span>
 <span class="keyword">end</span>
 
 clc;
@@ -301,7 +308,8 @@ set(gcf,<span class="string">'CurrentAxes'</span>,handles.axes3)
             want_to_continue=~get(handles.stopflag_checkbox,<span class="string">'Value'</span>);
             <span class="keyword">if</span> want_to_continue==0; error(<span class="string">'User chose to exit'</span>);<span class="keyword">end</span>
             <span class="keyword">break</span>;
-        <span class="keyword">catch</span>; display(lasterr);
+        <span class="keyword">catch</span>
+            display(lasterr);
             want_to_continue=input(<span class="string">'Type (1) to continue, (2) for keyboard command, (0) to exit\n'</span>);
             <span class="keyword">if</span> want_to_continue==2; keyboard; <span class="keyword">end</span>
             <span class="keyword">if</span> want_to_continue==0; error(<span class="string">'User chose to exit'</span>);<span class="keyword">end</span>
@@ -532,7 +540,7 @@ workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
 threeDMedianFilt();
 </pre><h2>Classification<a name="8"></a></h2>
          <p>--- Executes on button press in classify_scan_pushbutton.</p><pre class="codeinput"><span class="keyword">function</span> classify_scan_pushbutton_Callback(hObject, eventdata, handles)<span class="comment">%#ok&lt;DEFNU&gt;</span>
-<span class="keyword">global</span> scan
+<span class="keyword">global</span> scan PointData IntensityData RangeData workspace
 <span class="comment">%case 1 = 'Grey Metal '; case 2 = 'Shiny Metal'; case 3 = 'Cloth/Wood'; OR RED OR WHITE --- JUST CLOTH or WOOD!!! case 4 = 'Do not know';</span>
 
 <span class="comment">%if NOT USING real robot load data</span>
@@ -542,12 +550,6 @@ threeDMedianFilt();
     scan.IntensityData=IntensityData;
     scan.PointData=PointData;
     scan.RangeData=RangeData;
-<span class="keyword">else</span>
-<span class="comment">%     movetonewQ(handles,[90,-30,80,0,-25,0]);</span>
-     movetonewQ(handles,[0,-30,80,0,-15,0]);
-     use_real_robot_SCAN(-70);
-<span class="comment">%     figure;imshow(scan.RangeData/max(max(scan.RangeData)));</span>
-<span class="comment">%     figure;imshow(scan.IntensityData/max(max(scan.IntensityData)));</span>
 <span class="keyword">end</span>
 
 <span class="comment">%check that PointData exists and is valid</span>
@@ -577,75 +579,83 @@ threeDMedianFilt();
 <span class="comment">%do classification with data</span>
 display(<span class="string">'Classifying the LATEST set of data that has been scanned'</span>);
 scan.ClassificationData=[];
-<span class="keyword">try</span>
-    scan.ClassificationData=Block_Classifier(scan.PointData, scan.IntensityData,scan.RangeData);
-    axis <span class="string">equal</span>
-    display(<span class="string">'....Classification completed successfully'</span>);
-<span class="keyword">catch</span>
-    display(<span class="string">'....Problems in Classification'</span>);
-    keyboard
-<span class="keyword">end</span>
 
+<span class="keyword">try</span> [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData);
+<span class="comment">% profile clear;profile on;</span>
+<span class="keyword">try</span> UNclassifiedvoxels=update_ocstatus(ClassifiedData); <span class="comment">%profile off; profile viewer;</span>
+        display([<span class="string">'You still have not classified '</span>, num2str(size(UNclassifiedvoxels,1)/size(workspace.ocgrid,1)*100),<span class="string">' percent of known voxels'</span>]);
+        display(<span class="string">'....Classification completed successfully'</span>);
+    <span class="keyword">catch</span>; display(<span class="string">'Couldnt update voxels'</span>); keyboard; <span class="keyword">end</span>
+<span class="keyword">catch</span>; display(<span class="string">'Couldnt classify'</span>);keyboard; <span class="keyword">end</span>
+
+
+
+<span class="comment">% --- Executes on button press in AXBAMnClassify_pushbutton.</span>
+<span class="keyword">function</span> AXBAMnClassify_pushbutton_Callback(hObject, eventdata, handles)
+<span class="comment">%num of planes to tryand get to of interest</span>
+numofintplanes=str2double(get(handles.numofdir_AXBAMnC_edit,<span class="string">'string'</span>));
+<span class="comment">%run the classification function</span>
+poseclassunknown_Imp(numofintplanes)
 
 
 
 <span class="comment">% --- Executes on button press in plot_classified_pushbutton.</span>
-<span class="keyword">function</span> plot_classified_pushbutton_Callback(hObject, eventdata, handles)<span class="comment">%#ok&lt;DEFNU&gt;</span>
-<span class="keyword">global</span> scan
-
-<span class="keyword">if</span> ~isfield(scan,<span class="string">'ClassificationData'</span>) || size(scan.ClassificationData,1)==0
-    error(<span class="string">'Classification has not happened correctly'</span>);
-<span class="keyword">end</span>
-<span class="comment">%case 1 = 'Grey Metal '; case 2 = 'Shiny Metal'; case 3 = 'Cloth/Wood'; % OR RED OR WHITE --- JUST CLOTH or WOOD!!! case 4 = 'Do not know';</span>
-
-maxclasval=max(scan.ClassificationData(:,4))
-
-<span class="comment">%Go through and plot the different data</span>
-figure(2);hold <span class="string">on</span>;axis <span class="string">equal</span>;
-<span class="comment">%set(gcf,'CurrentAxes',handles.axes3);</span>
-<span class="keyword">for</span> current_mat=1:maxclasval
-    temp=find(scan.ClassificationData(:,4)==current_mat);
-    <span class="keyword">if</span> ~isempty(temp)
-        <span class="keyword">switch</span>(current_mat)
-            <span class="keyword">case</span> (1)
-                plotcolor=[.6 .6 .6];
-            <span class="keyword">case</span> (2)
-                plotcolor=[.4 .4 .4];
-            <span class="keyword">case</span> (3)
-                plotcolor=[1 0 0];
-            <span class="keyword">case</span> (4)
-                plotcolor=[0.8 0.8 1];
-        <span class="keyword">end</span>
-        <span class="keyword">if</span> current_mat~=5 plot3(scan.ClassificationData(temp,1),scan.ClassificationData(temp,2),scan.ClassificationData(temp,3),<span class="string">'Marker'</span>,<span class="string">'.'</span>,<span class="string">'Color'</span>,[plotcolor],<span class="string">'LineStyle'</span>,<span class="string">'none'</span>);<span class="keyword">end</span>;
-    <span class="keyword">end</span>
-<span class="keyword">end</span>
-
-ClassifiedData=[];
-colsiz=size(scan.ClassificationData,1)/size(scan.PointData,1);
-
-<span class="keyword">for</span> current_row=1:size(scan.PointData,1)
-    ClassifiedData=[ClassifiedData;(scan.ClassificationData((current_row-1)*colsiz+1:current_row*colsiz,4)/maxclasval)'];
-<span class="keyword">end</span>
-
-<span class="comment">%figure, imshow(ClassifiedData);</span>
-
-<span class="comment">%Median filtering</span>
-I2=medfilt2(ClassifiedData,[14 14]);
-figure, imshow(I2);
-
-Iedges=edge(I2,<span class="string">'canny'</span>);
-<span class="comment">%figure, imshow(Iedges);</span>
-
-[row,col]=ginput(1);
-<span class="keyword">while</span> col&gt;0 &amp;&amp; col&lt;size(Iedges,1) &amp;&amp; row&gt;0 &amp;&amp; row&lt;size(Iedges,2)
-    <span class="keyword">if</span> col&gt;0 &amp;&amp; col&lt;size(Iedges,1) &amp;&amp; row&gt;0 &amp;&amp; row&lt;size(Iedges,2)
-        row=round(row)-1+find(Iedges(round(col),round(row):end)&gt;0,1);
-        boundary=bwtraceboundary(Iedges,[round(col), round(row)],<span class="string">'N'</span>);
-        hold <span class="string">on</span>;
-        plot(boundary(:,2),boundary(:,1),<span class="string">'r'</span>,<span class="string">'LineWidth'</span>,3);
-    <span class="keyword">end</span>
-    [row,col]=ginput(1);
-<span class="keyword">end</span>
+<span class="comment">% function plot_classified_pushbutton_Callback(hObject, eventdata, handles)%#ok&lt;DEFNU&gt;</span>
+<span class="comment">% global scan</span>
+<span class="comment">%</span>
+<span class="comment">% if ~isfield(scan,'ClassificationData') || size(scan.ClassificationData,1)==0</span>
+<span class="comment">%     error('Classification has not happened correctly');</span>
+<span class="comment">% end</span>
+<span class="comment">% %case 1 = 'Grey Metal '; case 2 = 'Shiny Metal'; case 3 = 'Cloth/Wood'; % OR RED OR WHITE --- JUST CLOTH or WOOD!!! case 4 = 'Do not know';</span>
+<span class="comment">%</span>
+<span class="comment">% maxclasval=max(scan.ClassificationData(:,4))</span>
+<span class="comment">%</span>
+<span class="comment">% %Go through and plot the different data</span>
+<span class="comment">% figure(2);hold on;axis equal;</span>
+<span class="comment">% %set(gcf,'CurrentAxes',handles.axes3);</span>
+<span class="comment">% for current_mat=1:maxclasval</span>
+<span class="comment">%     temp=find(scan.ClassificationData(:,4)==current_mat);</span>
+<span class="comment">%     if ~isempty(temp)</span>
+<span class="comment">%         switch(current_mat)</span>
+<span class="comment">%             case (1)</span>
+<span class="comment">%                 plotcolor=[.6 .6 .6];</span>
+<span class="comment">%             case (2)</span>
+<span class="comment">%                 plotcolor=[.4 .4 .4];</span>
+<span class="comment">%             case (3)</span>
+<span class="comment">%                 plotcolor=[1 0 0];</span>
+<span class="comment">%             case (4)</span>
+<span class="comment">%                 plotcolor=[0.8 0.8 1];</span>
+<span class="comment">%         end</span>
+<span class="comment">%         if current_mat~=5 plot3(scan.ClassificationData(temp,1),scan.ClassificationData(temp,2),scan.ClassificationData(temp,3),'Marker','.','Color',[plotcolor],'LineStyle','none');end;</span>
+<span class="comment">%     end</span>
+<span class="comment">% end</span>
+<span class="comment">%</span>
+<span class="comment">% ClassifiedData=[];</span>
+<span class="comment">% colsiz=size(scan.ClassificationData,1)/size(scan.PointData,1);</span>
+<span class="comment">%</span>
+<span class="comment">% for current_row=1:size(scan.PointData,1)</span>
+<span class="comment">%     ClassifiedData=[ClassifiedData;(scan.ClassificationData((current_row-1)*colsiz+1:current_row*colsiz,4)/maxclasval)'];</span>
+<span class="comment">% end</span>
+<span class="comment">%</span>
+<span class="comment">% %figure, imshow(ClassifiedData);</span>
+<span class="comment">%</span>
+<span class="comment">% %Median filtering</span>
+<span class="comment">% I2=medfilt2(ClassifiedData,[14 14]);</span>
+<span class="comment">% figure, imshow(I2);</span>
+<span class="comment">%</span>
+<span class="comment">% Iedges=edge(I2,'canny');</span>
+<span class="comment">% %figure, imshow(Iedges);</span>
+<span class="comment">%</span>
+<span class="comment">% [row,col]=ginput(1);</span>
+<span class="comment">% while col&gt;0 &amp;&amp; col&lt;size(Iedges,1) &amp;&amp; row&gt;0 &amp;&amp; row&lt;size(Iedges,2)</span>
+<span class="comment">%     if col&gt;0 &amp;&amp; col&lt;size(Iedges,1) &amp;&amp; row&gt;0 &amp;&amp; row&lt;size(Iedges,2)</span>
+<span class="comment">%         row=round(row)-1+find(Iedges(round(col),round(row):end)&gt;0,1);</span>
+<span class="comment">%         boundary=bwtraceboundary(Iedges,[round(col), round(row)],'N');</span>
+<span class="comment">%         hold on;</span>
+<span class="comment">%         plot(boundary(:,2),boundary(:,1),'r','LineWidth',3);</span>
+<span class="comment">%     end</span>
+<span class="comment">%     [row,col]=ginput(1);</span>
+<span class="comment">% end</span>
 </pre><h2>Robot Functionality<a name="9"></a></h2>
          <p>--- Executes on button press in blasting_pushbutton.</p><pre class="codeinput"><span class="keyword">function</span> blasting_pushbutton_Callback(hObject, eventdata, handles)
 keyboard
@@ -861,6 +871,7 @@ platform_h.Start;
     <span class="comment">% aabb = [-2, -1, 0; 2, 0.6, 2];</span>
 
     aabb = [-1.5, -1.5, -1; 2, 1.5, 2];
+<span class="comment">%     aabb = [-1.5, 0.3, -1; 2, 0.7, 2];</span>
 <span class="comment">%     if we want to show the whole environment</span>
     <span class="keyword">if</span> get(handles.all_mesh_checkbox,<span class="string">'value'</span>)==1
         aabb = [-20, -20, -20; 20, 20, 20];
@@ -971,6 +982,52 @@ view(3);
     <span class="keyword">end</span>
 <span class="keyword">end</span>
 
+<span class="comment">% --- Executes on button press in plot_classified_checkbox.</span>
+<span class="keyword">function</span> plot_classified_checkbox_Callback(hObject, eventdata, handles)
+<span class="keyword">global</span> workspace classifiedplotHa
+
+<span class="keyword">if</span> get(hObject,<span class="string">'Value'</span>)
+    display(<span class="string">'Drawing plot'</span>)
+    classifiedplotHa=[];
+    class_cubesize=workspace.class_cubesize;
+
+    <span class="comment">%determine the unknown places and the know metal or wood</span>
+    sumofclass=workspace.ocgrid(:,4)+workspace.ocgrid(:,5);
+    warning(<span class="string">'off'</span>,<span class="string">'MATLAB:divideByZero'</span>)
+    <span class="keyword">try</span> classifiedvoxels=find(sumofclass&gt;=workspace.minclassifications &amp;<span class="keyword">...</span>
+                         (workspace.ocgrid(:,4)./workspace.ocgrid(:,5)&gt;workspace.classfierthreshhold |<span class="keyword">...</span>
+                          workspace.ocgrid(:,5)./workspace.ocgrid(:,4)&gt;workspace.classfierthreshhold));<span class="keyword">end</span>
+    <span class="keyword">try</span> UNclassifiedvoxels=find(sumofclass&lt;workspace.minclassifications | <span class="keyword">...</span>
+                         (workspace.ocgrid(:,4)./workspace.ocgrid(:,5)&lt;=workspace.classfierthreshhold &amp;<span class="keyword">...</span>
+                          workspace.ocgrid(:,5)./workspace.ocgrid(:,4)&lt;=workspace.classfierthreshhold));<span class="keyword">end</span>
+    warning(<span class="string">'on'</span>,<span class="string">'MATLAB:divideByZero'</span>)
+
+    <span class="comment">%now plot this</span>
+    hold <span class="string">on</span>;
+    <span class="keyword">try</span> classifiedplotHa(end+1)=plot3(workspace.ocgrid(UNclassifiedvoxels,1)*class_cubesize,<span class="keyword">...</span>
+          workspace.ocgrid(UNclassifiedvoxels,2)*class_cubesize,<span class="keyword">...</span>
+          workspace.ocgrid(UNclassifiedvoxels,3)*class_cubesize,<span class="string">'y'</span>,<span class="string">'marker'</span>,<span class="string">'.'</span>,<span class="string">'markersize'</span>,0.5,<span class="string">'linestyle'</span>,<span class="string">'none'</span>);<span class="keyword">end</span>
+    <span class="comment">%plot metal and wood voxels</span>
+
+    metalvoxels=workspace.ocgrid(classifiedvoxels(workspace.ocgrid(classifiedvoxels,4)&gt;workspace.ocgrid(classifiedvoxels,5)),1:3);
+    <span class="keyword">if</span> size(metalvoxels,1)&gt;0
+        <span class="keyword">try</span> classifiedplotHa(end+1)=plot3(metalvoxels(:,1)*class_cubesize,metalvoxels(:,2)*class_cubesize,metalvoxels(:,3)*class_cubesize,<span class="string">'r.'</span>);<span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    woodvoxels=workspace.ocgrid(classifiedvoxels(workspace.ocgrid(classifiedvoxels,4)&lt;workspace.ocgrid(classifiedvoxels,5)),1:3);
+    <span class="keyword">if</span> size(woodvoxels,1)&gt;0
+        <span class="keyword">try</span> classifiedplotHa(end+1)=plot3(woodvoxels(:,1)*class_cubesize,woodvoxels(:,2)*class_cubesize,woodvoxels(:,3)*class_cubesize,<span class="string">'b.'</span>);<span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    drawnow
+
+<span class="keyword">else</span>
+    display(<span class="string">'Removing plot'</span>)
+    <span class="keyword">for</span> i=1:length(classifiedplotHa);  <span class="keyword">try</span> delete(classifiedplotHa(i));<span class="keyword">end</span>; <span class="keyword">end</span>
+    clear <span class="string">global</span> <span class="string">classifiedplotHa</span>
+
+<span class="keyword">end</span>
+
 <span class="comment">% --- Executes on button press in show_unknownpoints_checkbox.</span>
 <span class="keyword">function</span> show_unknownpoints_checkbox_Callback(hObject, eventdata, handles) <span class="comment">%#ok&lt;INUSD,DEFNU&gt;</span>
 <span class="keyword">global</span> guiglobal workspace
@@ -1028,11 +1085,14 @@ theval=get(hObject,<span class="string">'Value'</span>);
 
 <span class="comment">% --- Executes on button press in zoom_pushbutton.</span>
 <span class="keyword">function</span> zoom_pushbutton_Callback(hObject, eventdata, handles)
-zoom <span class="string">on</span>;
+<span class="comment">% zoom on;</span>
+view(116,18)
+keyboard
+
 
 <span class="comment">%this function is used to collect the data for exploration to compare new info</span>
 <span class="keyword">function</span> state_data=collectdata(state_data)
-<span class="keyword">global</span> workspace
+<span class="keyword">global</span> workspace Q
 <span class="keyword">if</span> isempty(state_data)
     state_data.knownweight=calknownweight();
     state_data.unknownweight=calunknownweight();
@@ -1040,6 +1100,7 @@ zoom <span class="string">on</span>;
     state_data.size_unknown=size(setdiff(round(workspace.unknowncoords/workspace.inc_size),round(workspace.knowncoords/workspace.inc_size),<span class="string">'rows'</span>),1);
     state_data.size_indexedobsticles=size(workspace.indexedobsticles,1);
     state_data.time=0;state_data.starttime=clock;
+    state_data.Q=Q;
 <span class="keyword">else</span>
     state_data.knownweight=[state_data.knownweight,calknownweight()];
     state_data.unknownweight=[state_data.unknownweight,calunknownweight()];
@@ -1047,8 +1108,17 @@ zoom <span class="string">on</span>;
     state_data.size_unknown=[state_data.size_unknown,size(setdiff(round(workspace.unknowncoords/workspace.inc_size),round(workspace.knowncoords/workspace.inc_size),<span class="string">'rows'</span>),1)];
     state_data.size_indexedobsticles=[state_data.size_indexedobsticles,size(workspace.indexedobsticles,1)];
     state_data.time=[state_data.time,etime(clock,state_data.starttime)];
+    state_data.Q=[state_data.Q;Q];
 <span class="keyword">end</span>
 
+<span class="comment">% --- Executes on button press in savefig_pushbutton.</span>
+<span class="keyword">function</span> savefig_pushbutton_Callback(hObject, eventdata, handles)
+<span class="keyword">try</span>
+    AXBAMnCtesting();
+<span class="keyword">catch</span>
+    lasterr
+    keyboard
+<span class="keyword">end</span>
 
 
 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
@@ -1137,69 +1207,54 @@ usewhitebg = 1;
     set(hObject,<span class="string">'BackgroundColor'</span>,<span class="string">'white'</span>);
 <span class="keyword">end</span>
 
+<span class="comment">%this is for the edit box of how many planes of interest we are going to go</span>
+<span class="comment">%through</span>
+<span class="keyword">function</span> AXBAMnC_directs_edit_Callback(hObject, eventdata, handles)
+<span class="keyword">function</span> AXBAMnC_directs_edit_CreateFcn(hObject, eventdata, handles)
+<span class="keyword">if</span> ispc &amp;&amp; isequal(get(hObject,<span class="string">'BackgroundColor'</span>), get(0,<span class="string">'defaultUicontrolBackgroundColor'</span>))
+    set(hObject,<span class="string">'BackgroundColor'</span>,<span class="string">'white'</span>);
+<span class="keyword">end</span>
 
-<span class="comment">% --------------------------------------------------------------------</span>
-<span class="keyword">function</span> Untitled_1_Callback(hObject, eventdata, handles)
-<span class="comment">% hObject    handle to Untitled_1 (see GCBO)</span>
-<span class="comment">% eventdata  reserved - to be defined in a future version of MATLAB</span>
-<span class="comment">% handles    structure with handles and user data (see GUIDATA)</span>
-
-
-<span class="comment">% --------------------------------------------------------------------</span>
-<span class="keyword">function</span> Untitled_2_Callback(hObject, eventdata, handles)
-<span class="comment">% hObject    handle to Untitled_2 (see GCBO)</span>
-<span class="comment">% eventdata  reserved - to be defined in a future version of MATLAB</span>
-<span class="comment">% handles    structure with handles and user data (see GUIDATA)</span>
-
-
-<span class="comment">% --------------------------------------------------------------------</span>
-<span class="keyword">function</span> Untitled_3_Callback(hObject, eventdata, handles)
-<span class="comment">% hObject    handle to Untitled_3 (see GCBO)</span>
-<span class="comment">% eventdata  reserved - to be defined in a future version of MATLAB</span>
-<span class="comment">% handles    structure with handles and user data (see GUIDATA)</span>
-
-
-<span class="comment">% --------------------------------------------------------------------</span>
-<span class="keyword">function</span> Untitled_4_Callback(hObject, eventdata, handles)
-<span class="comment">% hObject    handle to Untitled_4 (see GCBO)</span>
-<span class="comment">% eventdata  reserved - to be defined in a future version of MATLAB</span>
-<span class="comment">% handles    structure with handles and user data (see GUIDATA)</span>
-
-
-<span class="comment">% --------------------------------------------------------------------</span>
-<span class="keyword">function</span> Untitled_5_Callback(hObject, eventdata, handles)
-<span class="comment">% hObject    handle to Untitled_5 (see GCBO)</span>
-<span class="comment">% eventdata  reserved - to be defined in a future version of MATLAB</span>
-<span class="comment">% handles    structure with handles and user data (see GUIDATA)</span>
-
-
-<span class="comment">% --- Executes on button press in all_mesh_checkbox.</span>
-<span class="keyword">function</span> all_mesh_checkbox_Callback(hObject, eventdata, handles)
-<span class="comment">% hObject    handle to all_mesh_checkbox (see GCBO)</span>
-<span class="comment">% eventdata  reserved - to be defined in a future version of MATLAB</span>
-<span class="comment">% handles    structure with handles and user data (see GUIDATA)</span>
-
-<span class="comment">% Hint: get(hObject,'Value') returns toggle state of all_mesh_checkbox</span>
-
-
-
-
+<span class="keyword">function</span> numofdir_AXBAMnC_edit_Callback(hObject, eventdata, handles)
+<span class="keyword">function</span> numofdir_AXBAMnC_edit_CreateFcn(hObject, eventdata, handles)
+<span class="keyword">if</span> ispc &amp;&amp; isequal(get(hObject,<span class="string">'BackgroundColor'</span>), get(0,<span class="string">'defaultUicontrolBackgroundColor'</span>))
+    set(hObject,<span class="string">'BackgroundColor'</span>,<span class="string">'white'</span>);
+<span class="keyword">end</span>
 
 <span class="keyword">function</span> rot_scan_deg_edit_Callback(hObject, eventdata, handles)
-
-
 <span class="comment">% --- Executes during object creation, after setting all properties.</span>
 <span class="keyword">function</span> rot_scan_deg_edit_CreateFcn(hObject, eventdata, handles)
 <span class="keyword">if</span> ispc &amp;&amp; isequal(get(hObject,<span class="string">'BackgroundColor'</span>), get(0,<span class="string">'defaultUicontrolBackgroundColor'</span>))
     set(hObject,<span class="string">'BackgroundColor'</span>,<span class="string">'white'</span>);
 <span class="keyword">end</span>
 
-
 <span class="comment">% --- Executes on button press in scanwhilemove_checkbox.</span>
 <span class="keyword">function</span> scanwhilemove_checkbox_Callback(hObject, eventdata, handles)
 
 <span class="comment">% --- Executes on button press in remv_unkn_in_mv_checkbox.</span>
 <span class="keyword">function</span> remv_unkn_in_mv_checkbox_Callback(hObject, eventdata, handles)
+
+<span class="comment">% --- Executes on button press in doclassification_checkbox.</span>
+<span class="keyword">function</span> doclassification_checkbox_Callback(hObject, eventdata, handles)
+
+<span class="comment">% --- Executes during object creation, after setting all properties.</span>
+<span class="keyword">function</span> minClassifications_edit_CreateFcn(hObject, eventdata, handles)
+<span class="keyword">if</span> ispc &amp;&amp; isequal(get(hObject,<span class="string">'BackgroundColor'</span>), get(0,<span class="string">'defaultUicontrolBackgroundColor'</span>))
+    set(hObject,<span class="string">'BackgroundColor'</span>,<span class="string">'white'</span>);
+<span class="keyword">end</span>
+<span class="keyword">function</span> minClassifications_edit_Callback(hObject, eventdata, handles)
+<span class="keyword">global</span> workspace
+workspace.minclassifications=str2double(get(hObject,<span class="string">'String'</span>));
+
+<span class="comment">% --- Executes during object creation, after setting all properties.</span>
+<span class="keyword">function</span> classification_ration_edit_CreateFcn(hObject, eventdata, handles)
+<span class="keyword">if</span> ispc &amp;&amp; isequal(get(hObject,<span class="string">'BackgroundColor'</span>), get(0,<span class="string">'defaultUicontrolBackgroundColor'</span>))
+    set(hObject,<span class="string">'BackgroundColor'</span>,<span class="string">'white'</span>);
+<span class="keyword">end</span>
+<span class="keyword">function</span> classification_ration_edit_Callback(hObject, eventdata, handles)
+<span class="keyword">global</span> workspace
+workspace.classfierthreshhold=str2double(get(hObject,<span class="string">'String'</span>));
+</pre><h2>dont know why this is needed, can't find the button for it<a name="12"></a></h2><pre class="codeinput"><span class="keyword">function</span> Untitled_1_Callback(hObject, eventdata, handles)
 </pre><p class="footer"><br>
             Published with MATLAB&reg; 7.4<br></p>
       </div>
@@ -1292,6 +1347,10 @@ do_clear(handles);
 % this is the do_clear function sets up most stuff
 function do_clear(handles)
 
+%add path 
+% keyboard
+% addpath('./EnvironmentalData')
+
 %MANUAL CHECKS: To do before start work
 display('Make sure you have done the following');
 display('1) Checked the laser is on by running the checklaser.exe file (power cycle if necessary)');
@@ -1356,7 +1415,7 @@ set(handles.useRealRobot_checkbox,'Value',0);
 drawnow;
 
 %clear the globals for scan, workspace, robot(r,Q), bestviews, PointData, RangeData
-clear global workspace scan bestviews Q r PointData RangeData guiglobal densoobj all_views robot_maxreach;
+clear global workspace scan bestviews Q r PointData RangeData guiglobal densoobj all_views robot_maxreach classunkn_optimise alldirectedpoints;
 
 %Sets up the robot
 setuprobot()
@@ -1379,11 +1438,13 @@ set(gcf,'CurrentAxes',handles.axes3);
 
 setupworkspace(get(handles.show_unknownpoints_checkbox,'Value'));
 
+
 global all_views
 if isempty(all_views)
-    display('Having to calculate all_views for exploration, this happens ones only');
-    calc_all_views();
-    load all_views.mat
+    uiwait(msgbox('not calculating allviews even though it dosent exist'));
+%     display('Having to calculate all_views for exploration, this happens ones only');
+%     calc_all_views();
+%     load all_views.mat
 end
 
 clc;
@@ -1433,7 +1494,8 @@ for stepcount=2:size(robot_maxreach.default_Q,1)+1
             want_to_continue=~get(handles.stopflag_checkbox,'Value');
             if want_to_continue==0; error('User chose to exit');end
             break;             
-        catch; display(lasterr); 
+        catch
+            display(lasterr);
             want_to_continue=input('Type (1) to continue, (2) for keyboard command, (0) to exit\n');            
             if want_to_continue==2; keyboard; end
             if want_to_continue==0; error('User chose to exit');end
@@ -1671,7 +1733,7 @@ threeDMedianFilt();
 %% Classification
 % REPLACE_WITH_DASH_DASH- Executes on button press in classify_scan_pushbutton.
 function classify_scan_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global scan 
+global scan PointData IntensityData RangeData workspace
 %case 1 = 'Grey Metal '; case 2 = 'Shiny Metal'; case 3 = 'Cloth/Wood'; OR RED OR WHITE REPLACE_WITH_DASH_DASH- JUST CLOTH or WOOD!!! case 4 = 'Do not know';
 
 %if NOT USING real robot load data
@@ -1681,12 +1743,6 @@ if ~get(handles.useRealRobot_checkbox,'Value')
     scan.IntensityData=IntensityData;
     scan.PointData=PointData;
     scan.RangeData=RangeData;
-else
-%     movetonewQ(handles,[90,-30,80,0,-25,0]);
-     movetonewQ(handles,[0,-30,80,0,-15,0]);
-     use_real_robot_SCAN(-70);
-%     figure;imshow(scan.RangeData/max(max(scan.RangeData)));
-%     figure;imshow(scan.IntensityData/max(max(scan.IntensityData)));
 end
 
 %check that PointData exists and is valid
@@ -1716,75 +1772,83 @@ end
 %do classification with data
 display('Classifying the LATEST set of data that has been scanned');
 scan.ClassificationData=[];
-try
-    scan.ClassificationData=Block_Classifier(scan.PointData, scan.IntensityData,scan.RangeData);
-    axis equal
-    display('....Classification completed successfully');    
-catch
-    display('....Problems in Classification');
-    keyboard
-end
 
+try [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData); 
+% profile clear;profile on;    
+try UNclassifiedvoxels=update_ocstatus(ClassifiedData); %profile off; profile viewer;
+        display(['You still have not classified ', num2str(size(UNclassifiedvoxels,1)/size(workspace.ocgrid,1)*100),' percent of known voxels']);
+        display('....Classification completed successfully');    
+    catch; display('Couldnt update voxels'); keyboard; end        
+catch; display('Couldnt classify');keyboard; end
+    
+    
+
+% REPLACE_WITH_DASH_DASH- Executes on button press in AXBAMnClassify_pushbutton.
+function AXBAMnClassify_pushbutton_Callback(hObject, eventdata, handles)
+%num of planes to tryand get to of interest
+numofintplanes=str2double(get(handles.numofdir_AXBAMnC_edit,'string'));
+%run the classification function    
+poseclassunknown_Imp(numofintplanes)
 
 
 
 % REPLACE_WITH_DASH_DASH- Executes on button press in plot_classified_pushbutton.
-function plot_classified_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global scan
-
-if ~isfield(scan,'ClassificationData') || size(scan.ClassificationData,1)==0
-    error('Classification has not happened correctly');
-end
-%case 1 = 'Grey Metal '; case 2 = 'Shiny Metal'; case 3 = 'Cloth/Wood'; % OR RED OR WHITE REPLACE_WITH_DASH_DASH- JUST CLOTH or WOOD!!! case 4 = 'Do not know';
-
-maxclasval=max(scan.ClassificationData(:,4))
-
-%Go through and plot the different data
-figure(2);hold on;axis equal;
-%set(gcf,'CurrentAxes',handles.axes3);
-for current_mat=1:maxclasval
-    temp=find(scan.ClassificationData(:,4)==current_mat);
-    if ~isempty(temp)
-        switch(current_mat)
-            case (1) 
-                plotcolor=[.6 .6 .6];
-            case (2) 
-                plotcolor=[.4 .4 .4];
-            case (3) 
-                plotcolor=[1 0 0];
-            case (4) 
-                plotcolor=[0.8 0.8 1];
-        end        
-        if current_mat~=5 plot3(scan.ClassificationData(temp,1),scan.ClassificationData(temp,2),scan.ClassificationData(temp,3),'Marker','.','Color',[plotcolor],'LineStyle','none');end;
-    end
-end
-
-ClassifiedData=[];
-colsiz=size(scan.ClassificationData,1)/size(scan.PointData,1);
-
-for current_row=1:size(scan.PointData,1)
-    ClassifiedData=[ClassifiedData;(scan.ClassificationData((current_row-1)*colsiz+1:current_row*colsiz,4)/maxclasval)'];
-end
-
-%figure, imshow(ClassifiedData);
-
-%Median filtering
-I2=medfilt2(ClassifiedData,[14 14]);
-figure, imshow(I2);
-
-Iedges=edge(I2,'canny');
-%figure, imshow(Iedges);
-
-[row,col]=ginput(1);  
-while col>0 && col<size(Iedges,1) && row>0 && row<size(Iedges,2)        
-    if col>0 && col<size(Iedges,1) && row>0 && row<size(Iedges,2)
-        row=round(row)-1+find(Iedges(round(col),round(row):end)>0,1);
-        boundary=bwtraceboundary(Iedges,[round(col), round(row)],'N');
-        hold on;
-        plot(boundary(:,2),boundary(:,1),'r','LineWidth',3);
-    end
-    [row,col]=ginput(1);
-end
+% function plot_classified_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
+% global scan
+% 
+% if ~isfield(scan,'ClassificationData') || size(scan.ClassificationData,1)==0
+%     error('Classification has not happened correctly');
+% end
+% %case 1 = 'Grey Metal '; case 2 = 'Shiny Metal'; case 3 = 'Cloth/Wood'; % OR RED OR WHITE REPLACE_WITH_DASH_DASH- JUST CLOTH or WOOD!!! case 4 = 'Do not know';
+% 
+% maxclasval=max(scan.ClassificationData(:,4))
+% 
+% %Go through and plot the different data
+% figure(2);hold on;axis equal;
+% %set(gcf,'CurrentAxes',handles.axes3);
+% for current_mat=1:maxclasval
+%     temp=find(scan.ClassificationData(:,4)==current_mat);
+%     if ~isempty(temp)
+%         switch(current_mat)
+%             case (1) 
+%                 plotcolor=[.6 .6 .6];
+%             case (2) 
+%                 plotcolor=[.4 .4 .4];
+%             case (3) 
+%                 plotcolor=[1 0 0];
+%             case (4) 
+%                 plotcolor=[0.8 0.8 1];
+%         end        
+%         if current_mat~=5 plot3(scan.ClassificationData(temp,1),scan.ClassificationData(temp,2),scan.ClassificationData(temp,3),'Marker','.','Color',[plotcolor],'LineStyle','none');end;
+%     end
+% end
+% 
+% ClassifiedData=[];
+% colsiz=size(scan.ClassificationData,1)/size(scan.PointData,1);
+% 
+% for current_row=1:size(scan.PointData,1)
+%     ClassifiedData=[ClassifiedData;(scan.ClassificationData((current_row-1)*colsiz+1:current_row*colsiz,4)/maxclasval)'];
+% end
+% 
+% %figure, imshow(ClassifiedData);
+% 
+% %Median filtering
+% I2=medfilt2(ClassifiedData,[14 14]);
+% figure, imshow(I2);
+% 
+% Iedges=edge(I2,'canny');
+% %figure, imshow(Iedges);
+% 
+% [row,col]=ginput(1);  
+% while col>0 && col<size(Iedges,1) && row>0 && row<size(Iedges,2)        
+%     if col>0 && col<size(Iedges,1) && row>0 && row<size(Iedges,2)
+%         row=round(row)-1+find(Iedges(round(col),round(row):end)>0,1);
+%         boundary=bwtraceboundary(Iedges,[round(col), round(row)],'N');
+%         hold on;
+%         plot(boundary(:,2),boundary(:,1),'r','LineWidth',3);
+%     end
+%     [row,col]=ginput(1);
+% end
 
 
 %% Robot Functionality
@@ -2006,6 +2070,7 @@ catch
     % aabb = [-2, -1, 0; 2, 0.6, 2];
     
     aabb = [-1.5, -1.5, -1; 2, 1.5, 2];
+%     aabb = [-1.5, 0.3, -1; 2, 0.7, 2];
 %     if we want to show the whole environment
     if get(handles.all_mesh_checkbox,'value')==1
         aabb = [-20, -20, -20; 20, 20, 20];
@@ -2116,6 +2181,52 @@ else
     end
 end
 
+% REPLACE_WITH_DASH_DASH- Executes on button press in plot_classified_checkbox.
+function plot_classified_checkbox_Callback(hObject, eventdata, handles)
+global workspace classifiedplotHa
+
+if get(hObject,'Value')
+    display('Drawing plot')  
+    classifiedplotHa=[];
+    class_cubesize=workspace.class_cubesize;
+    
+    %determine the unknown places and the know metal or wood
+    sumofclass=workspace.ocgrid(:,4)+workspace.ocgrid(:,5);
+    warning('off','MATLAB:divideByZero')
+    try classifiedvoxels=find(sumofclass>=workspace.minclassifications &...
+                         (workspace.ocgrid(:,4)./workspace.ocgrid(:,5)>workspace.classfierthreshhold |...
+                          workspace.ocgrid(:,5)./workspace.ocgrid(:,4)>workspace.classfierthreshhold));end
+    try UNclassifiedvoxels=find(sumofclass<workspace.minclassifications | ...
+                         (workspace.ocgrid(:,4)./workspace.ocgrid(:,5)<=workspace.classfierthreshhold &...
+                          workspace.ocgrid(:,5)./workspace.ocgrid(:,4)<=workspace.classfierthreshhold));end
+    warning('on','MATLAB:divideByZero')
+    
+    %now plot this
+    hold on;
+    try classifiedplotHa(end+1)=plot3(workspace.ocgrid(UNclassifiedvoxels,1)*class_cubesize,...
+          workspace.ocgrid(UNclassifiedvoxels,2)*class_cubesize,...
+          workspace.ocgrid(UNclassifiedvoxels,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');end
+    %plot metal and wood voxels
+
+    metalvoxels=workspace.ocgrid(classifiedvoxels(workspace.ocgrid(classifiedvoxels,4)>workspace.ocgrid(classifiedvoxels,5)),1:3);
+    if size(metalvoxels,1)>0
+        try classifiedplotHa(end+1)=plot3(metalvoxels(:,1)*class_cubesize,metalvoxels(:,2)*class_cubesize,metalvoxels(:,3)*class_cubesize,'r.');end
+    end
+
+    woodvoxels=workspace.ocgrid(classifiedvoxels(workspace.ocgrid(classifiedvoxels,4)<workspace.ocgrid(classifiedvoxels,5)),1:3);
+    if size(woodvoxels,1)>0
+        try classifiedplotHa(end+1)=plot3(woodvoxels(:,1)*class_cubesize,woodvoxels(:,2)*class_cubesize,woodvoxels(:,3)*class_cubesize,'b.');end
+    end
+
+    drawnow
+
+else
+    display('Removing plot')
+    for i=1:length(classifiedplotHa);  try delete(classifiedplotHa(i));end; end
+    clear global classifiedplotHa
+    
+end
+
 % REPLACE_WITH_DASH_DASH- Executes on button press in show_unknownpoints_checkbox.
 function show_unknownpoints_checkbox_Callback(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
 global guiglobal workspace
@@ -2173,11 +2284,14 @@ end
 
 % REPLACE_WITH_DASH_DASH- Executes on button press in zoom_pushbutton.
 function zoom_pushbutton_Callback(hObject, eventdata, handles)
-zoom on;
+% zoom on;
+view(116,18)
+keyboard
+
 
 %this function is used to collect the data for exploration to compare new info
 function state_data=collectdata(state_data)
-global workspace
+global workspace Q
 if isempty(state_data)
     state_data.knownweight=calknownweight();
     state_data.unknownweight=calunknownweight();   
@@ -2185,6 +2299,7 @@ if isempty(state_data)
     state_data.size_unknown=size(setdiff(round(workspace.unknowncoords/workspace.inc_size),round(workspace.knowncoords/workspace.inc_size),'rows'),1);
     state_data.size_indexedobsticles=size(workspace.indexedobsticles,1);
     state_data.time=0;state_data.starttime=clock;
+    state_data.Q=Q;
 else
     state_data.knownweight=[state_data.knownweight,calknownweight()];
     state_data.unknownweight=[state_data.unknownweight,calunknownweight()];
@@ -2192,9 +2307,18 @@ else
     state_data.size_unknown=[state_data.size_unknown,size(setdiff(round(workspace.unknowncoords/workspace.inc_size),round(workspace.knowncoords/workspace.inc_size),'rows'),1)];
     state_data.size_indexedobsticles=[state_data.size_indexedobsticles,size(workspace.indexedobsticles,1)];
     state_data.time=[state_data.time,etime(clock,state_data.starttime)];
+    state_data.Q=[state_data.Q;Q];
 end    
 
-
+% REPLACE_WITH_DASH_DASH- Executes on button press in savefig_pushbutton.
+function savefig_pushbutton_Callback(hObject, eventdata, handles)
+try 
+    AXBAMnCtesting();
+catch
+    lasterr
+    keyboard
+end
+            
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Not Used By Me
@@ -2283,63 +2407,26 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+%this is for the edit box of how many planes of interest we are going to go
+%through
+function AXBAMnC_directs_edit_Callback(hObject, eventdata, handles)
+function AXBAMnC_directs_edit_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
 
-% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
-function Untitled_1_Callback(hObject, eventdata, handles)
-% hObject    handle to Untitled_1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
-function Untitled_2_Callback(hObject, eventdata, handles)
-% hObject    handle to Untitled_2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
-function Untitled_3_Callback(hObject, eventdata, handles)
-% hObject    handle to Untitled_3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
-function Untitled_4_Callback(hObject, eventdata, handles)
-% hObject    handle to Untitled_4 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
-function Untitled_5_Callback(hObject, eventdata, handles)
-% hObject    handle to Untitled_5 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% REPLACE_WITH_DASH_DASH- Executes on button press in all_mesh_checkbox.
-function all_mesh_checkbox_Callback(hObject, eventdata, handles)
-% hObject    handle to all_mesh_checkbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of all_mesh_checkbox
-
-
-
-
+function numofdir_AXBAMnC_edit_Callback(hObject, eventdata, handles)
+function numofdir_AXBAMnC_edit_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
 
 function rot_scan_deg_edit_Callback(hObject, eventdata, handles)
-
-
 % REPLACE_WITH_DASH_DASH- Executes during object creation, after setting all properties.
 function rot_scan_deg_edit_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
 
 % REPLACE_WITH_DASH_DASH- Executes on button press in scanwhilemove_checkbox.
 function scanwhilemove_checkbox_Callback(hObject, eventdata, handles)
@@ -2347,8 +2434,30 @@ function scanwhilemove_checkbox_Callback(hObject, eventdata, handles)
 % REPLACE_WITH_DASH_DASH- Executes on button press in remv_unkn_in_mv_checkbox.
 function remv_unkn_in_mv_checkbox_Callback(hObject, eventdata, handles)
 
+% REPLACE_WITH_DASH_DASH- Executes on button press in doclassification_checkbox.
+function doclassification_checkbox_Callback(hObject, eventdata, handles)
+
+% REPLACE_WITH_DASH_DASH- Executes during object creation, after setting all properties.
+function minClassifications_edit_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+function minClassifications_edit_Callback(hObject, eventdata, handles)
+global workspace
+workspace.minclassifications=str2double(get(hObject,'String'));
+
+% REPLACE_WITH_DASH_DASH- Executes during object creation, after setting all properties.
+function classification_ration_edit_CreateFcn(hObject, eventdata, handles)
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+function classification_ration_edit_Callback(hObject, eventdata, handles)
+global workspace
+workspace.classfierthreshhold=str2double(get(hObject,'String'));
 
 
+%% dont know why this is needed, can't find the button for it
+function Untitled_1_Callback(hObject, eventdata, handles)
 
 ##### SOURCE END #####
 -->

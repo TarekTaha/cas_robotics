@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>setupworkspace</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2008-01-14">
+      <meta name="date" content="2008-06-19">
       <meta name="m-file" content="setupworkspace"><style>
 
 body {
@@ -265,6 +265,15 @@ drawnow
 <span class="keyword">end</span>
 
 workspace.spec_pnts=[];
+
+<span class="comment">%the classification cube size</span>
+workspace.class_cubesize=workspace.inc_size/4;
+
+<span class="comment">%variables for the classification threshholds</span>
+<span class="comment">%minimum number of classifications in voxel to make it valid</span>
+workspace.minclassifications=30;
+<span class="comment">% minimmum majority classification to make it useful</span>
+workspace.classfierthreshhold=1.5;
 </pre><p class="footer"><br>
             Published with MATLAB&reg; 7.4<br></p>
       </div>
@@ -463,6 +472,15 @@ if showunknownpnts
 end
 
 workspace.spec_pnts=[];
+
+%the classification cube size
+workspace.class_cubesize=workspace.inc_size/4;
+
+%variables for the classification threshholds
+%minimum number of classifications in voxel to make it valid
+workspace.minclassifications=30;
+% minimmum majority classification to make it useful
+workspace.classfierthreshhold=1.5;
 
 ##### SOURCE END #####
 -->

@@ -1,3 +1,6 @@
+%% makeindex
+% Description: This file goes through all filen inthe current directory and
+% makes a html folder and documents the code with an index.html file
 
 function makeindex()
 clear all;

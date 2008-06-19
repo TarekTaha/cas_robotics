@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>demopath</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2008-01-14">
+      <meta name="date" content="2008-06-19">
       <meta name="m-file" content="demopath_new"><style>
 
 body {
@@ -198,6 +198,7 @@ p.footer {
             pointsH=[pointsH;temppointsH];
 
             drawnow;
+            pause(0.2)
         <span class="keyword">end</span>
 
         <span class="comment">%it will go through an check either side (completely) of the</span>
@@ -253,7 +254,7 @@ p.footer {
         axis([-1 1 -1 1 0 1.5]);
 <span class="comment">%         grid on;</span>
 <span class="comment">%         rotate3d on;</span>
-        <span class="comment">%pause(3)</span>
+<span class="comment">%         pause(3)</span>
 <span class="comment">%         rotate3d off;</span>
         <span class="comment">%print('-dpng', sprintf('%s_%03.0f_%03.0f.png', 'demopath',current_path, current_step));</span>
 
@@ -411,7 +412,8 @@ for current_path=1:size(pathdata,2)
             %add plot handle to the stack so that it can be deleted
             pointsH=[pointsH;temppointsH];        
 
-            drawnow;        
+            drawnow;   
+            pause(0.2)
         end
         
         %it will go through an check either side (completely) of the
@@ -467,7 +469,7 @@ for current_path=1:size(pathdata,2)
         axis([-1 1 -1 1 0 1.5]);
 %         grid on;
 %         rotate3d on;
-        %pause(3)
+%         pause(3)
 %         rotate3d off;
         %print('-dpng', sprintf('%s_%03.0f_%03.0f.png', 'demopath',current_path, current_step));
         

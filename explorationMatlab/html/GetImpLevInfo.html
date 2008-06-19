@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>GetImpLevInfo</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2008-01-14">
+      <meta name="date" content="2008-06-19">
       <meta name="m-file" content="GetImpLevInfo"><style>
 
 body {
@@ -122,9 +122,9 @@ level1=[];level2=[];
             sqrt((vals(level2,1)-robot_maxreach.firstlinkpos(1)).^2+<span class="keyword">...</span>
                  (vals(level2,2)-robot_maxreach.firstlinkpos(2)).^2+<span class="keyword">...</span>
                  (vals(level2,3)-robot_maxreach.firstlinkpos(3)).^2)&lt;robot_maxreach.val &amp;<span class="keyword">...</span>
-                 (vals(level2,1)&lt;workspace.robotsize(1,1) | vals(level2,1)&gt;workspace.robotsize(1,2)) |<span class="keyword">...</span>
+                 ((vals(level2,1)&lt;workspace.robotsize(1,1) | vals(level2,1)&gt;workspace.robotsize(1,2)) |<span class="keyword">...</span>
                  (vals(level2,2)&lt;workspace.robotsize(2,1) | vals(level2,2)&gt;workspace.robotsize(2,2)) |<span class="keyword">...</span>
-                 (vals(level2,3)&lt;workspace.robotsize(3,1) | vals(level2,3)&gt;workspace.robotsize(3,2))));
+                 (vals(level2,3)&lt;workspace.robotsize(3,1) | vals(level2,3)&gt;workspace.robotsize(3,2)))));
     <span class="keyword">end</span>
 <span class="keyword">end</span>
 </pre><p class="footer"><br>
@@ -187,9 +187,9 @@ if size(level3,2)>0
             sqrt((vals(level2,1)-robot_maxreach.firstlinkpos(1)).^2+...
                  (vals(level2,2)-robot_maxreach.firstlinkpos(2)).^2+...
                  (vals(level2,3)-robot_maxreach.firstlinkpos(3)).^2)<robot_maxreach.val &...
-                 (vals(level2,1)<workspace.robotsize(1,1) | vals(level2,1)>workspace.robotsize(1,2)) |...
+                 ((vals(level2,1)<workspace.robotsize(1,1) | vals(level2,1)>workspace.robotsize(1,2)) |...
                  (vals(level2,2)<workspace.robotsize(2,1) | vals(level2,2)>workspace.robotsize(2,2)) |...
-                 (vals(level2,3)<workspace.robotsize(3,1) | vals(level2,3)>workspace.robotsize(3,2))));
+                 (vals(level2,3)<workspace.robotsize(3,1) | vals(level2,3)>workspace.robotsize(3,2)))));
     end
 end
 ##### SOURCE END #####
