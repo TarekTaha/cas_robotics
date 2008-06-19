@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>setupscanner</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2008-01-14">
+      <meta name="date" content="2008-06-19">
       <meta name="m-file" content="setupscanner"><style>
 
 body {
@@ -129,6 +129,7 @@ scan.numpntsInCube=1; <span class="comment">% this can be anything greater than 
 <span class="comment">% we don't want to have to do the scan projection everytime so we will load</span>
 <span class="comment">% it, however if any of the parameters (alpha theta) change then it will be</span>
 <span class="comment">% incorrect. Also variables from workspace global var are used too</span>
+<span class="comment">% uiwait(msgbox('Not loading basic_scan exploration data'));</span>
 <span class="keyword">try</span> load(<span class="string">'basic_scan_data.mat'</span>);
     <span class="comment">% scan.basescan=-1*basic_scan_data;</span>
     scan.basescan=basescan;
@@ -139,10 +140,11 @@ scan.numpntsInCube=1; <span class="comment">% this can be anything greater than 
 <span class="comment">%and is used in nbv_beta since this has predefined poses</span>
 scan.done_bestviews_orfailed=[inf, inf, inf, inf, inf, inf];
 
-<span class="keyword">try</span> load <span class="string">all_views.mat</span>
-<span class="keyword">catch</span>
-    display(<span class="string">'Cant call or load all_views.mat'</span>);
-<span class="keyword">end</span>
+uiwait(msgbox(<span class="string">'Not loading all_views exploration data'</span>));
+<span class="comment">% try load all_views.mat</span>
+<span class="comment">% catch</span>
+<span class="comment">%     display('Cant call or load all_views.mat');</span>
+<span class="comment">% end</span>
 </pre><p class="footer"><br>
             Published with MATLAB&reg; 7.4<br></p>
       </div>
@@ -203,6 +205,7 @@ scan.numpntsInCube=1; % this can be anything greater than 0, a value of 0.5 woul
 % we don't want to have to do the scan projection everytime so we will load
 % it, however if any of the parameters (alpha theta) change then it will be
 % incorrect. Also variables from workspace global var are used too
+% uiwait(msgbox('Not loading basic_scan exploration data'));
 try load('basic_scan_data.mat');
     % scan.basescan=-1*basic_scan_data;
     scan.basescan=basescan;
@@ -213,10 +216,12 @@ end
 %and is used in nbv_beta since this has predefined poses
 scan.done_bestviews_orfailed=[inf, inf, inf, inf, inf, inf];
 
-try load all_views.mat
-catch
-    display('Cant call or load all_views.mat');
-end
+uiwait(msgbox('Not loading all_views exploration data'));
+% try load all_views.mat
+% catch
+%     display('Cant call or load all_views.mat');
+% end
+
 ##### SOURCE END #####
 -->
    </body>

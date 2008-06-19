@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>explore</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2008-01-14">
+      <meta name="date" content="2008-06-19">
       <meta name="m-file" content="explore"><style>
 
 body {
@@ -157,6 +157,19 @@ p.footer {
     use_real_robot_GETJs();
     <span class="comment">%this sort out the points that we have got from a scan</span>
     organise_data();
+    <span class="comment">%if we want to do the classify and update voxels then we will do this here</span>
+    <span class="keyword">if</span> get(h.doclassification_checkbox,<span class="string">'value'</span>)
+        <span class="keyword">global</span> PointData IntensityData RangeData;
+        [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData);
+        UNclassifiedvoxels=update_ocstatus(ClassifiedData);
+        <span class="comment">%try and save the current status, if user ctrl+c s out it dosen't matter</span>
+        <span class="keyword">try</span> AXBAMnCtesting(false);
+        <span class="keyword">catch</span>
+            lasterr
+            keyboard
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
 <span class="keyword">end</span>
 </pre><h2>Display results<a name="7"></a></h2><pre class="codeinput"><span class="comment">% print results this exploration step details</span>
 display(<span class="string">'. . . . . . . . . . . . . . . . . . . . . . . . '</span>);
@@ -277,6 +290,19 @@ else
     use_real_robot_GETJs();    
     %this sort out the points that we have got from a scan
     organise_data();
+    %if we want to do the classify and update voxels then we will do this here
+    if get(h.doclassification_checkbox,'value')
+        global PointData IntensityData RangeData;
+        [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData); 
+        UNclassifiedvoxels=update_ocstatus(ClassifiedData); 
+        %try and save the current status, if user ctrl+c s out it dosen't matter
+        try AXBAMnCtesting(false);
+        catch
+            lasterr
+            keyboard
+        end
+    end
+
 end
 
 %% Display results

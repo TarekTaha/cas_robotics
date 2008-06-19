@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>special_map_area</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2008-01-14">
+      <meta name="date" content="2008-06-19">
       <meta name="m-file" content="special_map_area"><style>
 
 body {
@@ -164,13 +164,15 @@ ALLspec_pnts_ind=[];
     <span class="keyword">end</span>
 <span class="keyword">end</span>
 
-<span class="comment">%make it not an index anymore by real points</span>
-workspace.spec_pnts=unique([ALLspec_pnts_ind*workspace.inc_size;workspace.spec_pnts],<span class="string">'rows'</span>);
+<span class="comment">%if we have any special points to add</span>
+<span class="keyword">if</span> size(ALLspec_pnts_ind,1)&gt;0
+    <span class="comment">%make it not an index anymore by real points</span>
+    workspace.spec_pnts=unique([ALLspec_pnts_ind*workspace.inc_size;workspace.spec_pnts],<span class="string">'rows'</span>);
 
-<span class="comment">%normalise to the workspace size</span>
-workspace.spec_pnts=round(workspace.spec_pnts/workspace.inc_size)*workspace.inc_size;
-workspace.spec_pnts=setdiff(workspace.spec_pnts,[workspace.knowncoords;workspace.indexedobsticles],<span class="string">'rows'</span>);
-
+    <span class="comment">%normalise to the workspace size</span>
+    workspace.spec_pnts=round(workspace.spec_pnts/workspace.inc_size)*workspace.inc_size;
+    workspace.spec_pnts=setdiff(workspace.spec_pnts,[workspace.knowncoords;workspace.indexedobsticles],<span class="string">'rows'</span>);
+<span class="keyword">end</span>
 <span class="comment">% plot3(workspace.spec_pnts(:,1),workspace.spec_pnts(:,2),workspace.spec_pnts(:,3),'k*');</span>
 <span class="comment">% hold on;</span>
 <span class="comment">% plot3(PointData(:,:,1),PointData(:,:,2),PointData(:,:,3),'g.')</span>
@@ -273,13 +275,15 @@ for i=1:2:size(diffCol,1)
     end
 end
 
-%make it not an index anymore by real points
-workspace.spec_pnts=unique([ALLspec_pnts_ind*workspace.inc_size;workspace.spec_pnts],'rows');
+%if we have any special points to add
+if size(ALLspec_pnts_ind,1)>0
+    %make it not an index anymore by real points
+    workspace.spec_pnts=unique([ALLspec_pnts_ind*workspace.inc_size;workspace.spec_pnts],'rows');
 
-%normalise to the workspace size
-workspace.spec_pnts=round(workspace.spec_pnts/workspace.inc_size)*workspace.inc_size;
-workspace.spec_pnts=setdiff(workspace.spec_pnts,[workspace.knowncoords;workspace.indexedobsticles],'rows');
-
+    %normalise to the workspace size
+    workspace.spec_pnts=round(workspace.spec_pnts/workspace.inc_size)*workspace.inc_size;
+    workspace.spec_pnts=setdiff(workspace.spec_pnts,[workspace.knowncoords;workspace.indexedobsticles],'rows');
+end
 % plot3(workspace.spec_pnts(:,1),workspace.spec_pnts(:,2),workspace.spec_pnts(:,3),'k*');
 % hold on;
 % plot3(PointData(:,:,1),PointData(:,:,2),PointData(:,:,3),'g.')

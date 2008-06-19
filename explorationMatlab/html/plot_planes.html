@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>plot_planes</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2008-01-14">
+      <meta name="date" content="2008-06-19">
       <meta name="m-file" content="plot_planes"><style>
 
 body {
@@ -82,9 +82,10 @@ p.footer {
          <div>
             <ul>
                <li><a href="#1">Function Call</a></li>
-               <li><a href="#2">Variables</a></li>
-               <li><a href="#3">Go throuh each plane and fit in shifted sphere</a></li>
-               <li><a href="#4">Find which points on sphere correspond to where plane crosses</a></li>
+               <li><a href="#2">allow people to pass in wether to fill the disks or not</a></li>
+               <li><a href="#3">Variables</a></li>
+               <li><a href="#4">Go throuh each plane and fit in shifted sphere</a></li>
+               <li><a href="#5">Find which points on sphere correspond to where plane crosses</a></li>
             </ul>
          </div>
          <h2>Function Call<a name="1"></a></h2>
@@ -94,8 +95,11 @@ p.footer {
          <p><i>mew</i> (double) radius of the planes
          </p>
          <p><b>Returns:</b> NULL
-         </p><pre class="codeinput"><span class="keyword">function</span> plot_handles=plot_planes(plane,mew)
-</pre><h2>Variables<a name="2"></a></h2><pre class="codeinput">plane_sphere_threshold=.01;
+         </p><pre class="codeinput"><span class="keyword">function</span> plot_handles=plot_planes(plane,mew,plotfill)
+</pre><h2>allow people to pass in wether to fill the disks or not<a name="2"></a></h2><pre class="codeinput"><span class="keyword">if</span> nargin&lt;3
+    plotfill=true;
+<span class="keyword">end</span>
+</pre><h2>Variables<a name="3"></a></h2><pre class="codeinput">plane_sphere_threshold=.01;
 
 <span class="comment">%start with a normal sphere described by 20 points</span>
 [base_x,base_y,base_z]=sphere(30);
@@ -106,13 +110,13 @@ base_z=base_z*mew;
 <span class="comment">%for each plane</span>
 plot_handles=zeros([length(plane),1]);
 hold <span class="string">on</span>;
-</pre><h2>Go throuh each plane and fit in shifted sphere<a name="3"></a></h2>
+</pre><h2>Go throuh each plane and fit in shifted sphere<a name="4"></a></h2>
          <p><img vspace="5" hspace="5" src="plot_planes_eq2303396.png"> </p><pre class="codeinput"><span class="keyword">for</span> i=1:length(plane)
     <span class="comment">%Set a sphere to have a center at home point</span>
     locuspts_x=base_x+plane(i).home_point(1);
     locuspts_y=base_y+plane(i).home_point(2);
     locuspts_z=base_z+plane(i).home_point(3);
-</pre><h2>Find which points on sphere correspond to where plane crosses<a name="4"></a></h2>
+</pre><h2>Find which points on sphere correspond to where plane crosses<a name="5"></a></h2>
          <p><img vspace="5" hspace="5" src="plot_planes_eq3286603.png"> </p><pre class="codeinput">    pts_to_check=plane(i).equ(1)*locuspts_x+<span class="keyword">...</span>
                  plane(i).equ(2)*locuspts_y+<span class="keyword">...</span>
                  plane(i).equ(3)*locuspts_z+<span class="keyword">...</span>
@@ -124,10 +128,17 @@ hold <span class="string">on</span>;
      <span class="comment">%fill in the points which are considered to describe the plane.</span>
      <span class="comment">%From some angle this will appear as a circle, but it is a circle</span>
      <span class="comment">%rotated to fit on the plane</span>
-        plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),<span class="string">'b'</span>);
+     <span class="keyword">if</span> plotfill
+         plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),<span class="string">'b'</span>);
+     <span class="keyword">else</span>
+         plot_handles(i)=plot3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),<span class="string">'k'</span>);
+     <span class="keyword">end</span>
+
+
      <span class="keyword">else</span>
          pts_to_plot=find(abs(pts_to_check)&lt;plane_sphere_threshold*5);
-         plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),<span class="string">'b'</span>);
+<span class="comment">%          plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'b');</span>
+         plot_handles(i)=plot3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),<span class="string">'k'</span>);
      <span class="keyword">end</span>
 <span class="keyword">end</span>
 </pre><p class="footer"><br>
@@ -152,8 +163,12 @@ hold <span class="string">on</span>;
 %
 % *Returns:* NULL
 
-function plot_handles=plot_planes(plane,mew)
+function plot_handles=plot_planes(plane,mew,plotfill)
 
+%% allow people to pass in wether to fill the disks or not
+if nargin<3
+    plotfill=true;
+end
 %% Variables
 plane_sphere_threshold=.01;
 
@@ -199,10 +214,17 @@ for i=1:length(plane)
      %fill in the points which are considered to describe the plane.
      %From some angle this will appear as a circle, but it is a circle
      %rotated to fit on the plane
-        plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'b');        
+     if plotfill
+         plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'b');        
+     else
+         plot_handles(i)=plot3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'k');        
+     end
+
+        
      else
          pts_to_plot=find(abs(pts_to_check)<plane_sphere_threshold*5);
-         plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'b');        
+%          plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'b');        
+         plot_handles(i)=plot3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'k');        
      end
 end
 

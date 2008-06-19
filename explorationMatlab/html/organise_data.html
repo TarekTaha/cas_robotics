@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>organise_data</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2008-01-14">
+      <meta name="date" content="2008-06-19">
       <meta name="m-file" content="organise_data"><style>
 
 body {
@@ -243,7 +243,7 @@ valid_rows=find(dist);
         inbetweenpoint(:,3)=tempCOL;
     <span class="keyword">end</span>
 </pre><h2>Determine the cubes which the ray passed through within work (generous)<a name="9"></a></h2>
-         <p><img vspace="5" hspace="5" src="organise_data_eq1073527.png"> </p><pre class="codeinput">    cubes_checked=[int16(floor(inbetweenpoint/workspace.inc_size));int16(inbetweenpoint/workspace.inc_size)];
+         <p><img vspace="5" hspace="5" src="organise_data_eq1073527.png"> </p><pre class="codeinput">    cubes_checked=[int16(floor(inbetweenpoint/workspace.inc_size));int16(round(inbetweenpoint/workspace.inc_size))];
     <span class="comment">% Concaternate the cubes check which are in workspace with current list</span>
     markedcubes=[markedcubes;int16(cubes_checked((cubes_checked(:,1)&gt;=space_min_and_max(1) &amp;<span class="keyword">...</span>
                                                  cubes_checked(:,2)&gt;=space_min_and_max(2) &amp;<span class="keyword">...</span>
@@ -501,7 +501,7 @@ for i=[valid_rows]'
 % \lfloor \frac{inbetweenpoint}{inc\_size} \rfloor \\
 % \frac{inbetweenpoint}{inc\_size}
 % \end{array}\right]$$
-    cubes_checked=[int16(floor(inbetweenpoint/workspace.inc_size));int16(inbetweenpoint/workspace.inc_size)];
+    cubes_checked=[int16(floor(inbetweenpoint/workspace.inc_size));int16(round(inbetweenpoint/workspace.inc_size))];
     % Concaternate the cubes check which are in workspace with current list    
     markedcubes=[markedcubes;int16(cubes_checked((cubes_checked(:,1)>=space_min_and_max(1) &...
                                                  cubes_checked(:,2)>=space_min_and_max(2) &...

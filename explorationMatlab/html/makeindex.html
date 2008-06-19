@@ -11,7 +11,7 @@ To make changes, update the M-file and republish this document.
       -->
       <title>makeindex</title>
       <meta name="generator" content="MATLAB 7.4">
-      <meta name="date" content="2008-01-14">
+      <meta name="date" content="2008-06-19">
       <meta name="m-file" content="makeindex"><style>
 
 body {
@@ -70,7 +70,11 @@ p.footer {
 
   </style></head>
    <body>
-      <div class="content"><pre class="codeinput"><span class="keyword">function</span> makeindex()
+      <div class="content">
+         <h1>makeindex</h1>
+         <p>Description: This file goes through all filen inthe current directory and makes a html folder and documents the code with
+            an index.html file
+         </p><pre class="codeinput"><span class="keyword">function</span> makeindex()
 clear <span class="string">all</span>;
 a=dir;
 numMfiles=1;
@@ -176,6 +180,9 @@ fclose(fid);
       </div>
       <!--
 ##### SOURCE BEGIN #####
+%% makeindex
+% Description: This file goes through all filen inthe current directory and
+% makes a html folder and documents the code with an index.html file
 
 function makeindex()
 clear all;
