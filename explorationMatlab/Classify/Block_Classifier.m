@@ -2,6 +2,7 @@
 function [ClassifiedData] = Block_Classifier(PointData, IntensityData, RangeData) % this one uses edges from IntensityData Image
 
 warning('off');
+load('Classification_Criteria.mat');
 
 %% Flags
 do_smoothing = 0; %Set to 1 to do median filtering to smooth the classification result
@@ -81,7 +82,7 @@ if run_classifier == 1
         disp([int2str(ceil((i/(classiy_scan_range_end-classiy_scan_range_start))*100)), '% complete']);
     end
         try % I use try as sometimes the classifier crashes for an unknown reason
-            found_lines = Classifier(PointData, IntensityDatatoUse, RangeData, i, Iedges); % this one uses edges from IntensityData Image
+            found_lines = Classifier(PointData, IntensityDatatoUse, RangeData, i, Iedges,HParas); % this one uses edges from IntensityData Image
             % This creates the classfier output matrix. The matrix is in the same
             % format as PointData, IntensityData, etc      
             number_of_lines = size(found_lines.line_start_end_points_smoothed,1); 

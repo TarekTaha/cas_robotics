@@ -1,9 +1,23 @@
 %% FUNCTION: Basic scan
 % Description: this traces out the lines and gets a group of points as the
 % basic scan 
+
+%% Function Call
+%
+% *Inputs:* 
+% 
+% _file_name_ (size, type string) what is its purpose?
+%
+% *Returns:* 
+% 
+% _points_ (3 *many) points where the scan finishes (discretised)
+%
+% _ice_cream_bounds_ (3 *many) points but undiscretised.... I think
+% 
+
 function [points,ice_cream_bounds]=basic_scan(cube_size)
 
-% global scan workspace
+%% Variables
 
 %starttime=clock;
 
@@ -36,7 +50,7 @@ alpha=-20*pi/180;
 theta_incr=atan((cube_size/3)/las_range);
 %we have an actual min resoltion in hardware so this is the minmum
 if theta_incr<0.36*(pi/180);
-    theta_incr=0.36*(pi/180);;
+    theta_incr=0.36*(pi/180);
 end
     
 %% Take the scan - work out end points
@@ -187,7 +201,7 @@ end
 
 
 %% FUNCTION: delete_scan_lines
-%This cleans up the lines from a scan
+% This cleans up the lines from a scan
 
 function delete_scan_lines(scan_line_handles,scan_point_handles)
 

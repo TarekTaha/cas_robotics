@@ -81,7 +81,13 @@ for current_point=1:size(scan_data,1)
                                   scan_data(distance_between.closest_indices,2)-mean_to_sub(2),...
                                   scan_data(distance_between.closest_indices,3)-mean_to_sub(3)];    
             %get the convergance matrix of points and eigen values and vectors
-            convergange_mat=cov(scan_data_minusmean);
+%             convergange_mat=cov(scan_data_minusmean);
+            
+            %new way to do cov function
+            length_of_data = size(data_minusmean,1);
+            convergange_mat = (data_minusmean' * data_minusmean) / (length_of_data-1); 
+
+
             [eigenvectors,eigenvalues]=eig(convergange_mat);
             %make into a 3*1 matrix so we have each eigenvalue
             eigenvalues=eigenvalues*[1;1;1];

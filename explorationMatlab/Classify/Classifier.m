@@ -1,6 +1,6 @@
 %% WHEN USING STEVENS/GAVINS MATLAB LASER DATA COLLECTION
 
-function [found_lines] = Classifier(PointData, IntensityData, RangeData, Scan_to_Class, Iedges) % this one uses edges from IntensityData Image
+function [found_lines] = Classifier(PointData, IntensityData, RangeData, Scan_to_Class, Iedges, HParas) % this one uses edges from IntensityData Image
 
 if (exist('Iedges','var')) == 0 % this is so you can call Classifier without Iedges
     Iedges(size(PointData,1),size(PointData,2)) = 0;
@@ -8,6 +8,7 @@ end
 
 main_plot_figure = 1;
 
+usegavin_polyfit=1;
 %% WHEN USING MY GET LASER DATA OR PLY FILES
 % function Classifier() 
 % global scans_cart
@@ -74,10 +75,31 @@ end
 %     %SPEED BOOST This makes the lines a little less acurate but speed up the classifier
     use_points_set_sizes_of = 8+(floor(rand()*6));
     on_line_threshold = 70; %allows noisey points to be considered to be on the line 
+    
+    
+%% new polyfit    
+
+if usegavin_polyfit
+%new one
+    [tempx1,tempx0]= polyfit_gp(scans_cart.rangeX(3-number_of_points_on_line:3),scans_cart.rangeY(3-number_of_points_on_line:3),1);
+    line_parameters=[tempx1,tempx0];
+else
+    % old one
     line_parameters = polyfit(scans_cart.rangeX(3-number_of_points_on_line:3),scans_cart.rangeY(3-number_of_points_on_line:3),1);
+end
+%%
+
+
     for i = 3:number_of_points
         if mod(i,use_points_set_sizes_of) == 0 %This makes the lines a little less acurate but speed up the classifier
-            line_parameters = polyfit(scans_cart.rangeX(i-number_of_points_on_line:i),scans_cart.rangeY(i-number_of_points_on_line:i),1);
+            if usegavin_polyfit
+            %new one
+                [tempx1,tempx0]= polyfit_gp(scans_cart.rangeX(i-number_of_points_on_line:i),scans_cart.rangeY(i-number_of_points_on_line:i),1);
+                line_parameters=[tempx1,tempx0];
+            else
+            % old one
+                line_parameters = polyfit(scans_cart.rangeX(i-number_of_points_on_line:i),scans_cart.rangeY(i-number_of_points_on_line:i),1);
+            end
         end
     
     %SLOWER BUT MORE ACCURATE - But emphasises RANSAC's vertical line problem       
@@ -120,7 +142,15 @@ end
     %Smooths out detected lines
     for i = 1:number_of_lines
         clear lines;
-        line_parameters = polyfit(scans_cart.rangeX(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)),scans_cart.rangeY(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)),1);
+        if usegavin_polyfit
+        %new one
+            [tempx1,tempx0]= polyfit_gp(scans_cart.rangeX(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)),scans_cart.rangeY(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)),1);
+            line_parameters=[tempx1,tempx0];
+        else
+        % old one
+            line_parameters = polyfit(scans_cart.rangeX(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)),scans_cart.rangeY(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)),1);
+        end
+        
         lines(1,:) = scans_cart.rangeX(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)); % fitted line X values
         lines(2,:) = line_parameters(1)*scans_cart.rangeX(found_lines.line_start_end_points(i,1):found_lines.line_start_end_points(i,2)) + line_parameters(2); % fitted line Y values
         gradient_fit_line(i) = (lines(2,1)-lines(2,end))/(lines(1,1)- lines(1,end));
@@ -150,7 +180,15 @@ end
     %Draws on detected lines and SHOULD check for any none valid lines (lines that go through the lasers (0,0)
     for i = 1:found_lines.number_of_lines_smoothed
         clear lines;
-        line_parameters = polyfit(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)),1);
+        if usegavin_polyfit
+        %new one
+            [tempx1,tempx0]= polyfit_gp(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)),1);
+            line_parameters=[tempx1,tempx0];
+        else
+        % old one
+            line_parameters = polyfit(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)),1);
+        end      
+        
         lines(1,:) = scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)); % fitted line X values
         lines(2,:) = line_parameters(1)*scans_cart.rangeX(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2)) + line_parameters(2); % fitted line Y values
         lines(3,:) = scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(i,1):found_lines.line_start_end_points_smoothed(i,2));
@@ -481,7 +519,7 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
 % end  
 
 %% Probability Based Classifier
-    load('Classification_Criteria.mat');
+%     load('Classification_Criteria.mat');
 
     lhoods.liki_ratio_varis = [];
 
