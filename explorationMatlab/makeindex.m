@@ -16,6 +16,7 @@ for i=1:size(a,1)
     [b,c]=strtok(a(i).name,'.');
     if strcmp(c(2:end),'m')
         mfilenames(numMfiles).val=b;
+        mfilenames(numMfiles).description=[];
         mfilenames(numMfiles).calledby=[];
         mfilenames(numMfiles).calls=[];
         mfilenames(numMfiles).globals=[];
@@ -24,7 +25,30 @@ for i=1:size(a,1)
 %         if result~=0
 %             [result,output]=system(strcat('f:\bin\GnuWin32\bin\grep -H "',char(mfilenames(numMfiles).val),'(" *.m'));
 %         end
-        
+
+%% Read description from header of file
+
+tempfn=fopen(char([mfilenames(numMfiles).val,'.m']));
+linebyline=textscan(tempfn,'%s','delimiter', '\n');
+current_line=3;
+while ~strcmp(char(linebyline{1}{current_line}),'')    
+    [remaining,nothing]=strtok(char(linebyline{1}{current_line}),'%');
+    if isempty(mfilenames(numMfiles).description) && (strcmp(remaining,'') || strcmp(remaining,' '))
+        mfilenames(numMfiles).description='<b> None Valid </b>';
+        break;
+    else
+        if isempty(mfilenames(numMfiles).description)
+            mfilenames(numMfiles).description=remaining;
+        else
+            mfilenames(numMfiles).description=[mfilenames(numMfiles).description,'<br>',remaining];
+        end
+    end      
+    current_line=current_line+1;
+end
+
+fclose(tempfn);
+
+%% Determine function which call this function
         while (result==0 && size(output,2)>0)
             [templine,output]=strtok(output,char(10));
             calledbyfile =strtrim(strtok(templine,'.'));
@@ -39,6 +63,7 @@ for i=1:size(a,1)
 %             [result,output]=system(['f:\bin\GnuWin32\bin\grep -H -w "global" ',mfilenames(numMfiles).val,'.m']);
 %         end
 
+%% Determine globals used in this function
         while (result==0 && size(output,2)>0)
             [templine,output]=strtok(output,char(10));            
             [preceeding,globalvars]=strtok(templine,char(32));
@@ -81,7 +106,7 @@ cd html
 fid=fopen('index.html','w');
 fprintf(fid,'%s\n\r%s\n\r%s\n\r%s\n\r%s\n\r','<html>','<head>','<H1>Exploration Matlab Code</H1>','<H2> &copy Gavin Paul 2007</h2>','</head>');
 fprintf(fid,'%s\n\r','<table border="1" width="100%">');
-fprintf(fid,'%s\n\r','<tr><th width="15%">File (function)</th><th width="30%">Calls</th><th width="30%">Called By</th><th width="25%">Globals Used</th></tr>');
+fprintf(fid,'%s\n\r','<tr><th width="15%">File (function)</th><th width="26%">Description</th><th width="24%">Calls</th><th width="24%">Called By</th><th width="11%">Globals Used</th></tr>');
 
 
 %go through and print out each line out
@@ -94,7 +119,8 @@ for i=1:size(mfilenames,2)
         fprintf(fid,'%s\n\r',strcat('<td>',mfilenames(i).val,' (No HTML file)</td>'));
     end
 
-    fprintf(fid,'%s',strcat('<td>',mfilenames(i).calls,'</td>'));
+    fprintf(fid,'%s',strcat('<td>',mfilenames(i).description,'</td>'));
+    fprintf(fid,'%s',strcat('<td>',mfilenames(i).calls,'</td>'));    
     fprintf(fid,'%s',strcat('<td>',mfilenames(i).calledby,'</td>'));
     fprintf(fid,'%s',strcat('<td>',mfilenames(i).globals,'</td>'));
 
@@ -103,4 +129,3 @@ end
 
 fprintf(fid,'%s','</body></html>');
 fclose(fid);
-
