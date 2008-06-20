@@ -1,3 +1,14 @@
+%% Template_m_file
+%
+% *Description*: nothing Yet
+
+%% Function Call
+%
+% *Inputs:* plotdirectedC (size, type) what is its purpose?
+%
+% *Returns:* NULL
+
+
 function AXBAMnCtesting(plotdirectedC)
 %plot the current mesh and robot
 global r Q robmap_h workspace
