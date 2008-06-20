@@ -8,7 +8,9 @@
 
 %% Function Call
 %
-% *Inputs:* file_name (size, type string) what is its purpose?
+% *Inputs:* 
+%
+% _file_name_ (size, type string) what is its purpose?
 %
 % *Returns:* NULL
 
@@ -64,7 +66,8 @@ if ~strcmp(inputvars{current_val},'-1')
         if current_val==1
             outputdata{1}{7}={['% *Inputs:* ',name,' (size?, type?) ', descript]};
         else
-            outputdata{1}{end+1}={['%           ',name,' (size?, type?) ', descript]};
+            outputdata{1}{end+1}={'%'};
+            outputdata{1}{end+1}={['% _',name,'_ (size?, type?) ', descript]};
         end
         allinputvars=[char(allinputvars),name];
         current_val=current_val+1;
@@ -83,7 +86,8 @@ if ~strcmp(outputvars{current_val},'-1')
         if current_val==1
             outputdata{1}{end+1}={['% *Outputs:* ',name,' (size?, type?) ', descript]};
         else
-            outputdata{1}{end+1}={['%           ',name,' (size?, type?) ', descript]};
+            outputdata{1}{end+1}={'%'};
+            outputdata{1}{end+1}={['% _',name,'_ (size?, type?) ', descript]};
         end
         alloutputvars=[char(alloutputvars),name];
         current_val=current_val+1;

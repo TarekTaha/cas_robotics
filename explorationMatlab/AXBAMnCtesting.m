@@ -1,15 +1,19 @@
-%% Template_m_file
+%% AXBAMnCtesting
 %
-% *Description*: nothing Yet
+% *Description*: This is for plotting the current state of the output of
+% the classification
 
 %% Function Call
 %
-% *Inputs:* plotdirectedC (size, type) what is its purpose?
+% *Inputs:* 
+%
+% _plotdirectedC_ (binary) Whether or not to plot the direction
 %
 % *Returns:* NULL
 
-
 function AXBAMnCtesting(plotdirectedC)
+
+%% Variables
 %plot the current mesh and robot
 global r Q robmap_h workspace
 if nargin==0
@@ -28,7 +32,7 @@ plotunknown=input('Do you want to plot the unknown voxels 1=yes, 0=no');
     
 testdir='C:\Documents and Settings\RTA computer\My Documents\My Pictures\';
 
-%% plot the current mesh and robot
+%% Plot the current mesh and robot
 figure
 plotdenso(r,Q)
 camlight
@@ -42,6 +46,7 @@ axis equal
 view(116,18)
 saveas(gcf,[testdir,'AXBAMnC_Test',testnum,'Scan',scannum,'_meshNrobot.fig']);
 close gcf
+
 %% plot the current classification and robot
 figure
 plotdenso(r,Q)
