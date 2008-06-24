@@ -31,7 +31,17 @@ end
 %% Variables
 theta_between_rays = 0.351 * pi/180; %angle between laser rays;
 
+main_plot_figure = 1;
+
 usegavin_func=1;
+%% WHEN USING MY GET LASER DATA OR PLY FILES
+% function Classifier() 
+% global scans_cart
+% global found_lines
+
+%% TURNS PLOTTING ON OR OFF
+dont_plot = 1; % 0 to plot
+erase_mode = 'xor'; %'xor' speeds up plots but makes them a bit uglier
 
 %% Change data from Stevens format to my format
 %range
@@ -45,6 +55,17 @@ angle = size_data * theta_between_rays * 2;
 theta = -angle/2:theta_between_rays*2:+angle/2;
 scans_cart.intensityX = sin(theta(Scan_to_Class)) * IntensityData(Scan_to_Class,:)';
 scans_cart.intensityY = cos(theta(Scan_to_Class)) * IntensityData(Scan_to_Class,:)';
+
+%% PLOT THE LASER DATA
+if dont_plot == 0
+    colordef black;
+    figure(main_plot_figure);
+    %set(1,'name','Point Cloud','Position', [ 570 530 600 400 ]);%hold off;   
+    plot3(scans_cart.rangeX,scans_cart.rangeY, scans_cart.rangeZ, '.', 'linestyle','none', 'markersize',1, 'markeredgecolor', [0.75 0.75 0.75],'EraseMode',erase_mode);    
+    view(-180,180)
+    hold on;
+    %axis equal;%axis ([ -1000 700 1250 1750 -700 700 ])
+end
 
 %% FIND ALL FLAT SURFACES IN THE LASER DATA
 % Initalise variables    
@@ -76,9 +97,7 @@ else % old one
 end
 
 %use fewer line checks SPEED BOOST This makes the lines a little less acurate but speed up the classifier
-% use_points_set_sizes_of = 8+(floor(rand()*6));
-% use_points_set_sizes_of = 2+(floor(rand()*6));
-use_points_set_sizes_of = 1; %use all of them makes it much better
+use_points_set_sizes_of = 8+(floor(rand()*6));
 
 for i = 3:number_of_points
     if mod(i,use_points_set_sizes_of) == 0
@@ -180,7 +199,7 @@ found_lines.classifier_output = [];
 i=0; % used for the index in the following loop
     
 %% LOOP TO TEST ALL LINES
-% for i = 1:1:(size(found_lines.line_start_end_points_smoothed,1)) % DONT KNOW WHY THIS DOSEN'T work
+% for i = 1:1:(size(found_lines.line_start_end_points_smoothed,1)) % THE OLD LOOPER
 while (i<size(found_lines.line_start_end_points_smoothed,1))
     i = i+1;
 
@@ -444,10 +463,7 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
         polyfit_coefs_range =    polyfit(rotated_scan.rangeXM(:), rotated_scan.rangeYM(:), order);
     end             
     
-    fitted_line_vals_range= [polyfit_coefs_range(1)*rotated_scan.rangeXM(:).^2+...
-                            polyfit_coefs_range(2)*rotated_scan.rangeXM(:)+...
-                            polyfit_coefs_range(3),rotated_scan.rangeXM(:),rotated_scan.rangeXM(:)];
-                        
+    fitted_line_vals_range = [polyval(polyfit_coefs_range, rotated_scan.rangeXM(:)) , rotated_scan.rangeXM(:)];
 %     fitted_line_vals_width = size(fitted_line_vals_range, 2);
 
     %poly fit for the intensity data
@@ -535,31 +551,83 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
 
     %Classification
     material_to_class = lhoods.liki_ratio_varis(end,2);
-%     PClass.Confidence = lhoods.ratio/(1+lhoods.ratio);
+    PClass.Confidence = lhoods.ratio/(1+lhoods.ratio);
 
     switch(material_to_class)
         case 1
-%             PClass.Material = 'GSteel';
+            PClass.Material = 'GSteel';
             guess = 1;
         case 2
-%             PClass.Material = 'Alumin';
+            PClass.Material = 'Alumin';
             guess = 2;
         case 3
-%             PClass.Material = 'GMetal';
+            PClass.Material = 'GMetal';
             guess = 3;
         case 4
-%             PClass.Material = 'MSteel';  
+            PClass.Material = 'MSteel';  
             guess = 4;
         case 5
-%             PClass.Material = 'Copper';
+            PClass.Material = 'Copper';
             guess = 5;
         case 6
-%             PClass.Material = 'DPlyWd';
+            PClass.Material = 'DPlyWd';
             guess = 6;
         case 7
-%             PClass.Material = 'BCloth'; 
+            PClass.Material = 'BCloth'; 
             guess = 7;
-    end   
+    end
+
+
+%%  User Output
+    switch (guess)
+        case 1
+%             output = 'Galv Steel ';
+            output_color = [1 1 0]; % Yellow
+        case 2
+%             output = 'Aluminium  ';
+            output_color = [1 0 1]; % Magenta
+        case 3
+%             output = 'GMetal     '; % Cyan
+            output_color = [0 1 1]; 
+        case 4
+%             output = 'Mild Steel ';
+            output_color = [1 0 0]; % Red 
+        case 5
+%             output = 'Copper     ';
+            output_color = [0 1 0]; % Green 
+        case 6
+%             output = 'Plywood    ';
+            output_color = [0 0 1]; % Blue 
+        case 7
+%             output = 'Cloth      ';
+            output_color = [0 0 0]; % Black 
+        case 8
+%             output = 'Do not know';
+            output_color = [1 1 1]; % WHITE 
+    end 
+    
+    % %make every 20th line blue
+    % if mod(Scan_to_Class,20) == 0
+    %     output_color = [0 1 1] %CYAN
+    % end
+    
+    %creates colour coded figure as user output
+    if dont_plot == 0
+        set(line(i),'color',output_color,'linewidth',5);
+        if output_color == [1 1 1] 
+            delete(line(i)); %delets the line from memory
+            %set(line(i),'color',output_color,'linestyle','none'); %hides the line
+        end
+    end
+
+    % if dont_plot == 0
+    %     figure(30)
+    %     display_info = ['Line #' , int2str(i), ' - ', output];
+    %     set(30,'name',display_info,'Position',[ 700 370 350 50 ]);
+    %     display_info = ['Line #' , int2str(i)];
+    %     set(1,'name',display_info);
+    %     plot(1,1,'o','MarkerEdgeColor','k','MarkerFaceColor',output_color,'MarkerSize',10000,'EraseMode',erase_mode );
+    % end
 
     % puts the result in an accessible place
     found_lines.classifier_output(i,1)= guess;
@@ -575,6 +643,30 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
             found_lines.line_start_end_points_smoothed(i,2) = -found_lines.line_start_end_points_smoothed(i,2);
             found_lines.found_lines_gradients(end+1,1) = found_lines.found_lines_gradients(i,1);
             found_lines.found_lines_gradients(end+1,1) = found_lines.found_lines_gradients(i,1);
+            %draws first of the split lines on
+            if dont_plot == 0
+                figure(main_plot_figure);
+                temp_i = length(found_lines.line_start_end_points_smoothed)-1;
+                clear lines;
+                line_parameters = polyfit(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)),1);
+                lines(1,:) = scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)); % fitted line X values
+                lines(2,:) = line_parameters(1)*scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)) + line_parameters(2); % fitted line Y values
+                lines(3,:) = scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2));
+            %     line(temp_i) = plot3(lines(1,:),lines(2,:),lines(3,:),'b','linestyle','-','EraseMode',erase_mode );
+                %otherside of split
+                temp_i = length(found_lines.line_start_end_points_smoothed);
+                clear lines;
+                line_parameters = polyfit(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)),1);
+                lines(1,:) = scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)); % fitted line X values
+                lines(2,:) = line_parameters(1)*scans_cart.rangeX(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2)) + line_parameters(2); % fitted line Y values
+                lines(3,:) = scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(temp_i,1):found_lines.line_start_end_points_smoothed(temp_i,2));
+            %     line(temp_i) = plot3(lines(1,:),lines(2,:),lines(3,:),'b','linestyle','-','EraseMode',erase_mode );
+                %plots split points
+            %     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(end,1)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(end,1)),scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(end,1)),'oc','markerfacecolor','b','markersize',1.5,'EraseMode',erase_mode );
+            %     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(end-1,1)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(end-1,1)),scans_cart.rangeZ(found_lines.line_start_end_points_smoothed(end-1,1)),'oc','markerfacecolor','b','markersize',1.5,'EraseMode',erase_mode );
+            %     plot3(scans_cart.rangeX(found_lines.line_start_end_points_smoothed(end,2)),scans_cart.rangeY(found_lines.line_start_end_points_smoothed(end,2)),scans_cart.rangeX(found_lines.line_start_end_points_smoothed(end,2)),'oc','markerfacecolor','b','markersize',1.5,'EraseMode',erase_mode );
+
+            end
        end
     end
 end
