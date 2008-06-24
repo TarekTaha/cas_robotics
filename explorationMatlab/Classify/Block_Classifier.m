@@ -6,10 +6,10 @@ load('Classification_Criteria.mat');
 
 %% Flags
 do_smoothing = 0; %Set to 1 to do median filtering to smooth the classification result
-draw_image = 0; %Set to 1 to draw an 2D image of the PC
-draw_PC = 0; %Set to 1 to draw the PC
-display_ID_edgeim = 0; %displays an image of the intensity data and an image of teh edges found in the intensity image
-draw_image_with_edge = 0; %displays the images with the found edges marked on them
+draw_image = 1; %Set to 1 to draw an 2D image of the PC
+draw_PC = 1; %Set to 1 to draw the PC
+display_ID_edgeim = 1; %displays an image of the intensity data and an image of teh edges found in the intensity image
+draw_image_with_edge = 1; %displays the images with the found edges marked on them
 
 run_classifier = 1; %runs the classifier -used 0 when ClassifiedData already exists
 replace_hoks_false_intensity_data = 1; %This  replaces the hokuyo's false data with the intensity reading from the ray next to the non-returned  ray but on the same scan
@@ -82,7 +82,7 @@ if run_classifier == 1
         disp([int2str(ceil((i/(classiy_scan_range_end-classiy_scan_range_start))*100)), '% complete']);
     end
         try % I use try as sometimes the classifier crashes for an unknown reason
-            found_lines = Classifier(PointData, IntensityDatatoUse, RangeData, i, Iedges,HParas); % this one uses edges from IntensityData Image
+            found_lines = Classifier(PointData(i,:,:), IntensityDatatoUse(i,:,:), 1, Iedges,HParas); % this one uses edges from IntensityData Image
             % This creates the classfier output matrix. The matrix is in the same
             % format as PointData, IntensityData, etc      
             number_of_lines = size(found_lines.line_start_end_points_smoothed,1); 
@@ -147,10 +147,11 @@ if draw_PC == 1
     view(-90,-90);
     hold on;
     for i = 1:size(data_to_display,1)
-        for j = 1:size(data_to_display,2)
+        for j = 1:size(output_colours,2)% size(data_to_display,2)
             for k=1:9
                 if k~=7
                     a=find(data_to_display(i,:)==k);
+                    hold on;
                     plot3(PointData(i,a,1),PointData(i,a,2),PointData(i,a,3),'color', output_colours(j+1,:),'linestyle','none','marker','.','markersize',2);
                 end
             end
