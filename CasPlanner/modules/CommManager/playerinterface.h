@@ -20,7 +20,6 @@
  ***************************************************************************/
 #ifndef PLAYERINTERFACE_H
 #define PLAYERINTERFACE_H
-
 #include <libplayerc++/playerc++.h>
 #include <libplayercore/player.h>
 #include <libplayerc/playerc.h>

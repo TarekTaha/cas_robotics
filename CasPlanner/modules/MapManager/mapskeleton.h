@@ -54,7 +54,6 @@ class Vertex
 {
 	public:	
 		QPointF location;
-		QVector <Vertex> neighbours;
 		QVector <Connection> connections;
 		double prob;
 		int visits;

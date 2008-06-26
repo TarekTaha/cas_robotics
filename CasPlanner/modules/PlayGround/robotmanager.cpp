@@ -57,10 +57,12 @@ planningManager(NULL),
 navigator(NULL),
 intentionRecognizer(NULL),
 robot(NULL),
+//socialPlanner(NULL),
 notPaused(true),
 notFollowing(true)
 {
 	connect(playGround,SIGNAL(mapUpdated(Map *)),this,SLOT(updateMap(Map *)));
+//	setupSocialPlanner();
 	connect(this,SIGNAL(addMsg(int,int,QString)),playGround,SLOT(addMsg(int,int,QString)));	
 	readRobotConfigs(cf,secId);
 	readCommManagerConfigs(cf,secId); 
@@ -83,6 +85,9 @@ void RobotManager::updateMap(Map * mapData)
 {
 	if(planningManager)
 		planningManager->setMap(mapData);
+//	if(socialPlanner)
+//		socialPlanner->setMap(mapData);
+	
 }
 
 int RobotManager::readRobotConfigs(ConfigFile *cf,int secId)
@@ -157,10 +162,14 @@ int RobotManager::startNavigator()
 
 int RobotManager::startIntentionRecognizer()
 {
-	intentionRecognizer = new IntentionRecognizer(this->playGround,this);
-	intentionRecognizer->runRecognition = true;
-	intentionRecognizer->start();
+//	intentionRecognizer = new IntentionRecognizer(this->playGround,this);
+//	intentionRecognizer->runRecognition = true;
+//	intentionRecognizer->start();
 	return 1;
 }
 
-
+//int RobotManager::setupSocialPlanner()
+//{
+//	socialPlanner = new CasPlanner::SocialPlanner(this->playGround,this);
+//    return 1;
+//}

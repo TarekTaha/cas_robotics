@@ -253,7 +253,7 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
 		    // set up the rest of the child node details
   			curChild->parent = current;
   			curChild->depth  = current->depth + 1;
-  			curChild->id = ID++;
+  			//curChild->id = ID++;
   			//qDebug("ID is:%d",ID);
   			curChild->next = NULL;
   			curChild->prev = NULL;
@@ -345,6 +345,10 @@ bool Astar :: goalReached (Node *n)
 {
 	double angle_diff, delta_d;
 	delta_d = Dist(n->pose.p,end.p);
+	if ( delta_d <= distGoal)
+		return true;
+	else
+		return false;
 	if (n->direction == FORWARD)
 		angle_diff =	anglediff(end.phi,n->pose.phi);
 	else
