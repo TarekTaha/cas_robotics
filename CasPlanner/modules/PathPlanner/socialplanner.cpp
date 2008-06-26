@@ -20,13 +20,13 @@
  ***************************************************************************/
 #include "socialplanner.h"
 
-namespace CasPlanner
-{
 
-SocialPlanner::SocialPlanner(Map *m, Robot *r,MapSkeleton *mapS):Astar(r,0.2,"Social"),mapSkeleton(mapS)
+SocialPlanner::SocialPlanner(PlayGround *playGround,RobotManager * robotManager)
 {
-	map = m;
-	robot =  r;
+	mapSkeleton = &playGround->mapManager->mapSkeleton;
+	robot 		= robotManager->robot;
+	astar 		= new CasPlanner::Astar(robot,0.2,"Social");
+	astar->map 	= playGround->mapManager->globalMap;
 }
 
 SocialPlanner::SocialPlanner():mapSkeleton(NULL)
@@ -42,39 +42,39 @@ SocialPlanner :: ~SocialPlanner()
 
 void SocialPlanner::freeResources()
 {
-	freeSearchSpace();
+	astar->freeSearchSpace();
 	freePath();
-	p=root=test=NULL;
+	astar->p=astar->root=astar->test=NULL;
 }
 
 void SocialPlanner::freePath()
 {
-	while(path != NULL)
+	while(astar->path != NULL)
 	{
-		p = path->next;
-		delete path;
-		path = p;
+		astar->p = astar->path->next;
+		delete astar->path;
+		astar->path = astar->p;
 	}
 }
 
 void SocialPlanner::setStart(Pose start)
 {
-	this->start = start;
+	astar->start = start;
 }
 
 void SocialPlanner::setEnd(Pose end)
 {
-	this->end= end;
+	astar->end= end;
 }
 
 bool SocialPlanner::loadActivities(const char *filename)
 {
-  	int i,id,prev;
+  	int i,id;
   	assert(filename != NULL);
   	filename = strdup(filename);
   	FILE *file = fopen(filename, "r");
   	char * pch;
-  	char line[250],s[10];  	
+  	char line[250],obs[10];  	
   	if (!file)
   	{
   		qDebug("Error Opening File");
@@ -86,12 +86,15 @@ bool SocialPlanner::loadActivities(const char *filename)
   		fgets(line,sizeof(line),file);
 		pch = strtok (line, " ");
 		i=0;
+		QVector <int> task;
   		while (pch!=NULL)
   		{
   			sscanf(pch,"%d",&id);
+  			task.push_back(id);
   			pch = strtok (NULL, " "); if(pch==NULL) break;
-  			sscanf(pch,"%s",s);
+  			sscanf(pch,"%s",obs);
   			pch = strtok (NULL, " ");
+  			/*
   			if(++i==1)
   			{
   				prev = id;
@@ -104,7 +107,16 @@ bool SocialPlanner::loadActivities(const char *filename)
   				else
   					socialRewards[s] = 1;
   				prev = id;
-  			}
+  			}*/
+  		}
+  		int dest = task[task.size()-1];
+  		for(int j=0;i<task.size()-1;j++)
+  		{
+  			QString s = QString("%1-%2-%3").arg(task[j]).arg(task[j+1]).arg(dest);
+			if(socialRewards.contains(s))
+				socialRewards[s] = socialRewards[s] + 1 ;
+			else
+				socialRewards[s] = 1;  			
   		}
   	}
   	fclose(file);
@@ -116,13 +128,23 @@ bool SocialPlanner::loadActivities(const char *filename)
 //        ++j;
 //    }
     
-    setSocialReward(&socialRewards);
+    astar->setSocialReward(&socialRewards);
   	return true;
 }
 
 QHash<QString, int> SocialPlanner::getSocialRewards()
 {
 	return this->socialRewards;
+}
+
+void SocialPlanner::setMapSkeleton(MapSkeleton *mapSke)
+{
+	this->mapSkeleton = mapSke;
+}
+
+void SocialPlanner::setMap(Map * mapData)
+{
+	astar->map = mapData;
 }
 
 bool SocialPlanner::readSpaceFromFile(const char *filename)
@@ -141,7 +163,7 @@ bool SocialPlanner::readSpaceFromFile(const char *filename)
   	while (!feof(file))
   	{
   		fscanf(file,"%lf %lf %lf\n",&locationx,&locationy,&obstacle_cost);
-		if (search_space == NULL ) // Constructing the ROOT NODE
+		if (astar->search_space == NULL ) // Constructing the ROOT NODE
 		{
 			temp = new SearchSpaceNode;
 			temp->location.setX(locationx);
@@ -149,7 +171,7 @@ bool SocialPlanner::readSpaceFromFile(const char *filename)
 			temp->obstacle_cost = obstacle_cost;
 			temp->parent   = NULL;
 			temp->next     = NULL;
-			search_space = temp;
+			astar->search_space = temp;
 		}
 		else
 		{
@@ -157,8 +179,8 @@ bool SocialPlanner::readSpaceFromFile(const char *filename)
 			temp->location.setX(locationx);
 			temp->location.setY(locationy);
 			temp->parent = NULL;
-			temp->next   = search_space;
-			search_space = temp;
+			temp->next   = astar->search_space;
+			astar->search_space = temp;
 		}
   	}
   	fclose(file);
@@ -176,7 +198,7 @@ bool SocialPlanner::saveSpace2File(const char *filename)
     	fclose(file);
     	return false;
   	}
-  	SearchSpaceNode *temp=search_space;
+  	SearchSpaceNode *temp=astar->search_space;
   	while (temp)
   	{
   		fprintf(file,"%f %f %f\n",temp->location.x(),temp->location.y(),temp->obstacle_cost);
@@ -190,35 +212,30 @@ void SocialPlanner :: printNodeList()
 {
 	int step=1;
 	QPointF  location;
-	if(!(p = this->path))
+	if(!(astar->p = astar->path))
 		return ;
 	qDebug("\n  --------------------   START OF LIST ----------------------");
-	while(p !=NULL)
+	while(astar->p !=NULL)
 	{
-		location =  p->pose.p;
-		cout <<"\nStep [" << step++ <<"] state ["<<mapSkeleton->getCurrentSpatialState(p->pose)<<"] x["<< location.x()<<"]y["<<location.y()<<"]"<<" Direction="<<p->direction;
-		cout <<"\tG cost="<<p->g_value<<"\tH cost="<<p->h_value<<"\tFcost="<<p->f_value;
+		location =  astar->p->pose.p;
+		cout <<"\nStep [" << step++ <<"] state ["<<mapSkeleton->getCurrentSpatialState(astar->p->pose)<<"] x["<< location.x()<<"]y["<<location.y()<<"]"<<" Direction="<<astar->p->direction;
+		cout <<"\tG cost="<<astar->p->g_value<<"\tH cost="<<astar->p->h_value<<"\tFcost="<<astar->p->f_value;
 		fflush(stdout);
 		//cout<<"\tStored Angle = "<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(p->angle);
-		if (p->next !=NULL)
+		if (astar->p->next !=NULL)
 		{
 			//cout<<"\tNext Angle = "<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(atan2(p->next->location.y - p->location.y, p->next->location.x - p->location.x));
 			//cout<<"\tAngle Diff ="<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(anglediff(p->angle,atan2(p->next->location.y - p->location.y, p->next->location.x - p->location.x)));
 		}
-		p = p->next;
+		astar->p = astar->p->next;
 	}
 	qDebug("\n --------------------   END OF LIST ---------------------- ");fflush(stdout);
-}
-
-void SocialPlanner::setMapSkeleton(MapSkeleton *mapSke)
-{
-	this->mapSkeleton = mapSke;
 }
 
 void SocialPlanner::showConnections()
 {
 	QPointF loc1,loc2;
-	SearchSpaceNode *temp = search_space;
+	SearchSpaceNode *temp = astar->search_space;
 	int m=0,n=0;
 	while (temp != NULL)
 	{
@@ -235,20 +252,42 @@ void SocialPlanner::showConnections()
 	//this->MAXNODES = 2*m;
 }
 
+Node * SocialPlanner::getPath()
+{
+	if(astar)
+		return astar->path;
+	return NULL;
+}
+
+SearchSpaceNode * SocialPlanner::getSearchSpace()
+{
+	if(astar)
+		return astar->search_space;
+	return NULL;	
+}
+
+vector <Tree> SocialPlanner::getTree()
+{
+	if(astar)
+		return astar->tree;
+	//TODO: This is stupid, i will worry about it later (quick fix)
+	vector <Tree> tree;
+	return tree;
+}
+
 void SocialPlanner::buildSpace()
 {
   	SearchSpaceNode *temp=NULL,*child;
 	for(int i=0; i < mapSkeleton->verticies.size(); i++)
 	{
-		temp  = insertNode(mapSkeleton->verticies[i].getLocation(),i+1);
+		temp  = astar->insertNode(mapSkeleton->verticies[i].getLocation(),i+1);
 		for(int j=0;j<mapSkeleton->verticies[i].connections.size();j++)
 		{
 			QPointF s = mapSkeleton->verticies[mapSkeleton->verticies[i].connections[j].nodeIndex].getLocation();
-			child = insertNode(s,mapSkeleton->verticies[i].connections[j].nodeIndex+1);
+			child = astar->insertNode(s,mapSkeleton->verticies[i].connections[j].nodeIndex+1);
 			temp->children.push_back(child);	
 		}
 	}
-    MAXNODES = 3000;
+	astar->MAXNODES = 3000;
 }
 
-}

@@ -21,16 +21,15 @@
 #ifndef PLAYGROUND_H_
 #define PLAYGROUND_H_
 
-#include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
-
+// #include "robotmanager.h" -> #include "commmanager.h" -> #include "playerinterface.h" -> boost Signal Shit
+#include "robotmanager.h"
 #include <QVector>
 #include <QStatusBar> 
 #include "navigationtab.h"
 #include "mapviewer.h"
-#include "robotmanager.h"
 #include "configfile.h"
 #include "statusbar.h"
+#include "socialplanner.h"
 
 class Navigator;
 class NavContainer;

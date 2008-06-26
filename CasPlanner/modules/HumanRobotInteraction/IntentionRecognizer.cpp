@@ -27,7 +27,6 @@ beliefInitialized(false),
 destBelief(playG->mapManager->mapSkeleton.numDestinations,0),
 goToState(-1,-1,-1),
 oldGoToState(0,0,0),
-socialPlanner(NULL),
 lastObs(4),
 observation(4),
 action(4),
@@ -49,29 +48,27 @@ path(NULL)
 	numDestinations = playGround->mapManager->mapSkeleton.numDestinations;
 	activityLogger = new ActivityLogger;
 
-	socialPlanner = new SocialPlanner(playGround->mapManager->globalMap,robotManager->robot,&playGround->mapManager->mapSkeleton);
+	socialPlanner = new SocialPlanner(playG,robotManager);
 	socialPlanner->buildSpace();
 	socialPlanner->showConnections();
 	socialPlanner->loadActivities("logs/tasks_log.txt");
-	Pose s(playGround->mapManager->mapSkeleton.verticies[37].location.x(),playGround->mapManager->mapSkeleton.verticies[37].location.y(),0);
-	socialPlanner->setStart(s);
-	Pose e(playGround->mapManager->mapSkeleton.verticies[0].location.x(),playGround->mapManager->mapSkeleton.verticies[0].location.y(),DTOR(90));
-	socialPlanner->setEnd(e);
-	Node * retval = socialPlanner->startSearch(s,e,METRIC);
-	if(retval)
-	{
-		socialPlanner->printNodeList();
-	}
-	else
-	{
-		qDebug("No path Found");
-	}
+//	Pose s(playGround->mapManager->mapSkeleton.verticies[37].location.x(),playGround->mapManager->mapSkeleton.verticies[37].location.y(),0);
+//	socialPlanner->setStart(s);
+//	Pose e(playGround->mapManager->mapSkeleton.verticies[0].location.x(),playGround->mapManager->mapSkeleton.verticies[0].location.y(),DTOR(90));
+//	socialPlanner->setEnd(e);
+//	Node * retval = socialPlanner->startSearch(s,e,METRIC);
+//	if(retval)
+//	{
+//		socialPlanner->printNodeList();
+//	}
+//	else
+//	{
+//		qDebug("No path Found");
+//	}
 }
 
 IntentionRecognizer::~IntentionRecognizer()
 {
-	if(socialPlanner)
-		delete socialPlanner;
 	delete activityLogger;
 	fclose(file);
 	fclose(odom);
@@ -85,10 +82,10 @@ void IntentionRecognizer::InitializePOMDP()
   	//policyFileName = "modules/PomdpModels/mod11.policy";
  	policyFileName = "modules/PomdpModels/6dest.policy";
   	//policyFileName = "modules/PomdpModels/minimal_interaction.policy";
-  	config = new ZMDPConfig();
+  	config = new zmdp::ZMDPConfig();
   	config->readFromFile("modules/PomdpCore/zmdp.conf");
   	config->setString("policyOutputFile", "none");
-  	em = new BoundPairExec();
+  	em = new zmdp::BoundPairExec();
   	printf("initializing\n");
   	em->initReadFiles(pomdpFileName,policyFileName, *config);
 }
@@ -159,12 +156,12 @@ void IntentionRecognizer::followActionToNextState()
      * stored in the POMDP model.
      */ 
     double maxTrans = 0;
-	for (int sp=0; sp < ((Pomdp*)em->mdp)->getBeliefSize(); sp++) 
+	for (int sp=0; sp < ((zmdp::Pomdp*)em->mdp)->getBeliefSize(); sp++) 
     {
-    	if(((Pomdp*)em->mdp)->T[action](spatialState,sp) >= maxTrans)
+    	if(((zmdp::Pomdp*)em->mdp)->T[action](spatialState,sp) >= maxTrans)
     	{
 //    		printf("\nIndex=%d %5.3f ",sp,((Pomdp*)em->mdp)->T[action](spatialState,sp));
-			maxTrans = ((Pomdp*)em->mdp)->T[action](spatialState,sp);
+			maxTrans = ((zmdp::Pomdp*)em->mdp)->T[action](spatialState,sp);
 			nextState = sp;
     	}
     }
@@ -235,7 +232,7 @@ void IntentionRecognizer::followActionToNextState()
 void IntentionRecognizer::resetBelief()
 {
   	belief_vector b;
-  	initialBeliefD.resize(((Pomdp*)em->mdp)->getBeliefSize());
+  	initialBeliefD.resize(((zmdp::Pomdp*)em->mdp)->getBeliefSize());
   	if(robotManager->commManager)
   		robotManager->commManager->stop();
   	/*
@@ -302,6 +299,14 @@ void IntentionRecognizer::run()
 		spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(currentPose);
 		fprintf(odom,"%.3f %.3f %.3f %d\n",currentPose.p.x(),currentPose.p.y(),currentPose.phi,spatialState);
 		observation = robotManager->commManager->getJoyStickGlobalDir();
+		/* 
+		 * Added for testing the Social Planning
+		 */		
+		Pose s(playGround->mapManager->mapSkeleton.verticies[spatialState].location.x(),playGround->mapManager->mapSkeleton.verticies[spatialState].location.y(),0);
+		socialPlanner->setStart(s);		
+		/*
+		 * End of Addition
+		 */
 		if(!beliefInitialized)
 		{
 			/*
@@ -438,13 +443,39 @@ void IntentionRecognizer::run()
 					dataLock.unlock();
 				}
 			}
+			int maxDestBeliefIndex=0;
+			double maxDestBelief=0;
 			for(int i=0;i<numDestinations;i++)
 			{
-				printf("\n Belief is now Updated to Dest:%d with %f",i,destBelief[i]);				
+				printf("\n Belief is now Updated to Dest:%d with %f",i,destBelief[i]);
+				if(destBelief[i]>maxDestBelief)
+				{
+					maxDestBelief = destBelief[i];
+					maxDestBeliefIndex = i;
+				}
 				fprintf(file,"%.5f ",destBelief[i]);
 			}
+			/* 
+			 * Added for testing the Social Planning
+			 */
+			int destination = playGround->mapManager->mapSkeleton.destIndexes[maxDestBeliefIndex];
+			cout<<"Destination is:="<<destination;
+			Pose e(playGround->mapManager->mapSkeleton.verticies[destination].location.x(),playGround->mapManager->mapSkeleton.verticies[destination].location.y(),DTOR(90));
+			socialPlanner->setEnd(e);
+			Node * retval = socialPlanner->astar->startSearch(s,e,METRIC);
+			if(retval)
+			{
+				socialPlanner->printNodeList();
+			}
+			else
+			{
+				qDebug("No path Found");
+			}			
+			/*
+			 * End of Addition
+			 */
 			followActionToNextState();
 			justStarted = false;
 		}
-	}	
+	}
 }

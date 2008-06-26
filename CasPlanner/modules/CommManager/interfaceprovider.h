@@ -21,9 +21,8 @@
 #ifndef INTERFACEPROVIDER_H
 #define INTERFACEPROVIDER_H
 
-#include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
-
+// playerinterface.h include the boost shit at the beginning
+#include "playerinterface.h"
 #include <QImage>
 #include <QVector> 
 #include <QPointF>
@@ -32,7 +31,6 @@
 #include <QMetaType>
 #include "utils.h"
 #include "map.h"
-#include "playerinterface.h"
 //"Design by contract"
 
 using namespace PlayerCc;

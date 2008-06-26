@@ -174,6 +174,39 @@ void MapViewer::renderPaths()
 			    glEnd();
 			glPopMatrix();
 		}
+		if(playGround->robotPlatforms[i]->intentionRecognizer)
+		if(playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner)
+		if(playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->getPath())
+		{
+			Node * path = playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->getPath();
+	    	glColor4f(RGB_COLOR[3][0],RGB_COLOR[3][1],RGB_COLOR[3][2],0.5);
+	    	glLineWidth(2);
+	    	glColor4f(0,0,1,0.5);
+		    glBegin(GL_LINE_STRIP);
+			while(path)
+			{
+		    	glVertex2f(path->pose.p.x(),path->pose.p.y());
+				path = path->next;
+			}
+		    glEnd();
+		    glLineWidth(1);
+		    wayPoint = playGround->robotPlatforms[i]->navigator->wayPoint;
+		    // Draw Way Point
+		    if(wayPoint.p.x()==0 && wayPoint.p.y()==0)
+		    	continue;
+		    glPushMatrix();
+			    glTranslatef(wayPoint.p.x(),wayPoint.p.y(),0);
+			    glRotated(RTOD(wayPoint.phi),0,0,1);
+			    glColor4f(1,0,0,0.5);
+			    glShadeModel(GL_FLAT);
+			    glBegin(GL_TRIANGLE_FAN);
+					glColor4f(1,0,0,0.5);
+				    glVertex3f(0,0.1,0);
+				    glVertex3f(0.3,0,0);
+				    glVertex3f(0,-0.1,0);
+			    glEnd();
+			glPopMatrix();
+		}		
 	}
 }
 void MapViewer::setRobotsLocation()
@@ -246,7 +279,7 @@ void MapViewer::renderSearchTree()
 		//	continue;
 		//temp =  playGround->robotPlatforms[i]->planningManager->pathPlanner->search_space;
 		if(playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner)
-			temp =  playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->search_space;
+			temp =  playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->getSearchSpace();
 		else
 			continue;
 	    glPushMatrix();
@@ -285,7 +318,7 @@ void MapViewer::renderExpandedTree()
 		//tree =  playGround->robotPlatforms[i]->planningManager->pathPlanner->tree;
 		if(playGround->robotPlatforms[i]->intentionRecognizer)
 			if(playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner)
-				tree =  playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->tree;
+				tree =  playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->getTree();
 			else
 				continue;		
 	    glPushMatrix();

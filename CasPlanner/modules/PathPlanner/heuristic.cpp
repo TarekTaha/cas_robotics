@@ -46,33 +46,20 @@ double SocialHeuristic::gCost(Node *n)
 	double cost;
 	if(n == NULL || n->parent==NULL)
 		return 0.0;
-	cost = n->parent->g_value + Dist(n->pose.p,n->parent->pose.p);
+	cost -= this->socialRewards->value(QString("%1-%2").arg(n->parent->id).arg(n->id));
 	cout<<qPrintable(QString("%1-%2").arg(n->parent->id).arg(n->id))<<":="<<this->socialRewards->value(QString("%1-%2").arg(n->parent->id).arg(n->id))<<endl;
 	return cost;
 }
 
 double SocialHeuristic::hCost(Node *n,Pose end)
 {
-	double h=0,angle_cost=0,obstacle_penalty=0,reverse_penalty=0,delta_d=0;
-	if(n == NULL)
-		return(0);
+	double h=0,g=0;
+	if(n == NULL || n->parent==NULL)
+		return 0.0;
 	// Using the Euclidean distance
 	h = Dist(end.p,n->pose.p);
-	//h = 0;
-	if (n->parent != NULL) // Adding the Angle cost, we have to uniform the angle representation to the +ve rep or we well get a non sense result
-	{
-		double a,b;
-		a = n->pose.phi;
-		b = n->parent->pose.phi;
-		angle_cost = fabs(anglediffs(a,b)); // in radians
-		delta_d = Dist(n->pose.p,n->parent->pose.p);
-	}
-	obstacle_penalty = n->nearest_obstacle;
-	if(n->direction == BACKWARD)
-		reverse_penalty = delta_d;
-	
-	// 0.555 is the AXLE Length 
-	return ( h*(1 + reverse_penalty ) + 0.555 * angle_cost + obstacle_penalty*delta_d);
+	g = n->parent->g_value + Dist(n->pose.p,n->parent->pose.p);	
+	return h + g;
 }
 
 double DistanceHeuristic::gCost(Node *n)

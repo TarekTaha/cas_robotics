@@ -199,7 +199,7 @@ int CommManager::getLocalizerType()
   	{
   		emit addMsg(0,ERROR,QString("\n12 Communication Interface Not started YET!!!"));
   		return 0;
-  	}	
+  	}
 }
 
 int  CommManager::getJoyStickGlobalDir()

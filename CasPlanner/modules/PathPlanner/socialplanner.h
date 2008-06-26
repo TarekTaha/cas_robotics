@@ -1,30 +1,35 @@
 #ifndef SOCIALPLANNER_H_
 #define SOCIALPLANNER_H_
 
-#include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
-
+#include "playground.h"
 #include <QHash>
 #include "astar.h"
 #include "mapskeleton.h"
 #include "map.h"
 
-namespace CasPlanner
-{
 
-class SocialPlanner : public Astar
+class PlayGround;
+class RobotManager;
+
+class SocialPlanner 
 {
 	private :
 		Robot *robot;
-		MapSkeleton *mapSkeleton;
+		MapSkeleton  *mapSkeleton;
+		PlayGround   *playGround;
+		RobotManager *robotManager;
 		QHash<QString, int> socialRewards;
 	public :
+		CasPlanner::Astar *astar;		
 		void freeResources();
 		void freePath();
 		void printNodeList ();
 		void buildSpace();
 		void showConnections();
 		void saveSearchSpace();
+		Node * getPath();
+		SearchSpaceNode * getSearchSpace();
+		vector <Tree> getTree();
 		bool loadActivities(const char *filename);
 		bool readSpaceFromFile(const char *filename);
 		bool saveSpace2File(const char *filename);
@@ -32,11 +37,10 @@ class SocialPlanner : public Astar
 		void setEnd(Pose start);
 		QHash<QString, int> getSocialRewards();
 		void setMapSkeleton(MapSkeleton *mapSke);
+		void setMap(Map*);
+		SocialPlanner(PlayGround *playGround,RobotManager *robotManager);
 		SocialPlanner();
-		SocialPlanner(Map *m, Robot *r,MapSkeleton *mapS);
    	 	~SocialPlanner();
-
 };
 
-}
 #endif /*SOCIALPLANNER_H_*/

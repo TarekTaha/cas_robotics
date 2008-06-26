@@ -21,10 +21,7 @@
 #ifndef INTENTIONRECOGNIZER_H_
 #define INTENTIONRECOGNIZER_H_
 
-#include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
-#include <libplayerc/playerc.h>
-
+#include "playground.h"
 #include <QThread> 
 #include <QReadWriteLock>
 #include <QTime>
@@ -32,17 +29,15 @@
 #include <iostream>
 #include <QDataStream>
 #include "robot.h"
-#include "playground.h"
-
 #include "MatrixUtils.h"
 #include "BoundPairExec.h"
 #include "zmdpMainConfig.h"
 #include "activityLogger.h"
+#include "Pomdp.h"
 #include "socialplanner.h"
 
-#include "Pomdp.h"
-using namespace std;
-using namespace zmdp;
+//using namespace std;
+class SocialPlanner;
 
 class IntentionRecognizer: public QThread
 {
@@ -65,15 +60,15 @@ public:
 	QVector <double> destBelief;	
 	Pose currentState,currentPose,goToState,oldGoToState;
 	ActivityLogger *activityLogger;
-	CasPlanner::SocialPlanner *socialPlanner;
 	int  lastObs,observation,action,spatialState,oldSpatialState;
+	SocialPlanner *socialPlanner;
 private:
 	dvector initialBeliefD;
 	int interactionStrategy;
 	bool actionAmbiguity;
 	string pomdpFileName, policyFileName;
-	ZMDPConfig* config;
-	BoundPairExec* em;
+	zmdp::ZMDPConfig* config;
+	zmdp::BoundPairExec* em;
 	PlayGround * playGround;
 	RobotManager * robotManager;
 	QReadWriteLock dataLock;

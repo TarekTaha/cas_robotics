@@ -21,11 +21,8 @@
 #ifndef ROBOTMANAGER_H
 #define ROBOTMANAGER_H
 
-#include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
-
-#include <QObject>
 #include "commmanager.h"
+#include <QObject>
 #include "planningmanager.h"
 #include "navigator.h"
 #include "configfile.h"
@@ -54,6 +51,7 @@ class RobotManager : public QObject//public CommManager, public PlanningManager 
 		int readCommManagerConfigs(ConfigFile *cf,int secId);
 		int readPlannerConfigs(ConfigFile *cf);
 		int readNavigatorConfigs(ConfigFile *cf);
+//		int setupSocialPlanner();
 		int start();
 		int stop();
 		int startPlanner();
@@ -66,6 +64,7 @@ class RobotManager : public QObject//public CommManager, public PlanningManager 
 		Navigator       *navigator;
 		IntentionRecognizer *intentionRecognizer;
 		Robot           *robot;
+//		CasPlanner::SocialPlanner   *socialPlanner;
 		bool notPaused,notFollowing;
 	public 
 	slots:
