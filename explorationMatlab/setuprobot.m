@@ -13,7 +13,7 @@
 function setuprobot()
 
 %% Variables
-global Q r densoobj robot_maxreach;
+global Q r densoobj robot_maxreach linkFromLaserTransform;
 
 %New robot - start pose
 Q=[0,-75,160,0,30,0]*pi/180;
@@ -33,8 +33,6 @@ end
 %this loads the model used and calculates the elipses
 % MAKE SURE DENSOOBJ.mat has a variable called densoobj !!
 load densoobj.mat
-%CHANGE last peice so it sort of has the laser on it
-densoobj(7).M(find(densoobj(7).M(:,3)>=-0.001 & densoobj(7).M(:,1)<0),3)=0.12;
 
 for piece=1:size(densoobj,2)
     [densoobj(piece).ellipse.x,densoobj(piece).ellipse.y,densoobj(piece).ellipse.z,...

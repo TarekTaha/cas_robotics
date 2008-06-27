@@ -13,15 +13,15 @@
 function doscan(newQ)
 
 %% Variables
-global workspace r Q
+global workspace r Q linkFromLaserTransform
 
 %if nothing is passed, then we use the actual Q otherwise used passed Q
 if nargin==0
     newQ=Q;
 end
 
-%find out the current end-effector transform
-tr=fkine(r,newQ);
+%find out the current pose of the scanner
+tr=fkine(r,newQ) * linkFromLaserTransform;
 % plot3([tr(1,4) tr(1,4)+tr(1,1)],[tr(2,4) tr(2,4)+tr(2,1)],[tr(3,4) tr(3,4)+tr(3,1)],'color','red')
 % plot3([tr(1,4) tr(1,4)+tr(1,2)],[tr(2,4) tr(2,4)+tr(2,2)],[tr(3,4) tr(3,4)+tr(3,2)],'color','green')
 % plot3([tr(1,4) tr(1,4)+tr(1,3)],[tr(2,4) tr(2,4)+tr(2,3)],[tr(3,4) tr(3,4)+tr(3,3)],'color','blue')
