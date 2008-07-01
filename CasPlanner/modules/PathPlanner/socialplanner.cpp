@@ -23,15 +23,13 @@
 
 SocialPlanner::SocialPlanner(PlayGround *playGround,RobotManager * robotManager)
 {
-	mapSkeleton = &playGround->mapManager->mapSkeleton;
 	robot 		= robotManager->robot;
 	astar 		= new CasPlanner::Astar(robot,0.2,"Social");
-	astar->map 	= playGround->mapManager->globalMap;
-}
-
-SocialPlanner::SocialPlanner():mapSkeleton(NULL)
-{
-
+	if(playGround->mapManager)
+	{
+		mapSkeleton = &playGround->mapManager->mapSkeleton;
+		astar->map 	= playGround->mapManager->globalMap;	
+	}
 }
 
 SocialPlanner :: ~SocialPlanner()
@@ -110,7 +108,7 @@ bool SocialPlanner::loadActivities(const char *filename)
   			}*/
   		}
   		int dest = task[task.size()-1];
-  		for(int j=0;i<task.size()-1;j++)
+  		for(int j=0;j<task.size()-1;j++)
   		{
   			QString s = QString("%1-%2-%3").arg(task[j]).arg(task[j+1]).arg(dest);
 			if(socialRewards.contains(s))
@@ -121,12 +119,12 @@ bool SocialPlanner::loadActivities(const char *filename)
   	}
   	fclose(file);
   	
-//    QHash<QString, int>::const_iterator j = socialRewards.constBegin();
-//    while (j != socialRewards.constEnd())
-//    {
-//    	printf("\n Edge:=%s Reward:=%d",qPrintable(j.key()),j.value());
-//        ++j;
-//    }
+    QHash<QString, int>::const_iterator j = socialRewards.constBegin();
+    while (j != socialRewards.constEnd())
+    {
+    	printf("\n Edge:=%s Reward:=%d",qPrintable(j.key()),j.value());
+        ++j;
+    }
     
     astar->setSocialReward(&socialRewards);
   	return true;

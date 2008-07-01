@@ -11,7 +11,7 @@
 class PlayGround;
 class RobotManager;
 
-class SocialPlanner 
+class SocialPlanner
 {
 	private :
 		Robot *robot;
@@ -26,7 +26,6 @@ class SocialPlanner
 		void printNodeList ();
 		void buildSpace();
 		void showConnections();
-		void saveSearchSpace();
 		Node * getPath();
 		SearchSpaceNode * getSearchSpace();
 		vector <Tree> getTree();
@@ -39,8 +38,8 @@ class SocialPlanner
 		void setMapSkeleton(MapSkeleton *mapSke);
 		void setMap(Map*);
 		SocialPlanner(PlayGround *playGround,RobotManager *robotManager);
-		SocialPlanner();
-   	 	~SocialPlanner();
+   	 	~SocialPlanner(); 	 	
+   	 	SocialPlanner(){};
 };
 
 #endif /*SOCIALPLANNER_H_*/

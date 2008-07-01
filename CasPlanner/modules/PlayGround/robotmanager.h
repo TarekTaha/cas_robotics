@@ -29,6 +29,7 @@
 #include "robot.h"
 #include "playground.h"
 #include "IntentionRecognizer.h"
+#include "socialplanner.h"
 
 class Navigator;
 class NavContainer;
@@ -51,7 +52,7 @@ class RobotManager : public QObject//public CommManager, public PlanningManager 
 		int readCommManagerConfigs(ConfigFile *cf,int secId);
 		int readPlannerConfigs(ConfigFile *cf);
 		int readNavigatorConfigs(ConfigFile *cf);
-//		int setupSocialPlanner();
+		int setupSocialPlanner();
 		int start();
 		int stop();
 		int startPlanner();
@@ -64,7 +65,7 @@ class RobotManager : public QObject//public CommManager, public PlanningManager 
 		Navigator       *navigator;
 		IntentionRecognizer *intentionRecognizer;
 		Robot           *robot;
-//		CasPlanner::SocialPlanner   *socialPlanner;
+		SocialPlanner   *socialPlanner;
 		bool notPaused,notFollowing;
 	public 
 	slots:

@@ -48,15 +48,17 @@ path(NULL)
 	numDestinations = playGround->mapManager->mapSkeleton.numDestinations;
 	activityLogger = new ActivityLogger;
 
-	socialPlanner = new SocialPlanner(playG,robotManager);
+	socialPlanner = rManager->socialPlanner;
+	socialPlanner->setMap(playGround->mapManager->globalMap);
+	socialPlanner->setMapSkeleton(&playGround->mapManager->mapSkeleton);
 	socialPlanner->buildSpace();
 	socialPlanner->showConnections();
 	socialPlanner->loadActivities("logs/tasks_log.txt");
-//	Pose s(playGround->mapManager->mapSkeleton.verticies[37].location.x(),playGround->mapManager->mapSkeleton.verticies[37].location.y(),0);
-//	socialPlanner->setStart(s);
-//	Pose e(playGround->mapManager->mapSkeleton.verticies[0].location.x(),playGround->mapManager->mapSkeleton.verticies[0].location.y(),DTOR(90));
-//	socialPlanner->setEnd(e);
-//	Node * retval = socialPlanner->startSearch(s,e,METRIC);
+	Pose s(playGround->mapManager->mapSkeleton.verticies[37].location.x(),playGround->mapManager->mapSkeleton.verticies[37].location.y(),0);
+	socialPlanner->setStart(s);
+	Pose e(playGround->mapManager->mapSkeleton.verticies[0].location.x(),playGround->mapManager->mapSkeleton.verticies[0].location.y(),DTOR(90));
+	socialPlanner->setEnd(e);
+//	Node * retval = socialPlanner->astar->startSearch(s,e,METRIC);
 //	if(retval)
 //	{
 //		socialPlanner->printNodeList();

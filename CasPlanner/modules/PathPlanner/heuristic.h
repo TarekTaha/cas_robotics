@@ -36,7 +36,7 @@ class Heuristic
 public:
 	virtual ~Heuristic(){};
 	virtual double gCost(Node *)=0;
-	virtual double hCost(Node *,Pose )=0;;
+	virtual double hCost(Node *,Node * )=0;;
 	static Heuristic * factory(QString type) throw(CasPlannerException);
 	static Heuristic * factory(QString type,QHash<QString, int> *) throw(CasPlannerException);
 };
@@ -49,7 +49,7 @@ public:
 	friend class Heuristic;
 public:
 	double gCost(Node *n);
-	double hCost(Node *n, Pose end);
+	double hCost(Node *n, Node * end);
 	~SocialHeuristic(){};
 };
 
@@ -60,7 +60,7 @@ public:
 	friend class Heuristic;
 public:
 	double gCost(Node *n);
-	double hCost(Node *n, Pose end);
+	double hCost(Node *n, Node * end);
 	~DistanceHeuristic(){};
 };
 

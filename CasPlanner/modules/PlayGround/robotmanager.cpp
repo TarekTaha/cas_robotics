@@ -43,6 +43,8 @@ RobotManager::~RobotManager()
 		delete robot;
 	if(planningManager)
 		delete planningManager;
+	if(socialPlanner)
+		delete socialPlanner;
 }
 /* Read Configuration File and Initialize corresponding Sections :
  *  1- Initialize communication with the Player Server.
@@ -57,12 +59,12 @@ planningManager(NULL),
 navigator(NULL),
 intentionRecognizer(NULL),
 robot(NULL),
-//socialPlanner(NULL),
+socialPlanner(NULL),
 notPaused(true),
 notFollowing(true)
 {
 	connect(playGround,SIGNAL(mapUpdated(Map *)),this,SLOT(updateMap(Map *)));
-//	setupSocialPlanner();
+	setupSocialPlanner();
 	connect(this,SIGNAL(addMsg(int,int,QString)),playGround,SLOT(addMsg(int,int,QString)));	
 	readRobotConfigs(cf,secId);
 	readCommManagerConfigs(cf,secId); 
@@ -85,8 +87,8 @@ void RobotManager::updateMap(Map * mapData)
 {
 	if(planningManager)
 		planningManager->setMap(mapData);
-//	if(socialPlanner)
-//		socialPlanner->setMap(mapData);
+	if(socialPlanner)
+		socialPlanner->setMap(mapData);
 	
 }
 
@@ -162,14 +164,14 @@ int RobotManager::startNavigator()
 
 int RobotManager::startIntentionRecognizer()
 {
-//	intentionRecognizer = new IntentionRecognizer(this->playGround,this);
-//	intentionRecognizer->runRecognition = true;
-//	intentionRecognizer->start();
+	intentionRecognizer = new IntentionRecognizer(this->playGround,this);
+	intentionRecognizer->runRecognition = true;
+	intentionRecognizer->start();
 	return 1;
 }
 
-//int RobotManager::setupSocialPlanner()
-//{
-//	socialPlanner = new CasPlanner::SocialPlanner(this->playGround,this);
-//    return 1;
-//}
+int RobotManager::setupSocialPlanner()
+{
+	socialPlanner = new SocialPlanner(this->playGround,this);
+    return 1;
+}

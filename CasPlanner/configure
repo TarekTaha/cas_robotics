@@ -2,27 +2,23 @@
 
 function header 
 {
-    echo -e "\033[0;34m==>\033[0;0;1m $1 \033[0;0m"
+    echo -e "\033[0;34m--->>\033[0;0;1m $1 \033[0;0m"
 }
 function middle 
 {
-    echo -e "\033[0;33m==>\033[0;0;1m $1 \033[0;0m"
+    echo -e "\033[0;33m--->>\033[0;0;1m $1 \033[0;0m"
 }
 
 
 header "CasPlanner-1.0 Configure"
 middle "Checking for qmake..."
 
-qmake -v &> /dev/null
+qmake-qt4 -v &> /dev/null
 if [[ $? == 127 ]]
 then
-    qmake-qt4 -v &> /dev/null
-    if [[ $? == 0 ]]
-    then
-        QMAKE=qmake-qt4
-    fi
-else
     QMAKE=qmake
+else
+	QMAKE=qmake-qt4
 fi
 
 if [[ $? == 127 ]]

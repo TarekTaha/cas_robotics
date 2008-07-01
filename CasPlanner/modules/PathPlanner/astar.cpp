@@ -139,7 +139,7 @@ void Astar::findRoot() throw (CasPlannerException)
 	root->next = NULL;
 	root->prev = NULL;
 	root->g_value = 0;;
-	root->h_value = heuristic->gCost(root);
+//	root->h_value = heuristic->gCost(root);
 	root->f_value = root->g_value + root->h_value;
 	root->depth = 0;
 	root->pose.phi = start.phi;
@@ -148,9 +148,48 @@ void Astar::findRoot() throw (CasPlannerException)
 //	qDebug("	---->>>Root is Set to be X=%f Y=%f Phi=%f",root->pose.p.x(),root->pose.p.y(),RTOD(root->pose.phi));
 };
 
+// find the nearest node to the end
+void Astar::findDest() throw (CasPlannerException)
+{
+	SearchSpaceNode * temp;
+	if(!this->search_space)
+	{
+		throw(CasPlannerException("No SearchSpace Defined"));
+		return;
+	}
+	double distance,shortest_distance = 100000;
+	// allocate and setup the root node
+	dest = new Node;	
+	temp = this->search_space;
+	while(temp!=NULL)
+	{
+		distance = Dist(temp->location,end.p);
+		// Initialize the root node information and put it in the open list
+		if (distance < shortest_distance) 
+		{
+			shortest_distance = distance;
+			dest->pose.p.setX(temp->location.x());
+			dest->pose.p.setY(temp->location.y());
+			dest->id = temp->id;
+		}
+		temp = temp->next;
+	}
+	dest->parent = NULL;
+	dest->next = NULL;
+	dest->prev = NULL;
+	dest->g_value = 0;;
+	dest->h_value = 0;
+	dest->f_value = 0;
+	dest->depth = 0;
+	dest->pose.phi = end.phi;
+	dest->direction = FORWARD;
+	//Translate(root->pose,start.phi);
+//	qDebug("	---->>>Root is Set to be X=%f Y=%f Phi=%f",root->pose.p.x(),root->pose.p.y(),RTOD(root->pose.phi));
+};
+
 Node *  Astar::startSearch(Pose start,Pose end, int coord)
 {
-	int      ID = 1;
+//	int      ID = 1;
   	int      NodesExpanded = 0;
 	if(this->tree.size() > 0)		
 		this->tree.clear();
@@ -183,6 +222,7 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
 	this->end.phi = end.phi;
 	qDebug("	--->>> Search Started <<<---");
 	findRoot();
+	findDest();
 //	qDebug("	---->>>Target is Set to be X=%f Y=%f Phi=%f<<<---",end.p.x(),end.p.y(),RTOD(end.phi));
   	openList->Add(root);				// Add the root to OpenList
 //	qDebug("	--->>> Root Added <<<---");
@@ -257,8 +297,8 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
   			//qDebug("ID is:%d",ID);
   			curChild->next = NULL;
   			curChild->prev = NULL;
-  			curChild->g_value = heuristic->gCost(curChild);
-      		curChild->h_value = heuristic->hCost(curChild,end);
+//  			curChild->g_value = heuristic->gCost(curChild);
+//      		curChild->h_value = heuristic->hCost(curChild,dest);
   			curChild->f_value = curChild->g_value + curChild->h_value;
 			Node * p;
 			// check if the child is already in the open list
