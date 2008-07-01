@@ -48,6 +48,7 @@ class Astar: public SearchSpace
 {
 	private:
 		void   findRoot() throw(CasPlannerException);
+		void   findDest() throw(CasPlannerException);		
 		Node  *makeChildrenNodes(Node *parent) ;
 	public:
 		Astar(Robot *,double dG, QString heuristicType);
@@ -59,7 +60,7 @@ class Astar: public SearchSpace
 		Map    * map;
 		Pose start,end;
 		Robot *robot;
-		Node *root, *current, *childList, *curChild, *q, * test,*path, *p;
+		Node *root, *dest, *current, *childList, *curChild, *q, * test,*path, *p;
 		LList *openList,*closedList;
 		vector <Tree> tree;
 		void   setSocialReward(QHash<QString, int>*);

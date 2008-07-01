@@ -43,23 +43,22 @@ Heuristic *  Heuristic::factory(QString type,QHash<QString, int> *soRe) throw(Ca
 
 double SocialHeuristic::gCost(Node *n)
 {
-	double cost;
-	if(n == NULL || n->parent==NULL)
-		return 0.0;
-	cost -= this->socialRewards->value(QString("%1-%2").arg(n->parent->id).arg(n->id));
-	cout<<qPrintable(QString("%1-%2").arg(n->parent->id).arg(n->id))<<":="<<this->socialRewards->value(QString("%1-%2").arg(n->parent->id).arg(n->id))<<endl;
-	return cost;
+	return 0;
 }
 
-double SocialHeuristic::hCost(Node *n,Pose end)
+double SocialHeuristic::hCost(Node *n,Node * end)
 {
-	double h=0,g=0;
-	if(n == NULL || n->parent==NULL)
-		return 0.0;
-	// Using the Euclidean distance
-	h = Dist(end.p,n->pose.p);
-	g = n->parent->g_value + Dist(n->pose.p,n->parent->pose.p);	
-	return h + g;
+//	double cost=0,h=0,g=0;
+//	if(n == NULL || n->parent==NULL)
+//		return 0.0;
+//	// Using the Euclidean distance
+//	h = Dist(end->pose.p,n->pose.p);
+//	g = n->parent->g_value + Dist(n->pose.p,n->parent->pose.p);	
+//	cost =  h + g;
+//	cost -= this->socialRewards->value(QString("%1-%2-%3").arg(n->parent->id).arg(n->id).arg(end->id));
+//	cout<<qPrintable(QString("%1-%2-%3").arg(n->parent->id).arg(n->id).arg(end->id))<<":="<<this->socialRewards->value(QString("%1-%2-%3").arg(n->parent->id).arg(n->id).arg(end->id))<<endl;
+//	return cost;
+	return 0;
 }
 
 double DistanceHeuristic::gCost(Node *n)
@@ -71,13 +70,13 @@ double DistanceHeuristic::gCost(Node *n)
 	return cost;
 }
 
-double DistanceHeuristic::hCost(Node *n,Pose end)
+double DistanceHeuristic::hCost(Node *n,Node * end)
 {
 	double h=0,angle_cost=0,obstacle_penalty=0,reverse_penalty=0,delta_d=0;
 	if(n == NULL)
 		return(0);
 	// Using the Euclidean distance
-	h = Dist(end.p,n->pose.p);
+	h = Dist(end->pose.p,n->pose.p);
 	//h = 0;
 	if (n->parent != NULL) // Adding the Angle cost, we have to uniform the angle representation to the +ve rep or we well get a non sense result
 	{

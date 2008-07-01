@@ -42,9 +42,7 @@ class SpeedRender: public GLRender
         double speed; 
         double maxSpeed; 
         double turnRate; 
-        double maxTurnRate; 
-    
-    
+        double maxTurnRate;
 };
 
 #endif 
