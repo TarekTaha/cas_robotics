@@ -6,10 +6,10 @@ load('Classification_Criteria.mat');
 
 %% Flags
 do_smoothing = 0; %Set to 1 to do median filtering to smooth the classification result
-draw_image = 1; %Set to 1 to draw an 2D image of the PC
-draw_PC = 1; %Set to 1 to draw the PC
-display_ID_edgeim = 1; %displays an image of the intensity data and an image of teh edges found in the intensity image
-draw_image_with_edge = 1; %displays the images with the found edges marked on them
+draw_image = 0; %Set to 1 to draw an 2D image of the PC
+draw_PC = 0; %Set to 1 to draw the PC
+display_ID_edgeim = 0; %displays an image of the intensity data and an image of teh edges found in the intensity image
+draw_image_with_edge = 0; %displays the images with the found edges marked on them
 
 run_classifier = 1; %runs the classifier -used 0 when ClassifiedData already exists
 replace_hoks_false_intensity_data = 1; %This  replaces the hokuyo's false data with the intensity reading from the ray next to the non-returned  ray but on the same scan

@@ -153,7 +153,7 @@ set(handles.useRealRobot_checkbox,'Value',0);
 drawnow;
 
 %clear the globals for scan, workspace, robot(r,Q), bestviews, PointData, RangeData
-clear global workspace scan bestviews Q r PointData RangeData guiglobal densoobj all_views robot_maxreach classunkn_optimise alldirectedpoints;
+clear global workspace scan bestviews Q r PointData RangeData guiglobal densoobj all_views robot_maxreach classunkn_optimise alldirectedpoints graf_obs;
 
 %Sets up the robot
 setuprobot()
@@ -267,7 +267,7 @@ if current_test_case==1 && want_to_continue
             if ~isempty(find(tr_indexed(1)==workspace.knowncoords(:,1)&...
                              tr_indexed(2)==workspace.knowncoords(:,2)&...
                              tr_indexed(3)==workspace.knowncoords(:,3), 1))                  
-                [pathfound,all_steps]=pathplanner(newQ);
+                [pathfound,all_steps]=pathplanner_new(newQ);
                 if pathfound; plotdenso(r,newQ,false,false); end;
             end
         end

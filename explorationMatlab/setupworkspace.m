@@ -200,3 +200,14 @@ workspace.class_cubesize=workspace.inc_size/4;
 workspace.minclassifications=30;
 % minimmum majority classification to make it useful
 workspace.classfierthreshhold=1.5;
+
+%% Setup the graph obstacles, 
+% %this makes the check for a collision quicker
+% obsticle_points=workspace.indexedobsticles(GetImpLevInfo(workspace.indexedobsticles),:);
+% % If we include unknown
+% indexed_knowncoords=putinVoxels_gp(setdiff(workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:),workspace.indexedobsticles,'rows'),workspace.inc_size);
+% all_possible=putinVoxels_gp(workspace.unknowncoords(workspace.lev1unknown   ,:),workspace.inc_size);
+% [nothing,index]=setdiff(all_possible,[indexed_knowncoords;obsticle_points],'rows');
+% unknown_points=workspace.unknowncoords(workspace.lev1unknown(index),:);
+% 
+% update_jointconfig_obs(matsize,obsticle_points,unknown_points);

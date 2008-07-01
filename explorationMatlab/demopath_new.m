@@ -1,4 +1,4 @@
-%% demopath
+%% demopath_new
 %
 % *Description:*  This function is sent the steps of a path and then this
 % function will go through each step and show the path. There is also the
@@ -15,7 +15,7 @@
 %
 % *Returns:* NULL
 
-function demopath(all_steps)
+function demopath_new(all_steps)
 
 %% Variables
 global r Q densoobj workspace optimise
@@ -54,17 +54,31 @@ else %we are just demoing the path that has been passed
     pathdata(1).all_steps=all_steps;
     DISPON=true;
     points=workspace.indexedobsticles;
+    obsticle_points=workspace.indexedobsticles(GetImpLevInfo(workspace.indexedobsticles),:);
+    
+    indexed_knowncoords=putinVoxels_gp(setdiff(workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:),workspace.indexedobsticles,'rows'),workspace.inc_size);
+    all_possible=putinVoxels_gp(workspace.unknowncoords(workspace.lev1unknown   ,:),workspace.inc_size);
+    [nothing,index]=setdiff(all_possible,[indexed_knowncoords;obsticle_points],'rows');
+    unknown_points=workspace.unknowncoords(workspace.lev1unknown(index),:);
+    
     check_all_Js=false;
     checkstepsize=false;
-    showOBpoints=false;
+    showOBpoints=true;
 end
 
 %% Setup the figure (if required)
 if DISPON
     %fig=figure(2); 
     if size(points,1)>0 && showOBpoints
-        plot3(points(:,1),points(:,2),points(:,3),'marker','.','Color',[.2,.2,.1],'linestyle','none'); 
-    end        
+        plot3(points(:,1),points(:,2),points(:,3),'marker','.','Color',[.8,.8,.6],'linestyle','none'); 
+    end
+    
+    if size(unknown_points,1)>0 && size(obsticle_points,1)>0 && showOBpoints
+        
+        plot3(obsticle_points(:,1),obsticle_points(:,2),obsticle_points(:,3),'marker','.','Color',[.8,.4,.2],'linestyle','none'); 
+        plot3(unknown_points(:,1),unknown_points(:,2),unknown_points(:,3),'marker','.','Color',[.4,.4,.2],'linestyle','none'); 
+    end
+        
     view(3);axis([-1 1 -1 1 0 1.5]);
 %     colordef white;
 %     grid on;

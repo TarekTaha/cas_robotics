@@ -37,11 +37,12 @@ if nargin<3
 end
     
 %assumed there's nothing to collide with
-result=1;
+result=true;
 
 %% As long as there are some points
 % $$P \neq \emptyset $$
-if size(points,2)>0
+numpoints=size(points,1);
+if numpoints>0
 
 %% Translate Points back to coordinate frame of ellipse
 % $$ P_T = P \times Trans(-p_x,-p_y,-p_z) \times 
@@ -52,8 +53,13 @@ if size(points,2)>0
 
     %we want to inverse translate the points IE leave the elispes where
     %they were to start off with and translate the world around them
-    translated_points=[points(:,1)-t(1,4) points(:,2)-t(2,4) points(:,3)-t(3,4)];
-    translated_points=translated_points*t(1:3,1:3);
+%slow way
+%    translated_points=[points(:,1)-t(1,4) points(:,2)-t(2,4) points(:,3)-t(3,4)];
+%faster way
+    translated_points_1=points(:,1)-t(1,4);
+    translated_points_2=points(:,2)-t(2,4);
+    translated_points_3=points(:,3)-t(3,4);       
+    
 
 %% Check if there are points in ellipse
 % $$ \begin{array}{ccc}
@@ -63,9 +69,30 @@ if size(points,2)>0
 % \frac{(p_{Tz}-center_z)^2}{c^2}<=1 & \Rightarrow
 % result = 0 \end{array}$$
 
-    if ~isempty(find(((translated_points(:,1)-ellipse_vals.center(1)).^2)/ellipse_vals.params(1)^2+...
-                     ((translated_points(:,2)-ellipse_vals.center(2)).^2)/ellipse_vals.params(2)^2+...
-                     ((translated_points(:,3)-ellipse_vals.center(3)).^2)/ellipse_vals.params(3)^2<=1,1))
-        result=0; % THERE IS some point is inside
+%old slow way
+%     if ~isempty(find(((translated_points(:,1)-ellipse_vals.center(1)).^2)/ellipse_vals.params(1)^2+...
+%                      ((translated_points(:,2)-ellipse_vals.center(2)).^2)/ellipse_vals.params(2)^2+...
+%                      ((translated_points(:,3)-ellipse_vals.center(3)).^2)/ellipse_vals.params(3)^2<=1,1))
+%         result=0; % THERE IS some point is inside
+%     end  
+
+% %hyperfast (version 4) method    
+    translated_points_1_t=translated_points_1*t(1,1)+translated_points_2*t(2,1)+translated_points_3*t(3,1);
+    index_1=find(abs(translated_points_1_t-ellipse_vals.center(1))<=abs(ellipse_vals.params(1)));    
+    if ~isempty(index_1)
+        translated_points_2_t=translated_points_1*t(1,2)+translated_points_2*t(2,2)+translated_points_3*t(3,2);        
+        index_2=find(abs(translated_points_2_t(index_1)-ellipse_vals.center(2))<=abs(ellipse_vals.params(2)));    
+        if ~isempty(index_2)
+            translated_points_3_t=translated_points_1*t(1,3)+translated_points_2*t(2,3)+translated_points_3*t(3,3);
+            index_3=find(abs(translated_points_3_t(index_1(index_2))-ellipse_vals.center(3))<=abs(ellipse_vals.params(3)));    
+            if ~isempty(index_3)
+                if ~isempty(find(((translated_points_1_t(index_1(index_2(index_3)))-ellipse_vals.center(1)).^2)/ellipse_vals.params(1)^2+...
+                                 ((translated_points_2_t(index_1(index_2(index_3)))-ellipse_vals.center(2)).^2)/ellipse_vals.params(2)^2+...
+                                 ((translated_points_3_t(index_1(index_2(index_3)))-ellipse_vals.center(3)).^2)/ellipse_vals.params(3)^2<=1,1))
+                    result=false; % THERE IS some point is inside
+                end
+            end
+        end
     end
+
 end
