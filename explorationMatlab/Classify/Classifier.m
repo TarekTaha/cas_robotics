@@ -76,9 +76,9 @@ else % old one
 end
 
 %use fewer line checks SPEED BOOST This makes the lines a little less acurate but speed up the classifier
-% use_points_set_sizes_of = 8+(floor(rand()*6));
+ use_points_set_sizes_of = 8+(floor(rand()*6));
 % use_points_set_sizes_of = 2+(floor(rand()*6));
-use_points_set_sizes_of = 1; %use all of them makes it much better
+%use_points_set_sizes_of = 1; %use all of them makes it much better
 
 for i = 3:number_of_points
     if mod(i,use_points_set_sizes_of) == 0

@@ -74,6 +74,9 @@ points=points((points(:,1)>=workspace.min(1) & points(:,1)<=workspace.max(1) &..
 
 %keep only unique points               
 points=unique(points,'rows');
+%new way
+% points=unique_gp(points);
+
 
 %% Temporary Display and plotting for error testing etc
 

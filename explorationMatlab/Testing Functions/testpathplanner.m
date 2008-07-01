@@ -3,7 +3,7 @@
 % a certain amount of tests (numtests). It then finds paths for each on of
 % these if they are possible. If they are not possible then 
 
-function testpathplanner(numtests,tryalternate,useMiddleQ2,check_arm_perms,makenewgoals,useDijkstra)
+function testpathplanner(numtests,tryalternate,useMiddleQ2,check_arm_perms,makenewgoals,useDijkstra,waterplanner,groupplan)
 global Q r densoobj workspace optimise
 
 n = r.n;
@@ -12,20 +12,24 @@ t = r.base;
 qlimits=r.qlim;
 
 %% going through and setting up the default variables
-if nargin<6
-    useDijkstra=false;
-    if nargin<5
-        makenewgoals=true;
-        if nargin<4   
-            check_arm_perms=true;
-            if nargin<3   
-                useMiddleQ2=true;
-                if nargin<2
-                    tryalternate=false;
-                    if nargin==0
-                        numtests=1000;
-                        display(strcat('Setting number of tests to:',num2str(numtests),' since nothing was passed'));
-end; end; end; end; end; end
+if nargin<8
+    groupplan=false;
+    if nargin<7
+        waterplanner=false;
+        if nargin<6
+            useDijkstra=false;
+            if nargin<5
+                makenewgoals=true;
+                if nargin<4   
+                    check_arm_perms=true;
+                    if nargin<3   
+                        useMiddleQ2=true;
+                        if nargin<2
+                            tryalternate=false;
+                            if nargin==0
+                                numtests=1000;
+                                display(strcat('Setting number of tests to:',num2str(numtests),' since nothing was passed'));
+end; end; end; end; end; end; end; end
 
 %can delete if dijkstra is not used
 if useDijkstra; dijkstracounter=0;end 
@@ -112,51 +116,74 @@ numofaltpathsused=0;
 pathsfound_counter=1;
 pathdata=[];
 impossiblepathcnt=0;
-
-for i=1:numtests
-    Q=startQs(i,:);
-    newQ=endQs(i,:);
-    [temppathfound,all_steps]=pathplanner(newQ,tryalternate,check_arm_perms,useMiddleQ2,optimise.numofPPiterations,false);
-    %if we want to try and get a path with dijkstra algorithm
-    if ~temppathfound & useDijkstra
-        [temppathfound,all_steps]=practiceDijkstra(startQ,endQ);
-        if temppathfound==1
-            all_steps=all_steps.alljoints;
-            dijkstracounter=dijkstracounter+1;
-        end
-    end
-        
-    if temppathfound==1
-        if (all_steps(end,:)-newQ~=0)
-            numofaltpathsused=numofaltpathsused+1;
-            %we have to make the new start different because we found an
-            %alternate solution
-            if i<size(startQs,1)
-                startQs(i+1,:)=all_steps(end,:);
-            end
-        end
-        %keep the path that was taken
-        pathdata(pathsfound_counter).all_steps=all_steps;
-        pathsfound_counter=pathsfound_counter+1;
-    else
-        %Since we didn't get to the last end the next start Q is equal to
-        %the current start Q, as long as we are not at the end
-        if i<size(startQs,1)
-            startQs(i+1,:)=startQs(i,:);             
-            %display(strcat('For path num:', num2str(i+1),', we set the startQ to be the same as previous startQ since no path found'));
-        end
-        if temppathfound==-1
+if groupplan
+    tic
+    path_val=pathplanner_water(endQs,false,false);
+    toc
+    allpathsfound=[];
+    %go through the results and check how many are valid
+    for i=1:numtests
+        if path_val(i).result==true
+            allpathsfound=[allpathsfound;path_val(i).result];
+        else  
             impossiblepathcnt=impossiblepathcnt+1;
         end
-    end
-    allpathsfound=[allpathsfound;temppathfound];
-    
-end
+    end 
+    save('path_val.mat','path_val');
+else
+    for i=1:numtests
+        Q=startQs(i,:);
+        newQ=endQs(i,:);
+        if waterplanner==true
+            path_val=pathplanner_water(newQ,false);
+            temppathfound=path_val(1).result;
+            all_steps=path_val(1).all_steps;
+        else
+            [temppathfound,all_steps]=pathplanner(newQ,tryalternate,check_arm_perms,useMiddleQ2,optimise.numofPPiterations,false);
+        end
 
+        %if we want to try and get a path with dijkstra algorithm
+        if ~temppathfound && useDijkstra
+            [temppathfound,all_steps]=practiceDijkstra(startQ,endQ);
+            if temppathfound==1
+                all_steps=all_steps.alljoints;
+                dijkstracounter=dijkstracounter+1;
+            end
+        end
+
+        if temppathfound==1
+            if (all_steps(end,:)-newQ~=0)
+                numofaltpathsused=numofaltpathsused+1;
+                %we have to make the new start different because we found an
+                %alternate solution
+                if i<size(startQs,1)
+                    startQs(i+1,:)=all_steps(end,:);
+                end
+            end
+            %keep the path that was taken
+            pathdata(pathsfound_counter).all_steps=all_steps;
+            pathsfound_counter=pathsfound_counter+1;
+        else
+            %Since we didn't get to the last end the next start Q is equal to
+            %the current start Q, as long as we are not at the end
+            if i<size(startQs,1)
+                startQs(i+1,:)=startQs(i,:);             
+                %display(strcat('For path num:', num2str(i+1),', we set the startQ to be the same as previous startQ since no path found'));
+            end
+            if temppathfound==-1
+                impossiblepathcnt=impossiblepathcnt+1;
+            end
+        end
+        allpathsfound=[allpathsfound;temppathfound];
+
+    end
+end
 %% Display Results
 %clc
 finshtime=etime(clock,starttime);
+display('0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0');
 display(strcat('Statistics........ for: ',num2str(numtests),'tests, took: ',num2str(finshtime),' seconds'));
+if waterplanner==true; display('Using the waterplanner'); end
 display(['Num of valid paths found = ',num2str(length(find(allpathsfound==1))), ' at ',num2str(finshtime/length(find(allpathsfound==1))),' sec/path']);
 display(strcat('Num of impossible end posses = ',num2str(impossiblepathcnt)));
 display(strcat('..of which No. alternate paths = ',num2str(numofaltpathsused)));

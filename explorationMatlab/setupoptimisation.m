@@ -37,6 +37,9 @@ optimise.numofPPiterations=50;
 %As worked out with cos formul to keep max posible movement at end effector
 %to be approx 150mm and about the same size as safety dist in end ellipse 
 optimise.max_angle_for123=[4,5,7]*pi/180; %Less than 1/2 calculated for safety
+% watet based path planning this is how cource the graph search should be
+% where 1 would be equal to the max_angle_for123
+optimise.waterPPleaniancy=3.5;
 
 %% NBV
 %this is how many views to save for the NBV
@@ -56,3 +59,4 @@ optimise.addinfoweight=100;
 %results in safe places this dampner will stop all possibilites being
 %explored and only some will be looked at (still random)
 optimise.nbv_beta_dampner=0.8;
+
