@@ -123,12 +123,24 @@ SET( CasPlanner_SRCS
     ./modules/PathPlanner/heuristic.cpp
 )
 
-# some .ui files
+# UI .ui files
 SET(CasPlanner_UIS gui/hritab.ui )
+# Resources files
 SET(CasPlanner_RCS resources/icons.qrc)
 
 # Optimization Level
-SET(CMAKE_CXX_FLAGS "-O0 -o -ffast-math -march=pentium-m -msse2 -mfpmath=sse")
+SET(CMAKE_CXX_FLAGS "-O1 -o -ffast-math -march=pentium-m -msse2 -mfpmath=sse")
+
+# CDT Error Parser cannot handle error messages that span more than one line
+# which is the default gcc behavior. This is used to force gcc to generate single
+# line error messages with no line wrapping
+IF(CMAKE_COMPILER_IS_GNUCC)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
+ENDIF(CMAKE_COMPILER_IS_GNUCC)
+
+IF(CMAKE_COMPILER_IS_GNUCXX)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
+ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 # enable warnings
 ADD_DEFINITIONS( -Wall )
