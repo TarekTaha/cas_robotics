@@ -115,7 +115,8 @@ if ~isempty(all_steps) && ...
         try [pathfound,all_steps]=pathplanner_new(newQ,guiglobal.plotpath,tryalternate);end
     end     
 else % no valid path has been passed
-    try tic; 
+    try 
+        tic; 
         [pathfound,all_steps]=pathplanner_new(newQ,guiglobal.plotpath,tryalternate);
         display(['Additional Path Planning time is: ',num2str(toc)]);
     catch

@@ -95,11 +95,11 @@ else
         [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData); 
         UNclassifiedvoxels=update_ocstatus(ClassifiedData); 
         %try and save the current status, if user ctrl+c s out it dosen't matter
-        try AXBAMnCtesting(false);
-        catch
-            lasterr
-            keyboard
-        end
+%         try AXBAMnCtesting(false);
+%         catch
+%             lasterr
+%             keyboard
+%         end
     end
 
 end
