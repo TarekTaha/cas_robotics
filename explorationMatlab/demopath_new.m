@@ -63,7 +63,7 @@ else %we are just demoing the path that has been passed
     
     check_all_Js=false;
     checkstepsize=false;
-    showOBpoints=true;
+    showOBpoints=false;
 end
 
 %% Setup the figure (if required)

@@ -44,19 +44,20 @@ end
     
 %% Setup robot movement object
 rob_h=actxserver('EyeInHand.DensoCommand');
+rob_h2=actxserver('EyeInHand.DensoState');
 %make sure comms up are up to speed
 waitcounter=0;
-while size(rob_h.JointState,2)~=6
+while size(rob_h2.JointState,2)~=6
     pause(0.2);
     if waitcounter>25 %5 secs
         error('There is some problem with controller:m , make sure it is on, in auto mode, motor is on and program is running')
     end    
 end
 %check joint state and can continually check this to see that it has got to the correct position
-% display(strcat('Current Joint State is:',num2str(rob_h.JointState),' and the desired is:', num2str(tempQ)));
+% display(strcat('Current Joint State is:',num2str(rob_h2.JointStatee),' and the desired is:', num2str(tempQ)));
 
 %% Check if all joints are the same as what we want them to be within 1degree
-if ~isempty(find(round(tempQ-rob_h.JointState), 1))
+if ~isempty(find(round(tempQ-rob_h2.JointState), 1))
     %Set the speed
     rob_h.Type='SetSpeed';
     rob_h.Params=[robot_maxreach.move_speed,0];
@@ -66,10 +67,10 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
         rob_h.Type='MoveJointAbs';
         % NOTE THE 6th JOINT IS OVERRIDEN TO 0 EARLIER in NBV so that it is perpendicular to the angle of rotations of joint 5 throughout the scan
         rob_h.Params=tempQ;
-        display(strcat('The robot is currently at:', num2str(rob_h.JointState),' and is planning to move to:',num2str(rob_h.Params),'. Note 6th Joint may have been changed to 0 if using NBV. Please get ready to push EMERGENCY STOP'));
+        display(strcat('The robot is currently at:', num2str(rob_h2.JointState),' and is planning to move to:',num2str(rob_h.Params),'. Note 6th Joint may have been changed to 0 if using NBV. Please get ready to push EMERGENCY STOP'));
         % Additional Soft motion check - shouldn't be needed
-        if (rob_h.JointState(2)<-60 || tempQ(2)<-60)
-            if (rob_h.JointState(2)<-7/3*rob_h.JointState(3)-130 || tempQ(2)<-7/3*tempQ(3)-130)
+        if (rob_h2.JointState(2)<-60 || tempQ(2)<-60)
+            if (rob_h2.JointState(2)<-7/3*rob_h2.JointState(3)-130 || tempQ(2)<-7/3*tempQ(3)-130)
                 uiwait(msgbox('Note joint 2 is less than -60 hence may be outside motion space; NOT CURRENTLY ALLOWED'));
                 rob_h.release;
                 error('Dont use this angle for joint 2');
@@ -87,7 +88,7 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
         for pathpnt=1:size(all_steps,1)
             current_step_DEG=all_steps(pathpnt,:)*180/pi;
             rob_h.Params=current_step_DEG;            
-            %uiwait(msgbox(strcat('The robot is currently at:', num2str(rob_h.JointState),' and is planning to move to:',num2str(rob_h.Params),'. Note 6th Joint may have been changed to 0 if using NBV. Please get ready to push EMERGENCY STOP')));
+            %uiwait(msgbox(strcat('The robot is currently at:', num2str(rob_h2.JointState),' and is planning to move to:',num2str(rob_h.Params),'. Note 6th Joint may have been changed to 0 if using NBV. Please get ready to push EMERGENCY STOP')));
             if current_step_DEG(2)<-60
                 % Additional Soft motion check - shouldn't be needed
                 if (current_step_DEG(3)<-7/3*current_step_DEG(2)-130)
@@ -118,8 +119,8 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
                     else
                         %try alternate method of getting joint state
                         use_real_robot_GETJs()
-                        if ~isempty(find(abs((Q*180/pi)-rob_h.JointState)>eps,1)) && max(abs((Q*180/pi-current_step_DEG)))<7
-                            uiwait(msgbox('There is a problem with the rob_h.JointState function, I can use use_real_robot_GETJs but this is NOT a fix - EyeInHand.exe must die'));
+                        if ~isempty(find(abs((Q*180/pi)-rob_h2.JointState)>eps,1)) && max(abs((Q*180/pi-current_step_DEG)))<7
+                            uiwait(msgbox('There is a problem with the rob_h2.JointState function, I can use use_real_robot_GETJs but this is NOT a fix - EyeInHand.exe must die'));
                             please_use_GETjsFunc=true;
                             break
                         else
@@ -132,7 +133,7 @@ if ~isempty(find(round(tempQ-rob_h.JointState), 1))
                     releaserobot(rob_h)
                     error('Problem issuing commands to drive the robot');                    
                 end
-                %display(strcat('Joint state is currently:', num2str(rob_h.JointState)));  
+                %display(strcat('Joint state is currently:', num2str(rob_h2.JointState)));  
                 %if we need to update the old way
                 if please_use_GETjsFunc;use_real_robot_GETJs();end
             end

@@ -84,8 +84,8 @@ for current_point=1:size(scan_data,1)
 %             convergange_mat=cov(scan_data_minusmean);
             
             %new way to do cov function
-            length_of_data = size(data_minusmean,1);
-            convergange_mat = (data_minusmean' * data_minusmean) / (length_of_data-1); 
+            length_of_data = size(scan_data_minusmean,1);
+            convergange_mat = (scan_data_minusmean' * scan_data_minusmean) / (length_of_data-1); 
 
 
             [eigenvectors,eigenvalues]=eig(convergange_mat);
