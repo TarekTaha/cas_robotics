@@ -56,8 +56,8 @@ else %we are just demoing the path that has been passed
     points=workspace.indexedobsticles;
     obsticle_points=workspace.indexedobsticles(GetImpLevInfo(workspace.indexedobsticles),:);
     
-    indexed_knowncoords=putinVoxels_gp(setdiff(workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:),workspace.indexedobsticles,'rows'),workspace.inc_size);
-    all_possible=putinVoxels_gp(workspace.unknowncoords(workspace.lev1unknown   ,:),workspace.inc_size);
+    indexed_knowncoords=putInVoxels_gp(setdiff(workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:),workspace.indexedobsticles,'rows'),workspace.inc_size);
+    all_possible=putInVoxels_gp(workspace.unknowncoords(workspace.lev1unknown   ,:),workspace.inc_size);
     [nothing,index]=setdiff(all_possible,[indexed_knowncoords;obsticle_points],'rows');
     unknown_points=workspace.unknowncoords(workspace.lev1unknown(index),:);
     
