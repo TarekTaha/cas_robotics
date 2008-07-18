@@ -216,61 +216,84 @@ end
 %order the best views
 order_bestviews()
 
-%% try and get at least 1 path then save the remaing valid_max-1
+%% Do new wavefront based planner
+newQ=zeros([size(bestviews,2),6]);
+for current_view=1:size(bestviews,2)
+  newQ(current_view,:)=bestviews(current_view).Q;
+end
+pathval=pathplanner_water(newQ);
 valid_count=0;
-% this limits the amount of time we can spend searching for a path when
-% there may not be one
-valid_max=min(2*optimise.valid_max,size(bestviews,2));
-for current_view=1:valid_max
-    if valid_count<1
-        %if a path calculated previously exists from current place use it
-        if all_views.path(bestviews(current_view).all_views_val).valid==1 &&...
-                isempty(find(all_views.path(bestviews(current_view).all_views_val).all_steps(1,:)-Q>eps,1))
-            % check to make sure
-            if check_path_for_col(all_views.path(bestviews(current_view).all_views_val).all_steps,obsticle_points)
-                bestviews(current_view).valid=1;
-                bestviews(current_view).all_steps=all_views.path(bestviews(current_view).all_views_val).all_steps;
-            else %find a new path
-                all_views.path(cur_con).valid=0;
-                [bestviews(current_view).valid,bestviews(current_view).all_steps]=pathplanner_new(bestviews(current_view).Q,false,true,true,30);    
-            end
-        else %otherwise try and get another
-            [bestviews(current_view).valid,bestviews(current_view).all_steps]=pathplanner_new(bestviews(current_view).Q,false,true,true,30);    
-        end
-    else %once we have one path then we just fill the rest in with pre cal or blanks
-        if all_views.path(bestviews(current_view).all_views_val).valid==1 &&...
-                isempty(find(all_views.path(bestviews(current_view).all_views_val).all_steps(1,:)-Q>eps,1))
-            if check_path_for_col(all_views.path(bestviews(current_view).all_views_val).all_steps,obsticle_points)
-                bestviews(current_view).valid=1;
-                bestviews(current_view).all_steps=all_views.path(bestviews(current_view).all_views_val).all_steps;
-            else %set global var all_path valid to 0 and set dummy values for
-                all_views.path(cur_con).valid=0;
-                bestviews(current_view).valid=-1;
-                bestviews(current_view).all_steps=[];        
-            end
-        else
-            bestviews(current_view).valid=-1;
-            bestviews(current_view).all_steps=[];        
-        end
-    end
-
-    if bestviews(current_view).valid || valid_count>=1
-        valid_count=valid_count+1;
-        tempbestviews(valid_count)=bestviews(current_view);   
-        %we have enough (optimise.valid_max)
-        if valid_count>=optimise.valid_max
-            break;
-        end
-    else %it failed so note down that we can't get to this destination
-        all_views.path(bestviews(current_view).all_views_val).valid=0;
-    end
+tempbestviews=[];
+for current_view=1:size(pathval,2)  
+  if pathval(current_view).result
+    valid_count=valid_count+1;
+    tempbestviews(valid_count).valid=pathval(current_view).result;    
+    tempbestviews(valid_count).all_steps=pathval(current_view).all_steps;
+  end  
 end
-%set to the new sorted and pathplanned tempbestviews
-if valid_count==0
-     error('There were no bestviews found, probably because there were no possible paths to any of the desired ones, consider changing end_value_damper_weight');
+if valid_count>0
+  bestviews=tempbestviews;
+  display(['There were ',num2str(valid_count),' bestviews found with paths'])
 else
-    bestviews=tempbestviews;
+  error('There were no bestviews found after path planning');
 end
-
-
 toc
+
+% %% try and get at least 1 path then save the remaing valid_max-1
+% valid_count=0;
+% % this limits the amount of time we can spend searching for a path when
+% % there may not be one
+% valid_max=min(2*optimise.valid_max,size(bestviews,2));
+% for current_view=1:valid_max
+%     if valid_count<1
+%         %if a path calculated previously exists from current place use it
+%         if all_views.path(bestviews(current_view).all_views_val).valid==1 &&...
+%                 isempty(find(all_views.path(bestviews(current_view).all_views_val).all_steps(1,:)-Q>eps,1))
+%             % check to make sure
+%             if check_path_for_col(all_views.path(bestviews(current_view).all_views_val).all_steps,obsticle_points)
+%                 bestviews(current_view).valid=1;
+%                 bestviews(current_view).all_steps=all_views.path(bestviews(current_view).all_views_val).all_steps;
+%             else %find a new path
+%                 all_views.path(cur_con).valid=0;
+%                 [bestviews(current_view).valid,bestviews(current_view).all_steps]=pathplanner_new(bestviews(current_view).Q,false,true,true,30);    
+%             end
+%         else %otherwise try and get another
+%             [bestviews(current_view).valid,bestviews(current_view).all_steps]=pathplanner_new(bestviews(current_view).Q,false,true,true,30);    
+%         end
+%     else %once we have one path then we just fill the rest in with pre cal or blanks
+%         if all_views.path(bestviews(current_view).all_views_val).valid==1 &&...
+%                 isempty(find(all_views.path(bestviews(current_view).all_views_val).all_steps(1,:)-Q>eps,1))
+%             if check_path_for_col(all_views.path(bestviews(current_view).all_views_val).all_steps,obsticle_points)
+%                 bestviews(current_view).valid=1;
+%                 bestviews(current_view).all_steps=all_views.path(bestviews(current_view).all_views_val).all_steps;
+%             else %set global var all_path valid to 0 and set dummy values for
+%                 all_views.path(cur_con).valid=0;
+%                 bestviews(current_view).valid=-1;
+%                 bestviews(current_view).all_steps=[];        
+%             end
+%         else
+%             bestviews(current_view).valid=-1;
+%             bestviews(current_view).all_steps=[];        
+%         end
+%     end
+% 
+%     if bestviews(current_view).valid || valid_count>=1
+%         valid_count=valid_count+1;
+%         tempbestviews(valid_count)=bestviews(current_view);   
+%         %we have enough (optimise.valid_max)
+%         if valid_count>=optimise.valid_max
+%             break;
+%         end
+%     else %it failed so note down that we can't get to this destination
+%         all_views.path(bestviews(current_view).all_views_val).valid=0;
+%     end
+% end
+% %set to the new sorted and pathplanned tempbestviews
+% if valid_count==0
+%      error('There were no bestviews found, probably because there were no possible paths to any of the desired ones, consider changing end_value_damper_weight');
+% else
+%     bestviews=tempbestviews;
+% end
+
+
+% toc

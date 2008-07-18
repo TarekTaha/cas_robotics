@@ -43,7 +43,12 @@ else
         tr=fkine(r,Q);
         scan.origin=[tr(1,4),tr(2,4),tr(3,4)];
     else 
-        error('You have asked for not a NBV scan and there are no more default poses');
+        display('You have asked for not a NBV scan and there are no more default poses so doing NBV_beta2');
+        NBV_beta2();
+        global bestviews
+        db=bestviews(1).scanorigin;
+        scan.chosenview=bestviews(1).chosenview;
+        newQ=[bestviews(selection).Q(1:5),0];
     end
 end
 
