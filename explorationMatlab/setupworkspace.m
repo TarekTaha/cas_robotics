@@ -211,3 +211,5 @@ workspace.classfierthreshhold=1.5;
 % unknown_points=workspace.unknowncoords(workspace.lev1unknown(index),:);
 % 
 % update_jointconfig_obs(matsize,obsticle_points,unknown_points);
+global graf_obs
+load graf_obs.mat

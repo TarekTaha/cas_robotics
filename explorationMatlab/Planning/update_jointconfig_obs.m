@@ -73,6 +73,7 @@ else %else remove points that are now free from the old one
                     if results && unknown_points_result
                         nowfreeindx=find(graf_obs(:,1)==i & graf_obs(:,2)==j & graf_obs(:,3)==k,1);
                         graf_obs=graf_obs([1:nowfreeindx-1,nowfreeindx+1:end],:);
+                        graf_obs_2Bupdated=graf_obs_2Bupdated([1:nowfreeindx-1,nowfreeindx+1:end],:);
                     elseif ~results 
                         %it is in collision due to an obstacle and we
                         %shouldn't check it again

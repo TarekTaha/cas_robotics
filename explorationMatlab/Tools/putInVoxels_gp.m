@@ -1,4 +1,21 @@
-%pass in a set many rows by 3 cols
+%% putInVoxels_gp
+%
+% *Description:* This puts whatever is passed into voxels by dividing by
+% the global workspace.inc_size. It will try and use the mex file compiled
+% for windows but if fails it will use the matlab way of doing it
+
+%% Function Call
+% 
+% *Inputs:* 
+%
+% _a_ (3 x many cartesian matrix)
+%
+% _incsize_ (double) size of the voxels
+%
+% *Returns:* 
+%
+% _b_ (3x many cartesian matrix)
+
 function b=putInVoxels_gp(a,inc_size)
 
 %run the special c function for returning unique put into voxels
@@ -11,5 +28,5 @@ try b=putInVoxels(a,inc_size);
         b=b(1:firstrepeat,:);
     end    
 catch
-    b=unique(round(a/inc_size),'rows')*inc_size;
+     b=putInVoxels_matlab(a,inc_size);
 end

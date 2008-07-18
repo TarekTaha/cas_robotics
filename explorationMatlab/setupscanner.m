@@ -64,7 +64,7 @@ end
 %and is used in nbv_beta since this has predefined poses
 scan.done_bestviews_orfailed=[inf, inf, inf, inf, inf, inf];
 
-uiwait(msgbox('Not loading all_views exploration data'));
+% uiwait(msgbox('Not loading all_views exploration data'));
 % try load all_views.mat
 % catch
 %     display('Cant call or load all_views.mat');
