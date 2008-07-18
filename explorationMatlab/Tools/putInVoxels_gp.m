@@ -11,5 +11,5 @@ try b=putInVoxels(a,inc_size);
         b=b(1:firstrepeat,:);
     end    
 catch
-    b=unique(round(a/inc_size))*inc_size;
+    b=unique(round(a/inc_size),'rows')*inc_size;
 end

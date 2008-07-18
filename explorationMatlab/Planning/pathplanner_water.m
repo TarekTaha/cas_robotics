@@ -24,9 +24,12 @@ function [pathval] = pathplanner_water(newQ,animate,checkeachlink)
 
 %% Input checks
 if nargin<2
-    animate=false;
-    if nargin<1
-        error('You must pass in at least a destination newQ')
+    checkeachlink=false;
+    if nargin<2
+        animate=false;
+        if nargin<1
+            error('You must pass in at least a destination newQ')
+        end
     end
 end
 
