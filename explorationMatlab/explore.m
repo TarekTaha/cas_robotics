@@ -30,7 +30,7 @@ global workspace scan bestviews r Q robot_maxreach
 
 % this is either using a calculated NBV or choose our own
 if true(useNBV)
-    db=bestviews(selection).scanorigin;
+%     db=bestviews(selection).scanorigin;
     scan.chosenview=bestviews(selection).chosenview;
     % Make it so that the last angle is 0
     newQ=[bestviews(selection).Q(1:5),0];
@@ -45,10 +45,10 @@ else
     else 
         display('You have asked for not a NBV scan and there are no more default poses so doing NBV_beta2');
         NBV_beta2();
-        global bestviews
-        db=bestviews(1).scanorigin;
+        global bestviews;
+%         db=bestviews(1).scanorigin;
         scan.chosenview=bestviews(1).chosenview;
-        newQ=[bestviews(selection).Q(1:5),0];
+        newQ=[bestviews(1).Q(1:5),0];
     end
 end
 

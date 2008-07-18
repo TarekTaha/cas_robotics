@@ -291,9 +291,9 @@ elseif current_test_case>1 && want_to_continue
     for stepcount=stepcount+1:15;
         if ~get(handles.stopflag_checkbox,'Value')
             %do next best view exploration search
-            profile clear; profile on;
+%             profile clear; profile on;
             NBV_beta2();
-            profile off; profile viewer;
+%             profile off; profile viewer;
 
             current_bestview=1;
             max_bestviews_togothrough=optimise.valid_max*1/4;
@@ -842,7 +842,8 @@ global robmap_h
       
 try aabb = [-1.5, -1.5, -1; 2, 1.5, 2];
 hMesh = robmap_h.Mesh(aabb);
-obsticlepoints = GetImpLevInfo(hMesh.VertexData);
+obsticlepoints = hMesh.VertexData(GetImpLevInfo(hMesh.VertexData),:);
+
 catch; error('In getting the mesh needed for surface making');
 end
 

@@ -197,6 +197,7 @@ if size(markedcubes)>0
     %make sure all are still inside workspace
     points=points((points(:,1)>=workspace.min(1) & points(:,2)>=workspace.min(2) & points(:,3)>=workspace.min(3) &...
                    points(:,1)<=workspace.max(1) & points(:,2)<=workspace.max(2) & points(:,3)<=workspace.max(3)),:);
+  
     %make sure end points are within the workspace bounds
     ice_cream_bounds=ice_cream_bounds((ice_cream_bounds(:,1)>=workspace.min(1) & ice_cream_bounds(:,1)<=workspace.max(1) &...
                                        ice_cream_bounds(:,2)>=workspace.min(2) & ice_cream_bounds(:,2)<=workspace.max(2) &...
@@ -206,9 +207,29 @@ if size(markedcubes)>0
     ice_cream_bounds_NOSELF=remove_self_scanning(ice_cream_bounds);
     
 %     indexedobsticles=unique(floor(ice_cream_bounds_NOSELF/workspace.inc_size)*workspace.inc_size,'rows');
-    indexedobsticles=unique(round(ice_cream_bounds_NOSELF/workspace.inc_size)*workspace.inc_size,'rows');
+    indexedobsticles=putInVoxels_gp(ice_cream_bounds_NOSELF,workspace.inc_size);
     %also get rid of any indexed points that are within the feilds
     indexedobsticles=remove_self_scanning(indexedobsticles);
+    
+
+
+%% new method to try and make the iner circle of movement cleaner using
+    %stephens data
+    try 
+      global robmap_h
+      aabb = [workspace.impLev(1).x(1), workspace.impLev(1).y(1) workspace.impLev(1).z(1);...
+              workspace.impLev(1).x(2), workspace.impLev(1).y(2) workspace.impLev(1).z(2)];
+      hMesh = robmap_h.Mesh(aabb);
+      indexedobsticles_levl1=putInVoxels_gp(hMesh.VertexData(GetImpLevInfo(hMesh.VertexData),:),workspace.inc_size);
+    catch; 
+      error('In getting the mesh needed for surface making');
+    end    
+    [level1,level2,level3]=GetImpLevInfo(indexedobsticles);
+    %get points which are inside entire workspace but are not in the robots
+    %range (I will use the points from the mesh which are more acurate)
+    workspace.indexedobsticles=putInVoxels_gp([workspace.indexedobsticles;...
+                                               indexedobsticles(setdiff(level3,level1),:);...
+                                               indexedobsticles_levl1],workspace.inc_size);
 end
 
 %% Timing and Display purposes
@@ -216,13 +237,13 @@ end
 % display (strcat('You filled in:',num2str(size(points)),' cubes in: ',num2str(temptime),'secs'));
 
 %% Update (indexed) obstacles points global variables
-% workspace.Nobsticlepoints=[workspace.Nobsticlepoints;ice_cream_bounds_NOSELF];
-% only want unique indexed obsticles
-if size(workspace.indexedobsticles,2)==0
-    workspace.indexedobsticles=indexedobsticles;
-else
-    workspace.indexedobsticles=union(indexedobsticles,workspace.indexedobsticles,'rows');
-end
+    % workspace.Nobsticlepoints=[workspace.Nobsticlepoints;ice_cream_bounds_NOSELF];
+    % only want unique indexed obsticles
+%     if size(workspace.indexedobsticles,2)==0
+%         workspace.indexedobsticles=indexedobsticles;
+%     else
+%         workspace.indexedobsticles=union(indexedobsticles,workspace.indexedobsticles,'rows');
+%     end
 
 %% Remove points that are on a path we have taken
 if size(robot_maxreach.pointcarvedout,1)>0
