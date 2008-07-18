@@ -179,7 +179,7 @@ setupworkspace(get(handles.show_unknownpoints_checkbox,'Value'));
 
 global all_views
 if isempty(all_views)
-    uiwait(msgbox('not calculating allviews even though it dosent exist'));
+    warning('not calculating allviews even though it dosent exist');
 %     display('Having to calculate all_views for exploration, this happens ones only');
 %     calc_all_views();
 %     load all_views.mat
@@ -291,7 +291,9 @@ elseif current_test_case>1 && want_to_continue
     for stepcount=stepcount+1:15;
         if ~get(handles.stopflag_checkbox,'Value')
             %do next best view exploration search
+            profile clear; profile on;
             NBV_beta2();
+            profile off; profile viewer;
 
             current_bestview=1;
             max_bestviews_togothrough=optimise.valid_max*1/4;

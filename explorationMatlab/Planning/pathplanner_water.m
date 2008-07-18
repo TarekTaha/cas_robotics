@@ -23,7 +23,7 @@
 function [pathval] = pathplanner_water(newQ,animate,checkeachlink)
 
 %% Input checks
-if nargin<2
+if nargin<3
     checkeachlink=false;
     if nargin<2
         animate=false;
@@ -61,8 +61,8 @@ end
 obsticle_points=workspace.indexedobsticles(GetImpLevInfo(workspace.indexedobsticles),:);
 
 % If we include unknown
-indexed_knowncoords=putinVoxels_gp(setdiff(workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:),workspace.indexedobsticles,'rows'),workspace.inc_size);
-all_possible=putinVoxels_gp(workspace.unknowncoords(workspace.lev1unknown   ,:),workspace.inc_size);
+indexed_knowncoords=putInVoxels_gp(setdiff(workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:),workspace.indexedobsticles,'rows'),workspace.inc_size);
+all_possible=putInVoxels_gp(workspace.unknowncoords(workspace.lev1unknown   ,:),workspace.inc_size);
 [nothing,index]=setdiff(all_possible,[indexed_knowncoords;obsticle_points],'rows');
 unknown_points=workspace.unknowncoords(workspace.lev1unknown(index),:);
 % or else unknown is empty
@@ -98,6 +98,8 @@ startN(1:3)=ceil((startN(1:3)-qlimits(1:3,1)')./inc_size);
 
 % list of valid destinations
 endN=newQ(validnewQ==1,1:3);
+%update the list of newQ destinations
+newQ=newQ(validnewQ==1,:);
 for current_dest=1:size(endN,1)
     endN(current_dest,:)=ceil((endN(current_dest,:)-qlimits(1:3,1)')./inc_size);
 end
@@ -224,7 +226,7 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
 
     goalsfound=find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize(1)+endN(:,1))>0)';
 
-    display(['goals found =', num2str(size(goalsfound))]);
+    display(['Using only graph search, goals found =', num2str(size(goalsfound,2))]);
     
 %     for cur_goal=1:size(goalsfound,2) 
     %we want these to line up with the endN which also align with newQ
@@ -326,8 +328,22 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
                     currentpathtocheck((leanINT-1)*(pnode-1)+1:(leanINT-1)*pnode,:)=inbetweensteps;
                     
                 end
-                %this tacs on the last pose
-%                 pathval(cur_goal).all_steps=[pathval(cur_goal).all_steps;newQ(cur_goal,:)];
+
+                %this tacs on the last, actual destination, pose
+                currentQnode=pathval(cur_goal).all_steps(end,:);
+                nextQnode=newQ(cur_goal,:);
+                %go through the added increments and keep these in between steps 
+                for curr_step=1:leanINT-1
+                    ratiothrough=curr_step*optimise.waterPPleaniancy/leanINT;
+                    inbetweensteps(curr_step,:)=[currentQnode+(nextQnode-currentQnode)*...
+                                                 ratiothrough/optimise.waterPPleaniancy];
+
+                end
+                pathval(cur_goal).all_steps=[pathval(cur_goal).all_steps;inbetweensteps;newQ(cur_goal,:)];
+                %check the inbetween nodes of this step too
+                currentpathtocheck=[currentpathtocheck;inbetweensteps];
+                
+                
                 %we only need to check every other than the first and last
                 %value
                 [pathval(cur_goal).result,pathval(cur_goal).unknown_points_result]=check_path_for_col(currentpathtocheck,obsticle_points,unknown_points,linkvals);

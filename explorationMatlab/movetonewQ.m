@@ -112,12 +112,23 @@ if ~isempty(all_steps) && ...
     pathfound=check_path_for_col(all_steps);
     if ~pathfound
         display('The passed in path is not valid - calculating another');
-        try [pathfound,all_steps]=pathplanner_new(newQ,guiglobal.plotpath,tryalternate);end
+        %try and move directly to the goal with several combinations of
+        %joints but with no middle points
+        try [pathfound,all_steps]=pathplanner_new(newQ,false,true,false,0,false);end
+        if pathfound==0
+          pathval=pathplanner_water(newQ,guiglobal.plotpath);pathfound=pathval.result;all_steps=pathval.all_steps;
+        end
     end     
 else % no valid path has been passed
     try 
         tic; 
-        [pathfound,all_steps]=pathplanner_new(newQ,guiglobal.plotpath,tryalternate);
+        %try and move directly to the goal with several combinations of
+        %joints but with no middle points
+        try [pathfound,all_steps]=pathplanner_new(newQ,false,true,false,0,false);end
+        if pathfound==0
+          pathval=pathplanner_water(newQ,guiglobal.plotpath);pathfound=pathval.result;all_steps=pathval.all_steps;
+        end
+
         display(['Additional Path Planning time is: ',num2str(toc)]);
     catch
         keyboard
