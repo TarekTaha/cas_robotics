@@ -193,8 +193,10 @@ end; %end overall for loop for num of iterations
    
 %% FUNCTION: check between a start and end point to see if there is a path
 function [pathfound,all_steps]=checkdirectpath(startQ,endQ,max_angle_for123,check_arm_perms,obsticle_points)
+
 %even if it is half a whole path still start with the startQ
 all_steps=startQ;
+
 
 %how many increments to go through to get to end
 num_inc=ceil(max([abs(endQ(1)-startQ(1))/max_angle_for123(1),...
@@ -219,8 +221,17 @@ pathfound=check_path_for_col(all_steps,obsticle_points);
 if pathfound==1
 %     all_steps=path_minimise(all_steps);
     return
-%if we are to go through and check each arm permutation as well for a collsion free path 
-elseif check_arm_perms
+%if we are to go through and check each arm permutation as well for a
+%collsion free path as long as there is more than 1 joint different between
+%start and end
+elseif check_arm_perms && size(find(startQ(1:3)-endQ(1:3)==0),2)<2;
+    
+    %find any values that are the same and add eps to the start value
+    jointsthesame=find(startQ(1:3)-endQ(1:3)==0);
+    if size(jointsthesame,2)>0
+        startQ(jointsthesame)=startQ(jointsthesame)+eps;
+    end
+
     %calculate new increment value because each angle is separate there is
     %no need to make so many steps
     %how many increments to go through to get to end

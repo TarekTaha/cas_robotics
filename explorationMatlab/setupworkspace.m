@@ -212,4 +212,8 @@ workspace.classfierthreshhold=1.5;
 % 
 % update_jointconfig_obs(matsize,obsticle_points,unknown_points);
 global graf_obs
-load graf_obs.mat
+try 
+    load graf_obs.mat
+catch
+    uiwait(msgbox('couldnt load the graf_obs.mat file, make sure the planning directory is added to the maatlab path'));
+end

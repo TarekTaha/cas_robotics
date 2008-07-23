@@ -19,12 +19,12 @@ clear global bestviews;
 global workspace Q all_views bestviews optimise scan;
 
 %%%%%%%%%saving for the exhastive search
-try load Xsearchdata.mat;
-    Xsearchdata(end+1).workspace=workspace;
-catch;
-    Xsearchdata(1).workspace=workspace;
-end
-save('Xsearchdata.mat','Xsearchdata');
+% try load Xsearchdata.mat;
+%     Xsearchdata(end+1).workspace=workspace;
+% catch;
+%     Xsearchdata(1).workspace=workspace;
+% end
+% save('Xsearchdata.mat','Xsearchdata');
 %%%%%%%%end saving file
 
 %since we are no longer loading with exGUi we put it here to load if it
@@ -224,10 +224,11 @@ end
 pathval=pathplanner_water(newQ);
 valid_count=0;
 tempbestviews=[];
+encroachIntoUnknown=[];
 for current_view=1:size(pathval,2)  
   if pathval(current_view).result 
     if pathval(current_view).unknown_points_result
-      display(['The bestview num (',num2str(current_view),') may encroch upon some unknown space in its path, but still including it']);
+      encroachIntoUnknown=[encroachIntoUnknown,current_view]
     end
     valid_count=valid_count+1;
     %find the corresponding best view to this pose
@@ -252,6 +253,11 @@ for current_view=1:size(pathval,2)
     end
   end  
 end
+%if any go into unknown list them but don't ignore
+if size(encroachIntoUnknown,1)>0
+    display(['These bestview (',num2str(encroachIntoUnknown),') may encroch upon some unknown space in the inbetween links of its path, but still including it']);
+end
+
 if valid_count>0
   bestviews=tempbestviews;
   display(['There were ',num2str(valid_count),' bestviews found with paths'])
