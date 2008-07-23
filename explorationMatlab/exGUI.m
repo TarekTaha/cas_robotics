@@ -396,9 +396,11 @@ figure;
 subplot(3,1,1);plot(state_data.knownweight);grid on; title('Known Weight');
 subplot(3,1,2);plot(state_data.size_known);grid on; title('Total Known Points');
 subplot(3,1,3);plot(state_data.time);grid on; title('Time Taken');
-save('state_data.mat','state_data');
-testnum=input('test num');
-saveresultstofile(testnum);
+
+% Saving for journal results
+% save('state_data.mat','state_data');
+% testnum=input('test num');
+% saveresultstofile(testnum);
 
 % profile off; profile viewer;
 
@@ -413,7 +415,7 @@ if bestviews(selection).valid
     tempplothandle=plot3(bestviews(selection).scanorigin(1),bestviews(selection).scanorigin(2),bestviews(selection).scanorigin(3),'r*');
     hold on;
 %plot the direction
-    pointAT=bestviews(selection).chosenview+bestviews(selection).scanorigin;
+    pointAT=bestviews(selection).chosenview(:)+bestviews(selection).scanorigin(:);
     tempplothandle= [tempplothandle,plot3([bestviews(selection).scanorigin(1),pointAT(1)],[bestviews(selection).scanorigin(2),pointAT(2)],[bestviews(selection).scanorigin(3),pointAT(3)])];   
     uiwait(msgbox('have a look then press ok'))
     try for i=1:length(tempplothandle); delete(tempplothandle(i)); end; end;
@@ -424,6 +426,7 @@ if bestviews(selection).valid
 %%%%%%%%ENDdelete this plotting stuff    %%%%%%%%%%%
     
     useNBV=true;
+    display('NOT setup to explore from this view');
 %     explore(handles,useNBV,selection);
 else
     msgbox('Not a valid robot pose selected')
@@ -441,7 +444,7 @@ global bestviews;
 for cur_view=1:size(bestviews,2)
     if bestviews(cur_view).valid
         bestview_stringcell{cur_view}=...
-                strcat('#',num2str(cur_view),': ',num2str(bestviews(cur_view).overall),', is@(',num2str(bestviews(cur_view).scanorigin),...
+                strcat('#',num2str(cur_view),': ',num2str(bestviews(cur_view).overall),', is@(',num2str(bestviews(cur_view).scanorigin(:)'),...
                '), pose(',num2str(bestviews(cur_view).chosenview),'), Valid(',num2str(bestviews(cur_view).valid),'), addinfoweight=(',num2str(bestviews(cur_view).addinfoweight),'), JointMoveWeight=(',num2str(bestviews(cur_view).jointmoveweight),'), Q=[',num2str(bestviews(cur_view).Q),']');
      end
 end
@@ -1012,8 +1015,10 @@ global r Q guiglobal densoobj
 theval=get(hObject,'Value');
 if theval
     plotdenso(r, Q, guiglobal.checkFF, guiglobal.plot_ellipse);
+    DrawEnv(true);
 else
     try for piece=1:size(densoobj,2); delete(densoobj(piece).patches); end; end
+    DrawEnv(false);
 end
 
 % --- Executes on button press in zoom_pushbutton.
