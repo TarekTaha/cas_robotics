@@ -4,7 +4,7 @@ close all;
 animate=true;
 numdests=10;
 
-matsize=400; %200 is good
+matsize=200; %200 is good (length of 1 side)
 table=zeros([matsize,matsize]);
 numofits=10000;
 
@@ -57,7 +57,7 @@ obstacles=obstacles(obstacles(:,1)>0 & obstacles(:,2)>0 & obstacles(:,1)<=matsiz
 %set start to be 1
 table(startN(1),startN(2))=1;
 
-%% Realise water from start
+%% Release water from start (wavefront search)
 tic
 for i=1:numofits;
     [a,b]=find(table==1);
@@ -86,11 +86,11 @@ for i=1:numofits;
     %if we have got to the destination then break - a path is possible
     if isempty(find(table((endN(:,2)-1)*matsize+endN(:,1))==0,1)); break; end
     %draw every now and again
-    if rand>0.95 && animate==true; imshow(table/max(max(table)));drawnow;end
+    if rand>0.97 && animate==true; imshow(table/max(max(table)));drawnow;end
 end
 toc
 
-%% Go from destination to source (ANIMATE)
+%% Go from destination to source (ANIMATE)... 
 
 %if there is a way to get to the start
 if ~isempty(find(table((endN(:,2)-1)*matsize+endN(:,1))>0,1))
