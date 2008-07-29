@@ -156,9 +156,9 @@ drawnow;
 clear global workspace scan bestviews Q r PointData RangeData guiglobal densoobj all_views robot_maxreach classunkn_optimise alldirectedpoints graf_obs;
 
 %Sets up the robot
-profile clear;profile on;
+% profile clear;profile on;
 setuprobot()
-profile off;profile viewer;
+% profile off;profile viewer;
 
 global guiglobal
 guiglobal.ellipseplots=[];
@@ -436,9 +436,9 @@ end
 
 % --- Executes on button press in find_best_view_pushbutton.
 function find_best_view_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-%  profile clear;profile on;
+ profile clear;profile on;
 NBV_beta2();
-%  profile off;profile viewer;
+ profile off;profile viewer;
 
 %publish to the GUi different options
 global bestviews;
@@ -1196,6 +1196,8 @@ function classification_ration_edit_Callback(hObject, eventdata, handles)
 global workspace
 workspace.classfierthreshhold=str2double(get(hObject,'String'));
 
+function all_mesh_checkbox_Callback(hObject, eventdata, handles)
 
 %% dont know why this is needed, can't find the button for it
 function Untitled_1_Callback(hObject, eventdata, handles)
+

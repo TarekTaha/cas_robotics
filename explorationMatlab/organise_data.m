@@ -220,8 +220,13 @@ if size(markedcubes)>0
       aabb = [workspace.impLev(1).x(1), workspace.impLev(1).y(1) workspace.impLev(1).z(1);...
               workspace.impLev(1).x(2), workspace.impLev(1).y(2) workspace.impLev(1).z(2)];
       hMesh = robmap_h.Mesh(aabb);
-      indexedobsticles_levl1=putInVoxels_gp(hMesh.VertexData(GetImpLevInfo(hMesh.VertexData),:),workspace.inc_size);
+      if size(hMesh.VertexData,1)>0
+        indexedobsticles_levl1=putInVoxels_gp(hMesh.VertexData(GetImpLevInfo(hMesh.VertexData),:),workspace.inc_size);
+      else
+        indexedobsticles_levl1=[];
+      end
     catch; 
+      keyboard
       error('In getting the mesh needed for surface making');
     end    
     [level1,level2,level3]=GetImpLevInfo(indexedobsticles);
