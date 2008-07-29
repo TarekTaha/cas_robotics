@@ -62,3 +62,6 @@ robot_maxreach.path=[];
 %these are the points that are inside the elispses inside all the paths,
 %not per path
 robot_maxreach.pointcarvedout=[];
+
+%% For movement of the arm, the angular difference
+robot_maxreach.realMovementAngleInc=5;

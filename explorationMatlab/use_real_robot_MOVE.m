@@ -28,7 +28,7 @@ end
 if nargin==0
     %No path has been passed in
     all_steps=[];
-    tempQ=Q*180/pi;   
+    tempQ=rad2deg(Q);   
 else
     tempQ=all_steps(end,:)*180/pi;   
 end
@@ -98,17 +98,12 @@ if ~isempty(find(round(tempQ-rob_h2.JointState), 1))
                 end
             end
             %display(strcat('step No:',num2str(pathpnt),', Stepping to (in DEG):',num2str(current_step_DEG)));
-            rob_h.Start;pause(0.05);
+            pause(0.1);rob_h.Start;pause(0.1);
             
-            waitcoutner=0;
-            
-            %if we want to update the joints the old way or the new way
-            if please_use_GETjsFunc
-            else
-            end
+            waitcoutner=0;           
          
             %check we are where we want to be            
-            while max(abs((Q*180/pi-current_step_DEG)))>5
+            while max(abs((rad2deg(Q)-current_step_DEG)))>robot_maxreach.realMovementAngleInc
                 pause(0.15);
                 waitcoutner=waitcoutner+1;
                 if waitcoutner==75 %about 15 seconds                    
@@ -119,7 +114,7 @@ if ~isempty(find(round(tempQ-rob_h2.JointState), 1))
                     else
                         %try alternate method of getting joint state
                         use_real_robot_GETJs()
-                        if ~isempty(find(abs((Q*180/pi)-rob_h2.JointState)>eps,1)) && max(abs((Q*180/pi-current_step_DEG)))<7
+                        if ~isempty(find(abs((rad2deg(Q))-rob_h2.JointState)>eps,1)) && max(abs((rad2deg(Q)-current_step_DEG)))<robot_maxreach.realMovementAngleInc
                             uiwait(msgbox('There is a problem with the rob_h2.JointState function, I can use use_real_robot_GETJs but this is NOT a fix - EyeInHand.exe must die'));
                             please_use_GETjsFunc=true;
                             break

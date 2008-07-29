@@ -16,7 +16,7 @@ function NBV_beta2()
 % clear the plots and global bestviews variable
 clear global bestviews;
 
-global workspace Q all_views bestviews optimise scan;
+global workspace all_views bestviews scan r;
 
 %%%%%%%%%saving for the exhastive search
 % try load Xsearchdata.mat;
@@ -38,7 +38,11 @@ if isempty(all_views)
     end    
 end
 
-
+n=r.n;
+L = r.link;
+for piece=1:n   
+    linkvals(piece).val=[L{piece}.alpha L{piece}.A L{piece}.D L{piece}.offset];   
+end
 
 tic
 
@@ -49,7 +53,7 @@ all_possible=round(workspace.unknowncoords(workspace.lev1unknown   ,:)/workspace
 [nothing,index]=setdiff(all_possible,[indexed_knowncoords;obsticle_points],'rows');
 unknown_points=workspace.unknowncoords(workspace.lev1unknown(index),:);
 
-all_known=[workspace.knowncoords;workspace.indexedobsticles];
+all_known=sortrows([workspace.knowncoords;workspace.indexedobsticles]);
 
 unknownweight=calunknownweight();
 
@@ -58,7 +62,7 @@ pos_validconfigs=find(all_views.result==-1);
 
 %recheck the said to be valid configs
 for cur_con=pos_validconfigs'
-    [obstacle_result,unknown_result]=check_path_for_col(all_views.newQ(cur_con,:),obsticle_points,unknown_points);
+    [obstacle_result,unknown_result]=check_path_for_col(all_views.newQ(cur_con,:),obsticle_points,unknown_points,linkvals);
     if ~obstacle_result
         all_views.result(cur_con)=0;
     elseif ~unknown_result %we are in unknown space
@@ -82,6 +86,9 @@ all_views=remove_all_views_result0(all_views);
 %update the valid config var
 
 validconfigs=intersect(find(all_views.result==1),scanoriginOKindex);
+if size(validconfigs,1)==1
+  error('There are no valid configs possible in currently known space');
+end
 
 bestviews(size(validconfigs,1)).tr=zeros(4);
 bestviews(size(validconfigs,1)).chosenview=zeros([1,3]);
@@ -95,7 +102,10 @@ BVcount=1;
 
 for cur_con=validconfigs'
     points=all_views.expectedaddinfo(cur_con).vals;
-
+    %nothing new found at this pose
+    if size(points,1)==0
+      continue;
+    end
 
 %% Remove points that are beyond osticle points
     %obstructing planes
@@ -114,11 +124,29 @@ for cur_con=validconfigs'
 
     % firstly remove all points that we either know are free or have an obstacle
     if size(all_known,1)<size(workspace.unknowncoords,1)
-        points=setdiff(points,all_known,'rows');
+%         points=setdiff(points,all_known,'rows');
+        
+        %alternate setdiff method
+        [sortedlist,listindex]=sortrows([points;all_known]);
+
+        %since both lists are unique, we only want 1 point if that point is in both lists      
+        uniquerow=[sortedlist(1:size(points,1)+size(all_known,1)-1,:)~=sortedlist(2:size(points,1)+size(all_known,1),:);...
+                    true,true,true]; %last row is true by default since not compared to anything
+        %get the ones where at least 1 row is different and the index is
+        %out of the first set
+        sortedlistIndex=(uniquerow(:,1)|uniquerow(:,2)|uniquerow(:,3))&...
+                        listindex<size(points,1);
+        %update the points list with only new (not known) points
+        points=sortedlist(sortedlistIndex,:);        
+%         size(points)
     else
         points=intersect(points,workspace.unknowncoords,'rows');
     end
 
+    %nothing new found at this pose
+    if size(points,1)==0
+      continue;
+    end
 %% Go through each obstacle where the home point is within the scan
 % $$ \begin{array}{l}
 % \mbox{PlaneEq...} ax_p+by_p+cz_p+d=0\\
@@ -228,7 +256,7 @@ encroachIntoUnknown=[];
 for current_view=1:size(pathval,2)  
   if pathval(current_view).result 
     if pathval(current_view).unknown_points_result
-      encroachIntoUnknown=[encroachIntoUnknown,current_view]
+      encroachIntoUnknown=[encroachIntoUnknown,current_view];
     end
     valid_count=valid_count+1;
     %find the corresponding best view to this pose

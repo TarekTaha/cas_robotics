@@ -13,6 +13,8 @@
 %
 % _points_ (3*m double) all points we are trying to avoid
 %
+% _unknown_points_ (3*m double) all unknown points we are trying to avoid(with 4th link)
+%
 % _linkvals_ (6 struct containing L.alpha, L.A, L.D, L.offset
 %
 % *Returns:* 
