@@ -156,7 +156,9 @@ drawnow;
 clear global workspace scan bestviews Q r PointData RangeData guiglobal densoobj all_views robot_maxreach classunkn_optimise alldirectedpoints graf_obs;
 
 %Sets up the robot
+profile clear;profile on;
 setuprobot()
+profile off;profile viewer;
 
 global guiglobal
 guiglobal.ellipseplots=[];
