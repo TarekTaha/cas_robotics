@@ -1,13 +1,13 @@
 function exploreWaterpump3D()
 close all;
 
-animate=true;
+takemovie=true; F=[];
+animate=false;
 numdests=20;
 
-matsize=50;
+matsize=20; %50 is good
 table=zeros([matsize,matsize,matsize]);
 numofits=10000;
-
 
 % startN=round(rand(1,2)*matsize);
 startN=[1,matsize/2,1];
@@ -206,6 +206,17 @@ if ~isempty(find(table((endN(:,3)-1)*matsize^2+(endN(:,2)-1)*matsize+endN(:,1))>
                 plot3(nextnode(index,3),nextnode(index,2),nextnode(index,1),'r.');
                 drawnow;pause(0.05);
             end
+            if takemovie
+                plot3(nextnode(index,3),nextnode(index,2),nextnode(index,1),'r.');
+                view([-53+index,38+i]);
+                drawnow; 
+                if isempty(F)
+                    F=getframe; 
+                else
+                    F(end+1)=getframe;                     
+                end
+            end
+
         end
         plot3(pathval(i).val(:,3),pathval(i).val(:,2),pathval(i).val(:,1),'r');
     end   
@@ -220,7 +231,14 @@ if ~isempty(find(table((endN(:,3)-1)*matsize^2+(endN(:,2)-1)*matsize+endN(:,1))>
     end
 end
 
-%collsion checker
+if takemovie
+   keyboard
+   movie(F);
+   movie2avi(F,'3Dwavefrontmoveie.avi','compression','Cinepak','fps',30,'quality',100)
+end
+
+
+%% collsion checker
 function [results]=checkcollision(J1,J2,J3)
 keyboard
 global workspace
@@ -234,3 +252,4 @@ all_possible=round(workspace.unknowncoords(workspace.lev1unknown   ,:)/workspace
 unknown_points=workspace.unknowncoords(workspace.lev1unknown(index),:);
 
 result=check_path_for_col(newQ,obsticle_points,unknown_points);
+
