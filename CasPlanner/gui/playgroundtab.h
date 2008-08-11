@@ -49,40 +49,6 @@ class PlayGroundTab;
 class QDragEnterEvent;
 class QDropEvent;
 class QMouseEvent;
- 
-//class InterfacesList : public QListWidget
-//{
-//	Q_OBJECT
-//	public:
-//    	InterfacesList(QWidget *parent = 0);
-//     	void addInterface(DeviceType dev,QPixmap icon,QString name, QPoint location);
-//		void createIcons(QVector <DeviceType> * devices);     	
-//	public slots:
-//		void itemSelectionChanged();
-//	protected:		
-//    	void dragEnterEvent(QDragEnterEvent *event);
-//     	void dragMoveEvent(QDragMoveEvent *event);
-//     	void dropEvent(QDropEvent *event);
-//     	void startDrag(Qt::DropActions supportedActions);
-//     	QHash <QListWidgetItem *, DeviceType> wi2Dev;
-//};
-//
-//class RobotInterfaces : public QListWidget
-//{
-//	Q_OBJECT
-//	public:
-//    	RobotInterfaces(QWidget *parent = 0);
-//     	void addInterface(QPixmap icon,QString name, QPoint location);
-//		void createIcons(QVector <DeviceType> * devices);
-////	public slots:
-////		void itemSelectionChanged();
-////		void itemChanged( QListWidgetItem * item ); 		     	
-//	protected:
-//    	void dragEnterEvent(QDragEnterEvent *event);
-//     	void dragMoveEvent(QDragMoveEvent *event);
-//     	void dropEvent(QDropEvent *event);
-//     	void startDrag(Qt::DropActions supportedActions);
-//};
 
 class Interfaces : public QWidget
 {

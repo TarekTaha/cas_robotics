@@ -5,7 +5,7 @@
 #include "geometry2D.h"
 #include <cmath>
 #include <cassert>
-
+#include <cstdio>
 using namespace std;
 
 namespace Geom2D {

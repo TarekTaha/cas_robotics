@@ -77,7 +77,7 @@ class TasksControlPanel: public QWidget
 {
 	Q_OBJECT
     public:
-		TasksControlPanel(TasksGui *tasksGui,QWidget *tasksGui);
+		TasksControlPanel(TasksGui *,QWidget *);
 		void updateRobotSetting();
 	public slots:
 		void updateSelectedVoronoiMethod(bool);

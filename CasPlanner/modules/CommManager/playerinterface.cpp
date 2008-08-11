@@ -213,7 +213,7 @@ void PlayerInterface::checkForWheelChair()
 	QVector<DeviceType> * dev = getDevices();
 	for(int i=0;i< dev->size(); i++)
 	{
-		if((*dev)[i].driverName == "WheelchairDriver")
+		if((*dev)[i].getDriverName() == "WheelchairDriver")
 		{
 			if (wheelChairCommander)
 				delete wheelChairCommander;
@@ -249,43 +249,45 @@ QVector<DeviceType> * PlayerInterface::getDevices()
   	{
   		device.setAddress(iter->addr);
     	device.setName(strdup(iter->drivername));
+    	std::string str= pc->LookupName(iter->addr.interf);
+    	device.setInterfaceName(str.c_str());
 		switch(iter->addr.interf)
 		{
 			case PLAYER_LASER_CODE :
 				for(int j=0;j<lasers.size();j++)
 				{
 					if(lasers[j].lp && (iter->addr.index == j))
-						device.subscribed = true;
+						device.setSubscribed(true);
 					else
-						device.subscribed = false;
+						device.setSubscribed(false);
 				}
 				break;
 			case PLAYER_MAP_CODE :
 				if(this->map)
-					device.subscribed = true;
+					device.setSubscribed(true);
 				break;				
 			case PLAYER_POSITION2D_CODE:
 				if(this->drive && (iter->addr.index == 0))
-					device.subscribed = true;
+					device.setSubscribed(true);
 				else if((this->vfh && (iter->addr.index == 1)))
-					device.subscribed = true;
+					device.setSubscribed(true);
 				else
-						device.subscribed = false;					
+						device.setSubscribed(false);					
 				break;		
 			case PLAYER_LOCALIZE_CODE:
 				if(this->localizer)
-					device.subscribed = true;
+					device.setSubscribed(true);
 				else
-					device.subscribed = false;					
+					device.setSubscribed(false);					
 				break;		
 			case PLAYER_PTZ_CODE:
 				if(this->ptz)
-					device.subscribed = true;
+					device.setSubscribed(true);
 				else
-					device.subscribed = false;						
+					device.setSubscribed(false);						
 				break;						
 			default:
-				device.subscribed = false;
+				device.setSubscribed(false);
 		}
 		devices->push_back(device);
   	}
@@ -651,14 +653,14 @@ void PlayerInterface::connectDevices()
     }
     for(int i=0; i < lasers.size(); i++)
     {
-    	player_pose_t 	lp_pose;
+    	player_pose3d_t	lp_pose;
     	lasers[i].lp = new LaserProxy(pc,lasers[i].index);
     	lasers[i].lp->RequestConfigure();
     	lasers[i].lp->RequestGeom();	
     	lp_pose = lasers[i].lp->GetPose();
     	lasers[i].pose.p.setX(lp_pose.px);
     	lasers[i].pose.p.setY(lp_pose.py);	    	
-    	lasers[i].pose.phi = lp_pose.pa;
+    	lasers[i].pose.phi = lp_pose.ppitch;//pyaw,proll
 //    	qDebug("Laser Pose X:%f Y:%f Phi:%f",lasers[i].pose.p.x(),lasers[i].pose.p.y(),lasers[i].pose.phi);	    	
 		logMsg.append(QString("\n\t\t - Laser interface:%1 Interface Added Successfully").arg(lasers[i].index));  
     }
@@ -783,7 +785,6 @@ void PlayerInterface::run ()
 		    }
 	        if(ctrEnabled)
 	        {
-	        	player_pose_t ps;
 	        	if (!stopped)
 	        	{
 		        	if(velControl)
@@ -797,7 +798,6 @@ void PlayerInterface::run ()
 	        	}
 	            getspeed = drive->GetXSpeed();
 	            getturnrate = drive->GetYawSpeed();	            
-	            ps = drive->GetPose();
 	            odomLocation.p.setX(drive->GetXPos());
 	            odomLocation.p.setY(drive->GetYPos());
 	            odomLocation.phi =  drive->GetYaw();

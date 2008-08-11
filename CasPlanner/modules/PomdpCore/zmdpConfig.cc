@@ -34,7 +34,7 @@
 #include <iomanip>
 #include <fstream>
 #include <sstream>
-
+#include <cstring>
 #include "zmdpConfig.h"
 #include "zmdpCommonDefs.h"
 
