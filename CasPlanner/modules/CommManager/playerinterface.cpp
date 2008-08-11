@@ -639,7 +639,8 @@ void PlayerInterface::connectDevices()
     pc->SetDataMode(PLAYER_DATAMODE_PULL);
     //pc->SetDataMode(PLAYER_DATAMODE_PUSH);
 	pc->SetReplaceRule(true,-1,-1,-1);
-    /* TODO: Proper check for the successfullness of the proxy creation
+    /* 
+     * TODO: Proper check for the successfullness of the proxy creation
      */
     if(ctrEnabled)
     {

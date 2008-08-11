@@ -934,7 +934,7 @@ void MapViewer::paintGL()
     glGetDoublev(GL_MODELVIEW_MATRIX,modelMatrix);
     glGetDoublev(GL_PROJECTION_MATRIX,projMatrix);
     glGetIntegerv(GL_VIEWPORT,viewport);
-
+	setRobotsLocation();
     if(this->ogMap)
 	{
 		glDisable( GL_DEPTH_TEST );		
@@ -949,7 +949,6 @@ void MapViewer::paintGL()
 	    renderLaser();
 		renderRobot();	    
 		glEnable(GL_DEPTH_TEST);
-		setRobotsLocation();
 	    renderSpatialStates();
 	    renderAction();
 		renderExpandedTree();

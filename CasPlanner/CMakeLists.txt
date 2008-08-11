@@ -1,6 +1,8 @@
 # set project's name
 PROJECT( CasPlanner )
 
+cmake_minimum_required(VERSION 2.4)
+
 SET( CasPlanner_MOC_HDRS
     ./modules/CommManager/commmanager.h 
     ./modules/CommManager/comms.h 
@@ -222,9 +224,9 @@ INCLUDE_DIRECTORIES(
 )
 
 # here we instruct CMake to build "CasPlanner" executable from all of the source files
-ADD_EXECUTABLE( CasPlanner ${CasPlanner_SRCS} ${CasPlanner_MOC_SRCS} ${CasPlanner_RC_SRCS} ${CasPlanner_UI_HDRS} )
+ADD_EXECUTABLE( ../CasPlanner ${CasPlanner_SRCS} ${CasPlanner_MOC_SRCS} ${CasPlanner_RC_SRCS} ${CasPlanner_UI_HDRS} )
 
-TARGET_LINK_LIBRARIES( CasPlanner 
+TARGET_LINK_LIBRARIES( ../CasPlanner 
     ${QT_QTGUI_LIBRARY} 
     ${QT_QTCORE_LIBRARY} 
     ${QT_QTOPENGL_LIBRARY}	
