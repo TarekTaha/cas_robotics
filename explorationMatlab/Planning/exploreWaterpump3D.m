@@ -1,11 +1,11 @@
 function exploreWaterpump3D()
 close all;
 
-takemovie=true; F=[];
+takemovie=true;
 animate=false;
 numdests=20;
 
-matsize=20; %50 is good
+matsize=50; %50 is good
 table=zeros([matsize,matsize,matsize]);
 numofits=10000;
 
@@ -207,18 +207,22 @@ if ~isempty(find(table((endN(:,3)-1)*matsize^2+(endN(:,2)-1)*matsize+endN(:,1))>
                 drawnow;pause(0.05);
             end
             if takemovie
+                sizeofthispath=size(pathval(i).val,1)-1;
                 plot3(nextnode(index,3),nextnode(index,2),nextnode(index,1),'r.');
-                view([-53+index,38+i]);
+                [az,el] = view ;
+                view([az-2,38+5*i]);
                 drawnow; 
-                if isempty(F)
-                    F=getframe; 
-                else
-                    F(end+1)=getframe;                     
-                end
+                saveas(gcf,['3Dmovie_i',num2str(i),'_index',num2str(100+sizeofthispath),'.png']);
+%                 if isempty(F)
+%                     F=getframe; 
+%                 else
+%                     F(end+1)=getframe;                     
+%                 end
             end
 
         end
         plot3(pathval(i).val(:,3),pathval(i).val(:,2),pathval(i).val(:,1),'r');
+        saveas(gcf,['3Dmovie_i',num2str(i),'_index',num2str(100+sizeofthispath+1),'.png']);
     end   
     %show the path lines
     
@@ -231,11 +235,11 @@ if ~isempty(find(table((endN(:,3)-1)*matsize^2+(endN(:,2)-1)*matsize+endN(:,1))>
     end
 end
 
-if takemovie
-   keyboard
-   movie(F);
-   movie2avi(F,'3Dwavefrontmoveie.avi','compression','Cinepak','fps',30,'quality',100)
-end
+% if takemovie
+%    keyboard
+%    movie(F);
+%    movie2avi(F,'3Dwavefrontmoveie.avi','compression','Cinepak','fps',30,'quality',100)
+% end
 
 
 %% collsion checker

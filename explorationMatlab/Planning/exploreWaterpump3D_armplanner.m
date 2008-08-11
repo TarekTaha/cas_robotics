@@ -2,6 +2,7 @@ function exploreWaterpump3D_armplanner()
 close all;
 global r Q workspace 
 
+global sizeofthispath
 
 % load('Journal/test9hMesh.mat')
 % workspace.indexedobsticles=unique(workspace.inc_size*round(hMeshdata.v(GetimpLevInfo(hMeshdata.v),:)/workspace.inc_size),'rows');
@@ -10,7 +11,7 @@ global r Q workspace
 qlimits=r.qlim;
 
 
-animate=false;
+animate=false;sizeofthispath=1;
 numdests=200;
 numdust=1000;
 
@@ -210,6 +211,7 @@ for i=1:numofits;
                 drawnow;
             end
         end
+%         saveas(gcf,['Robot3Dmovie_i',num2str(i),'_index',num2str(1000+sizeofthispath),'.png']);sizeofthispath=sizeofthispath+1;
     end
 
 end
@@ -277,7 +279,7 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
             %plot the pathval        
             if animate
                 plot3(nextnode(index,3),nextnode(index,2),nextnode(index,1),'r.');
-                drawnow;pause(0.05);
+                drawnow;pause(0.05);                
             end
         end
         

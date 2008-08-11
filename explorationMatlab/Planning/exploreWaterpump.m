@@ -1,8 +1,8 @@
 function exploreWaterpump()
 close all;
 
-takemovie=true;
-animate=true;
+takemovie=true; currentFrame=1;
+animate=false;
 numdests=10;
 
 matsize=200; %200 is good (length of 1 side)
@@ -87,7 +87,7 @@ for i=1:numofits;
     if isempty(find(table((endN(:,2)-1)*matsize+endN(:,1))==0,1)); break; end
     %draw every now and again
     if rand>0.97 && animate==true; imshow(table/max(max(table)));drawnow;end
-    if takemovie && mod(i,2)==0 imshow(table/max(max(table))); F(i/2)=getframe; end
+    if takemovie && mod(i,2)==0 imshow(table/max(max(table))); saveas(gcf,['2Dmovie_',num2str(1000+currentFrame),'.png']); currentFrame=currentFrame+1;end
 end
 toc
 
@@ -150,8 +150,10 @@ if ~isempty(find(table((endN(:,2)-1)*matsize+endN(:,1))>0,1))
             end
             if takemovie
                 plot(nextnode(index,2),nextnode(index,1),'r.');
-                drawnow; 
-                F(end+1)=getframe; 
+                if mod(size(pathval(i).val,1),4)==0
+                    drawnow; 
+                    saveas(gcf,['2Dmovie_',num2str(1000+currentFrame),'.png']); currentFrame=currentFrame+1; 
+                end
             end
             
         end
@@ -165,8 +167,8 @@ if ~isempty(find(table((endN(:,2)-1)*matsize+endN(:,1))>0,1))
     end
 end
 
-if takemovie
-   keyboard
-   movie(F);
-   movie2avi(F,'2Dwavefrontmoveie.avi','compression','Cinepak','fps',30,'quality',100)
-end
+% if takemovie
+%    keyboard
+%    movie(F);
+%    movie2avi(F,'2Dwavefrontmoveie.avi','compression','Cinepak','fps',30,'quality',100)
+% end

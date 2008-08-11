@@ -20,6 +20,9 @@ function demopath_new(all_steps)
 %% Variables
 global r Q densoobj workspace optimise
 
+% display('remove this');
+%             global sizeofthispath
+            
 if size(r,1)<1
     error('robot has not been setup')
 end
@@ -129,7 +132,27 @@ for current_path=1:size(pathdata,2)
     for current_step=1:size(pathdata(current_path).all_steps,1)        
         nextQ=pathdata(current_path).all_steps(current_step,:);        
         if DISPON
+%%%%%%%%%%%%%%%%%%%
+% normal plotting case
             plotdenso(r, nextQ, show_ellipses, show_ellipses);        
+%%%%%%%%%%%%%%%%%%%
+% Plotting for taking images of the in between movements
+%             display('remove this');
+% 
+%             try difference=nextQ-prevQ;
+%                 step=[];
+%                 incs=difference/max(abs(difference)*180/pi);
+%                 for i=1:max(abs(difference)*180/pi)
+%                     step=prevQ+i*incs;
+%                     plotdenso(r, step, show_ellipses, show_ellipses);        
+%                     saveas(gcf,['Robot3Dmovie_',num2str(10000+sizeofthispath),'.png']);sizeofthispath=sizeofthispath+1;
+%                 end
+%             end 
+%             
+%             plotdenso(r, nextQ, show_ellipses, show_ellipses);        
+%             saveas(gcf,['Robot3Dmovie_',num2str(10000+sizeofthispath),'.png']);sizeofthispath=sizeofthispath+1;
+%             prevQ=nextQ;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
             %work out where the end effector is
             t=fkine(r,nextQ);
