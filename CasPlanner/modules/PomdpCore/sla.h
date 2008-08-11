@@ -25,10 +25,11 @@
 
 #include <math.h>
 #include <errno.h>
+#include <string.h>
 #include <vector>
 #include <iostream>
 #include <fstream>
-
+#include <algorithm>
 #include "zmdpCommonDefs.h"
 
 // sla     = simple linear algebra

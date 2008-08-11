@@ -68,8 +68,30 @@ class DeviceType
 		{
 			this->driverName = name;
 		};
+		void setInterfaceName(QString name)
+		{
+			this->interfaceName= name;
+		}
+		void setSubscribed(bool sub)
+		{
+			this->subscribed = sub;
+		}
+		QString getDriverName()
+		{
+			return driverName;
+		}
+		QString getInterfaceName()
+		{
+			return interfaceName;
+		}
+		bool isSubscribed()
+		{
+			return subscribed;
+		}
+	private:		
 		player_devaddr_t addr;
   		QString driverName;
+  		QString interfaceName;
   		bool subscribed;
 };
 
