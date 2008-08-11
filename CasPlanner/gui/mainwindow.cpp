@@ -81,7 +81,7 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
 }
 void MainWindow::logData()
 {
-	QApplication::beep();
+//	QApplication::beep();
     return;
 }
 
