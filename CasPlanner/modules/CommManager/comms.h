@@ -35,7 +35,6 @@ class Comms: public QObject
     public:
         virtual int readConfigs(ConfigFile *cf,int secId)=0;
         virtual int start()=0;
-        bool connected,localized;
 		virtual QString getName()
 		{
 		    return name; 

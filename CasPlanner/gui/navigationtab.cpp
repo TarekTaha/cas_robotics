@@ -142,7 +142,7 @@ void NavControlPanel::startIntentionRecognition()
 {
 	if(this->playGround->activeRobot)
 	{
-		if(!playGround->activeRobot->commManager->connected)
+		if(!playGround->activeRobot->commManager->isConnected())
 		{
 			QMessageBox msgBox(QMessageBox::Warning,QString("Warning"),QString("Your not Connected to the Robot, do you want me to connect?"),QMessageBox::Ok|QMessageBox::Cancel,this,Qt::Dialog);
 			msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -187,7 +187,7 @@ void NavControlPanel::pathFollow()
 		qDebug("\t NavTab: Communication Manager Not Initialized");
 		return;
 	}
-	if(!playGround->activeRobot->commManager->connected)
+	if(!playGround->activeRobot->commManager->isConnected())
 	{
 		QMessageBox msgBox(QMessageBox::Warning,QString("Warning"),QString("Your not Connected to the Robot, do you want me to connect?"),QMessageBox::Ok|QMessageBox::Cancel,this,Qt::Dialog);
 		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);

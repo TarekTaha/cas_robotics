@@ -22,7 +22,6 @@
 
 CommManager::CommManager(Robot *rob,PlayGround * playG):
 Comms(),
-connected(false),
 player(NULL),
 robot(rob),
 playGround(playG)
@@ -33,7 +32,6 @@ playGround(playG)
 	ptzEnabled		= false;
 	occMapEnabled	= false;
 	startConnected	= false;
-	connected		= false;
 	connect(this,SIGNAL(addMsg(int,int,QString)),playGround,SLOT(addMsg(int,int,QString)));
 }
 
@@ -100,7 +98,6 @@ void CommManager::disconnect()
 		player->quit();
 		usleep(100000);
 	}
-	connected = false;
 }
 
 void CommManager::setSpeed(double i_speed, double i_turnRate)
@@ -263,6 +260,16 @@ Pose CommManager::getOdomLocation()
   	}  		
 }
 /* 
+ * Tells you if the player client is connected
+ */
+bool CommManager::isConnected()
+{
+	if(player)
+		return player->isConnected();
+	else
+		return false;
+}
+/* 
  * Tells you if the AMCL was able to localize the robot with hight accuracy or not
  */
 bool CommManager::getLocalized()
@@ -271,7 +278,7 @@ bool CommManager::getLocalized()
 		return player->getLocalized();
   	else
   	{
-  		emit addMsg(0,ERROR,QString("\n16 Communication Interface Not started YET!!!"));
+  		emit addMsg(0,ERROR,QString("\n16b Communication Interface Not started YET!!!"));
   		return false;
   	}		
 }
@@ -427,7 +434,7 @@ int CommManager::start()
   		player->enableVfh(vfhId);
   	}
   	if(speechEnabled)
-  	{  
+  	{
 		logMsg.append(QString("\n\t\t	- VFH Navigator."));  			
   		player->enableSpeech(0);
   	}
@@ -443,11 +450,9 @@ int CommManager::start()
  			usleep(100000);
  		}
     	player->start(QThread::HighestPriority);	  	
-    	connected = true;
   	}
 	logMsg.append(QString("\n-> Communication Manager Started."));    
     emit addMsg(0,INFO,logMsg);  	
-    connected = true;
     return 1;
 }
 
