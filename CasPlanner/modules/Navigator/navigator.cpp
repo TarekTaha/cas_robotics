@@ -551,7 +551,7 @@ void Navigator::run()
 		qDebug("\t - Communication Manager Not Initialized");
 		return;
 	}
-	if(!robotManager->commManager->connected)
+	if(!robotManager->commManager->isConnected())
 	{
 		qDebug("\t - Your not Connected to the Robot, Connect First");
 		return;		

@@ -137,6 +137,7 @@ Q_OBJECT
 		void setPtz(double pan, double tilt);
         double getSpeed(); 
         double getTurnRate();
+        bool isConnected();
         bool getLocalized();
         Pose getLocation();        
         Pose getAmclLocation();
@@ -172,7 +173,7 @@ Q_OBJECT
         PlayerClient *pc;
        	playerc_client_t *client;
        	QVector <DeviceType> *devices;
-        bool joyStickEnabled,ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized, velControl,vfhEnabled,stopped,speechNotificationEnabled,speechEnabled;
+        bool joyStickEnabled,ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized, velControl,vfhEnabled,stopped,speechNotificationEnabled,speechEnabled,connected;
         int positionId,ptzId,mapId,localizerId,vfhId,joyStickId,speechId;
         QVector <Laser> lasers;
         Position2dProxy *drive, *vfh, *joyStick;

@@ -214,7 +214,7 @@ void MapViewer::setRobotsLocation()
 	robotsLocation.clear();
 	for(int i=0;i<playGround->robotPlatforms.size();i++)
 	{
-		if(playGround->robotPlatforms[i]->commManager->connected)
+		if(playGround->robotPlatforms[i]->commManager->isConnected())
 			robotsLocation.push_back(playGround->robotPlatforms[i]->commManager->getLocation());
 	}
 }
@@ -227,13 +227,17 @@ void MapViewer::renderLaser()
 	}
 	for(int i=0;i<playGround->robotPlatforms.size();i++)
 	{
-		if(!playGround->robotPlatforms[i]->commManager->connected)
+		if(!playGround->robotPlatforms[i]->commManager->isConnected())
 			continue;		
 	    LaserScan laserScan ;
 	    //laserScan =playGround->robotPlatforms[i]->commManager->getLaserScan();
 	    playGround->robotPlatforms[i]->commManager->getLaserScan(laserScan);
 	    //Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;
-	    Pose loc = robotsLocation[i];
+	    Pose loc;
+	    if(robotsLocation.size() > i )
+	    	loc = robotsLocation[i];
+	    else
+	    	continue;
 
 	    glPushMatrix();
 	    glTranslatef(loc.p.x(),loc.p.y(),0);
@@ -317,10 +321,12 @@ void MapViewer::renderExpandedTree()
 		QPointF child;
 		//tree =  playGround->robotPlatforms[i]->planningManager->pathPlanner->tree;
 		if(playGround->robotPlatforms[i]->intentionRecognizer)
+		{
 			if(playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner)
 				tree =  playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->getTree();
 			else
-				continue;		
+				continue;
+		}
 	    glPushMatrix();
 	    glColor4f(0,1,0,0.5);
 		for(unsigned int k=0;k<tree.size();k++)
@@ -347,9 +353,13 @@ void MapViewer::renderRobot()
 	}
 	for(int i=0;i<playGround->robotPlatforms.size();i++)
 	{
-		if(!playGround->robotPlatforms[i]->commManager->connected)
+		if(!playGround->robotPlatforms[i]->commManager->isConnected())
 			continue;
-	    Pose loc = robotsLocation[i];
+		Pose loc;
+	    if(robotsLocation.size() > i )
+	    	loc = robotsLocation[i];
+	    else
+	    	continue;
 //	    qDebug("Robot Location is X:%f Y:%f Phi:%f",robotsLocation[i].p.x(),robotsLocation[i].p.y(),
 //	    	   robotsLocation[i].phi);
 	    // Render Robot's trail
@@ -573,7 +583,7 @@ void MapViewer::displayGrid()
 		    glEnd();
 		    glColor4f(0.0f,0.0f,0.0f,1.0f);
 //		    renderText(i,-1,1, "X");
-		    renderTextFont(i,-1, BITMAP_FONT_TYPE_HELVETICA_18, "X-axis");		    		    
+		    renderTextFont(i,-1, BITMAP_FONT_TYPE_HELVETICA_18, (char*)"X-axis");		    		    
 		 }
 		 //Y-axis indicator
 	    int j = int((ogMap->height*ogMap->mapRes)/2.0 + 2);
@@ -586,7 +596,7 @@ void MapViewer::displayGrid()
 		    glEnd();
 		    glColor4f(0.0f,0.0f,0.0f,1.0f);
 //		    renderText(1,j,1, "Y");
-		    renderTextFont(1,j, BITMAP_FONT_TYPE_HELVETICA_18, "Y-axis");		    
+		    renderTextFont(1,j, BITMAP_FONT_TYPE_HELVETICA_18, (char*)"Y-axis");		    
 		 }
     }
     glPopMatrix();	
@@ -625,7 +635,7 @@ void MapViewer::renderObservation()
 		glColor4f(0.0f,0.0f,1.0f,1.0f);
 		glTranslatef(-aspectRatio+0.1,0.9,0.0);
 		glScalef(1/15.0, 1/15.0, 1.0);
-		renderTextFont(-0.99,0.95, BITMAP_FONT_TYPE_HELVETICA_12,"Joystick");		
+		renderTextFont(-0.99,0.95, BITMAP_FONT_TYPE_HELVETICA_12,(char*)"Joystick");		
 		drawCircle(1.0);
 		//int obs = playGround->activeRobot->intentionRecognizer->lastObs;
 		int obs = playGround->activeRobot->commManager->getJoyStickGlobalDir();
@@ -732,7 +742,7 @@ void MapViewer::renderSpatialStates()
 	    else if (i == playGround->activeRobot->intentionRecognizer->nextState)
 	    {
 	    	glColor4f(0,0,1,0.5);
-	    	renderTextFont(-0.5,0.5, BITMAP_FONT_TYPE_HELVETICA_10,"Next");
+	    	renderTextFont(-0.5,0.5, BITMAP_FONT_TYPE_HELVETICA_10,(char*)"Next");
 	    }
 		else if( (d = playGround->mapManager->mapSkeleton.destIndexes.indexOf((i%playGround->mapManager->mapSkeleton.numStates)))!=-1 )
 		{
@@ -903,7 +913,7 @@ void MapViewer::paintGL()
 //    glEnable(GL_LINE_SMOOTH);
 //    glEnable(GL_POLYGON_SMOOTH);
     glColor4f(0.0f,0.0f,0.0f,0.5f);
-    renderTextFont(0.65,-0.95, BITMAP_FONT_TYPE_HELVETICA_18, "Scale:1m/Tile" );
+    renderTextFont(0.65,-0.95, BITMAP_FONT_TYPE_HELVETICA_18, (char*)"Scale:1m/Tile" );
     glColor4f(0.78f,0.78f,0.78f,0.8f);
     glRectf(0.64,-0.9f,aspectRatio-0.03,-0.96f);
     

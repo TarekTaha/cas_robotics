@@ -62,9 +62,9 @@ class CommManager: public Comms, public MapProvider, public LaserProvider, publi
         virtual void   provideMap(Map &map); 
 	    virtual void   provideSpeed(double &speed, double &turnRate);
 	    virtual void   provideLocation(Pose & location);
+	    virtual bool   isConnected();
 	    virtual bool   getLocalized();
 		virtual QVector<DeviceType> * getDevices();
-		bool connected;
     public slots: 
         virtual void setSpeed(double speed, double turnRate); 
         virtual void setLocation(Pose location);

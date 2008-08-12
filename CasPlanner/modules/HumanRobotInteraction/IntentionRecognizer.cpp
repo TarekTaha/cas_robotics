@@ -284,7 +284,7 @@ void IntentionRecognizer::run()
 			qDebug("\t - (IR): Communication Manager Not Initialized");
 			continue;
 		}
-		if(!robotManager->commManager->connected)
+		if(!robotManager->commManager->isConnected())
 		{
 			qDebug("\t - (IR): Your not Connected to the Robot, Connect First");
 			continue;		
