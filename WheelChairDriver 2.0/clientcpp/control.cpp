@@ -18,9 +18,8 @@ int main()
   	using namespace PlayerCc;
   	SDL_Event event;
   	int running = 1,count=0;
-  	double dirFR = 0,dirLR = 0,lrOffset = 0,frOffset = 0,wcPrevX, wcPrevY;
+  	double dirFR = 0,dirLR = 0,lrOffset = 0,frOffset = 0;
   	bool changed=0;
-  	unsigned int spriteColour = 0xFFFFFFFF;
   	if (SDL_Init(SDL_INIT_VIDEO) != 0)
   	{
   		printf("Unable to initialize SDL: %s\n", SDL_GetError());
@@ -126,25 +125,25 @@ int main()
 						case SDLK_w:    
 							frOffset += 0.01;		
 							changed=1;	
-		  					printf("FR Offest is %d\n", frOffset);
+		  					printf("FR Offest is %f\n", frOffset);
 							fflush(stdout);
 							break;
 						case SDLK_s:  	
 							frOffset -= 0.01;			
 							changed=1;
-							printf("FR Offest is %d\n", frOffset);
+							printf("FR Offest is %f\n", frOffset);
 							fflush(stdout);
 							break;
 						case SDLK_a:  	
 							lrOffset += 0.01;			
 							changed=1;
-							printf("LR Offest is %d\n", lrOffset);
+							printf("LR Offest is %f\n", lrOffset);
 							fflush(stdout);
 							break;
 						case SDLK_d:  	
 							lrOffset -= 0.01;			
 							changed=1;
-							printf("LR Offest is %d\n", lrOffset);
+							printf("LR Offest is %f\n", lrOffset);
 							fflush(stdout); 
 							break;
 						case SDLK_r:  	
