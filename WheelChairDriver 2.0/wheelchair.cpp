@@ -59,7 +59,7 @@ int WheelChair :: resetUnit()
 {
 	unsigned int retbyte;
 	printf("\nResetting unit"); fflush(stdout);
-	if (controlUnit->SendCommand("O0000") != 0) //Reset output and wait response
+	if (controlUnit->SendCommand((char*)"O0000") != 0) //Reset output and wait response
 	{
 		PLAYER_ERROR("\n	-->Failed to find Wheelchair Interface Unit");
 		return -1;
@@ -67,7 +67,7 @@ int WheelChair :: resetUnit()
 	else 
 		puts("\n- Wheelchair Interface Unit Found and Reseted.");
 	controlUnit->ReadByte(&retbyte);
-	if (controlUnit->SendCommand("L0800") != 0) //Set fwd/rev to 2.5v
+	if (controlUnit->SendCommand((char*)"L0800") != 0) //Set fwd/rev to 2.5v
 	{       
 		PLAYER_ERROR("\n	-->Failed to set fwd/rev voltage to 2.5V");
 		return -1;
@@ -75,7 +75,7 @@ int WheelChair :: resetUnit()
 	else
 		puts("		+ Forward/Reverse Voltage was successfully set to 2.5V");
 
-	if (controlUnit->SendCommand("L1800") != 0) //Set left/right to 2.5v
+	if (controlUnit->SendCommand((char*)"L1800") != 0) //Set left/right to 2.5v
 	{       
 		PLAYER_ERROR("\n	-->Failed to set l/r voltage to 2.5V");
 		return -1;
@@ -109,9 +109,9 @@ int WheelChair::sendCommand(int WCcmd, bool param)
 					break;
 				if((!power && param) || (power && !param))
 				{
-					while(controlUnit->SendCommand("O0008") != 0) {usleep(SLEEP);}
+					while(controlUnit->SendCommand((char*)"O0008") != 0) {usleep(SLEEP);}
 					usleep(SLEEP);
-					while(controlUnit->SendCommand("O0000") != 0) {usleep(SLEEP);}
+					while(controlUnit->SendCommand((char*)"O0000") != 0) {usleep(SLEEP);}
 					(power)?power = false:power = true;
 				}
 				//printf("\nPower is:%d",power); fflush(stdout);
@@ -132,14 +132,14 @@ int WheelChair::sendCommand(int WCcmd, bool param)
 				if (((char)retBytes[2] == '0' && param) || ((char)retBytes[2] != '0' && !param)) 
 				{
 					// we need to toggle the mode
-					if(controlUnit->SendCommand("O0020") != 0)
+					if(controlUnit->SendCommand((char*)"O0020") != 0)
 					{	
 						PLAYER_ERROR("Failed to set mode\n");
-						controlUnit->SendCommand("O0000");
+						controlUnit->SendCommand((char*)"O0000");
 						return -1;
 					}
 					usleep(LATCHDELAY);
-					if(controlUnit->SendCommand("O0000") != 0)
+					if(controlUnit->SendCommand((char*)"O0000") != 0)
 					{
 						PLAYER_ERROR("Failed to set mode\n");
 						return -1;

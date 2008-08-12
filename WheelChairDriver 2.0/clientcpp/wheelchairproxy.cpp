@@ -64,7 +64,7 @@ int WheelChairProxy::GetPower()
 	memset(config, 0, sizeof(config) );
 	config->request = PLAYER_WHEELCHAIR_GET_POWER_REQ;		
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                             reinterpret_cast<void*>(&mData),reinterpret_cast<void*>(&mData),size) < 0)	
+                             reinterpret_cast<void*>(&mData),reinterpret_cast<void**>(&mData)) < 0)	
 		return -1;
 	else
 		return config->value; 
@@ -95,7 +95,7 @@ int WheelChairProxy::SoundHorn(unsigned int duration)
 	config->value = duration; // 100ms
 	config->request = PLAYER_WHEELCHAIR_SOUND_HORN_REQ;	
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                             reinterpret_cast<void*>(&mData),reinterpret_cast<void*>(&mData),size) < 0)	
+                             reinterpret_cast<void*>(&mData),reinterpret_cast<void**>(&mData)) < 0)	
 		return -1;
 	else
 		return 0;
@@ -110,7 +110,7 @@ int WheelChairProxy::GetMode()
 	memset(config, 0, sizeof(config) );
 	config->request = PLAYER_WHEELCHAIR_GET_MODE_REQ;
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                             reinterpret_cast<void*>(&mData),reinterpret_cast<void*>(&mData),size) < 0)	
+                             reinterpret_cast<void*>(&mData),reinterpret_cast<void**>(&mData)) < 0)	
 		return -1;
 	else
 		return config->value; 
@@ -126,7 +126,7 @@ int WheelChairProxy::IncrementGear(int gears)
 	config->value = gears;
 	config->request = PLAYER_WHEELCHAIR_INC_GEAR_REQ;		
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                             reinterpret_cast<void*>(&mData),0,0) < 0)	
+                             reinterpret_cast<void*>(&mData),0) < 0)	
 		return -1;
 	else
 		return 0;
@@ -145,7 +145,7 @@ int WheelChairProxy::DecrementGear(int gears)
 	config->value = gears;
 	config->request = PLAYER_WHEELCHAIR_DEC_GEAR_REQ;	
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                             reinterpret_cast<void*>(&mData),0,0) < 0)	
+                             reinterpret_cast<void*>(&mData),0) < 0)	
 		return -1;
 	else
 		return 0;
@@ -159,7 +159,7 @@ int WheelChairProxy::SetPower(int state_to_set)
 	config->value = state_to_set;
 	config->request = PLAYER_WHEELCHAIR_SET_POWER_REQ;
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                             reinterpret_cast<void*>(&mData),0,0) < 0)	
+                             reinterpret_cast<void*>(&mData),0) < 0)	
 		return -1;
 	else
 		return 0;
@@ -174,7 +174,7 @@ int WheelChairProxy::SetMode(int mode_to_set)
 	config->value = mode_to_set;
 	config->request = PLAYER_WHEELCHAIR_SET_MODE_REQ;
 	if(playerc_client_request(mDevice->info.client, &mDevice->info,PLAYER_OPAQUE_REQ,
-                             reinterpret_cast<void*>(&mData),0,0) < 0)	
+                             reinterpret_cast<void*>(&mData),0) < 0)	
 		return -1;
 	else
 		return 0;

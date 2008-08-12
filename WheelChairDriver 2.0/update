@@ -1,0 +1,14 @@
+#!/bin/bash
+# script to update the driver from version 2.0 to 2.1
+COUNT=`grep -c MessageQueue $1`
+COUNT2=`grep -c "Publish[ 	]*[(][^,]*,[ 	]*NULL" $1`
+if (( $COUNT + $COUNT2 > 0 ))
+then
+	echo backing up original in $1.pre.2.1
+	cp $1 $1.pre2.1
+	cat $1.pre2.1 | sed \
+		-e "s/\(Publish[ ]*[(][ ]*[^,]*\),[ ]*NULL/\1/" \
+		-e "s/MessageQueue[	 ]*\*[ 	]*/QueuePointer \&/" \
+		> $1
+fi
+

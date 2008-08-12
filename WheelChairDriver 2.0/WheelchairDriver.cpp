@@ -167,7 +167,7 @@ class WheelchairDriver : public Driver
 	    // Must implement the following methods.
 	    virtual int Setup();
 	    virtual int Shutdown();
-	    virtual int ProcessMessage(MessageQueue * resp_queue, 
+	    virtual int ProcessMessage(QueuePointer &resp_queue, 
 	                               player_msghdr * hdr, 
 	                               void * data);
    		virtual int Subscribe(player_devaddr_t id);
@@ -175,7 +175,7 @@ class WheelchairDriver : public Driver
 		WheelchairDriver(ConfigFile* cf, int section); 
     private:	
     	virtual void Main();
-		int  HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr,void * data);
+		int  HandleConfigs(QueuePointer &resp_queue,player_msghdr * hdr,void * data);
 		int  HandleCommands(player_msghdr *hdr,void * data);
 	 	void RefreshData();     //refreshs and sends data    
 		void UpdateOdom(int ltics, int rtics);  // Updates the Odometry 
@@ -547,7 +547,7 @@ void WheelchairDriver::Main()
 }
 
 // MessageHandler
-int WheelchairDriver::ProcessMessage(MessageQueue * resp_queue, player_msghdr * hdr, void * data)
+int WheelchairDriver::ProcessMessage(QueuePointer &resp_queue, player_msghdr * hdr, void * data)
 {
   // Look for configuration requests
   if(hdr->type == PLAYER_MSGTYPE_REQ)
@@ -598,7 +598,7 @@ int WheelchairDriver::HandleCommands(player_msghdr *hdr,void * data)
   	return retval;
 }
 
-int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr,void * data)
+int WheelchairDriver::HandleConfigs(QueuePointer &resp_queue,player_msghdr * hdr,void * data)
 {
 	// Handle Position REQ
 	// I didn't like the stupid MessageMatch Method
@@ -624,7 +624,7 @@ int WheelchairDriver::HandleConfigs(MessageQueue* resp_queue,player_msghdr * hdr
 			     */
 			    geom.pose.px = 0.3;
 			    geom.pose.py = 0.0;
-			    geom.pose.pa = 0.0;
+			    geom.pose.pyaw = 0.0;
 			    geom.size.sl = 0.9;
 			    geom.size.sw = 0.7;
 			    this->Publish(this->position_addr, resp_queue,PLAYER_MSGTYPE_RESP_ACK,PLAYER_POSITION2D_REQ_GET_GEOM,
@@ -908,12 +908,12 @@ void WheelchairDriver::RefreshData()
   	wheelchair_data->power = this->power;
   	uint size = sizeof(w_data) - sizeof(w_data.data) + w_data.data_count;
 	// cout<<"\nData Count:"<<size<<"Joyx:"<<wheelchair_data->joyx<<" JoyY:"<<wheelchair_data->joyy<<" Power:"<<wheelchair_data->power;
-    	Publish(this->opaque_addr, NULL,PLAYER_MSGTYPE_DATA, PLAYER_OPAQUE_DATA_STATE,reinterpret_cast<void*>(&w_data), size, NULL);  	
+    	Publish(this->opaque_addr,PLAYER_MSGTYPE_DATA, PLAYER_OPAQUE_DATA_STATE,reinterpret_cast<void*>(&w_data), size, NULL);  	
 
 	posdata.vel.px = this->vact;
 	posdata.vel.py = this->wact;
   	// put odometry data
-    Publish(this->position_addr, NULL,PLAYER_MSGTYPE_DATA, PLAYER_POSITION2D_DATA_STATE,(void*)&posdata, sizeof(posdata), NULL);
+    Publish(this->position_addr,PLAYER_MSGTYPE_DATA, PLAYER_POSITION2D_DATA_STATE,(void*)&posdata, sizeof(posdata), NULL);
 
 	last_position_update = now;
 };
