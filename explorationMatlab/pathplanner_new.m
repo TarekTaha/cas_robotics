@@ -354,7 +354,7 @@ jointcombs= [1,2,3;2,3,1;3,1,2];
             
             %get rid of steps where 1,2,3 dont move joint up 4,5,6 before
             %and after steps also include end position (for safety)
-            abspathdiff_bin=abs(all_steps(2:end,1:3)-all_steps(1:end-1,1:3))>eps;
+            abspathdiff_bin=abs(all_steps(2:end,1:3)-all_steps(1:end-1,1:3))>robot_maxreach.minjointres;
             all_steps=[all_steps(abspathdiff_bin(:,1)|abspathdiff_bin(:,2)|abspathdiff_bin(:,3),:);
                        all_steps(end,:)];
 %             if size(all_steps_temp,1)~=size(all_steps,1)
@@ -502,20 +502,20 @@ try
     tworows_diff0_23=find(pathdiff(:,2)==0&pathdiff(:,3)==0);
     tworows_diff0_13=find(pathdiff(:,1)==0&pathdiff(:,3)==0);
     if length(tworows_diff0_12)>2 && ...
-            ~isempty(find(pathdoubdiff(tworows_diff0_12(1:end-1),3)>eps,1)) &&...
-            ~isempty(find(pathdoubdiff(tworows_diff0_12(1:end-1),3)<-eps,1))
+            ~isempty(find(pathdoubdiff(tworows_diff0_12(1:end-1),3)>robot_maxreach.minjointres,1)) &&...
+            ~isempty(find(pathdoubdiff(tworows_diff0_12(1:end-1),3)<-robot_maxreach.minjointres,1))
         display('maybe path could be shorter J3');
 %             keyboard;
     end
     if length(tworows_diff0_23)>2 &&...
-            ~isempty(find(pathdoubdiff(tworows_diff0_23(1:end-1),1)>eps,1)) &&...
-            ~isempty(find(pathdoubdiff(tworows_diff0_23(1:end-1),1)<-eps,1))
+            ~isempty(find(pathdoubdiff(tworows_diff0_23(1:end-1),1)>robot_maxreach.minjointres,1)) &&...
+            ~isempty(find(pathdoubdiff(tworows_diff0_23(1:end-1),1)<-robot_maxreach.minjointres,1))
         display('maybe path could be shorter J1');
 %             keyboard;           
     end
     if length(tworows_diff0_13)>2 &&...
-            ~isempty(find(pathdoubdiff(tworows_diff0_13(1:end-1),2)>eps,1)) &&...
-            ~isempty(find(pathdoubdiff(tworows_diff0_13(1:end-1),2)<-eps,1))
+            ~isempty(find(pathdoubdiff(tworows_diff0_13(1:end-1),2)>robot_maxreach.minjointres,1)) &&...
+            ~isempty(find(pathdoubdiff(tworows_diff0_13(1:end-1),2)<-robot_maxreach.minjointres,1))
         display('maybe path could be shorter J2');    
 %         keyboard;
     end

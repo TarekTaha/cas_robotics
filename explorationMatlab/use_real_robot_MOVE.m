@@ -101,12 +101,13 @@ if ~isempty(find(round(tempQ-rob_h2.JointState), 1))
             pause(0.1);rob_h.Start;pause(0.1);
             
             waitcoutner=0;           
-         
+            %our joint state here
+            oldQ=Q;
             %check we are where we want to be            
             while max(abs((rad2deg(Q)-current_step_DEG)))>robot_maxreach.realMovementAngleInc
                 pause(0.15);
                 waitcoutner=waitcoutner+1;
-                if waitcoutner==75 %about 15 seconds                    
+                if waitcoutner==75 && ~isempty(find(abs(oldQ-Q)>0,1)) %about 15 seconds                    
                     button = questdlg('Did you press the emergency stop?','Running Slow');
                     if strcmp(button,'Yes')
                         releaserobot(rob_h)
@@ -114,7 +115,7 @@ if ~isempty(find(round(tempQ-rob_h2.JointState), 1))
                     else
                         %try alternate method of getting joint state
                         use_real_robot_GETJs()
-                        if ~isempty(find(abs((rad2deg(Q))-rob_h2.JointState)>eps,1)) && max(abs((rad2deg(Q)-current_step_DEG)))<robot_maxreach.realMovementAngleInc
+                        if ~isempty(find(abs((rad2deg(Q))-rob_h2.JointState)>robot_maxreach.minjointres,1)) && max(abs((rad2deg(Q)-current_step_DEG)))<robot_maxreach.realMovementAngleInc
                             uiwait(msgbox('There is a problem with the rob_h2.JointState function, I can use use_real_robot_GETJs but this is NOT a fix - EyeInHand.exe must die'));
                             please_use_GETjsFunc=true;
                             break
@@ -124,9 +125,13 @@ if ~isempty(find(round(tempQ-rob_h2.JointState), 1))
                         end
                     end
                 elseif waitcoutner>150 %about 30 seconds we have reissued the command and still no action
-                    keyboard
-                    releaserobot(rob_h)
-                    error('Problem issuing commands to drive the robot');                    
+                    if ~isempty(find(abs(oldQ-Q)>0,1))
+                      keyboard
+                      releaserobot(rob_h)
+                      error('Problem issuing commands to drive the robot');                    
+                    else
+                      display('Although it is taking a long time, we still seem to moving');
+                    end
                 end
                 %display(strcat('Joint state is currently:', num2str(rob_h2.JointState)));  
                 %if we need to update the old way
