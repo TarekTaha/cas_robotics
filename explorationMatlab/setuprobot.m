@@ -13,7 +13,7 @@
 function setuprobot()
 
 %% Variables
-global Q r densoobj robot_maxreach linkFromLaserTransform;
+global Q r densoobj robot_maxreach;
 
 %New robot - start pose
 Q=[0,-75,160,0,30,0]*pi/180;
@@ -23,10 +23,14 @@ default_Q=[default_Q;[0,-88*pi/180,98*pi/180,0,-15*pi/180,0]];
 robot_maxreach.default_Q=default_Q;
 
 %this is the robot object you wish to use
-try r = feval('rob_object');
+% try r = feval('rob_object');
+try r = denso6083(6);
 catch
     error('Cant setup robot object');
 end
+
+%%
+
 
 %% Load model, add laser, Calcellipses to go around each robot piece
 
@@ -65,3 +69,6 @@ robot_maxreach.pointcarvedout=[];
 
 %% For movement of the arm, the angular difference
 robot_maxreach.realMovementAngleInc=5;
+
+%% Min Joint resolution in rads
+robot_maxreach.minjointres=0.01*pi/180;

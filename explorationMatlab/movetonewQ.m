@@ -88,7 +88,7 @@ end
 %check if we are already at the destination and return if we are
 %eps is a very small value and if there is less than this angular distance
 %we disregard this and say it is at the same place
-if isempty(find(abs(Q-newQ)>eps, 1));
+if isempty(find(abs(Q-newQ)>robot_maxreach.minjointres, 1));
     %since we are already at the correct path
     try set(handles.dialog_text,'String','Already at destination');drawnow;
     catch; display('Already at destination'); end
@@ -105,8 +105,8 @@ end
 % Provided we haven't passed a path in which is full and has a start at Q
 % and finish at newQ, also that they are all numbers
 if ~isempty(all_steps) && ...
-        isempty(find(all_steps(1,1:3)-Q(1:3)>eps,1)) && ...
-        isempty(find(all_steps(end,1:3)-newQ(1:3)>eps,1)) &&...
+        isempty(find(all_steps(1,1:3)-Q(1:3)>robot_maxreach.minjointres,1)) && ...
+        isempty(find(all_steps(end,1:3)-newQ(1:3)>robot_maxreach.minjointres,1)) &&...
         isempty(find(isnan(all_steps),1))
     %check the path passed in for collisions
     pathfound=check_path_for_col(all_steps);

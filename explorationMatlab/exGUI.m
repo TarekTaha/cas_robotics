@@ -79,7 +79,7 @@ delete(hObject);
 
 %% Executes on button press in clear_pushbutton.
 function clear_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-clc
+%clc
 do_clear(handles);
 
 % this is the do_clear function sets up most stuff
@@ -99,25 +99,8 @@ display('5) Robot is in automatic mode on both pendant and E-stop control');
 display('6) The robocontroller program is running on pendant and recieveing no communication');
 display('7) There is no EyeinHand exe running intially in task manager');
 
-% display('Note: You should use the vr world robot not toms, you should also draw up the laser to put on the end as the 7th peice');
-
 display('Pausing so you can do these things');
 pause
-
-
-% VR world setup
-% global myworld
-% try close(myworld)
-%     delete(myworld)
-% end
-% 
-% vrclear('-force');
-% try myworld=vrworld('Robot.WRL');
-%     open(myworld);
-%     vrfigure(myworld);   
-% catch
-%     display('Unable to setup vr world');
-% end
 
 
 %sets up the surface map object and then this is used for scanning
@@ -135,6 +118,13 @@ try global platform_h;
     platform_h = actxserver('EyeInHand.PlatformCommand');
 catch
     display('EyeInHand Problem: Unable to create platform object')
+end
+
+% Used to continually monitor the joint state
+try DensoState_h = actxserver('EyeInHand.DensoState');
+    DensoState_h.registerevent(@updateQlistener);
+catch
+    display('EyeInHand Problem: Unable to create DensoState object')
 end
 
 
@@ -180,14 +170,14 @@ setupworkspace(get(handles.show_unknownpoints_checkbox,'Value'));
 
 
 global all_views
-if isempty(all_views)
-    warning('not calculating allviews even though it dosent exist');
-%     display('Having to calculate all_views for exploration, this happens ones only');
-%     calc_all_views();
-%     load all_views.mat
-end
+% if isempty(all_views)
+%     warning('not calculating allviews even though it dosent exist');
+% %     display('Having to calculate all_views for exploration, this happens ones only');
+% %     calc_all_views();
+% %     load all_views.mat
+% end
 
-clc;
+%clc;
 
 set(handles.dialog_text,'String','Setup Complete: Lets Explore');
 
@@ -310,24 +300,24 @@ elseif current_test_case>1 && want_to_continue
                 
                 while want_to_continue; 
                     try %if we have already planned a path, use this one otherwise try and get another, otherwise go to next possible one
-                        if movetonewQ(handles,bestviews(1).Q*180/pi,bestviews(1).all_steps);
+                        if movetonewQ(handles,rad2deg(bestviews(1).Q),bestviews(1).all_steps);
                             scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];explore(handles,useNBV,1);validpathfound=true;break;
                         else %can't get to the desired best view
-%                             display('User has control');
-%                             keyboard
+                            display('User has control');
+                            keyboard
                             
                             %tac on the actual position here just in case
                             %it isn't exactly where it was supposed to
                             %finish
                             robot_maxreach.path(end).all_steps(end+1,:)=Q;
                             %move back along the path taken to get here
-                            if ~movetonewQ(handles,robot_maxreach.path(end).all_steps(1,:)*180/pi,robot_maxreach.path(end).all_steps(end:-1:1,:));
+                            if ~movetonewQ(handles,rad2deg(robot_maxreach.path(end).all_steps(1,:)),robot_maxreach.path(end).all_steps(end:-1:1,:));
                                 display('some major problem if we cant follow the same path back');
                                 keyboard                                
                             end
                             %try once again to move to the actual desired
                             %newQ for exploration
-                            if movetonewQ(handles,bestviews(1).Q*180/pi,bestviews(1).all_steps);
+                            if movetonewQ(handles,rad2deg(bestviews(1).Q),bestviews(1).all_steps);
                                 scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];explore(handles,useNBV,1);validpathfound=true;break;
                             else % last resort is to remove surrounding obstacle points remove indexed and normal obsticle points within robot FF since not valid
                                 display(['No Valid path available or found, on #',num2str(current_bestview)]);
@@ -673,7 +663,7 @@ movetonewQ(handles);
 function get_current_Js_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 global Q;
 if get(handles.useRealRobot_checkbox,'Value'); use_real_robot_GETJs();end
-actual_Q=Q*180/pi;
+actual_Q=rad2deg(Q);
 display(strcat('the current joint state of the real robot is:',num2str(actual_Q)));
 set(handles.move_to_J1_edit,'String',num2str(actual_Q(1)));
 set(handles.move_to_J2_edit,'String',num2str(actual_Q(2)));

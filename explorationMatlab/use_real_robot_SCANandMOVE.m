@@ -46,7 +46,7 @@ else
         all_steps=[];
     else
         all_steps=vargin;
-        if isempty(find(abs((all_steps(1,:)-all_steps(end,:)))>eps,1))
+        if isempty(find(abs((all_steps(1,:)-all_steps(end,:)))>robot_maxreach.minjointres,1))
             %since we are already at the destination
             return
         end

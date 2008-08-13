@@ -13,12 +13,15 @@
 function doscan(newQ)
 
 %% Variables
-global workspace r Q linkFromLaserTransform
+global workspace r Q
 
 %if nothing is passed, then we use the actual Q otherwise used passed Q
 if nargin==0
     newQ=Q;
 end
+
+% Magic number
+linkFromLaserTransform=[-0.9397,-0,0.342,-0.067;0,-1,-0,0.0009;0.342,0,0.9397,0.1001;0,0,0,1;];
 
 %find out the current pose of the scanner
 tr=fkine(r,newQ) * linkFromLaserTransform;
