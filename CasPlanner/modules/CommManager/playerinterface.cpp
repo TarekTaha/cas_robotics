@@ -640,7 +640,6 @@ void PlayerInterface::clearResources()
 
 void PlayerInterface::connectDevices()
 {
-	cout<<"\nDebug Connect DEV A"; fflush(stdout);
     if(pc)
     {
 		clearResources();
@@ -652,7 +651,6 @@ void PlayerInterface::connectDevices()
     /* 
      * TODO: Proper check for the successfullness of the proxy creation
      */
-	cout<<"\nDebug Connect DEV B"; fflush(stdout);
     if(ctrEnabled)
     {
 		if(drive)
@@ -663,7 +661,6 @@ void PlayerInterface::connectDevices()
         drive = new Position2dProxy(pc,positionId);
 		logMsg.append(QString("\n\t\t - Motor Control Interface Engaged Successfully, ID:%1").arg(positionId));	   		 
     }
-    cout<<"\nDebug Connect DEV C"; fflush(stdout);
     for(int i=0; i < lasers.size(); i++)
     {
     	player_pose3d_t	lp_pose;
@@ -677,19 +674,16 @@ void PlayerInterface::connectDevices()
 //    	qDebug("Laser Pose X:%f Y:%f Phi:%f",lasers[i].pose.p.x(),lasers[i].pose.p.y(),lasers[i].pose.phi);	    	
 		logMsg.append(QString("\n\t\t - Laser interface:%1 Interface Added Successfully").arg(lasers[i].index));  
     }
-    cout<<"\nDebug Connect DEV D"; fflush(stdout);
     if(mapEnabled)
     {
     	map = new MapProxy(pc,mapId);
 		logMsg.append(QString("\n\t\t - Map Interface Engaged Successfully, ID:%1").arg(mapId));			
     }
-    cout<<"\nDebug Connect DEV Da"; fflush(stdout);
     if(ptzEnabled)
     {
 		ptz = new PtzProxy(pc, ptzId);
 		logMsg.append(QString("\n\t\t - Pan Tilt unit initialized Successfully ID:%1").arg(ptzId));			
     }
-    cout<<"\nDebug Connect DEV Db"; fflush(stdout);
     if(localizerEnabled)
     {
     	localizer 	  = new LocalizeProxy(pc,0);
@@ -703,14 +697,12 @@ void PlayerInterface::connectDevices()
     	localizerType = ODOM;
     	localized = true;
     }
-    cout<<"\nDebug Connect DEV Dc"; fflush(stdout);
     if(vfhEnabled)
     {
     	vfh 	= new Position2dProxy(pc,vfhId);
 		logMsg.append(QString("\n\t\t - Vfh Started Successfully ID:%1").arg(vfhId));	    	
     }	   
     /* This is temp until the wheelchair interface is added.*/
-    cout<<"\nDebug Connect DEV E"; fflush(stdout);
     if(joyStickEnabled)
     {
 	    if(!wheelChairCommander)
@@ -722,26 +714,25 @@ void PlayerInterface::connectDevices()
 			logMsg.append(QString("\nNo Joystick Found on ID:%1").arg(joyStickId));	    	
 	    }
     }
-    cout<<"\nDebug Connect DEV Ea"; fflush(stdout);
-//    if(speechEnabled)
-//    {
-//    	speechP  = new SpeechProxy(pc,speechId);
-//    	speechP->Say("Started");
-//    }
-	sleep(1);
-	cout<<"\nDebug Connect DEV F"; fflush(stdout);
+    if(speechEnabled)
+    {
+    	speechP  = new SpeechProxy(pc,speechId);
+    	speechP->Say("Started");
+    }
+
+    dataLock.lockForWrite();
+	this->connected = true;
+	dataLock.unlock();
+
 	logMsg.append(QString("\n\t Testing Player Server for Data Read:"));  	
 	logMsg.append(QString("\n\t\t - Test Passed, You can read Data from Player Server Now"));
 	logMsg.append(QString("\n\t\t - Connection Established"));
 	logMsg.append(QString("\n/********************************************************************/"));	
     emit addMsg(0,INFO,logMsg);
-//    dataLock.lockForWrite();
-//	this->connected = true;
-//	dataLock.unlock();
+	sleep(0.5);
 }
 void PlayerInterface::run ()
 {
-	cout<<"\nDebug Msg A"; fflush(stdout);
 	logMsg.append("\n/********************************************************************/");
 	logMsg.append("\nConnecting to Robot Server::");
 	logMsg.append(QString("\n\t Connecting to %1:%2 ...").arg(qPrintable(playerHost)).arg(playerPort));
@@ -749,16 +740,17 @@ void PlayerInterface::run ()
     {
     	connectDevices();
 //		Timer timer;
-		cout<<"\nDebug Msg B"; fflush(stdout);
 	    while(true)
 	    {
 //	    	qDebug("Loop Time is:%f %d",timer.msecElapsed()); fflush(stdout);
 //	    	timer.restart();
 	    	/* Read Only if new Data is Available*/
-//			pc->ReadIfWaiting();
-//			if(!pc->Peek(50))
-//				continue;
-//			pc->Read();
+	    	/*
+			pc->ReadIfWaiting();
+			if(!pc->Peek(50))
+				continue;
+			*/
+			pc->Read();
 			/*
 			 * Here Goes the Accelerometer Part, it reads via bluetooth the acc xyz
 			 * and generates a turnrate and velocity.
@@ -777,92 +769,114 @@ void PlayerInterface::run ()
 		    
 		    drive->SetSpeed(forwardSpeed,steeringTurnRate);
 */	    
-			cout<<"\nDebug Msg C"; fflush(stdout);
-//		    for(int laser_indx=0; laser_indx < lasers.size(); laser_indx++)
-//		    {
-//		    	if (laserScan.points.size())
-//		    		laserScan.points.clear();
-//		    	laserScan.laserPose.p.setX(lasers[laser_indx].pose.p.x());
-//		    	laserScan.laserPose.p.setY(lasers[laser_indx].pose.p.y());		    	
-//		    	laserScan.laserPose.phi =  lasers[laser_indx].pose.phi;		    	
-//		        for(uint i=0; i< lasers[laser_indx].lp->GetCount(); i++)
-//		        {
-//			    	laserScan.points.push_back(QPointF(lasers[laser_indx].lp->GetPoint(i).px, lasers[laser_indx].lp->GetPoint(i).py));    
-//				}
-//		  	}
+//			cout<<"\nDebug Msg C"; fflush(stdout);
+		    for(int laser_indx=0; laser_indx < lasers.size(); laser_indx++)
+		    {
+		    	if (laserScan.points.size())
+		    		laserScan.points.clear();
+		    	laserScan.laserPose.p.setX(lasers[laser_indx].pose.p.x());
+		    	laserScan.laserPose.p.setY(lasers[laser_indx].pose.p.y());		    	
+		    	laserScan.laserPose.phi =  lasers[laser_indx].pose.phi;		    	
+		        for(uint i=0; i< lasers[laser_indx].lp->GetCount(); i++)
+		        {
+			    	laserScan.points.push_back(QPointF(lasers[laser_indx].lp->GetPoint(i).px, lasers[laser_indx].lp->GetPoint(i).py));    
+				}
+		  	}
 //		    cout<<"\nDebug Msg D"; fflush(stdout);
-//		    if(joyStickEnabled)
-//		    {
-//	            if(!wheelChairCommander)
-//	            {
-//		            joyAxes.setX(joyStick->GetXPos());
-//		            joyAxes.setY(joyStick->GetYPos());
-//	            }
-//	            else
-//	            {
-//		            joyAxes.setX(wheelChairCommander->JoyX());
-//		            joyAxes.setY(wheelChairCommander->JoyY());
-//	            }
+		    if(joyStickEnabled)
+		    {
+	            if(!wheelChairCommander)
+	            {
+		            joyAxes.setX(joyStick->GetXPos());
+		            joyAxes.setY(joyStick->GetYPos());
+	            }
+	            else
+	            {
+		            joyAxes.setX(wheelChairCommander->JoyX());
+		            joyAxes.setY(wheelChairCommander->JoyY());
+	            }
 //	            int dir = getJoyStickDir();
 //	            int globalDir = getJoyStickGlobalDir();
 //	            printf("\nDirection=%d Global Dir=%d",dir,globalDir);
 //	            cout<<"\n Current Joystick X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();		    	
-//		    }
+		    }
 //		    cout<<"\nDebug Msg 1"; fflush(stdout);
-//	        if(ctrEnabled)
-//	        {
-//	        	if (!stopped)
-//	        	{
-//		        	if(velControl)
-//		        	{
-//			            drive->SetSpeed(speed,turnRate);
-//		        	}
-//		        	else
-//		        	{
-//		        		vfh->GoTo(vfhGoal.p.x(),vfhGoal.p.y(),vfhGoal.phi);	        		
-//		        	}
-//	        	}
-//	            getspeed = drive->GetXSpeed();
-//	            getturnrate = drive->GetYawSpeed();	            
-//	            odomLocation.p.setX(drive->GetXPos());
-//	            odomLocation.p.setY(drive->GetYPos());
-//	            odomLocation.phi =  drive->GetYaw();
-////				cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<RTOD(odom_location.phi);	            
-//	        }
-//			if(ptzEnabled)
-//			{
-//		    	ptz->SetCam(pan,tilt, 1);
-//			}
-//			if(mapEnabled)
-//			{
-////				map->GetMap();
-//			    //qDebug("Map width %d, height %d resolution %f",map->width,map->height,map->resolution);
-//			}
+	        if(ctrEnabled)
+	        {
+	        	if (!stopped)
+	        	{
+		        	if(velControl)
+		        	{
+						/*
+						 * Here Goes the Accelerometer Part, it reads via bluetooth the acc xyz
+						 * and generates a turnrate and velocity.
+						 */
+		        		if(n95Acc.isConnected())
+		        		{
+						    n95Acc.readBT();
+						    printf("\n Accel X:%d Y:%d Z:%d",n95Acc.getX(),n95Acc.getY(),n95Acc.getZ());
+						    double maxSpeed = 1, maxTurnRate=DTOR(50), forwardSpeed, steeringTurnRate;
+						    forwardSpeed = -1*n95Acc.getZ()/70.0*maxSpeed;
+						    steeringTurnRate =  n95Acc.getY()/70.0*maxTurnRate;
+						    
+						    if(abs(n95Acc.getZ())<10 )
+						    	forwardSpeed =0;
+						    if(abs(n95Acc.getY())<10 )
+						    	steeringTurnRate =0;					    
+						    drive->SetSpeed(forwardSpeed,steeringTurnRate);
+		        		}
+		        		else
+		        			drive->SetSpeed(speed,turnRate);
+		        	}
+		        	else
+		        	{
+		        		vfh->GoTo(vfhGoal.p.x(),vfhGoal.p.y(),vfhGoal.phi);	        		
+		        	}
+	        	}
+	            getspeed = drive->GetXSpeed();
+	            getturnrate = drive->GetYawSpeed();	            
+	            odomLocation.p.setX(drive->GetXPos());
+	            odomLocation.p.setY(drive->GetYPos());
+	            odomLocation.phi =  drive->GetYaw();
+//				cout<<"\n Current Location X:"<<odom_location.p.x()<<" Y:"<<odom_location.p.y()<<" Theta:"<<RTOD(odom_location.phi);	            
+	        }
+			if(ptzEnabled)
+			{
+		    	ptz->SetCam(pan,tilt, 1);
+			}
+			if(mapEnabled)
+			{
+//				map->GetMap();
+//			    qDebug("Map width %d, height %d resolution %f",map->width,map->height,map->resolution);
+			}
 //			cout<<"\nDebug Msg 2"; fflush(stdout);
-//		    if(localizer)
-//		    {
-//			    amclLocation.p.setX(localizer->GetHypoth(0).mean.px);
-//			    amclLocation.p.setY(localizer->GetHypoth(0).mean.py);
-//			    amclLocation.phi =  localizer->GetHypoth(0).mean.pa;
-////			    printf("\nHypo:%d",localizer->GetNumHypoths());
-////			    printf("AMCL location %f %f %f",amclLocation.p.x(),amclLocation.p.y(),amclLocation.phi);
-//			    if(localizer->GetHypoth(0).alpha >= 0.7)
-//			    	localized = true;
-//			    else
-//			    	localized = false;
-//		    }
+		    if(localizer)
+		    {
+		    	if(localizer->GetHypothCount()>=1)
+		    	{
+				    amclLocation.p.setX(localizer->GetHypoth(0).mean.px);
+				    amclLocation.p.setY(localizer->GetHypoth(0).mean.py);
+				    amclLocation.phi =  localizer->GetHypoth(0).mean.pa;
+//				    printf("\nHypo:%d",localizer->GetNumHypoths());
+//				    printf("AMCL location %f %f %f",amclLocation.p.x(),amclLocation.p.y(),amclLocation.phi);
+				    if(localizer->GetHypoth(0).alpha >= 0.7)
+				    	localized = true;
+				    else
+				    	localized = false;
+		    	}
+		    }
 //		    cout<<"\nDebug Msg 3"; fflush(stdout);
-//		    if(speechNotificationEnabled)
-//		    {
-//		    	if(speechP && !voiceMessage.isEmpty())
-//		    	{
-//		    		speechP->Say(qPrintable(voiceMessage));
-//		    		printf("\n I said :%s",qPrintable(voiceMessage));
-//		    		voiceMessage.clear();
-//		    	}
-//		    }
+		    if(speechNotificationEnabled)
+		    {
+		    	if(speechP && !voiceMessage.isEmpty())
+		    	{
+		    		speechP->Say(qPrintable(voiceMessage));
+		    		printf("\n I said :%s",qPrintable(voiceMessage));
+		    		voiceMessage.clear();
+		    	}
+		    }
 //		    cout<<"\nDebug Msg 4"; fflush(stdout);
-//	    	emit newData();
+	    	emit newData();
 	    }
     }
 	catch (PlayerCc::PlayerError e)

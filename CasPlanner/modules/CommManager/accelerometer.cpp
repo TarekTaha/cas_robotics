@@ -31,6 +31,11 @@ int Accelerometer::connectBT(uint8_t port, char MAC[18])
 	}
 }
 
+bool Accelerometer::isConnected()
+{
+	return this->connected;
+}
+
 int Accelerometer::getX()
 {
 	return x;

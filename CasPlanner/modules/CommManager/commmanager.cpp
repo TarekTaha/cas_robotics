@@ -406,6 +406,14 @@ int CommManager::start()
    		connect(player, SIGNAL(newData()), this, SIGNAL(newData()));
    		connect(player, SIGNAL(addMsg(int,int,QString)), playGround,SLOT(addMsg(int,int,QString)));
  	}
+  	else
+  	{
+  		if(player->isRunning())
+  		{
+  			emit addMsg(0,INFO,"Already Connected and running");
+  			return 1;
+  		}
+  	}
   	//Enable Robot Control ?
   	if(activateControl)
   	{
@@ -442,15 +450,7 @@ int CommManager::start()
 	{
 		player->enableJoyStick(joyStickId);		
 	}
-  	if(player)
-  	{
- 		if(player->isRunning())
- 		{
- 			player->quit();
- 			usleep(100000);
- 		}
-    	player->start(QThread::HighestPriority);	  	
-  	}
+    player->start(QThread::HighestPriority);
 	logMsg.append(QString("\n-> Communication Manager Started."));    
     emit addMsg(0,INFO,logMsg);  	
     return 1;

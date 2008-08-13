@@ -38,6 +38,7 @@ public:
 	int getX();
 	int getY();
 	int getZ();
+	bool isConnected();
 private:
 	int x,y,z;
 	struct sockaddr_rc addr;
