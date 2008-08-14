@@ -10,14 +10,18 @@
 %
 % *Globals still in memory*
 %
-% _hgjdehg_
+% _robmap_h_ (stephens surface map ofject)
+%
+% _platform_h_ (stephens platform ofject)
 %
 % *These globals are Saved to exploration_out.mat*
 %
+% _verts_ (extracted from robmap_h which is still available
+% 
 
 function standalone_explore()
 
-clear all
+clear all;close all;
 
 %MANUAL CHECKS: To do before start work
 display('Make sure you have done the following');
@@ -44,7 +48,7 @@ end
 % try and setup platform object
 try global platform_h;
     try platform_h.release;pause(1);end
-    platform_h = actxserver('EyeInHand.PlatformCommand');
+    platform_h = actxserver('EyeInHand.PlatformCommand'); 
 catch
     display('EyeInHand Problem: Unable to create platform object')
 end
@@ -53,9 +57,15 @@ end
 DensoState_h = actxserver('EyeInHand.DensoState');
 DensoState_h.registerevent(@updateQlistener);
 
-%clear the globals for scan, workspace, robot(r,Q), bestviews, PointData, RangeData
-clear global workspace scan bestviews r PointData RangeData guiglobal densoobj all_views robot_maxreach classunkn_optimise alldirectedpoints graf_obs;
-clear global IntensityData PoseData classifiedplotHa linkFromLaserTransform optimise plane   
+%% Clear all globals I use
+%clear the overall seetup globals 
+clear global workspace scan bestviews r densoobj all_views robot_maxreach optimise;
+%clear globals for data from laser
+clear global IntensityData PoseData PointData RangeData 
+% Clear other globals
+clear global classunkn_optimise classifiedplotHa plane alldirectedpoints graf_obs
+
+%% Setup functions
 %Sets up the robot
 setuprobot()
 
@@ -79,6 +89,9 @@ global robot_maxreach optimise workspace scan Q
 % do we want to continue or stop
 want_to_continue=true;
 
+%hack for standalone to fix termination conditions
+changeinweight=size(workspace.knowncoords,1);
+  
 %% intial safe pose default scans
 %since we wish to choose our own default start points
 for stepcount=2:size(robot_maxreach.default_Q,1)+1
@@ -89,19 +102,17 @@ for stepcount=2:size(robot_maxreach.default_Q,1)+1
       try standalone_scanNupdate(newQ)        
       catch display(lasterr);keyboard;
       end
+      changeinweight=[changeinweight;size(workspace.knowncoords,1)];
     end
 end
 
-%% TEST 2 - Non points -using algorithm
-%now go through and get NBV and then use them to explore
-for stepcount=stepcount+1:15;
+%% Actual NBV determination and Exploration
+% go through and get NBV and then use them to explore
+for stepcount=stepcount+1:10;
 %% determine NBV    
   NBV_beta2();
-  current_bestview=1;
-  max_bestviews_togothrough=optimise.valid_max*1/4;
+  %   %this needs to be here since it is cleared in NBV_beta2()
   global bestviews;        
-  while current_bestview<max_bestviews_togothrough && size(bestviews,2)>=1
-      current_bestview=current_bestview+1;
       while want_to_continue; 
           try %if we have already planned a path, use this one otherwise try and get another, otherwise go to next possible one
               if movetonewQ([],rad2deg(bestviews(1).Q),bestviews(1).all_steps,NOhandleOPTIONS);
@@ -122,43 +133,62 @@ for stepcount=stepcount+1:15;
                   end
                   %try once again to move to the actual desired newQ for exploration
                   if movetonewQ([],rad2deg(bestviews(1).Q),bestviews(1).all_steps,radNOhandleOPTIONS);
-                      scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];explore(handles,useNBV,1);validpathfound=true;
+                      scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];
+                      standalone_scanNupdate(bestviews(1).Q);
+                      validpathfound=true;
                       break;
                   end
               end             
           catch; display(lasterr);keyboard; 
           end;            
-      end                
-      %termination conditions
-      changeinweight=diff(state_data.knownweight);
+      end
+      
+      %Check termination conditions
+      changeinweight=[changeinweight;size(workspace.knowncoords,1)];
       if length(changeinweight)>3
-          if sum(changeinweight(end-3:end))<100
+          if sum(changeinweight(end-3:end))<300
               %set to stop ASAP
               want_to_continue=false;
               display('Termination condition reached');
               break;
           end
-      end
-
-      if size(bestviews,2)>1  
-          %Resize bestviews so as to get rid of the first element
-          clear temp_bestviews;
-          for cur_view=2:size(bestviews,2); temp_bestviews(cur_view-1)=bestviews(cur_view);end
-          bestviews=temp_bestviews;
-          order_bestviews(true);
-      else
-          bestviews=[];
-      end
-  end
+      end     
 end
 
-%% Save globals
+%% Plot nearby map
+try aabb = [-2, -2, -2; 2, 2, 2];hMesh = robmap_h.Mesh(aabb);f = hMesh.FaceData;v = hMesh.VertexData;hold on;guiglobal.mesh_h=trisurf(f, v(:,1), v(:,2), v(:,3), 'FaceColor', 'None');end
+try global r; hold on;plotdenso(r,Q);light;end
+
+%% Save important variables
+display('Saving vertices in -2 to 2 cube');
+save(['standalone_explore_pointcloud',date,'-',num2str(rand),'.mat'],'v');
+display('Saving workspace including freespace and classification results');
+save(['standalone_explore_workspace',date,'-',num2str(rand),'.mat'],'workspace');
+
 keyboard
-robmap_h
-workspace
-r
+
+%% Delete all my globals from memory
+%clear the overall seetup globals 
+clear global workspace scan bestviews r densoobj all_views robot_maxreach optimise;
+%clear globals for data from laser
+clear global IntensityData PoseData PointData RangeData 
+% Clear other globals
+clear global classunkn_optimise classifiedplotHa plane alldirectedpoints graf_obs guiglobal
+
+%% Display Useful globals
+display('Useful globals in memory are: platform_h -> EyeInHand.PlatformCommand, robmap_h -> EyeInHand.SurfaceMap).');
+display('Run memmgr to find out all variables in memory');
+display('------END Exploration Hack------------');
 
 
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% SEPARATE FUNCTION FOR SCAN, UPDATE MAP, CLASSIFY
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 %% Do the Scan, classify, update voxels
 function standalone_scanNupdate(newQ)
@@ -202,4 +232,9 @@ organise_data();
 %if we want to do the classify and update voxels then we will do this here
 global PointData IntensityData RangeData;
 [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData); 
+display('Doing classifications voxel update');
 UNclassifiedvoxels=update_ocstatus(ClassifiedData); 
+display('Finshed update');
+
+%% Update scan tries
+scan.tries=scan.tries+1;

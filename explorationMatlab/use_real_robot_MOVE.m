@@ -30,7 +30,10 @@ if nargin==0
     all_steps=[];
     tempQ=rad2deg(Q);   
 else
-    tempQ=all_steps(end,:)*180/pi;   
+  %get rid of crappy floating point unreachable joint commands (the 57 is
+  %approx 180/pi so we don't get yucky floating points from pi 
+  all_steps=round(all_steps/(robot_maxreach.minjointres/57))*(robot_maxreach.minjointres/57);
+  tempQ=rad2deg(all_steps(end,:));
 end
 
 %can use the old way of updating the joint state
@@ -125,12 +128,13 @@ if ~isempty(find(round(tempQ-rob_h2.JointState), 1))
                         end
                     end
                 elseif waitcoutner>150 %about 30 seconds we have reissued the command and still no action
-                    if ~isempty(find(abs(oldQ-Q)>0,1))
+                    if ~isempty(find(abs(oldQ-Q)>robot_maxreach.minjointres,1))
                       keyboard
                       releaserobot(rob_h)
                       error('Problem issuing commands to drive the robot');                    
                     else
-                      display('Although it is taking a long time, we still seem to moving');
+                      display('Although it is taking a long time, we still seem to moving');keyboard
+                      oldQ=Q;
                     end
                 end
                 %display(strcat('Joint state is currently:', num2str(rob_h2.JointState)));  

@@ -58,6 +58,8 @@ if isstruct(handles)==0
     if NOhandleOPTIONS.show_robot; show_robot=true;else show_robot=false;end
     if NOhandleOPTIONS.animate_move; animate_move=true;else animate_move=false;end
     if NOhandleOPTIONS.remv_unkn_in_mv; remv_unkn_in_mv=true;else remv_unkn_in_mv=false;end    
+    %whether to plot paths in water path planner or not
+    if isstruct(guiglobal); plotpath=guiglobal.plotpath; else plotpath=false;end
 else
     scanwhilemove=get(handles.scanwhilemove_checkbox,'value');
 %% Check if we only want to go to the exact destination
@@ -116,30 +118,54 @@ if ~isempty(all_steps) && ...
         %joints but with no middle points
         try [pathfound,all_steps]=pathplanner_new(newQ,false,true,false,0,false);end
         if pathfound==0
-          pathval=pathplanner_water(newQ,guiglobal.plotpath);pathfound=pathval.result;all_steps=pathval.all_steps;
+          pathval=pathplanner_water(newQ,plotpath);pathfound=pathval.result;all_steps=pathval.all_steps;
         end
     end     
 else % no valid path has been passed
     try 
         tic; 
+        %default is that no path is found
+        pathfound=0;
         %try and move directly to the goal with several combinations of
         %joints but with no middle points
         try [pathfound,all_steps]=pathplanner_new(newQ,false,true,false,0,false);end
         if pathfound==0
-          pathval=pathplanner_water(newQ,guiglobal.plotpath);pathfound=pathval.result;all_steps=pathval.all_steps;
+          pathval=pathplanner_water(newQ,plotpath);pathfound=pathval.result;all_steps=pathval.all_steps;
         end
 
         display(['Additional Path Planning time is: ',num2str(toc)]);
     catch
-        keyboard
+        lasterr;display('error in path planner');
+        keyboard; 
     end
 end
 
-%if it is an error returned means that the end is not valid
-if pathfound==-1
+if pathfound==0 || pathfound==-1
+  if pathfound==0 %no path found, update GUI accordingly      
+    if show_robot
+        plotdenso(r, Q, guiglobal.checkFF, guiglobal.plot_ellipse);
+    end
+    try set(handles.dialog_text,'String','End valid but no path found');
+    catch; display('End valid but no path found');end
+    
+    %if it is an error returned means that the end is not valid
+  elseif pathfound==-1     
     try set(handles.dialog_text,'String','Impossible Path - Collision avoided! Ignoring command!');
     catch; display('Impossible Path - Collision avoided! Ignoring command!');end
+  end
+    
+  % VERY DANGEROUS, AS LONG AS YOU ARE SURE YOU CAN MOVE THERE DIRECTLY    
+  userchoice=questdlg('THIS IS VERY DANGEROUS, I CAN MOVE LINEARLY TO THE GOAL, YOU MAY HIT ENVIRONMENT, DO YOU WANT TO CONTINUE','DANGER','Yes','No','ThrowError','ThrowError');
+  if strcmp(userchoice,'Yes');
+    incstoadd=[1:10]'*((newQ-Q)/10);
+    all_steps=[Q;...
+              Q(1)+incstoadd(:,1),Q(2)+incstoadd(:,2),Q(3)+incstoadd(:,3),Q(4)+incstoadd(:,4),Q(5)+incstoadd(:,5),Q(6)+incstoadd(:,6);
+              newQ];
+    %overriding pathfound to make it true
+    pathfound=true
+  elseif strcmp(userchoice,'Error');
     error('It is not safe/possible to move here');
+  end           
 end
 
 %% If there is a path then do the actual move(and plot) else do nothing
@@ -203,11 +229,4 @@ if pathfound && size(all_steps,1)>0
 
     %set overall Q to be the last step in path
     Q=all_steps(end,:);
-else %no path found, update GUI accordingly
-      
-    if show_robot
-        plotdenso(r, Q, guiglobal.checkFF, guiglobal.plot_ellipse);
-    end
-    try set(handles.dialog_text,'String','End valid but no path found');
-    catch; display('End valid but no path found');end
 end

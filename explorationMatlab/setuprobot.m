@@ -58,7 +58,7 @@ robot_maxreach.firstlinkpos=[0,t(2:3,4)'];
 
 %% Tag onto this var the scan/move speed of robot (should put in densoobj)
 
-robot_maxreach.scan_speed=4;
+robot_maxreach.scan_speed=10;
 robot_maxreach.move_speed=60;
 
 %% Used to hold all paths for the robot
@@ -71,4 +71,4 @@ robot_maxreach.pointcarvedout=[];
 robot_maxreach.realMovementAngleInc=5;
 
 %% Min Joint resolution in rads
-robot_maxreach.minjointres=0.01*pi/180;
+robot_maxreach.minjointres=0.02*pi/180;

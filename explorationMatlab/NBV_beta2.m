@@ -283,7 +283,7 @@ for current_view=1:size(pathval,2)
 end
 %if any go into unknown list them but don't ignore
 if size(encroachIntoUnknown,1)>0
-    display(['These bestview (',num2str(encroachIntoUnknown),') may encroch upon some unknown space in the inbetween links of its path, but still including it']);
+    display(['Some bestview may encroch upon some unknown space in the inbetween links of its path, but still including them']);
 end
 
 if valid_count>0
