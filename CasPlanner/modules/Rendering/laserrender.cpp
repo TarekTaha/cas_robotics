@@ -23,8 +23,8 @@
 LaserRender::LaserRender(QGLWidget *in_w): 
   GLRender(in_w),
   maxRange(8),
-  laserId(0),
-  provider(0)
+  laserId(0)
+//  provider(0)
 {
 
 }
@@ -36,15 +36,15 @@ void LaserRender::setId(int id)
     laserId = id;  
 }
 
-void LaserRender::setProvider( LaserProvider *i_prov)
-{
-    provider = i_prov;
-}
+//void LaserRender::setProvider( LaserProvider *i_prov)
+//{
+//    provider = i_prov;
+//}
 
 void LaserRender::updateData()
 {
-      provider->getLaserScan(laserData);
-      w->updateGL(); 
+//	laserData = provider->getLaserScan();
+//      w->updateGL(); 
 }
 
 void LaserRender::setRange(double range)
@@ -75,13 +75,13 @@ void LaserRender::render()
     
     glBegin(GL_TRIANGLE_FAN);
     	glVertex2f(0,0);  
-	    if(laserData.points.size() > 0)
-    	{
-        	for(int i=0; i < laserData.points.size(); i++)
-	        {
-    	        glVertex2f(laserData.points[i].x(), laserData.points[i].y());  
-        	}
-	    }
+//	    if(laserData.points.size() > 0)
+//    	{
+//        	for(int i=0; i < laserData.points.size(); i++)
+//	        {
+//    	        glVertex2f(laserData.points[i].x(), laserData.points[i].y());  
+//        	}
+//	    }
     	glVertex2f(0,0);
     glEnd(); 
     glPopMatrix();

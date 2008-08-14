@@ -92,7 +92,7 @@ void RobotManager::updateMap(Map * mapData)
 	
 }
 
-int RobotManager::readRobotConfigs(ConfigFile *cf,int secId)
+void RobotManager::readRobotConfigs(ConfigFile *cf,int secId)
 {
 	QString logMsg;
 	robot = new Robot();
@@ -103,75 +103,71 @@ int RobotManager::readRobotConfigs(ConfigFile *cf,int secId)
 	logMsg.append(QString("\n\t\t Robot Ip is:\t%1:%2").arg(robot->robotIp).arg(robot->robotPort));
 	logMsg.append("\n*********************************************************************");
 	emit addMsg(0,INFO,logMsg);
-    return 1;
 }       
 
-int RobotManager::readCommManagerConfigs(ConfigFile *cf,int secId)
+void RobotManager::readCommManagerConfigs(ConfigFile *cf,int secId)
 {
-	commManager = new CommManager(robot,this->playGround);
-	commManager->readConfigs(cf,secId);
-    return 1;
+	try
+	{
+		commManager = new CommManager(robot,this->playGround);
+		commManager->readConfigs(cf,secId);
+	}
+	catch (CasPlannerException &e)
+	{
+		cout<< e.what();
+	}
 }
 
-int RobotManager::readNavigatorConfigs(ConfigFile *cf)
+void RobotManager::readNavigatorConfigs(ConfigFile *cf)
 {
 	navigator = new Navigator(playGround,this);
 	navigator->readConfigs(cf);
-	return 1;
 }
 
-int RobotManager::readPlannerConfigs(ConfigFile *cf)
+void RobotManager::readPlannerConfigs(ConfigFile *cf)
 {
 	planningManager = new PlanningManager(this);
 	planningManager->readConfigs(cf);
-    return 1;
 }
 
-int RobotManager::start()
+void RobotManager::start()
 {
 	startComms();
 	startPlanner();
 	startNavigator();
-    return 1;
 }
 
-int RobotManager::stop()
+void RobotManager::stop()
 {
 	if(navigator)
 		navigator->StopNavigating();
 	if(commManager)
 		commManager->stop();
-	return 1;
 }
 
-int RobotManager::startComms()
+void RobotManager::startComms()
 {
     commManager->start();
-	return 1;
 }
 
-int RobotManager::startPlanner()
+void RobotManager::startPlanner()
 {
     planningManager->setupPlanner();
-    return 1;
 }
 
-int RobotManager::startNavigator()
+void RobotManager::startNavigator()
 {
     navigator->start();
-    return 1;
 }
 
-int RobotManager::startIntentionRecognizer()
+void RobotManager::startIntentionRecognizer()
 {
 	intentionRecognizer = new IntentionRecognizer(this->playGround,this);
 	intentionRecognizer->runRecognition = true;
 	intentionRecognizer->start();
-	return 1;
 }
 
-int RobotManager::setupSocialPlanner()
+void RobotManager::setupSocialPlanner()
 {
 	socialPlanner = new SocialPlanner(this->playGround,this);
-    return 1;
 }

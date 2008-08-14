@@ -22,7 +22,7 @@
 #define PATHPLANNER_H_
 
 #include <astar.h>
-#include "interfaceprovider.h"
+//#include "interfaceprovider.h"
 namespace CasPlanner
 {
 class PathPlanner : public Astar

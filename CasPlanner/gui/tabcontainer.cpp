@@ -30,8 +30,8 @@ TabContainer::TabContainer(QWidget *parent,PlayGround *playG)
     navCon = 	new NavContainer(parent,playGround);
    	addTab(navCon, "Navigation Panel");
    	  
-	playGroundTab = new PlayGroundTab(parent,playGround);    
-    addTab(playGroundTab, "PlayGround");
+   	playGroundTab = new PlayGroundTab(parent,playGround);    
+	addTab(playGroundTab, "PlayGround");
     
     planningTab = new PlanningTab(parent,playGround);
     addTab(planningTab, "Path Planning");

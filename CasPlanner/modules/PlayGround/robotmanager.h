@@ -20,45 +20,42 @@
  ***************************************************************************/
 #ifndef ROBOTMANAGER_H
 #define ROBOTMANAGER_H
-
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
 #include "commmanager.h"
-#include <QObject>
 #include "planningmanager.h"
 #include "navigator.h"
 #include "configfile.h"
-#include "robot.h"
 #include "playground.h"
 #include "IntentionRecognizer.h"
 #include "socialplanner.h"
 
 class Navigator;
-class NavContainer;
-class PlanningManager;
-class MapViewer;
-class PlayGround;
 class IntentionRecognizer;
+class CommManager;
+
 
 enum{FORCE_FIELD,VFH,CONFIG_SPACE,NO_AVOID,ND};
 enum{MINIMAL_INPUT,CONTINIOUS_INPUT};
 
-class RobotManager : public QObject//public CommManager, public PlanningManager ,public Navigator
+class RobotManager : public QObject
 {
 	Q_OBJECT
     public:
     	RobotManager();
 		RobotManager(PlayGround *playG,ConfigFile *cf,int secId);
 		~RobotManager();
-		int readRobotConfigs(ConfigFile *cf,int secId);
-		int readCommManagerConfigs(ConfigFile *cf,int secId);
-		int readPlannerConfigs(ConfigFile *cf);
-		int readNavigatorConfigs(ConfigFile *cf);
-		int setupSocialPlanner();
-		int start();
-		int stop();
-		int startPlanner();
-		int startNavigator();
-		int startComms();
-		int startIntentionRecognizer();
+		void readRobotConfigs(ConfigFile *cf,int secId);
+		void readCommManagerConfigs(ConfigFile *cf,int secId);
+		void readPlannerConfigs(ConfigFile *cf);
+		void readNavigatorConfigs(ConfigFile *cf);
+		void setupSocialPlanner();
+		void start();
+		void stop();
+		void startPlanner();
+		void startNavigator();
+		void startComms();
+		void startIntentionRecognizer();
 		PlayGround 		*playGround;
 		CommManager     *commManager;
 		PlanningManager *planningManager;

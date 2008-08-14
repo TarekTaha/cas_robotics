@@ -24,34 +24,47 @@
 #include <QString> 
 #include <QStringList>
 #include <QVector>
+#include <QPointF>
+#include <QThread>
 #include "configfile.h"
-/* 
- * This class specifies the must have operation that every
- * robot should have in their comminication management.
- */
-class Comms: public QObject 
+#include "utils.h"
+#include "map.h"
+#include "interfaceprovider.h"
+#include "casplannerexception.h"
+#include "statusbar.h"
+
+//Observations
+enum {Up,Down,Right,Left,NoInput};
+
+//Actions- Global Directions
+enum {North,South,East,West,Nothing,NE,NW,SE,SW};
+
+//Localizer in Use
+enum {GPS,AMCL,ODOM};
+
+class Comms: public QThread, public LocationProvider, public MapProvider, public SpeedProvider, public LaserProvider 
 {
     Q_OBJECT 
     public:
         virtual int readConfigs(ConfigFile *cf,int secId)=0;
-        virtual int start()=0;
+        virtual void connect2Robot(QString playerHost, int playerPort)=0;
 		virtual QString getName()
 		{
 		    return name; 
 		}
     signals:
         void newData();
-		void statusMsg(int,int,QString); 
+		void addMsg(int,int,QString); 
     public slots:
-    	virtual void stopMotors()=0;
         virtual void stop()=0;
         virtual void stopRelease()=0;
         virtual void disconnect()=0; 
     protected:
 		bool startConnected,activateControl,ptzEnabled,occMapEnabled,localizerEnabled,laserEnabled
-			 ,vfhEnabled,speechEnabled;
+			 ,vfhEnabled,speechEnabled,connected, joyStickEnabled, ctrEnabled, mapEnabled, localized 
+			 ,velControl, stopped;
     	QString name,playerIp; 
-        int playerPort,positionControlId,ptzId,mapId,localizerId,vfhId,speechId,joyStickId;
+        int positionId, playerPort,positionControlId,ptzId,mapId,localizerId,vfhId,speechId,joyStickId;
 };
 
 #endif 

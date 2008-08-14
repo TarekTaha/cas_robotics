@@ -20,47 +20,53 @@
  ***************************************************************************/
 #include "playerinterface.h"
 
-PlayerInterface::PlayerInterface(QString host, int port):
-    playerHost(host),
-    voiceMessage(""),
-    playerPort(port),   
-    pc(0), 
-    devices(NULL),
-    joyStickEnabled(false),
-    ptzEnabled(false),
-    ctrEnabled(false),
-    mapEnabled(false),
-    localizerEnabled(false),
-    localized(false),
-    velControl(true),
-    vfhEnabled(false),
-    stopped(false),
-    speechEnabled(false),
-    connected(false),
-    positionId(0),
-	drive(NULL),
-	vfh(NULL),
-	joyStick(NULL),
-    wheelChairCommander(NULL),
-    map(NULL),
-	ptz(NULL),
-	localizer(NULL),
-	speechP(NULL),
-	speed(0),
-	turnRate(0)
+PlayerInterface::PlayerInterface(QString host, int port)
 {
-	connect(this,SIGNAL(terminated()),this,SLOT(terminateMissions()));
-}
-
-void PlayerInterface::terminateMissions()
-{
-	qDebug("\n\nTERMINTED!!!!\n\n"); fflush(stdout);
+	resetResources();
+    playerHost = host;
+    playerPort = port;   
 }
 
 PlayerInterface::~PlayerInterface()
 {
 	setSpeed(0,0);
 	clearResources();
+}
+
+PlayerInterface::PlayerInterface()
+{
+	resetResources();
+}
+
+void PlayerInterface::resetResources()
+{
+    joyStickEnabled = false;
+    ptzEnabled		= false;
+    ctrEnabled		= false;
+    mapEnabled		= false;
+    localizerEnabled= false;
+    localized		= false;
+    velControl		= true;
+    vfhEnabled		= false;
+    stopped			= false;
+    speechEnabled	= false;
+    connected		= false;
+    positionId		= 0;	
+    playerHost		= "localhost";
+    voiceMessage	= "";
+    playerPort		= 6665;   
+    pc				= 0; 
+    devices			= NULL;
+	drive			= NULL;
+	vfh				= NULL;
+	joyStick		= NULL;
+    wheelChairCommander= NULL;
+    map				= NULL;
+	ptz				= NULL;
+	localizer		= NULL;
+	speechP			= NULL;
+	speed			= 0;
+	turnRate		= 0;
 }
 
 int PlayerInterface::getJoyStickGlobalDir()
@@ -354,7 +360,7 @@ void PlayerInterface::setSpeed(double i_speed, double i_turnRate)
 void PlayerInterface::setSpeechNotification(bool state)
 {
     dataLock.lockForWrite();
-    	speechNotificationEnabled = state;
+    	speechEnabled = state;
     dataLock.unlock(); 
 }
 
@@ -499,13 +505,27 @@ void PlayerInterface::enableLocalizer(int localizerId)
 	this->localizerId= localizerId;
 	localizerEnabled = true;
 }
-
+void PlayerInterface::provideSpeed(double &speed, double &turnRate)
+{
+    dataLock.lockForRead();
+	    speed = getspeed;
+	    turnRate = getturnrate;
+    dataLock.unlock(); 
+}
 double PlayerInterface::getSpeed()
 {
     dataLock.lockForRead();
     double retval = getspeed; 
     dataLock.unlock(); 
     return retval; 
+}
+
+bool PlayerInterface::getSpeechNotificaionStatus()
+{
+    dataLock.lockForRead();
+    double retval = speechEnabled; 
+    dataLock.unlock(); 
+    return retval;	
 }
 
 double PlayerInterface::getTurnRate()
@@ -580,7 +600,7 @@ LaserScan PlayerInterface::getLaserScan()
     return retval;
 }
 
-Map PlayerInterface::provideMap()
+Map PlayerInterface::getMap()
 {
 	Map retval;
     int metadata_offset = (map->GetHeight()-1)*map->GetWidth();
@@ -638,6 +658,19 @@ void PlayerInterface::clearResources()
 		delete pc;	
 }
 
+void PlayerInterface::disconnect()
+{
+	
+}
+void PlayerInterface::connect2Robot(QString host, int port)
+{
+	/*
+	 * Should do something smarter Here
+	 */
+	playerHost = host;
+	playerPort = port;
+	connectDevices();	
+}
 void PlayerInterface::connectDevices()
 {
     if(pc)
@@ -819,9 +852,9 @@ void PlayerInterface::run ()
 						    forwardSpeed = -1*n95Acc.getZ()/70.0*maxSpeed;
 						    steeringTurnRate =  n95Acc.getY()/70.0*maxTurnRate;
 						    
-						    if(abs(n95Acc.getZ())<10 )
+						    if(abs(n95Acc.getZ()) < 10 || abs(n95Acc.getZ()) > 50)
 						    	forwardSpeed =0;
-						    if(abs(n95Acc.getY())<10 )
+						    if(abs(n95Acc.getY()) < 10 || abs(n95Acc.getY()) > 50)
 						    	steeringTurnRate =0;					    
 						    drive->SetSpeed(forwardSpeed,steeringTurnRate);
 		        		}
@@ -866,7 +899,7 @@ void PlayerInterface::run ()
 		    	}
 		    }
 //		    cout<<"\nDebug Msg 3"; fflush(stdout);
-		    if(speechNotificationEnabled)
+		    if(speechEnabled)
 		    {
 		    	if(speechP && !voiceMessage.isEmpty())
 		    	{

@@ -36,6 +36,7 @@
 
 #include "interfaceprovider.h"
 #include "mapskeleton.h"
+#include "map.h"
 
 //using namespace defs;
 /*! Changes different Map representations into an occupancy

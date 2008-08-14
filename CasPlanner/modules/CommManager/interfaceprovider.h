@@ -21,31 +21,37 @@
 #ifndef INTERFACEPROVIDER_H
 #define INTERFACEPROVIDER_H
 
-// playerinterface.h include the boost shit at the beginning
-#include "playerinterface.h"
-#include <QImage>
 #include <QVector> 
 #include <QPointF>
-#include <QBitArray>
-#include <math.h>
-#include <QMetaType>
 #include "utils.h"
 #include "map.h"
+
+/* 
+ * This class specifies the must have operation that every
+ * robot should have in their comminication management.
+ */
 //"Design by contract"
 
-using namespace PlayerCc;
+class LaserScan
+{
+	public:
+		QVector<QPointF> points;
+		Pose laserPose;
+		LaserScan(){};		
+		~LaserScan(){};
+};
 
 class MapProvider
 {
     public:
-        virtual void provideMap(Map&)=0; 
+        virtual Map getMap()=0; 
         virtual ~MapProvider(){};
 };
 
 class LaserProvider 
 {
     public:
-        virtual void getLaserScan(LaserScan&)=0; 
+        virtual LaserScan getLaserScan()=0; 
         virtual ~LaserProvider(){}; 
 };
 
@@ -59,7 +65,7 @@ class SpeedProvider
 class LocationProvider
 {
 	public:
-		virtual void provideLocation(Pose &location)=0;
+		virtual  Pose getLocation()=0;
 		virtual ~LocationProvider(){};
 };
 
