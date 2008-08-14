@@ -231,7 +231,7 @@ void MapViewer::renderLaser()
 			continue;		
 	    LaserScan laserScan ;
 	    //laserScan =playGround->robotPlatforms[i]->commManager->getLaserScan();
-	    playGround->robotPlatforms[i]->commManager->getLaserScan(laserScan);
+	    laserScan = playGround->robotPlatforms[i]->commManager->getLaserScan();
 	    //Pose loc = playGround->robotPlatforms[i]->robot->robotLocation;
 	    Pose loc;
 	    if(robotsLocation.size() > i )

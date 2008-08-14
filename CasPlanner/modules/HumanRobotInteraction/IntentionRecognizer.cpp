@@ -32,6 +32,7 @@ observation(4),
 action(4),
 spatialState(-1),
 oldSpatialState(-2),
+socialPlanner(NULL),
 interactionStrategy(CONTINIOUS_INPUT),
 //interactionStrategy(MINIMAL_INPUT),
 actionAmbiguity(false),
@@ -48,16 +49,16 @@ path(NULL)
 	numDestinations = playGround->mapManager->mapSkeleton.numDestinations;
 	activityLogger = new ActivityLogger;
 
-	socialPlanner = rManager->socialPlanner;
-	socialPlanner->setMap(playGround->mapManager->globalMap);
-	socialPlanner->setMapSkeleton(&playGround->mapManager->mapSkeleton);
-	socialPlanner->buildSpace();
-	socialPlanner->showConnections();
-	socialPlanner->loadActivities("logs/tasks_log.txt");
-	Pose s(playGround->mapManager->mapSkeleton.verticies[37].location.x(),playGround->mapManager->mapSkeleton.verticies[37].location.y(),0);
-	socialPlanner->setStart(s);
-	Pose e(playGround->mapManager->mapSkeleton.verticies[0].location.x(),playGround->mapManager->mapSkeleton.verticies[0].location.y(),DTOR(90));
-	socialPlanner->setEnd(e);
+//	socialPlanner = rManager->socialPlanner;
+//	socialPlanner->setMap(playGround->mapManager->globalMap);
+//	socialPlanner->setMapSkeleton(&playGround->mapManager->mapSkeleton);
+//	socialPlanner->buildSpace();
+//	socialPlanner->showConnections();
+//	socialPlanner->loadActivities("logs/tasks_log.txt");
+//	Pose s(playGround->mapManager->mapSkeleton.verticies[37].location.x(),playGround->mapManager->mapSkeleton.verticies[37].location.y(),0);
+//	socialPlanner->setStart(s);
+//	Pose e(playGround->mapManager->mapSkeleton.verticies[0].location.x(),playGround->mapManager->mapSkeleton.verticies[0].location.y(),DTOR(90));
+//	socialPlanner->setEnd(e);
 //	Node * retval = socialPlanner->astar->startSearch(s,e,METRIC);
 //	if(retval)
 //	{
@@ -304,8 +305,8 @@ void IntentionRecognizer::run()
 		/* 
 		 * Added for testing the Social Planning
 		 */		
-		Pose s(playGround->mapManager->mapSkeleton.verticies[spatialState].location.x(),playGround->mapManager->mapSkeleton.verticies[spatialState].location.y(),0);
-		socialPlanner->setStart(s);		
+//		Pose s(playGround->mapManager->mapSkeleton.verticies[spatialState].location.x(),playGround->mapManager->mapSkeleton.verticies[spatialState].location.y(),0);
+//		socialPlanner->setStart(s);		
 		/*
 		 * End of Addition
 		 */
@@ -460,19 +461,19 @@ void IntentionRecognizer::run()
 			/* 
 			 * Added for testing the Social Planning
 			 */
-			int destination = playGround->mapManager->mapSkeleton.destIndexes[maxDestBeliefIndex];
-			cout<<"Destination is:="<<destination;
-			Pose e(playGround->mapManager->mapSkeleton.verticies[destination].location.x(),playGround->mapManager->mapSkeleton.verticies[destination].location.y(),DTOR(90));
-			socialPlanner->setEnd(e);
-			Node * retval = socialPlanner->astar->startSearch(s,e,METRIC);
-			if(retval)
-			{
-				socialPlanner->printNodeList();
-			}
-			else
-			{
-				qDebug("No path Found");
-			}			
+//			int destination = playGround->mapManager->mapSkeleton.destIndexes[maxDestBeliefIndex];
+//			cout<<"Destination is:="<<destination;
+//			Pose e(playGround->mapManager->mapSkeleton.verticies[destination].location.x(),playGround->mapManager->mapSkeleton.verticies[destination].location.y(),DTOR(90));
+//			socialPlanner->setEnd(e);
+//			Node * retval = socialPlanner->astar->startSearch(s,e,METRIC);
+//			if(retval)
+//			{
+//				socialPlanner->printNodeList();
+//			}
+//			else
+//			{
+//				qDebug("No path Found");
+//			}			
 			/*
 			 * End of Addition
 			 */

@@ -27,7 +27,7 @@
 #include <QtOpenGL>
 #include <GL/glut.h>
 #include <QTime>
-#include "interfaceprovider.h"
+//#include "interfaceprovider.h"
 #include "mapmanager.h"
 #include "playground.h"
 #include "navigationtab.h"

@@ -325,10 +325,11 @@ void RobotConfigPage::updateSelection(int r)
 		qDebug("commManager NULL"); fflush(stdout);
 		return;
 	} 
-	QVector <DeviceType> * d = playGround->robotPlatforms[r]->commManager->getDevices();
-	interfaces->createIcons(d);
-	//robotInterfaces->createIcons(d);
-	//interfacesList->createIcons(d);
+//	QVector <DeviceType> * d = playGround->robotPlatforms[r]->commManager->getDevices();
+//	if(d)
+//		interfaces->createIcons(d);
+//	robotInterfaces->createIcons(d);
+//	interfacesList->createIcons(d);
 }
 
 MapConfigPage::MapConfigPage(QWidget * parent,PlayGround *playG): 

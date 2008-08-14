@@ -22,7 +22,6 @@
 #define PLAYERINTERFACE_H
 #include <libplayerc++/playerc++.h>
 #include <libplayercore/player.h>
-#include <libplayerc/playerc.h>
 
 #include <QThread> 
 #include <QReadWriteLock>
@@ -30,10 +29,10 @@
 #include <iostream>
 #include <QDataStream>
 
+#include "comms.h"
 #include "utils.h"
 #include "map.h"
 #include "timer.h"
-#include "statusbar.h"
 #include "wheelchairproxy.h"
 #include "accelerometer.h"
 
@@ -42,12 +41,6 @@
 using namespace PlayerCc;
 using namespace std;
 
-//Observations
-enum {Up,Down,Right,Left,NoInput};
-//Actions- Global Directions
-enum {North,South,East,West,Nothing,NE,NW,SE,SW};
-//Localizer in Use
-enum {GPS,AMCL,ODOM};
 class DeviceType
 {
 	public:
@@ -104,22 +97,17 @@ class Laser
 		~Laser(){};
 };
 
-class LaserScan
-{
-	public:
-		QVector<QPointF> points;
-		Pose laserPose;
-		LaserScan(){};		
-		~LaserScan(){};
-};
 
-class PlayerInterface: public QThread 
+
+class PlayerInterface: public Comms
 {
 Q_OBJECT    
     public:
         PlayerInterface(QString playerHost, int playerPort);
+        PlayerInterface();
         ~PlayerInterface();
         void stop();
+        void connect2Robot(QString host, int port);
         void stopRelease();        
         void run();
         void checkForWheelChair();
@@ -133,7 +121,7 @@ Q_OBJECT
 		void enableLocalizer(int localizerId);
         LaserScan getLaserScan();
         void provideLocation(Pose location);
-	    Map provideMap(); 
+	    Map getMap(); 
 		void setPtz(double pan, double tilt);
         double getSpeed(); 
         double getTurnRate();
@@ -143,28 +131,30 @@ Q_OBJECT
         Pose getAmclLocation();
         Pose getOdomLocation();
         QVector<DeviceType> * getDevices();
+        void resetResources();        
         void gotoGoal(Pose);
         void vfhGoto(Pose);
         void setSpeed(double speed); 
         void setTurnRate(double turnRate); 
         void setSpeed(double speed, double turnRate);
-        void setSpeechNotification(bool state);        
+        void setSpeechNotification(bool state);   
+        bool getSpeechNotificaionStatus();
 		void setOdometry(Pose odom);
 		void speechSay(QString voiceM);
         void setLocation(Pose location);
+        void provideSpeed(double &speed, double &turnRate);
         void connectDevices();
         void clearResources();
         void setCtrEnabled(bool);
+        void disconnect();
 		int  getLocalizerType();        
         int  getJoyStickGlobalDir();
         int  getJoyStickDir();
 		Pose localizeToPosition(Pose localizerWayPoint);    
-    public slots:
-     	void terminateMissions();
     signals:
         void newData(); 
         void addMsg(int,int,QString);
-    private:
+    protected:
         QString playerHost; 
         QString logMsg;
         QString voiceMessage;
@@ -173,8 +163,6 @@ Q_OBJECT
         PlayerClient *pc;
        	playerc_client_t *client;
        	QVector <DeviceType> *devices;
-        bool joyStickEnabled,ptzEnabled,ctrEnabled,mapEnabled,localizerEnabled,localized, velControl,vfhEnabled,stopped,speechNotificationEnabled,speechEnabled,connected;
-        int positionId,ptzId,mapId,localizerId,vfhId,joyStickId,speechId;
         QVector <Laser> lasers;
         Position2dProxy *drive, *vfh, *joyStick;
         WheelChairProxy *wheelChairCommander;

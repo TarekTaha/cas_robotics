@@ -46,7 +46,7 @@
 #include "playground.h"
 #include "voronoipathplanner.h"
 #include "sensors.h"
-#include "interfaceprovider.h"
+//#include "interfaceprovider.h"
 #include "laserrender.h"
 #include "speedrender.h"
 #include "ogrender.h"

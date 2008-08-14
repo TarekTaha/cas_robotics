@@ -20,65 +20,29 @@
  ***************************************************************************/
 #ifndef COMMMANAGER_H
 #define COMMMANAGER_H
+
+#include <libplayerc++/playerc++.h>
+#include <libplayercore/player.h>
+
+#include <QObject>
+
 #include "playerinterface.h"
-
-class CommManager;
-class PlayerInterface;
-class Comms;
-class PlayGround;
-
-#include "comms.h"
-#include "interfaceprovider.h"
 #include "robot.h"
 #include "statusbar.h"
 #include "playground.h"
 
-class CommManager: public Comms, public MapProvider, public LaserProvider, public SpeedProvider ,public LocationProvider
+class PlayGround;
+
+class CommManager: public PlayerInterface
 {
     Q_OBJECT
     public:
         CommManager(Robot *,PlayGround * playG);
+        CommManager();
         ~CommManager(); 
-        virtual int readConfigs(ConfigFile *cf,int secId);
-        virtual int start(); 
-        virtual double getSpeed(); 
-        virtual double getTurnRate();
-        virtual int    getJoyStickGlobalDir();
-        virtual int    getLocalizerType();
-        virtual int    getJoyStickDir(); 
-        virtual Pose   getLocation();               
-        virtual Pose   getAmclLocation();
-        virtual Pose   getOdomLocation();
-        virtual bool   getSpeechNotificaionStatus();
-        virtual void   gotoGoal(Pose);
-        virtual void   vfhGoto(Pose);
-        virtual void   setSpeed(double speed);
-        virtual void   setPtz(double pan, double tilt);
-        virtual void   setTurnRate(double turnRate);
-        virtual void   speechSay(QString voiceM);
-        virtual void   setSpeechNotification(bool state);
-        virtual void   setOdometry(Pose odom);
-        virtual void   getLaserScan(LaserScan &scan);
-        virtual void   provideMap(Map &map); 
-	    virtual void   provideSpeed(double &speed, double &turnRate);
-	    virtual void   provideLocation(Pose & location);
-	    virtual bool   isConnected();
-	    virtual bool   getLocalized();
-		virtual QVector<DeviceType> * getDevices();
-    public slots: 
-        virtual void setSpeed(double speed, double turnRate); 
-        virtual void setLocation(Pose location);
-        virtual void stop();
-    	virtual void stopMotors();        
-        virtual void stopRelease();        
-        virtual void disconnect();         
-    signals:
-	    void dataUpdated();
-	    void addMsg(int,int, QString);
+        int readConfigs(ConfigFile *cf,int secId);
+        int initialize(); 
     protected:
-        // Player stuff 
-        PlayerInterface *player;
-       	QVector <Laser> lasers;
         Robot * robot;
        	PlayGround *playGround;
 };

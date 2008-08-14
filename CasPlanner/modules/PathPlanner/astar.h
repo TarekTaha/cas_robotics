@@ -36,9 +36,10 @@
 #include "utils.h"
 #include "robot.h"
 #include "searchspace.h"
-#include "interfaceprovider.h"
+//#include "interfaceprovider.h"
 #include "heuristic.h"
 #include "casplannerexception.h"
+#include "map.h"
 
 enum{METRIC,PIXEL};
 namespace CasPlanner
