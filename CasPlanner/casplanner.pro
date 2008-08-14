@@ -96,7 +96,8 @@ HEADERS += modules/CommManager/commmanager.h \
     modules/CommManager/accelerometer.h \
     modules/PathPlanner/socialplanner.h \
     modules/ExceptionHandling/casplannerexception.h \
-    modules/PathPlanner/heuristic.h
+    modules/PathPlanner/heuristic.h \
+    modules/Parser/xmlparser.h
 SOURCES += modules/CommManager/commmanager.cpp \
     modules/CommonTools/bandmat.cpp \
     modules/CommonTools/cholesky.cpp \
@@ -191,7 +192,8 @@ SOURCES += modules/CommManager/commmanager.cpp \
     modules/CommManager/accelerometer.cpp \
     modules/PathPlanner/socialplanner.cpp \
     modules/ExceptionHandling/casplannerexception.cpp \
-    modules/PathPlanner/heuristic.cpp
+    modules/PathPlanner/heuristic.cpp \
+    modules/Parser/xmlparser.cpp
 INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     /usr/local/Trolltech/Qt-4.2.2/include/QtGui \
     /usr/local/high/include \
@@ -224,19 +226,18 @@ INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     modules/PomdpCore \
     modules/HumanRobotInteraction \
     /usr/include/freetype2
-FORMS += gui/hritab.ui
+FORMS += gui/hritab.ui \
+    gui/configparsertab.ui
 RESOURCES = resources/icons.qrc
-QT += opengl
+QT += opengl \
+    xml
 QMAKE_CFLAGS_RELEASE += -g \
-#    -O3 \
-    -O0 \
-    -o
+    \ \ # -O3 \
+    -O0-o
 QMAKE_CXXFLAGS_RELEASE += -g \
-#    -O3 \
-    -O0 \
-    -o \
-    -ffast-math \
-    -march=pentium-m \
+    \ \ # -O3 \
+    -O0-o-ffast-math
+-march = pentium-m \
     -msse2 \
     -mfpmath=sse \
     $$system(pkg-config --cflags gthread-2.0 playerc++ playercore)

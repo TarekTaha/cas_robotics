@@ -20,6 +20,7 @@ SET( CasPlanner_MOC_HDRS
     ./modules/Rendering/ogrender.h 
     ./modules/CommManager/interfaceprovider.h
     ./modules/CommManager/playerinterface.h 
+    ./modules/Parser/xmlparser.h
     ./modules/PathPlanner/planningmanager.h 
     ./modules/PlayGround/playground.h 
     ./modules/PlayGround/robotmanager.h 
@@ -71,6 +72,7 @@ SET( CasPlanner_SRCS
     ./modules/Navigator/navigator.cpp 
     ./modules/Rendering/ogrender.cpp 
     ./modules/CommManager/playerinterface.cpp 
+    ./modules/Parser/xmlparser.cpp
     ./modules/PathPlanner/planningmanager.cpp 
     ./modules/PlayGround/playground.cpp 
     ./modules/PlayGround/robotmanager.cpp 
@@ -127,7 +129,10 @@ SET( CasPlanner_SRCS
 )
 
 # UI .ui files
-SET(CasPlanner_UIS gui/hritab.ui )
+SET(CasPlanner_UIS 
+    gui/hritab.ui 
+    gui/configparsertab.ui
+    )
 # Resources files
 SET(CasPlanner_RCS resources/icons.qrc)
 

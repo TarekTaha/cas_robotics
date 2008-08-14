@@ -18,44 +18,22 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
-#include <boost/signal.hpp>
-#include <boost/bind.hpp>
-#include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
+#ifndef CONFIGPARSERTAB_H
+#define CONFIGPARSERTAB_H
 
-#include <QMainWindow>
+#include <QtGui/QWidget>
+#include "ui_configparsertab.h"
 
-#include "playground.h"
-#include "statusbar.h"
-#include "tabcontainer.h"
-class MainWindow : public QMainWindow 
+class ConfigParserTab : public QWidget
 {
-Q_OBJECT
-public:
-	MainWindow(QWidget *parent=0); 
-	MainWindow(QStringList strings, QWidget *parent=0); 
-	~MainWindow();
-	void createMenus();
-	void createActions();
-    public slots:
-		void logData();
-		void commStart(); 
-		void captureScreenShot();
-private: 
-    TabContainer * tabcontainer;
-	PlayGround   * playGround;
-	int logCount,imageCounter;
-	QPixmap originalPixmap; 
-	QString fileName;
-    QMenu 	*fileMenu;
-    QMenu 	*helpMenu;
-    QAction *openAct;
-    QAction *saveAsAct;
-    QAction *exitAct;
-    QAction *aboutAct;
-    QAction *aboutQtAct;	
-};
-#endif
+    Q_OBJECT
 
+public:
+    ConfigParserTab(QWidget *parent = 0);
+    ~ConfigParserTab();
+
+private:
+    Ui::ConfigParserTabClass ui;
+};
+
+#endif // CONFIGPARSERTAB_H
