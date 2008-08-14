@@ -286,13 +286,14 @@ elseif current_test_case>1 && want_to_continue
 %             profile clear; profile on;
             NBV_beta2();
 %             profile off; profile viewer;
+current_bestview=stepcount-1;
 
-            current_bestview=1;
-            max_bestviews_togothrough=optimise.valid_max*1/4;
-            global bestviews;        
-            while current_bestview<max_bestviews_togothrough && size(bestviews,2)>=1 && ~get(handles.stopflag_checkbox,'Value')
-                %size(bestviews,2)>optimise.valid_max*3/4
-                current_bestview=current_bestview+1;
+%             current_bestview=1;
+%             max_bestviews_togothrough=optimise.valid_max*1/4;
+%             global bestviews;        
+%             while current_bestview<max_bestviews_togothrough && size(bestviews,2)>=1 && ~get(handles.stopflag_checkbox,'Value')
+%                 %size(bestviews,2)>optimise.valid_max*3/4
+%                 current_bestview=current_bestview+1;
 
                 useNBV=true;
     %             want_to_continue=true;
@@ -361,23 +362,29 @@ elseif current_test_case>1 && want_to_continue
                     end
                 end
                     
-                if size(bestviews,2)>1  
-                    %Resize bestviews so as to get rid of the first element
-                    clear temp_bestviews;
-                    for cur_view=2:size(bestviews,2); temp_bestviews(cur_view-1)=bestviews(cur_view);end
-                        bestviews=temp_bestviews;
-                        %if we actually found a place to move and explore
-                        %from record new data
-                        if validpathfound==true
-                            state_data=collectdata(state_data); 
-                        end
-
-                        redo_nbv_vol=true;
-                        order_bestviews(redo_nbv_vol);
-                else
-                    bestviews=[];
-                end
-            end
+                %this is suboptimal if we have lots of bestviews since we
+                %are going back through all of them and doing nbv_volume
+                %which is ray tracing, but out of the sample we don't have
+                %necesarialy the best possible views and the end of the 10
+                %seconds we still don't have paths whereas the other gives paths    
+                
+%                 if size(bestviews,2)>1  
+%                     %Resize bestviews so as to get rid of the first element
+%                     clear temp_bestviews;
+%                     for cur_view=2:size(bestviews,2); temp_bestviews(cur_view-1)=bestviews(cur_view);end
+%                         bestviews=temp_bestviews;
+%                         %if we actually found a place to move and explore
+%                         %from record new data
+%                         if validpathfound==true
+%                             state_data=collectdata(state_data); 
+%                         end
+% 
+%                         redo_nbv_vol=true;
+%                         order_bestviews(redo_nbv_vol);
+%                 else
+%                     bestviews=[];
+%                 end
+%             end
         end
     end
 end

@@ -98,7 +98,7 @@ if ~isempty(RangeData)
         error('There is no data with range greater than 20');
     end
     % Save this scan data as a block
-    workspace.ALLlastscandataInWkspace=ice_cream_bounds;    
+%     workspace.ALLlastscandataInWkspace=ice_cream_bounds;    
 else
     error('There is some problem with the laser, no data has been returned');
 end
