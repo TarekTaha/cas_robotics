@@ -32,6 +32,8 @@ QMainWindow(parent)
 MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     QMainWindow(parent), logCount(0)
 {
+    createActions();
+    createMenus();	
     // Create the PlayGround where all the RobotManagers will run
     playGround = new PlayGround (configFiles,statusBar());    
         
@@ -96,6 +98,41 @@ void MainWindow::captureScreenShot()
 
 void MainWindow::commStart()
 {
+}
+
+void MainWindow::createActions()
+{
+    openAct = new QAction(tr("&Open..."), this);
+    openAct->setShortcut(tr("Ctrl+O"));
+    connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+
+    saveAsAct = new QAction(tr("&Save As..."), this);
+    saveAsAct->setShortcut(tr("Ctrl+S"));
+    connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
+
+    exitAct = new QAction(tr("E&xit"), this);
+    exitAct->setShortcut(tr("Ctrl+Q"));
+    connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
+
+    aboutAct = new QAction(tr("&About"), this);
+    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+
+    aboutQtAct = new QAction(tr("About &Qt"), this);
+    connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+}
+
+void MainWindow::createMenus()
+{
+    fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(openAct);
+    fileMenu->addAction(saveAsAct);
+    fileMenu->addAction(exitAct);
+
+    menuBar()->addSeparator();
+
+    helpMenu = menuBar()->addMenu(tr("&Help"));
+    helpMenu->addAction(aboutAct);
+    helpMenu->addAction(aboutQtAct);
 }
 
 MainWindow::~MainWindow()

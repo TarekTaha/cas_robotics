@@ -18,44 +18,28 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
-#include <boost/signal.hpp>
-#include <boost/bind.hpp>
-#include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
+#ifndef XMLPARSER_H_
+#define XMLPARSER_H_
 
-#include <QMainWindow>
+#include<QObject>
+#include<QFile> 
+#include<QString>
+#include<QDomDocument>
 
-#include "playground.h"
-#include "statusbar.h"
-#include "tabcontainer.h"
-class MainWindow : public QMainWindow 
+class XmlParser: public QObject
 {
-Q_OBJECT
-public:
-	MainWindow(QWidget *parent=0); 
-	MainWindow(QStringList strings, QWidget *parent=0); 
-	~MainWindow();
-	void createMenus();
-	void createActions();
-    public slots:
-		void logData();
-		void commStart(); 
-		void captureScreenShot();
-private: 
-    TabContainer * tabcontainer;
-	PlayGround   * playGround;
-	int logCount,imageCounter;
-	QPixmap originalPixmap; 
-	QString fileName;
-    QMenu 	*fileMenu;
-    QMenu 	*helpMenu;
-    QAction *openAct;
-    QAction *saveAsAct;
-    QAction *exitAct;
-    QAction *aboutAct;
-    QAction *aboutQtAct;	
+	Q_OBJECT 
+	public:
+		XmlParser();
+		XmlParser(QFile *file);	
+		XmlParser(QString fileName);
+		virtual ~XmlParser();
+	    bool read(QIODevice *device);
+	    bool write(QIODevice *device);	
+	private:
+	    QDomDocument configFileDom;
+	    QFile *configFile;
+	    QString configFileName;
 };
-#endif
 
+#endif /*XMLPARSER_H_*/
