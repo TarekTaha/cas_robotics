@@ -18,7 +18,6 @@ SET( CasPlanner_MOC_HDRS
     ./modules/Rendering/mapviewer.h 
     ./modules/Navigator/navigator.h 
     ./modules/Rendering/ogrender.h 
-    ./modules/CommManager/interfaceprovider.h
     ./modules/CommManager/playerinterface.h 
     ./modules/Parser/xmlparser.h
     ./modules/PathPlanner/planningmanager.h 
@@ -159,7 +158,12 @@ ADD_DEFINITIONS( -Wall )
 
 ADD_DEFINITIONS( ${QT_DEFINITIONS} )
 FIND_PACKAGE( Qt4 REQUIRED )
-SET(QT_MT_REQUIRED true)
+
+SET(QT_USE_QTGUI TRUE )
+SET(QT_USE_QTOPENGL TRUE )
+SET(QT_USE_XML TRUE )
+SET(QT_USE_QTXMLPATTERNS TRUE)
+
 INCLUDE( ${QT_USE_FILE} )
 
 QT4_ADD_RESOURCES( CasPlanner_RC_SRCS ${CasPlanner_RCS} )
@@ -170,8 +174,6 @@ QT4_WRAP_UI( CasPlanner_UI_HDRS ${CasPlanner_UIS} )
 # and finally this will run moc:
 QT4_WRAP_CPP( CasPlanner_MOC_SRCS ${CasPlanner_MOC_HDRS} )
 
-SET(QT_USE_QTGUI TRUE )
-SET(QT_USE_QTOPENGL TRUE )
 
 ##################
 #  OPENGL STUFF  #
@@ -193,17 +195,14 @@ ENDIF(PKG_CONFIG_FOUND)
 IF(PLAYER_FOUND)
 	#do something ?
 ELSE(PLAYER_FOUND)
-	MESSAGE("Cannot find playerstage version 2.0 or above")
+	MESSAGE("Cannot find playerstage version 2.1 or above")
 ENDIF(PLAYER_FOUND)
   
 # we need this to be able to include headers produced by uic in our code
 # (CMAKE_BINARY_DIR holds a path to the build directory, while INCLUDE_DIRECTORIES() works just like INCLUDEPATH from qmake)
 INCLUDE_DIRECTORIES( 
+    ${QT_INCLUDES} 
 	${OPENGL_INCLUDE_DIR}
-	${QT_INCLUDES}
-	${QT_INCLUDE_DIR} 
-	${QT_QTGUI_INCLUDE_DIR}
-	${QT_QTCORE_INCLUDE_DIR}
     ${CMAKE_BINARY_DIR}
 	${PLAYER_INCLUDE_DIRS}    
     ./modules/PathPlanner 
@@ -235,7 +234,8 @@ ADD_EXECUTABLE( ../CasPlanner ${CasPlanner_SRCS} ${CasPlanner_MOC_SRCS} ${CasPla
 TARGET_LINK_LIBRARIES( ../CasPlanner 
     ${QT_QTGUI_LIBRARY} 
     ${QT_QTCORE_LIBRARY} 
-    ${QT_QTOPENGL_LIBRARY}	
+    ${QT_QTOPENGL_LIBRARY}
+    ${QT_QTXML_LIBRARY}	
 	${QT_LIBRARIES}
 	${PLAYER_LIBRARIES}
 	 freetype

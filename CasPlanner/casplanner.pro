@@ -227,26 +227,20 @@ INCLUDEPATH += /usr/local/Trolltech/Qt-4.2.2/include/QtCore \
     modules/HumanRobotInteraction \
     /usr/include/freetype2
 FORMS += gui/hritab.ui \
-    gui/configparsertab.ui
+		 gui/configparsertab.ui
+		 
 RESOURCES = resources/icons.qrc
 QT += opengl \
     xml
-QMAKE_CFLAGS_RELEASE += -g \
-    \ \ # -O3 \
-    -O0-o
-QMAKE_CXXFLAGS_RELEASE += -g \
-    \ \ # -O3 \
-    -O0-o-ffast-math
--march = pentium-m \
-    -msse2 \
-    -mfpmath=sse \
-    $$system(pkg-config --cflags gthread-2.0 playerc++ playercore)
+    
+QMAKE_CFLAGS_RELEASE   += -g -O0 -o
+QMAKE_CXXFLAGS_RELEASE += -g -O0 -o -ffast-math -march=pentium-m -msse2 -mfpmath=sse \
+						   $$system(pkg-config --cflags gthread-2.0 playerc++ playercore)
 
-# QMAKE_CFLAGS_RELEASE+= -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
-# QMAKE_LFLAGS_RELEASE += -g -O3 -ffast-math -march=pentium-m -msse2 -mfpmath=sse
 LIBS += $$system(pkg-config --cflags --libs gthread-2.0 playerc++ playercore) \
     -lfreetype \
     -lbluetooth
+    
 MOC_DIR = .tmp
 OBJECTS_DIR = .tmp
 RCC_DIR = .tmp

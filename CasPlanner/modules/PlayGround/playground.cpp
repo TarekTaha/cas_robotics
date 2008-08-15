@@ -38,6 +38,12 @@ activeRobot(NULL)
     for(int j=0; j < configFiles.size(); j++)
     {
 		ConfigFile *cf = new ConfigFile("localhost",6665);
+		XmlParser  *xmlParser = NULL;
+		if(configFiles[j].contains(".xml", Qt::CaseInsensitive))
+		{
+			xmlParser = new XmlParser(configFiles[j]);
+			xmlParser->read();
+		}
 		int numSections; 
 		cf->Load(configFiles[j].toLocal8Bit());
 		numSections = cf->GetSectionCount(); 
@@ -64,8 +70,10 @@ activeRobot(NULL)
 		    	RobotManager *rbm = new RobotManager(this,cf,i);
 		    	robotPlatforms.push_back(rbm);
 		    }
-		}	
+		}
 		delete cf;
+		if(xmlParser)
+			delete xmlParser;
     }
 }
 

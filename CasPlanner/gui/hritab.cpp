@@ -46,12 +46,14 @@ void HriTab::toggleStrategy(bool)
 	else
 	{
 		if(playGround)
+		{
 			if(playGround->robotPlatforms[0]->intentionRecognizer)
 			{
 				playGround->robotPlatforms[0]->intentionRecognizer->setInteractionStrategy(MINIMAL_INPUT);
 			}
 			else
 				printf("\n Start Intention Recognizer First !!!");
+		}
 	}
 }
 
