@@ -30,6 +30,7 @@
 #include "configfile.h"
 #include "statusbar.h"
 #include "socialplanner.h"
+#include "xmlparser.h"
 
 class Navigator;
 class NavContainer;

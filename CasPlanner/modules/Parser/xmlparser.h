@@ -21,10 +21,14 @@
 #ifndef XMLPARSER_H_
 #define XMLPARSER_H_
 
-#include<QObject>
-#include<QFile> 
-#include<QString>
-#include<QDomDocument>
+#include <QObject>
+#include <QFile> 
+#include <QString>
+#include <QDomDocument>
+#include <iostream>
+#include <QDomNamedNodeMap>
+#include <QDomNode>
+#include <QDomAttr>
 
 class XmlParser: public QObject
 {
@@ -35,6 +39,7 @@ class XmlParser: public QObject
 		XmlParser(QString fileName);
 		virtual ~XmlParser();
 	    bool read(QIODevice *device);
+	    void read();
 	    bool write(QIODevice *device);	
 	private:
 	    QDomDocument configFileDom;
