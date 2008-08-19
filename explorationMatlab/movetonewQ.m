@@ -49,6 +49,8 @@ if nargin<4
     end
 end
 
+if isstruct(guiglobal); plotpath=guiglobal.plotpath; else plotpath=false;end
+
 %if we don't have any handles
 if isstruct(handles)==0
     display('Handles not passed in so not updating the GUI');
@@ -58,8 +60,7 @@ if isstruct(handles)==0
     if NOhandleOPTIONS.show_robot; show_robot=true;else show_robot=false;end
     if NOhandleOPTIONS.animate_move; animate_move=true;else animate_move=false;end
     if NOhandleOPTIONS.remv_unkn_in_mv; remv_unkn_in_mv=true;else remv_unkn_in_mv=false;end    
-    %whether to plot paths in water path planner or not
-    if isstruct(guiglobal); plotpath=guiglobal.plotpath; else plotpath=false;end
+    %whether to plot paths in water path planner or not    
 else
     scanwhilemove=get(handles.scanwhilemove_checkbox,'value');
 %% Check if we only want to go to the exact destination

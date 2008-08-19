@@ -104,6 +104,13 @@ for cur_con=validconfigs'
     points=all_views.expectedaddinfo(cur_con).vals;
     %nothing new found at this pose
     if size(points,1)==0
+      bestviews(cur_con).tr=zeros(4);
+      bestviews(cur_con).chosenview=zeros([1,3]);
+      bestviews(cur_con).scanorigin=zeros([1,3]);
+      bestviews(cur_con).Q=zeros([1,6]);
+      bestviews(cur_con).expectedaddinfo=[];
+      bestviews(cur_con).addinfo=0;
+      bestviews(cur_con).all_views_val=0;
       continue;
     end
 
@@ -145,6 +152,13 @@ for cur_con=validconfigs'
 
     %nothing new found at this pose
     if size(points,1)==0
+      bestviews(cur_con).tr=zeros(4);
+      bestviews(cur_con).chosenview=zeros([1,3]);
+      bestviews(cur_con).scanorigin=zeros([1,3]);
+      bestviews(cur_con).Q=zeros([1,6]);
+      bestviews(cur_con).expectedaddinfo=[];
+      bestviews(cur_con).addinfo=0;
+      bestviews(cur_con).all_views_val=0;
       continue;
     end
 %% Go through each obstacle where the home point is within the scan
@@ -234,7 +248,25 @@ for cur_con=validconfigs'
     BVcount=BVcount+1;
 end
 
-
+%% Remove bestviews where there is insignificant gain
+display('Removing invalid bestviews')
+tic
+invalid_views=[];
+for cur_view=1:size(bestviews,2)
+  if isempty(bestviews(cur_view).expectedaddinfo)
+    invalid_views=[invalid_views;cur_view];
+  end
+end
+if size(invalid_views,1)>0
+  current_count=1;
+  for cur_view=size(bestviews,2)
+    if isempty(find(invalid_views==cur_view,1))
+      temp_bestviews(current_count)=bestviews(cur_view);
+      current_count=current_count+1;
+    end
+  end
+end
+toc
 
 %% Check if any bestviews were found, if so order them
 if isempty(bestviews)
