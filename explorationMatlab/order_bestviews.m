@@ -47,14 +47,23 @@ overallweight=zeros([1,size(bestviews,2)]);
 jointmoveweight=zeros([1,size(bestviews,2)]);addinfoweight=zeros([1,size(bestviews,2)]);
 % Collect all weights so they can be sorted
 for cur_view=1:size(bestviews,2)
-    calculate_NBV_overallweight(cur_view);
-    overallweight(cur_view) = bestviews(cur_view).overall;
-    jointmoveweight(cur_view) = bestviews(cur_view).jointmoveweight;
-    addinfoweight(cur_view) = bestviews(cur_view).addinfoweight;
+    try 
+      calculate_NBV_overallweight(cur_view);
+      overallweight(cur_view) = bestviews(cur_view).overall;
+      jointmoveweight(cur_view) = bestviews(cur_view).jointmoveweight;
+      addinfoweight(cur_view) = bestviews(cur_view).addinfoweight;
+    catch
+      display('There was an error in calculate_NBV_overallweight, setting all data in this bestview to zero and carrying on');
+      overallweight(cur_view)=0;
+      jointmoveweight(cur_view) =0;
+      addinfoweight(cur_view)=0;
+    end
+      
 end
 
 %% Sort the remaining bestviews
 [vals,index]=sort(overallweight,'descend');
+
 
 %% Remake the bestviews global variable
 clear temp_bestviews;
