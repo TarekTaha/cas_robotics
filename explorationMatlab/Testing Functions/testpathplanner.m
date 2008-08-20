@@ -15,7 +15,7 @@ qlimits=r.qlim;
 if nargin<8
     groupplan=false;
     if nargin<7
-        waterplanner=false;
+        waterplanner=true;
         if nargin<6
             useDijkstra=false;
             if nargin<5
@@ -135,7 +135,10 @@ else
         Q=startQs(i,:);
         newQ=endQs(i,:);
         if waterplanner==true
+          profile clear; profile on
             path_val=pathplanner_water(newQ,false);
+            profile off; profile viewer
+            keyboard
             temppathfound=path_val(1).result;
             all_steps=path_val(1).all_steps;
         else

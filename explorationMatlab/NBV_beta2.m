@@ -265,7 +265,9 @@ if size(invalid_views,1)>0
       current_count=current_count+1;
     end
   end
+  bestviews=temp_bestviews;
 end
+
 toc
 
 %% Check if any bestviews were found, if so order them
