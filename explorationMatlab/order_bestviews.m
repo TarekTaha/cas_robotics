@@ -55,7 +55,7 @@ for cur_view=1:size(bestviews,2)
     catch
       display('There was an error in calculate_NBV_overallweight, setting all data in this bestview to zero and carrying on');
       overallweight(cur_view)=0;
-      jointmoveweight(cur_view) =0;
+      jointmoveweight(cur_view)=0;
       addinfoweight(cur_view)=0;
     end
       

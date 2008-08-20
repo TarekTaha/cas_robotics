@@ -110,49 +110,56 @@ end
 % go through and get NBV and then use them to explore
 for stepcount=stepcount+1:10;
 %% determine NBV    
-  NBV_beta2();
+  try 
+    NBV_beta2();
+  catch
+    lasterr;
+    want_to_continue=false;
+    display('finishing exploration, and displaying results')
+    break;
+  end
   %   %this needs to be here since it is cleared in NBV_beta2()
   global bestviews;        
-      while want_to_continue; 
-          try %if we have already planned a path, use this one otherwise try and get another, otherwise go to next possible one
-              if movetonewQ([],rad2deg(bestviews(1).Q),bestviews(1).all_steps,NOhandleOPTIONS);
+  while want_to_continue; 
+      try %if we have already planned a path, use this one otherwise try and get another, otherwise go to next possible one
+          if movetonewQ([],rad2deg(bestviews(1).Q),bestviews(1).all_steps,NOhandleOPTIONS);
+              scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];
+              standalone_scanNupdate(bestviews(1).Q);
+              validpathfound=true;
+              break;
+          else %can't get to the desired best view
+              display('User has control');
+              keyboard
+
+              %tac on the actual position here just in case it isn't exactly where it was supposed to finish
+              robot_maxreach.path(end).all_steps(end+1,:)=Q;
+              %move back along the path taken to get here
+              if ~movetonewQ([],rad2deg(robot_maxreach.path(end).all_steps(1,:)),robot_maxreach.path(end).all_steps(end:-1:1,:),NOhandleOPTIONS);
+                  display('some major problem if we cant follow the same path back');
+                  keyboard                                
+              end
+              %try once again to move to the actual desired newQ for exploration
+              if movetonewQ([],rad2deg(bestviews(1).Q),bestviews(1).all_steps,radNOhandleOPTIONS);
                   scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];
                   standalone_scanNupdate(bestviews(1).Q);
                   validpathfound=true;
                   break;
-              else %can't get to the desired best view
-                  display('User has control');
-                  keyboard
-
-                  %tac on the actual position here just in case it isn't exactly where it was supposed to finish
-                  robot_maxreach.path(end).all_steps(end+1,:)=Q;
-                  %move back along the path taken to get here
-                  if ~movetonewQ([],rad2deg(robot_maxreach.path(end).all_steps(1,:)),robot_maxreach.path(end).all_steps(end:-1:1,:),NOhandleOPTIONS);
-                      display('some major problem if we cant follow the same path back');
-                      keyboard                                
-                  end
-                  %try once again to move to the actual desired newQ for exploration
-                  if movetonewQ([],rad2deg(bestviews(1).Q),bestviews(1).all_steps,radNOhandleOPTIONS);
-                      scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];
-                      standalone_scanNupdate(bestviews(1).Q);
-                      validpathfound=true;
-                      break;
-                  end
-              end             
-          catch; display(lasterr);keyboard; 
-          end;            
-      end
+              end
+          end             
+      catch; display(lasterr);keyboard; 
+      end;            
+  end
       
-      %Check termination conditions
-      changeinweight=[changeinweight;size(workspace.knowncoords,1)];
-      if length(changeinweight)>3
-          if sum(changeinweight(end-3:end))<300
-              %set to stop ASAP
-              want_to_continue=false;
-              display('Termination condition reached');
-              break;
-          end
-      end     
+  %Check termination conditions
+  changeinweight=[changeinweight;size(workspace.knowncoords,1)];
+  if length(changeinweight)>3
+      if sum(changeinweight(end-3:end))<300
+          %set to stop ASAP
+          want_to_continue=false;
+          display('Termination condition reached');
+          break;
+      end
+  end     
 end
 
 %% Plot nearby map
