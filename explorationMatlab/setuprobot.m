@@ -24,7 +24,7 @@ robot_maxreach.default_Q=default_Q;
 
 %this is the robot object you wish to use
 % try r = feval('rob_object');
-try r = denso6083(6);
+try r = densoVM6083(6);
 catch
     error('Cant setup robot object');
 end
