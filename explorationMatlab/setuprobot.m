@@ -10,7 +10,12 @@
 %
 % *Returns:* NULL
 
-function setuprobot()
+function setuprobot(numjoints)
+
+% whether we are using a blasting or a scanning robot
+if nargin==0
+    numjoints=6;
+end
 
 %% Variables
 global Q r densoobj robot_maxreach;
@@ -20,11 +25,16 @@ Q=[0,-75,160,0,30,0]*pi/180;
 % Default poses - add additional ones as needed
 default_Q=[Q;[0,-88*pi/180,140*pi/180,0,-15*pi/180,0]];
 default_Q=[default_Q;[0,-88*pi/180,98*pi/180,0,-15*pi/180,0]];
-robot_maxreach.default_Q=default_Q;
 
+if numjoints==6
+    robot_maxreach.default_Q=default_Q;
+else
+    Q=[Q,0];
+    robot_maxreach.default_Q=[default_Q,zeros([size(default_Q,1),1])];
+end
 %this is the robot object you wish to use
 % try r = feval('rob_object');
-try r = densoVM6083(6);
+try r = densoVM6083(numjoints);
 catch
     error('Cant setup robot object');
 end
