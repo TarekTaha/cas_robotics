@@ -1026,6 +1026,17 @@ function zoom_pushbutton_Callback(hObject, eventdata, handles)
 view(116,18)
 keyboard
 
+% --- Executes on button press in imageAq_checkbox.
+function imageAq_checkbox_Callback(hObject, eventdata, handles)
+global vid_object
+theval=get(hObject,'Value');
+if theval
+    setupvideo();
+else
+    imaqreset;
+    clear global vid_object
+    vid_object=[];    
+end
 
 %this function is used to collect the data for exploration to compare new info
 function state_data=collectdata(state_data)
@@ -1057,6 +1068,18 @@ catch
     keyboard
 end
             
+
+% --- Executes on button press in savePly_pushbutton.
+function savePly_pushbutton_Callback(hObject, eventdata, handles)
+global robmap_h
+filename=inputdlg('Enter a file name for ply file');
+if isempty(filename)
+  filename='you_should_enter_a_filename';
+end
+directory=pwd;
+robmap_h.StoreSurfaceMap([directory,'\',char(filename),'.ply']);
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Not Used By Me
@@ -1197,4 +1220,5 @@ function all_mesh_checkbox_Callback(hObject, eventdata, handles)
 
 %% dont know why this is needed, can't find the button for it
 function Untitled_1_Callback(hObject, eventdata, handles)
+
 
