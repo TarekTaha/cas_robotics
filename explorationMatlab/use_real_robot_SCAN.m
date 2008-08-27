@@ -20,13 +20,18 @@ function use_real_robot_SCAN(deg2scan)
 % display('Clearing all global scan variables before starting a new scan');
 clear global PoseData RangeData IntensityData PointData;
 
-global scan Q r PointData IntensityData RangeData robot_maxreach robmap_h;
+global scan Q r PointData IntensityData RangeData robot_maxreach robmap_h vid_object;
 
 %make sure their is a surface map object
 if isempty(robmap_h)
     display('Surface Map object has been deleted previously so I am recreating it')
     robmap_h=actxserver('EyeInHand.SurfaceMap');
     robmap_h.registerevent(@myhandler);
+end
+
+%if we are required to take images
+if ~isempty(vid_object)
+  cur_frame=1;
 end
 
 if size(Q,2)~=6
@@ -130,6 +135,14 @@ while get(robscan_h,'Completed')==0 || isempty(PointData)
         temp_counter=10;
     else
         temp_counter=temp_counter-1;
+        %take an image too
+        if ~isempty(vid_object)
+          trigger(vid_object.vid)
+          frame(cur_frame).val=getdata(vid_object.vid);%imshow(frame(i).val)
+          use_real_robot_GETJs;
+          frame(cur_frame).filename=[datestr(now,'yyyy-mm-dd HHMMSS'),' POSE ',num2str(Q)];
+          cur_frame=cur_frame+1;
+        end
     end
 end
 
@@ -139,6 +152,14 @@ scan.IntensityData=IntensityData;
 scan.RangeData=RangeData;
 
 release_scanner(robscan_h);
+if ~isempty(vid_object)
+  display('saving images to file in folder IMAGES');
+  for i=1:cur_frame-1    
+    frametowrite=frame(i).val;    
+    imwrite(frametowrite,['images\',frame(i).filename,'.',vid_object.imagefileEXT],vid_object.imagefileEXT);
+  end
+end
+
 
 %% Check validity
 if size(PointData,1)==0 && tilt_scan_range~=0
