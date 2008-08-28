@@ -78,7 +78,23 @@ end
 %calibration with an A1 (594 × 841) sheet in front resting on pront strut
 % -1.88         23.1         99.2         7.13        28.95        -3.43
 %makes for a distance of about a meter (1000mm) to each corner
-%
+%for 6DOF robot
+% fkine(r,Q)
+% 
+% ans =
+% 
+%    -0.8734    0.0467    0.4847    0.8038
+%     0.0777    0.9960    0.0442   -0.0210
+%    -0.4807    0.0763   -0.8736    0.5973
+%          0         0         0    1.0000
+%BUT FOR A 7DOF robot, absolutely beautiful
+% fkine(r,[Q])
+% ans =
+%    -0.0000    0.7071    0.7071    0.5820
+%     1.0000    0.0000    0.0000    0.0000
+%     0.0000    0.7071   -0.7071    0.5548
+%          0         0         0    1.0000
+         
 %FOV in horizontal
 % rad2deg(acos((2*1000^2-841^2)/(2*1000^2)))
 % =49.7323
@@ -87,7 +103,7 @@ end
 %FOV in vertical
 % rad2deg(acos((2*1000^2-594^2)/(2*1000^2)))
 % =34.5550
-%approx 30'
+%approx 35'
 
 
       
