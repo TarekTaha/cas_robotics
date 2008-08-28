@@ -34,11 +34,12 @@ function [reachableStates] = getReachableStates(pomdp,currnetfactoredBelief,o,a)
 % * 51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
 % ************************************************************************/
 
+%reachableStates(100).state = 0;
+%reachableStates(100).value = 0;
 reachableStates = [];
-
 n = length(currnetfactoredBelief);
 k = 0;
-alreadyExist = 0;
+tic;
 for i=1:n
     if currnetfactoredBelief(i).value == 0
         continue;
@@ -47,8 +48,22 @@ for i=1:n
     m = find(pomdp.transition(:,s,a));
      for sp=1:length(m)
          alreadyExist = 0;
+        % Now, proceed with this example, eliminating redundant elements of a vector. Note that once a vector is sorted, any redundant elements are adjacent. In addition, any equal adjacent elements in a vector create a zero entry in the DIFF of that vector. This suggests the following implementation for the operation. You are attempting to select the elements of the sorted vector that correspond to nonzero differences.
+        % 
+        % % First try. NOT QUITE RIGHT!! 
+        % x = sort(x(:)); 
+        % difference = diff(x); 
+        % y = x(difference~=0);
+        % 
+        % This is almost correct, but you have forgotten to take into account the fact that the DIFF function returns a vector that has one fewer element than the input vector. In your first algorithm, the last unique element is not accounted for. You can fix this by adding one element to the vector x before taking the difference. You need to make sure that the added element is always different than the previous element. One way to do this is to add a NaN.
+        % 
+        % % Final version. 
+        % x = sort(x(:)); 
+        % difference = diff([x;NaN]); 
+        % y = x(difference~=0);
+        % or use unique function
          if(pomdp.observation(sp,a,o))
-             for r=1:length(reachableStates)
+             for r=1:k%length(reachableStates)
                 if reachableStates(r).state == m(sp)
                     alreadyExist = 1;
                     break;
@@ -63,4 +78,12 @@ for i=1:n
      end
 end
 
+
+%reachableStates = cell2mat(reachableStates);
+reachableStates = reachableStates(1:k);
+toc;
+% x = sort(x(:)); 
+        % difference = diff([x;NaN]); 
+        % y = x(difference~=0);
+% reachableStates = unique(reachableStates);
 end
