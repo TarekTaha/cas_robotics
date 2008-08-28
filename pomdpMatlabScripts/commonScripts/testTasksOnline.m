@@ -81,8 +81,8 @@ end
 failure = 0;
 success = 0;
 % Maximuim Depth
-D = 3;
-d = 3;
+D = 6;
+d = 6;
 totalReward = 0;
 for i=1:100%length(obs)
     % first state is assumed to be known

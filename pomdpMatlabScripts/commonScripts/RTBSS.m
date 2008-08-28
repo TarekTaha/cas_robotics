@@ -39,6 +39,10 @@ function [maxValue action] = RTBSS(pomdp,currentBelief,d,D,debug)
 % * 51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
 % ************************************************************************/
 
+if nargin == 4
+    debug = false;
+end
+
 if d == 0
     maxValue = getUtilityFunctionValue(pomdp,currentBelief);
     if debug
