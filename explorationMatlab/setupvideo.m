@@ -42,7 +42,7 @@ end
   
 
 %% To trigger and register arm pose do this run
-% global Q vid_obect
+% global Q vid_object
 % numoftrigs=100;
 % for i=1:numoftrigs 
 %   display(['The video running state',num2str(isrunning(vid_object.vid))]);
@@ -55,29 +55,39 @@ end
 %     imwrite(frametowrite,['images\',frame(i).filename,'.',imagefileEXT],imagefileEXT);
 % end
 
-%% to stop do this
-% stop(vid)
-% flushdata(vid)
-% delete(vid)
-
-%% other useful functions
- 
-% get(vid)
-% get(getselectedsource(vid))
-% set(getselectedsource(vid),'FrameRate','10')
- 
-%  preview(vid);
-% closepreview(vid)
-
-
-
-
-
-
-
-
-
 % for i=1:numoftrigs
 %     frametowrite=frame(i).val;
 %     imwrite(frametowrite,['images\',fr
+% end
+
+%% to stop do this
+% stop(vid_object.vid)
+% flushdata(vid_object.vid)
+% delete(vid_object.vid)
+
+%% other useful functions
+ 
+% get(vid_object.vid)
+% get(getselectedsource(vid_object.vid))
+% set(getselectedsource(vid_object.vid),'FrameRate','10')
+ 
+%  preview(vid_object.vid);
+% closepreview(vid_object.vid)
+
+
+%calibration with an A1 (594 × 841) sheet in front resting on pront strut
+% -1.88         23.1         99.2         7.13        28.95        -3.43
+%makes for a distance of about a meter (1000mm) to each corner
+%
+%FOV in horizontal
+% rad2deg(acos((2*1000^2-841^2)/(2*1000^2)))
+% =49.7323
+% approx 50'
+
+%FOV in vertical
+% rad2deg(acos((2*1000^2-594^2)/(2*1000^2)))
+% =34.5550
+%approx 30'
+
+
       
