@@ -21,7 +21,7 @@ function use_real_robot_MOVE(all_steps)
 
 %% Variables
 global Q robot_maxreach
-if size(Q,2)~=6
+if size(Q,2)~=6 && size(Q,2)~=7
     error('Q - Joints have not been defined properly, should be a global');
 end
 
@@ -49,13 +49,13 @@ end
 rob_h=actxserver('EyeInHand.DensoCommand');
 % rob_h2=actxserver('EyeInHand.DensoState');
 %make sure comms up are up to speed
-waitcounter=0;
-while size(Q,2)~=6
-    pause(0.2);
-    if waitcounter>25 %5 secs
-        error('There is some problem with controller:m , make sure it is on, in auto mode, motor is on and program is running')
-    end    
-end
+% waitcounter=0;
+% while size(Q,2)~=6
+%     pause(0.2);
+%     if waitcounter>25 %5 secs
+%         error('There is some problem with controller:m , make sure it is on, in auto mode, motor is on and program is running')
+%     end    
+% end
 %check joint state and can continually check this to see that it has got to the correct position
 % display(strcat('Current Joint State is:',num2str(rob_h2.JointStatee),' and the desired is:', num2str(tempQ)));
 
