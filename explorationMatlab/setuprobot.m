@@ -28,9 +28,12 @@ default_Q=[default_Q;[0,-88*pi/180,98*pi/180,0,-15*pi/180,0]];
 
 if numjoints==6
     robot_maxreach.default_Q=default_Q;
+    ellipse_safetyfactor=0.1; %(0.1 is 10%)
 else
     Q=[Q,0];
-    robot_maxreach.default_Q=[default_Q,zeros([size(default_Q,1),1])];
+    robot_maxreach.default_Q=[default_Q,zeros([size(default_Q,1),1])];    
+    ellipse_safetyfactor=0.01; %(0.01 is 1%)
+    display(['ellipse_safetyfactor is set to ',num2str(ellipse_safetyfactor)]);
 end
 %this is the robot object you wish to use
 % try r = feval('rob_object');
@@ -38,6 +41,7 @@ try r = densoVM6083(numjoints);
 catch
     error('Cant setup robot object');
 end
+
 
 %%
 
@@ -50,7 +54,7 @@ load densoobj.mat
 
 for piece=1:size(densoobj,2)
     [densoobj(piece).ellipse.x,densoobj(piece).ellipse.y,densoobj(piece).ellipse.z,...
-        densoobj(piece).ellipse.params, densoobj(piece).ellipse.center]=calc_elip(piece,densoobj(piece).M);
+        densoobj(piece).ellipse.params, densoobj(piece).ellipse.center]=calc_elip(piece,densoobj(piece).M,ellipse_safetyfactor);
 end
 
 %% Speed up variables for NBV

@@ -30,7 +30,7 @@ center=(max(current_shape)+min(current_shape))/2;
 
 %added safety factor if nothing passed
 if nargin<3    
-    safetyfactor=0.1;
+    safetyfactor=0.1;    
 end
     
 %%
@@ -59,7 +59,7 @@ while  find(((current_shape(:,1)-center(1)).^2)/params(1)^2+...
     end
 end
 
-params=params*1.10;
+params=params*(1+safetyfactor);
 params=params+sum(params)/3*safetyfactor;
         
 %% Matlab's Ellipse Shell Creation Function
