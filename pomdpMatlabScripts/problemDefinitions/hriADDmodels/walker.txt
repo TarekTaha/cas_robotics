@@ -25,8 +25,8 @@
 // initial belief is a product of marginal beliefs
 
 init [*	(task		(stand	(0.8))	(sit	(0.1))	(movearound	(0.1)))
-	(intention	(forward (0.2))	(backward (0.2)) (Right (0.2)) (Left	(0.2)) (Nothing	(0.2)))
-	(satisfaction	(happy	(0.33))	(cautious	(0.34))	(frustrated	(0.33)))
+	(intention	(forward (0.1429))	(backward (0.1429))	(right (0.1429)) (left	(0.1429)) (nothing	(0.1429)) (sit	(0.1429)) (stand	(0.1429)))
+	(satisfaction	(happy	(0.33))		(cautious	(0.34))	(frustrated	(0.33)))
 	(status		(competent	(0.33))	(struggeling	(0.34))	(reliant	(0.33)))
      ]
    
@@ -36,40 +36,40 @@ unnormalised
 
 
 dd defaultIntention
-	(lsg'	(non	(rsg'	(non	(intention'	(right(0.0) left(0.0) forward(0.0) backward(0.0) sit(0.0) stand(0.0) nothing(1.0))))
-				(medium (intention'	(right(0.8) left(0.0) forward(0.0) backward(0.0) sit(0.0) stand(0.0) nothing(0.2))))
-				(high 	(intention'	(right(0.9) left(0.0) forward(0.0) backward(0.0) sit(0.0) stand(0.0) nothing(0.1))))
-				(neg	(intention'	(right(0.0) left(0.0) forward(0.0) backward(0.0) sit(0.0) stand(0.0) nothing(1.0))))
+	(lsg	(non	(rsg	(non	(intention'	(right (0.0)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (1.0))))
+				(medium (intention'	(right (0.8)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
+				(high 	(intention'	(right (0.9)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.1))))
+				(neg	(intention'	(right (0.0)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (1.0))))
 			)
 		)
-		(medium	(rsg'	(non	(intention'	(right(0.0) left(0.8) forward(0.0) backward(0.0) sit(0.0) stand(0.0) nothing(0.2))))
-				(medium (intention'	(right(0.0) left(0.0) forward(0.8) backward(0.0) sit(0.0) stand(0.0) nothing(0.2))))
-				(high 	(intention'	(right(0.6) left(0.0) forward(0.4) backward(0.0) sit(0.0) stand(0.0) nothing(0.0))))
-				(neg	(intention'	(right(0.0) left(0.8) forward(0.0) backward(0.0) sit(0.0) stand(0.0) nothing(0.2))))
+		(medium	(rsg	(non	(intention'	(right (0.0)) (left (0.8)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
+				(medium (intention'	(right (0.0)) (left (0.0)) (forward (0.8)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
+				(high 	(intention'	(right (0.6)) (left (0.0)) (forward (0.4)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.0))))
+				(neg	(intention'	(right (0.0)) (left (0.8)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
 			)
 		)
-		(high	(rsg'	(non	(intention'	(right(0.0) left(0.9) forward(0.0) backward(0.0) sit(0.0) stand(0.0) nothing(0.1))))
-				(medium (intention'	(right(0.8) left(0.6) forward(0.4) backward(0.0) sit(0.0) stand(0.0) nothing(0.0))))
-				(high 	(intention'	(right(0.0) left(0.0) forward(0.8) backward(0.0) sit(0.0) stand(0.0) nothing(0.2))))
-				(neg	(intention'	(right(0.0) left(0.8) forward(0.0) backward(0.0) sit(0.0) stand(0.0) nothing(0.2))))
+		(high	(rsg	(non	(intention'	(right (0.0)) (left (0.9)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.1))))
+				(medium (intention'	(right (0.0)) (left (0.6)) (forward (0.4)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.0))))
+				(high 	(intention'	(right (0.0)) (left (0.0)) (forward (0.8)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
+				(neg	(intention'	(right (0.0)) (left (0.8)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
 			)
 		)
-		(neg	(rsg'	(non	(intention'	(right(0.0) left(0.0) forward(0.0) backward(0.0) sit(0.0) stand(0.0) nothing(1.0))))
-				(medium (intention'	(right(0.4) left(0.0) forward(0.0) backward(0.0) sit(0.0) stand(0.0) nothing(0.6))))
-				(high 	(intention'	(right(0.9) left(0.0) forward(0.0) backward(0.0) sit(0.0) stand(0.0) nothing(0.1))))
-				(neg	(intention'	(right(0.0) left(0.0) forward(0.0) backward(0.9) sit(0.0) stand(0.0) nothing(0.1))))
+		(neg	(rsg	(non	(intention'	(right (0.0)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (1.0))))
+				(medium (intention'	(right (0.4)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.6))))
+				(high 	(intention'	(right (0.9)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.1))))
+				(neg	(intention'	(right (0.0)) (left (0.0)) (forward (0.0)) (backward (0.9)) (sit (0.0)) (stand (0.0)) (nothing (0.1))))
 			)
 		)
 	)
 enddd
 
 dd defaulprox
-	(uir	(close	(lir	(close	(intention'	(right(0.1667) left(0.1667) forward(0.1667) backward(0.1667) sit(0.1667) stand(0.0) nothing(0.1667))))
-				(far 	(intention'	(right(0.1429) left(0.1429) forward(0.1429) backward(0.1429) sit(0.1429) stand(0.1429) nothing(0.1429))))
+	(uir	(close	(lir	(close	(intention'	(right (0.1667)) (left (0.1667)) (forward (0.1667)) (backward (0.1667)) (sit (0.1667)) (stand (0.0)) (nothing (0.1667))))
+				(far 	(intention'	(right (0.1429)) (left (0.1429)) (forward (0.1429)) (backward (0.1429)) (sit (0.1429)) (stand (0.1429)) (nothing (0.1429))))
 			)
 		)
-		(far	(lir	(close	(intention'	(right(0.0) left(0.0) forward(0.0) backward(0.0) sit(0.0) stand(1.0) nothing(0.0))))
-				(far 	(intention'	(right(0.0) left(0.0) forward(0.0) backward(0.0) sit(0.0) stand(0.0) nothing(1.0))))
+		(far	(lir	(close	(intention'	(right (0.0)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (1.0)) (nothing (0.0))))
+				(far 	(intention'	(right (0.0)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (1.0))))
 			)
 		)
 	)
@@ -80,10 +80,34 @@ dd correctIntention
 enddd
 
 // dynamics of the satisfaction level
-dd defaultsat
-	(satisfaction	(happy 		(satisfaction'	(happy	(0.9)) (cautious	(0.1)) (frustrated	(0.0))))
-			(cautious	(satisfaction'	(happy	(0.1)) (cautious	(0.8)) (frustrated	(0.1))))
-			(frustrated	(satisfaction'	(happy	(0.0)) (cautious	(0.1)) (frustrated	(0.9))))
+//dd defaultsat
+//	(satisfaction	(happy 		(satisfaction'	(happy	(0.9)) (cautious	(0.1)) (frustrated	(0.0))))
+//			(cautious	(satisfaction'	(happy	(0.1)) (cautious	(0.8)) (frustrated	(0.1))))
+//			(frustrated	(satisfaction'	(happy	(0.0)) (cautious	(0.1)) (frustrated	(0.9))))
+//	)
+//enddd
+
+dd defaultlsg
+	(lsg'
+	    (non	(0.25)) (medium		(0.25)) (high		(0.25)) (neg		(0.25))
+	)
+enddd
+
+dd defaultrsg
+	(rsg'		
+	    (non	(0.25)) (medium		(0.25)) (high		(0.25)) (neg		(0.25))
+	)
+enddd
+
+dd defaultuir
+	(uir'		
+	    (close	(0.5)) (far	(0.5))
+	)
+enddd
+
+dd defaultlir
+	(lir'		
+	    (close	(0.5)) (far	(0.5))
 	)
 enddd
 
@@ -92,8 +116,11 @@ enddd
 // and making sure that the user is close enough to the user.
 
 action nothing
-	task		( )
-	intention	(SAMEintention)
+	task	(task	(stand 		(task'		(stand	(1.0)) (sit	(0.0)) (movearound	(0.0))))
+			(sit		(task'		(stand	(0.0)) (sit	(1.0)) (movearound	(0.0))))
+			(movearound	(task'		(stand	(0.0)) (sit	(0.0)) (movearound	(1.0))))
+		)
+	intention	(correctIntention)
 	satisfaction	(intention 	(right	 	(satisfaction' (happy	(0.0)) (cautious	(0.2)) (frustrated	(0.8))) )
 					(left	 	(satisfaction' (happy	(0.0)) (cautious	(0.2)) (frustrated	(0.8))) )
 					(forward 	(satisfaction' (happy	(0.0)) (cautious	(0.2)) (frustrated	(0.8))) )
@@ -103,18 +130,20 @@ action nothing
 					(nothing 	(satisfaction' (happy	(1.0)) (cautious	(0.0)) (frustrated	(0.0))) )					
 			)
 	status		(SAMEstatus)
-	loc		(moveNorth)
 	observe
-		lsg	
-		rsg
-		uir
-		lir
+		lsg	(defaultlsg)
+		rsg	(defaultrsg)
+		uir	(defaultuir)
+		lir	(defaultlir)
 	endobserve
 endaction
 
 action forward
-	task		(taskmovearound)
-	intention	(SAMEintention)
+	task	(task	(stand 		(task'		(stand	(1.0)) (sit	(0.0)) (movearound	(0.0))))
+			(sit		(task'		(stand	(0.0)) (sit	(1.0)) (movearound	(0.0))))
+			(movearound	(task'		(stand	(0.0)) (sit	(0.1)) (movearound	(1.0))))
+		)
+	intention	(correctIntention)
 	satisfaction	(intention 	(right	 	(satisfaction' (happy	(0.0)) (cautious	(0.2)) (frustrated	(0.8))) )
 					(left	 	(satisfaction' (happy	(0.0)) (cautious	(0.2)) (frustrated	(0.8))) )
 					(forward 	(satisfaction' (happy	(0.0)) (cautious	(0.2)) (frustrated	(0.8))) )
@@ -124,18 +153,20 @@ action forward
 					(nothing 	(satisfaction' (happy	(1.0)) (cautious	(0.0)) (frustrated	(0.0))) )					
 			)
 	status		(SAMEstatus)
-	loc		(moveNorth)
 	observe
-		lsg	
-		rsg
-		uir
-		lir
+		lsg	(defaultlsg)
+		rsg	(defaultrsg)
+		uir	(defaultuir)
+		lir	(defaultlir)
 	endobserve
 endaction
 
 action backward
-	task		(taskmovearound)
-	intention	(SAMEintention)
+	task	(task	(stand 		(task'		(stand	(1.0)) (sit	(0.0)) (movearound	(0.0))))
+			(sit		(task'		(stand	(0.0)) (sit	(1.0)) (movearound	(0.0))))
+			(movearound	(task'		(stand	(0.0)) (sit	(0.1)) (movearound	(1.0))))
+		)
+	intention	(correctIntention)
 	satisfaction	(intention 	(right	 	(satisfaction' (happy	(0.0)) (cautious	(0.2)) (frustrated	(0.8))) )
 					(left	 	(satisfaction' (happy	(0.0)) (cautious	(0.2)) (frustrated	(0.8))) )
 					(forward 	(satisfaction' (happy	(0.0)) (cautious	(0.2)) (frustrated	(0.8))) )
@@ -145,18 +176,20 @@ action backward
 					(nothing 	(satisfaction' (happy	(1.0)) (cautious	(0.0)) (frustrated	(0.0))) )					
 			)
 	status		(SAMEstatus)
-	loc		(moveNorth)
 	observe
-		lsg	
-		rsg
-		uir
-		lir
+		lsg	(defaultlsg)
+		rsg	(defaultrsg)
+		uir	(defaultuir)
+		lir	(defaultlir)
 	endobserve
 endaction
 
 action right
-	task		(taskmovearound)
-	intention	(SAMEintention)
+	task	(task	(stand 		(task'		(stand	(1.0)) (sit	(0.0)) (movearound	(0.0))))
+			(sit		(task'		(stand	(0.0)) (sit	(1.0)) (movearound	(0.0))))
+			(movearound	(task'		(stand	(0.0)) (sit	(0.1)) (movearound	(1.0))))
+		)
+	intention	(correctIntention)
 	satisfaction	(intention 	(right	 	(satisfaction' (happy	(0.0)) (cautious	(0.2)) (frustrated	(0.8))) )
 					(left	 	(satisfaction' (happy	(0.0)) (cautious	(0.2)) (frustrated	(0.8))) )
 					(forward 	(satisfaction' (happy	(0.0)) (cautious	(0.2)) (frustrated	(0.8))) )
@@ -166,18 +199,20 @@ action right
 					(nothing 	(satisfaction' (happy	(1.0)) (cautious	(0.0)) (frustrated	(0.0))) )					
 			)
 	status		(SAMEstatus)
-	loc		(moveNorth)
 	observe
-		lsg	
-		rsg
-		uir
-		lir
+		lsg	(defaultlsg)
+		rsg	(defaultrsg)
+		uir	(defaultuir)
+		lir	(defaultlir)
 	endobserve
 endaction
 
 action left
-	task		(taskmovearound)
-	intention	(SAMEintention)
+	task	(task	(stand 		(task'		(stand	(1.0)) (sit	(0.0)) (movearound	(0.0))))
+			(sit		(task'		(stand	(0.0)) (sit	(1.0)) (movearound	(0.0))))
+			(movearound	(task'		(stand	(0.0)) (sit	(0.1)) (movearound	(1.0))))
+		)
+	intention	(correctIntention)
 	satisfaction	(intention 	(right	 	(satisfaction' (happy	(0.0)) (cautious	(0.2)) (frustrated	(0.8))) )
 					(left	 	(satisfaction' (happy	(0.0)) (cautious	(0.2)) (frustrated	(0.8))) )
 					(forward 	(satisfaction' (happy	(0.0)) (cautious	(0.2)) (frustrated	(0.8))) )
@@ -187,19 +222,54 @@ action left
 					(nothing 	(satisfaction' (happy	(1.0)) (cautious	(0.0)) (frustrated	(0.0))) )					
 			)
 	status		(SAMEstatus)
-	loc		(moveNorth)
 	observe
-		lsg	
-		rsg
-		uir
-		lir
+		lsg	(defaultlsg)
+		rsg	(defaultrsg)
+		uir	(defaultuir)
+		lir	(defaultlir)
 	endobserve
 endaction
 
-reward [+  (huc	(yes	(5.0))
-		(no	(0.0)))
-	   (w	(drenched (-3.0))
-		(sprinkled (-1.1))
-		(dry	(0.0)))]
+reward [+	(satisfaction	(happy		(2.0))
+				(cautious	(0.0))
+				(frustrated	(-2.0))
+		)
+		(intention	(forward	(task	(movearound 	(2.0))
+							(sit		(-2.0))
+							(stand		(-2.0))
+						)
+				)
+				(backward	(task 	(movearound 	(2.0))
+							(sit		(-2.0))
+							(stand		(-2.0))
+						)
+				)
+				(right		(task 	(movearound 	(2.0))
+							(sit		(-2.0))
+							(stand		(-2.0))
+						)
+				)
+				(left		(task 	(movearound 	(2.0))
+							(sit		(-2.0))
+							(stand		(-2.0))
+						)
+				)
+				(stand		(task 	(movearound 	(-2.0))
+							(sit		(-2.0))
+							(stand		(2.0))
+						)
+				)
+				(sit		(task 	(movearound 	(-2.0))
+							(sit		(2.0))
+							(stand		(-2.0))
+						)
+				)
+				(nothing	(task 	(movearound 	(-2.0))
+							(sit		(2.0))
+							(stand		(2.0))
+						)
+				)
+		)
+      ]
 discount 0.9
 tolerance 0.001
