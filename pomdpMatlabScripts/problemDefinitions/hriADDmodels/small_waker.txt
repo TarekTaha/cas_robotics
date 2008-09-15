@@ -1,0 +1,193 @@
+// Walker Example:
+// Patient is sitting backward initially
+// The walker is put in front of him (probably he can call the walker to autonomously come to him)
+// The patient uses the walker to stand forward: for that to happen the walker should be in the right
+// position and the readings from  one of the proximity sensors should be on (body of patient detected
+// by the sensor).
+// The user holds the handles and stands forward.
+// The user then directs the walker and walks through out the environment assited by the walker (patient should be
+// holding both handles and the user should be close to the walker.
+// Patient returns to initial location
+// Patient sits backward with the help of the walker.
+
+(variables
+	(task stand sit movearound)		  	 		// task: task to be performed
+	(intention right left forward backward sit stand nothing) 	// I   : immediate action intention
+)
+// observations
+(observations	(lsg	non medium high neg)	// left strain gauges
+		(rsg	non medium high neg)	// right strain gauges
+		(uir	close far)	 	// upper infra red
+		(lir	close far)	 	// lower infra red
+)
+// initial belief is a product of marginal beliefs
+
+init [*	(task		(stand	(0.33))	(sit	(0.34))	(movearound	(0.33)))
+	(intention	(forward (0.1429))	(backward (0.1429))	(right (0.1429)) (left	(0.1429)) (nothing	(0.1429)) (sit	(0.1429)) (stand	(0.1429)))
+     ]
+
+// some CPTS may be unnormalized -
+// this means all CPTs will be automatically normalized when read in
+unnormalised
+
+dd defaultlsg
+	(lsg'
+	    (non	(0.25)) (medium		(0.25)) (high		(0.25)) (neg		(0.25))
+	)
+enddd
+
+dd defaultrsg
+	(rsg'
+	    (non	(0.25)) (medium		(0.25)) (high		(0.25)) (neg		(0.25))
+	)
+enddd
+
+dd defaultuir
+	(uir'
+	    (close	(0.5)) (far	(0.5))
+	)
+enddd
+
+dd defaultlir
+	(lir'
+	    (close	(0.5)) (far	(0.5))
+	)
+enddd
+
+// The system can perform 5 actions: move right, move left, move forward, move backward, and lock in place
+// Actions performed like standing up and sitting down are assited by the system through locking in place
+// and making sure that the user is close enough to the user.
+
+action nothing
+	task	(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
+			(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
+			(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+		)
+	intention	(SAMEintention)
+	observe
+		lsg	(defaultlsg)
+		rsg	(defaultrsg)
+		uir	(defaultuir)
+		lir	(defaultlir)
+	endobserve
+endaction
+
+action forward
+	task	(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
+			(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
+			(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+		)
+	intention	
+							(lsg	(non	(rsg	(non	(intention'	(right (0.0)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (1.0))))
+										(medium (intention'	(right (0.8)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
+										(high 	(intention'	(right (0.9)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.1))))
+										(neg	(intention'	(right (0.0)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (1.0))))
+									)
+								)
+								(medium	(rsg	(non	(intention'	(right (0.0)) (left (0.8)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
+										(medium (intention'	(right (0.0)) (left (0.0)) (forward (0.8)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
+										(high 	(intention'	(right (0.6)) (left (0.0)) (forward (0.4)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.0))))
+										(neg	(intention'	(right (0.0)) (left (0.8)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
+									)
+								)
+								(high	(rsg	(non	(intention'	(right (0.0)) (left (0.9)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.1))))
+										(medium (intention'	(right (0.0)) (left (0.6)) (forward (0.4)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.0))))
+										(high 	(intention'	(right (0.0)) (left (0.0)) (forward (0.8)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
+										(neg	(intention'	(right (0.0)) (left (0.8)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
+									)
+								)
+								(neg	(rsg	(non	(intention'	(right (0.0)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (1.0))))
+										(medium (intention'	(right (0.4)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.6))))
+										(high 	(intention'	(right (0.9)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.1))))
+										(neg	(intention'	(right (0.0)) (left (0.0)) (forward (0.0)) (backward (0.9)) (sit (0.0)) (stand (0.0)) (nothing (0.1))))
+									)
+								)
+							)
+	observe
+		lsg	(defaultlsg)
+		rsg	(defaultrsg)
+		uir	(defaultuir)
+		lir	(defaultlir)
+	endobserve
+endaction
+
+action backward
+	task	(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
+			(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
+			(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+		)
+	intention	(SAMEintention)
+	observe
+		lsg	(defaultlsg)
+		rsg	(defaultrsg)
+		uir	(defaultuir)
+		lir	(defaultlir)
+	endobserve
+endaction
+
+action right
+	task	(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
+			(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
+			(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+		)
+	intention	(SAMEintention)
+	observe
+		lsg	(defaultlsg)
+		rsg	(defaultrsg)
+		uir	(defaultuir)
+		lir	(defaultlir)
+	endobserve
+endaction
+
+action left
+	task	(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
+			(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
+			(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+		)
+	intention	(SAMEintention)
+	observe
+		lsg	(defaultlsg)
+		rsg	(defaultrsg)
+		uir	(defaultuir)
+		lir	(defaultlir)
+	endobserve
+endaction
+
+reward 	(intention	(forward	(task	(movearound 	(2.0))
+						(sit		(-2.0))
+						(stand		(-2.0))
+					)
+			)
+			(backward	(task 	(movearound 	(2.0))
+						(sit		(-2.0))
+						(stand		(-2.0))
+					)
+			)
+			(right		(task 	(movearound 	(2.0))
+						(sit		(-2.0))
+						(stand		(-2.0))
+					)
+			)
+			(left		(task 	(movearound 	(2.0))
+						(sit		(-2.0))
+						(stand		(-2.0))
+					)
+			)
+			(stand		(task 	(movearound 	(-2.0))
+						(sit		(-2.0))
+						(stand		(2.0))
+					)
+			)
+			(sit		(task 	(movearound 	(-2.0))
+						(sit		(2.0))
+						(stand		(-2.0))
+					)
+			)
+			(nothing	(task 	(movearound 	(-2.0))
+						(sit		(2.0))
+						(stand		(2.0))
+					)
+			)
+	)
+discount 0.9
+tolerance 0.001
