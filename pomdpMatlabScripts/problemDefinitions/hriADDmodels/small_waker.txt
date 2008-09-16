@@ -11,57 +11,238 @@
 // Patient sits backward with the help of the walker.
 
 (variables
-	(task stand sit movearound)		  	 		// task: task to be performed
 	(intention right left forward backward sit stand nothing) 	// I   : immediate action intention
+	(task stand sit movearound)		  	 		// task: task to be performed
 )
 // observations
 (observations	(lsg	non medium high neg)	// left strain gauges
 		(rsg	non medium high neg)	// right strain gauges
 		(uir	close far)	 	// upper infra red
 		(lir	close far)	 	// lower infra red
+		(locked yes no)
 )
 // initial belief is a product of marginal beliefs
 
-init [*	(task		(stand	(0.33))	(sit	(0.34))	(movearound	(0.33)))
+init [*	(task		(stand	(1.0))	(sit	(0.0))	(movearound	(0.0)))
 	(intention	(forward (0.1429))	(backward (0.1429))	(right (0.1429)) (left	(0.1429)) (nothing	(0.1429)) (sit	(0.1429)) (stand	(0.1429)))
      ]
-
+//init (intention	(forward (0.1429))	(backward (0.1429))	(right (0.1429)) (left	(0.1429)) (nothing	(0.1429)) (sit	(0.1429)) (stand	(0.1429)))
 // some CPTS may be unnormalized -
 // this means all CPTs will be automatically normalized when read in
 unnormalised
 
 dd defaultlsg
-	(lsg'
-	    (non	(0.25)) (medium		(0.25)) (high		(0.25)) (neg		(0.25))
+	(intention
+			(forward	(lsg'	
+						(non	(0.0)) (medium		(0.3)) (high		(0.7)) (neg		(0.0))
+					)
+			)
+			(backward	(lsg'	
+						(non	(0.0)) (medium		(0.0)) (high		(0.0)) (neg		(1.0))
+					)
+			)
+			(right		(lsg'	
+						(non	(0.4)) (medium		(0.6)) (high		(0.0)) (neg		(0.0))
+					)
+			)
+			(left		(lsg'	
+						(non	(0.0)) (medium		(0.4)) (high		(0.6)) (neg		(0.0))
+					)
+			)
+			(sit		(lsg'	
+						(non	(0.0)) (medium		(0.5)) (high		(0.5)) (neg		(0.0))
+					)
+			)
+			(stand		(lsg'	
+						(non	(0.0)) (medium		(0.5)) (high		(0.5)) (neg		(0.0))
+					)
+			)
+			(nothing	(lsg'	
+						(non	(0.7)) (medium		(0.1)) (high		(0.1)) (neg		(0.1))
+					)
+			)
 	)
 enddd
 
 dd defaultrsg
-	(rsg'
-	    (non	(0.25)) (medium		(0.25)) (high		(0.25)) (neg		(0.25))
+	(intention
+			(forward	(rsg'	
+						(non	(0.0)) (medium		(0.3)) (high		(0.7)) (neg		(0.0))
+					)
+			)
+			(backward	(rsg'	
+						(non	(0.0)) (medium		(0.0)) (high		(0.0)) (neg		(1.0))
+					)
+			)
+			(right		(rsg'	
+						(non	(0.0)) (medium		(0.4)) (high		(0.6)) (neg		(0.0))
+					)
+			)
+			(left		(rsg'	
+						(non	(0.4)) (medium		(0.6)) (high		(0.0)) (neg		(0.0))
+					)
+			)
+			(sit		(rsg'	
+						(non	(0.0)) (medium		(0.5)) (high		(0.5)) (neg		(0.0))
+					)
+			)
+			(stand		(rsg'	
+						(non	(0.0)) (medium		(0.5)) (high		(0.5)) (neg		(0.0))
+					)
+			)
+			(nothing	(rsg'	
+						(non	(0.7)) (medium		(0.1)) (high		(0.1)) (neg		(0.1))
+					)
+			)
 	)
 enddd
 
 dd defaultuir
-	(uir'
-	    (close	(0.5)) (far	(0.5))
+	(intention
+			(forward	(uir'	
+						(close	(1.0)) (far		(0.0))
+					)
+			)
+			(backward	(uir'	
+						(close	(1.0)) (far		(0.0))
+					)
+			)
+			(right		(uir'	
+						(close	(1.0)) (far		(0.0))
+					)
+			)
+			(left		(uir'	
+						(close	(1.0)) (far		(0.0))
+					)
+			)
+			(sit		(uir'	
+						(close	(0.1)) (far		(0.9))
+					)
+			)
+			(stand		(uir'	
+						(close	(1.0)) (far		(0.0))
+					)
+			)
+			(nothing	(uir'	
+						(close	(0.0)) (far		(1.0))
+					)
+			)
 	)
 enddd
 
 dd defaultlir
-	(lir'
-	    (close	(0.5)) (far	(0.5))
+	(intention
+			(forward	(lir'	
+						(close	(1.0)) (far		(0.0))
+					)
+			)
+			(backward	(lir'	
+						(close	(1.0)) (far		(0.0))
+					)
+			)
+			(right		(lir'	
+						(close	(1.0)) (far		(0.0))
+					)
+			)
+			(left		(lir'	
+						(close	(1.0)) (far		(0.0))
+					)
+			)
+			(sit		(lir'	
+						(close	(1.0)) (far		(0.0))
+					)
+			)
+			(stand		(lir'	
+						(close	(1.0)) (far		(0.0))
+					)
+			)
+			(nothing	(lir'	
+						(close	(0.0)) (far		(1.0))
+					)
+			)
 	)
 enddd
 
+dd defaultlock
+	(intention
+			(forward	(locked'	
+						(yes	(0.0)) (no	(1.0)) 
+					)
+			)
+			(backward	(locked'	
+						(yes	(0.0)) (no	(1.0)) 
+					)
+			)
+			(right		(locked'	
+						(yes	(0.0)) (no	(1.0)) 
+					)
+			)
+			(left		(locked'	
+						(yes	(0.0)) (no	(1.0)) 
+					)
+			)
+			(sit		(locked'	
+						(yes	(1.0)) (no	(0.0)) 
+					)
+			)
+			(stand		(locked'	
+						(yes	(1.0)) (no	(0.0)) 
+					)
+			)
+			(nothing	(locked'	
+						(yes	(0.5)) (no	(0.5)) 
+					)
+			)
+	)
+enddd
 // The system can perform 5 actions: move right, move left, move forward, move backward, and lock in place
 // Actions performed like standing up and sitting down are assited by the system through locking in place
 // and making sure that the user is close enough to the user.
 
 action nothing
-	task	(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
-			(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
-			(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+	task 	(intention
+			(forward
+				(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(backward
+				(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(right
+				(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(left
+				(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(sit
+				(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(stand
+				(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(nothing
+				(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
 		)
 	intention	(SAMEintention)
 	observe
@@ -69,52 +250,155 @@ action nothing
 		rsg	(defaultrsg)
 		uir	(defaultuir)
 		lir	(defaultlir)
+		locked	(defaultlock)
 	endobserve
+	cost	(intention
+			( 
+				forward		(1.0)
+			)
+			( 
+				backward	(1.0)
+			)
+			( 
+				right		(1.0)
+			)
+			( 
+				left		(1.0)
+			)
+			( 
+				sit		(1.0)
+			)
+			( 
+				stand		(1.0)
+			)
+			( 
+				nothing		(-2.0)
+			)
+		)
 endaction
 
 action forward
-	task	(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
-			(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
-			(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+	task 	(intention
+			(forward
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(backward
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(right
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(left
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(sit
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(stand
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(nothing
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
 		)
-	intention	
-							(lsg	(non	(rsg	(non	(intention'	(right (0.0)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (1.0))))
-										(medium (intention'	(right (0.8)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
-										(high 	(intention'	(right (0.9)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.1))))
-										(neg	(intention'	(right (0.0)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (1.0))))
-									)
-								)
-								(medium	(rsg	(non	(intention'	(right (0.0)) (left (0.8)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
-										(medium (intention'	(right (0.0)) (left (0.0)) (forward (0.8)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
-										(high 	(intention'	(right (0.6)) (left (0.0)) (forward (0.4)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.0))))
-										(neg	(intention'	(right (0.0)) (left (0.8)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
-									)
-								)
-								(high	(rsg	(non	(intention'	(right (0.0)) (left (0.9)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.1))))
-										(medium (intention'	(right (0.0)) (left (0.6)) (forward (0.4)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.0))))
-										(high 	(intention'	(right (0.0)) (left (0.0)) (forward (0.8)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
-										(neg	(intention'	(right (0.0)) (left (0.8)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.2))))
-									)
-								)
-								(neg	(rsg	(non	(intention'	(right (0.0)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (1.0))))
-										(medium (intention'	(right (0.4)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.6))))
-										(high 	(intention'	(right (0.9)) (left (0.0)) (forward (0.0)) (backward (0.0)) (sit (0.0)) (stand (0.0)) (nothing (0.1))))
-										(neg	(intention'	(right (0.0)) (left (0.0)) (forward (0.0)) (backward (0.9)) (sit (0.0)) (stand (0.0)) (nothing (0.1))))
-									)
-								)
-							)
+	intention	(SAMEintention)
 	observe
 		lsg	(defaultlsg)
 		rsg	(defaultrsg)
 		uir	(defaultuir)
 		lir	(defaultlir)
+		locked	(defaultlock)
 	endobserve
+	cost	(intention
+			( 
+				forward		(-2.0)
+			)
+			( 
+				backward	(1.0)
+			)
+			( 
+				right		(1.0)
+			)
+			( 
+				left		(1.0)
+			)
+			( 
+				sit		(1.0)
+			)
+			( 
+				stand		(1.0)
+			)
+			( 
+				nothing		(1.0)
+			)
+		)
 endaction
 
 action backward
-	task	(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
-			(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
-			(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+	task 	(intention
+			(forward
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(backward
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(right
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(left
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(sit
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(stand
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(nothing
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
 		)
 	intention	(SAMEintention)
 	observe
@@ -122,13 +406,77 @@ action backward
 		rsg	(defaultrsg)
 		uir	(defaultuir)
 		lir	(defaultlir)
+		locked	(defaultlock)
 	endobserve
+	cost	(intention
+			( 
+				forward		(1.0)
+			)
+			( 
+				backward	(-2.0)
+			)
+			( 
+				right		(1.0)
+			)
+			( 
+				left		(1.0)
+			)
+			( 
+				sit		(1.0)
+			)
+			( 
+				stand		(1.0)
+			)
+			( 
+				nothing		(1.0)
+			)
+		)
 endaction
 
 action right
-	task	(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
-			(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
-			(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+	task 	(intention
+			(forward
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(backward
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(right
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(left
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(sit
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(stand
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(nothing
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
 		)
 	intention	(SAMEintention)
 	observe
@@ -136,13 +484,77 @@ action right
 		rsg	(defaultrsg)
 		uir	(defaultuir)
 		lir	(defaultlir)
+		locked	(defaultlock)
 	endobserve
+	cost	(intention
+			( 
+				forward		(1.0)
+			)
+			( 
+				backward	(1.0)
+			)
+			( 
+				right		(-2.0)
+			)
+			( 
+				left		(1.0)
+			)
+			( 
+				sit		(1.0)
+			)
+			( 
+				stand		(1.0)
+			)
+			( 
+				nothing		(1.0)
+			)
+		)
 endaction
 
 action left
-	task	(task	(stand 		(task'		(stand	(0.8)) (sit	(0.1)) (movearound	(0.1))))
-			(sit		(task'		(stand	(0.1)) (sit	(0.8)) (movearound	(0.1))))
-			(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+	task 	(intention
+			(forward
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(backward
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(right
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(left
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(sit
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(stand
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
+			(nothing
+				(task	(stand 		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(sit		(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+					(movearound	(task'		(stand	(0.1)) (sit	(0.1)) (movearound	(0.8))))
+				)
+			)
 		)
 	intention	(SAMEintention)
 	observe
@@ -150,44 +562,32 @@ action left
 		rsg	(defaultrsg)
 		uir	(defaultuir)
 		lir	(defaultlir)
+		locked	(defaultlock)
 	endobserve
+	cost	(intention
+			( 
+				forward		(1.0)
+			)
+			( 
+				backward	(1.0)
+			)
+			( 
+				right		(1.0)
+			)
+			( 
+				left		(-2.0)
+			)
+			( 
+				sit		(1.0)
+			)
+			( 
+				stand		(1.0)
+			)
+			( 
+				nothing		(1.0)
+			)
+		)
 endaction
 
-reward 	(intention	(forward	(task	(movearound 	(2.0))
-						(sit		(-2.0))
-						(stand		(-2.0))
-					)
-			)
-			(backward	(task 	(movearound 	(2.0))
-						(sit		(-2.0))
-						(stand		(-2.0))
-					)
-			)
-			(right		(task 	(movearound 	(2.0))
-						(sit		(-2.0))
-						(stand		(-2.0))
-					)
-			)
-			(left		(task 	(movearound 	(2.0))
-						(sit		(-2.0))
-						(stand		(-2.0))
-					)
-			)
-			(stand		(task 	(movearound 	(-2.0))
-						(sit		(-2.0))
-						(stand		(2.0))
-					)
-			)
-			(sit		(task 	(movearound 	(-2.0))
-						(sit		(2.0))
-						(stand		(-2.0))
-					)
-			)
-			(nothing	(task 	(movearound 	(-2.0))
-						(sit		(2.0))
-						(stand		(2.0))
-					)
-			)
-	)
 discount 0.9
 tolerance 0.001
