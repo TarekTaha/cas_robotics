@@ -104,7 +104,7 @@ end
 cd html
 % Print Header
 fid=fopen('index.html','w');
-fprintf(fid,'%s\n\r%s\n\r%s\n\r%s\n\r%s\n\r','<html>','<head>','<H1>Exploration Matlab Code</H1>','<H2> &copy Gavin Paul 2007</h2>','</head>');
+fprintf(fid,'%s\n\r%s\n\r%s\n\r%s\n\r%s\n\r','<html>','<head>','<H1>Matlab Code makeindex</H1>','<H2> &copy Gavin Paul 2007</h2>','</head>');
 fprintf(fid,'%s\n\r','<table border="1" width="100%">');
 fprintf(fid,'%s\n\r','<tr><th width="15%">File (function)</th><th width="26%">Description</th><th width="24%">Calls</th><th width="24%">Called By</th><th width="11%">Globals Used</th></tr>');
 
