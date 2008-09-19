@@ -1,4 +1,5 @@
 %% FUNCTION: Basic scan
+%
 % Description: this traces out the lines and gets a group of points as the
 % basic scan 
 
