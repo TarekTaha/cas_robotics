@@ -32,7 +32,7 @@ init [*	(task		(stand	(1.0))	(sit	(0.0))	(movearound	(0.0)))
 unnormalised
 
 dd defaultlsg
-	(intention
+	(intention'
 			(forward	(lsg'	
 						(non	(0.0)) (medium		(0.3)) (high		(0.7)) (neg		(0.0))
 					)
@@ -65,7 +65,7 @@ dd defaultlsg
 enddd
 
 dd defaultrsg
-	(intention
+	(intention'
 			(forward	(rsg'	
 						(non	(0.0)) (medium		(0.3)) (high		(0.7)) (neg		(0.0))
 					)
@@ -98,7 +98,7 @@ dd defaultrsg
 enddd
 
 dd defaultuir
-	(intention
+	(intention'
 			(forward	(uir'	
 						(close	(1.0)) (far		(0.0))
 					)
@@ -131,7 +131,7 @@ dd defaultuir
 enddd
 
 dd defaultlir
-	(intention
+	(intention'
 			(forward	(lir'	
 						(close	(1.0)) (far		(0.0))
 					)
@@ -164,7 +164,7 @@ dd defaultlir
 enddd
 
 dd defaultlock
-	(intention
+	(intention'
 			(forward	(locked'	
 						(yes	(0.0)) (no	(1.0)) 
 					)
