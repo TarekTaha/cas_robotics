@@ -1,7 +1,13 @@
 function [W,M,V,L] = EM_GM(X,k,ltol,maxiter,pflag,Init)
-% [W,M,V,L] = EM_GM(X,k,ltol,maxiter,pflag,Init) 
+% [W,M,V,L] = EM_GM_fast(X,k,ltol,maxiter,pflag,Init) 
 % 
 % EM algorithm for k multidimensional Gaussian mixture estimation
+% (EM_GM_fast is the modified version of EM_GM for speed enchancement.
+%  The functionalities of EM_GM_fast and EM_GM are identical.)
+%
+% Note: EM_GM_fast requires more memory than EM_GM to execute.
+%       If EM_GM_fast does not provide any speed gain or is slower than EM_GM,
+%       more memory is needed or EM_GM should be used instead.
 %
 % Inputs:
 %   X(n,d) - input data, n=number of observations, d=dimension of variable
@@ -24,6 +30,12 @@ function [W,M,V,L] = EM_GM(X,k,ltol,maxiter,pflag,Init)
 %   University of Waterloo, 
 %   March, 2006
 %
+%   Michael Boedigheimer
+%   Amgen
+%   Dept of Computational Biology
+%   Thousand Oaks CA, 91320
+%   Dec, 2005
+% 
 
 %%%% Validate inputs %%%%
 if nargin <= 1,
@@ -83,7 +95,7 @@ Lo = 2*Ln;
 %%%% EM algorithm %%%%
 niter = 0;
 while (abs(100*(Ln-Lo)/Lo)>ltol) & (niter<=maxiter),
-    E = Expectation(X,k,W,M,V); % E-step    
+    E = Expectation(X,k,W,M,V);     % E-step
     [W,M,V] = Maximization(X,k,E);  % M-step
     Lo = Ln;
     Ln = Likelihood(X,k,W,M,V);
@@ -108,45 +120,36 @@ end
 %%%%%%%%%%%%%%%%%%%%%%
 
 function E = Expectation(X,k,W,M,V)
+% This function is the modification of 'Expectation' in EM_GM made by 
+% Mr. Michael Boedigheimer to enchance computational speed.
+% Note: this modification requires more memory to execute.
+%       If EM_GM_fast does not provide any speed gain or is slower than EM_GM,
+%       more memory is needed or EM_GM should be used instead.
 [n,d] = size(X);
-a = (2*pi)^(0.5*d);
-S = zeros(1,k);
-iV = zeros(d,d,k);
-for j=1:k,
-    if V(:,:,j)==zeros(d,d), V(:,:,j)=ones(d,d)*eps; end
-    S(j) = sqrt(det(V(:,:,j)));
-    iV(:,:,j) = inv(V(:,:,j));    
-end
 E = zeros(n,k);
-for i=1:n,    
-    for j=1:k,
-        dXM = X(i,:)'-M(:,j);
-        pl = exp(-0.5*dXM'*iV(:,:,j)*dXM)/(a*S(j));
-        E(i,j) = W(j)*pl;
-    end
-    E(i,:) = E(i,:)/sum(E(i,:));
+for j = 1:k,
+    if V(:,:,j)==zeros(d,d), V(:,:,j)=ones(d,d)*eps; end
+    E(:,j) = W(j).*mvnpdf( X, M(:,j)', V(:,:,j) );
 end
+total = repmat(sum(E,2),1,j);
+E = E./total;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%% End of Expectation %%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [W,M,V] = Maximization(X,k,E)
+% This function is the modification of 'Maximization' in EM_GM made by 
+% Mr. Michael Boedigheimer to enchance computational speed.
+% Note: this modification requires more memory to execute.
+%       If EM_GM_fast does not provide any speed gain or is slower than EM_GM,
+%       more memory is needed or EM_GM should be used instead.
 [n,d] = size(X);
-W = zeros(1,k); M = zeros(d,k);
-V = zeros(d,d,k);
-for i=1:k,  % Compute weights
-    for j=1:n,
-        W(i) = W(i) + E(j,i);
-        M(:,i) = M(:,i) + E(j,i)*X(j,:)';
-    end
-    M(:,i) = M(:,i)/W(i);
-end
+W = sum(E);
+M = X'*E./repmat(W,d,1);
 for i=1:k,
-    for j=1:n,
-        dXM = X(j,:)'-M(:,i);
-        V(:,:,i) = V(:,:,i) + E(j,i)*dXM*dXM';
-    end
-    V(:,:,i) = V(:,:,i)/W(i);
+    dXM = X - repmat(M(:,i)',n,1);
+    Wsp = spdiags(E(:,i),0,n,n);
+    V(:,:,i) = dXM'*Wsp*dXM/W(i);
 end
 W = W/n;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -161,7 +164,8 @@ U = mean(X)';
 S = cov(X);
 L = 0;
 for i=1:k,
-    iV = inv(V(:,:,i));
+    iV = pinv(V(:,:,i));
+    %iV = inv(V(:,:,i));
     L = L + W(i)*(-0.5*n*log(det(2*pi*V(:,:,i))) ...
         -0.5*(n-1)*(trace(iV*S)+(U-M(:,i))'*iV*(U-M(:,i))));
 end

@@ -11,6 +11,7 @@ pomdpModel.destCrossFeature = 1;
 pomdpModel.destinations = {'s1d1','s6d2','s26d3','s30d4','s31d5','s38d6','s44d7'};
 pomdpModel.actions = {'North','South','East','West','Stop'};
 pomdpModel.obsStrings = {'Up','Down','Right','Left','Nothing'};
+pomdpModel.observations = {'Up','Down','Right','Left','Nothing'};
 
 % Percentage Uncertainty in the actions
 %pomdpModel.actionsUncertainty = [10,10,20,20,10];    
