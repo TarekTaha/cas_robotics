@@ -2913,299 +2913,299 @@ O: * : s49d4 : Right 0.02500000
 O: * : s49d4 : Left 0.02500000
 O: * : s49d4 : Nothing 0.02500000
 
-O: * : s1d5 : Up 0.01250000
-O: * : s1d5 : Down 0.95000000
-O: * : s1d5 : Right 0.01250000
-O: * : s1d5 : Left 0.01250000
-O: * : s1d5 : Nothing 0.01250000
+O: * : s1d5 : Up 0.20000000
+O: * : s1d5 : Down 0.20000000
+O: * : s1d5 : Right 0.20000000
+O: * : s1d5 : Left 0.20000000
+O: * : s1d5 : Nothing 0.20000000
 
-O: * : s2d5 : Up 0.03750000
-O: * : s2d5 : Down 0.03750000
-O: * : s2d5 : Right 0.85000000
-O: * : s2d5 : Left 0.03750000
-O: * : s2d5 : Nothing 0.03750000
+O: * : s2d5 : Up 0.20000000
+O: * : s2d5 : Down 0.20000000
+O: * : s2d5 : Right 0.20000000
+O: * : s2d5 : Left 0.20000000
+O: * : s2d5 : Nothing 0.20000000
 
-O: * : s3d5 : Up 0.90000000
-O: * : s3d5 : Down 0.02500000
-O: * : s3d5 : Right 0.02500000
-O: * : s3d5 : Left 0.02500000
-O: * : s3d5 : Nothing 0.02500000
+O: * : s3d5 : Up 0.20000000
+O: * : s3d5 : Down 0.20000000
+O: * : s3d5 : Right 0.20000000
+O: * : s3d5 : Left 0.20000000
+O: * : s3d5 : Nothing 0.20000000
 
-O: * : s4d5 : Up 0.03750000
-O: * : s4d5 : Down 0.03750000
-O: * : s4d5 : Right 0.85000000
-O: * : s4d5 : Left 0.03750000
-O: * : s4d5 : Nothing 0.03750000
+O: * : s4d5 : Up 0.20000000
+O: * : s4d5 : Down 0.20000000
+O: * : s4d5 : Right 0.20000000
+O: * : s4d5 : Left 0.20000000
+O: * : s4d5 : Nothing 0.20000000
 
-O: * : s5d5 : Up 0.03750000
-O: * : s5d5 : Down 0.03750000
-O: * : s5d5 : Right 0.85000000
-O: * : s5d5 : Left 0.03750000
-O: * : s5d5 : Nothing 0.03750000
+O: * : s5d5 : Up 0.20000000
+O: * : s5d5 : Down 0.20000000
+O: * : s5d5 : Right 0.20000000
+O: * : s5d5 : Left 0.20000000
+O: * : s5d5 : Nothing 0.20000000
 
-O: * : s6d5 : Up 0.90000000
-O: * : s6d5 : Down 0.02500000
-O: * : s6d5 : Right 0.02500000
-O: * : s6d5 : Left 0.02500000
-O: * : s6d5 : Nothing 0.02500000
+O: * : s6d5 : Up 0.20000000
+O: * : s6d5 : Down 0.20000000
+O: * : s6d5 : Right 0.20000000
+O: * : s6d5 : Left 0.20000000
+O: * : s6d5 : Nothing 0.20000000
 
-O: * : s7d5 : Up 0.03750000
-O: * : s7d5 : Down 0.03750000
-O: * : s7d5 : Right 0.85000000
-O: * : s7d5 : Left 0.03750000
-O: * : s7d5 : Nothing 0.03750000
+O: * : s7d5 : Up 0.20000000
+O: * : s7d5 : Down 0.20000000
+O: * : s7d5 : Right 0.20000000
+O: * : s7d5 : Left 0.20000000
+O: * : s7d5 : Nothing 0.20000000
 
-O: * : s8d5 : Up 0.90000000
-O: * : s8d5 : Down 0.02500000
-O: * : s8d5 : Right 0.02500000
-O: * : s8d5 : Left 0.02500000
-O: * : s8d5 : Nothing 0.02500000
+O: * : s8d5 : Up 0.20000000
+O: * : s8d5 : Down 0.20000000
+O: * : s8d5 : Right 0.20000000
+O: * : s8d5 : Left 0.20000000
+O: * : s8d5 : Nothing 0.20000000
 
-O: * : s9d5 : Up 0.03750000
-O: * : s9d5 : Down 0.03750000
-O: * : s9d5 : Right 0.85000000
-O: * : s9d5 : Left 0.03750000
-O: * : s9d5 : Nothing 0.03750000
+O: * : s9d5 : Up 0.20000000
+O: * : s9d5 : Down 0.20000000
+O: * : s9d5 : Right 0.20000000
+O: * : s9d5 : Left 0.20000000
+O: * : s9d5 : Nothing 0.20000000
 
-O: * : s10d5 : Up 0.90000000
-O: * : s10d5 : Down 0.02500000
-O: * : s10d5 : Right 0.02500000
-O: * : s10d5 : Left 0.02500000
-O: * : s10d5 : Nothing 0.02500000
+O: * : s10d5 : Up 0.20000000
+O: * : s10d5 : Down 0.20000000
+O: * : s10d5 : Right 0.20000000
+O: * : s10d5 : Left 0.20000000
+O: * : s10d5 : Nothing 0.20000000
 
-O: * : s11d5 : Up 0.03750000
-O: * : s11d5 : Down 0.03750000
-O: * : s11d5 : Right 0.85000000
-O: * : s11d5 : Left 0.03750000
-O: * : s11d5 : Nothing 0.03750000
+O: * : s11d5 : Up 0.20000000
+O: * : s11d5 : Down 0.20000000
+O: * : s11d5 : Right 0.20000000
+O: * : s11d5 : Left 0.20000000
+O: * : s11d5 : Nothing 0.20000000
 
-O: * : s12d5 : Up 0.03750000
-O: * : s12d5 : Down 0.03750000
-O: * : s12d5 : Right 0.85000000
-O: * : s12d5 : Left 0.03750000
-O: * : s12d5 : Nothing 0.03750000
+O: * : s12d5 : Up 0.20000000
+O: * : s12d5 : Down 0.20000000
+O: * : s12d5 : Right 0.20000000
+O: * : s12d5 : Left 0.20000000
+O: * : s12d5 : Nothing 0.20000000
 
-O: * : s13d5 : Up 0.90000000
-O: * : s13d5 : Down 0.02500000
-O: * : s13d5 : Right 0.02500000
-O: * : s13d5 : Left 0.02500000
-O: * : s13d5 : Nothing 0.02500000
+O: * : s13d5 : Up 0.20000000
+O: * : s13d5 : Down 0.20000000
+O: * : s13d5 : Right 0.20000000
+O: * : s13d5 : Left 0.20000000
+O: * : s13d5 : Nothing 0.20000000
 
-O: * : s14d5 : Up 0.03750000
-O: * : s14d5 : Down 0.03750000
-O: * : s14d5 : Right 0.85000000
-O: * : s14d5 : Left 0.03750000
-O: * : s14d5 : Nothing 0.03750000
+O: * : s14d5 : Up 0.20000000
+O: * : s14d5 : Down 0.20000000
+O: * : s14d5 : Right 0.20000000
+O: * : s14d5 : Left 0.20000000
+O: * : s14d5 : Nothing 0.20000000
 
-O: * : s15d5 : Up 0.03750000
-O: * : s15d5 : Down 0.03750000
-O: * : s15d5 : Right 0.85000000
-O: * : s15d5 : Left 0.03750000
-O: * : s15d5 : Nothing 0.03750000
+O: * : s15d5 : Up 0.20000000
+O: * : s15d5 : Down 0.20000000
+O: * : s15d5 : Right 0.20000000
+O: * : s15d5 : Left 0.20000000
+O: * : s15d5 : Nothing 0.20000000
 
-O: * : s16d5 : Up 0.90000000
-O: * : s16d5 : Down 0.02500000
-O: * : s16d5 : Right 0.02500000
-O: * : s16d5 : Left 0.02500000
-O: * : s16d5 : Nothing 0.02500000
+O: * : s16d5 : Up 0.20000000
+O: * : s16d5 : Down 0.20000000
+O: * : s16d5 : Right 0.20000000
+O: * : s16d5 : Left 0.20000000
+O: * : s16d5 : Nothing 0.20000000
 
-O: * : s17d5 : Up 0.03750000
-O: * : s17d5 : Down 0.03750000
-O: * : s17d5 : Right 0.85000000
-O: * : s17d5 : Left 0.03750000
-O: * : s17d5 : Nothing 0.03750000
+O: * : s17d5 : Up 0.20000000
+O: * : s17d5 : Down 0.20000000
+O: * : s17d5 : Right 0.20000000
+O: * : s17d5 : Left 0.20000000
+O: * : s17d5 : Nothing 0.20000000
 
-O: * : s18d5 : Up 0.90000000
-O: * : s18d5 : Down 0.02500000
-O: * : s18d5 : Right 0.02500000
-O: * : s18d5 : Left 0.02500000
-O: * : s18d5 : Nothing 0.02500000
+O: * : s18d5 : Up 0.20000000
+O: * : s18d5 : Down 0.20000000
+O: * : s18d5 : Right 0.20000000
+O: * : s18d5 : Left 0.20000000
+O: * : s18d5 : Nothing 0.20000000
 
-O: * : s19d5 : Up 0.03750000
-O: * : s19d5 : Down 0.03750000
-O: * : s19d5 : Right 0.85000000
-O: * : s19d5 : Left 0.03750000
-O: * : s19d5 : Nothing 0.03750000
+O: * : s19d5 : Up 0.20000000
+O: * : s19d5 : Down 0.20000000
+O: * : s19d5 : Right 0.20000000
+O: * : s19d5 : Left 0.20000000
+O: * : s19d5 : Nothing 0.20000000
 
-O: * : s20d5 : Up 0.90000000
-O: * : s20d5 : Down 0.02500000
-O: * : s20d5 : Right 0.02500000
-O: * : s20d5 : Left 0.02500000
-O: * : s20d5 : Nothing 0.02500000
+O: * : s20d5 : Up 0.20000000
+O: * : s20d5 : Down 0.20000000
+O: * : s20d5 : Right 0.20000000
+O: * : s20d5 : Left 0.20000000
+O: * : s20d5 : Nothing 0.20000000
 
-O: * : s21d5 : Up 0.03750000
-O: * : s21d5 : Down 0.03750000
-O: * : s21d5 : Right 0.85000000
-O: * : s21d5 : Left 0.03750000
-O: * : s21d5 : Nothing 0.03750000
+O: * : s21d5 : Up 0.20000000
+O: * : s21d5 : Down 0.20000000
+O: * : s21d5 : Right 0.20000000
+O: * : s21d5 : Left 0.20000000
+O: * : s21d5 : Nothing 0.20000000
 
-O: * : s22d5 : Up 0.03750000
-O: * : s22d5 : Down 0.03750000
-O: * : s22d5 : Right 0.85000000
-O: * : s22d5 : Left 0.03750000
-O: * : s22d5 : Nothing 0.03750000
+O: * : s22d5 : Up 0.20000000
+O: * : s22d5 : Down 0.20000000
+O: * : s22d5 : Right 0.20000000
+O: * : s22d5 : Left 0.20000000
+O: * : s22d5 : Nothing 0.20000000
 
-O: * : s23d5 : Up 0.90000000
-O: * : s23d5 : Down 0.02500000
-O: * : s23d5 : Right 0.02500000
-O: * : s23d5 : Left 0.02500000
-O: * : s23d5 : Nothing 0.02500000
+O: * : s23d5 : Up 0.20000000
+O: * : s23d5 : Down 0.20000000
+O: * : s23d5 : Right 0.20000000
+O: * : s23d5 : Left 0.20000000
+O: * : s23d5 : Nothing 0.20000000
 
-O: * : s24d5 : Up 0.90000000
-O: * : s24d5 : Down 0.02500000
-O: * : s24d5 : Right 0.02500000
-O: * : s24d5 : Left 0.02500000
-O: * : s24d5 : Nothing 0.02500000
+O: * : s24d5 : Up 0.20000000
+O: * : s24d5 : Down 0.20000000
+O: * : s24d5 : Right 0.20000000
+O: * : s24d5 : Left 0.20000000
+O: * : s24d5 : Nothing 0.20000000
 
-O: * : s25d5 : Up 0.02500000
-O: * : s25d5 : Down 0.02500000
-O: * : s25d5 : Right 0.02500000
-O: * : s25d5 : Left 0.90000000
-O: * : s25d5 : Nothing 0.02500000
+O: * : s25d5 : Up 0.20000000
+O: * : s25d5 : Down 0.20000000
+O: * : s25d5 : Right 0.20000000
+O: * : s25d5 : Left 0.20000000
+O: * : s25d5 : Nothing 0.20000000
 
-O: * : s26d5 : Up 0.01250000
-O: * : s26d5 : Down 0.95000000
-O: * : s26d5 : Right 0.01250000
-O: * : s26d5 : Left 0.01250000
-O: * : s26d5 : Nothing 0.01250000
+O: * : s26d5 : Up 0.20000000
+O: * : s26d5 : Down 0.20000000
+O: * : s26d5 : Right 0.20000000
+O: * : s26d5 : Left 0.20000000
+O: * : s26d5 : Nothing 0.20000000
 
-O: * : s27d5 : Up 0.90000000
-O: * : s27d5 : Down 0.02500000
-O: * : s27d5 : Right 0.02500000
-O: * : s27d5 : Left 0.02500000
-O: * : s27d5 : Nothing 0.02500000
+O: * : s27d5 : Up 0.20000000
+O: * : s27d5 : Down 0.20000000
+O: * : s27d5 : Right 0.20000000
+O: * : s27d5 : Left 0.20000000
+O: * : s27d5 : Nothing 0.20000000
 
-O: * : s28d5 : Up 0.90000000
-O: * : s28d5 : Down 0.02500000
-O: * : s28d5 : Right 0.02500000
-O: * : s28d5 : Left 0.02500000
-O: * : s28d5 : Nothing 0.02500000
+O: * : s28d5 : Up 0.20000000
+O: * : s28d5 : Down 0.20000000
+O: * : s28d5 : Right 0.20000000
+O: * : s28d5 : Left 0.20000000
+O: * : s28d5 : Nothing 0.20000000
 
-O: * : s29d5 : Up 0.03750000
-O: * : s29d5 : Down 0.03750000
-O: * : s29d5 : Right 0.85000000
-O: * : s29d5 : Left 0.03750000
-O: * : s29d5 : Nothing 0.03750000
+O: * : s29d5 : Up 0.20000000
+O: * : s29d5 : Down 0.20000000
+O: * : s29d5 : Right 0.20000000
+O: * : s29d5 : Left 0.20000000
+O: * : s29d5 : Nothing 0.20000000
 
-O: * : s30d5 : Up 0.01250000
-O: * : s30d5 : Down 0.95000000
-O: * : s30d5 : Right 0.01250000
-O: * : s30d5 : Left 0.01250000
-O: * : s30d5 : Nothing 0.01250000
+O: * : s30d5 : Up 0.20000000
+O: * : s30d5 : Down 0.20000000
+O: * : s30d5 : Right 0.20000000
+O: * : s30d5 : Left 0.20000000
+O: * : s30d5 : Nothing 0.20000000
 
-O: * : s31d5 : Up 0.05000000
-O: * : s31d5 : Down 0.05000000
-O: * : s31d5 : Right 0.05000000
-O: * : s31d5 : Left 0.05000000
-O: * : s31d5 : Nothing 0.80000000
+O: * : s31d5 : Up 0.20000000
+O: * : s31d5 : Down 0.20000000
+O: * : s31d5 : Right 0.20000000
+O: * : s31d5 : Left 0.20000000
+O: * : s31d5 : Nothing 0.20000000
 
-O: * : s32d5 : Up 0.01250000
-O: * : s32d5 : Down 0.95000000
-O: * : s32d5 : Right 0.01250000
-O: * : s32d5 : Left 0.01250000
-O: * : s32d5 : Nothing 0.01250000
+O: * : s32d5 : Up 0.20000000
+O: * : s32d5 : Down 0.20000000
+O: * : s32d5 : Right 0.20000000
+O: * : s32d5 : Left 0.20000000
+O: * : s32d5 : Nothing 0.20000000
 
-O: * : s33d5 : Up 0.01250000
-O: * : s33d5 : Down 0.95000000
-O: * : s33d5 : Right 0.01250000
-O: * : s33d5 : Left 0.01250000
-O: * : s33d5 : Nothing 0.01250000
+O: * : s33d5 : Up 0.20000000
+O: * : s33d5 : Down 0.20000000
+O: * : s33d5 : Right 0.20000000
+O: * : s33d5 : Left 0.20000000
+O: * : s33d5 : Nothing 0.20000000
 
-O: * : s34d5 : Up 0.02500000
-O: * : s34d5 : Down 0.02500000
-O: * : s34d5 : Right 0.02500000
-O: * : s34d5 : Left 0.90000000
-O: * : s34d5 : Nothing 0.02500000
+O: * : s34d5 : Up 0.20000000
+O: * : s34d5 : Down 0.20000000
+O: * : s34d5 : Right 0.20000000
+O: * : s34d5 : Left 0.20000000
+O: * : s34d5 : Nothing 0.20000000
 
-O: * : s35d5 : Up 0.01250000
-O: * : s35d5 : Down 0.95000000
-O: * : s35d5 : Right 0.01250000
-O: * : s35d5 : Left 0.01250000
-O: * : s35d5 : Nothing 0.01250000
+O: * : s35d5 : Up 0.20000000
+O: * : s35d5 : Down 0.20000000
+O: * : s35d5 : Right 0.20000000
+O: * : s35d5 : Left 0.20000000
+O: * : s35d5 : Nothing 0.20000000
 
-O: * : s36d5 : Up 0.90000000
-O: * : s36d5 : Down 0.02500000
-O: * : s36d5 : Right 0.02500000
-O: * : s36d5 : Left 0.02500000
-O: * : s36d5 : Nothing 0.02500000
+O: * : s36d5 : Up 0.20000000
+O: * : s36d5 : Down 0.20000000
+O: * : s36d5 : Right 0.20000000
+O: * : s36d5 : Left 0.20000000
+O: * : s36d5 : Nothing 0.20000000
 
-O: * : s37d5 : Up 0.02500000
-O: * : s37d5 : Down 0.02500000
-O: * : s37d5 : Right 0.02500000
-O: * : s37d5 : Left 0.90000000
-O: * : s37d5 : Nothing 0.02500000
+O: * : s37d5 : Up 0.20000000
+O: * : s37d5 : Down 0.20000000
+O: * : s37d5 : Right 0.20000000
+O: * : s37d5 : Left 0.20000000
+O: * : s37d5 : Nothing 0.20000000
 
-O: * : s38d5 : Up 0.01250000
-O: * : s38d5 : Down 0.95000000
-O: * : s38d5 : Right 0.01250000
-O: * : s38d5 : Left 0.01250000
-O: * : s38d5 : Nothing 0.01250000
+O: * : s38d5 : Up 0.20000000
+O: * : s38d5 : Down 0.20000000
+O: * : s38d5 : Right 0.20000000
+O: * : s38d5 : Left 0.20000000
+O: * : s38d5 : Nothing 0.20000000
 
-O: * : s39d5 : Up 0.90000000
-O: * : s39d5 : Down 0.02500000
-O: * : s39d5 : Right 0.02500000
-O: * : s39d5 : Left 0.02500000
-O: * : s39d5 : Nothing 0.02500000
+O: * : s39d5 : Up 0.20000000
+O: * : s39d5 : Down 0.20000000
+O: * : s39d5 : Right 0.20000000
+O: * : s39d5 : Left 0.20000000
+O: * : s39d5 : Nothing 0.20000000
 
-O: * : s40d5 : Up 0.03750000
-O: * : s40d5 : Down 0.03750000
-O: * : s40d5 : Right 0.85000000
-O: * : s40d5 : Left 0.03750000
-O: * : s40d5 : Nothing 0.03750000
+O: * : s40d5 : Up 0.20000000
+O: * : s40d5 : Down 0.20000000
+O: * : s40d5 : Right 0.20000000
+O: * : s40d5 : Left 0.20000000
+O: * : s40d5 : Nothing 0.20000000
 
-O: * : s41d5 : Up 0.01250000
-O: * : s41d5 : Down 0.95000000
-O: * : s41d5 : Right 0.01250000
-O: * : s41d5 : Left 0.01250000
-O: * : s41d5 : Nothing 0.01250000
+O: * : s41d5 : Up 0.20000000
+O: * : s41d5 : Down 0.20000000
+O: * : s41d5 : Right 0.20000000
+O: * : s41d5 : Left 0.20000000
+O: * : s41d5 : Nothing 0.20000000
 
-O: * : s42d5 : Up 0.90000000
-O: * : s42d5 : Down 0.02500000
-O: * : s42d5 : Right 0.02500000
-O: * : s42d5 : Left 0.02500000
-O: * : s42d5 : Nothing 0.02500000
+O: * : s42d5 : Up 0.20000000
+O: * : s42d5 : Down 0.20000000
+O: * : s42d5 : Right 0.20000000
+O: * : s42d5 : Left 0.20000000
+O: * : s42d5 : Nothing 0.20000000
 
-O: * : s43d5 : Up 0.03750000
-O: * : s43d5 : Down 0.03750000
-O: * : s43d5 : Right 0.85000000
-O: * : s43d5 : Left 0.03750000
-O: * : s43d5 : Nothing 0.03750000
+O: * : s43d5 : Up 0.20000000
+O: * : s43d5 : Down 0.20000000
+O: * : s43d5 : Right 0.20000000
+O: * : s43d5 : Left 0.20000000
+O: * : s43d5 : Nothing 0.20000000
 
-O: * : s44d5 : Up 0.01250000
-O: * : s44d5 : Down 0.95000000
-O: * : s44d5 : Right 0.01250000
-O: * : s44d5 : Left 0.01250000
-O: * : s44d5 : Nothing 0.01250000
+O: * : s44d5 : Up 0.20000000
+O: * : s44d5 : Down 0.20000000
+O: * : s44d5 : Right 0.20000000
+O: * : s44d5 : Left 0.20000000
+O: * : s44d5 : Nothing 0.20000000
 
-O: * : s45d5 : Up 0.90000000
-O: * : s45d5 : Down 0.02500000
-O: * : s45d5 : Right 0.02500000
-O: * : s45d5 : Left 0.02500000
-O: * : s45d5 : Nothing 0.02500000
+O: * : s45d5 : Up 0.20000000
+O: * : s45d5 : Down 0.20000000
+O: * : s45d5 : Right 0.20000000
+O: * : s45d5 : Left 0.20000000
+O: * : s45d5 : Nothing 0.20000000
 
-O: * : s46d5 : Up 0.03750000
-O: * : s46d5 : Down 0.03750000
-O: * : s46d5 : Right 0.85000000
-O: * : s46d5 : Left 0.03750000
-O: * : s46d5 : Nothing 0.03750000
+O: * : s46d5 : Up 0.20000000
+O: * : s46d5 : Down 0.20000000
+O: * : s46d5 : Right 0.20000000
+O: * : s46d5 : Left 0.20000000
+O: * : s46d5 : Nothing 0.20000000
 
-O: * : s47d5 : Up 0.90000000
-O: * : s47d5 : Down 0.02500000
-O: * : s47d5 : Right 0.02500000
-O: * : s47d5 : Left 0.02500000
-O: * : s47d5 : Nothing 0.02500000
+O: * : s47d5 : Up 0.20000000
+O: * : s47d5 : Down 0.20000000
+O: * : s47d5 : Right 0.20000000
+O: * : s47d5 : Left 0.20000000
+O: * : s47d5 : Nothing 0.20000000
 
-O: * : s48d5 : Up 0.03750000
-O: * : s48d5 : Down 0.03750000
-O: * : s48d5 : Right 0.85000000
-O: * : s48d5 : Left 0.03750000
-O: * : s48d5 : Nothing 0.03750000
+O: * : s48d5 : Up 0.20000000
+O: * : s48d5 : Down 0.20000000
+O: * : s48d5 : Right 0.20000000
+O: * : s48d5 : Left 0.20000000
+O: * : s48d5 : Nothing 0.20000000
 
-O: * : s49d5 : Up 0.90000000
-O: * : s49d5 : Down 0.02500000
-O: * : s49d5 : Right 0.02500000
-O: * : s49d5 : Left 0.02500000
-O: * : s49d5 : Nothing 0.02500000
+O: * : s49d5 : Up 0.20000000
+O: * : s49d5 : Down 0.20000000
+O: * : s49d5 : Right 0.20000000
+O: * : s49d5 : Left 0.20000000
+O: * : s49d5 : Nothing 0.20000000
 
 O: * : s1d6 : Up 0.01250000
 O: * : s1d6 : Down 0.95000000
@@ -3501,101 +3501,101 @@ O: * : s49d6 : Right 0.02500000
 O: * : s49d6 : Left 0.02500000
 O: * : s49d6 : Nothing 0.02500000
 
-O: * : s1d7 : Up 0.20000000
-O: * : s1d7 : Down 0.20000000
-O: * : s1d7 : Right 0.20000000
-O: * : s1d7 : Left 0.20000000
-O: * : s1d7 : Nothing 0.20000000
+O: * : s1d7 : Up 0.01250000
+O: * : s1d7 : Down 0.95000000
+O: * : s1d7 : Right 0.01250000
+O: * : s1d7 : Left 0.01250000
+O: * : s1d7 : Nothing 0.01250000
 
-O: * : s2d7 : Up 0.20000000
-O: * : s2d7 : Down 0.20000000
-O: * : s2d7 : Right 0.20000000
-O: * : s2d7 : Left 0.20000000
-O: * : s2d7 : Nothing 0.20000000
+O: * : s2d7 : Up 0.03750000
+O: * : s2d7 : Down 0.03750000
+O: * : s2d7 : Right 0.85000000
+O: * : s2d7 : Left 0.03750000
+O: * : s2d7 : Nothing 0.03750000
 
-O: * : s3d7 : Up 0.20000000
-O: * : s3d7 : Down 0.20000000
-O: * : s3d7 : Right 0.20000000
-O: * : s3d7 : Left 0.20000000
-O: * : s3d7 : Nothing 0.20000000
+O: * : s3d7 : Up 0.90000000
+O: * : s3d7 : Down 0.02500000
+O: * : s3d7 : Right 0.02500000
+O: * : s3d7 : Left 0.02500000
+O: * : s3d7 : Nothing 0.02500000
 
-O: * : s4d7 : Up 0.20000000
-O: * : s4d7 : Down 0.20000000
-O: * : s4d7 : Right 0.20000000
-O: * : s4d7 : Left 0.20000000
-O: * : s4d7 : Nothing 0.20000000
+O: * : s4d7 : Up 0.90000000
+O: * : s4d7 : Down 0.02500000
+O: * : s4d7 : Right 0.02500000
+O: * : s4d7 : Left 0.02500000
+O: * : s4d7 : Nothing 0.02500000
 
-O: * : s5d7 : Up 0.20000000
-O: * : s5d7 : Down 0.20000000
-O: * : s5d7 : Right 0.20000000
-O: * : s5d7 : Left 0.20000000
-O: * : s5d7 : Nothing 0.20000000
+O: * : s5d7 : Up 0.03750000
+O: * : s5d7 : Down 0.03750000
+O: * : s5d7 : Right 0.85000000
+O: * : s5d7 : Left 0.03750000
+O: * : s5d7 : Nothing 0.03750000
 
-O: * : s6d7 : Up 0.20000000
-O: * : s6d7 : Down 0.20000000
-O: * : s6d7 : Right 0.20000000
-O: * : s6d7 : Left 0.20000000
-O: * : s6d7 : Nothing 0.20000000
+O: * : s6d7 : Up 0.90000000
+O: * : s6d7 : Down 0.02500000
+O: * : s6d7 : Right 0.02500000
+O: * : s6d7 : Left 0.02500000
+O: * : s6d7 : Nothing 0.02500000
 
-O: * : s7d7 : Up 0.20000000
-O: * : s7d7 : Down 0.20000000
-O: * : s7d7 : Right 0.20000000
-O: * : s7d7 : Left 0.20000000
-O: * : s7d7 : Nothing 0.20000000
+O: * : s7d7 : Up 0.02500000
+O: * : s7d7 : Down 0.02500000
+O: * : s7d7 : Right 0.02500000
+O: * : s7d7 : Left 0.90000000
+O: * : s7d7 : Nothing 0.02500000
 
-O: * : s8d7 : Up 0.20000000
-O: * : s8d7 : Down 0.20000000
-O: * : s8d7 : Right 0.20000000
-O: * : s8d7 : Left 0.20000000
-O: * : s8d7 : Nothing 0.20000000
+O: * : s8d7 : Up 0.90000000
+O: * : s8d7 : Down 0.02500000
+O: * : s8d7 : Right 0.02500000
+O: * : s8d7 : Left 0.02500000
+O: * : s8d7 : Nothing 0.02500000
 
-O: * : s9d7 : Up 0.20000000
-O: * : s9d7 : Down 0.20000000
-O: * : s9d7 : Right 0.20000000
-O: * : s9d7 : Left 0.20000000
-O: * : s9d7 : Nothing 0.20000000
+O: * : s9d7 : Up 0.04333333
+O: * : s9d7 : Down 0.04333333
+O: * : s9d7 : Right 0.51000000
+O: * : s9d7 : Left 0.36000000
+O: * : s9d7 : Nothing 0.04333333
 
-O: * : s10d7 : Up 0.20000000
-O: * : s10d7 : Down 0.20000000
-O: * : s10d7 : Right 0.20000000
-O: * : s10d7 : Left 0.20000000
-O: * : s10d7 : Nothing 0.20000000
+O: * : s10d7 : Up 0.90000000
+O: * : s10d7 : Down 0.02500000
+O: * : s10d7 : Right 0.02500000
+O: * : s10d7 : Left 0.02500000
+O: * : s10d7 : Nothing 0.02500000
 
-O: * : s11d7 : Up 0.20000000
-O: * : s11d7 : Down 0.20000000
-O: * : s11d7 : Right 0.20000000
-O: * : s11d7 : Left 0.20000000
-O: * : s11d7 : Nothing 0.20000000
+O: * : s11d7 : Up 0.90000000
+O: * : s11d7 : Down 0.02500000
+O: * : s11d7 : Right 0.02500000
+O: * : s11d7 : Left 0.02500000
+O: * : s11d7 : Nothing 0.02500000
 
-O: * : s12d7 : Up 0.20000000
-O: * : s12d7 : Down 0.20000000
-O: * : s12d7 : Right 0.20000000
-O: * : s12d7 : Left 0.20000000
-O: * : s12d7 : Nothing 0.20000000
+O: * : s12d7 : Up 0.03750000
+O: * : s12d7 : Down 0.03750000
+O: * : s12d7 : Right 0.85000000
+O: * : s12d7 : Left 0.03750000
+O: * : s12d7 : Nothing 0.03750000
 
-O: * : s13d7 : Up 0.20000000
-O: * : s13d7 : Down 0.20000000
-O: * : s13d7 : Right 0.20000000
-O: * : s13d7 : Left 0.20000000
-O: * : s13d7 : Nothing 0.20000000
+O: * : s13d7 : Up 0.90000000
+O: * : s13d7 : Down 0.02500000
+O: * : s13d7 : Right 0.02500000
+O: * : s13d7 : Left 0.02500000
+O: * : s13d7 : Nothing 0.02500000
 
-O: * : s14d7 : Up 0.20000000
-O: * : s14d7 : Down 0.20000000
-O: * : s14d7 : Right 0.20000000
-O: * : s14d7 : Left 0.20000000
-O: * : s14d7 : Nothing 0.20000000
+O: * : s14d7 : Up 0.03750000
+O: * : s14d7 : Down 0.03750000
+O: * : s14d7 : Right 0.85000000
+O: * : s14d7 : Left 0.03750000
+O: * : s14d7 : Nothing 0.03750000
 
-O: * : s15d7 : Up 0.20000000
-O: * : s15d7 : Down 0.20000000
-O: * : s15d7 : Right 0.20000000
-O: * : s15d7 : Left 0.20000000
-O: * : s15d7 : Nothing 0.20000000
+O: * : s15d7 : Up 0.03750000
+O: * : s15d7 : Down 0.03750000
+O: * : s15d7 : Right 0.85000000
+O: * : s15d7 : Left 0.03750000
+O: * : s15d7 : Nothing 0.03750000
 
-O: * : s16d7 : Up 0.20000000
-O: * : s16d7 : Down 0.20000000
-O: * : s16d7 : Right 0.20000000
-O: * : s16d7 : Left 0.20000000
-O: * : s16d7 : Nothing 0.20000000
+O: * : s16d7 : Up 0.90000000
+O: * : s16d7 : Down 0.02500000
+O: * : s16d7 : Right 0.02500000
+O: * : s16d7 : Left 0.02500000
+O: * : s16d7 : Nothing 0.02500000
 
 O: * : s17d7 : Up 0.90000000
 O: * : s17d7 : Down 0.02500000
@@ -3603,11 +3603,11 @@ O: * : s17d7 : Right 0.02500000
 O: * : s17d7 : Left 0.02500000
 O: * : s17d7 : Nothing 0.02500000
 
-O: * : s18d7 : Up 0.20000000
-O: * : s18d7 : Down 0.20000000
-O: * : s18d7 : Right 0.20000000
-O: * : s18d7 : Left 0.20000000
-O: * : s18d7 : Nothing 0.20000000
+O: * : s18d7 : Up 0.90000000
+O: * : s18d7 : Down 0.02500000
+O: * : s18d7 : Right 0.02500000
+O: * : s18d7 : Left 0.02500000
+O: * : s18d7 : Nothing 0.02500000
 
 O: * : s19d7 : Up 0.02500000
 O: * : s19d7 : Down 0.02500000
@@ -3615,11 +3615,11 @@ O: * : s19d7 : Right 0.02500000
 O: * : s19d7 : Left 0.90000000
 O: * : s19d7 : Nothing 0.02500000
 
-O: * : s20d7 : Up 0.20000000
-O: * : s20d7 : Down 0.20000000
-O: * : s20d7 : Right 0.20000000
-O: * : s20d7 : Left 0.20000000
-O: * : s20d7 : Nothing 0.20000000
+O: * : s20d7 : Up 0.90000000
+O: * : s20d7 : Down 0.02500000
+O: * : s20d7 : Right 0.02500000
+O: * : s20d7 : Left 0.02500000
+O: * : s20d7 : Nothing 0.02500000
 
 O: * : s21d7 : Up 0.02500000
 O: * : s21d7 : Down 0.02500000
@@ -3633,11 +3633,11 @@ O: * : s22d7 : Right 0.02500000
 O: * : s22d7 : Left 0.90000000
 O: * : s22d7 : Nothing 0.02500000
 
-O: * : s23d7 : Up 0.20000000
-O: * : s23d7 : Down 0.20000000
-O: * : s23d7 : Right 0.20000000
-O: * : s23d7 : Left 0.20000000
-O: * : s23d7 : Nothing 0.20000000
+O: * : s23d7 : Up 0.90000000
+O: * : s23d7 : Down 0.02500000
+O: * : s23d7 : Right 0.02500000
+O: * : s23d7 : Left 0.02500000
+O: * : s23d7 : Nothing 0.02500000
 
 O: * : s24d7 : Up 0.02500000
 O: * : s24d7 : Down 0.02500000
@@ -3657,101 +3657,101 @@ O: * : s26d7 : Right 0.01250000
 O: * : s26d7 : Left 0.01250000
 O: * : s26d7 : Nothing 0.01250000
 
-O: * : s27d7 : Up 0.20000000
-O: * : s27d7 : Down 0.20000000
-O: * : s27d7 : Right 0.20000000
-O: * : s27d7 : Left 0.20000000
-O: * : s27d7 : Nothing 0.20000000
+O: * : s27d7 : Up 0.90000000
+O: * : s27d7 : Down 0.02500000
+O: * : s27d7 : Right 0.02500000
+O: * : s27d7 : Left 0.02500000
+O: * : s27d7 : Nothing 0.02500000
 
-O: * : s28d7 : Up 0.20000000
-O: * : s28d7 : Down 0.20000000
-O: * : s28d7 : Right 0.20000000
-O: * : s28d7 : Left 0.20000000
-O: * : s28d7 : Nothing 0.20000000
+O: * : s28d7 : Up 0.02500000
+O: * : s28d7 : Down 0.02500000
+O: * : s28d7 : Right 0.02500000
+O: * : s28d7 : Left 0.90000000
+O: * : s28d7 : Nothing 0.02500000
 
-O: * : s29d7 : Up 0.20000000
-O: * : s29d7 : Down 0.20000000
-O: * : s29d7 : Right 0.20000000
-O: * : s29d7 : Left 0.20000000
-O: * : s29d7 : Nothing 0.20000000
+O: * : s29d7 : Up 0.01250000
+O: * : s29d7 : Down 0.95000000
+O: * : s29d7 : Right 0.01250000
+O: * : s29d7 : Left 0.01250000
+O: * : s29d7 : Nothing 0.01250000
 
-O: * : s30d7 : Up 0.20000000
-O: * : s30d7 : Down 0.20000000
-O: * : s30d7 : Right 0.20000000
-O: * : s30d7 : Left 0.20000000
-O: * : s30d7 : Nothing 0.20000000
+O: * : s30d7 : Up 0.01250000
+O: * : s30d7 : Down 0.95000000
+O: * : s30d7 : Right 0.01250000
+O: * : s30d7 : Left 0.01250000
+O: * : s30d7 : Nothing 0.01250000
 
-O: * : s31d7 : Up 0.20000000
-O: * : s31d7 : Down 0.20000000
-O: * : s31d7 : Right 0.20000000
-O: * : s31d7 : Left 0.20000000
-O: * : s31d7 : Nothing 0.20000000
+O: * : s31d7 : Up 0.02500000
+O: * : s31d7 : Down 0.02500000
+O: * : s31d7 : Right 0.02500000
+O: * : s31d7 : Left 0.90000000
+O: * : s31d7 : Nothing 0.02500000
 
-O: * : s32d7 : Up 0.20000000
-O: * : s32d7 : Down 0.20000000
-O: * : s32d7 : Right 0.20000000
-O: * : s32d7 : Left 0.20000000
-O: * : s32d7 : Nothing 0.20000000
+O: * : s32d7 : Up 0.01250000
+O: * : s32d7 : Down 0.95000000
+O: * : s32d7 : Right 0.01250000
+O: * : s32d7 : Left 0.01250000
+O: * : s32d7 : Nothing 0.01250000
 
-O: * : s33d7 : Up 0.20000000
-O: * : s33d7 : Down 0.20000000
-O: * : s33d7 : Right 0.20000000
-O: * : s33d7 : Left 0.20000000
-O: * : s33d7 : Nothing 0.20000000
+O: * : s33d7 : Up 0.01250000
+O: * : s33d7 : Down 0.95000000
+O: * : s33d7 : Right 0.01250000
+O: * : s33d7 : Left 0.01250000
+O: * : s33d7 : Nothing 0.01250000
 
-O: * : s34d7 : Up 0.20000000
-O: * : s34d7 : Down 0.20000000
-O: * : s34d7 : Right 0.20000000
-O: * : s34d7 : Left 0.20000000
-O: * : s34d7 : Nothing 0.20000000
+O: * : s34d7 : Up 0.02500000
+O: * : s34d7 : Down 0.02500000
+O: * : s34d7 : Right 0.02500000
+O: * : s34d7 : Left 0.90000000
+O: * : s34d7 : Nothing 0.02500000
 
-O: * : s35d7 : Up 0.20000000
-O: * : s35d7 : Down 0.20000000
-O: * : s35d7 : Right 0.20000000
-O: * : s35d7 : Left 0.20000000
-O: * : s35d7 : Nothing 0.20000000
+O: * : s35d7 : Up 0.01250000
+O: * : s35d7 : Down 0.95000000
+O: * : s35d7 : Right 0.01250000
+O: * : s35d7 : Left 0.01250000
+O: * : s35d7 : Nothing 0.01250000
 
-O: * : s36d7 : Up 0.20000000
-O: * : s36d7 : Down 0.20000000
-O: * : s36d7 : Right 0.20000000
-O: * : s36d7 : Left 0.20000000
-O: * : s36d7 : Nothing 0.20000000
+O: * : s36d7 : Up 0.90000000
+O: * : s36d7 : Down 0.02500000
+O: * : s36d7 : Right 0.02500000
+O: * : s36d7 : Left 0.02500000
+O: * : s36d7 : Nothing 0.02500000
 
-O: * : s37d7 : Up 0.20000000
-O: * : s37d7 : Down 0.20000000
-O: * : s37d7 : Right 0.20000000
-O: * : s37d7 : Left 0.20000000
-O: * : s37d7 : Nothing 0.20000000
+O: * : s37d7 : Up 0.02500000
+O: * : s37d7 : Down 0.02500000
+O: * : s37d7 : Right 0.02500000
+O: * : s37d7 : Left 0.90000000
+O: * : s37d7 : Nothing 0.02500000
 
-O: * : s38d7 : Up 0.20000000
-O: * : s38d7 : Down 0.20000000
-O: * : s38d7 : Right 0.20000000
-O: * : s38d7 : Left 0.20000000
-O: * : s38d7 : Nothing 0.20000000
+O: * : s38d7 : Up 0.01250000
+O: * : s38d7 : Down 0.95000000
+O: * : s38d7 : Right 0.01250000
+O: * : s38d7 : Left 0.01250000
+O: * : s38d7 : Nothing 0.01250000
 
-O: * : s39d7 : Up 0.20000000
-O: * : s39d7 : Down 0.20000000
-O: * : s39d7 : Right 0.20000000
-O: * : s39d7 : Left 0.20000000
-O: * : s39d7 : Nothing 0.20000000
+O: * : s39d7 : Up 0.90000000
+O: * : s39d7 : Down 0.02500000
+O: * : s39d7 : Right 0.02500000
+O: * : s39d7 : Left 0.02500000
+O: * : s39d7 : Nothing 0.02500000
 
-O: * : s40d7 : Up 0.20000000
-O: * : s40d7 : Down 0.20000000
-O: * : s40d7 : Right 0.20000000
-O: * : s40d7 : Left 0.20000000
-O: * : s40d7 : Nothing 0.20000000
+O: * : s40d7 : Up 0.02500000
+O: * : s40d7 : Down 0.02500000
+O: * : s40d7 : Right 0.02500000
+O: * : s40d7 : Left 0.90000000
+O: * : s40d7 : Nothing 0.02500000
 
-O: * : s41d7 : Up 0.20000000
-O: * : s41d7 : Down 0.20000000
-O: * : s41d7 : Right 0.20000000
-O: * : s41d7 : Left 0.20000000
-O: * : s41d7 : Nothing 0.20000000
+O: * : s41d7 : Up 0.01250000
+O: * : s41d7 : Down 0.95000000
+O: * : s41d7 : Right 0.01250000
+O: * : s41d7 : Left 0.01250000
+O: * : s41d7 : Nothing 0.01250000
 
-O: * : s42d7 : Up 0.20000000
-O: * : s42d7 : Down 0.20000000
-O: * : s42d7 : Right 0.20000000
-O: * : s42d7 : Left 0.20000000
-O: * : s42d7 : Nothing 0.20000000
+O: * : s42d7 : Up 0.90000000
+O: * : s42d7 : Down 0.02500000
+O: * : s42d7 : Right 0.02500000
+O: * : s42d7 : Left 0.02500000
+O: * : s42d7 : Nothing 0.02500000
 
 O: * : s43d7 : Up 0.90000000
 O: * : s43d7 : Down 0.02500000
@@ -3771,29 +3771,29 @@ O: * : s45d7 : Right 0.02500000
 O: * : s45d7 : Left 0.02500000
 O: * : s45d7 : Nothing 0.02500000
 
-O: * : s46d7 : Up 0.20000000
-O: * : s46d7 : Down 0.20000000
-O: * : s46d7 : Right 0.20000000
-O: * : s46d7 : Left 0.20000000
-O: * : s46d7 : Nothing 0.20000000
+O: * : s46d7 : Up 0.03750000
+O: * : s46d7 : Down 0.03750000
+O: * : s46d7 : Right 0.85000000
+O: * : s46d7 : Left 0.03750000
+O: * : s46d7 : Nothing 0.03750000
 
-O: * : s47d7 : Up 0.20000000
-O: * : s47d7 : Down 0.20000000
-O: * : s47d7 : Right 0.20000000
-O: * : s47d7 : Left 0.20000000
-O: * : s47d7 : Nothing 0.20000000
+O: * : s47d7 : Up 0.90000000
+O: * : s47d7 : Down 0.02500000
+O: * : s47d7 : Right 0.02500000
+O: * : s47d7 : Left 0.02500000
+O: * : s47d7 : Nothing 0.02500000
 
-O: * : s48d7 : Up 0.20000000
-O: * : s48d7 : Down 0.20000000
-O: * : s48d7 : Right 0.20000000
-O: * : s48d7 : Left 0.20000000
-O: * : s48d7 : Nothing 0.20000000
+O: * : s48d7 : Up 0.03750000
+O: * : s48d7 : Down 0.03750000
+O: * : s48d7 : Right 0.85000000
+O: * : s48d7 : Left 0.03750000
+O: * : s48d7 : Nothing 0.03750000
 
-O: * : s49d7 : Up 0.20000000
-O: * : s49d7 : Down 0.20000000
-O: * : s49d7 : Right 0.20000000
-O: * : s49d7 : Left 0.20000000
-O: * : s49d7 : Nothing 0.20000000
+O: * : s49d7 : Up 0.90000000
+O: * : s49d7 : Down 0.02500000
+O: * : s49d7 : Right 0.02500000
+O: * : s49d7 : Left 0.02500000
+O: * : s49d7 : Nothing 0.02500000
 
 
 # R: <action> : <start-state> : <end-state> : <observation> %f
@@ -3811,14 +3811,6 @@ R: * : s43d4 : s40d4 : Right 4.286
 R: * : s40d4 : s28d4 : Up    4.286 
 R: * : s28d4 : s29d4 : Up    4.286 
 R: * : s29d4 : s30d4 : Nothing 4.286 
-R: * : s1d5  : s2d5  : Right 10.000 
-R: * : s2d5  : s48d5 : Right 5.000 
-R: * : s48d5 : s46d5 : Right 5.000 
-R: * : s46d5 : s43d5 : Right 5.000 
-R: * : s43d5 : s40d5 : Right 5.000 
-R: * : s40d5 : s28d5 : Up    5.000 
-R: * : s28d5 : s29d5 : Right 5.000 
-R: * : s29d5 : s31d5 : Nothing 5.000 
 R: * : s1d6  : s2d6  : Right 10.000 
 R: * : s2d6  : s48d6 : Right 5.714 
 R: * : s48d6 : s46d6 : Right 5.714 
@@ -3841,6 +3833,11 @@ R: * : s28d3 : s27d3 : Down  6.667
 R: * : s27d3 : s24d3 : Right 6.667 
 R: * : s24d3 : s25d3 : Up    2.857 
 R: * : s25d3 : s26d3 : Nothing 2.857 
+R: * : s1d7  : s2d7  : Right 10.000 
+R: * : s2d7  : s48d7 : Right 4.000 
+R: * : s48d7 : s46d7 : Right 4.000 
+R: * : s46d7 : s43d7 : Up    4.000 
+R: * : s43d7 : s44d7 : Nothing 4.000 
 R: * : s3d4  : s2d4  : Right 10.000 
 R: * : s2d4  : s48d4 : Right 5.714 
 R: * : s48d4 : s46d4 : Right 5.714 
@@ -3849,14 +3846,6 @@ R: * : s43d4 : s40d4 : Right 5.714
 R: * : s40d4 : s28d4 : Up    5.714 
 R: * : s28d4 : s29d4 : Up    5.714 
 R: * : s29d4 : s30d4 : Nothing 5.714 
-R: * : s3d5  : s2d5  : Right 10.000 
-R: * : s2d5  : s48d5 : Right 5.000 
-R: * : s48d5 : s46d5 : Right 5.000 
-R: * : s46d5 : s43d5 : Right 5.000 
-R: * : s43d5 : s40d5 : Right 5.000 
-R: * : s40d5 : s28d5 : Up    5.000 
-R: * : s28d5 : s29d5 : Right 5.000 
-R: * : s29d5 : s31d5 : Nothing 5.000 
 R: * : s3d6  : s2d6  : Right 10.000 
 R: * : s2d6  : s48d6 : Right 4.286 
 R: * : s48d6 : s46d6 : Right 4.286 
@@ -3881,6 +3870,11 @@ R: * : s24d3 : s25d3 : Up    1.429
 R: * : s25d3 : s26d3 : Nothing 1.429 
 R: * : s3d1  : s2d1  : Up    5.000 
 R: * : s2d1  : s1d1  : Nothing 5.000 
+R: * : s3d7  : s2d7  : Right 10.000 
+R: * : s2d7  : s48d7 : Right 6.000 
+R: * : s48d7 : s46d7 : Right 6.000 
+R: * : s46d7 : s43d7 : Up    6.000 
+R: * : s43d7 : s44d7 : Nothing 6.000 
 R: * : s3d2  : s4d2  : Left  5.000 
 R: * : s4d2  : s5d2  : Down  5.000 
 R: * : s5d2  : s6d2  : Nothing 5.000 
@@ -3920,37 +3914,30 @@ R: * : s22d4 : s24d4 : Up    3.000
 R: * : s24d4 : s27d4 : Up    3.000 
 R: * : s27d4 : s28d4 : Up    3.000 
 R: * : s28d4 : s29d4 : Up    3.000 
-R: * : s29d4 : s30d4 : Nothing 5.000 
-R: * : s9d5  : s11d5 : Right 20.000 
-R: * : s11d5 : s12d5 : Right 20.000 
-R: * : s12d5 : s14d5 : Right 10.000 
-R: * : s14d5 : s15d5 : Right 10.000 
-R: * : s15d5 : s17d5 : Right 10.000 
-R: * : s17d5 : s19d5 : Right 10.000 
-R: * : s19d5 : s21d5 : Right 10.000 
-R: * : s21d5 : s22d5 : Right 10.000 
-R: * : s22d5 : s24d5 : Up    10.000 
-R: * : s24d5 : s27d5 : Up    10.000 
-R: * : s27d5 : s28d5 : Up    10.000 
-R: * : s28d5 : s29d5 : Right 10.000 
-R: * : s29d5 : s31d5 : Nothing 10.000 
+R: * : s29d4 : s30d4 : Nothing 3.000 
 R: * : s9d6  : s11d6 : Right 10.000 
 R: * : s11d6 : s12d6 : Right 10.000 
 R: * : s12d6 : s14d6 : Right 3.333 
 R: * : s14d6 : s15d6 : Right 3.333 
-R: * : s15d6 : s17d6 : Right 3.333 
-R: * : s17d6 : s19d6 : Right 3.333 
+R: * : s15d6 : s17d6 : Right 2.000 
+R: * : s17d6 : s19d6 : Right 2.000 
 R: * : s19d6 : s21d6 : Right 2.000 
 R: * : s21d6 : s22d6 : Right 2.000 
 R: * : s22d6 : s24d6 : Up    2.000 
 R: * : s24d6 : s27d6 : Up    2.000 
-R: * : s27d6 : s28d6 : Up    10.000 
-R: * : s28d6 : s29d6 : Right 10.000 
-R: * : s29d6 : s31d6 : Up    10.000 
-R: * : s31d6 : s32d6 : Right 10.000 
-R: * : s32d6 : s34d6 : Right 10.000 
-R: * : s34d6 : s37d6 : Up    10.000 
-R: * : s37d6 : s38d6 : Nothing 10.000 
+R: * : s27d6 : s28d6 : Up    2.000 
+R: * : s28d6 : s29d6 : Right 2.000 
+R: * : s29d6 : s31d6 : Up    2.000 
+R: * : s31d6 : s32d6 : Right 3.333 
+R: * : s32d6 : s34d6 : Right 3.333 
+R: * : s34d6 : s37d6 : Up    3.333 
+R: * : s37d6 : s38d6 : Nothing 3.333 
+R: * : s4d7  : s3d7  : Up    15.000 
+R: * : s3d7  : s2d7  : Right 6.000 
+R: * : s2d7  : s48d7 : Right 6.000 
+R: * : s48d7 : s46d7 : Right 3.750 
+R: * : s46d7 : s43d7 : Up    3.750 
+R: * : s43d7 : s44d7 : Nothing 10.000 
 R: * : s8d3  : s7d3  : Right 10.000 
 R: * : s7d3  : s9d3  : Right 10.000 
 R: * : s9d3  : s11d3 : Right 10.000 
@@ -3978,82 +3965,66 @@ R: * : s22d4 : s24d4 : Up    3.000
 R: * : s24d4 : s27d4 : Up    3.000 
 R: * : s27d4 : s28d4 : Up    3.000 
 R: * : s28d4 : s29d4 : Up    3.000 
-R: * : s29d4 : s30d4 : Nothing 5.000 
-R: * : s8d5  : s7d5  : Right 10.000 
-R: * : s9d5  : s11d5 : Right 10.000 
-R: * : s11d5 : s12d5 : Right 10.000 
-R: * : s12d5 : s14d5 : Right 5.000 
-R: * : s14d5 : s15d5 : Right 5.000 
-R: * : s15d5 : s17d5 : Right 5.000 
-R: * : s17d5 : s19d5 : Right 5.000 
-R: * : s19d5 : s21d5 : Right 5.000 
-R: * : s21d5 : s22d5 : Right 5.000 
-R: * : s22d5 : s24d5 : Up    5.000 
-R: * : s24d5 : s27d5 : Up    5.000 
-R: * : s27d5 : s28d5 : Up    5.000 
-R: * : s28d5 : s29d5 : Right 5.000 
-R: * : s29d5 : s31d5 : Nothing 5.000 
+R: * : s29d4 : s30d4 : Nothing 3.000 
 R: * : s8d6  : s7d6  : Right 10.000 
 R: * : s9d6  : s11d6 : Right 20.000 
 R: * : s11d6 : s12d6 : Right 20.000 
 R: * : s12d6 : s14d6 : Right 6.667 
 R: * : s14d6 : s15d6 : Right 6.667 
-R: * : s15d6 : s17d6 : Right 6.667 
-R: * : s17d6 : s19d6 : Right 6.667 
-R: * : s19d6 : s21d6 : Right 2.857 
-R: * : s21d6 : s22d6 : Right 2.857 
-R: * : s22d6 : s24d6 : Up    2.857 
-R: * : s24d6 : s27d6 : Up    2.857 
-R: * : s27d6 : s28d6 : Up    2.857 
-R: * : s28d6 : s29d6 : Right 2.857 
-R: * : s29d6 : s31d6 : Up    2.857 
-R: * : s31d6 : s32d6 : Right 2.857 
-R: * : s32d6 : s34d6 : Right 2.857 
-R: * : s34d6 : s37d6 : Up    2.857 
-R: * : s37d6 : s38d6 : Nothing 2.857 
-R: * : s7d2  : s4d2  : Left  2.500 
-R: * : s4d2  : s5d2  : Down  2.500 
-R: * : s5d2  : s6d2  : Nothing 2.500 
-R: * : s7d1  : s4d1  : Up    2.500 
-R: * : s4d1  : s3d1  : Up    2.500 
-R: * : s3d1  : s2d1  : Up    2.500 
-R: * : s2d1  : s1d1  : Nothing 5.000 
+R: * : s15d6 : s17d6 : Right 4.000 
+R: * : s17d6 : s19d6 : Right 4.000 
+R: * : s19d6 : s21d6 : Right 4.000 
+R: * : s21d6 : s22d6 : Right 4.000 
+R: * : s22d6 : s24d6 : Up    4.000 
+R: * : s24d6 : s27d6 : Up    4.000 
+R: * : s27d6 : s28d6 : Up    4.000 
+R: * : s28d6 : s29d6 : Right 4.000 
+R: * : s29d6 : s31d6 : Up    4.000 
+R: * : s31d6 : s32d6 : Right 6.667 
+R: * : s32d6 : s34d6 : Right 6.667 
+R: * : s34d6 : s37d6 : Up    6.667 
+R: * : s37d6 : s38d6 : Nothing 6.667 
+R: * : s8d2  : s7d2  : Left  10.000 
+R: * : s7d2  : s4d2  : Left  10.000 
+R: * : s4d2  : s5d2  : Down  10.000 
+R: * : s5d2  : s6d2  : Nothing 10.000 
+R: * : s8d1  : s7d1  : Left  10.000 
+R: * : s7d1  : s4d1  : Up    10.000 
+R: * : s4d1  : s3d1  : Up    10.000 
+R: * : s3d1  : s2d1  : Up    10.000 
+R: * : s2d1  : s1d1  : Nothing 10.000 
+R: * : s8d7  : s7d7  : Left  10.000 
+R: * : s7d7  : s4d7  : Up    10.000 
+R: * : s4d7  : s3d7  : Up    15.000 
+R: * : s48d7 : s46d7 : Right 10.000 
+R: * : s46d7 : s43d7 : Up    5.000 
+R: * : s43d7 : s44d7 : Nothing 2.727 
 R: * : s17d3 : s19d3 : Right 13.333 
 R: * : s19d3 : s21d3 : Right 10.000 
 R: * : s21d3 : s22d3 : Right 10.000 
-R: * : s22d3 : s24d3 : Right 10.000 
-R: * : s24d3 : s25d3 : Up    10.000 
-R: * : s25d3 : s26d3 : Nothing 10.000 
+R: * : s22d3 : s24d3 : Right 8.000 
+R: * : s24d3 : s25d3 : Up    8.000 
+R: * : s25d3 : s26d3 : Nothing 8.000 
 R: * : s17d4 : s19d4 : Right 40.000 
 R: * : s19d4 : s21d4 : Right 20.000 
 R: * : s21d4 : s22d4 : Right 20.000 
-R: * : s22d4 : s24d4 : Up    20.000 
-R: * : s24d4 : s27d4 : Up    20.000 
-R: * : s27d4 : s28d4 : Up    20.000 
-R: * : s28d4 : s29d4 : Up    20.000 
+R: * : s22d4 : s24d4 : Up    6.667 
+R: * : s24d4 : s27d4 : Up    6.667 
+R: * : s27d4 : s28d4 : Up    6.667 
+R: * : s28d4 : s29d4 : Up    6.667 
 R: * : s29d4 : s30d4 : Nothing 6.667 
-R: * : s15d5 : s17d5 : Right 10.000 
-R: * : s17d5 : s19d5 : Right 5.000 
-R: * : s19d5 : s21d5 : Right 1.667 
-R: * : s21d5 : s22d5 : Right 1.667 
-R: * : s22d5 : s24d5 : Up    1.667 
-R: * : s24d5 : s27d5 : Up    1.667 
-R: * : s27d5 : s28d5 : Up    1.667 
-R: * : s28d5 : s29d5 : Right 1.667 
-R: * : s29d5 : s31d5 : Nothing 1.667 
-R: * : s15d6 : s17d6 : Right 5.000 
-R: * : s17d6 : s19d6 : Right 1.667 
-R: * : s19d6 : s21d6 : Right 1.429 
-R: * : s21d6 : s22d6 : Right 1.429 
-R: * : s22d6 : s24d6 : Up    1.429 
-R: * : s24d6 : s27d6 : Up    1.429 
-R: * : s27d6 : s28d6 : Up    1.429 
-R: * : s28d6 : s29d6 : Right 1.429 
-R: * : s29d6 : s31d6 : Up    1.429 
-R: * : s31d6 : s32d6 : Right 1.429 
-R: * : s32d6 : s34d6 : Right 1.429 
-R: * : s34d6 : s37d6 : Up    1.429 
-R: * : s37d6 : s38d6 : Nothing 1.429 
+R: * : s17d6 : s19d6 : Right 2.500 
+R: * : s19d6 : s21d6 : Right 2.000 
+R: * : s21d6 : s22d6 : Right 2.000 
+R: * : s22d6 : s24d6 : Up    1.667 
+R: * : s24d6 : s27d6 : Up    1.667 
+R: * : s27d6 : s28d6 : Up    1.667 
+R: * : s28d6 : s29d6 : Right 1.667 
+R: * : s29d6 : s31d6 : Up    1.667 
+R: * : s31d6 : s32d6 : Right 1.250 
+R: * : s32d6 : s34d6 : Right 1.250 
+R: * : s34d6 : s37d6 : Up    1.250 
+R: * : s37d6 : s38d6 : Nothing 1.250 
 R: * : s9d2  : s7d2  : Left  2.500 
 R: * : s7d2  : s4d2  : Left  2.500 
 R: * : s4d2  : s5d2  : Down  2.500 
@@ -4062,46 +4033,39 @@ R: * : s9d1  : s7d1  : Left  2.500
 R: * : s7d1  : s4d1  : Up    2.500 
 R: * : s4d1  : s3d1  : Up    2.500 
 R: * : s3d1  : s2d1  : Up    2.500 
-R: * : s2d1  : s1d1  : Nothing 5.000 
+R: * : s2d1  : s1d1  : Nothing 2.500 
+R: * : s48d7 : s46d7 : Right 16.667 
+R: * : s46d7 : s43d7 : Up    8.333 
+R: * : s43d7 : s44d7 : Nothing 4.545 
+R: * : s49d7 : s48d7 : Right 10.000 
 R: * : s17d3 : s19d3 : Right 13.333 
 R: * : s19d3 : s21d3 : Right 10.000 
 R: * : s21d3 : s22d3 : Right 10.000 
-R: * : s22d3 : s24d3 : Right 10.000 
-R: * : s24d3 : s25d3 : Up    10.000 
-R: * : s25d3 : s26d3 : Nothing 10.000 
+R: * : s22d3 : s24d3 : Right 8.000 
+R: * : s24d3 : s25d3 : Up    8.000 
+R: * : s25d3 : s26d3 : Nothing 8.000 
 R: * : s13d4 : s12d4 : Right 10.000 
 R: * : s17d4 : s19d4 : Right 20.000 
 R: * : s19d4 : s21d4 : Right 10.000 
 R: * : s21d4 : s22d4 : Right 10.000 
-R: * : s22d4 : s24d4 : Up    10.000 
-R: * : s24d4 : s27d4 : Up    10.000 
-R: * : s27d4 : s28d4 : Up    10.000 
-R: * : s28d4 : s29d4 : Up    10.000 
+R: * : s22d4 : s24d4 : Up    3.333 
+R: * : s24d4 : s27d4 : Up    3.333 
+R: * : s27d4 : s28d4 : Up    3.333 
+R: * : s28d4 : s29d4 : Up    3.333 
 R: * : s29d4 : s30d4 : Nothing 3.333 
-R: * : s13d5 : s12d5 : Right 10.000 
-R: * : s15d5 : s17d5 : Right 10.000 
-R: * : s17d5 : s19d5 : Right 5.000 
-R: * : s19d5 : s21d5 : Right 1.667 
-R: * : s21d5 : s22d5 : Right 1.667 
-R: * : s22d5 : s24d5 : Up    1.667 
-R: * : s24d5 : s27d5 : Up    1.667 
-R: * : s27d5 : s28d5 : Up    1.667 
-R: * : s28d5 : s29d5 : Right 1.667 
-R: * : s29d5 : s31d5 : Nothing 1.667 
 R: * : s13d6 : s12d6 : Right 10.000 
-R: * : s15d6 : s17d6 : Right 10.000 
-R: * : s17d6 : s19d6 : Right 3.333 
-R: * : s19d6 : s21d6 : Right 2.857 
-R: * : s21d6 : s22d6 : Right 2.857 
-R: * : s22d6 : s24d6 : Up    2.857 
-R: * : s24d6 : s27d6 : Up    2.857 
-R: * : s27d6 : s28d6 : Up    2.857 
-R: * : s28d6 : s29d6 : Right 2.857 
-R: * : s29d6 : s31d6 : Up    2.857 
-R: * : s31d6 : s32d6 : Right 2.857 
-R: * : s32d6 : s34d6 : Right 2.857 
-R: * : s34d6 : s37d6 : Up    2.857 
-R: * : s37d6 : s38d6 : Nothing 2.857 
+R: * : s17d6 : s19d6 : Right 5.000 
+R: * : s19d6 : s21d6 : Right 4.000 
+R: * : s21d6 : s22d6 : Right 4.000 
+R: * : s22d6 : s24d6 : Up    3.333 
+R: * : s24d6 : s27d6 : Up    3.333 
+R: * : s27d6 : s28d6 : Up    3.333 
+R: * : s28d6 : s29d6 : Right 3.333 
+R: * : s29d6 : s31d6 : Up    3.333 
+R: * : s31d6 : s32d6 : Right 2.500 
+R: * : s32d6 : s34d6 : Right 2.500 
+R: * : s34d6 : s37d6 : Up    2.500 
+R: * : s37d6 : s38d6 : Nothing 2.500 
 R: * : s13d2 : s12d2 : Left  10.000 
 R: * : s12d2 : s11d2 : Left  10.000 
 R: * : s11d2 : s9d2  : Left  10.000 
@@ -4116,132 +4080,191 @@ R: * : s9d1  : s7d1  : Left  2.500
 R: * : s7d1  : s4d1  : Up    2.500 
 R: * : s4d1  : s3d1  : Up    2.500 
 R: * : s3d1  : s2d1  : Up    2.500 
-R: * : s2d1  : s1d1  : Nothing 5.000 
+R: * : s2d1  : s1d1  : Nothing 2.500 
+R: * : s13d7 : s12d7 : Right 10.000 
+R: * : s12d7 : s14d7 : Right 10.000 
+R: * : s14d7 : s15d7 : Right 10.000 
+R: * : s15d7 : s17d7 : Up    10.000 
+R: * : s17d7 : s45d7 : Up    10.000 
+R: * : s45d7 : s43d7 : Up    10.000 
+R: * : s43d7 : s44d7 : Nothing 5.455 
 R: * : s16d3 : s15d3 : Right 10.000 
 R: * : s17d3 : s19d3 : Right 13.333 
 R: * : s19d3 : s21d3 : Right 10.000 
 R: * : s21d3 : s22d3 : Right 10.000 
-R: * : s22d3 : s24d3 : Right 10.000 
-R: * : s24d3 : s25d3 : Up    10.000 
-R: * : s25d3 : s26d3 : Nothing 10.000 
+R: * : s22d3 : s24d3 : Right 8.000 
+R: * : s24d3 : s25d3 : Up    8.000 
+R: * : s25d3 : s26d3 : Nothing 8.000 
 R: * : s16d4 : s15d4 : Right 10.000 
 R: * : s17d4 : s19d4 : Right 40.000 
 R: * : s19d4 : s21d4 : Right 20.000 
 R: * : s21d4 : s22d4 : Right 20.000 
-R: * : s22d4 : s24d4 : Up    20.000 
-R: * : s24d4 : s27d4 : Up    20.000 
-R: * : s27d4 : s28d4 : Up    20.000 
-R: * : s28d4 : s29d4 : Up    20.000 
+R: * : s22d4 : s24d4 : Up    6.667 
+R: * : s24d4 : s27d4 : Up    6.667 
+R: * : s27d4 : s28d4 : Up    6.667 
+R: * : s28d4 : s29d4 : Up    6.667 
 R: * : s29d4 : s30d4 : Nothing 6.667 
-R: * : s24d5 : s27d5 : Up    10.000 
-R: * : s27d5 : s28d5 : Up    10.000 
-R: * : s28d5 : s29d5 : Right 2.500 
-R: * : s29d5 : s31d5 : Nothing 2.500 
-R: * : s24d6 : s27d6 : Up    10.000 
-R: * : s27d6 : s28d6 : Up    10.000 
-R: * : s28d6 : s29d6 : Right 2.857 
-R: * : s29d6 : s31d6 : Up    2.857 
-R: * : s31d6 : s32d6 : Right 2.857 
-R: * : s32d6 : s34d6 : Right 2.857 
-R: * : s34d6 : s37d6 : Up    2.857 
-R: * : s37d6 : s38d6 : Nothing 2.857 
-R: * : s15d2 : s14d2 : Left  0.833 
-R: * : s14d2 : s12d2 : Left  0.833 
-R: * : s12d2 : s11d2 : Left  0.833 
-R: * : s11d2 : s9d2  : Left  0.833 
-R: * : s9d2  : s7d2  : Left  0.833 
-R: * : s7d2  : s4d2  : Left  0.833 
-R: * : s4d2  : s5d2  : Down  1.000 
-R: * : s5d2  : s6d2  : Nothing 1.250 
-R: * : s2d1  : s1d1  : Nothing 1.667 
-R: * : s24d3 : s25d3 : Up    10.000 
-R: * : s25d3 : s26d3 : Nothing 10.000 
-R: * : s24d4 : s27d4 : Up    3.333 
-R: * : s27d4 : s28d4 : Up    5.000 
-R: * : s28d4 : s29d4 : Up    1.667 
-R: * : s29d4 : s30d4 : Nothing 1.667 
-R: * : s24d5 : s27d5 : Up    10.000 
-R: * : s27d5 : s28d5 : Up    10.000 
-R: * : s28d5 : s29d5 : Right 2.500 
-R: * : s29d5 : s31d5 : Nothing 2.500 
-R: * : s24d6 : s27d6 : Up    20.000 
-R: * : s27d6 : s28d6 : Up    20.000 
-R: * : s28d6 : s29d6 : Right 5.714 
-R: * : s29d6 : s31d6 : Up    5.714 
-R: * : s31d6 : s32d6 : Right 5.714 
-R: * : s32d6 : s34d6 : Right 5.714 
-R: * : s34d6 : s37d6 : Up    5.714 
-R: * : s37d6 : s38d6 : Nothing 5.714 
-R: * : s17d2 : s15d2 : Left  0.833 
-R: * : s15d2 : s14d2 : Left  0.833 
-R: * : s14d2 : s12d2 : Left  0.833 
-R: * : s12d2 : s11d2 : Left  0.833 
-R: * : s11d2 : s9d2  : Left  0.833 
-R: * : s9d2  : s7d2  : Left  0.833 
-R: * : s7d2  : s4d2  : Left  0.833 
-R: * : s4d2  : s5d2  : Down  1.000 
-R: * : s5d2  : s6d2  : Nothing 1.250 
-R: * : s2d1  : s1d1  : Nothing 1.667 
-R: * : s24d3 : s25d3 : Up    3.333 
-R: * : s25d3 : s26d3 : Nothing 3.333 
-R: * : s24d4 : s27d4 : Up    3.333 
-R: * : s27d4 : s28d4 : Up    5.000 
-R: * : s28d4 : s29d4 : Up    1.667 
-R: * : s29d4 : s30d4 : Nothing 1.667 
-R: * : s24d5 : s27d5 : Up    40.000 
-R: * : s27d5 : s28d5 : Up    40.000 
-R: * : s28d5 : s29d5 : Right 10.000 
-R: * : s29d5 : s31d5 : Nothing 10.000 
-R: * : s24d6 : s27d6 : Up    5.000 
-R: * : s27d6 : s28d6 : Up    5.000 
-R: * : s28d6 : s29d6 : Right 1.429 
-R: * : s29d6 : s31d6 : Up    1.429 
-R: * : s31d6 : s32d6 : Right 1.429 
-R: * : s32d6 : s34d6 : Right 1.429 
-R: * : s34d6 : s37d6 : Up    1.429 
-R: * : s37d6 : s38d6 : Nothing 1.429 
-R: * : s19d2 : s17d2 : Left  1.667 
-R: * : s17d2 : s15d2 : Left  1.667 
-R: * : s15d2 : s14d2 : Left  1.667 
-R: * : s14d2 : s12d2 : Left  1.667 
-R: * : s12d2 : s11d2 : Left  1.667 
-R: * : s11d2 : s9d2  : Left  1.667 
-R: * : s9d2  : s7d2  : Left  1.667 
-R: * : s7d2  : s4d2  : Left  1.667 
-R: * : s4d2  : s5d2  : Down  2.000 
-R: * : s5d2  : s6d2  : Nothing 2.500 
-R: * : s2d1  : s1d1  : Nothing 6.667 
+R: * : s16d6 : s15d6 : Right 10.000 
+R: * : s17d6 : s19d6 : Right 5.000 
+R: * : s19d6 : s21d6 : Right 4.000 
+R: * : s21d6 : s22d6 : Right 4.000 
+R: * : s22d6 : s24d6 : Up    3.333 
+R: * : s24d6 : s27d6 : Up    3.333 
+R: * : s27d6 : s28d6 : Up    3.333 
+R: * : s28d6 : s29d6 : Right 3.333 
+R: * : s29d6 : s31d6 : Up    3.333 
+R: * : s31d6 : s32d6 : Right 2.222 
+R: * : s32d6 : s34d6 : Right 2.222 
+R: * : s34d6 : s37d6 : Up    2.222 
+R: * : s37d6 : s38d6 : Nothing 2.222 
+R: * : s15d2 : s14d2 : Left  1.111 
+R: * : s14d2 : s12d2 : Left  1.111 
+R: * : s12d2 : s11d2 : Left  1.111 
+R: * : s11d2 : s9d2  : Left  1.111 
+R: * : s9d2  : s7d2  : Left  1.111 
+R: * : s7d2  : s4d2  : Left  1.111 
+R: * : s4d2  : s5d2  : Down  0.714 
+R: * : s5d2  : s6d2  : Nothing 0.714 
+R: * : s2d1  : s1d1  : Nothing 2.500 
+R: * : s17d7 : s45d7 : Up    5.000 
+R: * : s45d7 : s43d7 : Up    15.000 
+R: * : s43d7 : s44d7 : Nothing 3.000 
 R: * : s24d3 : s25d3 : Up    5.000 
 R: * : s25d3 : s26d3 : Nothing 5.000 
-R: * : s29d4 : s30d4 : Nothing 10.000 
-R: * : s34d6 : s37d6 : Up    3.333 
-R: * : s37d6 : s38d6 : Nothing 3.333 
-R: * : s4d2  : s5d2  : Down  2.308 
-R: * : s5d2  : s6d2  : Nothing 2.308 
-R: * : s2d1  : s1d1  : Nothing 6.667 
-R: * : s4d2  : s5d2  : Down  2.308 
-R: * : s5d2  : s6d2  : Nothing 2.308 
-R: * : s48d1 : s2d1  : Up    3.333 
-R: * : s2d1  : s1d1  : Nothing 3.333 
+R: * : s24d4 : s27d4 : Up    3.333 
+R: * : s27d4 : s28d4 : Up    2.000 
+R: * : s28d4 : s29d4 : Up    1.667 
+R: * : s29d4 : s30d4 : Nothing 1.667 
+R: * : s24d6 : s27d6 : Up    20.000 
+R: * : s27d6 : s28d6 : Up    10.000 
+R: * : s28d6 : s29d6 : Right 4.444 
+R: * : s29d6 : s31d6 : Up    4.444 
+R: * : s31d6 : s32d6 : Right 4.444 
+R: * : s32d6 : s34d6 : Right 4.444 
+R: * : s34d6 : s37d6 : Up    4.444 
+R: * : s37d6 : s38d6 : Nothing 4.444 
+R: * : s17d2 : s15d2 : Left  1.111 
+R: * : s15d2 : s14d2 : Left  1.111 
+R: * : s14d2 : s12d2 : Left  1.111 
+R: * : s12d2 : s11d2 : Left  1.111 
+R: * : s11d2 : s9d2  : Left  1.111 
+R: * : s9d2  : s7d2  : Left  1.111 
+R: * : s7d2  : s4d2  : Left  1.111 
+R: * : s4d2  : s5d2  : Down  0.714 
+R: * : s5d2  : s6d2  : Nothing 0.714 
+R: * : s2d1  : s1d1  : Nothing 2.500 
+R: * : s17d7 : s45d7 : Up    3.333 
+R: * : s45d7 : s43d7 : Up    10.000 
+R: * : s43d7 : s44d7 : Nothing 2.000 
+R: * : s24d3 : s25d3 : Up    1.667 
+R: * : s25d3 : s26d3 : Nothing 1.667 
+R: * : s24d4 : s27d4 : Up    3.333 
+R: * : s27d4 : s28d4 : Up    2.000 
+R: * : s28d4 : s29d4 : Up    1.667 
+R: * : s29d4 : s30d4 : Nothing 1.667 
+R: * : s24d6 : s27d6 : Up    5.000 
+R: * : s27d6 : s28d6 : Up    2.500 
+R: * : s28d6 : s29d6 : Right 1.111 
+R: * : s29d6 : s31d6 : Up    1.111 
+R: * : s31d6 : s32d6 : Right 1.111 
+R: * : s32d6 : s34d6 : Right 1.111 
+R: * : s34d6 : s37d6 : Up    1.111 
+R: * : s37d6 : s38d6 : Nothing 1.111 
+R: * : s19d2 : s17d2 : Left  6.667 
+R: * : s17d2 : s15d2 : Left  2.222 
+R: * : s15d2 : s14d2 : Left  2.222 
+R: * : s14d2 : s12d2 : Left  2.222 
+R: * : s12d2 : s11d2 : Left  2.222 
+R: * : s11d2 : s9d2  : Left  2.222 
+R: * : s9d2  : s7d2  : Left  2.222 
+R: * : s7d2  : s4d2  : Left  2.222 
+R: * : s4d2  : s5d2  : Down  1.429 
+R: * : s5d2  : s6d2  : Nothing 1.429 
+R: * : s2d1  : s1d1  : Nothing 5.000 
+R: * : s19d7 : s17d7 : Up    5.000 
+R: * : s17d7 : s45d7 : Up    5.000 
+R: * : s45d7 : s43d7 : Up    15.000 
+R: * : s43d7 : s44d7 : Nothing 3.000 
+R: * : s24d3 : s25d3 : Up    1.667 
+R: * : s25d3 : s26d3 : Nothing 1.667 
+R: * : s24d4 : s27d4 : Up    13.333 
+R: * : s27d4 : s28d4 : Up    8.000 
+R: * : s28d4 : s29d4 : Up    6.667 
+R: * : s29d4 : s30d4 : Nothing 6.667 
+R: * : s22d7 : s21d7 : Left  5.000 
+R: * : s21d7 : s19d7 : Left  5.000 
+R: * : s19d7 : s17d7 : Up    5.000 
+R: * : s17d7 : s45d7 : Up    5.000 
+R: * : s45d7 : s43d7 : Up    15.000 
+R: * : s43d7 : s44d7 : Nothing 3.000 
+R: * : s24d6 : s27d6 : Up    5.000 
+R: * : s27d6 : s28d6 : Up    2.500 
+R: * : s28d6 : s29d6 : Right 1.111 
+R: * : s29d6 : s31d6 : Up    1.111 
+R: * : s31d6 : s32d6 : Right 1.111 
+R: * : s32d6 : s34d6 : Right 1.111 
+R: * : s34d6 : s37d6 : Up    1.111 
+R: * : s37d6 : s38d6 : Nothing 1.111 
+R: * : s22d2 : s21d2 : Left  3.333 
+R: * : s21d2 : s19d2 : Left  10.000 
+R: * : s19d2 : s17d2 : Left  10.000 
+R: * : s17d2 : s15d2 : Left  3.333 
+R: * : s4d2  : s5d2  : Down  3.333 
+R: * : s5d2  : s6d2  : Nothing 3.333 
+R: * : s2d1  : s1d1  : Nothing 5.000 
+R: * : s4d2  : s5d2  : Down  3.333 
+R: * : s5d2  : s6d2  : Nothing 3.333 
+R: * : s48d1 : s2d1  : Up    2.500 
+R: * : s2d1  : s1d1  : Nothing 2.500 
+R: * : s43d7 : s44d7 : Nothing 15.000 
 R: * : s28d3 : s27d3 : Down  5.000 
 R: * : s27d3 : s24d3 : Right 5.000 
 R: * : s24d3 : s25d3 : Up    5.000 
 R: * : s25d3 : s26d3 : Nothing 5.000 
-R: * : s29d4 : s30d4 : Nothing 10.000 
+R: * : s29d4 : s30d4 : Nothing 8.000 
 R: * : s34d6 : s37d6 : Up    6.667 
 R: * : s37d6 : s38d6 : Nothing 6.667 
-R: * : s4d2  : s5d2  : Down  3.077 
-R: * : s5d2  : s6d2  : Nothing 3.077 
-R: * : s46d1 : s48d1 : Left  3.333 
-R: * : s48d1 : s2d1  : Up    3.333 
-R: * : s2d1  : s1d1  : Nothing 3.333 
+R: * : s4d2  : s5d2  : Down  4.444 
+R: * : s5d2  : s6d2  : Nothing 4.444 
+R: * : s46d1 : s48d1 : Left  2.500 
+R: * : s48d1 : s2d1  : Up    2.500 
+R: * : s2d1  : s1d1  : Nothing 2.500 
+R: * : s43d7 : s44d7 : Nothing 15.000 
 R: * : s28d3 : s27d3 : Down  5.000 
 R: * : s27d3 : s24d3 : Right 5.000 
 R: * : s24d3 : s25d3 : Up    5.000 
 R: * : s25d3 : s26d3 : Nothing 5.000 
-R: * : s29d4 : s30d4 : Nothing 2.500 
+R: * : s29d4 : s30d4 : Nothing 2.000 
 R: * : s34d6 : s37d6 : Up    3.333 
 R: * : s37d6 : s38d6 : Nothing 3.333 
+R: * : s4d2  : s5d2  : Down  1.111 
+R: * : s5d2  : s6d2  : Nothing 1.111 
+R: * : s43d1 : s46d1 : Left  10.000 
+R: * : s46d1 : s48d1 : Left  10.000 
+R: * : s48d1 : s2d1  : Up    10.000 
+R: * : s2d1  : s1d1  : Nothing 10.000 
+R: * : s28d3 : s27d3 : Down  5.000 
+R: * : s27d3 : s24d3 : Right 5.000 
+R: * : s24d3 : s25d3 : Up    5.000 
+R: * : s25d3 : s26d3 : Nothing 5.000 
+R: * : s29d4 : s30d4 : Nothing 2.000 
+R: * : s34d6 : s37d6 : Up    10.000 
+R: * : s37d6 : s38d6 : Nothing 10.000 
+R: * : s43d7 : s44d7 : Nothing 10.000 
+R: * : s4d2  : s5d2  : Down  3.333 
+R: * : s5d2  : s6d2  : Nothing 3.333 
+R: * : s40d1 : s43d1 : Left  2.500 
+R: * : s43d1 : s46d1 : Left  2.500 
+R: * : s46d1 : s48d1 : Left  2.500 
+R: * : s48d1 : s2d1  : Up    2.500 
+R: * : s2d1  : s1d1  : Nothing 2.500 
+R: * : s40d7 : s43d7 : Up    10.000 
+R: * : s43d7 : s44d7 : Nothing 10.000 
+R: * : s28d3 : s27d3 : Down  5.000 
+R: * : s27d3 : s24d3 : Right 5.000 
+R: * : s24d3 : s25d3 : Up    5.000 
+R: * : s25d3 : s26d3 : Nothing 5.000 
+R: * : s29d4 : s30d4 : Nothing 6.000 
 R: *    : *  : s1d1 : * 100
 R: *    : *  : s6d2 : * 100
 R: *    : *  : s26d3 : * 100

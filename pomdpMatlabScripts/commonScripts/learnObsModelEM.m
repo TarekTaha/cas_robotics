@@ -161,15 +161,16 @@ end
 %   L - log likelihood of estimates
 %
 X = trainingList;
-k = pomdpModel.numSpatialStates*length(pomdpModel.destinations);
+k = pomdpModel.numSpatialStates;%*length(pomdpModel.destinations);
 d = size(X,2);
 
 Init.W = ones(1,k);
 Init.M = zeros(d,k);   Init.M(:,:) = 2.5;
 Init.V = zeros(d,d,k); 
 Init.L = 0;
-[W,M,V,L] = EM_GM(X,k,[],[],0,Init);
+[W,M,V,L] = EM_GM(X,k,[],[],1,[]);
 
+obsProbs = L;
 clear obsSum;
 clear fileTemp;
 end
