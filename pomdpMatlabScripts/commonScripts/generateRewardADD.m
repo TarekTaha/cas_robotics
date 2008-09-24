@@ -150,7 +150,7 @@ for i=1:length(rewardSum)
     for j=1:length(total)
         if strcmp(rewardSum{i}.start,total{j}.start) && (reward{i}.taskStart == reward{j}.taskStart) && reward{i}.dest == reward{j}.dest
             result= normalizeTo*rewardSum{i}.reward/total{j}.reward;
-            fprintf(fileid,'\t\t(%s (destination (d%d\t(intention\t\t(%s\t(loc''\t(%s (%f))))))))\n',rewardSum{i}.start,rewardSum{i}.dest,rewardSum{i}.obs,rewardSum{i}.end,result);
+            fprintf(fileid,'\t\t(%s\t(destination\t(d%d\t(loc''\t\t(%s\t(intention''\t(%s (%f))))))))\n',rewardSum{i}.start,rewardSum{i}.dest,rewardSum{i}.end,rewardSum{i}.obs,result);
             break;
         end
     end
