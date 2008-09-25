@@ -185,9 +185,9 @@ for i=1:numSpatialStates
    for j=1:length(destinations)
         indx = (i+(j-1)*numSpatialStates);
         if(j==1)
-            fprintf(fileid,'\t\t(s%-4d\t(destination''\t(d%-4d\t(intention (Up (%f)) (Down (%f)) (Right (%f)) (Left (%f)) (Nothing (%f)) ))\n',i,j,obsProbs(indx,1),obsProbs(indx,2),obsProbs(indx,3),obsProbs(indx,4),obsProbs(indx,5));			
+            fprintf(fileid,'\t\t(s%-4d\t(destination''\t(d%-4d\t(intention'' (Up (%f)) (Down (%f)) (Right (%f)) (Left (%f)) (Nothing (%f)) ))\n',i,j,obsProbs(indx,1),obsProbs(indx,2),obsProbs(indx,3),obsProbs(indx,4),obsProbs(indx,5));			
         else
-            fprintf(fileid,'\t\t\t\t\t(d%-4d\t(intention (Up (%f)) (Down (%f)) (Right (%f)) (Left (%f)) (Nothing (%f)) ))\n',j,obsProbs(indx,1),obsProbs(indx,2),obsProbs(indx,3),obsProbs(indx,4),obsProbs(indx,5));			        
+            fprintf(fileid,'\t\t\t\t\t(d%-4d\t(intention'' (Up (%f)) (Down (%f)) (Right (%f)) (Left (%f)) (Nothing (%f)) ))\n',j,obsProbs(indx,1),obsProbs(indx,2),obsProbs(indx,3),obsProbs(indx,4),obsProbs(indx,5));			        
         end
    end
    fprintf(fileid,'\t\t\t)\n\t\t)\n');   
