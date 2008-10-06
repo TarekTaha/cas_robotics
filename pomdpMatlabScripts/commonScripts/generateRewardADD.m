@@ -104,16 +104,19 @@ for i=1:length(reward)
     s = s+1;
     rewardSum{s}.reward = 0;
     rewardSum{s}.visited = 0;    
+    rewardSum{s}.totalVisited = 0;
     for j=i:length(reward)
-        if strcmp(reward{i}.start,reward{j}.start) && strcmp(reward{i}.end,reward{j}.end) && reward{i}.dest == reward{j}.dest && ...
-                strcmp(reward{i}.obs,reward{j}.obs) && (reward{i}.taskStart == reward{j}.taskStart)
-            rewardSum{s}.obs        = reward{i}.obs;
-            rewardSum{s}.start      = reward{i}.start;
-            rewardSum{s}.end        = reward{i}.end;        
-            rewardSum{s}.dest       = reward{i}.dest;        
-            rewardSum{s}.reward = rewardSum{s}.reward + 10;
-            rewardSum{s}.taskStart = reward{num}.taskStart;
-            reward{j}.visited = 1;
+        if strcmp(reward{i}.start,reward{j}.start) && strcmp(reward{i}.end,reward{j}.end) && (reward{i}.dest == reward{j}.dest) && ...
+           strcmp(reward{i}.obs,reward{j}.obs) %&& (reward{i}.taskStart == reward{j}.taskStart)
+            rewardSum{s}.obs          = reward{i}.obs;
+            rewardSum{s}.start        = reward{i}.start;
+            rewardSum{s}.end          = reward{i}.end;        
+            rewardSum{s}.dest         = reward{i}.dest;        
+            rewardSum{s}.taskStart    = reward{i}.taskStart;
+            rewardSum{s}.totalVisited = rewardSum{s}.totalVisited + 1;
+            rewardSum{s}.reward       = rewardSum{s}.reward + 10;
+            rewardSum{s}.visited      = 0;            
+            reward{j}.visited         = 1;
         end
     end
 end
@@ -127,9 +130,11 @@ for i=1:length(rewardSum)
     s = s+1;
     total{s}.reward = 0;
     for j=i:length(rewardSum)
-        if strcmp(rewardSum{i}.start,rewardSum{j}.start) && (reward{i}.taskStart == reward{j}.taskStart) && reward{i}.dest == reward{j}.dest
-            total{s}.reward = total{s}.reward + rewardSum{j}.reward;
-            total{s}.start = rewardSum{j}.start;
+        if strcmp(rewardSum{i}.start,rewardSum{j}.start) && (rewardSum{i}.dest == rewardSum{j}.dest) %&& (rewardSum{i}.taskStart == rewardSum{j}.taskStart)
+            total{s}.reward      = total{s}.reward + rewardSum{j}.reward;
+            total{s}.start       = rewardSum{j}.start;
+            total{s}.dest        = rewardSum{j}.dest;
+            total{s}.taskStart   = rewardSum{j}.taskStart;
             rewardSum{j}.visited = 1;
         end
     end
@@ -148,9 +153,12 @@ fprintf(fileid,'dd destPrediction\n');
 fprintf(fileid,'\t(loc\n');
 for i=1:length(rewardSum)
     for j=1:length(total)
-        if strcmp(rewardSum{i}.start,total{j}.start) && (reward{i}.taskStart == reward{j}.taskStart) && reward{i}.dest == reward{j}.dest
+        if strcmp(rewardSum{i}.start,total{j}.start) && (rewardSum{i}.dest == total{j}.dest) %&& (rewardSum{i}.taskStart == total{j}.taskStart)
             result= normalizeTo*rewardSum{i}.reward/total{j}.reward;
-            fprintf(fileid,'\t\t(%s\t(destination\t(d%d\t(loc''\t\t(%s\t(intention''\t(%s (%f))))))))\n',rewardSum{i}.start,rewardSum{i}.dest,rewardSum{i}.end,rewardSum{i}.obs,result);
+            if(result > 10)
+                reply = input('Unexpected Error? Y/N [Y]: ', 's');
+            end
+            fprintf(fileid,'\t\t(%s\t(destination''\t(d%d\t(loc''\t\t(%s\t(intention''\t(%s (%f))))))))\n',rewardSum{i}.start,rewardSum{i}.dest,rewardSum{i}.end,rewardSum{i}.obs,result);
             break;
         end
     end
