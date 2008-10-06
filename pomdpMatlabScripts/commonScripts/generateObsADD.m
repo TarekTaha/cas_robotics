@@ -38,9 +38,11 @@ function obsProbs = generateObsADD(tasksFile)
 file = textread(tasksFile,'%s','delimiter','\n','whitespace',' \b\t','bufsize',100000);
 k=0;
 
-destinations = {'s1d1','s6d2','s44d3','s30d4','s26d5','s38d6'};
+%destinations = {'s1d1','s6d2','s44d3','s30d4','s26d5','s38d6'};
+destinations = {'s31d1','s38d2'};
 obsStrings = {'Up','Down','Right','Left','Nothing'};
-numSpatialStates = 49;
+%numSpatialStates = 49;
+numSpatialStates = 9;
 observationsUncertainty = [5,5,5,5,5];
 
 %ignore comments
@@ -174,9 +176,10 @@ for i=1:numSpatialStates
    for j=1:length(obsStrings)
         indx = (i+(j-1)*numSpatialStates);
         if sum(destProbs(indx,:))==0
-            destProbs(indx,:) = 1/6;
+            destProbs(indx,:) = 1/length(destinations);
         end
-        fprintf(fileid,'\t\t\t\t(%-10s(destination'' (d1 (%f)) (d2(%f)) (d3 (%f)) (d4 (%f)) (d5 (%f)) (d6 (%f)) ))\n',obsStrings{j},destProbs(indx,1),destProbs(indx,2),destProbs(indx,3),destProbs(indx,4),destProbs(indx,5),destProbs(indx,6));			
+        %fprintf(fileid,'\t\t\t\t(%-10s(destination'' (d1 (%f)) (d2(%f)) (d3 (%f)) (d4 (%f)) (d5 (%f)) (d6 (%f)) ))\n',obsStrings{j},destProbs(indx,1),destProbs(indx,2),destProbs(indx,3),destProbs(indx,4),destProbs(indx,5),destProbs(indx,6));			
+        fprintf(fileid,'\t\t\t\t(%-10s(destination'' (d1 (%f)) (d2(%f)) ))\n',obsStrings{j},destProbs(indx,1),destProbs(indx,2));			        
    end
    fprintf(fileid,'\t\t\t)\n\t\t)\n');   
 end
