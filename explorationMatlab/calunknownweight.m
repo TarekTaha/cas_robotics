@@ -80,6 +80,7 @@ unknownweight=(size(level1_un,1)-size(level1_kn,1)-size(level1_ob,1))*workspace.
               (size(level3_un,1)-size(level3_kn,1)-size(level3_ob,1))*workspace.dotweight(3);
 
           if unknownweight<0
-              keyboard
+            unknownweight=0;
+%              keyboard
           end
           

@@ -27,12 +27,13 @@ end
 
 if nargin==0
     %No path has been passed in
-    all_steps=[];
-    tempQ=rad2deg(Q);   
+    error('Must pass in a position to move to');
+%     all_steps=[];
+%     tempQ=rad2deg(Q);   
 else
   %get rid of crappy floating point unreachable joint commands (the 57 is
   %approx 180/pi so we don't get yucky floating points from pi 
-  all_steps=round(all_steps/(robot_maxreach.minjointres/57))*(robot_maxreach.minjointres/57);
+  all_steps=round(all_steps(:,1:6)/(robot_maxreach.minjointres/57))*(robot_maxreach.minjointres/57);
   tempQ=rad2deg(all_steps(end,:));
 end
 
@@ -60,7 +61,7 @@ rob_h=actxserver('EyeInHand.DensoCommand');
 % display(strcat('Current Joint State is:',num2str(rob_h2.JointStatee),' and the desired is:', num2str(tempQ)));
 
 %% Check if all joints are the same as what we want them to be within 1degree
-if ~isempty(find(round(tempQ-Q), 1))
+if ~isempty(find(round(tempQ(1:6)-rad2deg(Q)), 1))
     %Set the speed
     rob_h.Type='SetSpeed';
     rob_h.Params=[robot_maxreach.move_speed,0];
@@ -72,7 +73,7 @@ if ~isempty(find(round(tempQ-Q), 1))
         rob_h.Params=tempQ;
         display(strcat('The robot is currently at:', num2str(Q),' and is planning to move to:',num2str(rob_h.Params),'. Note 6th Joint may have been changed to 0 if using NBV. Please get ready to push EMERGENCY STOP'));
         % Additional Soft motion check - shouldn't be needed
-        if ~joint_softlimit_check(Q) || ~joint_softlimit_check(tempQ)
+        if ~joint_softlimit_check(Q) || ~joint_softlimit_check(deg2rad(tempQ))
             uiwait(msgbox('Failed softlimit check, make sure this point is within limitsD'));
             rob_h.release;
             error('Dont use this set of angles for joint 2 and 3');

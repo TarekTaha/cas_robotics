@@ -259,13 +259,16 @@ for cur_view=1:size(bestviews,2)
 end
 if size(invalid_views,1)>0
   current_count=1;
-  for cur_view=size(bestviews,2)
+  for cur_view=1:size(bestviews,2)
     if isempty(find(invalid_views==cur_view,1))
       temp_bestviews(current_count)=bestviews(cur_view);
       current_count=current_count+1;
     end
   end
-  bestviews=temp_bestviews;
+  try 
+    bestviews=temp_bestviews;
+  catch bestviews=[];
+  end
 end
 
 toc
