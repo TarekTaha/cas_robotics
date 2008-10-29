@@ -40,21 +40,21 @@ playGround(playG),
 robotManager(rManager),
 path(NULL)
 {
-	InitializePOMDP();
 	if (!playGround)
 	{
 		perror("\nIR: PlayGround Not Passed Correctly");
 	}
-	numStates = playGround->mapManager->mapSkeleton.numStates;
-	numDestinations = playGround->mapManager->mapSkeleton.numDestinations;
-	activityLogger = new ActivityLogger;
-
-//	socialPlanner = rManager->socialPlanner;
-//	socialPlanner->setMap(playGround->mapManager->globalMap);
-//	socialPlanner->setMapSkeleton(&playGround->mapManager->mapSkeleton);
-//	socialPlanner->buildSpace();
-//	socialPlanner->showConnections();
-//	socialPlanner->loadActivities("logs/tasks_log.txt");
+	/**
+	 *  Social Planner Part
+	 */
+	socialPlanner = rManager->socialPlanner;
+	socialPlanner->setMap(playGround->mapManager->globalMap);
+	socialPlanner->setMapSkeleton(&playGround->mapManager->mapSkeleton);
+	socialPlanner->buildSpace();
+	socialPlanner->showConnections();
+	//socialPlanner->loadActivities("logs/tasks_log.txt");
+	socialPlanner->loadActivities("logs/exp_tasks_list_large");
+	/* TEST SMALL PATH */
 //	Pose s(playGround->mapManager->mapSkeleton.verticies[37].location.x(),playGround->mapManager->mapSkeleton.verticies[37].location.y(),0);
 //	socialPlanner->setStart(s);
 //	Pose e(playGround->mapManager->mapSkeleton.verticies[0].location.x(),playGround->mapManager->mapSkeleton.verticies[0].location.y(),DTOR(90));
@@ -68,6 +68,15 @@ path(NULL)
 //	{
 //		qDebug("No path Found");
 //	}
+	
+	/**
+	 * POMDP Part
+	 */
+	InitializePOMDP();
+
+	numStates = playGround->mapManager->mapSkeleton.numStates;
+	numDestinations = playGround->mapManager->mapSkeleton.numDestinations;
+	activityLogger = new ActivityLogger;
 }
 
 IntentionRecognizer::~IntentionRecognizer()
@@ -461,7 +470,7 @@ void IntentionRecognizer::run()
 			/* 
 			 * Added for testing the Social Planning
 			 */
-//			int destination = playGround->mapManager->mapSkeleton.destIndexes[maxDestBeliefIndex];
+			int destination = playGround->mapManager->mapSkeleton.destIndexes[maxDestBeliefIndex];
 //			cout<<"Destination is:="<<destination;
 //			Pose e(playGround->mapManager->mapSkeleton.verticies[destination].location.x(),playGround->mapManager->mapSkeleton.verticies[destination].location.y(),DTOR(90));
 //			socialPlanner->setEnd(e);

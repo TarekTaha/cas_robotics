@@ -27,18 +27,20 @@ Heuristic *  Heuristic::factory(QString type) throw(CasPlannerException)
 {
 	if (type == "Distance")
 	{
+		cout <<"\n Distance"; fflush(stdout);
 		return new DistanceHeuristic;	
 	}
-	throw (CasPlannerException("Bad Heuristic Type"));
+	throw (CasPlannerException((char*)"Bad Heuristic Type"));
 }
 
 Heuristic *  Heuristic::factory(QString type,QHash<QString, int> *soRe) throw(CasPlannerException)
 {
 	if (type == "Social")
 	{
+		cout <<"\n Social";	fflush(stdout);
 		return new SocialHeuristic(soRe);
 	}
-	throw (CasPlannerException("Bad Heuristic Type"));
+	throw (CasPlannerException((char*)"Bad Heuristic Type"));
 }
 
 double SocialHeuristic::gCost(Node *n)
@@ -48,17 +50,16 @@ double SocialHeuristic::gCost(Node *n)
 
 double SocialHeuristic::hCost(Node *n,Node * end)
 {
-//	double cost=0,h=0,g=0;
-//	if(n == NULL || n->parent==NULL)
-//		return 0.0;
-//	// Using the Euclidean distance
-//	h = Dist(end->pose.p,n->pose.p);
-//	g = n->parent->g_value + Dist(n->pose.p,n->parent->pose.p);	
-//	cost =  h + g;
-//	cost -= this->socialRewards->value(QString("%1-%2-%3").arg(n->parent->id).arg(n->id).arg(end->id));
-//	cout<<qPrintable(QString("%1-%2-%3").arg(n->parent->id).arg(n->id).arg(end->id))<<":="<<this->socialRewards->value(QString("%1-%2-%3").arg(n->parent->id).arg(n->id).arg(end->id))<<endl;
-//	return cost;
-	return 0;
+	double cost=0,h=0,g=0;
+	if(n == NULL || n->parent==NULL)
+		return 0.0;
+	// Using the Euclidean distance
+	h = Dist(end->pose.p,n->pose.p);
+	g = n->parent->g_value + Dist(n->pose.p,n->parent->pose.p);	
+	cost =  h + g;
+	cost -= this->socialRewards->value(QString("%1-%2-%3").arg(n->parent->id).arg(n->id).arg(end->id));
+	cout<<qPrintable(QString("%1-%2-%3").arg(n->parent->id).arg(n->id).arg(end->id))<<":="<<this->socialRewards->value(QString("%1-%2-%3").arg(n->parent->id).arg(n->id).arg(end->id))<<endl;
+	return cost;
 }
 
 double DistanceHeuristic::gCost(Node *n)
