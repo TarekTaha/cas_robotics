@@ -64,10 +64,13 @@ notPaused(true),
 notFollowing(true)
 {
 	connect(playGround,SIGNAL(mapUpdated(Map *)),this,SLOT(updateMap(Map *)));
-	setupSocialPlanner();
 	connect(this,SIGNAL(addMsg(int,int,QString)),playGround,SLOT(addMsg(int,int,QString)));	
 	readRobotConfigs(cf,secId);
 	readCommManagerConfigs(cf,secId); 
+	/* Social Robot Has to be called
+	 * After The Robot  readRobotConfigs
+	 */
+	setupSocialPlanner();
 	int numSections = cf->GetSectionCount(); 
 	for(int i=0; i < numSections; i++)
 	{

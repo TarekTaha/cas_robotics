@@ -601,7 +601,7 @@ void Navigator::run()
 		delta_t = delta_timer.secElapsed();
 		delta_timer.restart();
 		usleep(30000);
-		printf("\n Debug Location 1"); fflush(stdout);
+//		printf("\n Debug Location 1"); fflush(stdout);
 		// Get current Robot Location
 		currentPose = robotManager->commManager->getLocation();
 		
@@ -618,7 +618,7 @@ void Navigator::run()
 		
 		trail.push_back(currentPose.p);
 		
-		printf("\n Debug Location 2"); fflush(stdout);		
+//		printf("\n Debug Location 2"); fflush(stdout);		
 //		laserScan = robotManager->commManager->getLaserScan();
 //		cout<<"\n Current Location X:"<<currentPose.p.x()<<" Y:"<<currentPose.p.y()<<" Theta:"<<currentPose.phi;
 		/* If this location is new, then use it. Otherwise
@@ -665,7 +665,7 @@ void Navigator::run()
 */		
 //		first = ClosestPathSeg(EstimatedPos.p,path2Follow);
 //		qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);		
-		printf("\n Debug Location 3"); fflush(stdout);
+//		printf("\n Debug Location 3"); fflush(stdout);
 
 		/* If we chose to follow a virtual point on the path then calculate that point
 		 * It will not be used most of the time, but it adds accuracy in control for
@@ -888,7 +888,7 @@ void Navigator::run()
 			wayPoint = goal;
 		}
 		emit setWayPoint(&goal);
-		printf("\n Debug Location 9"); fflush(stdout);
+//		printf("\n Debug Location 9"); fflush(stdout);
 		QTime ff_time;
 //		Pose goal;
 		if(!pause)
@@ -953,7 +953,7 @@ void Navigator::run()
 					}
 					wayPoint = goal;	
 					// Vector Field Histogram
-//					qDebug("\nSending to VFH goto X:%f Y:%f Phi:%f",goal.p.x(),goal.p.y(),RTOD(goal.phi));
+					qDebug("\nSending to VFH goto X:%f Y:%f Phi:%f",goal.p.x(),goal.p.y(),RTOD(goal.phi));
 					robotManager->commManager->vfhGoto(wayPoint);	
 					break;		
 				default:
@@ -966,7 +966,7 @@ void Navigator::run()
 			robotManager->commManager->setTurnRate(0);
 		}
 		loc = EstimatedPos;
-		printf("\n Debug Location 10"); fflush(stdout);
+//		printf("\n Debug Location 10"); fflush(stdout);
 	}
 	robotManager->commManager->setSpeed(0);
 	robotManager->commManager->setTurnRate(0);

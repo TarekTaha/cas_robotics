@@ -279,9 +279,10 @@ void MapViewer::renderSearchTree()
 	for(int i=0;i<1;i++)
 	{
 		SearchSpaceNode * temp,*child;
-		//if(!playGround->robotPlatforms[i]->planningManager->renderTree)
-		//	continue;
-		//temp =  playGround->robotPlatforms[i]->planningManager->pathPlanner->search_space;
+		if(!playGround->robotPlatforms[i]->planningManager->renderTree)
+			continue;
+		temp =  playGround->robotPlatforms[i]->planningManager->pathPlanner->search_space;
+		
 		if(playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner)
 			temp =  playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->getSearchSpace();
 		else
@@ -319,7 +320,6 @@ void MapViewer::renderExpandedTree()
 	{
 		vector <Tree> tree;
 		QPointF child;
-		//tree =  playGround->robotPlatforms[i]->planningManager->pathPlanner->tree;
 		if(playGround->robotPlatforms[i]->intentionRecognizer)
 		{
 			if(playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner)
@@ -443,7 +443,7 @@ void MapViewer::update()
 }
 
 void MapViewer::loadTexture()
-{	
+{
 //	qDebug("oldW:%d oldH:%d",ogMap->width,ogMap->height);	
    	newWidth =  (int) std::pow(2.0f, (int)ceil(log((float)ogMap->width) / log(2.f)));
    	newHeight = (int) std::pow(2.0f, (int)ceil(log((float)ogMap->height) / log(2.f)));

@@ -40,9 +40,9 @@ PlayerInterface::PlayerInterface()
 
 void PlayerInterface::resetResources()
 {
-    joyStickEnabled = false;
+    joyStickEnabled = true;
     ptzEnabled		= false;
-    ctrEnabled		= false;
+    ctrEnabled		= true;
     mapEnabled		= false;
     localizerEnabled= false;
     localized		= false;
@@ -775,15 +775,22 @@ void PlayerInterface::run ()
 //		Timer timer;
 	    while(true)
 	    {
-//	    	qDebug("Loop Time is:%f %d",timer.msecElapsed()); fflush(stdout);
+//	    	qDebug("Loop Time is:%f",timer.msecElapsed()); fflush(stdout);
 //	    	timer.restart();
 	    	/* Read Only if new Data is Available*/
-	    	/*
-			pc->ReadIfWaiting();
-			if(!pc->Peek(50))
+			/* using ReadIfWaiting */
+	    	// pc->ReadIfWaiting();
+	    	/* ORRRRR */
+			if(!pc->Peek(20))
+			{
 				continue;
-			*/
-			pc->Read();
+			}
+			else
+			{
+				pc->Read();
+			}
+	    	/*  A Blocking Read */
+//			pc->Read();
 			/*
 			 * Here Goes the Accelerometer Part, it reads via bluetooth the acc xyz
 			 * and generates a turnrate and velocity.
@@ -834,7 +841,7 @@ void PlayerInterface::run ()
 //	            cout<<"\n Current Joystick X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();		    	
 		    }
 //		    cout<<"\nDebug Msg 1"; fflush(stdout);
-	        if(ctrEnabled)
+	        if(ctrEnabled && drive)
 	        {
 	        	if (!stopped)
 	        	{
@@ -866,6 +873,7 @@ void PlayerInterface::run ()
 		        		vfh->GoTo(vfhGoal.p.x(),vfhGoal.p.y(),vfhGoal.phi);	        		
 		        	}
 	        	}
+//	        	cout<<"\nDebug Msg 1.5"; fflush(stdout);
 	            getspeed = drive->GetXSpeed();
 	            getturnrate = drive->GetYawSpeed();	            
 	            odomLocation.p.setX(drive->GetXPos());

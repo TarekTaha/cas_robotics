@@ -139,7 +139,7 @@ void Astar::findRoot() throw (CasPlannerException)
 	root->next = NULL;
 	root->prev = NULL;
 	root->g_value = 0;;
-//	root->h_value = heuristic->gCost(root);
+	root->h_value = heuristic->gCost(root);
 	root->f_value = root->g_value + root->h_value;
 	root->depth = 0;
 	root->pose.phi = start.phi;
@@ -297,8 +297,8 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
   			//qDebug("ID is:%d",ID);
   			curChild->next = NULL;
   			curChild->prev = NULL;
-//  			curChild->g_value = heuristic->gCost(curChild);
-//      		curChild->h_value = heuristic->hCost(curChild,dest);
+  			curChild->g_value = heuristic->gCost(curChild);
+      		curChild->h_value = heuristic->hCost(curChild,dest);
   			curChild->f_value = curChild->g_value + curChild->h_value;
 			Node * p;
 			// check if the child is already in the open list
