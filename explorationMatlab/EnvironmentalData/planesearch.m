@@ -1,0 +1,240 @@
+%% planesearch
+%
+% *Description*: This function searches through plane data to make up
+% bigger surfaces
+ function planesearch ()
+close all;
+tic
+
+%% Load dataset 
+% Recomended that you use this on a set of points
+% surface_making_simple(points,sizeofplane)
+% global plane 
+
+%OR could use stephens planes
+
+% Here are 3 examples (only run one at a time obviously)
+% _1_
+%load RoofPlaneSet.mat
+% _2_ the point cloud data is a bit crappy
+ load example_plane.mat; planeSet=plane;
+% _3_
+%load meshNplanes.mat; planeSet=plane;
+
+
+%% Variables
+maxDistConstant=0.2; %meters
+maxAngleConstant=5*pi/180; %degrees
+maxDist2PlaneConstant=0.05; %meters
+minplanes2callAsurface=4; % What is the minimum planes which make a surface worth growing
+showClusterNormalDist=false; % do you want to see the angle between all normals in surface population
+
+% variables set for all centers and normals
+all_centers=zeros([size(planeSet,2),3]);
+all_norms=zeros([size(planeSet,2),3]);
+
+% stack variables with plane data
+for i=1:size(planeSet,2)
+    all_centers(i,:)=planeSet(i).home_point;
+    all_norms(i,:)=planeSet(i).normal_by_eigenval';
+end
+
+% Make a graph with all nodes
+connectivityGraph=zeros([size(planeSet,2),size(planeSet,2)]);
+
+% Registered to surface
+registered_to_surface=zeros([size(planeSet,2),1]);
+
+% This variable will hold the surfaces later
+% larger_surface.originalnorm
+%               .originalcenter
+%               .registered_to_surface
+
+%% Search at each plane for surrounding planes 
+% $$ \begin{array}{c} 
+% D=|P_{i}-P| \\
+% \theta=\cos^{-1}(n_{i} \dot P) \\
+% \theta(\theta>\frac{\pi}{2})=\pi-\theta(\theta>\frac{\pi}){2})\\
+% dis_{to\_plane}=\left|\frac{AP_x + BP_y + CP_z + D}{\sqrt{A^2+B^2+C^2}}\right|\\
+% \end{array}$$
+%1) within a distance
+%2) where the angle between normals is small
+for i=1:size(planeSet,2) 
+
+% Optimisation Note 1: You dont need to sqrt the distance just make the later
+% constant a squared value by nature; 2: Note how we only gather data and
+% search i->end so there is no search overlap
+    dist_to_all_TEMP=sqrt((all_centers(i,1)-all_centers(i:end,1)).^2+...
+                          (all_centers(i,2)-all_centers(i:end,2)).^2+...
+                          (all_centers(i,3)-all_centers(i:end,3)).^2);
+
+% Optimisation Note 1: to get the angle you dont really need to normalise the vectors since
+%they are already normalised; 2: Make sure comparitor is in radians to save a
+% conversion here to degrees; 3: Note how we are only searching from i->end
+% this is so we are not searching over the whole graph everytime since
+% search would have much more overlap
+    norm_ang_to_all_TEMP=acos(dot([all_norms(i,1)*ones(size(all_norms,1)-i+1,1),...
+                                   all_norms(i,2)*ones(size(all_norms,1)-i+1,1),...
+                                   all_norms(i,3)*ones(size(all_norms,1)-i+1,1)],all_norms(i:end,:),2));
+    % Make sure all values are between 0 and 90 (change great values so they are 
+    % eg 176'=4' and 130'=50'
+    norm_ang_to_all_TEMP(norm_ang_to_all_TEMP>pi/2)=pi-norm_ang_to_all_TEMP(norm_ang_to_all_TEMP>pi/2);
+    
+    %make a temporary plane equation out of the ith normal and center point
+    temp_plane_equ=[all_norms(i,1),all_norms(i,2),all_norms(i,3),...
+                          -(all_norms(i,1)*all_centers(i,1)+all_norms(i,2)*all_centers(i,2)+all_norms(i,3)*all_centers(i,3))];
+    %this is the distance from the ith plane to all other points
+    dist_plane_to_points=dis_bet_plane_n_pnt_internal(temp_plane_equ,all_centers(i:end,:));
+    
+%% Forms the connectivity graph
+% $$ \begin{array}{c} 
+% \mbox{Find i corresponding to connected planes}\\
+% D_i<\mbox{maxDistConstant}  \\
+% \theta_i<\mbox{maxAngleConstant}\\
+% dis_{to\_plane,i}<\mbox{maxDist2PlaneConstant}\\
+% \end{array}$$
+
+
+    %Zeros stuffed at start to make updating the connectivity graph easier     
+    if i>1 stuffing=zeros([i-1,1]); else stuffing=[];end
+    index_of_links_temp=[BOOLEAN(stuffing);...
+                        (dist_to_all_TEMP > 0 & ... 
+                         dist_to_all_TEMP < maxDistConstant & ...
+                         norm_ang_to_all_TEMP < maxAngleConstant & ...
+                         dist_plane_to_points < maxDist2PlaneConstant)];
+%updates connectivity from node i (make sure there is no self link)
+    connectivityGraph(index_of_links_temp,i)=1;
+    connectivityGraph(i,index_of_links_temp)=1;    
+    connectivityGraph(i,i)=0;
+end
+
+
+%% Use bredthfirst tree searh, determine links between planes on surface
+% $$ \begin{array}{cccccc} 
+% \mbox{Connectivity Graph between planes}\\
+% & 1& 2 & 3 & 4 & etc\\
+% 1& 0 & 1 & 1 & 0 & etc\\
+% 2& 1 & 0 & 1 & 0 & etc\\
+% 3& 1 & 1 & 0 & 1 & etc\\
+% 4& 0 & 0 & 1 & 0 & etc\\
+% etc& etc & etc & etc & etc & 0\\
+% \end{array}$$
+%%
+% We are looking for clusters in the graph which represent connectivity and
+% hence a larger surface made up of the planes
+
+% look for hubs as with network theory
+[numlinks,popularIndex]=sort(sum(connectivityGraph,1),'descend');
+
+% If any planes unregister search for clusters in the graph
+while ~isempty(find(registered_to_surface==0,1))
+    index_temp=popularIndex(find(registered_to_surface(popularIndex)==0,1));
+
+    %check if the larger_surface variable exists
+    if ~exist('larger_surface','var')
+        larger_surface.originalnorm=all_norms(index_temp,:);
+        larger_surface.originalcenter=all_centers(index_temp,:);
+    else
+        larger_surface(end+1).originalnorm=all_norms(index_temp,:);
+        larger_surface(end).originalcenter=all_centers(index_temp,:);
+    end
+    curr_surf=size(larger_surface,2);   
+    %register this plane to a surface
+    registered_to_surface(index_temp)=curr_surf;
+    %register all linked planes to the surface
+    linked_planes_temp=find(connectivityGraph(:,index_temp)>0);
+    if linked_planes_temp>0
+        registered_to_surface(linked_planes_temp)=curr_surf;
+        planes_to_check=linked_planes_temp;
+        %go through until there are no more trees to check
+        while size(planes_to_check,2)>0
+            %find the links to this current plane node
+            linked_planes_temp=find(connectivityGraph(planes_to_check(1),:)>0);            
+
+            %make sure they are not registered to the surface already
+            linked_planes_temp=setdiff(linked_planes_temp',...
+                                       find(registered_to_surface==curr_surf));
+
+            %update the list of registered to the surface planes
+            registered_to_surface(linked_planes_temp)=curr_surf;
+
+            % fill planes to check with new links, removing current checked plane
+            planes_to_check=[planes_to_check(2:end);linked_planes_temp];
+        end
+    end
+    larger_surface(end).registered_to_surface=find(registered_to_surface==curr_surf);
+end
+timetaken = toc
+% profile off; profile viewer;
+
+% find surfaces that have more than a single plane
+validnewsurfaces=[];
+for i=1:size(larger_surface,2)
+    if size(larger_surface(i).registered_to_surface,1)>=minplanes2callAsurface
+        validnewsurfaces=[validnewsurfaces,i];
+    end
+end
+
+%% Draw the center of all the tiles
+hold on;
+title (['Number of surfaces found = ',num2str(size(validnewsurfaces,2)),'. Time Taken: ',num2str(timetaken)])
+axis equal
+view(3)
+colorindex=1;
+textforlegend=[];
+
+for i=validnewsurfaces
+    if mod(i,4)==1; colorval=rand*([colorindex/size(validnewsurfaces,2),0,0]);
+    elseif mod(i,4)==2; colorval=rand*([1,colorindex/size(validnewsurfaces,2),0]);
+    elseif mod(i,4)==3; colorval=rand*([colorindex/size(validnewsurfaces,2),colorindex/size(validnewsurfaces,2),0]);
+    else; colorval=[0,0,colorindex/size(validnewsurfaces,2)];
+    end    
+    plot3(all_centers(larger_surface(i).registered_to_surface,1),...
+          all_centers(larger_surface(i).registered_to_surface,2),...          
+           all_centers(larger_surface(i).registered_to_surface,3),'linestyle','none','color',colorval,'marker','*');             
+       textforlegend{colorindex}=['Plane ',num2str(colorindex)];
+    text(larger_surface(i).originalcenter(1),larger_surface(i).originalcenter(2),larger_surface(i).originalcenter(3),num2str(colorindex),'FontSize',18)       
+    colorindex=colorindex+1;
+end
+legend(textforlegend);
+
+
+%shows the distribution of the surfaces
+if showClusterNormalDist
+    for i=validnewsurfaces
+        norm_ang_to_all_TEMP=ones([size(larger_surface(i).registered_to_surface,1),size(larger_surface(i).registered_to_surface,1)]);
+        for j=1:size(larger_surface(i).registered_to_surface,1)-1
+            norm_ang_to_all_TEMP(j+1:size(larger_surface(i).registered_to_surface,1),j)=dot([all_norms(larger_surface(i).registered_to_surface(j),1)*ones([size(larger_surface(i).registered_to_surface(j+1:end),1),1]),...
+                                      all_norms(larger_surface(i).registered_to_surface(j),2)*ones([size(larger_surface(i).registered_to_surface(j+1:end),1),1]),...
+                                      all_norms(larger_surface(i).registered_to_surface(j),3)*ones([size(larger_surface(i).registered_to_surface(j+1:end),1),1])],...
+                                      all_norms(larger_surface(i).registered_to_surface(j+1:end),:),2);                          
+            norm_ang_to_all_TEMP(j,j+1:size(larger_surface(i).registered_to_surface,1))=norm_ang_to_all_TEMP(j+1:size(larger_surface(i).registered_to_surface,1),j)';                          
+        end
+        norm_ang_to_all_TEMP=acos(norm_ang_to_all_TEMP);
+        norm_ang_to_all_TEMP(norm_ang_to_all_TEMP>pi/2)=pi-norm_ang_to_all_TEMP(norm_ang_to_all_TEMP>pi/2);
+        figure(2);
+        surf(norm_ang_to_all_TEMP*180/pi)
+        pause(5)
+    end
+end
+
+%% FUNCTION: dis_bet_plane_n_pnt_internal
+% $$ \begin{array}{l}
+% \mbox{Point(s) passed in... } P\\
+% \mbox{Distances: (1 or many)... } dis_{to\_plane}=\left|\frac{AP_x + BP_y + CP_z + D}{\sqrt{A^2+B^2+C^2}}\right|
+% \end{array}$$
+
+% Pass in the ABCD of a plane and a set of points and  this function will return
+% the distance between them
+function dis_to_plane=dis_bet_plane_n_pnt_internal(plane_equ,pnt)
+%dis_to_plane=zeros([1,size(pnt,1)]);
+if size(pnt,1)>1
+        dis_to_plane=abs((plane_equ(1)*pnt(:,1)+...
+                                       plane_equ(2)*pnt(:,2)+...
+                                       plane_equ(3)*pnt(:,3)+plane_equ(4))./...
+                                       sqrt(plane_equ(1)^2+plane_equ(2)^2+plane_equ(3)^2));
+                                   
+else
+    dis_to_plane=abs((plane_equ(1)*pnt(1)+plane_equ(2)*pnt(2)+plane_equ(3)*pnt(3)+plane_equ(4))/...
+             sqrt(plane_equ(1)^2+plane_equ(2)^2+plane_equ(3)^2));
+end
