@@ -52,22 +52,21 @@ path(NULL)
 	socialPlanner->setMapSkeleton(&playGround->mapManager->mapSkeleton);
 	socialPlanner->buildSpace();
 	socialPlanner->showConnections();
-	//socialPlanner->loadActivities("logs/tasks_log.txt");
 	socialPlanner->loadActivities("logs/exp_tasks_list_large");
 	/* TEST SMALL PATH */
-//	Pose s(playGround->mapManager->mapSkeleton.verticies[37].location.x(),playGround->mapManager->mapSkeleton.verticies[37].location.y(),0);
-//	socialPlanner->setStart(s);
-//	Pose e(playGround->mapManager->mapSkeleton.verticies[0].location.x(),playGround->mapManager->mapSkeleton.verticies[0].location.y(),DTOR(90));
-//	socialPlanner->setEnd(e);
-//	Node * retval = socialPlanner->astar->startSearch(s,e,METRIC);
-//	if(retval)
-//	{
-//		socialPlanner->printNodeList();
-//	}
-//	else
-//	{
-//		qDebug("No path Found");
-//	}
+	Pose s(playGround->mapManager->mapSkeleton.verticies[37].location.x(),playGround->mapManager->mapSkeleton.verticies[37].location.y(),0);
+	socialPlanner->setStart(s);
+	Pose e(playGround->mapManager->mapSkeleton.verticies[0].location.x(),playGround->mapManager->mapSkeleton.verticies[0].location.y(),DTOR(90));
+	socialPlanner->setEnd(e);
+	Node * retval = socialPlanner->astar->startSearch(s,e,METRIC);
+	if(retval)
+	{
+		socialPlanner->printNodeList();
+	}
+	else
+	{
+		qDebug("No path Found");
+	}
 	
 	/**
 	 * POMDP Part

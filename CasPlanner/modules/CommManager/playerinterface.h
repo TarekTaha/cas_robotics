@@ -113,7 +113,7 @@ Q_OBJECT
         void checkForWheelChair();
         void enableControl(int driveId);
         void setLasers(QVector<Laser> lasers); 
-		void enablePtz(int ptzId);
+        void enablePtz(int ptzId);
 		void enableJoyStick(int joyId);		
 		void enableVfh(int vfhId);
 		void enableMap(int mapId);
