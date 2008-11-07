@@ -43,47 +43,49 @@ class PlanningTab : public QWidget
 {
 Q_OBJECT
 
-	public:
-		~PlanningTab();
-		PlanningTab(QWidget *parent=0, PlayGround *playGroun=0);
-	public slots:
-		void updateSelectedObject(double);
-		void updateSelectedAvoidanceAlgo(bool);
-		void updateSelectedRobot(bool);		
-	public:
-		void updateRobotSetting();
-		PlayGround * playGround;
-		// Planning Steps
-		QGroupBox planningGB;
-		QCheckBox bridgeTest;
-		QCheckBox connectNodes;
-		QCheckBox regGrid;
-		QCheckBox obstPenalty;
-		QCheckBox expandObst;
-		QCheckBox showTree;
-	
-		// Planning Parameters
-		QGroupBox parametersGB;
-		QDoubleSpinBox obstExpRadSB;
-		QDoubleSpinBox bridgeTestResSB;
-		QDoubleSpinBox bridgeSegLenSB;
-		QDoubleSpinBox regGridResSB;
-		QDoubleSpinBox nodeConRadSB;
-		QDoubleSpinBox obstPenRadSB;
-	
-		// Obstacle Avoidance
-		QGroupBox obstavoidGB;
-		QRadioButton noavoidRadBtn;
-		QRadioButton forceFieldRadBtn;
-		QRadioButton configSpaceRadBtn;
-		QRadioButton vfhRadBtn;
-		QVector <QRadioButton *> availableRobots;
-	
-		//Pointers to the currently selected Robot
-		QGroupBox robotsGB;
-		RobotManager *currRobot;
-		QTreeWidgetItem *robotItem;
-		bool robotInitialization;
+    public:
+        ~PlanningTab();
+        PlanningTab(QWidget *parent=0, PlayGround *playGroun=0);
+    public slots:
+        void updateSelectedObject(double);
+        void updateSelectedAvoidanceAlgo(bool);
+        void updateSelectedRobot(bool);
+    public:
+        void updateRobotSetting();
+        PlayGround * playGround;
+        // Planning Steps
+        QGroupBox planningGB;
+        QCheckBox bridgeTest;
+        QCheckBox connectNodes;
+        QCheckBox regGrid;
+        QCheckBox obstPenalty;
+        QCheckBox expandObst;
+        QCheckBox showSearchTree;
+        QCheckBox showSearchSpaceTree;
+        QCheckBox showPaths;
+
+        // Planning Parameters
+        QGroupBox parametersGB;
+        QDoubleSpinBox obstExpRadSB;
+        QDoubleSpinBox bridgeTestResSB;
+        QDoubleSpinBox bridgeSegLenSB;
+        QDoubleSpinBox regGridResSB;
+        QDoubleSpinBox nodeConRadSB;
+        QDoubleSpinBox obstPenRadSB;
+
+        // Obstacle Avoidance
+        QGroupBox obstavoidGB;
+        QRadioButton noavoidRadBtn;
+        QRadioButton forceFieldRadBtn;
+        QRadioButton configSpaceRadBtn;
+        QRadioButton vfhRadBtn;
+        QVector <QRadioButton *> availableRobots;
+
+        //Pointers to the currently selected Robot
+        QGroupBox robotsGB;
+        RobotManager *currRobot;
+        QTreeWidgetItem *robotItem;
+        bool robotInitialization;
 };
 
 #endif /*PLANNINGTAB_H_*/
