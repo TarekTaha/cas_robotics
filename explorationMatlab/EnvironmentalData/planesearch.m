@@ -15,9 +15,9 @@ close all;
 
 % Here are 3 examples (only run one at a time obviously)
 % _1_
-load RoofPlaneSet.mat
+%load RoofPlaneSet.mat
 % _2_ the point cloud data is a bit crappy
-% load example_plane.mat; planeSet=plane;
+ load example_plane.mat; planeSet=plane;
 % _3_
 %load meshNplanes.mat; planeSet=plane;
 
@@ -58,7 +58,6 @@ setuprobot(7);
 %% If you want pose sel connectivity do this now
 if doposesel
     [level1,level2,level3]=GetImpLevInfo(all_centers);
-    all_centers(level2,:)
     all_centers_new=[];
     all_norms_new=[];
     planeSet_new=[];
@@ -86,7 +85,7 @@ if doposesel
     tic
     global workspace
     display('Adding obstacles for pose selection');
-    workspace.indexedobsticles=putinVoxels_gp(workspace.indexedobsticles,workspace.inc_size);
+    workspace.indexedobsticles=putinVoxels_gp([workspace.indexedobsticles;all_centers],workspace.inc_size);
     profile clear;profile on;
     temp_poses=PoseSel4planesearch(planeSet);
     profile off;profile viewer;
@@ -105,7 +104,7 @@ if doposesel
         
     end
     subplot(2,3,6)        
-    pie(length(find(all_poses(:,8)==true)),length(find(all_poses(:,8)==false)))
+    pie([length(find(all_poses(:,8)==true)),length(find(all_poses(:,8)==false))])
         
     toc
 end
