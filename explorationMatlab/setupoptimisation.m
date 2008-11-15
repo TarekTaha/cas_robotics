@@ -18,16 +18,18 @@ global optimise
 %this is the min stream length
 optimise.mintargetdis=0.15;
 %this is the max stream length
-optimise.maxtargetdis=0.50;
+optimise.maxtargetdis=0.60;
 %this is the min distance between where stream hits target the target and
 %where we desire it to hit (plane.home_point)
-optimise.minAccepDis=0.01;
+optimise.minAccepDis=0.02;
 % This is how many max iterations for the optimisation
-optimise.iLimit=100;%used to be 1000
+optimise.iLimit=30;%used to be 1000
 % This is the acceptable value for the cost funciton minimisation
-optimise.stol = 1e-10;%used to be 1e-13...note: unless it is 1e-2 or more it basically always goes to the iteration limit
+optimise.stol = 1e-4;%used to be 1e-13...note: unless it is 1e-2 or more it basically always goes to the iteration limit
 %the max angular deflection (in rads) from requested in pose selection
-optimise.maxDeflectionError = pi/6;%used to be pi/8;
+optimise.maxDeflectionError = pi/3;%used to be pi/8;
+%the min angular deflection (in rads) from requested in pose selection
+optimise.minDeflectionError = pi/180;%really shouldn't be 0 deg
 % this takes 10 ms everytime it is called and it need only be called once
 optimise.options = optimset('Display', 'off', 'Largescale', 'off', 'TolFun', optimise.stol,'MaxFunEvals', optimise.iLimit);
 % optimise.options = optimset('Display', 'off', 'Largescale', 'off',
