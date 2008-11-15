@@ -4,7 +4,7 @@
 % bigger surfaces
  function planesearch ()
 close all;
-tic
+
 
 %% Load dataset 
 % Recomended that you use this on a set of points
@@ -15,9 +15,9 @@ tic
 
 % Here are 3 examples (only run one at a time obviously)
 % _1_
-%load RoofPlaneSet.mat
+load RoofPlaneSet.mat
 % _2_ the point cloud data is a bit crappy
- load example_plane.mat; planeSet=plane;
+% load example_plane.mat; planeSet=plane;
 % _3_
 %load meshNplanes.mat; planeSet=plane;
 
@@ -27,6 +27,7 @@ maxDistConstant=0.2; %meters
 maxAngleConstant=5*pi/180; %degrees
 maxDist2PlaneConstant=0.05; %meters
 minplanes2callAsurface=4; % What is the minimum planes which make a surface worth growing
+doposesel=true;
 showClusterNormalDist=false; % do you want to see the angle between all normals in surface population
 
 % variables set for all centers and normals
@@ -39,6 +40,7 @@ for i=1:size(planeSet,2)
     all_norms(i,:)=planeSet(i).normal_by_eigenval';
 end
 
+
 % Make a graph with all nodes
 connectivityGraph=zeros([size(planeSet,2),size(planeSet,2)]);
 
@@ -50,6 +52,65 @@ registered_to_surface=zeros([size(planeSet,2),1]);
 %               .originalcenter
 %               .registered_to_surface
 
+%setupa 7 link robot
+setuprobot(7);
+
+%% If you want pose sel connectivity do this now
+if doposesel
+    [level1,level2,level3]=GetImpLevInfo(all_centers);
+    all_centers(level2,:)
+    all_centers_new=[];
+    all_norms_new=[];
+    planeSet_new=[];
+    for i=level1'
+        if isempty(planeSet_new)
+            all_centers_new=all_centers(i,:);
+            all_norms_new=all_norms(i,:);
+            planeSet_new=planeSet(i);
+        else
+            all_centers_new=[all_centers_new;all_centers(i,:)];
+            all_norms_new=[all_norms_new;all_norms(i,:)];
+            planeSet_new(end+1)=planeSet(i);
+        end
+    end
+    all_centers=all_centers_new;
+    all_norms=all_norms_new;
+    planeSet=planeSet_new;
+    
+    figure;
+    global r  Q;plot(r,Q)
+    hold on
+    plot3(all_centers(:,1),all_centers(:,2),all_centers(:,3),'r.');
+    light
+
+    tic
+    global workspace
+    display('Adding obstacles for pose selection');
+    workspace.indexedobsticles=putinVoxels_gp(workspace.indexedobsticles,workspace.inc_size);
+    profile clear;profile on;
+    temp_poses=PoseSel4planesearch(planeSet);
+    profile off;profile viewer;
+    keyboard
+    all_poses=zeros([size(temp_poses,2),size(temp_poses(1).Q,2)+1]);
+    for i=1:size(temp_poses,2)
+        all_poses(i,:)=[temp_poses(i).Q,temp_poses(i).validPose];
+    end
+    figure;
+    for i=1:5%size(temp_poses(i).Q,2)
+        subplot(2,3,i)        
+        %hist(all_poses(:,i),15);
+        
+        rose(all_poses(:,i),80)
+        title(['Joint ',num2str(i), ',u=',num2str(mean(all_poses(:,i)*180/pi)), ' sig^2=',num2str((std(all_poses(:,i)*180/pi)^2)) ])
+        
+    end
+    subplot(2,3,6)        
+    pie(length(find(all_poses(:,8)==true)),length(find(all_poses(:,8)==false)))
+        
+    toc
+end
+
+tic
 %% Search at each plane for surrounding planes 
 % $$ \begin{array}{c} 
 % D=|P_{i}-P| \\
