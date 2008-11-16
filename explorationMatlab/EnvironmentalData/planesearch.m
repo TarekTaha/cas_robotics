@@ -53,10 +53,14 @@ registered_to_surface=zeros([size(planeSet,2),1]);
 %               .registered_to_surface
 
 %setupa 7 link robot
-setuprobot(7);
+
 
 %% If you want pose sel connectivity do this now
 if doposesel
+    global r Q
+    if isempty(r)||isempty(Q); error('You must run exGUI once if you wish to do pose selection');end
+    %make sure robot is a 7 link object for blasting
+    setuprobot(7)
     [level1,level2,level3]=GetImpLevInfo(all_centers);
     all_centers_new=[];
     all_norms_new=[];
@@ -77,7 +81,7 @@ if doposesel
     planeSet=planeSet_new;
     
     figure;
-    global r  Q;plot(r,Q)
+    plot(r,Q)
     hold on
     plot3(all_centers(:,1),all_centers(:,2),all_centers(:,3),'r.');
     light
@@ -89,7 +93,7 @@ if doposesel
     profile clear;profile on;
     temp_poses=PoseSel4planesearch(planeSet);
     profile off;profile viewer;
-    keyboard
+    
     all_poses=zeros([size(temp_poses,2),size(temp_poses(1).Q,2)+1]);
     for i=1:size(temp_poses,2)
         all_poses(i,:)=[temp_poses(i).Q,temp_poses(i).validPose];
@@ -104,9 +108,9 @@ if doposesel
         
     end
     subplot(2,3,6)        
-    pie([length(find(all_poses(:,8)==true)),length(find(all_poses(:,8)==false))])
-        
+    pie([length(find(all_poses(:,8)==true)),length(find(all_poses(:,8)==false))])        
     toc
+    keyboard
 end
 
 tic
@@ -157,7 +161,7 @@ for i=1:size(planeSet,2)
 
     %Zeros stuffed at start to make updating the connectivity graph easier     
     if i>1 stuffing=zeros([i-1,1]); else stuffing=[];end
-    index_of_links_temp=[BOOLEAN(stuffing);...
+    index_of_links_temp=[boolean(stuffing);...
                         (dist_to_all_TEMP > 0 & ... 
                          dist_to_all_TEMP < maxDistConstant & ...
                          norm_ang_to_all_TEMP < maxAngleConstant & ...

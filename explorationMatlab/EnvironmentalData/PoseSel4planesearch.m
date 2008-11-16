@@ -36,12 +36,14 @@ display('Starting 1st phase...............');
 
 %starting jointConfig guess could be all zeros or current Q
 % jointConfig=[0 0 0 0 0 0,0];
-% jointConfig=Q;
+%pad Q with zeros if needed
+while length(Q)<7; Q=[Q,0];end
+
 jointConfig=ikine_g_plane(r,plane(1).home_point, plane(1).equ, Q);
 jointConfig(jointConfig'<qlimits(:,1)*0.96)=qlimits(jointConfig'<qlimits(:,1),1)*0.96;
 jointConfig(jointConfig'>qlimits(:,2)*0.96)=qlimits(jointConfig'>qlimits(:,2),2)*0.96;
 if ~check_path_for_col(jointConfig)
-    jointConfig=Q
+    jointConfig=Q;
 end
 
     
@@ -86,7 +88,7 @@ for i = 1:length(plane)
 %                 end
 %             end
         else
-            display('Found a pose immediately using EYEINHAND');
+            display('...1) DensoBlasting_h found immediately');
         end
         
         
@@ -174,19 +176,22 @@ for i = 1:length(plane)
     pose(end).validPose = valid;
     
     valid_count=valid_count+valid;
-    display([num2str(i),' of ', num2str(length(plane)),' (', num2str(i/length(plane)*100), '%) - valid: ', num2str(valid), ' (',num2str(valid_count/i),'% found)']);
+    display([num2str(i),' of ', num2str(length(plane)),' (', num2str(i/length(plane)*100), '%) - valid: ', num2str(valid), ' (',num2str(valid_count/i*100),'% found)']);
 end
 
-
-display(['Finished 1st search phaseaze. Found ', num2str(valid_count), 'of' num2str(i), ' targets (',num2str(valid_count/i),'%)']);
+display('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+display(['Finished 1st search phase. Found ', num2str(valid_count), 'of' num2str(i), ' targets (',num2str(valid_count/i*100),'%)']);
 %Go through and use future planes poses found to generate impossible ones
 display('Starting 2nd phase...............');
 for i=1:length(plane)
     %display('only doing 20');
     if ~pose(i).validPose
         [jointConfig,valid]=tryuseallasstarters(pose,plane(i),qlimits,t_base,Links,numlinks,collchk4eyeinhand_ang);
-        if valid
-            display(['Rechecking:' ,num2str(i),' of ', num2str(length(plane)),' (', num2str(i/length(plane)*100), '%) - valid: ', num2str(valid), ' (',num2str(valid_count/i),'% found)']);
+        %increase by if valid is true or false
+        valid_count=valid_count+valid;
+        
+        if valid            
+            display(['Rechecking:' ,num2str(i),' of ', num2str(length(plane)),' (', num2str(i/length(plane)*100), '%) - valid: ', num2str(valid), ' (',num2str(valid_count/length(plane)*100),'% found)']);
             pose(i).Q=jointConfig;
             pose(i).validPose = true;
         end
@@ -227,7 +232,7 @@ DensoBlasting_h.TargetNormal = plane.equ(1:3);
                         keyboard
                     end
                     if valid
-                        display('Found pose using DensoBlasting_h & PREVIOUS VALID as starter');
+                        display('...1) DensoBlasting_h found ');
                         jointConfig=jointConfig_temp;
                         return;
                     end
@@ -253,7 +258,7 @@ DensoBlasting_h.TargetNormal = plane.equ(1:3);
 
                     end
                     if valid
-                        display('........Found pose using blasting_posesel & PREVIOUS VALID as starter');
+                        display('...2) blasting_posesel found ');
                         jointConfig=jointConfig_temp;
                         return;
                     end
