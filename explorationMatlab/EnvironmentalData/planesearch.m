@@ -15,20 +15,23 @@ close all;
 
 % Here are 3 examples (only run one at a time obviously)
 % _1_
-%load RoofPlaneSet.mat
+load RoofPlaneSet.mat
 % _2_ the point cloud data is a bit crappy
 % load example_plane.mat; planeSet=plane;
 % _3_
-load meshNplanes.mat; planeSet=plane;
+%load meshNplanes.mat; planeSet=plane;
 
 
 %% Variables
 maxDistConstant=0.2; %meters
 maxAngleConstant=5*pi/180; %degrees
 maxDist2PlaneConstant=0.05; %meters
+% first 3 angles are based upon optimise.max_angle_for123 (force field safety)
+maxQConstant=[4*pi/180,5*pi/180,7*pi/180,10*pi/180,10*pi/180,10*pi/180];
 minplanes2callAsurface=4; % What is the minimum planes which make a surface worth growing
 doposesel=true;
 showClusterNormalDist=false; % do you want to see the angle between all normals in surface population
+plot_all_poseInfo=true;
 
 % variables set for all centers and normals
 all_centers=zeros([size(planeSet,2),3]);
@@ -80,6 +83,13 @@ if doposesel
     all_norms=all_norms_new;
     planeSet=planeSet_new;
     
+    % Update graph with all nodes
+    connectivityGraph=zeros([size(planeSet,2),size(planeSet,2)]);
+
+    % Update Registered to surface variable 
+    registered_to_surface=zeros([size(planeSet,2),1]);
+
+    
     figure;
     plot(r,Q)
     hold on
@@ -90,27 +100,36 @@ if doposesel
     global workspace
     display('Adding obstacles for pose selection');
     workspace.indexedobsticles=putinVoxels_gp([workspace.indexedobsticles;all_centers],workspace.inc_size);
-    profile clear;profile on;
-    temp_poses=PoseSel4planesearch(planeSet);
-    profile off;profile viewer;
+
+%     profile clear;profile on;
+     temp_poses=PoseSel4planesearch(planeSet);
+% load meshNplanes_poseset2.mat
+%load roofPlaneSet_poseset.mat
+
+%     profile off;profile viewer;
+
     
     all_poses=zeros([size(temp_poses,2),size(temp_poses(1).Q,2)+1]);
     for i=1:size(temp_poses,2)
         all_poses(i,:)=[temp_poses(i).Q,temp_poses(i).validPose];
     end
-    figure;
-    for i=1:5%size(temp_poses(i).Q,2)
-        subplot(2,3,i)        
-        %hist(all_poses(:,i),15);
-        
-        rose(all_poses(:,i),80)
-        title(['Joint ',num2str(i), ',u=',num2str(mean(all_poses(:,i)*180/pi)), ' sig^2=',num2str((std(all_poses(:,i)*180/pi)^2)) ])
-        
+    
+    
+    if plot_all_poseInfo
+        figure;
+        for i=1:5%size(temp_poses(i).Q,2)
+            subplot(2,3,i)        
+            %hist(all_poses(:,i),15);
+
+            rose(all_poses(:,i),80)
+            title(['Joint ',num2str(i), ',u=',num2str(mean(all_poses(:,i)*180/pi)), ' sig^2=',num2str((std(all_poses(:,i)*180/pi)^2)) ])
+
+        end
+        subplot(2,3,6)        
+        pie([length(find(all_poses(:,8)==true)),length(find(all_poses(:,8)==false))])        
+        toc
+        keyboard
     end
-    subplot(2,3,6)        
-    pie([length(find(all_poses(:,8)==true)),length(find(all_poses(:,8)==false))])        
-    toc
-    keyboard
 end
 
 tic
@@ -150,6 +169,17 @@ for i=1:size(planeSet,2)
     %this is the distance from the ith plane to all other points
     dist_plane_to_points=dis_bet_plane_n_pnt_internal(temp_plane_equ,all_centers(i:end,:));
     
+    %This is the Q difference
+    anglebetweenQs=[abs(all_poses(i,1)-all_poses(i:end,1)),...
+                    abs(all_poses(i,2)-all_poses(i:end,2)),...
+                    abs(all_poses(i,3)-all_poses(i:end,3)),...
+                    abs(all_poses(i,4)-all_poses(i:end,4)),...
+                    abs(all_poses(i,5)-all_poses(i:end,5)),...
+                    abs(all_poses(i,6)-all_poses(i:end,6))];
+                anglebetweenQs(all_poses(i:end,8)==0,:)=inf;
+                
+    
+    
 %% Forms the connectivity graph
 % $$ \begin{array}{c} 
 % \mbox{Find i corresponding to connected planes}\\
@@ -165,7 +195,13 @@ for i=1:size(planeSet,2)
                         (dist_to_all_TEMP > 0 & ... 
                          dist_to_all_TEMP < maxDistConstant & ...
                          norm_ang_to_all_TEMP < maxAngleConstant & ...
-                         dist_plane_to_points < maxDist2PlaneConstant)];
+                         dist_plane_to_points < maxDist2PlaneConstant)&...
+                         (anglebetweenQs(:,1)<maxQConstant(1)&...
+                          anglebetweenQs(:,2)<maxQConstant(2)&...
+                          anglebetweenQs(:,3)<maxQConstant(3)&...
+                          anglebetweenQs(:,4)<maxQConstant(4)&...
+                          anglebetweenQs(:,5)<maxQConstant(5)&...
+                          anglebetweenQs(:,6)<maxQConstant(6))]; %find if any angles are bad, if not then its ok
 %updates connectivity from node i (make sure there is no self link)
     connectivityGraph(index_of_links_temp,i)=1;
     connectivityGraph(i,index_of_links_temp)=1;    
@@ -240,6 +276,8 @@ for i=1:size(larger_surface,2)
 end
 
 %% Draw the center of all the tiles
+figure;
+try plot(r,Q);end;
 hold on;
 title (['Number of surfaces found = ',num2str(size(validnewsurfaces,2)),'. Time Taken: ',num2str(timetaken)])
 axis equal
