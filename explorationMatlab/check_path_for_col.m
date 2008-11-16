@@ -31,7 +31,8 @@ function [result,unknown_points_result] = check_path_for_col(all_steps,points,un
 global r densoobj 
 
 %robot parameters
-n = r.n;
+% n = r.n; %must be 6 because that is all the ellipsoid peices I have
+
 rob_base = r.base;
 
 if nargin<4
@@ -85,7 +86,7 @@ end
 
 for i=1:size(all_steps,1)
     t = rob_base;
-    for piece=1:n        
+    for piece=1:6        
 %         t = t * L{piece}(all_steps(i,piece));
         t = t * linktransform_gp(linkvals(piece).val,(all_steps(i,piece)));
 %         if ~isempty(find(abs(t-t1)>0,1))
