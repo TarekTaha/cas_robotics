@@ -36,7 +36,7 @@ rob_base = r.base;
 
 if nargin<4
     L = r.link;
-    for piece=1:n
+    for piece=1:6
         linkvals(piece).val=[L{piece}.alpha L{piece}.A L{piece}.D L{piece}.offset];
     end
     if nargin<3

@@ -29,18 +29,20 @@ end
     DensoBlasting_h.MinimumFunctionGradient = optimise.stol;
 
     collchk4eyeinhand_ang=3*pi/180;
-  
+    valid_count=0
 
 %   profile clear; profile on;
-display('Currently determining poses for target set');
+display('Starting 1st phase...............');
 
 %starting jointConfig guess could be all zeros or current Q
 % jointConfig=[0 0 0 0 0 0,0];
-jointConfig=Q;
-% jointConfig=ikine_g_plane(r,plane(1).home_point, plane(1).equ, [0 0 0 0 0 0,0]);
-% jointConfig(jointConfig'<qlimits(:,1)*0.96)=qlimits(jointConfig'<qlimits(:,1),1)*0.96;
-% jointConfig(jointConfig'>qlimits(:,2)*0.96)=qlimits(jointConfig'>qlimits(:,2),2)*0.96;
-
+% jointConfig=Q;
+jointConfig=ikine_g_plane(r,plane(1).home_point, plane(1).equ, Q);
+jointConfig(jointConfig'<qlimits(:,1)*0.96)=qlimits(jointConfig'<qlimits(:,1),1)*0.96;
+jointConfig(jointConfig'>qlimits(:,2)*0.96)=qlimits(jointConfig'>qlimits(:,2),2)*0.96;
+if ~check_path_for_col(jointConfig)
+    jointConfig=Q
+end
 
     
 for i = 1:length(plane)
@@ -171,16 +173,20 @@ for i = 1:length(plane)
     %set the pose state to valid state TRUE or FALSE
     pose(end).validPose = valid;
     
-    
-    display([num2str(i),' of ', num2str(length(plane)),' (', num2str(i/length(plane)*100), '%) - valid: ', num2str(valid)]);
+    valid_count=valid_count+valid;
+    display([num2str(i),' of ', num2str(length(plane)),' (', num2str(i/length(plane)*100), '%) - valid: ', num2str(valid), ' (',num2str(valid_count/i),'% found)']);
 end
 
+
+display(['Finished 1st search phaseaze. Found ', num2str(valid_count), 'of' num2str(i), ' targets (',num2str(valid_count/i),'%)']);
 %Go through and use future planes poses found to generate impossible ones
+display('Starting 2nd phase...............');
 for i=1:length(plane)
     %display('only doing 20');
     if ~pose(i).validPose
         [jointConfig,valid]=tryuseallasstarters(pose,plane(i),qlimits,t_base,Links,numlinks,collchk4eyeinhand_ang);
         if valid
+            display(['Rechecking:' ,num2str(i),' of ', num2str(length(plane)),' (', num2str(i/length(plane)*100), '%) - valid: ', num2str(valid), ' (',num2str(valid_count/i),'% found)']);
             pose(i).Q=jointConfig;
             pose(i).validPose = true;
         end

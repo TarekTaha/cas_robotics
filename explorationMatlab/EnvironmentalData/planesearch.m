@@ -17,9 +17,9 @@ close all;
 % _1_
 %load RoofPlaneSet.mat
 % _2_ the point cloud data is a bit crappy
- load example_plane.mat; planeSet=plane;
+% load example_plane.mat; planeSet=plane;
 % _3_
-%load meshNplanes.mat; planeSet=plane;
+load meshNplanes.mat; planeSet=plane;
 
 
 %% Variables
