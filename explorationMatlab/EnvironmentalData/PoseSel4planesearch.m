@@ -180,7 +180,7 @@ for i = 1:length(plane)
 end
 
 display('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
-display(['Finished 1st search phase. Found ', num2str(valid_count), 'of' num2str(i), ' targets (',num2str(valid_count/i*100),'%)']);
+display(['Finished 1st search phase. Found ', num2str(valid_count), ' of ' num2str(i), ' targets (',num2str(valid_count/i*100),'%)']);
 %Go through and use future planes poses found to generate impossible ones
 display('Starting 2nd phase...............');
 for i=1:length(plane)
