@@ -204,10 +204,23 @@ display(['Finished 1st search phase. Found ', num2str(valid_count), ' of ' num2s
 % used to seed any of the unsucsessful ones. We go through and use future
 % planes poses found to generate impossible ones 
 display('Starting 2nd phase...............');
+all_valid=zeros([valid_count,numlinks]);
+valid_count=0;
+for i=1:length(plane)
+    if pose(i).validPose
+        valid_count=valid_count+1;
+        all_valid(valid_count,:)= pose(i).Q;
+    end
+end
+mew=sum(all_valid,1)/valid_count;
+disttomean=sqrt((all_valid(:,1)-mew(1))^2+(all_valid(:,2)-mew(2))^2+(all_valid(:,3)-mew(3))^2+(all_valid(:,4)-mew(4))^2+(all_valid(:,5)-mew(5))^2);
+[nothing,index]=sortrow(disttomean,'ascend');
+% all_valid(index,:);
+
 for i=1:length(plane)
     %display('only doing 60');
     if ~pose(i).validPose
-        [jointConfig,valid,foundby]=tryuseallasstarters(pose,plane(i),qlimits,t_base,Links,numlinks,collchk4eyeinhand_ang);
+        [jointConfig,valid,foundby]=tryuseallasstarters(pose,plane(i),qlimits,t_base,Links,numlinks,all_valid(index,:),collchk4eyeinhand_ang);
         
         %increase by if valid is true or false
         valid_count=valid_count+valid;
@@ -220,6 +233,14 @@ for i=1:length(plane)
             end
             pose(i).Q=jointConfig;
             pose(i).validPose = true;
+            %update the all_valid variable
+            all_valid=[all_valid;jointConfig];
+            %update the mean
+            mew=(mew*(valid_count-1)+all_valid)/valid_count;
+            %get distance to new mean
+            disttomean=sqrt((all_valid(:,1)-mew(1))^2+(all_valid(:,2)-mew(2))^2+(all_valid(:,3)-mew(3))^2+(all_valid(:,4)-mew(4))^2+(all_valid(:,5)-mew(5))^2);
+            %sort in order of distance from mean
+            [nothing,index]=sortrow(disttomean,'ascend');
         end
     end
 end
@@ -234,9 +255,9 @@ end
 
 
 %% This fucntion tries to find missing poses
-function [jointConfig,valid,foundby]=tryuseallasstarters(pose,plane,qlimits,t_base,Links,numlinks,collchk4eyeinhand_ang,maxtries)
+function [jointConfig,valid,foundby]=tryuseallasstarters(pose,plane,qlimits,t_base,Links,numlinks,Q_guess_order,collchk4eyeinhand_ang,maxtries)
 global DensoBlasting_h
-if nargin<8    
+if nargin<9    
     maxtries=30;
 end
 valid=false;
@@ -255,25 +276,30 @@ end
 tries=0;
 if size(pose,2)>1
     %it is better to use the randomised order of the poses
-    for current_pose=randperm(size(pose,2)-1)
-        if pose(current_pose).validPose
-            try                      
-                jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(pose(current_pose).Q(1:6)))),0];
+%     for current_pose=randperm(size(pose,2)-1)
+% if pose(current_pose).validPose
+%using the closest guesses to the mean
+    for current_pose=1:size(Q_guess_order,2)
+        try                      
+            jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(Q_guess_order(current_pose,1:6)))),0];
+%                 jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(pose(current_pose).Q(1:6)))),0];
                 %do we need a collision check? (if greater than 3
                 %deg movement)
-                docollcheck=~isempty(find((pose(current_pose).Q(1:6)-jointConfig_temp(1:6))>collchk4eyeinhand_ang,1));
+                
+            docollcheck=~isempty(find((Q_guess_order(current_pose,1:6)-jointConfig_temp(1:6))>collchk4eyeinhand_ang,1));
+%                 docollcheck=~isempty(find((pose(current_pose).Q(1:6)-jointConfig_temp(1:6))>collchk4eyeinhand_ang,1));
                 %check if valid
-                [valid,dist]=classunkcheck_newQ(jointConfig_temp,qlimits,plane.home_point,t_base,Links,numlinks,plane.equ,false,docollcheck);
-            catch
-                keyboard
-            end
-            % If we found then display the method used: DensoBlasting_h
-            if valid
-                foundby='. Found by 1) DensoBlasting_h';
-                jointConfig=jointConfig_temp;
-                return;
-            end
+            [valid,dist]=classunkcheck_newQ(jointConfig_temp,qlimits,plane.home_point,t_base,Links,numlinks,plane.equ,false,docollcheck);
+        catch
+            keyboard
         end
+            % If we found then display the method used: DensoBlasting_h
+        if valid
+            foundby='. Found by 1) DensoBlasting_h';
+            jointConfig=jointConfig_temp;
+            return;
+        end
+%         end
     end            
 end
 
@@ -282,21 +308,22 @@ end
 %and has already been tried
 tries=0;
 if size(pose,2)>1
-    for current_pose=randperm(size(pose,2)-1)       
-        if pose(current_pose).validPose
+    for current_pose=1:size(Q_guess_order,2)
+%     for current_pose=randperm(size(pose,2)-1)       
+%         if pose(current_pose).validPose
             %don't attempt to use too many poses this may be an impossible pose after all        
-            if tries>maxtries; break; else tries=tries+1;end
-            try 
-                [jointConfig_temp,valid] = blasting_posesel(plane.home_point, plane.equ, pose(current_pose).Q);
-                if valid jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig_temp(1:6)))),0];end
-
-            end
-            % If we found then display the method used: blasting_posesel
-            if valid
-                foundby='. Found by 2) blasting_posesel';
-                jointConfig=jointConfig_temp;
-                return;
-            end
+        if tries>maxtries; break; else tries=tries+1;end
+        try 
+            [jointConfig_temp,valid] = blasting_posesel(plane.home_point, plane.equ, Q_guess_order(current_pose,1:6));
+%             [jointConfig_temp,valid] = blasting_posesel(plane.home_point, plane.equ, pose(current_pose).Q);
+            if valid jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig_temp(1:6)))),0];end
         end
-    end            
+            % If we found then display the method used: blasting_posesel
+        if valid
+            foundby='. Found by 2) blasting_posesel';
+            jointConfig=jointConfig_temp;
+            return;
+        end
+    end
+%     end            
 end
