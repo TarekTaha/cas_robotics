@@ -5,7 +5,7 @@
  function planesearch ()
 close all;
 
-global workspace r Q;
+global workspace r Q robot_maxreach;
 %% Load dataset 
 % Recomended that you use this on a set of points
 % surface_making_simple(points,sizeofplane)
@@ -15,11 +15,11 @@ global workspace r Q;
 
 % Here are 3 examples (only run one at a time obviously)
 % _1_
-load RoofPlaneSet.mat
+%load RoofPlaneSet.mat
 % _2_ the point cloud data is a bit crappy
 % load example_plane.mat; planeSet=plane;
 % _3_
-%load meshNplanes.mat; planeSet=plane;
+load meshNplanes.mat; planeSet=plane;
 
 
 %% Variables
@@ -54,9 +54,15 @@ registered_to_surface=zeros([size(planeSet,2),1]);
 %% If you want pose sel connectivity do this now
 if doposesel
     if isempty(r)||isempty(Q); error('You must run exGUI once if you wish to do pose selection');end
-
-    %make sure robot is a 7 link object for blasting
+    
     setuprobot(7)
+    
+    %make the third
+    display('moving third joint to 90 deg and other than that at starting pose')        
+    Q=robot_maxreach.default_Q(1,:);
+    Q(3)=pi/2;
+    %make sure robot is a 7 link object for blasting
+    
 
     %select planes within range
     [level1,level2,level3]=GetImpLevInfo(all_centers);

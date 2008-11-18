@@ -44,6 +44,10 @@ DensoBlasting_h.MaximumDegreesToSurfaceNormal = rad2deg(optimise.maxDeflectionEr
 DensoBlasting_h.ToolFrameReferencePoint = [0, 0, 0];
 DensoBlasting_h.MinimumFunctionGradient = optimise.stol;
 
+for piece=1:numlinks
+	linkvals(piece).val=[Links{piece}.alpha Links{piece}.A Links{piece}.D Links{piece}.offset];
+end
+    
 % Angle requiring collision checking if it changes more than this
 collchk4eyeinhand_ang=4*pi/180;
 valid_count=0;
@@ -91,7 +95,7 @@ for i = 1:length(plane)
         %do we need a collision check? how close to previous guess
         docollcheck=~isempty(find(jointConfig(1:5)-jointConfig_temp(1:5)>collchk4eyeinhand_ang,1));
         %check if valid: eg close to target goal, no collision, within limits etc
-        [valid,dist]=classunkcheck_newQ(jointConfig_temp,qlimits,plane(i).home_point,t_base,Links,numlinks,plane(i).equ,false,docollcheck);
+        [valid,dist]=classunkcheck_newQ(jointConfig_temp,qlimits,plane(i).home_point,t_base,Links,numlinks,plane(i).equ,false,linkvals,docollcheck);
         
         %if not valid use my blasting_posesel method
         if valid
@@ -213,14 +217,14 @@ for i=1:length(plane)
     end
 end
 mew=sum(all_valid,1)/valid_count;
-disttomean=sqrt((all_valid(:,1)-mew(1))^2+(all_valid(:,2)-mew(2))^2+(all_valid(:,3)-mew(3))^2+(all_valid(:,4)-mew(4))^2+(all_valid(:,5)-mew(5))^2);
-[nothing,index]=sortrow(disttomean,'ascend');
+disttomean=sqrt((all_valid(:,1)-mew(1)).^2+(all_valid(:,2)-mew(2)).^2+(all_valid(:,3)-mew(3)).^2+(all_valid(:,4)-mew(4)).^2+(all_valid(:,5)-mew(5)).^2);
+[nothing,index]=sortrows(disttomean);
 % all_valid(index,:);
 
 for i=1:length(plane)
     %display('only doing 60');
     if ~pose(i).validPose
-        [jointConfig,valid,foundby]=tryuseallasstarters(pose,plane(i),qlimits,t_base,Links,numlinks,all_valid(index,:),collchk4eyeinhand_ang);
+        [jointConfig,valid,foundby]=tryuseallasstarters(pose,plane(i),qlimits,t_base,Links,numlinks,all_valid(index,:),collchk4eyeinhand_ang,linkvals);
         
         %increase by if valid is true or false
         valid_count=valid_count+valid;
@@ -236,11 +240,11 @@ for i=1:length(plane)
             %update the all_valid variable
             all_valid=[all_valid;jointConfig];
             %update the mean
-            mew=(mew*(valid_count-1)+all_valid)/valid_count;
+            mew=(mew*(valid_count-1)+jointConfig)/valid_count;
             %get distance to new mean
-            disttomean=sqrt((all_valid(:,1)-mew(1))^2+(all_valid(:,2)-mew(2))^2+(all_valid(:,3)-mew(3))^2+(all_valid(:,4)-mew(4))^2+(all_valid(:,5)-mew(5))^2);
+            disttomean=sqrt((all_valid(:,1)-mew(1)).^2+(all_valid(:,2)-mew(2)).^2+(all_valid(:,3)-mew(3)).^2+(all_valid(:,4)-mew(4)).^2+(all_valid(:,5)-mew(5)).^2);
             %sort in order of distance from mean
-            [nothing,index]=sortrow(disttomean,'ascend');
+            [nothing,index]=sortrows(disttomean);
         end
     end
 end
@@ -255,9 +259,9 @@ end
 
 
 %% This fucntion tries to find missing poses
-function [jointConfig,valid,foundby]=tryuseallasstarters(pose,plane,qlimits,t_base,Links,numlinks,Q_guess_order,collchk4eyeinhand_ang,maxtries)
+function [jointConfig,valid,foundby]=tryuseallasstarters(pose,plane,qlimits,t_base,Links,numlinks,Q_guess_order,collchk4eyeinhand_ang,linkvals,maxtries)
 global DensoBlasting_h
-if nargin<9    
+if nargin<10    
     maxtries=30;
 end
 valid=false;
@@ -274,12 +278,12 @@ end
                         
 %Try all valid poses as starter for this one missing using DensoBlasting_h
 tries=0;
-if size(pose,2)>1
+if size(Q_guess_order,1)>1
     %it is better to use the randomised order of the poses
 %     for current_pose=randperm(size(pose,2)-1)
 % if pose(current_pose).validPose
 %using the closest guesses to the mean
-    for current_pose=1:size(Q_guess_order,2)
+    for current_pose=1:size(Q_guess_order,1)
         try                      
             jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(Q_guess_order(current_pose,1:6)))),0];
 %                 jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(pose(current_pose).Q(1:6)))),0];
@@ -289,7 +293,7 @@ if size(pose,2)>1
             docollcheck=~isempty(find((Q_guess_order(current_pose,1:6)-jointConfig_temp(1:6))>collchk4eyeinhand_ang,1));
 %                 docollcheck=~isempty(find((pose(current_pose).Q(1:6)-jointConfig_temp(1:6))>collchk4eyeinhand_ang,1));
                 %check if valid
-            [valid,dist]=classunkcheck_newQ(jointConfig_temp,qlimits,plane.home_point,t_base,Links,numlinks,plane.equ,false,docollcheck);
+            [valid,dist]=classunkcheck_newQ(jointConfig_temp,qlimits,plane.home_point,t_base,Links,numlinks,plane.equ,false,linkvals,docollcheck);
         catch
             keyboard
         end
@@ -307,14 +311,14 @@ end
 %a starter (don't use the latest which is obviously jointConfig
 %and has already been tried
 tries=0;
-if size(pose,2)>1
-    for current_pose=1:size(Q_guess_order,2)
+if size(Q_guess_order,1)>1
+    for current_pose=1:size(Q_guess_order,1)
 %     for current_pose=randperm(size(pose,2)-1)       
 %         if pose(current_pose).validPose
             %don't attempt to use too many poses this may be an impossible pose after all        
         if tries>maxtries; break; else tries=tries+1;end
         try 
-            [jointConfig_temp,valid] = blasting_posesel(plane.home_point, plane.equ, Q_guess_order(current_pose,1:6));
+            [jointConfig_temp,valid] = blasting_posesel(plane.home_point, plane.equ, Q_guess_order(current_pose,:));
 %             [jointConfig_temp,valid] = blasting_posesel(plane.home_point, plane.equ, pose(current_pose).Q);
             if valid jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig_temp(1:6)))),0];end
         end
