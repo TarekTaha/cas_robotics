@@ -5,29 +5,69 @@
  function planesearch ()
 close all;
 
-global workspace r Q robot_maxreach;
+global workspace r Q robot_maxreach hMesh;
 %% Load dataset 
 % Recomended that you use this on a set of points
-% surface_making_simple(points,sizeofplane)
-% global plane 
+%
+%Do you want to load planes or make planes
+loadplanes1_makeplanes0=0;
 
-%OR could use stephens planes
-
+if loadplanes1_makeplanes0
 % Here are 3 examples (only run one at a time obviously)
 % _1_
 %load RoofPlaneSet.mat
 % _2_ the point cloud data is a bit crappy
 % load example_plane.mat; planeSet=plane;
 % _3_
-load meshNplanes.mat; planeSet=plane;
+% load meshNplanes.mat; planeSet=plane;
 
+else
+    %OR could use stephens planes
+    display('Loading map');
+    try global robmap_h; 
+        if isempty(robmap_h) 
+            try robmap_h.release;pause(1);end;
+            robmap_h=actxserver('EyeInHand.SurfaceMap');
+            robmap_h.registerevent(@myhandler);
+        end
+        %get the Denso Blasting Cost Function
+        try global DensoBlasting_h
+            if isempty(DensoBlasting_h);DensoBlasting_h = robmap_h.GetDensoBlastingCostFunction; end
+        catch
+            display('EyeInHand Problem: Unable to create DensoBlastingCost from surface map')
+        end
+    catch
+        display('EyeInHand Problem: Unable to create surface map')
+    end
+    directory=pwd;
+    robmap_h.Resolution=0.01;
+    robmap_h.SurfaceFusionDistance = 0.1;
+    robmap_h.SurfaceDeviation = 0.01;
+    aabbExtent = [-2, -1, 0; 2, 1, 3];
+    robmap_h.Extent = aabbExtent;
+    robmap_h.AddRangeGrid([directory,'\','grid_1.ply']);
+    aabb.lower = [-2, -1, 0];
+    aabb.upper = [2, 1, 3];
+    if isempty(hMesh)
+        hMesh = robmap_h.SurfacesInsideBox(aabb.lower, aabb.upper);
+    end
+    % f = hMesh.FaceData;
+    v = hMesh.VertexData;
+    %get verts in workspace
+    [level1,level2,level3]=GetImpLevInfo(v);
+    display('Doing surface making');
+    surface_making_simple(v(level3,:),0.04);
+    global plane
+    planeSet=plane;
+end
 
 %% Variables
 maxDistConstant=0.2; %meters
 maxAngleConstant=5*pi/180; %degrees
 maxDist2PlaneConstant=0.05; %meters
 % first 3 angles are based upon optimise.max_angle_for123 (force field safety)
-maxQConstant=[8*pi/180,10*pi/180,14*pi/180,20*pi/180,20*pi/180,20*pi/180];
+% maxQConstant=[8*pi/180,10*pi/180,14*pi/180,20*pi/180,20*pi/180,20*pi/180];
+maxQConstant=[20*pi/180,20*pi/180,20*pi/180,22*pi/180,22*pi/180,40*pi/180];
 minplanes2callAsurface=4; % What is the minimum planes which make a surface worth growing
 doposesel=true;
 showClusterNormalDist=false; % do you want to see the angle between all normals in surface population
@@ -72,7 +112,7 @@ if doposesel
     all_norms_new=[];
     planeSet_new=[];
     % Go through targets within blasting range of this robot model
-    for i=level1'
+    for i=level2'
         if isempty(planeSet_new)
             all_centers_new=all_centers(i,:);
             all_norms_new=all_norms(i,:);
@@ -100,11 +140,11 @@ if doposesel
     display('Adding obstacles for pose selection');
     workspace.indexedobsticles=putinVoxels_gp([workspace.indexedobsticles;all_centers],workspace.inc_size);
 
-    profile clear;profile on;
+%     profile clear;profile on;
      temp_poses=PoseSel4planesearch(planeSet,poseselect_messagesON);
 %load meshNplanes_poseset2.mat
 %load roofPlaneSet_poseset.mat
-    profile off;profile viewer;
+%     profile off;profile viewer;
 
     % Go throgh each of the poses returned and put into a variable all_poses
     % which also includes if the pose is valid or not as the 8th row of the matrix 
@@ -130,6 +170,7 @@ if doposesel
 %         keyboard
     end
 	toc
+    save(['posedata_',num2str(datestr(now,'yyyymmddTHHMMSS')),'.mat'],'temp_poses');
 end
 
 
