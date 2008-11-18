@@ -62,8 +62,8 @@ display('Starting 1st phase...............');
 while length(Q)<7; Q=[Q,0];end
 
 jointConfig=ikine_g_plane(r,plane(1).home_point, plane(1).equ, Q);
-jointConfig(jointConfig'<qlimits(:,1)*0.96)=qlimits(jointConfig'<qlimits(:,1),1)*0.96;
-jointConfig(jointConfig'>qlimits(:,2)*0.96)=qlimits(jointConfig'>qlimits(:,2),2)*0.96;
+jointConfig(jointConfig'<qlimits(:,1)*0.96)=qlimits(jointConfig'<qlimits(:,1)*0.96,1)*0.96;
+jointConfig(jointConfig'>qlimits(:,2)*0.96)=qlimits(jointConfig'>qlimits(:,2)*0.96,2)*0.96;
 if ~check_path_for_col(jointConfig)
     jointConfig=Q;
 end
