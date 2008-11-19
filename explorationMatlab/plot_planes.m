@@ -22,10 +22,10 @@ if nargin<3
     plotfill=true;
 end
 %% Variables
-plane_sphere_threshold=.01;
+plane_sphere_threshold=.002;
 
 %start with a normal sphere described by 20 points
-[base_x,base_y,base_z]=sphere(30);
+[base_x,base_y,base_z]=sphere(60);
 %make the radium mew
 base_x=base_x*mew;
 base_y=base_y*mew;
@@ -76,6 +76,6 @@ for i=1:length(plane)
      else
          pts_to_plot=find(abs(pts_to_check)<plane_sphere_threshold*5);
 %          plot_handles(i)=fill3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'b');        
-         plot_handles(i)=plot3(locuspts_x(pts_to_plot),locuspts_y(pts_to_plot),locuspts_z(pts_to_plot),'k');        
+         plot_handles(i)=plot3(locuspts_x(pts_to_plot,pts_to_plot(1)),locuspts_y(pts_to_plot,pts_to_plot(1)),locuspts_z(pts_to_plot,pts_to_plot(1)),'k');        
      end
 end
