@@ -10,7 +10,7 @@ global workspace r Q robot_maxreach hMesh;
 % Recomended that you use this on a set of points
 %
 %Do you want to load planes or make planes
-loadplanes1_makeplanes0=0;
+loadplanes1_makeplanes0=1;
 
 if loadplanes1_makeplanes0
 % Here are 3 examples (only run one at a time obviously)
@@ -19,7 +19,7 @@ if loadplanes1_makeplanes0
 % _2_ the point cloud data is a bit crappy
 % load example_plane.mat; planeSet=plane;
 % _3_
-% load meshNplanes.mat; planeSet=plane;
+ load meshNplanes.mat; planeSet=plane;
 
 else
     %OR could use stephens planes
@@ -88,6 +88,7 @@ end
 % Make a graph with all nodes
 connectivityGraph=zeros([size(planeSet,2),size(planeSet,2)]);
 
+
 % Registered to surface
 registered_to_surface=zeros([size(planeSet,2),1]);
 
@@ -112,7 +113,7 @@ if doposesel
     all_norms_new=[];
     planeSet_new=[];
     % Go through targets within blasting range of this robot model
-    for i=level2'
+    for i=level1'
         if isempty(planeSet_new)
             all_centers_new=all_centers(i,:);
             all_norms_new=all_norms(i,:);
@@ -141,8 +142,8 @@ if doposesel
     workspace.indexedobsticles=putinVoxels_gp([workspace.indexedobsticles;all_centers],workspace.inc_size);
 
 %     profile clear;profile on;
-     temp_poses=PoseSel4planesearch(planeSet,poseselect_messagesON);
-%load meshNplanes_poseset2.mat
+%      temp_poses=PoseSel4planesearch(planeSet,poseselect_messagesON);
+load meshNplanes_poseset2.mat
 %load roofPlaneSet_poseset.mat
 %     profile off;profile viewer;
 
@@ -175,6 +176,15 @@ end
 
 
 tic
+
+%% DELETE ME
+connectivityGraph_C1=connectivityGraph;
+connectivityGraph_C2=connectivityGraph;
+connectivityGraph_C3=connectivityGraph;
+connectivityGraph_C4=connectivityGraph;
+
+
+
 %% Search at each plane for surrounding planes 
 % $$ \begin{array}{c} 
 % D=|P_{i}-P| \\
@@ -231,9 +241,8 @@ for i=1:size(planeSet,2)
 
     %Zeros stuffed at start to make updating the connectivity graph easier     
     if i>1 stuffing=zeros([i-1,1]); else stuffing=[];end
-    index_of_links_temp=[boolean(stuffing);...
-                        (dist_to_all_TEMP > 0 & ... 
-                         dist_to_all_TEMP < maxDistConstant & ...
+    index_of_links_temp=[boolean(stuffing);...dist_to_all_TEMP > 0 & ... 
+                        (dist_to_all_TEMP < maxDistConstant & ...
                          norm_ang_to_all_TEMP < maxAngleConstant & ...
                          dist_plane_to_points < maxDist2PlaneConstant)&...
                          (anglebetweenQs(:,1)<maxQConstant(1)&...
@@ -247,7 +256,33 @@ for i=1:size(planeSet,2)
     connectivityGraph(index_of_links_temp,i)=1;
     connectivityGraph(i,index_of_links_temp)=1;    
     connectivityGraph(i,i)=0;
+    
+    %dist constraint    
+    index_of_links_temp=[boolean(stuffing);(dist_to_all_TEMP < maxDistConstant)];
+    connectivityGraph_C1(index_of_links_temp,i)=1;connectivityGraph_C1(i,index_of_links_temp)=1; 
+    %angle to norm    
+    index_of_links_temp=[boolean(stuffing);(norm_ang_to_all_TEMP < maxAngleConstant)];
+    connectivityGraph_C2(index_of_links_temp,i)=1;connectivityGraph_C2(i,index_of_links_temp)=1; 
+    %perp dist to plane
+    index_of_links_temp=[boolean(stuffing);(dist_plane_to_points < maxDist2PlaneConstant)];
+    connectivityGraph_C3(index_of_links_temp,i)=1;connectivityGraph_C3(i,index_of_links_temp)=1; 
+    %joints
+    index_of_links_temp=[boolean(stuffing);(anglebetweenQs(:,1)<maxQConstant(1)&anglebetweenQs(:,2)<maxQConstant(2)&...
+                          anglebetweenQs(:,3)<maxQConstant(3)&anglebetweenQs(:,4)<maxQConstant(4)&...
+                          anglebetweenQs(:,5)<maxQConstant(5)&anglebetweenQs(:,6)<maxQConstant(6))];
+    connectivityGraph_C4(index_of_links_temp,i)=1;connectivityGraph_C4(i,index_of_links_temp)=1; 
+
+        
+    
 end
+
+
+figure
+subplot(2,2,1); imshow(abs(connectivityGraph_C1-1));title('Dist Constraint')
+subplot(2,2,2); imshow(abs(connectivityGraph_C2-1));title('Angle to Norm. Constraint')
+subplot(2,2,3); imshow(abs(connectivityGraph_C3-1));title('Dist to Plane Constraint')
+subplot(2,2,4); imshow(abs(connectivityGraph_C4-1));title('Joint Constraint')
+
 
 
 %% Use bredthfirst tree searh, determine links between planes on surface
@@ -314,6 +349,40 @@ for i=1:size(larger_surface,2)
     if size(larger_surface(i).registered_to_surface,1)>=minplanes2callAsurface
         validnewsurfaces=[validnewsurfaces,i];
     end
+end
+
+
+%
+connectivityGraph_inv=abs(connectivityGraph-1);
+figure;
+% subplot(1,2,1)
+imshow(connectivityGraph_inv);
+title('Combined Connectivity Graph')
+for i=1:size(registered_to_surface,1)%size(connectivityGraph_inv,1);
+    if ~isempty(find(registered_to_surface(i)==validnewsurfaces,1))
+        connectivityGraph_inv(connectivityGraph_inv(:,i)==0,i)=registered_to_surface(i)+1;
+    end
+end
+% %make all invalid surfaces or non connects back to 0
+% connectivityGraph_inv(find(connectivityGraph_inv<=1))=0;
+% %All the rest get scalled from 0 to 1
+% connectivityGraph_inv=(connectivityGraph_inv)/max(max(connectivityGraph_inv));
+% %inver again so we have 0 to 1(for no connects)
+% connectivityGraph_inv=abs(connectivityGraph_inv-1);
+% subplot(1,2,2)
+% imshow(connectivityGraph_inv)
+
+%make a matrix of the same size
+connectivityGraph_inv_temp=connectivityGraph_inv;
+figure
+sqrtedsize=ceil(sqrt(size(validnewsurfaces,2)))
+for i=1:size(validnewsurfaces,2)
+    %set it all to 1s (eg all white)
+    connectivityGraph_inv_temp(:,:)=1;
+    subplot(sqrtedsize,sqrtedsize,i)
+    title(['Showing connectivity of surface',num2str(i)]);
+    connectivityGraph_inv_temp(find(connectivityGraph_inv==validnewsurfaces(i)+1))=0;
+    imshow(connectivityGraph_inv_temp);
 end
 
 %% Draw the center of all the tiles
