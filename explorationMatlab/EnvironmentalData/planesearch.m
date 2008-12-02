@@ -431,6 +431,9 @@ if showClusterNormalDist
     end
 end
 
+% save to file
+save('planeseachoutcome.mat','larger_surface','plane');
+
 %% FUNCTION: dis_bet_plane_n_pnt_internal
 % $$ \begin{array}{l}
 % \mbox{Point(s) passed in... } P\\
