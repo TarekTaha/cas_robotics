@@ -8,6 +8,7 @@
 
 close all;
 
+error('make sure you change graph_obs file to graf_obs_no_obs.mat temporarily')
 %% Load Variables
 global r workspace optimise densoobj
 qlimits=r.qlim;
@@ -110,9 +111,9 @@ biglist=sortrows(biglist);
 uniquevals=unique(biglist);
 figure(3);
 hist(biglist,size(uniquevals,1))
-title('The histogram of importance of workspace nodes based upon the number of C-space node they affect');
-xlabel('Index of obstacle points in workspace')
-ylabel('Importance, how many C-space nodes they affect')
+title('Histogram of C-space Nodes Affected By Voxel Obstacles');
+xlabel('Voxel Obstacle Index')
+ylabel('Importance (No. of C-space nodes affected)')
 
 %% Now make one big list of the importance of each unique node
 currentcount=1;
@@ -132,12 +133,13 @@ figure(4);
 % plot these showing importance of each of the points in the workspace by
 % how many C-space nodes they affect
 C=[uniquebiglist(:,2)/max(uniquebiglist(:,2))];
-scatter3(points(uniquebiglist(:,1),1),points(uniquebiglist(:,1),2),points(uniquebiglist(:,1),3),C*50,C);    
+scatter3(points(uniquebiglist(:,1),1),points(uniquebiglist(:,1),2),points(uniquebiglist(:,1),3),C*60,C);    
 axis equal
-title('Workspace of robot')
-xlabel('x')
-ylabel('y')
-zlabel('z')
+set(gca,'fontsize',14)
+title('Eucleadean Manipulator Workspace Regions of Interferance','fontsize',22)
+xlabel('x','fontsize',18)
+ylabel('y','fontsize',18)
+zlabel('z','fontsize',18)
 
     
     

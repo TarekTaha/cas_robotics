@@ -14,21 +14,24 @@
 %
 % _checkeachlink_ (binary) If you want to use pathplanner_new to plan between nodes
 %
+% _docolCheck_ (binary) only for testing purposes if we don't do collision checking on intermediate nodes
+%
 % *Returns:* 
 %
-% _pathfound_ =0 (no path), -1 (not valid newQ), 1 (path found)
-%
-% _all_steps_ = 6 collums of joints * many steps (will return path to first found destination)
+% _pathval_ (struct) containing .result={-1,0,1} and .all_steps which is 6 collums of joints 
 
-function [pathval] = pathplanner_water(newQ,animate,checkeachlink)
+function [pathval] = pathplanner_water(newQ,animate,checkeachlink,docolCheck)
 
 %% Input checks
-if nargin<3
-    checkeachlink=false;
-    if nargin<2
-        animate=false;
-        if nargin<1
-            error('You must pass in at least a destination newQ')
+if nargin<4
+    docolCheck=true
+    if nargin<3
+        checkeachlink=false;
+        if nargin<2
+            animate=false;
+            if nargin<1
+                error('You must pass in at least a destination newQ')
+            end
         end
     end
 end
@@ -346,7 +349,12 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
                 
                 %we only need to check every other than the first and last
                 %value
-                [pathval(cur_goal).result,pathval(cur_goal).unknown_points_result]=check_path_for_col(currentpathtocheck,obsticle_points,unknown_points,linkvals);
+                if docolCheck
+                    [pathval(cur_goal).result,pathval(cur_goal).unknown_points_result]=check_path_for_col(currentpathtocheck,obsticle_points,unknown_points,linkvals);
+                else %%NOTE: ONLY FOR TESTING PURPOSES SHOULD WE EVER GET HERE
+                    pathval(cur_goal).result=1;
+                    pathval(cur_goal).unknown_points_result=[];
+                end
             else
                 pathval(cur_goal).all_steps=Q;
                 tempQ=Q; if animate;  display('Danger! Dont quit here since global Q value is currently lost'); end
