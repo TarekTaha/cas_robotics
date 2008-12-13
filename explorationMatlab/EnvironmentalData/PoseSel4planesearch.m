@@ -2,7 +2,7 @@
 %is pointing towards the origin which is the base center (0,0,0)
         
 function [pose]=PoseSel4planesearch(plane,displayon)
-global r Q optimise
+global r Q optimise jointConfigCollisionChecked
 
 if nargin<2
     displayon=true;
@@ -44,12 +44,15 @@ DensoBlasting_h.MaximumDegreesToSurfaceNormal = rad2deg(optimise.maxDeflectionEr
 DensoBlasting_h.ToolFrameReferencePoint = [0, 0, 0];
 DensoBlasting_h.MinimumFunctionGradient = optimise.stol;
 
+%this will store where collision checks have been done
+jointConfigCollisionChecked=Q;
+        
 for piece=1:numlinks
 	linkvals(piece).val=[Links{piece}.alpha Links{piece}.A Links{piece}.D Links{piece}.offset];
 end
     
 % Angle requiring collision checking if it changes more than this
-collchk4eyeinhand_ang=4*pi/180;
+collchk4eyeinhand_ang=2*pi/180;
 valid_count=0;
 foundby='';
 
@@ -66,6 +69,8 @@ jointConfig(jointConfig'<qlimits(:,1)*0.96)=qlimits(jointConfig'<qlimits(:,1)*0.
 jointConfig(jointConfig'>qlimits(:,2)*0.96)=qlimits(jointConfig'>qlimits(:,2)*0.96,2)*0.96;
 if ~check_path_for_col(jointConfig)
     jointConfig=Q;
+else %its ok so add to list of checks done
+    jointConfigCollisionChecked=[jointConfigCollisionChecked;jointConfig];
 end
 
 %% Go through each target plane passed in 
@@ -93,15 +98,34 @@ for i = 1:length(plane)
 %         rad2deg(jointConfig_temp(1:6)-jointConfig(1:6))
         
         %do we need a collision check? how close to previous guess
-        docollcheck=~isempty(find(jointConfig(1:5)-jointConfig_temp(1:5)>collchk4eyeinhand_ang,1));
+        %before all classunknown_newQ checks    
+        %look for a nearby joint angle that has been already checked. If
+        %there is a nearby angle then DONT do a collision check
+        docollcheck=isempty(find((jointConfigCollisionChecked(:,1)-jointConfig_temp(1)<collchk4eyeinhand_ang & ...
+                                  jointConfigCollisionChecked(:,2)-jointConfig_temp(2)<collchk4eyeinhand_ang & ...
+                                  jointConfigCollisionChecked(:,3)-jointConfig_temp(3)<collchk4eyeinhand_ang & ...
+                                  jointConfigCollisionChecked(:,4)-jointConfig_temp(4)<collchk4eyeinhand_ang & ...
+                                  jointConfigCollisionChecked(:,5)-jointConfig_temp(5)<collchk4eyeinhand_ang),1));                                                            
         %check if valid: eg close to target goal, no collision, within limits etc
         [valid,dist]=classunkcheck_newQ(jointConfig_temp,qlimits,plane(i).home_point,t_base,Links,numlinks,plane(i).equ,false,linkvals,docollcheck);
+
+        %put this after all classunknown_newQ checks and blasting_posesel 
+        if docollcheck && valid
+            jointConfigCollisionChecked=[jointConfigCollisionChecked;jointConfig_temp];
+        end
         
-        %if not valid use my blasting_posesel method
+        
+%% if not valid use my blasting_posesel method
         if valid
             foundby='. Found by 1) DensoBlasting_h ';
         else
             [jointConfig_temp,valid] = blasting_posesel(plane(i).home_point, plane(i).equ, jointConfig_temp,false);
+           
+            %Store that a collision check has been performed
+            if valid
+                jointConfigCollisionChecked=[jointConfigCollisionChecked;jointConfig_temp];
+            end
+        
             if valid 
                 jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig_temp(1:6)))),0];
                 foundby='. Found by 2) blasting_posesel';
@@ -198,7 +222,7 @@ for i = 1:length(plane)
     %display the current status of the 1st phase of the search
     if displayon
         display([num2str(i),' of ', num2str(length(plane)),' (', num2str(i/length(plane)*100), '%) - valid: ', num2str(valid), ' (',num2str(valid_count/i*100),'% success)', foundby]);
-    end
+    end                
 end
 display('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
 display(['Finished 1st search phase. Found ', num2str(valid_count), ' of ' num2str(i), ' targets (',num2str(valid_count/i*100),'%)']);
@@ -260,7 +284,7 @@ end
 
 %% This fucntion tries to find missing poses
 function [jointConfig,valid,foundby]=tryuseallasstarters(pose,plane,qlimits,t_base,Links,numlinks,Q_guess_order,collchk4eyeinhand_ang,linkvals,maxtries)
-global DensoBlasting_h
+global DensoBlasting_h jointConfigCollisionChecked
 if nargin<10    
     maxtries=30;
 end
@@ -287,13 +311,25 @@ if size(Q_guess_order,1)>1
         try                      
             jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(Q_guess_order(current_pose,1:6)))),0];
 %                 jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(pose(current_pose).Q(1:6)))),0];
-                %do we need a collision check? (if greater than 3
-                %deg movement)
-                
-            docollcheck=~isempty(find((Q_guess_order(current_pose,1:6)-jointConfig_temp(1:6))>collchk4eyeinhand_ang,1));
-%                 docollcheck=~isempty(find((pose(current_pose).Q(1:6)-jointConfig_temp(1:6))>collchk4eyeinhand_ang,1));
-                %check if valid
+
+
+            %do we need a collision check? how close to previous guess
+            %before all classunknown_newQ checks    
+            %look for a nearby joint angle that has been already checked. If
+            %there is a nearby angle then DONT do a collision check
+            docollcheck=isempty(find((jointConfigCollisionChecked(:,1)-jointConfig_temp(1)<collchk4eyeinhand_ang & ...
+                                      jointConfigCollisionChecked(:,2)-jointConfig_temp(2)<collchk4eyeinhand_ang & ...
+                                      jointConfigCollisionChecked(:,3)-jointConfig_temp(3)<collchk4eyeinhand_ang & ...
+                                      jointConfigCollisionChecked(:,4)-jointConfig_temp(4)<collchk4eyeinhand_ang & ...
+                                      jointConfigCollisionChecked(:,5)-jointConfig_temp(5)<collchk4eyeinhand_ang),1));                                                            
+               
+             %check if valid
             [valid,dist]=classunkcheck_newQ(jointConfig_temp,qlimits,plane.home_point,t_base,Links,numlinks,plane.equ,false,linkvals,docollcheck);
+            %put this after all classunknown_newQ checks and blasting_posesel 
+            if docollcheck && valid
+                jointConfigCollisionChecked=[jointConfigCollisionChecked;jointConfig_temp];
+            end
+        
         catch
             keyboard
         end
@@ -319,8 +355,12 @@ if size(Q_guess_order,1)>1
         if tries>maxtries; break; else tries=tries+1;end
         try 
             [jointConfig_temp,valid] = blasting_posesel(plane.home_point, plane.equ, Q_guess_order(current_pose,:));
-%             [jointConfig_temp,valid] = blasting_posesel(plane.home_point, plane.equ, pose(current_pose).Q);
-            if valid jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig_temp(1:6)))),0];end
+                                
+            if valid 
+                %Store that a collision check has been performed
+                jointConfigCollisionChecked=[jointConfigCollisionChecked;jointConfig_temp];
+                jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig_temp(1:6)))),0];
+            end
         end
             % If we found then display the method used: blasting_posesel
         if valid

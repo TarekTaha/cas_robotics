@@ -10,7 +10,7 @@ global workspace r Q robot_maxreach hMesh;
 % Recomended that you use this on a set of points
 %
 %Do you want to load planes or make planes
-loadplanes1_makeplanes0=1;
+loadplanes1_makeplanes0=0;
 
 if loadplanes1_makeplanes0
 % Here are 3 examples (only run one at a time obviously)
@@ -142,8 +142,8 @@ if doposesel
     workspace.indexedobsticles=putinVoxels_gp([workspace.indexedobsticles;all_centers],workspace.inc_size);
 
 %     profile clear;profile on;
-%      temp_poses=PoseSel4planesearch(planeSet,poseselect_messagesON);
-load meshNplanes_poseset2.mat
+      temp_poses=PoseSel4planesearch(planeSet,poseselect_messagesON);
+% load meshNplanes_poseset2.mat
 %load roofPlaneSet_poseset.mat
 %     profile off;profile viewer;
 
