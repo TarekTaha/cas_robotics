@@ -10,7 +10,8 @@ global workspace r Q robot_maxreach hMesh;
 % Recomended that you use this on a set of points
 %
 %Do you want to load planes or make planes
-loadplanes1_makeplanes0=0;
+% =2 if done externally
+loadplanes1_makeplanes0=2;
 
 if loadplanes1_makeplanes0
 % Here are 3 examples (only run one at a time obviously)
@@ -21,7 +22,7 @@ if loadplanes1_makeplanes0
 % _3_
  load meshNplanes.mat; planeSet=plane;
 
-else
+elseif loadplanes1_makeplanes0==0
     %OR could use stephens planes
     display('Loading map');
     try global robmap_h; 
@@ -59,6 +60,12 @@ else
     surface_making_simple(v(level3,:),0.04);
     global plane
     planeSet=plane;
+    
+%% This is if it is done externally
+elseif loadplanes1_makeplanes0==2
+    global plane
+    planeSet=plane;
+
 end
 
 %% Variables
@@ -71,10 +78,15 @@ maxQConstant=[20*pi/180,20*pi/180,20*pi/180,22*pi/180,22*pi/180,40*pi/180];
 minplanes2callAsurface=4; % What is the minimum planes which make a surface worth growing
 doposesel=true;
 showClusterNormalDist=false; % do you want to see the angle between all normals in surface population
-plot_all_poseInfo=true;
+plot_all_poseInfo=false;
 poseselect_messagesON=false;
+saveposedata=false;
+draw_center_of_all_tiles=false;
+plotconnectivityGraphs=false;
 
-% variables set for all centers and normals
+
+
+%% Other variables set for all centers and normals
 all_centers=zeros([size(planeSet,2),3]);
 all_norms=zeros([size(planeSet,2),3]);
 
@@ -113,7 +125,7 @@ if doposesel
     all_norms_new=[];
     planeSet_new=[];
     % Go through targets within blasting range of this robot model
-    for i=level1'
+    for i=level2'
         if isempty(planeSet_new)
             all_centers_new=all_centers(i,:);
             all_norms_new=all_norms(i,:);
@@ -137,7 +149,7 @@ if doposesel
     % Plot the planes and the robot 
 %     figure;plot(r,Q);hold on;plot3(all_centers(:,1),all_centers(:,2),all_centers(:,3),'r.');light
 
-    tic
+     tic
     display('Adding obstacles for pose selection');
     workspace.indexedobsticles=putinVoxels_gp([workspace.indexedobsticles;all_centers],workspace.inc_size);
 
@@ -171,7 +183,9 @@ if doposesel
 %         keyboard
     end
 	toc
-    save(['posedata_',num2str(datestr(now,'yyyymmddTHHMMSS')),'.mat'],'temp_poses');
+    if saveposedata
+        save(['posedata_',num2str(datestr(now,'yyyymmddTHHMMSS')),'.mat'],'temp_poses');
+    end
 end
 
 
@@ -276,13 +290,13 @@ for i=1:size(planeSet,2)
     
 end
 
-
-figure
-subplot(2,2,1); imshow(abs(connectivityGraph_C1-1));title('Dist Constraint')
-subplot(2,2,2); imshow(abs(connectivityGraph_C2-1));title('Angle to Norm. Constraint')
-subplot(2,2,3); imshow(abs(connectivityGraph_C3-1));title('Dist to Plane Constraint')
-subplot(2,2,4); imshow(abs(connectivityGraph_C4-1));title('Joint Constraint')
-
+if plotconnectivityGraphs
+    figure
+    subplot(2,2,1); imshow(abs(connectivityGraph_C1-1));title('Dist Constraint')
+    subplot(2,2,2); imshow(abs(connectivityGraph_C2-1));title('Angle to Norm. Constraint')
+    subplot(2,2,3); imshow(abs(connectivityGraph_C3-1));title('Dist to Plane Constraint')
+    subplot(2,2,4); imshow(abs(connectivityGraph_C4-1));title('Joint Constraint')
+end
 
 
 %% Use bredthfirst tree searh, determine links between planes on surface
@@ -352,65 +366,68 @@ for i=1:size(larger_surface,2)
 end
 
 
-%
-connectivityGraph_inv=abs(connectivityGraph-1);
-figure;
-% subplot(1,2,1)
-imshow(connectivityGraph_inv);
-title('Combined Connectivity Graph')
-for i=1:size(registered_to_surface,1)%size(connectivityGraph_inv,1);
-    if ~isempty(find(registered_to_surface(i)==validnewsurfaces,1))
-        connectivityGraph_inv(connectivityGraph_inv(:,i)==0,i)=registered_to_surface(i)+1;
+if plotconnectivityGraphs
+    connectivityGraph_inv=abs(connectivityGraph-1);
+    figure;
+    % subplot(1,2,1)
+    imshow(connectivityGraph_inv);
+    title('Combined Connectivity Graph')
+    for i=1:size(registered_to_surface,1)%size(connectivityGraph_inv,1);
+        if ~isempty(find(registered_to_surface(i)==validnewsurfaces,1))
+            connectivityGraph_inv(connectivityGraph_inv(:,i)==0,i)=registered_to_surface(i)+1;
+        end
     end
-end
-% %make all invalid surfaces or non connects back to 0
-% connectivityGraph_inv(find(connectivityGraph_inv<=1))=0;
-% %All the rest get scalled from 0 to 1
-% connectivityGraph_inv=(connectivityGraph_inv)/max(max(connectivityGraph_inv));
-% %inver again so we have 0 to 1(for no connects)
-% connectivityGraph_inv=abs(connectivityGraph_inv-1);
-% subplot(1,2,2)
-% imshow(connectivityGraph_inv)
+    % %make all invalid surfaces or non connects back to 0
+    % connectivityGraph_inv(find(connectivityGraph_inv<=1))=0;
+    % %All the rest get scalled from 0 to 1
+    % connectivityGraph_inv=(connectivityGraph_inv)/max(max(connectivityGraph_inv));
+    % %inver again so we have 0 to 1(for no connects)
+    % connectivityGraph_inv=abs(connectivityGraph_inv-1);
+    % subplot(1,2,2)
+    % imshow(connectivityGraph_inv)
 
-%make a matrix of the same size
-connectivityGraph_inv_temp=connectivityGraph_inv;
-figure
-sqrtedsize=ceil(sqrt(size(validnewsurfaces,2)))
-for i=1:size(validnewsurfaces,2)
-    %set it all to 1s (eg all white)
-    connectivityGraph_inv_temp(:,:)=1;
-    subplot(sqrtedsize,sqrtedsize,i)
-    title(['Showing connectivity of surface',num2str(i)]);
-    connectivityGraph_inv_temp(find(connectivityGraph_inv==validnewsurfaces(i)+1))=0;
-    imshow(connectivityGraph_inv_temp);
+    %make a matrix of the same size
+    connectivityGraph_inv_temp=connectivityGraph_inv;
+    figure
+    sqrtedsize=ceil(sqrt(size(validnewsurfaces,2)))
+    for i=1:size(validnewsurfaces,2)
+        %set it all to 1s (eg all white)
+        connectivityGraph_inv_temp(:,:)=1;
+        subplot(sqrtedsize,sqrtedsize,i)
+        title(['Showing connectivity of surface',num2str(i)]);
+        connectivityGraph_inv_temp(find(connectivityGraph_inv==validnewsurfaces(i)+1))=0;
+        imshow(connectivityGraph_inv_temp);
+    end
 end
 
 %% Draw the center of all the tiles
-figure;
-hold on;
-title (['Number of surfaces found = ',num2str(size(validnewsurfaces,2)),'. Time Taken: ',num2str(timetaken)])
+if draw_center_of_all_tiles
+    figure;
+    hold on;
+    title (['Number of surfaces found = ',num2str(size(validnewsurfaces,2)),'. Time Taken: ',num2str(timetaken)])
 
 
-colorindex=1;
-textforlegend=[];
+    colorindex=1;
+    textforlegend=[];
 
-for i=validnewsurfaces
-    if mod(i,4)==1; colorval=rand*([colorindex/size(validnewsurfaces,2),0,0]);
-    elseif mod(i,4)==2; colorval=rand*([1,colorindex/size(validnewsurfaces,2),0]);
-    elseif mod(i,4)==3; colorval=rand*([colorindex/size(validnewsurfaces,2),colorindex/size(validnewsurfaces,2),0]);
-    else; colorval=[0,0,colorindex/size(validnewsurfaces,2)];
-    end    
-    plot3(all_centers(larger_surface(i).registered_to_surface,1),...
-          all_centers(larger_surface(i).registered_to_surface,2),...          
-           all_centers(larger_surface(i).registered_to_surface,3),'linestyle','none','color',colorval,'marker','*');             
-       textforlegend{colorindex}=['Plane ',num2str(colorindex)];
-    text(larger_surface(i).originalcenter(1)*1.1,larger_surface(i).originalcenter(2)*1.1,larger_surface(i).originalcenter(3)*1.1,num2str(colorindex),'FontSize',18)
-    colorindex=colorindex+1;
+    for i=validnewsurfaces
+        if mod(i,4)==1; colorval=rand*([colorindex/size(validnewsurfaces,2),0,0]);
+        elseif mod(i,4)==2; colorval=rand*([1,colorindex/size(validnewsurfaces,2),0]);
+        elseif mod(i,4)==3; colorval=rand*([colorindex/size(validnewsurfaces,2),colorindex/size(validnewsurfaces,2),0]);
+        else; colorval=[0,0,colorindex/size(validnewsurfaces,2)];
+        end    
+        plot3(all_centers(larger_surface(i).registered_to_surface,1),...
+              all_centers(larger_surface(i).registered_to_surface,2),...          
+               all_centers(larger_surface(i).registered_to_surface,3),'linestyle','none','color',colorval,'marker','*');             
+           textforlegend{colorindex}=['Plane ',num2str(colorindex)];
+        text(larger_surface(i).originalcenter(1)*1.1,larger_surface(i).originalcenter(2)*1.1,larger_surface(i).originalcenter(3)*1.1,num2str(colorindex),'FontSize',18)
+        colorindex=colorindex+1;
+    end
+    legend(textforlegend);
+    try plot(r,Q,'axis',gcf);light;end;
+    axis equal;
+    view(3)
 end
-legend(textforlegend);
-try plot(r,Q,'axis',gcf);light;end;
-axis equal;
-view(3)
 
 %shows the distribution of the surfaces
 if showClusterNormalDist
