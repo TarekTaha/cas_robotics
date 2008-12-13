@@ -1,4 +1,8 @@
 function CspaceProb_ofUsage()
+
+error('make sure you change graph_obs file to graf_obs_no_obs.mat temporarily')
+
+
 global optimise workspace r
 qlimits=r.qlim;
 leaniancy=optimise.waterPPleaniancy;

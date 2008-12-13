@@ -8,10 +8,15 @@
 
 close all;
 
-error('make sure you change graph_obs file to graf_obs_no_obs.mat temporarily')
+clear pointsInterferWith
+
 %% Load Variables
 global r workspace optimise densoobj
+
+setuprobot(6)
+
 qlimits=r.qlim;
+
 
 % how many times bigger than the max move angle size can we accept
 leaniancy=optimise.waterPPleaniancy;
@@ -95,6 +100,8 @@ end
 %% this will put all points in the one list so we can look at a historgram of it
 biglist=zeros([totalpointsindex,1]);
 currentcount=1;
+pointsInterferWith(1).cpspace=[];
+
 for i=1:matsize(1)
     for j=1:matsize(2)
         for k=1:matsize(3)
@@ -102,6 +109,12 @@ for i=1:matsize(1)
             if sizecurrentset>0
                 biglist(currentcount:currentcount+sizecurrentset-1,:)=depend(i,j,k).pointsindex;
                 currentcount=currentcount+sizecurrentset;
+                for m=1:sizecurrentset
+                    %try and add to the end, if it fails make a new list
+                    try pointsInterferWith(depend(i,j,k).pointsindex(m)).cpspace(end+1,:)=[i,j,k];
+                    catch pointsInterferWith(depend(i,j,k).pointsindex(m)).cpspace=[i,j,k];                      
+                    end
+                end
             end
         end
     end
@@ -114,6 +127,9 @@ hist(biglist,size(uniquevals,1))
 title('Histogram of C-space Nodes Affected By Voxel Obstacles');
 xlabel('Voxel Obstacle Index')
 ylabel('Importance (No. of C-space nodes affected)')
+
+save('cart_config_correl_biglist.mat','biglist');
+save('Ch7Tab - pointsInterferWith.mat','pointsInterferWith');
 
 %% Now make one big list of the importance of each unique node
 currentcount=1;
@@ -141,5 +157,6 @@ xlabel('x','fontsize',18)
 ylabel('y','fontsize',18)
 zlabel('z','fontsize',18)
 
+save('cart_config_correl_uniquebiglist.mat','uniquebiglist');
     
     
