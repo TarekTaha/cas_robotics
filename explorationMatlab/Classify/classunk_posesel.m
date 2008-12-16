@@ -36,7 +36,7 @@
 
 function [qt,solutionvalid,dist_val,targetdist] = classunk_posesel(pt, plane_equ, q)
 
-
+error('Not using this any more use PoseSel4planesearch.m which calls blasting pose sel with 7 link robot')
 %% Variables
 % $$ \begin{array}{lc}
 % \mbox{targetNormal...} & V_{tn} \\

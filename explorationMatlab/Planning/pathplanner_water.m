@@ -19,27 +19,40 @@
 % *Returns:* 
 %
 % _pathval_ (struct) containing .result={-1,0,1} and .all_steps which is 6 collums of joints 
+%
+% _validnewQ_ (binary*many) contains a valid list based upon newQ passed in, generally all newQ are ok but if not then their index in this var will be 0
 
-function [pathval] = pathplanner_water(newQ,animate,checkeachlink,docolCheck)
+function [pathval,validnewQ] = pathplanner_water(newQ,animate,checkeachlink,docolCheck,currQ)
+
+% close all;
+global r Q workspace optimise graf_obs
 
 %% Input checks
-if nargin<4
-    docolCheck=true
-    if nargin<3
-        checkeachlink=false;
-        if nargin<2
-            animate=false;
-            if nargin<1
-                error('You must pass in at least a destination newQ')
+if nargin<5
+    currQ=Q;
+    if nargin<4
+        docolCheck=true;
+        if nargin<3
+            checkeachlink=false;
+            if nargin<2
+                animate=false;
+                if nargin<1
+                    error('You must pass in at least a destination newQ')
+                end
             end
         end
     end
 end
 
+if size(currQ,2)>6 || size(newQ,2)>6
+    display('You should pass in newQ as a 6*1 matrix, pathval.all_steps will be returned as a 6*many')
+    currQ=currQ(1:6);
+    newQ=newQ(:,1:6);
+end
+
 %% Variables
 
-% close all;
-global r Q workspace optimise graf_obs
+
 
 
 % load('Journal/test9hMesh.mat')
@@ -47,9 +60,12 @@ global r Q workspace optimise graf_obs
 
 %clear global graf_obs;
 
-startN=Q(1,1:3);
+startN=currQ(1,1:3);
 
 qlimits=r.qlim;
+%make sure it is the correct size
+qlimits=qlimits(1:6,:);
+
 %how many times bigger than the max move angle size can we accept
 leaniancy=optimise.waterPPleaniancy;
 matsize=floor((qlimits(1:3,2)-qlimits(1:3,1))./optimise.max_angle_for123'/leaniancy);
@@ -77,11 +93,6 @@ for current_newQ=1:size(newQ,1)
     if ~check_path_for_col(newQ(current_newQ,:),obsticle_points,[],linkvals); 
         validnewQ(current_newQ)=false; 
         continue; 
-    end
-    % Check joint limits
-    if ~isempty(find(newQ(current_newQ,:)'<qlimits(:,1), 1)) || ~isempty(find(newQ(current_newQ,:)'>qlimits(:,2), 1))
-        validnewQ(current_newQ)=false; 
-        continue;
     end
 end
 
@@ -119,12 +130,12 @@ numofits=100;
 
 %% IF we only have 1 destination check if we are at the end (exit if we are)
 if size(newQ,1)==1
-    if isempty(find(newQ~=Q, 1))      
+    if isempty(find(newQ~=currQ, 1))      
         pathval(1).result=1;
         return;
     %if the only differnce is the last 3 joints do old way 
-    elseif isempty(find(newQ(1:3)~=Q(1:3), 1))
-        [pathval(1).result,pathval(1).all_steps] = pathplanner_new(newQ,tryalternate,check_arm_perms,useMiddleQ2,numofPPiterations,0);
+    elseif isempty(find(newQ(1:3)~=currQ(1:3), 1))
+        [pathval(1).result,pathval(1).all_steps] = pathplanner_new(newQ,0,1,0,0,0);
         return
     end
 end
@@ -301,8 +312,8 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
                 leanINT=ceil(optimise.waterPPleaniancy);
                 
                 %this prealocates the size for all steps and sets first val
-                %to be the currnt Q               
-                pathval(cur_goal).all_steps=[Q;...
+                %to be the currQ               
+                pathval(cur_goal).all_steps=[currQ(1:6);...
                                             zeros([(size(pathval(cur_goal).val,1)-1)*leanINT-1,6])];
                 currentpathtocheck=zeros([(leanINT-1)*size(pathval(cur_goal).val,1),6]);
                 inbetweensteps=zeros([leanINT-1,6]);
@@ -310,12 +321,12 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
                     %determine the latest node added to the list
                     currentQnode=pathval(cur_goal).all_steps(leanINT*(pnode-1)+1,:);
                     
-                    %determine the next node in terms of Q
+                    %determine the next node in terms of currQ
                     [J1,J2,J3]=mapindextojoints(pathval(cur_goal).val(pnode,1),...
                                       pathval(cur_goal).val(pnode,2),...
                                       pathval(cur_goal).val(pnode,3),qlimits,matsize);
                     nextQnode=[J1,J2,J3,...
-                               Q(4:6)+pnode*(newQ(cur_goal,4:6)-Q(4:6))/size(pathval(cur_goal).val,1)];
+                               currQ(4:6)+pnode*(newQ(cur_goal,4:6)-currQ(4:6))/size(pathval(cur_goal).val,1)];
                     %go through the added increments and keep these in between steps 
                     for curr_step=1:leanINT-1
                         ratiothrough=curr_step*optimise.waterPPleaniancy/leanINT;
@@ -334,7 +345,7 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
 
                 %this tacs on the last, actual destination, pose
                 currentQnode=pathval(cur_goal).all_steps(end,:);
-                nextQnode=newQ(cur_goal,:);
+                nextQnode=newQ(cur_goal,1:6);
                 %go through the added increments and keep these in between steps 
                 for curr_step=1:leanINT-1
                     ratiothrough=curr_step*optimise.waterPPleaniancy/leanINT;
@@ -342,7 +353,15 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
                                                  ratiothrough/optimise.waterPPleaniancy];
 
                 end
-                pathval(cur_goal).all_steps=[pathval(cur_goal).all_steps;inbetweensteps;newQ(cur_goal,:)];
+                pathval(cur_goal).all_steps=[pathval(cur_goal).all_steps;inbetweensteps;newQ(cur_goal,1:6)];
+                
+                %padarray with zeros at end if necessary
+                if size(newQ,2)>size(pathval(cur_goal).all_steps,2)
+                    pathval(cur_goal).all_steps=...
+                        padarray(pathval(cur_goal).all_steps,[0,size(newQ,2)-size(pathval(cur_goal).all_steps,2)],'post');
+                end
+                
+                
                 %check the inbetween nodes of this step too
                 currentpathtocheck=[currentpathtocheck;inbetweensteps];
                 
@@ -356,49 +375,39 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
                     pathval(cur_goal).unknown_points_result=[];
                 end
             else
-                pathval(cur_goal).all_steps=Q;
-                currQ=Q; if animate;  display('Danger! Dont quit here since global Q value is currently lost'); end
+                pathval(cur_goal).all_steps=currQ;
+                currQtemp=currQ; 
                 for pnode=1:size(pathval(cur_goal).val,1)-1                
                     [J1,J2,J3]=mapindextojoints(pathval(cur_goal).val(pnode,1),pathval(cur_goal).val(pnode,2),pathval(cur_goal).val(pnode,3),qlimits,matsize);
-    %                     startQnode=[J1,J2,J3,Q(4:6)+pnode*(newQ(cur_goal,4:6)-Q(4:6))/size(pathval(cur_goal).val,1)];
-                    Q=[J1,J2,J3,Q(4:6)+pnode*(newQ(cur_goal,4:6)-Q(4:6))/size(pathval(cur_goal).val,1)];
+
+                    currQtemp=[J1,J2,J3,Q(4:6)+pnode*(newQ(cur_goal,4:6)-Q(4:6))/size(pathval(cur_goal).val,1)];
 
                     [J1,J2,J3]=mapindextojoints(pathval(cur_goal).val(pnode+1,1),pathval(cur_goal).val(pnode+1,2),pathval(cur_goal).val(pnode+1,3),qlimits,matsize);
                     % at pnode+1
                     nextQnode=[J1,J2,J3,Q(4:6)+(pnode+1)*(newQ(cur_goal,4:6)-Q(4:6))/size(pathval(cur_goal).val,1)];
-    %                 tempsteps=startQnode;
-    %                 for curr_step=1:optimise.waterPPleaniancy
-    %                     tempsteps=[tempsteps;...
-    %                                Q+(nextQnode-Q)*curr_step/optimise.waterPPleaniancy];
-    %                 end
-    %                 [result,unknown_points_result]=check_path_for_col(tempsteps,obsticle_points,unknown_points);
 
                     %use original path planer to get between nodes, if this is
                     %not possible you should use the graphs search again
-                    [result,tempsteps]=pathplanner_new(nextQnode,0,1,0,0,0);
+                    [result,tempsteps]=pathplanner_new(nextQnode,0,1,0,0,0,currQtemp);
 
 
 
                     if result==true
-    %                     if unknown_points_result==false
-    %                         display('No actual collsion detected but moving through unknown space');
-    %                     end
                         pathval(cur_goal).all_steps=[pathval(cur_goal).all_steps;tempsteps];
                         %this should be moved somewhere else so it isn't
                         %continuously defined
                         pathval(cur_goal).result=1;
+                        currQtemp=tempsteps(end,:);
                     else
                         pathval(cur_goal).result=0;
                         if animate display(['Cant get to the required newQ: ',num2str(cur_goal),', between 2 links-so breaking']);end
                         break;
                     end
                 end
-                Q=currQ; 
+
                 if animate; display('Ok to do anything now');end
             end
 
-        
-        
         
             %show the path lines
             if animate

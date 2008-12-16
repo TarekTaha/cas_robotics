@@ -1,11 +1,15 @@
 %Note: This assumes we wish to blast in the direction where the normal
 %is pointing towards the origin which is the base center (0,0,0)
         
-function [pose]=PoseSel4planesearch(plane,displayon)
-global r Q optimise jointConfigCollisionChecked
+%NOTE: it is assumed that currQ (and or Q) is safe 
+function [pose]=PoseSel4planesearch(plane,displayon,currQ)
+global r optimise jointConfigCollisionChecked Q
 
-if nargin<2
-    displayon=true;
+if nargin<3
+    currQ=Q;
+    if nargin<2
+        displayon=true;
+    end
 end
 
 % Turn off warning messages if we dont care
@@ -34,6 +38,22 @@ end
 
 %% Variables 
 numlinks = r.n;
+
+% we must setup the robot again to be a 7 link one otherwise the pose selection wont work
+if numlinks<7 
+    setuprobot(7);
+    make6jointrobot=true;
+    %pad currQ with zeros if needed
+    while length(currQ)<7; currQ=[currQ,0];end
+    %uppdate the number of links
+    numlinks = r.n;
+else
+    make6jointrobot=false;
+end
+
+
+
+    
 Links = r.link;
 qlimits=r.qlim; 
 t_base = r.base;
@@ -45,7 +65,7 @@ DensoBlasting_h.ToolFrameReferencePoint = [0, 0, 0];
 DensoBlasting_h.MinimumFunctionGradient = optimise.stol;
 
 %this will store where collision checks have been done
-jointConfigCollisionChecked=Q;
+jointConfigCollisionChecked=currQ;
         
 for piece=1:numlinks
 	linkvals(piece).val=[Links{piece}.alpha Links{piece}.A Links{piece}.D Links{piece}.offset];
@@ -61,14 +81,13 @@ display('Starting 1st phase...............');
 %% Initial Guess - VERY IMPORTANT - starting jointConfig guess could be all zeros or current Q
 % jointConfig=[0 0 0 0 0 0,0];
 
-%pad Q with zeros if needed
-while length(Q)<7; Q=[Q,0];end
 
-jointConfig=ikine_g_plane(r,plane(1).home_point, plane(1).equ, Q);
+
+jointConfig=ikine_g_plane(r,plane(1).home_point, plane(1).equ, currQ);
 jointConfig(jointConfig'<qlimits(:,1)*0.96)=qlimits(jointConfig'<qlimits(:,1)*0.96,1)*0.96;
 jointConfig(jointConfig'>qlimits(:,2)*0.96)=qlimits(jointConfig'>qlimits(:,2)*0.96,2)*0.96;
 if ~check_path_for_col(jointConfig)
-    jointConfig=Q;
+    jointConfig=currQ;
 else %its ok so add to list of checks done
     jointConfigCollisionChecked=[jointConfigCollisionChecked;jointConfig];
 end
@@ -278,6 +297,16 @@ display(['Finished 2nd search phase. Found ', num2str(valid_count), ' of ' num2s
 %turn warnings back on
 if ~displayon
     warning on
+end
+
+%if we changed the robot for blast planning then change it back
+if make6jointrobot
+    setuprobot(6);
+    for i=1:length(plane)
+       if pose(i).validPose
+           pose(i).Q=pose(i).Q(:,1:6);
+       end
+    end    
 end
 
 

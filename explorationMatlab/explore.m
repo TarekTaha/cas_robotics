@@ -109,6 +109,10 @@ else
 
 end
 
+%% Save predicted information gain _for this timestep_
+workspace.predictedCoords=bestviews(selection).expectedaddinfo;
+    
+
 %% Display results
 
 % print results this exploration step details
