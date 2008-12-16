@@ -6,6 +6,9 @@
 close all;
 
 global workspace r Q robot_maxreach hMesh;
+
+display('Running plane search, currently this is standalone, only for testing and for AFTER mapping');
+
 %% Load dataset 
 % Recomended that you use this on a set of points
 %
@@ -111,9 +114,11 @@ if doposesel
     setuprobot(7)
     
     %make the third
-    display('moving third joint to 90 deg and other than that at starting pose')        
-    Q=robot_maxreach.default_Q(1,:);
-    Q(3)=pi/2;
+    display('moving to a better position')        
+    
+    NOhandleOPTIONS.useRealRobot=false;NOhandleOPTIONS.show_robot=false;NOhandleOPTIONS.animate_move=false;NOhandleOPTIONS.remv_unkn_in_mv=false;
+    movetonewQ(0,robot_maxreach.default_Q(3,:),[],NOhandleOPTIONS)
+    
     %make sure robot is a 7 link object for blasting
     
 

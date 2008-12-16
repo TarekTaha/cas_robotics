@@ -19,13 +19,15 @@
 %
 % _disON_ (binary) If you want to see the print outs of the working
 %
+% _currQ_ (1*6 double) radians - Is not usually passed and is set to Q however if passed planning will be from here
+%
 % *Returns:* 
 %
 % _pathfound_ =0 (no path), -1 (not valid newQ), 1 (path found)
 %
 % _all_steps_ = 6 collums of joints * many steps
 
-function [pathfound,all_steps] = pathplanner_new(newQ,tryalternate,check_arm_perms,useMiddleQ2,numofPPiterations,disON)
+function [pathfound,all_steps] = pathplanner_new(newQ,tryalternate,check_arm_perms,useMiddleQ2,numofPPiterations,disON,currQ)
 
 %% Variables
 global r Q optimise workspace
@@ -33,32 +35,39 @@ global r Q optimise workspace
 %intiallise all the steps through the path to empty
 all_steps=[];
 
-%% check if we are at the end (exit if we are)
-if isempty(find(newQ~=Q, 1))
-    pathfound=1;
-    return;
-end
+
 
 %% Check passed arguments set defaults where appropriate
-if nargin<6
-    disON=false;
-    if nargin<5
-        %default nu of interations assuming that there IS an alternate solution
-        numofPPiterations=optimise.numofPPiterations;
-        if nargin<4
-            % It will make more than one middle possition and try and reach this
-            useMiddleQ2=true;
-            if nargin<3        
-                %if we want to use the different arm movement permutations
-                check_arm_perms=true;
-                if nargin<2
-                    %default is to get an alternate pose just in case
-                    tryalternate=true;
-                    if nargin==0; error('You must pass at least a newQ value to try and reach from the current (global) Q');end
+if nargin<7
+    currQ=Q;
+    if nargin<6
+        disON=false;
+        if nargin<5
+            %default nu of interations assuming that there IS an alternate solution
+            numofPPiterations=optimise.numofPPiterations;
+            if nargin<4
+                % It will make more than one middle possition and try and reach this
+                useMiddleQ2=true;
+                if nargin<3        
+                    %if we want to use the different arm movement permutations
+                    check_arm_perms=true;
+                    if nargin<2
+                        %default is to get an alternate pose just in case
+                        tryalternate=true;
+                        if nargin==0; error('You must pass at least a newQ value to try and reach from the current (global) Q');end
+                    end
                 end
             end
         end
-    end
+    end    
+end
+    
+%Change Q to currQ
+
+%% check if we are at the end (exit if we are)
+if isempty(find(newQ~=currQ, 1))
+    pathfound=1;
+    return;
 end
 
 %these are the obstacle point within the arm range that are present during this iteration of path planning
@@ -87,7 +96,7 @@ if ~isempty(find(newQ'<qlimits(:,1), 1)) || ~isempty(find(newQ'>qlimits(:,2), 1)
 end
    
 %% Check if there is a direct path
-[pathfound,all_steps]=checkdirectpath(Q,newQ,max_angle_for123,check_arm_perms,obsticle_points);
+[pathfound,all_steps]=checkdirectpath(currQ,newQ,max_angle_for123,check_arm_perms,obsticle_points);
 %since a direct path is possible and safe return with this path
 if pathfound; 
     if disON; display('Complete safe path found-direct');end; 
@@ -112,7 +121,7 @@ if tryalternate
 end
 %try and get a path with the alternate end and same begining
 if tryalternate
-    [pathfound,all_steps]=checkdirectpath(Q,alternate_newQ,max_angle_for123,check_arm_perms,obsticle_points);
+    [pathfound,all_steps]=checkdirectpath(currQ,alternate_newQ,max_angle_for123,check_arm_perms,obsticle_points);
     if pathfound; 
         if disON; display('Complete safe path found');end; 
         return; 
@@ -130,7 +139,7 @@ if pathfound==0
     end
 
     %setup a start Q variable that won't alter the global
-    startQ=Q;
+    startQ=currQ;
        
     %this will try the Alternat path on the even numbers for gothroughtimes
     if (-1)^(gothroughtimes)==1 && tryalternate
@@ -141,7 +150,7 @@ if pathfound==0
         endQ=newQ;
     end    
 
-    %this var will hold all the intermediate steps between Q and newQ
+    %this var will hold all the intermediate steps between currQ and newQ
     all_steps=startQ;  
     
     %randomly select a middleQ with first 3 joints randomly chosen between bounds
