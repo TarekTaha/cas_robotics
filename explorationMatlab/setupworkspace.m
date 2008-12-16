@@ -192,14 +192,7 @@ end
 
 workspace.spec_pnts=[];
 
-%the classification cube size
-workspace.class_cubesize=workspace.inc_size/4;
 
-%variables for the classification threshholds
-%minimum number of classifications in voxel to make it valid
-workspace.minclassifications=30;
-% minimmum majority classification to make it useful
-workspace.classfierthreshhold=1.5;
 
 %% Setup the graph obstacles, 
 % %this makes the check for a collision quicker
@@ -217,3 +210,16 @@ try
 catch
     uiwait(msgbox('couldnt load the graf_obs.mat file, make sure the planning directory is added to the maatlab path'));
 end
+
+%% Setup the classifier surface size
+workspace.classifyMew=0.1;
+workspace.classifyProbThreshhold=0.98;
+
+%the classification cube size
+workspace.class_cubesize=workspace.inc_size/4;
+
+%variables for the classification threshholds
+%minimum number of classifications in voxel to make it valid
+workspace.minclassifications=30;
+% minimmum majority classification to make it useful
+workspace.classfierthreshhold=1.5;

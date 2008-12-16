@@ -30,11 +30,10 @@
 function [pathfound,all_steps] = pathplanner_new(newQ,tryalternate,check_arm_perms,useMiddleQ2,numofPPiterations,disON,currQ)
 
 %% Variables
-global r Q optimise workspace
+global r Q optimise workspace robot_maxreach
   
 %intiallise all the steps through the path to empty
 all_steps=[];
-
 
 
 %% Check passed arguments set defaults where appropriate
@@ -61,7 +60,13 @@ if nargin<7
         end
     end    
 end
-    
+
+if size(currQ,2)>6
+    display('You should pass in newQ as a 6*1 matrix, all steps will be returned as a 6*many')
+    currQ=currQ(1:6);
+    newQ=newQ(:,1:6);
+end
+
 %Change Q to currQ
 
 %% check if we are at the end (exit if we are)
@@ -80,9 +85,13 @@ end
 
 %what the max angle is or the joints 1,2,3 so we work out steps from this
 max_angle_for123=optimise.max_angle_for123;
+maxangleJ4to6=optimise.maxangleJ4to6;
+minjointres=robot_maxreach.minjointres;
 
 %this is parameters of the robot
 qlimits=r.qlim;
+%make sure it is the correct size
+qlimits=qlimits(1:6,:);
 
 %% check that the initial desired end joint config is safe and possible
 if ~check_path_for_col(newQ,obsticle_points); 
@@ -96,7 +105,7 @@ if ~isempty(find(newQ'<qlimits(:,1), 1)) || ~isempty(find(newQ'>qlimits(:,2), 1)
 end
    
 %% Check if there is a direct path
-[pathfound,all_steps]=checkdirectpath(currQ,newQ,max_angle_for123,check_arm_perms,obsticle_points);
+[pathfound,all_steps]=checkdirectpath(currQ,newQ,max_angle_for123,check_arm_perms,obsticle_points,maxangleJ4to6,minjointres);
 %since a direct path is possible and safe return with this path
 if pathfound; 
     if disON; display('Complete safe path found-direct');end; 
@@ -108,7 +117,7 @@ if tryalternate
     try 
         requiredT=fkine(r,newQ);
         if disON; display('using new pose selection method which includes collision detection');end
-        [alternate_newQ,valid_pose]=streamOnto_mine_manystarts(r,requiredT(1:3,4),requiredT(1:3,3),Q);
+        [alternate_newQ,valid_pose]=streamOnto_mine_manystarts(r,requiredT(1:3,4),requiredT(1:3,3),currQ);
         if ~valid_pose 
             numofPPiterations=numofPPiterations/2;
             tryalternate=0; %we wont try this section again
@@ -121,7 +130,7 @@ if tryalternate
 end
 %try and get a path with the alternate end and same begining
 if tryalternate
-    [pathfound,all_steps]=checkdirectpath(currQ,alternate_newQ,max_angle_for123,check_arm_perms,obsticle_points);
+    [pathfound,all_steps]=checkdirectpath(currQ,alternate_newQ,max_angle_for123,check_arm_perms,obsticle_points,maxangleJ4to6,minjointres);
     if pathfound; 
         if disON; display('Complete safe path found');end; 
         return; 
@@ -158,7 +167,7 @@ if pathfound==0
 
     if disON; display(strcat('Splitting path into two parts with middle as:',num2str(middleQ)));end
     
-    [pathfound,all_steps]=checkdirectpath(startQ,middleQ,max_angle_for123,check_arm_perms,obsticle_points);    
+    [pathfound,all_steps]=checkdirectpath(startQ,middleQ,max_angle_for123,check_arm_perms,obsticle_points,maxangleJ4to6,minjointres);    
     %if no path found found go to the next iteration
     if pathfound==0; 
         %else it is a complete failure
@@ -166,15 +175,15 @@ if pathfound==0
         continue; 
     else
         if disON; display('With the path now split, we have got halfway, now trying to get whole way');end
-        [pathfound,additional_steps]=checkdirectpath(middleQ,endQ,max_angle_for123,check_arm_perms,obsticle_points);
+        [pathfound,additional_steps]=checkdirectpath(middleQ,endQ,max_angle_for123,check_arm_perms,obsticle_points,maxangleJ4to6,minjointres);
         if pathfound==0; 
             if disON; display('path finding failure: couldnt get middle->end');end
             if useMiddleQ2
                 %randomly select another middleQ2 between middleQ and endQ
                 middleQ2=pick_a_middleQ(middleQ,endQ);
                 if disON; display(strcat('Splitting path into 3 parts with middle2 (middle of middle->end) as:',num2str(middleQ2)));end
-                [pathfound_1,additional_steps1]=checkdirectpath(middleQ,middleQ2,max_angle_for123,check_arm_perms,obsticle_points); 
-                [pathfound_2,additional_steps2]=checkdirectpath(middleQ2,endQ,max_angle_for123,check_arm_perms,obsticle_points);            
+                [pathfound_1,additional_steps1]=checkdirectpath(middleQ,middleQ2,max_angle_for123,check_arm_perms,obsticle_points,maxangleJ4to6,minjointres); 
+                [pathfound_2,additional_steps2]=checkdirectpath(middleQ2,endQ,max_angle_for123,check_arm_perms,obsticle_points,maxangleJ4to6,minjointres);            
                 if pathfound_1 && pathfound_2
                     all_steps=[all_steps;additional_steps1;additional_steps2];
                     if disON; display('Complete safe path found_with 2 mid points');end; 
@@ -201,7 +210,7 @@ end; %end overall for loop for num of iterations
 
    
 %% FUNCTION: check between a start and end point to see if there is a path
-function [pathfound,all_steps]=checkdirectpath(startQ,endQ,max_angle_for123,check_arm_perms,obsticle_points)
+function [pathfound,all_steps]=checkdirectpath(startQ,endQ,max_angle_for123,check_arm_perms,obsticle_points,maxangleJ4to6,minjointres)
 
 %even if it is half a whole path still start with the startQ
 all_steps=startQ;
@@ -210,7 +219,10 @@ all_steps=startQ;
 %how many increments to go through to get to end
 num_inc=ceil(max([abs(endQ(1)-startQ(1))/max_angle_for123(1),...
                   abs(endQ(2)-startQ(2))/max_angle_for123(2),...
-                  abs(endQ(3)-startQ(3))/max_angle_for123(3)]));
+                  abs(endQ(3)-startQ(3))/max_angle_for123(3),...
+                  abs(endQ(4)-startQ(4))/maxangleJ4to6,...
+                  abs(endQ(5)-startQ(5))/maxangleJ4to6,...
+                  abs(endQ(6)-startQ(6))/maxangleJ4to6]));
 %since we may not be at our destination but only joint 4,5,6 may change and
 %so we will have num_inc==0 so we have to make it go through in atleast 1 step
 num_inc=max(num_inc,1);
@@ -244,10 +256,18 @@ elseif check_arm_perms && size(find(startQ(1:3)-endQ(1:3)==0),2)<2;
     %calculate new increment value because each angle is separate there is
     %no need to make so many steps
     %how many increments to go through to get to end
-    num_inc=[abs(endQ(1)-startQ(1))/max_angle_for123(1),...
+    num_inc=ceil([abs(endQ(1)-startQ(1))/max_angle_for123(1),...
             abs(endQ(2)-startQ(2))/max_angle_for123(2),...
-            abs(endQ(3)-startQ(3))/max_angle_for123(3)];
-    num_inc=[ceil(num_inc),ones([1,3])*ceil(sum(num_inc(1:3)))];
+            abs(endQ(3)-startQ(3))/max_angle_for123(3),...
+            abs(endQ(4)-startQ(4))/maxangleJ4to6,...
+            abs(endQ(5)-startQ(5))/maxangleJ4to6,...
+            abs(endQ(6)-startQ(6))/maxangleJ4to6]);
+        
+        num_inc(num_inc==0)=1;
+        
+%      num_inc=[ceil(num_inc),ones([1,3])*ceil(sum(num_inc(1:3)))];
+    
+
     if num_inc==0
         keyboard
     end
@@ -363,7 +383,7 @@ jointcombs= [1,2,3;2,3,1;3,1,2];
             
             %get rid of steps where 1,2,3 dont move joint up 4,5,6 before
             %and after steps also include end position (for safety)
-            abspathdiff_bin=abs(all_steps(2:end,1:3)-all_steps(1:end-1,1:3))>robot_maxreach.minjointres;
+            abspathdiff_bin=abs(all_steps(2:end,1:3)-all_steps(1:end-1,1:3))>minjointres;
             all_steps=[all_steps(abspathdiff_bin(:,1)|abspathdiff_bin(:,2)|abspathdiff_bin(:,3),:);
                        all_steps(end,:)];
 %             if size(all_steps_temp,1)~=size(all_steps,1)
@@ -511,20 +531,20 @@ try
     tworows_diff0_23=find(pathdiff(:,2)==0&pathdiff(:,3)==0);
     tworows_diff0_13=find(pathdiff(:,1)==0&pathdiff(:,3)==0);
     if length(tworows_diff0_12)>2 && ...
-            ~isempty(find(pathdoubdiff(tworows_diff0_12(1:end-1),3)>robot_maxreach.minjointres,1)) &&...
-            ~isempty(find(pathdoubdiff(tworows_diff0_12(1:end-1),3)<-robot_maxreach.minjointres,1))
+            ~isempty(find(pathdoubdiff(tworows_diff0_12(1:end-1),3)>minjointres,1)) &&...
+            ~isempty(find(pathdoubdiff(tworows_diff0_12(1:end-1),3)<-minjointres,1))
         display('maybe path could be shorter J3');
 %             keyboard;
     end
     if length(tworows_diff0_23)>2 &&...
-            ~isempty(find(pathdoubdiff(tworows_diff0_23(1:end-1),1)>robot_maxreach.minjointres,1)) &&...
-            ~isempty(find(pathdoubdiff(tworows_diff0_23(1:end-1),1)<-robot_maxreach.minjointres,1))
+            ~isempty(find(pathdoubdiff(tworows_diff0_23(1:end-1),1)>minjointres,1)) &&...
+            ~isempty(find(pathdoubdiff(tworows_diff0_23(1:end-1),1)<-minjointres,1))
         display('maybe path could be shorter J1');
 %             keyboard;           
     end
     if length(tworows_diff0_13)>2 &&...
-            ~isempty(find(pathdoubdiff(tworows_diff0_13(1:end-1),2)>robot_maxreach.minjointres,1)) &&...
-            ~isempty(find(pathdoubdiff(tworows_diff0_13(1:end-1),2)<-robot_maxreach.minjointres,1))
+            ~isempty(find(pathdoubdiff(tworows_diff0_13(1:end-1),2)>minjointres,1)) &&...
+            ~isempty(find(pathdoubdiff(tworows_diff0_13(1:end-1),2)<-minjointres,1))
         display('maybe path could be shorter J2');    
 %         keyboard;
     end

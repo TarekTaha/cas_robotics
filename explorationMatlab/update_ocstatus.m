@@ -29,6 +29,70 @@ class_ocgrid=[round(pointswithclass(:,1:3)/class_cubesize),pointswithclass(:,4)]
 [level1,level2]=GetImpLevInfo(class_ocgrid(:,1:3)*class_cubesize);
 class_ocgrid=class_ocgrid(level2,:);
 
+%% Add bayesian update
+load Classification_Criteria.mat
+
+%how many materials not including unknown
+% nummaterial= size(class_ocgrid,2)-1;
+%all which have a MEAN and STD in the HParams which is all except edge/unknowns
+nummaterial=size(struct2cell(HParas.I),1)/2;
+
+uniformdisOnMats=ones([1,nummaterial])/nummaterial;
+%make sure the structure is valid
+if ~isfield(workspace,'probofmaterial');
+    workspace.probofmaterial=[];
+end
+
+for i=1:size(class_ocgrid,1)
+    cur_mat=class_ocgrid(i,4);
+    %must be within actual materials not unknown or edges
+    if cur_mat<=nummaterial
+        %if there is nothing in the probofmaterial
+        if ~isempty(workspace.probofmaterial)
+            curr_voxel=find(workspace.probofmaterial(:,1)==class_ocgrid(i,1) &...
+                            workspace.probofmaterial(:,2)==class_ocgrid(i,2) & ...
+                            workspace.probofmaterial(:,3)==class_ocgrid(i,3),1);
+            if ~isempty(curr_voxel)
+                %all others decreased by prob of 0.05
+                workspace.probofmaterial(curr_voxel,[4:3+cur_mat-1,3+cur_mat+1:end])=...
+                workspace.probofmaterial(curr_voxel,[4:3+cur_mat-1,3+cur_mat+1:end])*0.05;
+                %Actual is increased by 0.95
+                workspace.probofmaterial(curr_voxel,3+cur_mat)=workspace.probofmaterial(curr_voxel,3+cur_mat)*0.95;
+                
+                %normalise probability
+                                     normalisingfactor=sum(workspace.probofmaterial(curr_voxel,4:end));
+                workspace.probofmaterial(curr_voxel,4:end)=workspace.probofmaterial(curr_voxel,4:end)/normalisingfactor;
+
+            else
+                startnewVoxel=true;
+            end
+        else
+            startnewVoxel=true;
+        end
+        
+        %if the probofmaterial variable is empty or there was no valid
+        %voxel start a new line
+        if startnewVoxel
+            workspace.probofmaterial(end+1,:)=[class_ocgrid(i,1:3), uniformdisOnMats];
+            %all others decreased by prob of 0.05
+            workspace.probofmaterial(end,[4:3+cur_mat-1,3+cur_mat+1:end])=...
+            workspace.probofmaterial(end,[4:3+cur_mat-1,3+cur_mat+1:end])*0.05;
+            %Actual is increased by 0.95
+            workspace.probofmaterial(end,3+cur_mat)=workspace.probofmaterial(end,3+cur_mat)*0.95;            
+            
+            %normalise probability
+                          normalisingfactor=sum(workspace.probofmaterial(end,4:end));
+            workspace.probofmaterial(end,4:end)=workspace.probofmaterial(end,4:end)/normalisingfactor;
+        end
+        
+        startnewVoxel=false;
+    end
+end
+    
+% workspace.ALLlastscandataInWkspace(:,1)
+
+
+%%
 % hold on;
 % try planeplotHa(end+1)=plot3(class_ocgrid(:,1)*class_cubesize,class_ocgrid(:,2)*class_cubesize,class_ocgrid(:,3)*class_cubesize,'y','marker','.','markersize',0.1,'linestyle','none');end
 
@@ -42,6 +106,7 @@ class_ocgrid=class_ocgrid(level2,:);
 %     pause
 % end
 
+%% Update the ocgrid structure, NOT REALLY NEEDED NOW
 %make sure the structure is valid
 if ~isfield(workspace,'ocgrid');
     workspace.ocgrid=[];
@@ -51,6 +116,7 @@ if size(workspace.ocgrid,2)~=6
 else
     tempocgrid=setdiff(class_ocgrid(:,1:3),workspace.ocgrid(:,1:3),'rows');
 end
+
 workspace.ocgrid=[workspace.ocgrid;tempocgrid,zeros([size(tempocgrid,1),3])];
 [level1,level2]=GetImpLevInfo(workspace.ocgrid(:,1:3)*class_cubesize);
 workspace.ocgrid=workspace.ocgrid(level2,:);
@@ -69,17 +135,19 @@ for i=1:indexb
     workspace.ocgrid(i,6)=workspace.ocgrid(i,6)+unknownnum;
 end
 
+%% we only want to hold the voxels which correspond with the current map
+try     
+    aabb = [-1.5, -1.5, 0.2; 1.5, 1.5, 1.8];
+    % aabb = [-inf, -inf, -inf; inf, inf, inf];
+    hMesh = robmap_h.Mesh(aabb);
+    % f = hMesh.FaceData;
+    v = hMesh.VertexData;
+    [level1,level2]=GetImpLevInfo(v);
+    v_decrete=unique(round(v(level2,:)/class_cubesize),'rows');
+    [vals,indexa,indexb]=intersect(v_decrete,workspace.ocgrid(:,1:3),'rows');
+    workspace.ocgrid=workspace.ocgrid(indexb,:);
+end
 
-%we only want to hold the voxels which correspond with the current map
-aabb = [-1.5, -1.5, 0.2; 1.5, 1.5, 1.8];
-% aabb = [-inf, -inf, -inf; inf, inf, inf];
-hMesh = robmap_h.Mesh(aabb);
-% f = hMesh.FaceData;
-v = hMesh.VertexData;
-[level1,level2]=GetImpLevInfo(v);
-v_decrete=unique(round(v(level2,:)/class_cubesize),'rows');
-[vals,indexa,indexb]=intersect(v_decrete,workspace.ocgrid(:,1:3),'rows');
-workspace.ocgrid=workspace.ocgrid(indexb,:);
 
 % figure(2)
 sumofclass=workspace.ocgrid(:,4)+workspace.ocgrid(:,5);
@@ -110,3 +178,7 @@ warning('on','MATLAB:divideByZero')
 % 
 %     drawnow
 % end
+
+
+
+

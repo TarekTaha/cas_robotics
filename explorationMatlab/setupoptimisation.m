@@ -44,6 +44,10 @@ optimise.numofPPiterations=50;
 %As worked out with cos formul to keep max posible movement at end effector
 %to be approx 150mm and about the same size as safety dist in end ellipse 
 optimise.max_angle_for123=[4,5,7]*pi/180; %Less than 1/2 calculated for safety
+%the max angle that joints 4->6 can move without checks (calculated
+%heuristically)
+optimise.maxangleJ4to6=20*pi/180;
+
 % watet based path planning this is how cource the graph search should be
 % where 1 would be equal to the max_angle_for123
 optimise.waterPPleaniancy=3.5;

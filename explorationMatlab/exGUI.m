@@ -523,7 +523,8 @@ function AXBAMnClassify_pushbutton_Callback(hObject, eventdata, handles)
 %num of planes to tryand get to of interest
 numofintplanes=str2double(get(handles.numofdir_AXBAMnC_edit,'string'));
 %run the classification function    
-poseclassunknown_Imp(numofintplanes)
+% poseclassunknown_Imp(numofintplanes)
+poseclassunknown_Imp_newest(numofintplanes)
 
 
 

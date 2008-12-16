@@ -34,6 +34,9 @@ global r densoobj
 % n = r.n; %must be 6 because that is all the ellipsoid peices I have
 
 rob_base = r.base;
+qlimits=r.qlim;
+%make sure it is the correct size
+qlimits=qlimits(1:6,:);
 
 if nargin<4
     L = r.link;
@@ -68,6 +71,18 @@ if ~joint_softlimit_check(all_steps)
     return;
 end
 
+
+%% Check hard limits
+if (all_steps(:,1)<qlimits(1,1) || all_steps(:,1)>qlimits(1,2) ||...
+    all_steps(:,2)<qlimits(2,1) || all_steps(:,2)>qlimits(2,2) ||...
+    all_steps(:,3)<qlimits(3,1) || all_steps(:,3)>qlimits(3,2) ||...
+    all_steps(:,4)<qlimits(4,1) || all_steps(:,4)>qlimits(4,2) ||...
+    all_steps(:,5)<qlimits(5,1) || all_steps(:,5)>qlimits(5,2) ||...
+    all_steps(:,6)<qlimits(6,1) || all_steps(:,6)>qlimits(6,2))
+    result=0;
+    return;
+end        
+    
 % %% Check that they are all numbers
 % if ~isempty(find(isnan(all_steps),1))
 % %     keyboard
