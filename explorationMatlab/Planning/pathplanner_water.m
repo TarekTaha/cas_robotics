@@ -357,7 +357,7 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
                 end
             else
                 pathval(cur_goal).all_steps=Q;
-                tempQ=Q; if animate;  display('Danger! Dont quit here since global Q value is currently lost'); end
+                currQ=Q; if animate;  display('Danger! Dont quit here since global Q value is currently lost'); end
                 for pnode=1:size(pathval(cur_goal).val,1)-1                
                     [J1,J2,J3]=mapindextojoints(pathval(cur_goal).val(pnode,1),pathval(cur_goal).val(pnode,2),pathval(cur_goal).val(pnode,3),qlimits,matsize);
     %                     startQnode=[J1,J2,J3,Q(4:6)+pnode*(newQ(cur_goal,4:6)-Q(4:6))/size(pathval(cur_goal).val,1)];
@@ -393,7 +393,7 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
                         break;
                     end
                 end
-                Q=tempQ; 
+                Q=currQ; 
                 if animate; display('Ok to do anything now');end
             end
 

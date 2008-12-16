@@ -4,7 +4,7 @@
 % classification
 
 function poseclassunknown_Imp(numofintplanes)
-
+error('make sure this is the same as the other pose selection version-Dec14th');
 %% Setup and Variables
 % close all
 global r Q PointData RangeData IntensityData workspace classPlanePlotHa AXBAMnCtestdata alldirectedpoints
