@@ -156,8 +156,12 @@ workspace.unknowncoords=round(workspace.unknowncoords/workspace.inc_size)*worksp
 index=find((workspace.unknowncoords(:,1)<workspace.robotsize(1,2) & workspace.unknowncoords(:,1)>workspace.robotsize(1,1)) &...
            (workspace.unknowncoords(:,2)<workspace.robotsize(2,2) & workspace.unknowncoords(:,2)>workspace.robotsize(2,1)) &...
            (workspace.unknowncoords(:,3)<workspace.robotsize(3,2) & workspace.unknowncoords(:,3)>workspace.robotsize(3,1)));
-newindex=setdiff([1:size(workspace.unknowncoords,1)]',index);
-workspace.unknowncoords=workspace.unknowncoords(newindex,:);
+%make all thoes points removed from UNKNOWN and put in KNOWN stack
+workspace.knowncoords=[workspace.knowncoords;workspace.unknowncoords(index,:)];
+% then change the values in unknown space to be only ouside of this
+% newindex=setdiff([1:size(workspace.unknowncoords,1)]',index);
+% workspace.unknowncoords=workspace.unknowncoords(newindex,:);
+
 
 %make sure all points are within the workspace
 [nothing1,nothing1,level3_un]=GetImpLevInfo(workspace.unknowncoords);

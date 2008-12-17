@@ -1,3 +1,7 @@
+                                                                     
+                                                                     
+                                                                     
+                                             
 %% exGUI
 %
 % *Description:*  This is the main GUI file. Goes with the exGUI.fig figure
@@ -286,81 +290,76 @@ elseif current_test_case>1 && want_to_continue
 %             profile clear; profile on;
             NBV_beta2();
 %             profile off; profile viewer;
-current_bestview=stepcount-1;
+          
+            current_bestview=stepcount-1;
+            global bestviews;        
 
-%             current_bestview=1;
-%             max_bestviews_togothrough=optimise.valid_max*1/4;
-%             global bestviews;        
-%             while current_bestview<max_bestviews_togothrough && size(bestviews,2)>=1 && ~get(handles.stopflag_checkbox,'Value')
-%                 %size(bestviews,2)>optimise.valid_max*3/4
-%                 current_bestview=current_bestview+1;
-
-                useNBV=true;
-    %             want_to_continue=true;
-                want_to_continue=~get(handles.stopflag_checkbox,'Value');   
+            useNBV=true;
+            
+            want_to_continue=~get(handles.stopflag_checkbox,'Value');   
                 
-                while want_to_continue; 
-                    try %if we have already planned a path, use this one otherwise try and get another, otherwise go to next possible one
+            while want_to_continue; 
+                try %if we have already planned a path, use this one otherwise try and get another, otherwise go to next possible one
+                    if movetonewQ(handles,rad2deg(bestviews(1).Q),bestviews(1).all_steps);
+                        scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];explore(handles,useNBV,1);validpathfound=true;break;
+                    else %can't get to the desired best view
+                        display('User has control');
+                        keyboard
+
+                        %tac on the actual position here just in case
+                        %it isn't exactly where it was supposed to
+                        %finish
+                        robot_maxreach.path(end).all_steps(end+1,:)=Q;
+                        %move back along the path taken to get here
+                        if ~movetonewQ(handles,rad2deg(robot_maxreach.path(end).all_steps(1,:)),robot_maxreach.path(end).all_steps(end:-1:1,:));
+                            display('some major problem if we cant follow the same path back');
+                            keyboard                                
+                        end
+                        %try once again to move to the actual desired
+                        %newQ for exploration
                         if movetonewQ(handles,rad2deg(bestviews(1).Q),bestviews(1).all_steps);
                             scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];explore(handles,useNBV,1);validpathfound=true;break;
-                        else %can't get to the desired best view
-                            display('User has control');
-                            keyboard
-                            
-                            %tac on the actual position here just in case
-                            %it isn't exactly where it was supposed to
-                            %finish
-                            robot_maxreach.path(end).all_steps(end+1,:)=Q;
-                            %move back along the path taken to get here
-                            if ~movetonewQ(handles,rad2deg(robot_maxreach.path(end).all_steps(1,:)),robot_maxreach.path(end).all_steps(end:-1:1,:));
-                                display('some major problem if we cant follow the same path back');
-                                keyboard                                
-                            end
-                            %try once again to move to the actual desired
-                            %newQ for exploration
-                            if movetonewQ(handles,rad2deg(bestviews(1).Q),bestviews(1).all_steps);
-                                scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];explore(handles,useNBV,1);validpathfound=true;break;
-                            else % last resort is to remove surrounding obstacle points remove indexed and normal obsticle points within robot FF since not valid
-                                display(['No Valid path available or found, on #',num2str(current_bestview)]);
-                                validpathfound=false;
-                            end
+                        else % last resort is to remove surrounding obstacle points remove indexed and normal obsticle points within robot FF since not valid
+                            display(['No Valid path available or found, on #',num2str(current_bestview)]);
+                            validpathfound=false;
                         end
-                        
-                        want_to_continue=0;                        
-                    catch; display(lasterr);
-                        want_to_continue=input(' Type (0) to go to new best view, (1) to continue trying for a path, (2) for keyboard command, (3) to exit\n');            
-                        if want_to_continue==2; keyboard; end
-                        if want_to_continue==3; error('User chose to exit');end
-                        if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end 
-                        display(['No Valid path available or found, on #',num2str(current_bestview)]);
-                        validpathfound=false;
-                    end;
-                end                
-
-                if show_new_info_details            
-                %Plotting and dispalying what we expected compared to what we got
-                display(strcat('The size of the expected infor was:',num2str(size(bestviews(1).expectedaddinfo)),', While the actual size was:',num2str(size(workspace.newestknownledge)),...
-                    ', The set difference was:',num2str(size(setdiff(bestviews(1).expectedaddinfo,workspace.newestknownledge,'rows'))),...
-                    ', The weighted addinfo is:',num2str(bestviews(1).addinfo),'. And the overall weight was:',num2str(bestviews(1).overall)));
-                    temp=plot3(bestviews(1).expectedaddinfo(:,1),bestviews(1).expectedaddinfo(:,2),bestviews(1).expectedaddinfo(:,3),'r.');
-                    temp2=plot3(workspace.newestknownledge(:,1),workspace.newestknownledge(:,2),workspace.newestknownledge(:,3),'g.');
-                    temp3=setdiff(bestviews(1).expectedaddinfo,workspace.newestknownledge,'rows');
-                    temp4=plot3(temp3(:,1),temp3(:,2),temp3(:,3),'b.');
-                    pause(2);
-                    delete(temp); delete(temp4);
-                    pause(2);delete(temp2); 
-                end
-
-                %termination conditions
-                changeinweight=diff(state_data.knownweight);
-                if length(changeinweight)>3
-                    if sum(changeinweight(end-3:end))<100
-                        %set to stop ASAP
-                        set(handles.stopflag_checkbox,'Value',1);
-                        display('Termination condition reached');
-                        break;
                     end
+
+                    want_to_continue=0;                        
+                catch; display(lasterr);
+                    want_to_continue=input(' Type (0) to go to new best view, (1) to continue trying for a path, (2) for keyboard command, (3) to exit\n');            
+                    if want_to_continue==2; keyboard; end
+                    if want_to_continue==3; error('User chose to exit');end
+                    if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end 
+                    display(['No Valid path available or found, on #',num2str(current_bestview)]);
+                    validpathfound=false;
+                end;
+            end                
+
+            if show_new_info_details            
+            %Plotting and dispalying what we expected compared to what we got
+            display(strcat('The size of the expected infor was:',num2str(size(bestviews(1).expectedaddinfo)),', While the actual size was:',num2str(size(workspace.newestknownledge)),...
+                ', The set difference was:',num2str(size(setdiff(bestviews(1).expectedaddinfo,workspace.newestknownledge,'rows'))),...
+                ', The weighted addinfo is:',num2str(bestviews(1).addinfo),'. And the overall weight was:',num2str(bestviews(1).overall)));
+                temp=plot3(bestviews(1).expectedaddinfo(:,1),bestviews(1).expectedaddinfo(:,2),bestviews(1).expectedaddinfo(:,3),'r.');
+                temp2=plot3(workspace.newestknownledge(:,1),workspace.newestknownledge(:,2),workspace.newestknownledge(:,3),'g.');
+                temp3=setdiff(bestviews(1).expectedaddinfo,workspace.newestknownledge,'rows');
+                temp4=plot3(temp3(:,1),temp3(:,2),temp3(:,3),'b.');
+                pause(2);
+                delete(temp); delete(temp4);
+                pause(2);delete(temp2); 
+            end
+
+            %termination conditions
+            changeinweight=diff(state_data.knownweight);
+            if length(changeinweight)>3
+                if sum(changeinweight(end-3:end))<100
+                    %set to stop ASAP
+                    set(handles.stopflag_checkbox,'Value',1);
+                    display('Termination condition reached');
+                    break;
                 end
+            end
                     
                 %this is suboptimal if we have lots of bestviews since we
                 %are going back through all of them and doing nbv_volume
@@ -385,6 +384,11 @@ current_bestview=stepcount-1;
 %                     bestviews=[];
 %                 end
 %             end
+
+testdir='C:\MATLAB\R2007a\work\Gavin\PhD\PhD_Disertation\Code\Ch4\';
+save([testdir,'AXBAMnC_Test',num2str(1),'Scan',num2str(stepcount-1),'_workspaceSTATE.mat'],'workspace');
+
+
         end
     end
 end
@@ -1221,5 +1225,6 @@ function all_mesh_checkbox_Callback(hObject, eventdata, handles)
 
 %% dont know why this is needed, can't find the button for it
 function Untitled_1_Callback(hObject, eventdata, handles)
+
 
 
