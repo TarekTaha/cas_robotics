@@ -64,6 +64,7 @@ attemptingscan=4; %used to set how many times we try before giving up
 while attemptingscan
     %give it an initial pose for base position)
     robscan_h=robmap_h.ScannerCommand(eye(4));
+    robscan_h.TraceTo(['C:\data\', datestr(clock, 30), '_']);
     
     robscan_h.Type='TiltingRangeScan';
     robscan_h.TiltSpeed=robot_maxreach.scan_speed;
