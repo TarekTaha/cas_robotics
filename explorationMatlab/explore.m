@@ -109,8 +109,9 @@ else
 
 end
 
-%% Save predicted information gain _for this timestep_
-workspace.predictedCoords=bestviews(selection).expectedaddinfo;
+%% Save predicted information gain _for this timestep_ 
+% Note:wont work when there is no selection
+try workspace.predictedCoords=bestviews(selection).expectedaddinfo;end
     
 
 %% Display results
