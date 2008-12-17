@@ -63,6 +63,7 @@ scan.origin=tr(1:3,4)';
 %% Start Scanning/robot communication
 %give it an initial pose for base position)
 robscan_h=robmap_h.ScannerCommand(eye(4));
+robscan_h.TraceTo(['C:\data\', datestr(clock, 30), '_']);
 
 robscan_h.Type='RangeScan';
 robscan_h.TiltSpeed=robot_maxreach.scan_speed;

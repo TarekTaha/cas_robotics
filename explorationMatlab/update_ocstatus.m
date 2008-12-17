@@ -15,7 +15,7 @@ classfierthreshhold=workspace.classfierthreshhold;
 pointswithclass=zeros([size(PointData,1)*size(PointData,2),4]);
 CorrespondingRange=zeros([size(PointData,1)*size(PointData,2),1]);
 
-for i=1:size(PointData,1);
+for i=1:min(size(PointData,1),size(ClassifiedData,1))
     pointswithclass((i-1)*size(PointData,2)+1:i*size(PointData,2),:)=[squeeze(PointData(i,:,:)),ClassifiedData(i,:)'];
     CorrespondingRange((i-1)*size(PointData,2)+1:i*size(PointData,2),:)=RangeData(i,:);
 end;
