@@ -15,16 +15,20 @@ global PointData RangeData IntensityData workspace classPlanePlotHa AXBAMnCtestd
 % axis equal
 % camlight
 
-if ~exist('alldirectedpoints','var')
-    alldirectedpoints=[];
-end
+% if ~exist('alldirectedpoints','var')    
+  alldirectedpoints=[];
+% end
+
 
 %% Load data or classify a scan
 
 NOhandleOPTIONS.useRealRobot=true;
 NOhandleOPTIONS.show_robot=true;
-NOhandleOPTIONS.animate_move=true;
+NOhandleOPTIONS.animate_move=false;
 NOhandleOPTIONS.remv_unkn_in_mv=false;    
+
+%this is how many we go after at once
+maxindexsize=30;
 
 %take one scan from an initial pose
 % newQ=[0,-88*pi/180,140*pi/180,0,0*pi/180,0];
@@ -83,8 +87,20 @@ classunkn_optimise.maxAngle=42*pi/180;
        
 
 %% set the blasting variables
-[planeSet,pose,pathval]=determinePathsNposes(index);
+try [planeSet,pose,pathval]=determinePathsNposes(index,maxindexsize);
+  if size(planeSet,1)==0; error('do it again');end
+catch
+  display('No poses found, trying again with twice as many maxindexsize, and removing self scanning')
+  workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
 
+  try [planeSet,pose,pathval]=determinePathsNposes(index,2*maxindexsize);
+    if size(planeSet,1)==0; error('Still no pose');end
+  catch
+    display('Still no luck so handing over to you');
+    keyboard
+  end
+end
+  
 
 %% go through until we have found enough solutions as required
 
@@ -108,11 +124,11 @@ while solsfound<numofintplanes
 
                      
         %make sure vector is correct
-%         newQ=poses(indextoblast).Q;
+         newQ=pose(indextoblast).Q;
 
         %move to the next place if possible, else continue with the
         %next plane
-        if ~movetonewQ(0,rad2deg(newQ),pathval(indextoblast),NOhandleOPTIONS);            
+        if ~movetonewQ(0,rad2deg(newQ),pathval(indextoblast).all_steps,NOhandleOPTIONS);            
             %go to next one since we can't get to this one
             indextoblast=indextoblast+1;
             continue;
@@ -131,7 +147,11 @@ while solsfound<numofintplanes
                 newQ=[newQ(1:4),-45*pi/180,0];
             end
 
-            try movetonewQ(0,rad2deg(newQ),[],NOhandleOPTIONS);catch; error('Could move to correct position');end
+            try 
+              movetonewQ(0,rad2deg(newQ),[],NOhandleOPTIONS);
+            catch; 
+              error('Could move to correct position');
+            end
             
 %% for testing/plotting purposes
             AXBAMnCtestdata.planeSet=planeSet(indextoblast);
@@ -144,8 +164,12 @@ while solsfound<numofintplanes
             % and do a scan to classify           
             global PointData IntensityData RangeData
             try [ClassifiedData] = Block_Classifier(PointData, IntensityData, RangeData); catch; error('Couldnt classify');end                                
+            
+            %update oc grid status
+            update_ocstatus(ClassifiedData);
         end
-
+        
+        
         solsfound=solsfound+1;
         display(['Solution found and found a path successfully there = ',num2str(solsfound)]);
         %if we have enough then break
@@ -155,19 +179,33 @@ while solsfound<numofintplanes
             
 %% Testing
 %          uiwait(msgbox('press OK button to continue'));
-%         try AXBAMnCtesting(true);
-%         catch display('Some error when saving testing data');
-%         end
+        try AXBAMnCtesting(false);
+        catch display('Some error when saving testing data');
+          keyboard
+        end
 %% End testing 
 
         %so we dont redo the same point again or within 2*Mew of any other center point
-        pt=plane(indextoblast).home_point;            
+        pt=planeSet(indextoblast).home_point;            
         alldirectedpoints=[alldirectedpoints;pt];
         
         [index,UNclassifiedvoxels]=get_unknown_identification();    
                       
         %% Determine poses and paths
-        [planeSet,pose,pathval]=determinePathsNposes(index);
+        try [planeSet,pose,pathval]=determinePathsNposes(index,maxindexsize,alldirectedpoints);
+          if size(planeSet,1)==0; error('do it again');end
+        catch
+          display('No poses found, trying again with twice as many maxindexsize, and removing self scanning')
+          workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
+          
+        try [planeSet,pose,pathval]=determinePathsNposes(index,2*maxindexsize);
+          if size(planeSet,1)==0; error('Still no pose');end
+        catch
+          display('Still no luck so handing over to you');
+          keyboard
+        end
+        end
+
         
         %reset indextoblast
         indextoblast=1;

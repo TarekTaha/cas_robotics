@@ -26,6 +26,13 @@ Q=[0,-75,160,0,30,0]*pi/180;
 default_Q=[Q;[0,-88*pi/180,140*pi/180,0,-15*pi/180,0]];
 default_Q=[default_Q;[0,-88*pi/180,98*pi/180,0,-15*pi/180,0]];
 
+% uiwait(msgbox('Changing the default Q - delete me later'));
+display('Changing the default Q - delete me later');
+Q=[0,-88*pi/180,140*pi/180,0,-15*pi/180,0];
+default_Q=[Q;[0,-88*pi/180,98*pi/180,0,-15*pi/180,0]];
+
+
+
 if numjoints==6
     robot_maxreach.default_Q=default_Q;
     ellipse_safetyfactor=0.1; %(0.1 is 10%)

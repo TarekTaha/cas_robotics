@@ -43,6 +43,9 @@ if ~isfield(workspace,'probofmaterial');
     workspace.probofmaterial=[];
 end
 
+%default is for it to be false
+startnewVoxel=false;
+
 for i=1:size(class_ocgrid,1)
     cur_mat=class_ocgrid(i,4);
     %must be within actual materials not unknown or edges
@@ -55,9 +58,9 @@ for i=1:size(class_ocgrid,1)
             if ~isempty(curr_voxel)
                 %all others decreased by prob of 0.05
                 workspace.probofmaterial(curr_voxel,[4:3+cur_mat-1,3+cur_mat+1:end])=...
-                workspace.probofmaterial(curr_voxel,[4:3+cur_mat-1,3+cur_mat+1:end])*0.05;
-                %Actual is increased by 0.95
-                workspace.probofmaterial(curr_voxel,3+cur_mat)=workspace.probofmaterial(curr_voxel,3+cur_mat)*0.95;
+                workspace.probofmaterial(curr_voxel,[4:3+cur_mat-1,3+cur_mat+1:end])*(1-workspace.classifyConfidence);
+                %Actual is increased by workspace.classifyConfidence
+                workspace.probofmaterial(curr_voxel,3+cur_mat)=workspace.probofmaterial(curr_voxel,3+cur_mat)*workspace.classifyConfidence;
                 
                 %normalise probability
                                      normalisingfactor=sum(workspace.probofmaterial(curr_voxel,4:end));
@@ -76,9 +79,9 @@ for i=1:size(class_ocgrid,1)
             workspace.probofmaterial(end+1,:)=[class_ocgrid(i,1:3), uniformdisOnMats];
             %all others decreased by prob of 0.05
             workspace.probofmaterial(end,[4:3+cur_mat-1,3+cur_mat+1:end])=...
-            workspace.probofmaterial(end,[4:3+cur_mat-1,3+cur_mat+1:end])*0.05;
-            %Actual is increased by 0.95
-            workspace.probofmaterial(end,3+cur_mat)=workspace.probofmaterial(end,3+cur_mat)*0.95;            
+            workspace.probofmaterial(end,[4:3+cur_mat-1,3+cur_mat+1:end])*(1-workspace.classifyConfidence);
+            %Actual is increased by workspace.classifyConfidence
+            workspace.probofmaterial(end,3+cur_mat)=workspace.probofmaterial(end,3+cur_mat)*workspace.classifyConfidence;            
             
             %normalise probability
                           normalisingfactor=sum(workspace.probofmaterial(end,4:end));
