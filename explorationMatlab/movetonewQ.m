@@ -49,6 +49,19 @@ if nargin<4
     end
 end
 
+if size(all_steps,1)>0 && size(newQ,2)~=size(all_steps,2)
+  error('newQ and all_steps variables must be the same size');
+end
+  
+%changing the size since we only 
+if size(newQ,2)>6
+  newQ=newQ(1:6);
+  if size(all_steps,1)>0
+    all_steps=all_steps(:,1:6);
+  end
+end
+
+  
 if isstruct(guiglobal); plotpath=guiglobal.plotpath; else plotpath=false;end
 
 %if we don't have any handles

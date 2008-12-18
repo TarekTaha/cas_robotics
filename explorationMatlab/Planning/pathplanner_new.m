@@ -62,9 +62,12 @@ if nargin<7
 end
 
 if size(currQ,2)>6
-    display('You should pass in newQ as a 6*1 matrix, all steps will be returned as a 6*many')
-    currQ=currQ(1:6);
-    newQ=newQ(:,1:6);
+%   display('You should pass in newQ as a 6*1 matrix, all steps will be returned as a 6*many')
+  currQ=currQ(1:6);
+  newQ=newQ(:,1:6);
+  make7jointrobot=true;
+else
+  make7jointrobot=false;
 end
 
 %Change Q to currQ
@@ -109,6 +112,8 @@ end
 %since a direct path is possible and safe return with this path
 if pathfound; 
     if disON; display('Complete safe path found-direct');end; 
+    %if we need to pad with zeros at end
+    if make7jointrobot; all_steps=padarray(all_steps,[0,1],'post');end          
     return; 
 end
 
@@ -133,6 +138,7 @@ if tryalternate
     [pathfound,all_steps]=checkdirectpath(currQ,alternate_newQ,max_angle_for123,check_arm_perms,obsticle_points,maxangleJ4to6,minjointres);
     if pathfound; 
         if disON; display('Complete safe path found');end; 
+        if make7jointrobot; all_steps=padarray(all_steps,[0,1],'post');end   
         return; 
     end
 end
@@ -188,6 +194,7 @@ if pathfound==0
                     all_steps=[all_steps;additional_steps1;additional_steps2];
                     if disON; display('Complete safe path found_with 2 mid points');end; 
                     pathfound=1;
+                    if make7jointrobot; all_steps=padarray(all_steps,[0,1],'post');end   
                     return;
                 else               
                     %else go on to next path
@@ -199,6 +206,7 @@ if pathfound==0
             end
         else; all_steps=[all_steps;additional_steps];
             if disON; display('Complete safe path found_with 1 mid point');end; 
+            if make7jointrobot; all_steps=padarray(all_steps,[0,1],'post');end   
             return;
         end
     end;     

@@ -240,7 +240,9 @@ for stepcount=2:size(robot_maxreach.default_Q,1)+1
             end   
         end; 
     end
-    state_data=collectdata(state_data); 
+    state_data=collectdata(state_data,handles,stepcount); 
+    
+
 end
 
 want_to_continue=~get(handles.stopflag_checkbox,'Value');
@@ -278,7 +280,7 @@ if current_test_case==1 && want_to_continue
         catch display(lasterr);
         end
         %data collection
-        state_data=collectdata(state_data);
+        state_data=collectdata(state_data,handles,stepcount);
     end
 
 %% TEST 2 - Non points -using algorithm
@@ -288,7 +290,15 @@ elseif current_test_case>1 && want_to_continue
         if ~get(handles.stopflag_checkbox,'Value')
             %do next best view exploration search
 %             profile clear; profile on;
+try 
             NBV_beta2();
+catch
+  lasterr
+  display('No views found or some error, removing self scanning and trying again');
+  workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
+  try NBV_beta2();catch; lasterr;display('Still no best views fond or some error: handing over control to you master');keyboard;end
+end
+  
 %             profile off; profile viewer;
           
             current_bestview=stepcount-1;
@@ -385,9 +395,8 @@ elseif current_test_case>1 && want_to_continue
 %                 end
 %             end
 
-testdir='C:\MATLAB\R2007a\work\Gavin\PhD\PhD_Disertation\Code\Ch4\';
-save([testdir,'AXBAMnC_Test',num2str(1),'Scan',num2str(stepcount-1),'_workspaceSTATE.mat'],'workspace');
-
+          %save the state and save testing values
+          state_data=collectdata(state_data,handles,stepcount); 
 
         end
     end
@@ -931,33 +940,49 @@ if get(hObject,'Value')
     classifiedplotHa=[];
     class_cubesize=workspace.class_cubesize;
     
-    %determine the unknown places and the know metal or wood
-    sumofclass=workspace.ocgrid(:,4)+workspace.ocgrid(:,5);
-    warning('off','MATLAB:divideByZero')
-    try classifiedvoxels=find(sumofclass>=workspace.minclassifications &...
-                         (workspace.ocgrid(:,4)./workspace.ocgrid(:,5)>workspace.classfierthreshhold |...
-                          workspace.ocgrid(:,5)./workspace.ocgrid(:,4)>workspace.classfierthreshhold));end
-    try UNclassifiedvoxels=find(sumofclass<workspace.minclassifications | ...
-                         (workspace.ocgrid(:,4)./workspace.ocgrid(:,5)<=workspace.classfierthreshhold &...
-                          workspace.ocgrid(:,5)./workspace.ocgrid(:,4)<=workspace.classfierthreshhold));end
-    warning('on','MATLAB:divideByZero')
-    
-    %now plot this
+
+% NEW WAY    
+    classifiedvoxels=find(max(workspace.probofmaterial(:,4:end),[],2)>workspace.classifyProbThreshhold);
+    UNclassifiedvoxels=setdiff([1:size(workspace.probofmaterial,2)],classifiedvoxels);
     hold on;
-    try classifiedplotHa(end+1)=plot3(workspace.ocgrid(UNclassifiedvoxels,1)*class_cubesize,...
-          workspace.ocgrid(UNclassifiedvoxels,2)*class_cubesize,...
-          workspace.ocgrid(UNclassifiedvoxels,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');end
+    try classifiedplotHa(end+1)=plot3(workspace.ocgrid(UNclassifiedvoxels,1)*class_cubesize,workspace.ocgrid(UNclassifiedvoxels,2)*class_cubesize,...
+    workspace.ocgrid(UNclassifiedvoxels,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');end
+      
+    [nothing,Materialindex]=max(workspace.probofmaterial(classifiedvoxels,4:end),[],2);
+    for curr_mat=unique(Materialindex)'
+      IndexofMaterialindex=find(Materialindex==curr_mat);
+      toplot=workspace.probofmaterial(classifiedvoxels(IndexofMaterialindex),1:3)*class_cubesize;
+      classifiedplotHa(end+1)=plot3(toplot(:,1),toplot(:,2),toplot(:,3),'color',[0,curr_mat/max(Materialindex),curr_mat/max(Materialindex)],'marker','.','markersize',0.5,'linestyle','none');
+    end
+    
+% OLD WAY
+%     %determine the unknown places and the know metal or wood
+%     sumofclass=workspace.ocgrid(:,4)+workspace.ocgrid(:,5);
+%     warning('off','MATLAB:divideByZero')
+%     try classifiedvoxels=find(sumofclass>=workspace.minclassifications &...
+%                          (workspace.ocgrid(:,4)./workspace.ocgrid(:,5)>workspace.classfierthreshhold |...
+%                           workspace.ocgrid(:,5)./workspace.ocgrid(:,4)>workspace.classfierthreshhold));end
+%     try UNclassifiedvoxels=find(sumofclass<workspace.minclassifications | ...
+%                          (workspace.ocgrid(:,4)./workspace.ocgrid(:,5)<=workspace.classfierthreshhold &...
+%                           workspace.ocgrid(:,5)./workspace.ocgrid(:,4)<=workspace.classfierthreshhold));end
+%     warning('on','MATLAB:divideByZero')
+    
+%now plot this
+%     hold on;
+%     try classifiedplotHa(end+1)=plot3(workspace.ocgrid(UNclassifiedvoxels,1)*class_cubesize,...
+%           workspace.ocgrid(UNclassifiedvoxels,2)*class_cubesize,...
+%           workspace.ocgrid(UNclassifiedvoxels,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');end
     %plot metal and wood voxels
 
-    metalvoxels=workspace.ocgrid(classifiedvoxels(workspace.ocgrid(classifiedvoxels,4)>workspace.ocgrid(classifiedvoxels,5)),1:3);
-    if size(metalvoxels,1)>0
-        try classifiedplotHa(end+1)=plot3(metalvoxels(:,1)*class_cubesize,metalvoxels(:,2)*class_cubesize,metalvoxels(:,3)*class_cubesize,'r.');end
-    end
-
-    woodvoxels=workspace.ocgrid(classifiedvoxels(workspace.ocgrid(classifiedvoxels,4)<workspace.ocgrid(classifiedvoxels,5)),1:3);
-    if size(woodvoxels,1)>0
-        try classifiedplotHa(end+1)=plot3(woodvoxels(:,1)*class_cubesize,woodvoxels(:,2)*class_cubesize,woodvoxels(:,3)*class_cubesize,'b.');end
-    end
+%     metalvoxels=workspace.ocgrid(classifiedvoxels(workspace.ocgrid(classifiedvoxels,4)>workspace.ocgrid(classifiedvoxels,5)),1:3);
+%     if size(metalvoxels,1)>0
+%         try classifiedplotHa(end+1)=plot3(metalvoxels(:,1)*class_cubesize,metalvoxels(:,2)*class_cubesize,metalvoxels(:,3)*class_cubesize,'r.');end
+%     end
+% 
+%     woodvoxels=workspace.ocgrid(classifiedvoxels(workspace.ocgrid(classifiedvoxels,4)<workspace.ocgrid(classifiedvoxels,5)),1:3);
+%     if size(woodvoxels,1)>0
+%         try classifiedplotHa(end+1)=plot3(woodvoxels(:,1)*class_cubesize,woodvoxels(:,2)*class_cubesize,woodvoxels(:,3)*class_cubesize,'b.');end
+%     end
 
     drawnow
 
@@ -1044,7 +1069,7 @@ else
 end
 
 %this function is used to collect the data for exploration to compare new info
-function state_data=collectdata(state_data)
+function state_data=collectdata(state_data,handles,stepcount)
 global workspace Q
 if isempty(state_data)
     state_data.knownweight=calknownweight();
@@ -1062,7 +1087,26 @@ else
     state_data.size_indexedobsticles=[state_data.size_indexedobsticles,size(workspace.indexedobsticles,1)];
     state_data.time=[state_data.time,etime(clock,state_data.starttime)];
     state_data.Q=[state_data.Q;Q];
-end    
+end   
+
+% If we are doing testing we want to hold the data
+if nargin>1
+   if get(handles.testing_checkbox,'value')==1
+     testnumber=get(handles.testnumber_edit,'string');
+     global robmap_h RangeData
+     aabb = [workspace.min; workspace.max];
+     hMesh = robmap_h.Mesh(aabb);
+     f = hMesh.FaceData;
+     v = hMesh.VertexData;
+     workspace.testdata.nummeshfaces=size(f);
+     workspace.testdata.nummeshverts=size(v);
+     workspace.testdata.rangeDataSize=size(RangeData);
+     workspace.testdata.verts=v;
+
+     testdir=['C:\MATLAB\R2007a\work\Gavin\PhD\PhD_Disertation\Code\Ch4\Test ',num2str(testnumber),'\'];
+     save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_workspaceSTATE.mat'],'workspace');
+  end
+end
 
 % --- Executes on button press in savefig_pushbutton.
 function savefig_pushbutton_Callback(hObject, eventdata, handles)
@@ -1226,5 +1270,36 @@ function all_mesh_checkbox_Callback(hObject, eventdata, handles)
 %% dont know why this is needed, can't find the button for it
 function Untitled_1_Callback(hObject, eventdata, handles)
 
+
+% --- Executes on button press in testing_checkbox.
+function testing_checkbox_Callback(hObject, eventdata, handles)
+% hObject    handle to testing_checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of testing_checkbox
+
+
+
+function testnumber_edit_Callback(hObject, eventdata, handles)
+% hObject    handle to testnumber_edit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of testnumber_edit as text
+%        str2double(get(hObject,'String')) returns contents of testnumber_edit as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function testnumber_edit_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to testnumber_edit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
 
 

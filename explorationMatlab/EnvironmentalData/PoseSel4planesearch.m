@@ -50,6 +50,11 @@ if numlinks<7
 else
     make6jointrobot=false;
 end
+%Should pass in a currQ with the same size as the robot and =7
+if size(currQ,2)<7
+	currQ=[currQ,0];
+end
+
 
 
 

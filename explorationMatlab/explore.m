@@ -55,6 +55,11 @@ end
 %% Calculate what was known previously
 previously_known=calknownweight();
 
+%% Save predicted information gain _for this timestep_ 
+% Note:wont work when there is no selection
+try workspace.predictedCoords=setdiff(workspace.unknowncoords,unique([workspace.knowncoords;workspace.indexedobsticles;bestviews(selection).expectedaddinfo],'rows'),'rows');end
+
+
 %% Do the Scan _imaginary_
 if (get(h.useRealRobot_checkbox,'Value')==0)
     if movetonewQ(h,newQ*180/pi)~=true
@@ -109,9 +114,6 @@ else
 
 end
 
-%% Save predicted information gain _for this timestep_ 
-% Note:wont work when there is no selection
-try workspace.predictedCoords=bestviews(selection).expectedaddinfo;end
     
 
 %% Display results

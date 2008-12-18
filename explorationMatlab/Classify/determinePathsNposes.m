@@ -2,14 +2,16 @@
 % pass me the index of valid planes and the ,UNclassifiedvoxels
 % I will return a list of planeSet, poses for them and paths to get there
 
-function [planeSet,pose,pathval]=determinePathsNposes(index)
+function [planeSet,pose,pathval]=determinePathsNposes(index,maxindexsize)
 
 global classunkn_optimise optimise plane Q
 
 %% VARIABLE
 
 % how many planes we are after in one go
-maxindexsize=20;
+if nargin<2
+  maxindexsize=20;
+end
 maxangleJ4to6=optimise.maxangleJ4to6;
 
 %make a planeset out of the desirable planes
@@ -64,7 +66,7 @@ currQ=[Q(1:3),zeros([1,size(newQ,2)-3])];
 %Change NewQ: newQ with 4:end as 0
 newQlast4allzero=[newQ(:,1:3),zeros([size(newQ,1),size(newQ,2)-3])];
 %path plan to all the changed newQs (some may be invalid since they weren't checked
-[pathvaltemp2,validposes]=pathplanner_water(newQlast4allzero,false,currQ);
+[pathvaltemp2,validposes]=pathplanner_water(newQlast4allzero,false,false,true,currQ);
 
 %resize mats based upon validposes
 pathvaltemp1=pathvaltemp1(validposes);
@@ -72,34 +74,61 @@ newQ=newQ(validposes,:);
 planeSet=planeSet(validposes);
 pose=pose(validposes);
 
+validposes=false([1,size(pathvaltemp2,2)]);
+
+for curr_pose=1:size(pathvaltemp2,2)
+  if ~isempty(pathvaltemp2(curr_pose).result) && pathvaltemp2(curr_pose).result==1
+    validposes(curr_pose)=true;
+  end
+end
+%resize mats based upon looking at the actual paths that come back
+pathvaltemp1=pathvaltemp1(validposes);
+newQ=newQ(validposes,:);
+planeSet=planeSet(validposes);
+pose=pose(validposes);
+%also do this one now since it (shouldn't be done in the previous validposes one
+pathvaltemp2=pathvaltemp2(validposes);
+
+
 validposes=[];
 %now go from end of newQ with 4:end as zeros to the final newQ pose
 %determined
 for curr_pose=1:size(pathvaltemp1,2)
-    if isempty(find(abs(pathvaltemp2(curr_pose).all_steps(end,4:end)-newQ(curr_pose,4:end))>maxangleJ4to6,1)) 
+try    
+  if isempty(find(abs(pathvaltemp2(curr_pose).all_steps(end,4:end)-newQ(curr_pose,4:end))>maxangleJ4to6,1)) 
         pathvaltemp3(1).all_steps=newQ;
         pathvaltemp3(1).result=1;
-    else        
+  else        
         currQ=pathvaltemp2(curr_pose).all_steps(end,:);
         
         try [pathvaltemp3(1).result,pathvaltemp3(1).all_steps] = pathplanner_new(newQ(curr_pose,:),0,1,0,0,0,currQ);
         catch
             keyboard
         end
-    end
+  end
     
-    %now combine them
-    pathval(curr_pose).result=pathvaltemp1(curr_pose).result==1 & pathvaltemp2(curr_pose).result==1 & pathvaltemp3(1).result==1;
+  %now combine them
+  pathval(curr_pose).result=pathvaltemp1(curr_pose).result==1 & pathvaltemp2(curr_pose).result==1 & pathvaltemp3(1).result==1;
+  if pathval(curr_pose).result
     pathval(curr_pose).all_steps=[pathvaltemp1(curr_pose).all_steps;...
                                   pathvaltemp2(curr_pose).all_steps;...
                                   pathvaltemp3(1).all_steps];
     pathval(curr_pose).newQ=newQ(curr_pose,:);
-    if pathval(curr_pose).result
-        validposes=[validposes;curr_pose];
-    end
+    validposes=[validposes;curr_pose];
+  end
+
+    
+catch
+  keyboard
+end
 end
 
 %% Resize matrices
 planeSet=planeSet(validposes);
 pose=pose(validposes);
-pathval=pathval(validposes);
+if ~isempty(find(validposes==1,1))
+  pathval=pathval(validposes);
+else
+  pathval=[];
+end
+  

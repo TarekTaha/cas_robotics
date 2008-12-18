@@ -45,9 +45,12 @@ if nargin<5
 end
 
 if size(currQ,2)>6 || size(newQ,2)>6
-    display('You should pass in newQ as a 6*1 matrix, pathval.all_steps will be returned as a 6*many')
+%     display('You should pass in newQ as a 6*1 matrix, HOWEVER pathval.all_steps will still be returned as a padded 7*many')
     currQ=currQ(1:6);
     newQ=newQ(:,1:6);
+    make7jointrobot=true;
+else
+    make7jointrobot=false;
 end
 
 %% Variables
@@ -130,7 +133,9 @@ numofits=100;
 
 %% IF we only have 1 destination check if we are at the end (exit if we are)
 if size(newQ,1)==1
-    if isempty(find(newQ~=currQ, 1))      
+    if isempty(find(newQ~=currQ, 1))
+        pathval(1).all_steps=newQ;  
+        if make7jointrobot; pathval(1).all_steps=[pathval(1).all_steps,0];end          
         pathval(1).result=1;
         return;
     %if the only differnce is the last 3 joints do old way 
@@ -356,11 +361,9 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
                 pathval(cur_goal).all_steps=[pathval(cur_goal).all_steps;inbetweensteps;newQ(cur_goal,1:6)];
                 
                 %padarray with zeros at end if necessary
-                if size(newQ,2)>size(pathval(cur_goal).all_steps,2)
-                    pathval(cur_goal).all_steps=...
-                        padarray(pathval(cur_goal).all_steps,[0,size(newQ,2)-size(pathval(cur_goal).all_steps,2)],'post');
-                end
-                
+                if make7jointrobot; 
+                  pathval(cur_goal).all_steps=padarray(pathval(cur_goal).all_steps,[0,1],'post');                      
+                end          
                 
                 %check the inbetween nodes of this step too
                 currentpathtocheck=[currentpathtocheck;inbetweensteps];
@@ -393,7 +396,8 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
 
 
                     if result==true
-                        pathval(cur_goal).all_steps=[pathval(cur_goal).all_steps;tempsteps];
+                        pathval(cur_goal).all_steps=[pathval(cur_goal).all_steps;tempsteps];                        
+                        
                         %this should be moved somewhere else so it isn't
                         %continuously defined
                         pathval(cur_goal).result=1;
@@ -404,6 +408,11 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
                         break;
                     end
                 end
+                
+                %padarray with zeros at end if we have a 7jointrobot intially asked about
+                if make7jointrobot
+                  pathval(cur_goal).all_steps=padarray(pathval(cur_goal).all_steps,[0,1],'post');                      
+                end 
 
                 if animate; display('Ok to do anything now');end
             end

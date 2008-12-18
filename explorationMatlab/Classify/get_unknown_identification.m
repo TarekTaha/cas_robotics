@@ -11,7 +11,7 @@ class_cubesize=workspace.class_cubesize;
 if doNEWway
 %% New way
 
-    UNclassifiedvoxels=find(max(workspace.probofmaterial(:,4:end)')<classifyProbThreshhold)';
+    UNclassifiedvoxels=find(max(workspace.probofmaterial(:,4:end),[],2)'<classifyProbThreshhold)';
     %make new surfaces out of unclassified voxels
     surface_making_simple(workspace.probofmaterial(UNclassifiedvoxels,1:3)*class_cubesize,mew)
     
@@ -57,7 +57,9 @@ for i=1:length(plane)
     [level1,level2]=GetImpLevInfo(plane(i).home_point);
     if ~isempty(level2)
         if ~isempty(alldirectedpoints)
-            if isempty(find(sqrt((plane(i).home_point(1)-alldirectedpoints(:,1)).^2+(plane(i).home_point(2)-alldirectedpoints(:,2)).^2+(plane(i).home_point(3)-alldirectedpoints(:,3)).^2)<2*mew,1))
+            if isempty(find(sqrt((plane(i).home_point(1)-alldirectedpoints(:,1)).^2+...
+                                 (plane(i).home_point(2)-alldirectedpoints(:,2)).^2+...
+                                 (plane(i).home_point(3)-alldirectedpoints(:,3)).^2)<2*mew,1))
                 sizemat(i)=size(plane(i).points,1);
             end
         else
@@ -68,4 +70,4 @@ end
 
 % order these
 [nothing,index]=sort(sizemat,'descend');
-indextoblast=1;  
+ 
