@@ -33,7 +33,7 @@ end
 % testnum= input('Please enter TEST number','s');
 % scannum= input('Please enter SCAN number','s');
 % plotunknown=input('Do you want to plot the unknown voxels 1=yes, 0=no');
-testnum=5;
+testnum=6;
 testdir=['C:\MATLAB\R2007a\work\Gavin\PhD\PhD_Disertation\Code\Ch7\Test ',num2str(testnum),'\'];
 %as long as there is nothing else in the directory the numbering should be fine
 filesInDir=dir(testdir);
