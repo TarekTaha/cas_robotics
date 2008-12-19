@@ -126,7 +126,7 @@ end
 %% Resize matrices
 planeSet=planeSet(validposes);
 pose=pose(validposes);
-if ~isempty(find(validposes==1,1))
+if size(validposes,1)>0
   pathval=pathval(validposes);
 else
   pathval=[];
