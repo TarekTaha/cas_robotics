@@ -16,7 +16,8 @@ global PointData RangeData IntensityData workspace classPlanePlotHa AXBAMnCtestd
 % camlight
 
 % if ~exist('alldirectedpoints','var')    
-  alldirectedpoints=[];
+display('Not currently clearning alldirectedpoints');
+%   alldirectedpoints=[];
 % end
 
 
@@ -90,14 +91,18 @@ classunkn_optimise.maxAngle=42*pi/180;
 try [planeSet,pose,pathval]=determinePathsNposes(index,maxindexsize);
   if size(planeSet,1)==0; error('do it again');end
 catch
-  display('No poses found, trying again with twice as many maxindexsize, and removing self scanning')
+  display('No poses found, trying again with 4* maxindexsize, and removing self scanning')
   workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
 
-  try [planeSet,pose,pathval]=determinePathsNposes(index,2*maxindexsize);
+  try [planeSet,pose,pathval]=determinePathsNposes(index,4*maxindexsize);
     if size(planeSet,1)==0; error('Still no pose');end
   catch
-    display('Still no luck so handing over to you');
-    keyboard
+    display('No poses found, trying again with all index')
+    try [planeSet,pose,pathval]=determinePathsNposes(index,size(index,1));
+    catch
+      display('Still no luck so handing over to you');
+      keyboard
+    end
   end
 end
   
@@ -105,8 +110,9 @@ end
 %% go through until we have found enough solutions as required
 
 indextoblast=1;
-while solsfound<numofintplanes
 
+while solsfound<numofintplanes
+    try
     %Shouldn't happen but if we dont have a valid pose go to next pose
     if ~pose(indextoblast).validPose            
         indextoblast=indextoblast+1;
@@ -127,7 +133,7 @@ while solsfound<numofintplanes
          newQ=pose(indextoblast).Q;
 
         %move to the next place if possible, else continue with the
-        %next plane
+        %next plane        
         if ~movetonewQ(0,rad2deg(newQ),pathval(indextoblast).all_steps,NOhandleOPTIONS);            
             %go to next one since we can't get to this one
             indextoblast=indextoblast+1;
@@ -195,14 +201,18 @@ while solsfound<numofintplanes
         try [planeSet,pose,pathval]=determinePathsNposes(index,maxindexsize,alldirectedpoints);
           if size(planeSet,1)==0; error('do it again');end
         catch
-          display('No poses found, trying again with twice as many maxindexsize, and removing self scanning')
+          display('No poses found, trying again with 4* maxindexsize, and removing self scanning')
           workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
           
-        try [planeSet,pose,pathval]=determinePathsNposes(index,2*maxindexsize);
+        try [planeSet,pose,pathval]=determinePathsNposes(index,4*maxindexsize);
           if size(planeSet,1)==0; error('Still no pose');end
         catch
-          display('Still no luck so handing over to you');
-          keyboard
+          display('No poses found, trying again with all index')
+          try [planeSet,pose,pathval]=determinePathsNposes(index,size(index,1));
+          catch
+            display('Still no luck so handing over to you');
+            keyboard
+          end
         end
         end
 
@@ -211,7 +221,16 @@ while solsfound<numofintplanes
         indextoblast=1;
         
     end
+    
+  catch;
+    lasterr
+    display('some problem in the while loop, you have control')
+    keyboard
+  end
 end
+
+
+  
 
     
        
