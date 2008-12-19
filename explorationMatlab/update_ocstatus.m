@@ -91,7 +91,20 @@ for i=1:size(class_ocgrid,1)
         startnewVoxel=false;
     end
 end
-    
+
+
+try     
+    aabb = [workspace.min; workspace.max];
+    % aabb = [-inf, -inf, -inf; inf, inf, inf];
+    hMesh = robmap_h.Mesh(aabb);
+    % f = hMesh.FaceData;
+    v = hMesh.VertexData;
+    [level1,level2]=GetImpLevInfo(v);
+    v_decrete=unique(round(v(level2,:)/class_cubesize),'rows');
+    [vals,indexa,indexb]=intersect(v_decrete,workspace.probofmaterial(:,1:3),'rows');
+    workspace.probofmaterial=workspace.probofmaterial(indexb,:);
+end
+
 % workspace.ALLlastscandataInWkspace(:,1)
 
 
