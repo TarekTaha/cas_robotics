@@ -42,6 +42,8 @@ plotunknown=0;
     
 % testdir='C:\Documents and Settings\RTA computer\My Documents\My Pictures\';
 
+%% Save the latest pointcloud size, info and verts
+recordlatest_testdata();
 
 %% Plot the current mesh and robot
 if plot_the_current_mesh_and_robot

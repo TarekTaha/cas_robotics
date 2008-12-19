@@ -1092,19 +1092,9 @@ end
 % If we are doing testing we want to hold the data
 if nargin>1
    if get(handles.testing_checkbox,'value')==1
-     testnumber=get(handles.testnumber_edit,'string');
-     global robmap_h RangeData
-     aabb = [workspace.min; workspace.max];
-     hMesh = robmap_h.Mesh(aabb);
-     f = hMesh.FaceData;
-     v = hMesh.VertexData;
-     workspace.testdata.nummeshfaces=size(f);
-     workspace.testdata.nummeshverts=size(v);
-     workspace.testdata.rangeDataSize=size(RangeData);
-     workspace.testdata.verts=v;
-
-     testdir=['C:\MATLAB\R2007a\work\Gavin\PhD\PhD_Disertation\Code\Ch4\Test ',num2str(testnumber),'\'];
-     save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_workspaceSTATE.mat'],'workspace');
+       recordlatest_testdata()
+       testdir=['C:\MATLAB\R2007a\work\Gavin\PhD\PhD_Disertation\Code\Ch4\Test ',num2str(testnumber),'\'];
+       save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_workspaceSTATE.mat'],'workspace');
   end
 end
 
