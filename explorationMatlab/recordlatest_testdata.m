@@ -5,7 +5,7 @@
 function recordlatest_testdata()
 global workspace
 
-testnumber=get(handles.testnumber_edit,'string');
+
 global robmap_h RangeData
 aabb = [workspace.min; workspace.max];
 hMesh = robmap_h.Mesh(aabb);

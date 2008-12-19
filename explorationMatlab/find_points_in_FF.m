@@ -35,7 +35,7 @@ L = r.link;
 t = r.base;
 
 %% Go through each link of robot (1->n)
-for i=1:n
+for i=1:size(newQ,2)
     t = t * L{i}(newQ(i));
     % Translate points to the elispe coordinate frame (IE leave the elispes
     % where they were to start off with and translate the world around them

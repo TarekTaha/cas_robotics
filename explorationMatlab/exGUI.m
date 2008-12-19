@@ -523,10 +523,11 @@ scan.ClassificationData=[];
 
 try [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData); 
 % profile clear;profile on;    
-try UNclassifiedvoxels=update_ocstatus(ClassifiedData); %profile off; profile viewer;
-        display(['You still have not classified ', num2str(size(UNclassifiedvoxels,1)/size(workspace.ocgrid,1)*100),' percent of known voxels']);
+  try update_ocstatus(ClassifiedData); %profile off; profile viewer;
+%     UNclassifiedvoxels=update_ocstatus(ClassifiedData); %profile off; profile viewer;
+%         display(['You still have not classified ', num2str(size(UNclassifiedvoxels,1)/size(workspace.ocgrid,1)*100),' percent of known voxels']);
         display('....Classification completed successfully');    
-    catch; display('Couldnt update voxels'); keyboard; end        
+  catch; display('Couldnt update voxels'); keyboard; end        
 catch; display('Couldnt classify');keyboard; end
     
     
@@ -1092,6 +1093,7 @@ end
 % If we are doing testing we want to hold the data
 if nargin>1
    if get(handles.testing_checkbox,'value')==1
+       testnumber=get(handles.testnumber_edit,'string');
        recordlatest_testdata()
        testdir=['C:\MATLAB\R2007a\work\Gavin\PhD\PhD_Disertation\Code\Ch4\Test ',num2str(testnumber),'\'];
        save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_workspaceSTATE.mat'],'workspace');

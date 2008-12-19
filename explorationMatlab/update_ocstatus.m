@@ -4,7 +4,7 @@
 
 % should return nothing
 
-function UNclassifiedvoxels=update_ocstatus(ClassifiedData)
+function update_ocstatus(ClassifiedData)
 
 global workspace PointData RangeData robmap_h
 %get the variables from the workspace 
@@ -104,6 +104,8 @@ try
     [vals,indexa,indexb]=intersect(v_decrete,workspace.probofmaterial(:,1:3),'rows');
     workspace.probofmaterial=workspace.probofmaterial(indexb,:);
 end
+
+return
 
 % workspace.ALLlastscandataInWkspace(:,1)
 
