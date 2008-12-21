@@ -2,9 +2,12 @@
 %
 % *Description*: This function searches through plane data to make up
 % bigger surfaces
- function planesearch ()
+ function planesearch (dosurfacemaking)
 close all;
 
+if nargin==0
+    dosurfacemaking=true;
+end
 global workspace r Q robot_maxreach hMesh;
 
 display('Running plane search, currently this is standalone, only for testing and for AFTER mapping');
@@ -111,13 +114,19 @@ registered_to_surface=zeros([size(planeSet,2),1]);
 if doposesel
     if isempty(r)||isempty(Q); error('You must run exGUI once if you wish to do pose selection');end
     
-    setuprobot(7)
+%     setuprobot(7)
     
     %make the third
     display('moving to a better position')        
     
     NOhandleOPTIONS.useRealRobot=false;NOhandleOPTIONS.show_robot=false;NOhandleOPTIONS.animate_move=false;NOhandleOPTIONS.remv_unkn_in_mv=false;
-    movetonewQ(0,robot_maxreach.default_Q(3,:),[],NOhandleOPTIONS)
+    if ~isempty(find(Q-robot_maxreach.default_Q(end,:)>eps,1))
+        try movetonewQ(0,robot_maxreach.default_Q(end,:),[],NOhandleOPTIONS)
+        catch
+            display('cant use moveto command, simply setting Q to desired pose');
+            Q=robot_maxreach.default_Q(end,:);
+        end
+    end
     
     %make sure robot is a 7 link object for blasting
     
