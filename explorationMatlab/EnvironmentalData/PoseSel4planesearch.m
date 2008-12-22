@@ -40,7 +40,8 @@ end
 numlinks = r.n;
 
 % we must setup the robot again to be a 7 link one otherwise the pose selection wont work
-if numlinks<7 
+if numlinks<7
+    tempQ=Q;
     setuprobot(7);
     make6jointrobot=true;
     %pad currQ with zeros if needed
@@ -307,6 +308,8 @@ end
 %if we changed the robot for blast planning then change it back
 if make6jointrobot
     setuprobot(6);
+    %put Q back to what it was
+    Q=tempQ;
     for i=1:length(plane)
        if pose(i).validPose
            pose(i).Q=pose(i).Q(:,1:6);
