@@ -17,7 +17,7 @@ display('Running plane search, currently this is standalone, only for testing an
 %
 %Do you want to load planes or make planes
 % =2 if done externally
-loadplanes1_makeplanes0=2;
+loadplanes1_makeplanes0=1;
 
 if loadplanes1_makeplanes0
 % Here are 3 examples (only run one at a time obviously)
