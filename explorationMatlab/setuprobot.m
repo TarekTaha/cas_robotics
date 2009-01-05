@@ -35,13 +35,18 @@ default_Q=[Q;[0,-88*pi/180,98*pi/180,0,-15*pi/180,0]];
 
 if numjoints==6
     robot_maxreach.default_Q=default_Q;
-    ellipse_safetyfactor=0.1; %(0.1 is 10%)
+    ellipse_safetyfactor=0.05; %(0.1 is 10%) used to be 0.1 but now we are using stephens model for ploting its better
+    display(['ellipse_safetyfactor is set to ',num2str(ellipse_safetyfactor)]);
 else
     Q=[Q,0];
     robot_maxreach.default_Q=[default_Q,zeros([size(default_Q,1),1])];    
     ellipse_safetyfactor=0.01; %(0.01 is 1%)
     display(['ellipse_safetyfactor is set to ',num2str(ellipse_safetyfactor)]);
 end
+%adding safety factor as a vvariable that stays with us
+robot_maxreach.ellipse_safetyfactor=ellipse_safetyfactor;
+
+
 %this is the robot object you wish to use
 % try r = feval('rob_object');
 try r = densoVM6083(numjoints);
@@ -50,19 +55,33 @@ catch
 end
 
 
-%%
-
-
 %% Load model, add laser, Calcellipses to go around each robot piece
 
 %this loads the model used and calculates the elipses
 % MAKE SURE DENSOOBJ.mat has a variable called densoobj !!
-load densoobj.mat
+%load densoobj.mat
+%use stephens verts to make the ellipsoids instead
+display('Using stephens models now not toms');
+L=r.link;
+n=r.n;
+for i=1:n
+    densoobj(i).M=L{i}.glyph.vertices;
+    densoobj(i).F=L{i}.glyph.faces;
+end
+%this is a hack, put the same peice on the end twice so that we can still
+%ahve the same sized densoobj and still ignore the first peice in most of
+%the code
+if i==6
+    densoobj(i+1).M=L{i}.glyph.vertices;
+    densoobj(i+1).F=L{i}.glyph.faces;
+end
 
 for piece=1:size(densoobj,2)
     [densoobj(piece).ellipse.x,densoobj(piece).ellipse.y,densoobj(piece).ellipse.z,...
         densoobj(piece).ellipse.params, densoobj(piece).ellipse.center]=calc_elip(piece,densoobj(piece).M,ellipse_safetyfactor);
 end
+
+
 
 %% Speed up variables for NBV
 %this is used to make the NBV quicker so it will only try realistic points
