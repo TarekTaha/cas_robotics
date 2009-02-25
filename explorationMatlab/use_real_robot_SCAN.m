@@ -63,8 +63,12 @@ attemptingscan=4; %used to set how many times we try before giving up
 
 while attemptingscan
     %give it an initial pose for base position)
-    robscan_h=robmap_h.ScannerCommand(eye(4));
-    robscan_h.TraceTo(['C:\data\', datestr(clock, 30), '_']);
+    robscan_h=actxserver('EyeInHand.ScannerCommand');
+    robscan_h.AddObserver(robmap_h);
+    
+    %old way (prior to 25Feb2008
+%     robscan_h=robmap_h.ScannerCommand(eye(4));
+%     robscan_h.TraceTo(['C:\data\', datestr(clock, 30), '_']);
     
     robscan_h.Type='TiltingRangeScan';
     robscan_h.TiltSpeed=robot_maxreach.scan_speed;
@@ -75,6 +79,9 @@ while attemptingscan
     %this is 120' either side so 2* 120
     robscan_h.width=2*scan.theta*180/pi;
 
+    
+    robscan_h.registerevent(@myhandler)
+    
     %display scan details
 %     display(strcat('Current Scan mode is: ',robscan_h.Mode,...
 %         '. Total width is: ',num2str(robscan_h.width),...
