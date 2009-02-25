@@ -80,7 +80,7 @@ if ~isempty(find(round(tempQ(1:6)-rad2deg(Q)), 1))
         end
         rob_h.Start;
         % want it to wait until it has finished getting to the next posiiotn before scanning
-        rob_h.WaitUntilCompleted(30,0);
+        %rob_h.WaitUntilCompleted(30,0);
         % simply release the object
         rob_h.release;
 
@@ -144,5 +144,6 @@ function releaserobot(rob_h)
     pause(0.1);
     rob_h.Type='StopDriveJointAbs';
     rob_h.Start;
-    rob_h.WaitUntilCompleted(2,0)
+    %rob_h.WaitUntilCompleted(2,0)
+    pause(0.5);
     rob_h.release;
