@@ -27,7 +27,8 @@ try global robmap_h;
     %get the Denso Blasting Cost Function
     try global DensoBlasting_h
         if isempty(DensoBlasting_h)
-            DensoBlasting_h = robmap_h.GetDensoBlastingCostFunction;
+%             DensoBlasting_h = robmap_h.GetDensoBlastingCostFunction;
+            DensoBlasting_h = actxserver('EyeInHand.DensoBlastingCost');
         end
     catch
         display('EyeInHand Problem: Unable to create DensoBlastingCost from surface map')
