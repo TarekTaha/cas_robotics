@@ -38,7 +38,7 @@
 
 function [qt,solutionvalid,dist_val,targetdist] = blasting_posesel051408(pt, plane_equ, q)
 
-
+error('Dont use this blating_posesel ')
 %% Variables
 % $$ \begin{array}{lc}
 % \mbox{targetNormal...} & V_{tn} \\
