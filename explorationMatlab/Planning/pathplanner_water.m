@@ -94,7 +94,7 @@ unknown_points=workspace.unknowncoords(workspace.lev1unknown(index),:);
 validnewQ=true([size(newQ,1),1]);
 for current_newQ=1:size(newQ,1)
     if ~check_path_for_col(newQ(current_newQ,:),obsticle_points,[],linkvals); 
-        validnewQ(current_newQ)=false; 
+        validnewQ(current_newQ)=false;  
         continue; 
     end
 end

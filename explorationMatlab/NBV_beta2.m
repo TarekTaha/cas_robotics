@@ -58,11 +58,12 @@ all_known=sortrows([workspace.knowncoords;workspace.indexedobsticles]);
 unknownweight=calunknownweight();
 
 % find valid configs
-pos_validconfigs=find(all_views.result==-1);
+% pos_validconfigs=find(all_views.result==-1);
+pos_validconfigs=find(all_views.result==-1 | all_views.result==1);
 
 %recheck the said to be valid configs
 for cur_con=pos_validconfigs'
-    [obstacle_result,unknown_result]=check_path_for_col(all_views.newQ(cur_con,:),obsticle_points,unknown_points,linkvals);
+    [obstacle_result,unknown_result]=check_path_for_col(all_views.newQ(cur_con,:),obsticle_points,unknown_points,linkvals);   
     if ~obstacle_result
         all_views.result(cur_con)=0;
     elseif ~unknown_result %we are in unknown space
@@ -281,12 +282,36 @@ end
 %order the best views
 order_bestviews()
 
+%% NEW RRT PLANNER FROM STEVE
+% global occHandle
+% MotionPlanner = actxserver('EyeInHand.DensoMotionPlan');
+% % MotionPlanner.OccupancyData = occHandle;
+% MotionPlanner.SurfaceData=robmap_h;
+% for current_view=1:size(bestviews,2)
+%   MotionPlanner.InitialConfiguration=rad2deg(Q);
+%   MotionPlanner.TargetConfiguration=rad2deg(bestviews(current_view).Q);
+% %   MotionPlanner.CanStart
+%   MotionPlanner.Start; 
+%   tic
+%   MotionPlanner.WaitUntilCompleted(1.0);
+%   toc
+%   if strcmpi(MotionPlanner.Status, 'Started')
+%     MotionPlanner.Stop;
+%     display(['Stopping',num2str(current_view)]);
+%     pause(1);
+%   end
+% 
+%   bestviews(current_view).all_steps=deg2rad(MotionPlanner.ConfigurationPath);
+% end
+
 %% Do new wavefront based planner
 newQ=zeros([size(bestviews,2),6]);
 for current_view=1:size(bestviews,2)
   newQ(current_view,:)=bestviews(current_view).Q;
 end
 pathval=pathplanner_water(newQ);
+
+
 valid_count=0;
 tempbestviews=[];
 encroachIntoUnknown=[];

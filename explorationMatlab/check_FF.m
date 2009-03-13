@@ -77,13 +77,22 @@ if numpoints>0
 %     end  
 
 % %hyperfast (version 4) method    
-    translated_points_1_t=translated_points_1*t(1,1)+translated_points_2*t(2,1)+translated_points_3*t(3,1);
+
+%same as timsing [pnts,1] by t', and rotating back to ellispe coordinate frame by t(1:3,1:3)'
+
+%     translated_points_1_t=translated_points_1*t(1,1)+translated_points_2*t(2,1)+translated_points_3*t(3,1);
+    translated_points_1_t=translated_points_1*t(1,1)+translated_points_2*t(1,2)+translated_points_3*t(1,3);
+    
     index_1=find(abs(translated_points_1_t-ellipse_vals.center(1))<=abs(ellipse_vals.params(1)));    
     if ~isempty(index_1)
-        translated_points_2_t=translated_points_1*t(1,2)+translated_points_2*t(2,2)+translated_points_3*t(3,2);        
+%         translated_points_2_t=translated_points_1*t(1,2)+translated_points_2*t(2,2)+translated_points_3*t(3,2);        
+        translated_points_2_t=translated_points_1*t(2,1)+translated_points_2*t(2,2)+translated_points_3*t(2,3);        
+        
         index_2=find(abs(translated_points_2_t(index_1)-ellipse_vals.center(2))<=abs(ellipse_vals.params(2)));    
         if ~isempty(index_2)
-            translated_points_3_t=translated_points_1*t(1,3)+translated_points_2*t(2,3)+translated_points_3*t(3,3);
+%             translated_points_3_t=translated_points_1*t(1,3)+translated_points_2*t(2,3)+translated_points_3*t(3,3);
+            translated_points_3_t=translated_points_1*t(3,1)+translated_points_2*t(3,2)+translated_points_3*t(3,3);
+                        
             index_3=find(abs(translated_points_3_t(index_1(index_2))-ellipse_vals.center(3))<=abs(ellipse_vals.params(3)));    
             if ~isempty(index_3)
                 if ~isempty(find(((translated_points_1_t(index_1(index_2(index_3)))-ellipse_vals.center(1)).^2)/ellipse_vals.params(1)^2+...

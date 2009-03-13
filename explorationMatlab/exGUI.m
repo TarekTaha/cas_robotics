@@ -131,6 +131,14 @@ catch
     display('EyeInHand Problem: Unable to create DensoState object')
 end
 
+%used for planning and to keep track of unexplored
+try global occHandle
+  occHandle= actxserver('EyeInHand.OccupancyMap');
+catch
+  display('EyeInHand Problem: Unable to create OccupancyMap object')
+end
+
+
 
 %clear the main axis
 set(gcf,'CurrentAxes',handles.axes3);
@@ -298,6 +306,7 @@ catch
   workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
   try NBV_beta2();catch; lasterr;display('Still no best views fond or some error: handing over control to you master');keyboard;end
 end
+display('check if bestviews contains all paths');keyboard;
   
 %             profile off; profile viewer;
           
@@ -1071,7 +1080,7 @@ end
 
 %this function is used to collect the data for exploration to compare new info
 function state_data=collectdata(state_data,handles,stepcount)
-global workspace Q
+global workspace Q bestviews
 if isempty(state_data)
     state_data.knownweight=calknownweight();
     state_data.unknownweight=calunknownweight();   
@@ -1095,8 +1104,10 @@ if nargin>1
    if get(handles.testing_checkbox,'value')==1
        testnumber=get(handles.testnumber_edit,'string');
        recordlatest_testdata()
-       testdir=['C:\MATLAB\R2007a\work\Gavin\PhD\PhD_Disertation\Code\Ch4\Test ',num2str(testnumber),'\'];
+       testdir=['C:\MATLAB\R2007a\work\Gavin\PhD\PhD_Disertation\Code\Ch8\Test ',num2str(testnumber),'\'];
        save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_workspaceSTATE.mat'],'workspace');
+       save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_bestviews.mat'],'bestviews');
+       display(['Saving workspace and bestviews to ',testdir]);
   end
 end
 
