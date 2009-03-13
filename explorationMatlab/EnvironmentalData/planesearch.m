@@ -85,7 +85,7 @@ minplanes2callAsurface=4; % What is the minimum planes which make a surface wort
 doposesel=true;
 showClusterNormalDist=false; % do you want to see the angle between all normals in surface population
 plot_all_poseInfo=false;
-poseselect_messagesON=false;
+poseselect_messagesON=true;
 saveposedata=false;
 draw_center_of_all_tiles=false;
 plotconnectivityGraphs=false;
@@ -169,6 +169,10 @@ if doposesel
 
 %     profile clear;profile on;
       temp_poses=PoseSel4planesearch(planeSet,poseselect_messagesON);
+      
+      error('This may not work anymore - use tests from Ch5 of thesis')
+
+      
 % load meshNplanes_poseset2.mat
 %load roofPlaneSet_poseset.mat
 %     profile off;profile viewer;

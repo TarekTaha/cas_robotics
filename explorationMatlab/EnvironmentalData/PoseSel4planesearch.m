@@ -135,17 +135,20 @@ for i = 1:length(plane)
         %check if valid: eg close to target goal, no collision, within limits etc
         [valid,dist]=classunkcheck_newQ(jointConfig_temp,qlimits,plane(i).home_point,t_base,Links,numlinks,plane(i).equ,false,linkvals,docollcheck);
 
-        %put this after all classunknown_newQ checks and blasting_posesel 
+        %put this after all classunknown_newQ checks and new_blasting_posesel 
         if docollcheck && valid
             jointConfigCollisionChecked=[jointConfigCollisionChecked;jointConfig_temp];
         end
         
         
-%% if not valid use my blasting_posesel method
+%% if not valid use my new_blasting_posesel method
         if valid
             foundby='. Found by 1) DensoBlasting_h ';
+            
+            [jointConfig_temp,valid] = new_blasting_posesel(plane(i).home_point, plane(i).equ, jointConfig_temp,false);
+            
         else
-            [jointConfig_temp,valid] = blasting_posesel(plane(i).home_point, plane(i).equ, jointConfig_temp,false);
+            [jointConfig_temp,valid] = new_blasting_posesel(plane(i).home_point, plane(i).equ, jointConfig_temp,false);
            
             %Store that a collision check has been performed
             if valid
@@ -154,7 +157,7 @@ for i = 1:length(plane)
         
             if valid 
                 jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig_temp(1:6)))),0];
-                foundby='. Found by 2) blasting_posesel';
+                foundby='. Found by 2) new_blasting_posesel';
             end            
         end
     catch
@@ -188,7 +191,7 @@ for i = 1:length(plane)
 % 
 %                 if pose(current_pose).validPose
 %                     try 
-%                         [jointConfig_temp,valid] = blasting_posesel(plane(i).home_point, plane(i).equ, pose(current_pose).Q);
+%                         [jointConfig_temp,valid] = new_blasting_posesel(plane(i).home_point, plane(i).equ, pose(current_pose).Q);
 %                         if valid jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig_temp(1:6)))),0];end
 %                     end
 %                     if valid
@@ -214,7 +217,7 @@ for i = 1:length(plane)
 %             [valid]=classunkcheck_newQ(jointConfig_temp,qlimits,plane(i).home_point,t_base,Links,numlinks,plane(i).equ,false);
 %             if ~valid            
 %                 try 
-%                     [jointConfig_temp,valid] = blasting_posesel(plane(i).home_point, plane(i).equ, jointConfig_temp);
+%                     [jointConfig_temp,valid] = new_blasting_posesel(plane(i).home_point, plane(i).equ, jointConfig_temp);
 %                     if valid jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig_temp(1:6)))),0];end
 %                 end
 %             end
@@ -363,7 +366,7 @@ if size(Q_guess_order,1)>1
                
              %check if valid
             [valid,dist]=classunkcheck_newQ(jointConfig_temp,qlimits,plane.home_point,t_base,Links,numlinks,plane.equ,false,linkvals,docollcheck);
-            %put this after all classunknown_newQ checks and blasting_posesel 
+            %put this after all classunknown_newQ checks and new_blasting_posesel 
             if docollcheck && valid
                 jointConfigCollisionChecked=[jointConfigCollisionChecked;jointConfig_temp];
             end
@@ -392,7 +395,7 @@ if size(Q_guess_order,1)>1
             %don't attempt to use too many poses this may be an impossible pose after all        
         if tries>maxtries; break; else tries=tries+1;end
         try 
-            [jointConfig_temp,valid] = blasting_posesel(plane.home_point, plane.equ, Q_guess_order(current_pose,:));
+            [jointConfig_temp,valid] = new_blasting_posesel(plane.home_point, plane.equ, Q_guess_order(current_pose,:));
                                 
             if valid 
                 %Store that a collision check has been performed
@@ -400,9 +403,9 @@ if size(Q_guess_order,1)>1
                 jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig_temp(1:6)))),0];
             end
         end
-            % If we found then display the method used: blasting_posesel
+            % If we found then display the method used: new_blasting_posesel
         if valid
-            foundby='. Found by 2) blasting_posesel';
+            foundby='. Found by 2) new_blasting_posesel';
             jointConfig=jointConfig_temp;
             return;
         end

@@ -35,7 +35,7 @@ default_Q=[Q;[0,-88*pi/180,98*pi/180,0,-15*pi/180,0]];
 
 if numjoints==6
     robot_maxreach.default_Q=default_Q;
-    ellipse_safetyfactor=0.05; %(0.1 is 10%) used to be 0.1 but now we are using stephens model for ploting its better
+    ellipse_safetyfactor=0.02; %(0.1 is 10%) used to be 0.1 but now we are using stephens model for ploting its better
     display(['ellipse_safetyfactor is set to ',num2str(ellipse_safetyfactor)]);
 else
     Q=[Q,0];
