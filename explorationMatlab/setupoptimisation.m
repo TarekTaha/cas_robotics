@@ -23,7 +23,7 @@ optimise.maxtargetdis=0.60;
 %where we desire it to hit (plane.home_point)
 optimise.minAccepDis=0.02;
 % This is how many max iterations for the optimisation
-optimise.iLimit=30;%used to be 1000
+optimise.iLimit=50;%used to be 1000
 % This is the acceptable value for the cost funciton minimisation
 optimise.stol = 1e-4;%used to be 1e-13...note: unless it is 1e-2 or more it basically always goes to the iteration limit
 %the max angular deflection (in rads) from requested in pose selection
@@ -50,7 +50,7 @@ optimise.maxangleJ4to6=20*pi/180;
 
 % watet based path planning this is how cource the graph search should be
 % where 1 would be equal to the max_angle_for123
-optimise.waterPPleaniancy=3.5;
+optimise.waterPPleaniancy=2.5;
 
 %% NBV
 %this is how many views to save for the NBV

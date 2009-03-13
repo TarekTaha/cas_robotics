@@ -59,8 +59,20 @@ while  find(((current_shape(:,1)-center(1)).^2)/params(1)^2+...
     end
 end
 
+% p=1.6075;
+% SA=4*pi*(((params(1)*params(2))^p+(params(1)*params(3))^p+(params(3)*params(2))^p)/3)^(1/p);
+% display(['exact SA = ',num2str(SA)]);
+% display(['exact volume = ',num2str(4/3*pi*params(1)*params(2)*params(3))]);
+
 params=params*(1+safetyfactor);
+% SA=4*pi*(((params(1)*params(2))^p+(params(1)*params(3))^p+(params(3)*params(2))^p)/3)^(1/p);
+% display(['exact SA = ',num2str(SA)]);
+% display(['volume *1.02 = ',num2str(4/3*pi*params(1)*params(2)*params(3))]);
+
 params=params+sum(params)/3*safetyfactor;
+% SA=4*pi*(((params(1)*params(2))^p+(params(1)*params(3))^p+(params(3)*params(2))^p)/3)^(1/p);
+% display(['exact SA = ',num2str(SA)]);
+% display(['volume + sumofall/3 by 0.02 = ',num2str(4/3*pi*params(1)*params(2)*params(3))]);
         
 %% Matlab's Ellipse Shell Creation Function
 [x,y,z]=ellipsoid(center(1),center(2),center(3),params(1),params(2),params(3),10);
