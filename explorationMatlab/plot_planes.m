@@ -25,7 +25,7 @@ end
 plane_sphere_threshold=.002;
 
 %start with a normal sphere described by 20 points
-[base_x,base_y,base_z]=sphere(60);
+[base_x,base_y,base_z]=sphere(30);
 %make the radium mew
 base_x=base_x*mew;
 base_y=base_y*mew;
