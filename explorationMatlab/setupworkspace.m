@@ -71,12 +71,12 @@ workspace.indexedobsticles_equ=[];
 % 3) blast danger
 % 4) all else don't care about
 %*level 1* is where the robot can move
-workspace.impLev(1).x=[-1.1,1.2];
-workspace.impLev(1).y=[-1.2,1.2];
-workspace.impLev(1).z=[workspace.inc_size,1.5];
+workspace.impLev(1).x=[-1.3,1.4];
+workspace.impLev(1).y=[-1.4,1.4];
+workspace.impLev(1).z=[workspace.inc_size,1.7];
 %*level 2* is where the robot can blast but not move
-workspace.impLev(2).x=[-1.4,1.5];
-workspace.impLev(2).y=[-1.4,1.5];
+workspace.impLev(2).x=[-1.4,1.55];
+workspace.impLev(2).y=[-1.5,1.5];
 workspace.impLev(2).z=[0,2.1];
 %*level 3* is where the robot can shoot sand but not blast and not move
 workspace.impLev(3).x=[workspace.min(1),workspace.max(1)];
@@ -86,7 +86,8 @@ workspace.impLev(3).z=[workspace.min(3),workspace.max(3)];
 % This is the weight given to info in each of the levels
 % *Note* points in level 1 are also in level 2 and 3 so they get weights for
 % each (1), points in level 2 are also in 3 so they get both
-workspace.dotweight=[0.5,0.3,0.05];
+%made them add to 1 in accordamce with PhD working
+workspace.dotweight=[0.6,0.35,0.05];
 %used in NBV so say if all info is in top bracket then what would the weight be?
 workspace.dotweight_Sum=sum(workspace.dotweight);
 %so as it would be smaller increments

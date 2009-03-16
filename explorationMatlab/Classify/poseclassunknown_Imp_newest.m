@@ -7,7 +7,7 @@ function poseclassunknown_Imp_newest(numofintplanes)
 
 %% Setup and Variables
 % close all
-global PointData RangeData IntensityData workspace classPlanePlotHa AXBAMnCtestdata alldirectedpoints
+global PointData RangeData IntensityData workspace classPlanePlotHa AXBAMnCtestdata alldirectedpoints 
 
 % figure(1)
 % plot_planes(plane,mew);
@@ -89,17 +89,20 @@ classunkn_optimise.maxAngle=42*pi/180;
 
 %% set the blasting variables
 try [planeSet,pose,pathval]=determinePathsNposes(index,maxindexsize);
-  if size(planeSet,1)==0; error('do it again');end
+  if size(planeSet,2)==0; error('do it again');end
 catch
+  lasterr;
   display('No poses found, trying again with 4* maxindexsize, and removing self scanning')
   workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
 
   try [planeSet,pose,pathval]=determinePathsNposes(index,4*maxindexsize);
-    if size(planeSet,1)==0; error('Still no pose');end
+    if size(planeSet,2)==0; error('Still no pose');end
   catch
+    lasterr;
     display('No poses found, trying again with all index')
     try [planeSet,pose,pathval]=determinePathsNposes(index,size(index,1));
     catch
+        lasterr
       display('Still no luck so handing over to you');
       keyboard
     end
@@ -163,6 +166,7 @@ while solsfound<numofintplanes
             AXBAMnCtestdata.planeSet=planeSet(indextoblast);
             AXBAMnCtestdata.newQ=newQ;
             AXBAMnCtestdata.Pworkspace=workspace;
+            AXBAMnCtestdata.allE=pose(indextoblast).allE;
 %% end fortesting         
             
             try use_real_robot_SCAN(-60); organise_data();catch; error('Could scan anything');end
@@ -226,7 +230,19 @@ while solsfound<numofintplanes
     lasterr
     display('some problem in the while loop, you have control')
     keyboard
-  end
+%     display('No paths found or something, removing self scanning and trying again');
+%     global workspace
+%     workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
+%     try [planeSet,pose,pathval]=determinePathsNposes(index,4*maxindexsize);
+%       if isempty(pose)
+%         display('still cant find any poses and or paths you have control');
+%         keyboard
+%       end
+%     catch;
+%       display('still cant find any poses and or paths you have control');
+%       keyboard
+%     end
+   end
 end
 
 

@@ -230,6 +230,10 @@ toc
 % % keyboard
 %% Go from destination to source (ANIMATE)
 % 
+if table(startN(1),startN(2),startN(3))<=0
+  error('According to pathplanner_water, the current node is an obstacle');
+end
+
 %if there is a way to get to the start
 if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize(1)+endN(:,1))>0,1))
     %plot start and finish
@@ -263,7 +267,6 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
             % while the first step of the path is not at the start work backwards
             while pathval(cur_goal).val(1,1)~=startN(1) || pathval(cur_goal).val(1,2)~=startN(2) || pathval(cur_goal).val(1,3)~=startN(3)
                 a=pathval(cur_goal).val(1,1);b=pathval(cur_goal).val(1,2);c=pathval(cur_goal).val(1,3);
-
                 %find the next (actally previous) node can be equal to the same node
                 nextnode=[a-1,b-1,c-1;a-1,b,c-1;a-1,b+1,c-1;
                           a,b-1,c-1;a,b,c-1;a,b+1,c-1;

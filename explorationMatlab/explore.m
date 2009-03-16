@@ -103,7 +103,7 @@ else
     if get(h.doclassification_checkbox,'value')
         global PointData IntensityData RangeData;
         [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData); 
-        UNclassifiedvoxels=update_ocstatus(ClassifiedData); 
+        update_ocstatus(ClassifiedData); 
         %try and save the current status, if user ctrl+c s out it dosen't matter
 %         try AXBAMnCtesting(false);
 %         catch

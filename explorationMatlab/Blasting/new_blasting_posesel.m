@@ -45,7 +45,7 @@ do_longversion=false;
 % $$ \begin{array}{lc}
 % \mbox{targetNormal...} & V_{tn} \\
 % \end{array}$$
-    global optimise densoobj workspace r robmap_h;
+    global optimise densoobj workspace r allE;
     
     obstacle_points=workspace.indexedobsticles;
     
@@ -255,11 +255,12 @@ usingzeros=false;
              1/(1+exp(-k*(dist_to_stream_end-dist_to_stream_OPend))); %dist_to_stream_end-dist_to_stream_OPend %should max at 0
              ]; 
 if showerrors 
-    e     
-         dq;
+    e;     
+%          dq;
 %          temp_prev(1:6)-dq
-         temp_prev=dq;
+%          temp_prev=dq;
 %           plot(r,q_temp')
+allE=[allE,e];
 end
     end
 end
