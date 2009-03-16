@@ -280,7 +280,7 @@ if isempty(bestviews)
 end
 
 %order the best views
-order_bestviews()
+%order_bestviews()
 
 %% NEW RRT PLANNER FROM STEVE
 % global occHandle
@@ -351,6 +351,7 @@ end
 if valid_count>0
   bestviews=tempbestviews;
   display(['There were ',num2str(valid_count),' bestviews found with paths'])
+  order_bestviews_Pareto()
 else
   error('There were no bestviews found after path planning');
 end

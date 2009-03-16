@@ -257,6 +257,9 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
             pathval(cur_goal).val=[endN(cur_goal,1),endN(cur_goal,2),endN(cur_goal,3)];
             pathval(cur_goal).val=[endN(cur_goal,1),endN(cur_goal,2),endN(cur_goal,3)];
             maxval=0;
+            
+
+            
             % while the first step of the path is not at the start work backwards
             while pathval(cur_goal).val(1,1)~=startN(1) || pathval(cur_goal).val(1,2)~=startN(2) || pathval(cur_goal).val(1,3)~=startN(3)
                 a=pathval(cur_goal).val(1,1);b=pathval(cur_goal).val(1,2);c=pathval(cur_goal).val(1,3);
@@ -377,6 +380,11 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
                     pathval(cur_goal).result=1;
                     pathval(cur_goal).unknown_points_result=[];
                 end
+                
+
+            
+            
+            
             else
                 pathval(cur_goal).all_steps=currQ;
                 currQtemp=currQ; 
@@ -435,4 +443,13 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
             end
         end
     end    
+end
+
+
+%go through and ndo one last check to make sure all paths are valid
+for cur_path=1:size(pathval,2)
+    %if we currently think it is valid then check again
+    if pathval(cur_path).result==1
+         pathval(cur_path).result=check_path_for_col(pathval(cur_path).all_steps);
+    end
 end

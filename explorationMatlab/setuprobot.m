@@ -88,7 +88,7 @@ end
 %we know that the max reach from the first joint (swivel) is max about 1.1
 %meters so don't even try anything that is larger than that
 
-robot_maxreach.val=1.15;
+robot_maxreach.val=1.25;
 
 n = r.n;
 L = r.link;
