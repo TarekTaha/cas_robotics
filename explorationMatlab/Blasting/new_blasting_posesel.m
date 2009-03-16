@@ -47,6 +47,8 @@ do_longversion=false;
 % \end{array}$$
     global optimise densoobj workspace r robmap_h;
     
+    obstacle_points=workspace.indexedobsticles;
+    
     %default is true, unless proven otherwise
     solutionvalid=true;
     
@@ -161,11 +163,11 @@ usingzeros=false;
 %             tr = tr * Links{i}(q_temp(i));
             tr = tr * linktransform_gp(linkvals(i).val,(q_temp(i)));
             if i>2 && i<7 && ~skipcollision_check  && result_row(i)<=1
-                try %tempresult=check_FF(tr,densoobj(i+1).ellipse,workspace.indexedobsticles);
+                try %tempresult=check_FF(tr,densoobj(i+1).ellipse,obstacle_points);
 %                     keyboard 
-                translated_points_1=workspace.indexedobsticles(:,1)-tr(1,4);
-                translated_points_2=workspace.indexedobsticles(:,2)-tr(2,4);
-                translated_points_3=workspace.indexedobsticles(:,3)-tr(3,4); 
+                translated_points_1=obstacle_points(:,1)-tr(1,4);
+                translated_points_2=obstacle_points(:,2)-tr(2,4);
+                translated_points_3=obstacle_points(:,3)-tr(3,4); 
     
 %                 translated_points_1_t=translated_points_1*tr(1,1)+translated_points_2*tr(2,1)+translated_points_3*tr(3,1);
                 translated_points_1_t=translated_points_1*tr(1,1)+translated_points_2*tr(1,2)+translated_points_3*tr(1,3);               
