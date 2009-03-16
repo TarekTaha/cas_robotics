@@ -21,7 +21,7 @@ global bestviews r densoobj workspace
 dotweight=workspace.dotweight;
 
 % obstacle_points=workspace.indexedobsticles;
-obsticle_points=workspace.indexedobsticles(GetImpLevInfo(workspace.indexedobsticles),:);
+obstacle_points=workspace.indexedobsticles(GetImpLevInfo(workspace.indexedobsticles),:);
 
 % Determine the points in workspace
 index=GetImpLevInfo(workspace.unknowncoords);
@@ -74,7 +74,7 @@ end
 [vals,rank_f_4]=sort(index_f_4,'ascend');
 
 %add up all ranks
-indexsum=rank_f_1+rank_f_2+rank_f_3+rank_f_4;
+indexsum=2*rank_f_1+2*rank_f_2+rank_f_3+rank_f_4;
 %find the best one which has the smallest overall rank
 [vals,summedindexSorted]=sort(indexsum,'ascend');
 
@@ -85,7 +85,7 @@ for cur_view=summedindexSorted
     cur_rank=cur_rank+1;
 end
 
-tempbestviews=bestviews;
+bestviews=tempbestviews;
 
 
 %% find the expected information gain
@@ -107,7 +107,7 @@ all_interferance=sum(uniquebiglist(:,2));
 
 %prob is the interferance of this node divided by all interferances
 %determine all probs at once
-probs=uniquebiglist(:,2)/size(uniquebiglist,1);
+probs=uniquebiglist(ib,2)/size(uniquebiglist,1);
 %make a one sided uncertainty so max information is at prob=0.5
 H_2=sum(-(probs/2).*log(probs/2));
 

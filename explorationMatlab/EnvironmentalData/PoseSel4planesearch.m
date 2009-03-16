@@ -2,14 +2,18 @@
 %is pointing towards the origin which is the base center (0,0,0)
         
 %NOTE: it is assumed that currQ (and or Q) is safe 
-function [pose]=PoseSel4planesearch(plane,displayon,currQ)
-global r optimise jointConfigCollisionChecked Q
+function [pose]=PoseSel4planesearch(plane,displayon,currQ,useMyMethodOnly)
+global r optimise jointConfigCollisionChecked Q allE
 
-if nargin<3
-    currQ=Q;
-    if nargin<2
-        displayon=true;
-    end
+if nargin<4
+  %if this is true we use both mine and steves
+  useMyMethodOnly=false;
+  if nargin<3
+      currQ=Q;
+      if nargin<2
+          displayon=true;
+      end
+  end
 end
 
 % Turn off warning messages if we dont care
@@ -64,7 +68,12 @@ end
 Links = r.link;
 qlimits=r.qlim; 
 t_base = r.base;
-DensoBlasting_h.MinimumMillimetersToSurface = optimise.mintargetdis*1000;
+try DensoBlasting_h.MinimumMillimetersToSurface = optimise.mintargetdis*1000;
+catch
+  display('PoseSel4planesearch:: trying to restart the server: EyeInHand.DensoBlastingCost')
+  DensoBlasting_h = actxserver('EyeInHand.DensoBlastingCost');
+  DensoBlasting_h.MinimumMillimetersToSurface = optimise.mintargetdis*1000;
+end
 DensoBlasting_h.MaximumMillimetersToSurface = optimise.maxtargetdis*1000;
 DensoBlasting_h.MinimumDegreesToSurfaceNormal = rad2deg(optimise.minDeflectionError);
 DensoBlasting_h.MaximumDegreesToSurfaceNormal = rad2deg(optimise.maxDeflectionError);
@@ -118,7 +127,11 @@ for i = 1:length(plane)
 %         plot3([plane(i).home_point(1),plane(i).home_point(1)-plane(i).equ(1)],[plane(i).home_point(2),plane(i).home_point(2)-plane(i).equ(2)],[plane(i).home_point(3),plane(i).home_point(3)-plane(i).equ(3)],'b')
         
         %use previous pose as the guess use DensoBlasting_h method
-        jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig(1:6)))),0];
+        if ~useMyMethodOnly
+          jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig(1:6)))),0];
+        else
+          jointConfig_temp=jointConfig;
+        end
 %         plot(r,jointConfig_temp)
 %         DensoBlasting_h.OptimiserInfo
 %         rad2deg(jointConfig_temp(1:6)-jointConfig(1:6))
@@ -142,13 +155,14 @@ for i = 1:length(plane)
         
         
 %% if not valid use my new_blasting_posesel method
-        if valid
-            foundby='. Found by 1) DensoBlasting_h ';
-            
-            [jointConfig_temp,valid] = new_blasting_posesel(plane(i).home_point, plane(i).equ, jointConfig_temp,false);
-            
+        if valid && ~useMyMethodOnly
+            foundby='. Found by 1) DensoBlasting_h ';                        
         else
+          if useMyMethodOnly
+            [jointConfig_temp,valid] = new_blasting_posesel(plane(i).home_point, plane(i).equ, jointConfig_temp,true);
+          else
             [jointConfig_temp,valid] = new_blasting_posesel(plane(i).home_point, plane(i).equ, jointConfig_temp,false);
+          end
            
             %Store that a collision check has been performed
             if valid
@@ -243,6 +257,10 @@ for i = 1:length(plane)
     
     %set the pose state to valid state eg: TRUE or FALSE
     pose(end).validPose = valid;
+    %if this is not set it will be empty
+    pose(end).allE=allE;
+    %make sure it is empty
+    allE=[];
     
     % Increase the valid pose with either TRUE (1) or FALSE (0)
     valid_count=valid_count+valid;

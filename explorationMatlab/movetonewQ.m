@@ -54,7 +54,7 @@ if size(all_steps,1)>0 && size(newQ,2)~=size(all_steps,2)
 end
   
 %changing the size since we only 
-if size(newQ,2)>6
+if size(newQ,2)>r.n
   newQ=newQ(1:6);
   if size(all_steps,1)>0
     all_steps=all_steps(:,1:6);

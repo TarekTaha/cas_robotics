@@ -351,7 +351,12 @@ end
 if valid_count>0
   bestviews=tempbestviews;
   display(['There were ',num2str(valid_count),' bestviews found with paths'])
-  order_bestviews_Pareto()
+  
+  try order_bestviews_Pareto()
+  catch
+    warning('NOT ORDERING properly, using old method');order_bestviews();
+  end
+  
 else
   error('There were no bestviews found after path planning');
 end

@@ -306,7 +306,6 @@ catch
   workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
   try NBV_beta2();catch; lasterr;display('Still no best views fond or some error: handing over control to you master');keyboard;end
 end
-display('check if bestviews contains all paths');keyboard;
   
 %             profile off; profile viewer;
           
@@ -547,7 +546,12 @@ function AXBAMnClassify_pushbutton_Callback(hObject, eventdata, handles)
 numofintplanes=str2double(get(handles.numofdir_AXBAMnC_edit,'string'));
 %run the classification function    
 % poseclassunknown_Imp(numofintplanes)
-poseclassunknown_Imp_newest(numofintplanes)
+for i=1:numofintplanes
+  %only do one at a time
+  poseclassunknown_Imp_newest(1)
+%   save the test
+  AXBAMnCtesting();
+end
 
 
 
@@ -962,7 +966,7 @@ if get(hObject,'Value')
     for curr_mat=unique(Materialindex)'
       IndexofMaterialindex=find(Materialindex==curr_mat);
       toplot=workspace.probofmaterial(classifiedvoxels(IndexofMaterialindex),1:3)*class_cubesize;
-      classifiedplotHa(end+1)=plot3(toplot(:,1),toplot(:,2),toplot(:,3),'color',[0,curr_mat/max(Materialindex),curr_mat/max(Materialindex)],'marker','.','markersize',0.5,'linestyle','none');
+      classifiedplotHa(end+1)=plot3(toplot(:,1),toplot(:,2),toplot(:,3),'color',[0,curr_mat/max(Materialindex),curr_mat/max(Materialindex)],'marker','.','markersize',4,'linestyle','none');
     end
     
 % OLD WAY
@@ -1104,9 +1108,14 @@ if nargin>1
    if get(handles.testing_checkbox,'value')==1
        testnumber=get(handles.testnumber_edit,'string');
        recordlatest_testdata()
-       testdir=['C:\MATLAB\R2007a\work\Gavin\PhD\PhD_Disertation\Code\Ch8\Test ',num2str(testnumber),'\'];
+       testdir=['C:\MATLAB\R2007a\work\Gavin\PhD\PhD_Disertation\Code\Ch8\Stage 1\Test ',num2str(testnumber),'\'];
        save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_workspaceSTATE.mat'],'workspace');
        save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_bestviews.mat'],'bestviews');
+       global robmap_h
+       robmap_h.StoreSurfaceMap([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_newDistanceField.ply']);
+       
+       save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_bestviews.mat'],'bestviews');
+       
        display(['Saving workspace and bestviews to ',testdir]);
   end
 end

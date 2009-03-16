@@ -55,15 +55,25 @@ end
 sizemat=zeros([length(plane),1]);
 for i=1:length(plane)
     [level1,level2]=GetImpLevInfo(plane(i).home_point);
-    if ~isempty(level2)
+    if ~isempty(level1)
         if ~isempty(alldirectedpoints)
             if isempty(find(sqrt((plane(i).home_point(1)-alldirectedpoints(:,1)).^2+...
                                  (plane(i).home_point(2)-alldirectedpoints(:,2)).^2+...
                                  (plane(i).home_point(3)-alldirectedpoints(:,3)).^2)<2*mew,1))
-                sizemat(i)=size(plane(i).points,1);
+                sizemat(i)=size(plane(i).points,1)*workspace.dotweight(1);
             end
         else
-            sizemat(i)=size(plane(i).points,1);
+            sizemat(i)=size(plane(i).points,1)*workspace.dotweight(1);
+        end      
+    elseif ~isempty(level2)
+        if ~isempty(alldirectedpoints)
+            if isempty(find(sqrt((plane(i).home_point(1)-alldirectedpoints(:,1)).^2+...
+                                 (plane(i).home_point(2)-alldirectedpoints(:,2)).^2+...
+                                 (plane(i).home_point(3)-alldirectedpoints(:,3)).^2)<2*mew,1))
+                sizemat(i)=size(plane(i).points,1)*workspace.dotweight(2);
+            end
+        else
+            sizemat(i)=size(plane(i).points,1)*workspace.dotweight(2);
         end
     end
 end
