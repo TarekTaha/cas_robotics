@@ -487,45 +487,67 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
 
     lhoods.liki_ratio_varis = [];
 
+    %using Classification_Criteria_old1.mat
+%     %likelihood based on intensity
+%     lhoods.I.GSteel = normpdf(mse_intensity, HParas.I.GSteel_mean, HParas.I.GSteel_std);
+%     lhoods.I.Alumin = normpdf(mse_intensity, HParas.I.Alumin_mean, HParas.I.Alumin_std);
+%     lhoods.I.GMetal = normpdf(mse_intensity, HParas.I.GMetal_mean, HParas.I.GMetal_std);
+%     lhoods.I.MSteel = normpdf(mse_intensity, HParas.I.MSteel_mean, HParas.I.MSteel_std);
+%     lhoods.I.Copper = normpdf(mse_intensity, HParas.I.Copper_mean, HParas.I.Copper_std);
+%     lhoods.I.DPlyWd = normpdf(mse_intensity, HParas.I.DPlyWd_mean, HParas.I.DPlyWd_std);
+%     lhoods.I.BCloth = normpdf(mse_intensity, HParas.I.BCloth_mean, HParas.I.BCloth_std);     
+% 
+%     %likelihood based on range
+%     lhoods.R.GSteel = normpdf(mse_range, HParas.R.GSteel_mean, HParas.R.GSteel_std);
+%     lhoods.R.Alumin = normpdf(mse_range, HParas.R.Alumin_mean, HParas.R.Alumin_std);
+%     lhoods.R.GMetal = normpdf(mse_range, HParas.R.GMetal_mean, HParas.R.GMetal_std);
+%     lhoods.R.MSteel = normpdf(mse_range, HParas.R.MSteel_mean, HParas.R.MSteel_std);
+%     lhoods.R.Copper = normpdf(mse_range, HParas.R.Copper_mean, HParas.R.Copper_std);
+%     lhoods.R.DPlyWd = normpdf(mse_range, HParas.R.DPlyWd_mean, HParas.R.DPlyWd_std);
+%     lhoods.R.BCloth = normpdf(mse_range, HParas.R.BCloth_mean, HParas.R.BCloth_std);
+
+%     %likelihood based on both 
+%     lhoods.combined.GSteel = lhoods.I.GSteel * lhoods.R.GSteel;
+%     lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.GSteel , 1];
+% 
+%     lhoods.combined.Alumin = lhoods.I.Alumin * lhoods.R.Alumin;
+%     lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.Alumin , 2];
+% 
+%     lhoods.combined.GMetal = lhoods.I.GMetal * lhoods.R.GMetal;
+%     lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.GMetal , 3];
+% 
+%     lhoods.combined.MSteel = lhoods.I.MSteel * lhoods.R.MSteel;
+%     lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.MSteel , 4];
+% 
+%     lhoods.combined.Copper = lhoods.I.Copper * lhoods.R.Copper;
+%     lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.Copper , 5];
+% 
+%     lhoods.combined.DPlyWd = lhoods.I.DPlyWd * lhoods.R.DPlyWd;
+%     lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.DPlyWd , 6];
+% 
+%     lhoods.combined.BCloth = lhoods.I.BCloth * lhoods.R.BCloth;
+%     lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.BCloth , 7];
+    
+%using Classification_Criteria.mat
     %likelihood based on intensity
-    lhoods.I.GSteel = normpdf(mse_intensity, HParas.I.GSteel_mean, HParas.I.GSteel_std);
-    lhoods.I.Alumin = normpdf(mse_intensity, HParas.I.Alumin_mean, HParas.I.Alumin_std);
-    lhoods.I.GMetal = normpdf(mse_intensity, HParas.I.GMetal_mean, HParas.I.GMetal_std);
-    lhoods.I.MSteel = normpdf(mse_intensity, HParas.I.MSteel_mean, HParas.I.MSteel_std);
-    lhoods.I.Copper = normpdf(mse_intensity, HParas.I.Copper_mean, HParas.I.Copper_std);
-    lhoods.I.DPlyWd = normpdf(mse_intensity, HParas.I.DPlyWd_mean, HParas.I.DPlyWd_std);
-    lhoods.I.BCloth = normpdf(mse_intensity, HParas.I.BCloth_mean, HParas.I.BCloth_std);
+    lhoods.I.PaintedMetal = normpdf(mse_intensity, HParas.I.mean(1), HParas.I.std(1));
+    lhoods.I.Wood = normpdf(mse_intensity, HParas.I.mean(2), HParas.I.std(2));
+    lhoods.I.Plastic = normpdf(mse_intensity, HParas.I.mean(3), HParas.I.std(3));
 
     %likelihood based on range
-    lhoods.R.GSteel = normpdf(mse_range, HParas.R.GSteel_mean, HParas.R.GSteel_std);
-    lhoods.R.Alumin = normpdf(mse_range, HParas.R.Alumin_mean, HParas.R.Alumin_std);
-    lhoods.R.GMetal = normpdf(mse_range, HParas.R.GMetal_mean, HParas.R.GMetal_std);
-    lhoods.R.MSteel = normpdf(mse_range, HParas.R.MSteel_mean, HParas.R.MSteel_std);
-    lhoods.R.Copper = normpdf(mse_range, HParas.R.Copper_mean, HParas.R.Copper_std);
-    lhoods.R.DPlyWd = normpdf(mse_range, HParas.R.DPlyWd_mean, HParas.R.DPlyWd_std);
-    lhoods.R.BCloth = normpdf(mse_range, HParas.R.BCloth_mean, HParas.R.BCloth_std);
-
+    lhoods.R.PaintedMetal = normpdf(mse_intensity, HParas.R.mean(1), HParas.R.std(1));
+    lhoods.R.Wood = normpdf(mse_intensity, HParas.R.mean(2), HParas.R.std(2));
+    lhoods.R.Plastic = normpdf(mse_intensity, HParas.R.mean(3), HParas.R.std(3));
+    
     %likelihood based on both 
-    lhoods.combined.GSteel = lhoods.I.GSteel * lhoods.R.GSteel;
-    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.GSteel , 1];
+    lhoods.combined.PaintedMetal = lhoods.I.PaintedMetal * lhoods.R.PaintedMetal;
+    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.PaintedMetal , 1];
 
-    lhoods.combined.Alumin = lhoods.I.Alumin * lhoods.R.Alumin;
-    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.Alumin , 2];
+    lhoods.combined.Wood = lhoods.I.Wood * lhoods.R.Wood;
+    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.Wood , 2];
 
-    lhoods.combined.GMetal = lhoods.I.GMetal * lhoods.R.GMetal;
-    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.GMetal , 3];
-
-    lhoods.combined.MSteel = lhoods.I.MSteel * lhoods.R.MSteel;
-    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.MSteel , 4];
-
-    lhoods.combined.Copper = lhoods.I.Copper * lhoods.R.Copper;
-    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.Copper , 5];
-
-    lhoods.combined.DPlyWd = lhoods.I.DPlyWd * lhoods.R.DPlyWd;
-    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.DPlyWd , 6];
-
-    lhoods.combined.BCloth = lhoods.I.BCloth * lhoods.R.BCloth;
-    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.BCloth , 7];
+    lhoods.combined.Plastic = lhoods.I.Plastic * lhoods.R.Plastic;
+    lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.Plastic , 3];
 
     %order to most likely first
     lhoods.liki_ratio_varis = sortrows(lhoods.liki_ratio_varis, 1);
@@ -539,26 +561,14 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
 
     switch(material_to_class)
         case 1
-%             PClass.Material = 'GSteel';
+%             PClass.Material = 'PaintedMetal';
             guess = 1;
         case 2
-%             PClass.Material = 'Alumin';
+%             PClass.Material = 'Wood';
             guess = 2;
         case 3
-%             PClass.Material = 'GMetal';
+%             PClass.Material = 'Plastic';
             guess = 3;
-        case 4
-%             PClass.Material = 'MSteel';  
-            guess = 4;
-        case 5
-%             PClass.Material = 'Copper';
-            guess = 5;
-        case 6
-%             PClass.Material = 'DPlyWd';
-            guess = 6;
-        case 7
-%             PClass.Material = 'BCloth'; 
-            guess = 7;
     end   
 
     % puts the result in an accessible place

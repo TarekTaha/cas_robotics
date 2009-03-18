@@ -957,16 +957,24 @@ if get(hObject,'Value')
 
 % NEW WAY    
     classifiedvoxels=find(max(workspace.probofmaterial(:,4:end),[],2)>workspace.classifyProbThreshhold);
-    UNclassifiedvoxels=setdiff([1:size(workspace.probofmaterial,2)],classifiedvoxels);
+    UNclassifiedvoxels=setdiff([1:size(workspace.probofmaterial,1)],classifiedvoxels);
     hold on;
-    try classifiedplotHa(end+1)=plot3(workspace.ocgrid(UNclassifiedvoxels,1)*class_cubesize,workspace.ocgrid(UNclassifiedvoxels,2)*class_cubesize,...
-    workspace.ocgrid(UNclassifiedvoxels,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');end
+    classifiedplotHa(end+1)=plot3(workspace.probofmaterial(UNclassifiedvoxels,1)*class_cubesize,workspace.probofmaterial(UNclassifiedvoxels,2)*class_cubesize,...
+    workspace.probofmaterial(UNclassifiedvoxels,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');
       
     [nothing,Materialindex]=max(workspace.probofmaterial(classifiedvoxels,4:end),[],2);
     for curr_mat=unique(Materialindex)'
       IndexofMaterialindex=find(Materialindex==curr_mat);
       toplot=workspace.probofmaterial(classifiedvoxels(IndexofMaterialindex),1:3)*class_cubesize;
-      classifiedplotHa(end+1)=plot3(toplot(:,1),toplot(:,2),toplot(:,3),'color',[0,curr_mat/max(Materialindex),curr_mat/max(Materialindex)],'marker','.','markersize',4,'linestyle','none');
+%       classifiedplotHa(end+1)=plot3(toplot(:,1),toplot(:,2),toplot(:,3),'color',[0,curr_mat/max(Materialindex),curr_mat/max(Materialindex)],'marker','.','markersize',4,'linestyle','none');
+      if curr_mat==1
+          classifiedplotHa(end+1)=plot3(toplot(:,1),toplot(:,2),toplot(:,3),'color','k','marker','.','markersize',4,'linestyle','none');        
+      elseif curr_mat==2
+          classifiedplotHa(end+1)=plot3(toplot(:,1),toplot(:,2),toplot(:,3),'color',[0.5,0.5,0.5],'marker','.','markersize',4,'linestyle','none');        
+      elseif curr_mat==3
+          classifiedplotHa(end+1)=plot3(toplot(:,1),toplot(:,2),toplot(:,3),'color','c','marker','.','markersize',4,'linestyle','none');        
+      end
+      
     end
     
 % OLD WAY

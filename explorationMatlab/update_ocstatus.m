@@ -35,7 +35,10 @@ load Classification_Criteria.mat
 %how many materials not including unknown
 % nummaterial= size(class_ocgrid,2)-1;
 %all which have a MEAN and STD in the HParams which is all except edge/unknowns
-nummaterial=size(struct2cell(HParas.I),1)/2;
+% nummaterial=size(struct2cell(HParas.I),1)/2;
+
+%new way to find size
+nummaterial=size(HParas.I.mean,2);
 
 uniformdisOnMats=ones([1,nummaterial])/nummaterial;
 %make sure the structure is valid
