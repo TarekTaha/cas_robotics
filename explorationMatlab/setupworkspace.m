@@ -219,6 +219,7 @@ end
 %% Setup the classifier surface size
 workspace.classifyMew=0.1;
 workspace.classifyProbThreshhold=0.999;
+% display('changed the classifyProbThreshhold threshold');
 workspace.classifyConfidence=0.90;
 
 %the classification cube size

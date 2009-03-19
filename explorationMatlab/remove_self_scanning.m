@@ -30,7 +30,7 @@ global r Q densoobj
 
 % if we haven't been passed the joints then 
 if nargin<3
-    removefactor=2.2;
+    removefactor=2.5;
     if nargin<2
         %% try to get the latest Q from the robot if we are using it will
         %% fail if there if not using real robot

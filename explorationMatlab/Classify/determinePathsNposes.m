@@ -50,13 +50,15 @@ end
 planeSet=planeSet(validposes);
 pose=pose(validposes);
 
+
 %% just use water pathplanner
-pathval=pathplanner_water(newQ);
+%you must have last 4 joints at zero for this to work
+pathval=pathplanner_water([newQ(:,1:3),zeros([size(newQ,1),3])]);
 %set all invalid uless they proove otherwise
 validposes=false([1,size(pathval,2)]);
 correspondingindex=[];
 for curr_pose=1:size(pathval,2)
-  try correspondingindex_temp=find(newQ(:,1)-pathval(curr_pose).newQ(1)==0 &newQ(:,2)-pathval(curr_pose).newQ(2)==0 &newQ(:,3)-pathval(curr_pose).newQ(3)==0 &newQ(:,4)-pathval(curr_pose).newQ(4)==0 & newQ(:,5)-pathval(curr_pose).newQ(5)==0 & newQ(:,6)-pathval(curr_pose).newQ(6)==0);
+  try correspondingindex_temp=find(newQ(:,1)-pathval(curr_pose).newQ(1)==0 &newQ(:,2)-pathval(curr_pose).newQ(2)==0 &newQ(:,3)-pathval(curr_pose).newQ(3)==0);
     if isempty(correspondingindex) || size(correspondingindex_temp,1)==1
       correspondingindex(curr_pose)=correspondingindex_temp(1);
     else
@@ -73,6 +75,20 @@ end
 newQ=newQ(correspondingindex,:);
 planeSet=planeSet(correspondingindex);
 pose=pose(correspondingindex);
+
+display(['Before moving last 4 joints Current valid size is ',num2str(size(find(validposes==1),2)), ' poses with paths'])
+for curr_pose=1:size(newQ,1)
+  if validposes(curr_pose) %otherwise don't bother with it
+    [pathfound,all_steps]=pathplanner_new(newQ(curr_pose,:),0,1,0,optimise.numofPPiterations,0,[newQ(curr_pose,1:3),0,0,0]);
+    if pathfound==1
+      validposes(curr_pose)=true;
+      pathval(curr_pose).all_steps=[pathval(curr_pose).all_steps;all_steps];
+      pathval(curr_pose).newQ=newQ(curr_pose,:);  
+    else
+      validposes(curr_pose)=false;
+    end
+  end
+end  
 
 
 % %% move last joints to all zeros them the first 3 then the last 3 back to
@@ -154,7 +170,7 @@ planeSet=planeSet(validposes);
 pose=pose(validposes);
 if size(validposes,1)>0
   pathval=pathval(validposes);
-  display(['determinePathsNposes:: found valid ',num2str(size(validposes,2)), ' poses with paths'])
+  display(['determinePathsNposes:: found valid ',num2str(size(find(validposes==1),2)), ' poses with paths'])
 else
   pathval=[];
 end

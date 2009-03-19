@@ -66,9 +66,9 @@ while attemptingscan
     robscan_h=actxserver('EyeInHand.ScannerCommand');
     robscan_h.AddObserver(robmap_h);
     
-    %save file to grid1
-    filePrefix=[pwd,'\'];
-    robscan_h.TraceTo(filePrefix);
+%     %save file to grid1
+%     filePrefix=[pwd,'\'];
+%     robscan_h.TraceTo(filePrefix);
     
     
     %old way (prior to 25Feb2008

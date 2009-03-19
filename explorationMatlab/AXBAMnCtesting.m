@@ -11,7 +11,7 @@
 %
 % *Returns:* NULL
 
-function AXBAMnCtesting()%plotdirectedC)
+function AXBAMnCtesting(handles)%plotdirectedC)
 
 %% Variables
 plot_the_current_mesh_and_robot=false;
@@ -33,7 +33,7 @@ end
 % testnum= input('Please enter TEST number','s');
 % scannum= input('Please enter SCAN number','s');
 % plotunknown=input('Do you want to plot the unknown voxels 1=yes, 0=no');
-testnum=1;
+testnum=get(handles.testnumber_edit,'string');
 testdir=['C:\MATLAB\R2007a\work\Gavin\PhD\PhD_Disertation\Code\Ch8\Stage 2\Test ',num2str(testnum),'\'];
 %as long as there is nothing else in the directory the numbering should be fine
 filesInDir=dir(testdir);
