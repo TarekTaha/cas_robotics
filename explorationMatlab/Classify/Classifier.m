@@ -369,7 +369,7 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
             % writes orignal data from far low to SP as is
             rotated_scan.intensityYM = rotated_scan.intensityY;
             % puts in fake centre points
-            rotated_scan.intensityYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = 1600;
+            rotated_scan.intensityYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = 2100;
             % takes data from the far low and writes it far high up to SP
             for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
             	rotated_scan.intensityYM(k) = rotated_scan.intensityY(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add); 
@@ -419,7 +419,7 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
             % writes orignal data from far low to SP as is
             rotated_scan.intensityYM = rotated_scan.intensityYFlipped;
             % puts in fake centre point
-            rotated_scan.intensityYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = 1600;
+            rotated_scan.intensityYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = 2100;
             % takes data from the far low and writes it far high up to SP
             for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
             	rotated_scan.intensityYM(k) = rotated_scan.intensityYFlipped(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add); 
@@ -446,8 +446,9 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
     
     fitted_line_vals_range= [polyfit_coefs_range(1)*rotated_scan.rangeXM(:).^2+...
                             polyfit_coefs_range(2)*rotated_scan.rangeXM(:)+...
-                            polyfit_coefs_range(3),rotated_scan.rangeXM(:),rotated_scan.rangeXM(:)];
-                        
+                            polyfit_coefs_range(3),rotated_scan.rangeXM(:)];
+
+
 %     fitted_line_vals_width = size(fitted_line_vals_range, 2);
 
     %poly fit for the intensity data
@@ -459,7 +460,15 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
     else % old one
         polyfit_coefs_intensity = polyfit(rotated_scan.intensityXM(:), rotated_scan.intensityYM(:), order);
         fitted_line_vals_intensity = [polyval(polyfit_coefs_intensity, rotated_scan.intensityXM(:)) , rotated_scan.intensityXM(:)];
-    end      
+    end
+    
+%     figure(2);
+%     subplot(2,1,1)
+%     plot(rotated_scan.rangeXM(:),fitted_line_vals_range(:,1),'r-')
+%     hold on;plot(rotated_scan.rangeXM(:), rotated_scan.rangeYM(:),'b.');hold off;
+%     subplot(2,1,2)
+%     plot(rotated_scan.intensityXM(:),fitted_line_vals_intensity(:,1),'r-')
+%     hold on;plot(rotated_scan.intensityXM(:), rotated_scan.intensityYM(:),'b.');hold off;
 
 %% CALCULATE THE REQUIRED RESIDUALS FOR THE POLYs BEING TESTED
 
@@ -527,26 +536,37 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
 % 
 %     lhoods.combined.BCloth = lhoods.I.BCloth * lhoods.R.BCloth;
 %     lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.BCloth , 7];
+
+%using Classification_Criteria.mat
+    %likelihood based on intensity A2 poly coeficient
+    lhoods.I.PaintedMetal = normpdf(polyfit_coefs_intensity(1), HParas.I.mean(1), HParas.I.std(1));
+    lhoods.I.Wood = normpdf(polyfit_coefs_intensity(1), HParas.I.mean(2), HParas.I.std(2));
+    lhoods.I.Plastic = normpdf(polyfit_coefs_intensity(1), HParas.I.mean(3), HParas.I.std(3));
+ 
+    %likelihood based on range A2 poly coeficient
+    lhoods.R.PaintedMetal = normpdf(polyfit_coefs_range(1), HParas.R.mean(1), HParas.R.std(1));
+    lhoods.R.Wood = normpdf(polyfit_coefs_range(1), HParas.R.mean(2), HParas.R.std(2));
+    lhoods.R.Plastic = normpdf(polyfit_coefs_range(1), HParas.R.mean(3), HParas.R.std(3));
     
 %using Classification_Criteria.mat
-    %likelihood based on intensity
-    lhoods.I.PaintedMetal = normpdf(mse_intensity, HParas.I.mean(1), HParas.I.std(1));
-    lhoods.I.Wood = normpdf(mse_intensity, HParas.I.mean(2), HParas.I.std(2));
-    lhoods.I.Plastic = normpdf(mse_intensity, HParas.I.mean(3), HParas.I.std(3));
+    %likelihood based on intensityMSE
+    lhoods.IMSE.PaintedMetal = normpdf(mse_intensity, HParas.IMSE.mean(1), HParas.IMSE.std(1));
+    lhoods.IMSE.Wood = normpdf(mse_intensity, HParas.IMSE.mean(2), HParas.IMSE.std(2));
+    lhoods.IMSE.Plastic = normpdf(mse_intensity, HParas.IMSE.mean(3), HParas.IMSE.std(3));
 
-    %likelihood based on range
-    lhoods.R.PaintedMetal = normpdf(mse_intensity, HParas.R.mean(1), HParas.R.std(1));
-    lhoods.R.Wood = normpdf(mse_intensity, HParas.R.mean(2), HParas.R.std(2));
-    lhoods.R.Plastic = normpdf(mse_intensity, HParas.R.mean(3), HParas.R.std(3));
+    %likelihood based on rangeMSE
+    lhoods.RMSE.PaintedMetal = normpdf(mse_range, HParas.RMSE.mean(1), HParas.RMSE.std(1));
+    lhoods.RMSE.Wood = normpdf(mse_range, HParas.RMSE.mean(2), HParas.RMSE.std(2));
+    lhoods.RMSE.Plastic = normpdf(mse_range, HParas.RMSE.mean(3), HParas.RMSE.std(3));
     
     %likelihood based on both 
-    lhoods.combined.PaintedMetal = lhoods.I.PaintedMetal * lhoods.R.PaintedMetal;
+    lhoods.combined.PaintedMetal = lhoods.I.PaintedMetal * lhoods.R.PaintedMetal * lhoods.IMSE.PaintedMetal * lhoods.RMSE.PaintedMetal;
     lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.PaintedMetal , 1];
 
-    lhoods.combined.Wood = lhoods.I.Wood * lhoods.R.Wood;
+    lhoods.combined.Wood = lhoods.I.Wood * lhoods.R.Wood * lhoods.IMSE.Wood * lhoods.RMSE.Wood;
     lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.Wood , 2];
 
-    lhoods.combined.Plastic = lhoods.I.Plastic * lhoods.R.Plastic;
+    lhoods.combined.Plastic = lhoods.I.Plastic * lhoods.R.Plastic * lhoods.IMSE.Plastic * lhoods.RMSE.Plastic;
     lhoods.liki_ratio_varis = [lhoods.liki_ratio_varis; lhoods.combined.Plastic , 3];
 
     %order to most likely first
@@ -554,10 +574,26 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
 
     %likelihood ratio
     lhoods.ratio = lhoods.liki_ratio_varis(end,1)/lhoods.liki_ratio_varis(end-1,1);
+global lhoods_ratio_save
+lhoods_ratio_save=[lhoods_ratio_save;lhoods.ratio];
 
-    %Classification
+if lhoods.liki_ratio_varis(end,1)==0 || lhoods.ratio<200
+      material_to_class=4;
+elseif isnan(lhoods.ratio)
+      material_to_class=4;
+else
+%       Classification
     material_to_class = lhoods.liki_ratio_varis(end,2);
-%     PClass.Confidence = lhoods.ratio/(1+lhoods.ratio);
+%         PClass.Confidence = lhoods.ratio/(1+lhoods.ratio);
+end
+  
+global mse_range_save mse_intensity_save polyfit_coefs_range_save polyfit_coefs_intensity_save ;
+mse_intensity_save=[mse_intensity_save;mse_intensity];
+mse_range_save=[mse_range_save;mse_range];
+
+polyfit_coefs_range_save=[polyfit_coefs_range_save;polyfit_coefs_range(1)];
+polyfit_coefs_intensity_save=[polyfit_coefs_intensity_save;polyfit_coefs_intensity(1)];
+
 
     switch(material_to_class)
         case 1
@@ -569,7 +605,11 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
         case 3
 %             PClass.Material = 'Plastic';
             guess = 3;
+        case 4
+            guess = 4;
+
     end   
+
 
     % puts the result in an accessible place
     found_lines.classifier_output(i,1)= guess;
@@ -585,7 +625,9 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
             found_lines.line_start_end_points_smoothed(i,2) = -found_lines.line_start_end_points_smoothed(i,2);
             found_lines.found_lines_gradients(end+1,1) = found_lines.found_lines_gradients(i,1);
             found_lines.found_lines_gradients(end+1,1) = found_lines.found_lines_gradients(i,1);
-       end
+        else
+          found_lines.classifier_output(i,1) = 8;%randint(1,1,[1,3]); %make a guess
+        end
     end
 end
     

@@ -50,7 +50,7 @@ optimise.maxangleJ4to6=20*pi/180;
 
 % watet based path planning this is how cource the graph search should be
 % where 1 would be equal to the max_angle_for123
-optimise.waterPPleaniancy=2.5;
+optimise.waterPPleaniancy=1.8;%2.5;
 
 %% NBV
 %this is how many views to save for the NBV

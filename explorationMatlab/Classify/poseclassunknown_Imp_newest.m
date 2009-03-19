@@ -7,7 +7,7 @@ function poseclassunknown_Imp_newest(numofintplanes)
 
 %% Setup and Variables
 % close all
-global PointData RangeData IntensityData workspace classPlanePlotHa AXBAMnCtestdata alldirectedpoints 
+global PointData RangeData IntensityData workspace classPlanePlotHa AXBAMnCtestdata alldirectedpoints Q
 
 % figure(1)
 % plot_planes(plane,mew);
@@ -28,6 +28,13 @@ NOhandleOPTIONS.show_robot=true;
 NOhandleOPTIONS.animate_move=false;
 NOhandleOPTIONS.remv_unkn_in_mv=false;    
 
+%must start from a reasonable pose
+ try movetonewQ(0,rad2deg([Q(1:3),0,0,0]),[],NOhandleOPTIONS); 
+ catch
+   error('The start must have joint 4-6 =0')
+ end
+
+ 
 %this is how many we go after at once
 maxindexsize=30;
 
@@ -93,14 +100,17 @@ try [planeSet,pose,pathval]=determinePathsNposes(index,maxindexsize);
 catch
   lasterr;
   display('No poses found, trying again with 4* maxindexsize, and removing self scanning')
-  workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
+  workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles,Q,2.8);
 
   try [planeSet,pose,pathval]=determinePathsNposes(index,4*maxindexsize);
     if size(planeSet,2)==0; error('Still no pose');end
   catch
     lasterr;
     display('No poses found, trying again with all index')
+      workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles,Q,3);
+
     try [planeSet,pose,pathval]=determinePathsNposes(index,size(index,1));
+      if size(planeSet,2)==0; error('No really...Still no pose');end
     catch
         lasterr
       display('Still no luck so handing over to you');
@@ -117,7 +127,10 @@ indextoblast=1;
 while solsfound<numofintplanes
     try
     %Shouldn't happen but if we dont have a valid pose go to next pose
-    if ~pose(indextoblast).validPose            
+    if isempty(pose)
+      display('for some reason pose variable is empty')
+      keyboard
+    elseif ~pose(indextoblast).validPose            
         indextoblast=indextoblast+1;
         continue
     else %we have a valid pose
@@ -177,6 +190,11 @@ while solsfound<numofintplanes
             
             %update oc grid status
             update_ocstatus(ClassifiedData);
+            
+%             move back to zeros for last 4
+            try movetonewQ(0,rad2deg([Q(1:3),0,0,0]),[],NOhandleOPTIONS);  %try moving to all zeros
+            catch movetonewQ(0,[0,-85,90,0,0,0],[],NOhandleOPTIONS); %try moving back to the assumed safe pose starting guess
+            end 
         end
         
         

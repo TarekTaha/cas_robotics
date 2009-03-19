@@ -14,7 +14,11 @@
 function organise_data()
 
 %% Variables
-global workspace scan PointData RangeData PoseData robot_maxreach
+global workspace scan PointData RangeData PoseData robot_maxreach robmap_h
+
+%optimising the surface map
+robmap_h.Optimise
+
 % starttime=clock;
 % Number of points we want in the cube for ray casting
 % numpntsInCube=scan.numpntsInCube;

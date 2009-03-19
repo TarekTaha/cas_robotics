@@ -529,6 +529,18 @@ end
 display('Classifying the LATEST set of data that has been scanned');
 scan.ClassificationData=[];
 
+% %this was added as a test measure to try and work out the intestiy parameters for the LRC
+% display('Clearing the save data');
+% clear global mse_range_save mse_intensity_save polyfit_coefs_range_save polyfit_coefs_intensity_save ;
+% [ClassifiedData] = Block_Classifier(PointData(:,114:228,:), IntensityData(:,114:228),RangeData(:,114:228)); 
+% global mse_range_save mse_intensity_save polyfit_coefs_range_save polyfit_coefs_intensity_save ;
+% % save('material1-paintedmetal.mat','mse_range_save','mse_intensity_save','polyfit_coefs_range_save','polyfit_coefs_intensity_save');
+% save('material2-wood.mat','mse_range_save','mse_intensity_save','polyfit_coefs_range_save','polyfit_coefs_intensity_save');
+% % save('material3-plastic.mat','mse_range_save','mse_intensity_save','polyfit_coefs_range_save','polyfit_coefs_intensity_save');
+% display('only making the file fortraining');
+% return  
+
+
 try [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData); 
 % profile clear;profile on;    
   try update_ocstatus(ClassifiedData); %profile off; profile viewer;
@@ -550,7 +562,7 @@ for i=1:numofintplanes
   %only do one at a time
   poseclassunknown_Imp_newest(1)
 %   save the test
-  AXBAMnCtesting();
+  AXBAMnCtesting(handles);
 end
 
 
@@ -669,7 +681,8 @@ else
     use_real_robot_SCAN(deg2scan);
     organise_data();
     use_real_robot_GETJs();
-    plotdenso(r, Q, guiglobal.checkFF, guiglobal.plot_ellipse);
+    plotdenso(r, Q, guiglobal.checkFF, guiglobal.plot_ellipse);    
+    
 end
 
 % --- Executes on button press in rot_scan_pushbutton.
@@ -960,7 +973,7 @@ if get(hObject,'Value')
     UNclassifiedvoxels=setdiff([1:size(workspace.probofmaterial,1)],classifiedvoxels);
     hold on;
     classifiedplotHa(end+1)=plot3(workspace.probofmaterial(UNclassifiedvoxels,1)*class_cubesize,workspace.probofmaterial(UNclassifiedvoxels,2)*class_cubesize,...
-    workspace.probofmaterial(UNclassifiedvoxels,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');
+    workspace.probofmaterial(UNclassifiedvoxels,3)*class_cubesize,'y','marker','.','markersize',1,'linestyle','none');
       
     [nothing,Materialindex]=max(workspace.probofmaterial(classifiedvoxels,4:end),[],2);
     for curr_mat=unique(Materialindex)'
@@ -968,9 +981,9 @@ if get(hObject,'Value')
       toplot=workspace.probofmaterial(classifiedvoxels(IndexofMaterialindex),1:3)*class_cubesize;
 %       classifiedplotHa(end+1)=plot3(toplot(:,1),toplot(:,2),toplot(:,3),'color',[0,curr_mat/max(Materialindex),curr_mat/max(Materialindex)],'marker','.','markersize',4,'linestyle','none');
       if curr_mat==1
-          classifiedplotHa(end+1)=plot3(toplot(:,1),toplot(:,2),toplot(:,3),'color','k','marker','.','markersize',4,'linestyle','none');        
+          classifiedplotHa(end+1)=plot3(toplot(:,1),toplot(:,2),toplot(:,3),'color','k','marker','.','markersize',8,'linestyle','none');        
       elseif curr_mat==2
-          classifiedplotHa(end+1)=plot3(toplot(:,1),toplot(:,2),toplot(:,3),'color',[0.5,0.5,0.5],'marker','.','markersize',4,'linestyle','none');        
+          classifiedplotHa(end+1)=plot3(toplot(:,1),toplot(:,2),toplot(:,3),'color',[0.5,0.5,0.5],'marker','.','markersize',8,'linestyle','none');        
       elseif curr_mat==3
           classifiedplotHa(end+1)=plot3(toplot(:,1),toplot(:,2),toplot(:,3),'color','c','marker','.','markersize',4,'linestyle','none');        
       end
