@@ -282,6 +282,8 @@ elseif check_arm_perms && size(find(startQ(1:3)-endQ(1:3)==0),2)<2;
 
     %this is the size of the increment values
     inc_val=(endQ-startQ)./num_inc;
+    %make sure all the first 3 are greater than zero
+    inc_val(inc_val(1:3)==0)=eps;
 
 %% %Additional Combs
 % combs=

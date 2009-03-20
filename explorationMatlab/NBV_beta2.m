@@ -16,7 +16,20 @@ function NBV_beta2()
 % clear the plots and global bestviews variable
 clear global bestviews;
 
-global workspace all_views bestviews scan r;
+global workspace all_views bestviews scan r Q optimise;
+
+
+%must be able to get to 0 and from current pose
+[pathfound,all_steps_to0]=pathplanner_new([Q(1:3)+eps,zeros([1,r.n-3])],0,1,0,optimise.numofPPiterations,0);
+if pathfound==0
+  workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles,Q);
+  [pathfound,all_steps_to0]=pathplanner_new([Q(1:3)+eps,zeros([1,r.n-3])],0,1,0,optimise.numofPPiterations,0);
+  if pathfound==0
+    warning('You must be able to get back to zero from the current pose')
+    keyboard
+  end
+end
+
 
 %%%%%%%%%saving for the exhastive search
 % try load Xsearchdata.mat;
@@ -253,8 +266,10 @@ end
 display('Removing invalid bestviews')
 tic
 invalid_views=[];
-for cur_view=1:size(bestviews,2)
-  if isempty(bestviews(cur_view).expectedaddinfo)
+
+
+for cur_view=1:size(bestviews,2)  
+  if isempty(bestviews(cur_view).expectedaddinfo)  
     invalid_views=[invalid_views;cur_view];
   end
 end
@@ -307,14 +322,31 @@ end
 %% Do new wavefront based planner
 newQ=zeros([size(bestviews,2),6]);
 for current_view=1:size(bestviews,2)
-  newQ(current_view,:)=bestviews(current_view).Q;
+  
+  try [pathfound,bestviews(current_view).all_steps_from0]=pathplanner_new([bestviews(current_view).Q(1:3)+eps,bestviews(current_view).Q(4:6)],0,1,0,optimise.numofPPiterations,0,[bestviews(current_view).Q(1:3),zeros([1,r.n-3])]);
+  catch
+    pathfound=0;
+    bestviews(current_view).all_steps_from0=[];
+  end
+  
+  if pathfound
+    newQ(current_view,:)=[bestviews(current_view).Q(1:3),zeros([1,r.n-3])];
+  else   %no path from newQ(1:3),0,0,0 to newQ found so going to try anyway with no zeros
+    newQ(current_view,:)=bestviews(current_view).Q;
+    %so clear the all_steps_from0 since it is crap values anyway
+    bestviews(current_view).all_steps_from0=[];
+  end
 end
-pathval=pathplanner_water(newQ);
+
+
+pathval=pathplanner_water(newQ,0,0,1,[Q(1:3)+eps,zeros([1,r.n-3])]);
 
 
 valid_count=0;
 tempbestviews=[];
 encroachIntoUnknown=[];
+correspondingindex_used=[];
+
 for current_view=1:size(pathval,2)  
   if pathval(current_view).result 
     if pathval(current_view).unknown_points_result
@@ -327,12 +359,27 @@ for current_view=1:size(pathval,2)
                             newQ(:,3)-pathval(current_view).all_steps(end,3)==0 & ...
                             newQ(:,4)-pathval(current_view).all_steps(end,4)==0 & ...
                             newQ(:,5)-pathval(current_view).all_steps(end,5)==0 & ...
-                            newQ(:,6)-pathval(current_view).all_steps(end,6)==0,1);
+                            newQ(:,6)-pathval(current_view).all_steps(end,6)==0);
+                          
     if isempty(correspondingindex)
       error('Couldnt find the corresponding best view');
+    elseif size(correspondingindex,1)>1
+      %find the first one that hasn't been seen before
+      temp=setdiff(correspondingindex,correspondingindex_used);
+      correspondingindex=temp(1);      
     end
+    %store the ones already seen
+    correspondingindex_used=[correspondingindex_used;correspondingindex];
+    
+    %find the correct path
     bestviews(correspondingindex).valid=pathval(current_view).result;
-    bestviews(correspondingindex).all_steps=pathval(current_view).all_steps;
+    
+    %add steps at start to get to 0's and then at end to get from 0's to newQ
+    bestviews(correspondingindex).all_steps=[all_steps_to0;
+                                             pathval(current_view).all_steps;
+                                             bestviews(current_view).all_steps_from0];
+                                           
+                                             
 
     %put old bestview data into the temp bestview (need to assign to whole
     %of tempbestviews if it is the first structure assignment)
