@@ -100,14 +100,13 @@ try [planeSet,pose,pathval]=determinePathsNposes(index,maxindexsize);
 catch
   lasterr;
   display('No poses found, trying again with 4* maxindexsize, and removing self scanning')
-  workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles,Q,2.8);
+  workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles,Q);
 
   try [planeSet,pose,pathval]=determinePathsNposes(index,4*maxindexsize);
     if size(planeSet,2)==0; error('Still no pose');end
   catch
     lasterr;
     display('No poses found, trying again with all index')
-      workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles,Q,3);
 
     try [planeSet,pose,pathval]=determinePathsNposes(index,size(index,1));
       if size(planeSet,2)==0; error('No really...Still no pose');end
@@ -248,18 +247,6 @@ while solsfound<numofintplanes
     lasterr
     display('some problem in the while loop, you have control')
     keyboard
-%     display('No paths found or something, removing self scanning and trying again');
-%     global workspace
-%     workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
-%     try [planeSet,pose,pathval]=determinePathsNposes(index,4*maxindexsize);
-%       if isempty(pose)
-%         display('still cant find any poses and or paths you have control');
-%         keyboard
-%       end
-%     catch;
-%       display('still cant find any poses and or paths you have control');
-%       keyboard
-%     end
    end
 end
 
