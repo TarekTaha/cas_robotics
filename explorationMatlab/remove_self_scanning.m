@@ -34,7 +34,7 @@ if nargin<3
     if nargin<2
         %% try to get the latest Q from the robot if we are using it will
         %% fail if there if not using real robot
-        try  use_real_robot_GETJs(); end
+        %try  use_real_robot_GETJs(); end
         newQ=Q;
     end    
 end
@@ -45,7 +45,7 @@ t = r.base;
 
 %% Go through each link of robot (1->n)
 for i=1:n
-    if size(newQ,2)<=i
+    if i<=size(newQ,2)
       t = t * L{i}(newQ(i));
     else
       %we have too many links for this current newQ
@@ -62,7 +62,7 @@ for i=1:n
 % \frac{(X-center_x)^2}{a^2}+\frac{(Y-center_y)^2}{b^2}+\frac{(Z-center_z)^2}{c^2}>1.5 
 % \end{array}$$
 
-    if n<3 
+    if i<3 
         points=points((((translated_points(:,1)-densoobj(i+1).ellipse.center(1)).^2)/densoobj(i+1).ellipse.params(1)^2+...
                        ((translated_points(:,2)-densoobj(i+1).ellipse.center(2)).^2)/densoobj(i+1).ellipse.params(2)^2+...
                        ((translated_points(:,3)-densoobj(i+1).ellipse.center(3)).^2)/densoobj(i+1).ellipse.params(3)^2>removefactor/2),:);
