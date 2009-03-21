@@ -347,8 +347,16 @@ tempbestviews=[];
 encroachIntoUnknown=[];
 correspondingindex_used=[];
 
-for current_view=1:size(pathval,2)  
+for current_view=1:size(pathval,2)
+  
+  
   if pathval(current_view).result 
+    if ~isempty(find(diff(abs(pathval(current_view).all_steps(:,1:3)))>20*pi/180,1))
+      %then its not valid
+      display('path with greater than 20 deg leap at end detected so ignoring it');
+      continue;          
+    end
+    
     if pathval(current_view).unknown_points_result
       encroachIntoUnknown=[encroachIntoUnknown,current_view];
     end
@@ -374,12 +382,24 @@ for current_view=1:size(pathval,2)
     %find the correct path
     bestviews(correspondingindex).valid=pathval(current_view).result;
     
+    %if we have some views to add to the end and the first step is equal to
+      %the last step of pathval(current_view).all_steps (within eps) the get
+    %rid of it
+    if ~isempty(bestviews(current_view).all_steps_from0)
+      if isempty(find(pathval(current_view).all_steps(end,:)'-bestviews(current_view).all_steps_from0(1,:)'>eps,1))
+        try bestviews(current_view).all_steps_from0=bestviews(current_view).all_steps_from0(2:end,:);
+        catch 
+          display('NBV_beta2 :: couldnt take off the first step of bestview 0 to actual newQ');
+        end
+      end
+    end
     %add steps at start to get to 0's and then at end to get from 0's to newQ
     bestviews(correspondingindex).all_steps=[all_steps_to0;
                                              pathval(current_view).all_steps;
                                              bestviews(current_view).all_steps_from0];
                                            
                                              
+      
 
     %put old bestview data into the temp bestview (need to assign to whole
     %of tempbestviews if it is the first structure assignment)
