@@ -21,7 +21,7 @@ optimise.mintargetdis=0.15;
 optimise.maxtargetdis=0.60;
 %this is the min distance between where stream hits target the target and
 %where we desire it to hit (plane.home_point)
-optimise.minAccepDis=0.02;
+optimise.minAccepDis=0.015;
 % This is how many max iterations for the optimisation
 optimise.iLimit=50;%used to be 1000
 % This is the acceptable value for the cost funciton minimisation
