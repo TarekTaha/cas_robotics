@@ -15,22 +15,27 @@
 %
 % *Returns:* NULL
 
-function surface_making_simple(PointData,mew,DISPON)
+function surface_making_simple(PointData,mew,DISPON,min_num_pts_in_plane)
 
 %% Variables
 clear global plane
-global plane
+global plane 
+
+global point_cloud_reg
 
 %default is to not show the display
-if nargin<3
-    DISPON=false;
+if nargin<4
+    % The minimum num of points in a plane
+    min_num_pts_in_plane=8;
+    if nargin<3
+        DISPON=false;
+    end
 end
 
 %Scan data is the Point data 3*many cartisian points passed in
 scan_data=PointData;
 
-% The minimum num of points in a plane
-min_num_pts_in_plane=8;
+
 % The threashold of plane fit
 eigen_value_thresh=2;
 

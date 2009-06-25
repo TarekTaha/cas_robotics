@@ -260,7 +260,8 @@ for i = 1:length(plane)
     %if this is not set it will be empty
     pose(end).allE=allE;
     %make sure it is empty
-    allE=[];
+    allE.E=[];
+    allE.Q=[];
     
     % Increase the valid pose with either TRUE (1) or FALSE (0)
     valid_count=valid_count+valid;

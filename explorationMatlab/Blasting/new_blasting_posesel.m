@@ -46,6 +46,10 @@ do_longversion=false;
 % \mbox{targetNormal...} & V_{tn} \\
 % \end{array}$$
     global optimise densoobj workspace r allE;
+    allE.E=[];
+    allE.Q=[];
+    allE.funcE=[];
+    allE.funcQ=[];
     
     obstacle_points=workspace.indexedobsticles;
     
@@ -91,13 +95,23 @@ do_longversion=false;
 
     
 %% Do the least squared optimisation function using q passed in       
+history.gradient = [];
+history.residual = [];
+history.x = [];
+    
 resnorm2=inf;
 q_original=q;
 usingzeros=false;
 % options = optimset('Display', 'off', 'Largescale', 'off', 'TolFun', optimise.stol,'MaxFunEvals', optimise.iLimit,'DiffMinChange',0.01*pi/180);
     xGuess = zeros([size(q,1)-1,size(q,2)]);lb = []; ub = [];
-    
-    [dq, resnorm1,residual1] = lsqnonlin(@costComponents, xGuess, lb, ub, optimise.options);        
+
+%% Delete
+%     ops=optimset('outputfcn', @outfun,'Display', 'off', 'Largescale', 'off', 'TolFun', optimise.stol,'MaxIter', optimise.iLimit,'MaxFunEvals',optimise.funLimit); 
+%     [dq, resnorm1,residual1] = lsqnonlin(@costComponents, xGuess, lb, ub, ops);        
+ops=optimise.options;
+ops.OutputFcn=@outfun;
+[dq, resnorm1,residual1] = lsqnonlin(@costComponents, xGuess, lb, ub, ops);        
+
 
     %if some of the residuals are greater than 1 (eg unacceptable) do more itterations
     if ~isempty(find(residual1>1,1)) && do_longversion
@@ -140,7 +154,39 @@ usingzeros=false;
     if usingzeros && solutionvalid
         display('found one');
     end
+      
+%% record search path (from steves blastConfiguration)
+    function stop = outfun(x,optimValues,state)
+        stop = false;
         
+%         keyboard
+        
+        switch state
+            case 'init'
+%                 hold on
+            case 'iter'
+                if size(history.residual,2) > 1
+                    fval1 = norm(optimValues.residual);
+                    fval2 = norm(history.residual(:,end));
+                    if abs(fval1 - fval2) < optimise.options.TolFun
+                        stop = true;
+                    end
+                end
+                % Concatenate current point and objective function
+                % value with history. x must be a row vector.
+                history.gradient = [history.gradient optimValues.gradient];
+%                 history.fval = [history.fval optimValues.fval];
+                history.residual = [history.residual optimValues.residual];
+                history.x = [history.x x];
+
+                allE.E=[allE.E,optimValues.residual];
+                allE.Q=[allE.Q,[q(1:5)+real(x(1:5));0]];
+
+            case 'done'
+%                 hold off
+            otherwise
+        end
+    end
 %% EMBEDDED FUNCTION: Run iteratively changing delta q (dq)
     function [e]=costComponents(dq)
         tr=t;               
@@ -239,10 +285,10 @@ usingzeros=false;
      dist_to_stream_OPend=sqrt((intersectionPNT(1)-streamEndOp(1))^2+(intersectionPNT(2)-streamEndOp(2))^2+(intersectionPNT(3)-streamEndOp(3))^2);
                
 
-           k=10;
+k=1;%            k=10;
         e = [1/(1+exp(-k*(theta-optimise.maxDeflectionError))); %g_1
-             1- 1/(1+exp(-k*(streamlength-optimise.mintargetdis)))+1/(1+exp(-k*(streamlength-optimise.maxtargetdis))); %g_2
-             1/(1+exp(-k/2*(viewpoint_acuracy-optimise.minAccepDis))); %g_3 (note how optimise.minAccepDis is actually the maximum constraint)
+             1- 1/(1+exp(-k*(10*streamlength-10*optimise.mintargetdis)))+1/(1+exp(-k*(10*streamlength-10*optimise.maxtargetdis))); %g_2
+             1/(1+exp(-k*(10*viewpoint_acuracy-10*optimise.minAccepDis))); %g_3 (note how optimise.minAccepDis is actually the maximum constraint)
             (1-1/(1+exp(-k*(result_row(3)-1))))^2+...
             (1-1/(1+exp(-k*(result_row(4)-1))))^2+...
             (1-1/(1+exp(-k*(result_row(5)-1))))^2+...
@@ -260,62 +306,15 @@ if showerrors
 %          temp_prev(1:6)-dq
 %          temp_prev=dq;
 %           plot(r,q_temp')
-allE=[allE,e];
-end
-    end
+
+allE.funcE=[allE.funcE,e];
+allE.funcQ=[allE.funcQ,q_temp];
 end
 
 
-%% check_that_guess_is_valid
-function q=check_that_guess_is_valid(q,qlimits,pt,t,Links,numlinks,plane_equ,displayon,maxdistguess,linkvals)
-%check to see we are not starting parallel with plane normal a temp variable to hold the joint fix
-    newQ=q;
-    
-    [valid,dist_val,targetdist(1).val,correctway]=classunkcheck_newQ(newQ,qlimits,pt,t,Links,numlinks,plane_equ,displayon,linkvals); 
-    if dist_val>maxdistguess        
-        if newQ(5)>0; newQ(5)=q(5)-pi/2;            
-        else newQ(5)=q(5)+pi/2;          
-        end   
-        if displayon; display('changing joint 5 only');end
-        [valid,dist_val,targetdist(1).val,correctway]=classunkcheck_newQ(newQ,qlimits,pt,t,Links,numlinks,plane_equ,displayon,linkvals); 
-        
-        if dist_val>maxdistguess            
-            newQ=q;
-            if newQ(4)>0; newQ(4)=q(4)-pi/2;                              
-            else newQ(4)=q(4)+pi/2;               
-            end
-            if displayon; display('changing joint 4 only');end
-            [valid,dist_val,targetdist(1).val,correctway]=classunkcheck_newQ(newQ,qlimits,pt,t,Links,numlinks,plane_equ,displayon,linkvals); 
-            
-            if dist_val>maxdistguess
-                newQ=q;
-                if newQ(4)>0; newQ(4)=newQ(4)-pi/2;
-                else newQ(4)=newQ(4)+pi/2;
-                end                
-                if newQ(5)>0; newQ(5)=newQ(5)-pi/2;
-                else newQ(5)=newQ(5)+pi/2;
-                end
-                if displayon; display('changing joint 4 and 5');end
-                [valid,dist_val,targetdist(1).val,correctway]=classunkcheck_newQ(newQ,qlimits,pt,t,Links,numlinks,plane_equ,displayon,linkvals); 
-                
-                if dist_val>maxdistguess
-                    if displayon; display('Still not good enough even after different starts of 4 and 5');end
-                    %probably could make a better guess
-                end
-            else if displayon; display('close enough without moving 4 and 5 together');end
-            end
-        else if displayon; display('close enough without moving 4');end
-        end
-    else if displayon; display('close enough without moving 4 or 5');end
+
+
+
+
     end
-    
-    %if we are aligned ok but we are around the opposite way then fix this
-    if ~correctway         
-        if newQ(4)>0; newQ(4)=newQ(4)-pi;                              
-        else newQ(4)=newQ(4)+pi;               
-        end
-        if displayon; display('Switching directing by changing joint 4 only'); end
-    end 
-    
-    q=newQ;
 end
