@@ -27,13 +27,16 @@ plot_config.addinmirror=false;
 % Config
 global config
 % the minimum ray to use
-config.minray=30;%130;
+config.minray=130;%30;
 % the max ray to use
-config.maxray=440;%300;
+config.maxray=300;%440;
 % get the pose from out of the ply file (%redundant)
 config.getposedata=false; if config.getposedata setuprobot(); end
 % for each voxel display which material box it is in
 config.show_voxelpostiioninfo=false;
+% Collect all wood together as one material
+config.allwood_thesame=true;
+
 
 % Which grid files to use? (note there is no  grid 2)
 grid_file_number=[true,false,true,true];
@@ -50,8 +53,8 @@ mu=0.15;
 % The material type names
 materialtype{1}='rusted metal';
 materialtype{2}='wood';
-materialtype{3}='wood on roof';
-materialtype{4}='shiny metal';   
+materialtype{3}='wood on roof'; %note: if allwood_thesame==true, this will actually be 2 as well
+materialtype{4}='shiny metal';  %note: if allwood_thesame==true, this will be 3
 
 % Clear values
 classifierdata(1).val=[];classifierdata(2).val=[];classifierdata(3).val=[];classifierdata(4).val=[];
@@ -137,7 +140,21 @@ end
 all_data=all_data;
 all_data_T=all_data_T;
 
+%% if all wood is the same, materials 2&3->2 and 4->3 
+if config.allwood_thesame
+    %change all mat 3 to mat 2 and mat 4 to mat 3
+    all_data_T(all_data_T==3)=2;
+    all_data_T(all_data_T==4)=3;
+    
+    %recreate classifierdata
+    temp=classifierdata;
+    classifierdata=[];
+    classifierdata(1).val=temp(1).val;
+    classifierdata(2).val=[temp(2).val;temp(3).val];
+    classifierdata(3).val=temp(4).val;
+end
 
+    
 %% if plotting is required
 if plot_config.show_angleofincidenceplot
     for materialtype_num=1:size(classifierdata,2)  

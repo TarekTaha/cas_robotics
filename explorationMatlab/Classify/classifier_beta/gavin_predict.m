@@ -1,16 +1,53 @@
-function gavin_predict(model,all_data,all_data_T)
+%% gavin_predict
+%
+% *Description:* given a set and a model test the model and show results 
+%
+% *Inputs*
+% all_data (3xmany) with angle of incidence, ormalised intensity and rang, 
+% all_data_T (1xmany) the correct answer as we specified
+% model (SVM model) see: http://www.csie.ntu.edu.tw/~cjlin/libsvm/index.html
+%
+% *Outputs*
+% NONE
 
+
+function gavin_predict(model,all_data,all_data_T,ratiotouse)
+
+%so we have to be greater than x*100% sure of all outcome otherwise say unsure
+minprob_threshhold=0.9;
+
+if nargin<4 || ratiotouse>1 || ratiotouse<0
+    ratiotouse=rand();
+end
 close all
 
-%rand num and rand perm of solutions 
-randindex=randperm(size(all_data,1));
-randnumofindex=1:round(rand*1000);
-subset_all_data_T=all_data_T(randindex(randnumofindex));
-subset_all_data=all_data(randindex(randnumofindex),:);
+nummat=max(size(model));
+
+%find out how many of each material points there are
+for curr_mat=1:nummat
+    num_of_mats(curr_mat)=size(find(all_data_T==curr_mat),1);
+end
+%choose a number less than the whole set
+num_trainingset=round(min(num_of_mats)*ratiotouse);
+
+subset_all_data_T=[];
+subset_all_data=[];
+%for each material select the same number of random points
+for curr_mat=1:nummat
+    possible_index=find(all_data_T==curr_mat);
+    
+    %get a random perm of the number of training set
+    randindex=randperm(size(possible_index,1));
+    randnumofindex=randindex(1:num_trainingset);
+    
+    %make subset consisting of a random set of each material which is the same size    
+    subset_all_data_T=[subset_all_data_T;all_data_T(possible_index(randnumofindex))];
+    subset_all_data=[subset_all_data;all_data(possible_index(randnumofindex),:)];
+end
+
 %normalise data
 subset_all_data=gavin_normalisedata(subset_all_data);
 
-nummat=max(size(model));
 %num of games to be played is sum of first n-1 numbers
 num_of_games=((nummat-1)^2+(nummat-1))/2;
 numinputs=size(subset_all_data,1);
@@ -49,27 +86,54 @@ for i=1:nummat-1
 end
 
 
+disp_results=false;
 
 for i=1:size(resulttable,1)
-    for j=1:nummat
-        wins(j)=size(find(resulttable(i,:)==j),2);
+    if ~isempty(find(probs(i,:)<minprob_threshhold & probs(i,:)>0,1))
+        winner(i)=0;
+        if disp_results
+            display(['Unsure. Answer:', num2str(resulttable(i,:)),'. Probs: (', num2str(probs(i,:)),'). Correct answer: ', num2str(subset_all_data_T(i))]);
+        end
+    else
+        for j=1:nummat
+            winindex=find(resulttable(i,:)==j);
+            %wins is now a sum of the certainty, so it we have a certainty of 1
+            %then it is a tally of the wins, otherwise it could be as low as
+            %0.5, 
+            wins(j)=sum(probs(i,winindex));
+            %old way
+    %         wins(j)=size(find(resulttable(i,:)==j),2);        
+        end
+
+        [nothing,winner(i)]=max(wins); 
+        %average prob 
+        if disp_results
+            display(['Pred:', num2str(winner(i)),'. Actual: ', num2str(subset_all_data_T(i)),'.. Results:', num2str(resulttable(i,:)),'. Probs: (', num2str(probs(i,:)),'). Average winner prob is: ',num2str(wins(winner(i))/(nummat-1))]);
+        end
     end
-    [nothing,winner(i)]=max(wins);
 end
 
-display(['Got correct: ',...
+display(['Of the: ', num2str(size(subset_all_data_T,1)),', I got correct: ',...
     num2str(size(find(subset_all_data_T==winner),1)),...
-    ' of ',num2str(size(subset_all_data_T,1)),' (',...
-    num2str(size(find(subset_all_data_T==winner),1)/size(subset_all_data_T,1)*100),'%)']);
+    ' of ',num2str(size(subset_all_data_T,1)-size(find(winner==0),1)),' (',...
+    num2str(size(find(subset_all_data_T==winner),1)/(size(subset_all_data_T,1)-size(find(winner==0),1))*100),...
+    '%),and was unsure about ',num2str(size(find(winner==0),1)),...
+    ' prob threshold is ',num2str(minprob_threshhold)]);
 
 for curr_mat=1:nummat
     figure(curr_mat)
     thisMaterialTotal=size(find(subset_all_data_T==curr_mat),1);
-    index=find(subset_all_data_T~=winner & subset_all_data_T==curr_mat);
+    %all which are the current material but the answer is not the same as
+    %the known answer and we haven't answered unknown
+    index=find(subset_all_data_T~=winner & subset_all_data_T==curr_mat & winner~=0);
     misclassifications(curr_mat).val=winner(index);
     hist(misclassifications(curr_mat).val,[1:curr_mat-1,curr_mat+1:nummat])
     xlabel('Incorrect Classifications');
-    ylabel(['Incorrect Classifications= ',num2str(size(misclassifications(curr_mat).val,1)),', of ',num2str(thisMaterialTotal),', with all tested= ',num2str(size(randnumofindex,2)),'']);
-    title(['Should be material ',num2str(curr_mat)])
-    pause
+    ylabel(['Incorrect Classifications= ',num2str(size(misclassifications(curr_mat).val,1)),', of ',num2str(thisMaterialTotal)]);
+    title(['Material ',num2str(curr_mat),...
+        '. Correct: ',num2str(size(find(subset_all_data_T==winner & subset_all_data_T==curr_mat),1)/size(find(subset_all_data_T==curr_mat),1)*100),...
+        '%. Unsure: ',num2str(size(find(winner==0 & subset_all_data_T==curr_mat),1)/size(find(subset_all_data_T==curr_mat),1)*100),...
+        '%. Mistake: ',num2str(size(find(winner~=0 & winner~=subset_all_data_T & subset_all_data_T==curr_mat),1)/size(find(subset_all_data_T==curr_mat),1)*100),'%'])
+%     display('Prese enter to continue');
+%     pause
 end
