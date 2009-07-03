@@ -8,6 +8,9 @@
 function gavin_fitlines(classifierdata,plotnormfit,plotpolyfit)
 % load gavin_classifierdata_rays130to300_mu15mm_voxsize10mm.mat
 % global classifierdata
+
+error('problems in loop')
+
 figure(4)
 if nargin<3
     plotpolyfit=false;
@@ -48,7 +51,7 @@ for material_num=1:size(classifierdata,2)
         for i=anglerange
             index2=find(angle(index)>i-angleinc/2 & angle(index)<i+angleinc/2);
             if size(index2,1)>1
-                [muhat,sigmahat] = normfit(intensity(angle(index)>i & angle(index)<i+angleinc));
+                [muhat,sigmahat] = normfit(intensity(index2));
                 all_muhat_temp(count)=muhat;
                 all_sigmahat_temp(count)=sigmahat;
             end       
