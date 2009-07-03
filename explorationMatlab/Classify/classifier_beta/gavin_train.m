@@ -64,7 +64,12 @@ for curr_mat_negOne=1:max(all_data_T)
             tempdata_T_negOne(:)=-1;
 
             %train the curr_mat_negOne vs curr_mat_one model
-            model(curr_mat_negOne,curr_mat_one).val= svmtrain([tempdata_T_negOne;tempdata_T_one],[tempdata_negOne;tempdata_one],'-b 1');                                                     
+            try            
+                model(curr_mat_negOne,curr_mat_one).val= svmtrain([tempdata_T_negOne;tempdata_T_one],[tempdata_negOne;tempdata_one],'-b 1');                                                     
+            catch
+                display('some error');
+                keyboard;
+            end
         end        
     end
 end

@@ -11,12 +11,12 @@
 % NONE
 
 
-function gavin_predict(model,all_data,all_data_T,ratiotouse)
+function [subset_all_data,subset_all_data_T,subset_all_data_xyz,winner]=gavin_predict(model,all_data,all_data_T,all_data_xyz,ratiotouse)
 
 %so we have to be greater than x*100% sure of all outcome otherwise say unsure
-minprob_threshhold=0.9;
+minprob_threshhold=0.7;
 
-if nargin<4 || ratiotouse>1 || ratiotouse<0
+if nargin<5 || ratiotouse>1 || ratiotouse<0
     ratiotouse=rand();
 end
 close all
@@ -32,6 +32,7 @@ num_trainingset=round(min(num_of_mats)*ratiotouse);
 
 subset_all_data_T=[];
 subset_all_data=[];
+subset_all_data_xyz=[];
 %for each material select the same number of random points
 for curr_mat=1:nummat
     possible_index=find(all_data_T==curr_mat);
@@ -43,6 +44,7 @@ for curr_mat=1:nummat
     %make subset consisting of a random set of each material which is the same size    
     subset_all_data_T=[subset_all_data_T;all_data_T(possible_index(randnumofindex))];
     subset_all_data=[subset_all_data;all_data(possible_index(randnumofindex),:)];
+    subset_all_data_xyz=[subset_all_data_xyz;all_data_xyz(possible_index(randnumofindex),:)];
 end
 
 %normalise data
