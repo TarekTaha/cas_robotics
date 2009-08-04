@@ -220,10 +220,17 @@ if size(markedcubes)>0
 %% new method to try and make the iner circle of movement cleaner using
     %stephens data
     try 
-      global robmap_h
+      %make allowances for the RTA proj code
+      try hCOM=getappdata(gcf,'hCOM');
+      catch global robmap_h;
+      end
+            
       aabb = [workspace.impLev(1).x(1), workspace.impLev(1).y(1) workspace.impLev(1).z(1);...
               workspace.impLev(1).x(2), workspace.impLev(1).y(2) workspace.impLev(1).z(2)];
-      hMesh = robmap_h.Mesh(aabb);
+      %make allowances for the RTA proj code      
+      try hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
+      catch hMesh = robmap_h.Mesh(aabb);
+      end
       if size(hMesh.VertexData,1)>0
         indexedobsticles_levl1=putInVoxels_gp(hMesh.VertexData(GetImpLevInfo(hMesh.VertexData),:),workspace.inc_size);
       else
