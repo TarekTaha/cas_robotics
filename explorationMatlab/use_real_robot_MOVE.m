@@ -17,7 +17,7 @@
 %
 % *Returns:* NULL
 
-function use_real_robot_MOVE(all_steps)
+function use_real_robot_MOVE(all_steps,hFigure)
 
 %% Variables
 global Q robot_maxreach
@@ -135,6 +135,10 @@ if ~isempty(find(round(tempQ(1:6)-rad2deg(Q)), 1))
         end
         %% Release movement object
         releaserobot(rob_h)
+        %if we are interacting with RTA project version
+        if nargin==2
+          ARM_AnimateMoveHokyo(hFigure);
+        end
     end    
 end
 
