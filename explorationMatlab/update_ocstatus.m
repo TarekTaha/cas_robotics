@@ -99,7 +99,11 @@ end
 try     
     aabb = [workspace.min; workspace.max];
     % aabb = [-inf, -inf, -inf; inf, inf, inf];
-    hMesh = robmap_h.Mesh(aabb);
+    try hCOM=getappdata(gcf,'hCOM');
+      hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
+    catch hMesh = robmap_h.Mesh(aabb);
+    end
+      
     % f = hMesh.FaceData;
     v = hMesh.VertexData;
     [level1,level2]=GetImpLevInfo(v);
@@ -160,7 +164,12 @@ end
 try     
     aabb = [-1.5, -1.5, 0.2; 1.5, 1.5, 1.8];
     % aabb = [-inf, -inf, -inf; inf, inf, inf];
-    hMesh = robmap_h.Mesh(aabb);
+    %allowances for RTA proj code
+    try hCOM=getappdata(gcf,'hCOM');
+    hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
+    catch hMesh = robmap_h.Mesh(aabb);
+    end
+
     % f = hMesh.FaceData;
     v = hMesh.VertexData;
     [level1,level2]=GetImpLevInfo(v);
