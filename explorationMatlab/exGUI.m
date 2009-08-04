@@ -763,7 +763,7 @@ if isempty(platform_h)
 end
 platform_h.Type = 'MoveForward';
 platform_h.Start;
-%     platform_h.WaitUntilCompleted(20,0);
+%     platform_h.WaitUntilCompleted(20);
 % allOff()
 
 
