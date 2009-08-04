@@ -18,11 +18,14 @@
 % _NOhandleOPTIONS_ (Struc) MUST FILL IN ALL FIELDS:
 % useRealRobot, show_robot, animate_move, remv_unkn_in_mv
 %
+% _hFigure_ (Struc) This is the handle which can be passed on so as to
+% update the RTA project figure
+%
 % *Returns:* 
 %
 % _pathfound_ (binary) if a path was found or not
 
-function pathfound=movetonewQ(handles,newQ,all_steps,NOhandleOPTIONS)
+function pathfound=movetonewQ(handles,newQ,all_steps,NOhandleOPTIONS,hFigure)
 
 %% Variables
 global r Q guiglobal workspace robot_maxreach;
@@ -199,7 +202,12 @@ if pathfound && size(all_steps,1)>0
     %If using real robot try and move it
     if useRealRobot
         try if ~scanwhilemove
-                use_real_robot_MOVE(all_steps); 
+                % If we need to pass in the fig handle for RTA proj code
+                if nargin==5 use_real_robot_MOVE(all_steps,hFigure); 
+                else use_real_robot_MOVE(all_steps,hFigure); 
+                end
+                  
+                  
                 try set(handles.dialog_text,'String','Actual robot movement complete');
                 catch; display('Actual robot movement complete');end                    
             else
