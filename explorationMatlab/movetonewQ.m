@@ -204,7 +204,7 @@ if pathfound && size(all_steps,1)>0
         try if ~scanwhilemove
                 % If we need to pass in the fig handle for RTA proj code
                 if nargin==5 use_real_robot_MOVE(all_steps,hFigure); 
-                else use_real_robot_MOVE(all_steps,hFigure); 
+                else use_real_robot_MOVE(all_steps); 
                 end
                   
                   

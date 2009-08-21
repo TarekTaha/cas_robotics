@@ -14,10 +14,8 @@
 function organise_data()
 
 %% Variables
-global workspace scan PointData RangeData PoseData robot_maxreach robmap_h
-
-%optimising the surface map
-robmap_h.Optimise
+global workspace scan PointData RangeData PoseData robot_maxreach
+hCOM = getappdata(gcf, 'hCOM');
 
 % starttime=clock;
 % Number of points we want in the cube for ray casting
@@ -221,16 +219,10 @@ if size(markedcubes)>0
     %stephens data
     try 
       %make allowances for the RTA proj code
-      try hCOM=getappdata(gcf,'hCOM');
-      catch global robmap_h;
-      end
-            
       aabb = [workspace.impLev(1).x(1), workspace.impLev(1).y(1) workspace.impLev(1).z(1);...
               workspace.impLev(1).x(2), workspace.impLev(1).y(2) workspace.impLev(1).z(2)];
       %make allowances for the RTA proj code      
-      try hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
-      catch hMesh = robmap_h.Mesh(aabb);
-      end
+      hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
       if size(hMesh.VertexData,1)>0
         indexedobsticles_levl1=putInVoxels_gp(hMesh.VertexData(GetImpLevInfo(hMesh.VertexData),:),workspace.inc_size);
       else
