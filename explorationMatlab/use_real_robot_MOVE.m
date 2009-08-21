@@ -15,9 +15,13 @@
 % _all_steps_ (many*6 double) radians the steps that the arm must
 % move through on its path
 %
+% _hFigure_
+%
+% Do_Path_Check (bool) if we want to do soft limit checking
+%
 % *Returns:* NULL
 
-function use_real_robot_MOVE(all_steps,hFigure)
+function use_real_robot_MOVE(all_steps,hFigure,Do_Path_Check)
 
 %% Variables
 global Q robot_maxreach
@@ -25,6 +29,9 @@ if size(Q,2)~=6 && size(Q,2)~=7
     error('Q - Joints have not been defined properly, should be a global');
 end
 
+
+
+  
 if nargin==0
     %No path has been passed in
     error('Must pass in a position to move to');
@@ -35,15 +42,26 @@ else
   %approx 180/pi so we don't get yucky floating points from pi 
   all_steps=round(all_steps(:,1:6)/(robot_maxreach.minjointres/57))*(robot_maxreach.minjointres/57);
   tempQ=rad2deg(all_steps(end,:));
+  
+  %check these paramaters and set if not initialised
+  if nargin<3
+    Do_Path_Check=true;
+    if nargin<2
+      hFigure=[];
+    end
+  end
 end
+
 
 %can use the old way of updating the joint state
 please_use_GETjsFunc=true;
 
 %% Check that no steps exceed soft limits
-if ~joint_softlimit_check(all_steps)
+if Do_Path_Check
+  if ~joint_softlimit_check(all_steps)
     display('there is a possible bad position in the joint steps, this shouldnt be planned, giving you control')
     keyboard
+  end
 end
     
 %% Setup robot movement object
@@ -65,6 +83,8 @@ if ~isempty(find(round(tempQ(1:6)-rad2deg(Q)), 1))
     %Set the speed
     rob_h.Type='SetSpeed';
     rob_h.Params=[robot_maxreach.move_speed,0];
+    rob_h.Start;
+    pause(0.1)
 
 %% Move to an absolute joint reference if there is no path, otherwise
     if size(all_steps,1)<=1
@@ -72,17 +92,18 @@ if ~isempty(find(round(tempQ(1:6)-rad2deg(Q)), 1))
         % NOTE THE 6th JOINT IS OVERRIDEN TO 0 EARLIER in NBV so that it is perpendicular to the angle of rotations of joint 5 throughout the scan
         rob_h.Params=tempQ;
         display(strcat('The robot is currently at:', num2str(Q),' and is planning to move to:',num2str(rob_h.Params),'. Note 6th Joint may have been changed to 0 if using NBV. Please get ready to push EMERGENCY STOP'));
-        % Additional Soft motion check - shouldn't be needed
-        if ~joint_softlimit_check(Q) || ~joint_softlimit_check(deg2rad(tempQ))
-            uiwait(msgbox('Failed softlimit check, make sure this point is within limitsD'));
-            rob_h.release;
-            error('Dont use this set of angles for joint 2 and 3');
-        end
+%         % Additional Soft motion check - shouldn't be needed
+%         if ~joint_softlimit_check(Q) || ~joint_softlimit_check(deg2rad(tempQ))
+%             uiwait(msgbox('Failed softlimit check, make sure this point is within limitsD'));
+%             rob_h.release;
+%             error('Dont use this set of angles for joint 2 and 3');
+%         end
         rob_h.Start;
+        pause(0.1)
         % want it to wait until it has finished getting to the next posiiotn before scanning
         %rob_h.WaitUntilCompleted(30);
         % simply release the object
-        rob_h.release;
+        %rob_h.release;
 
 %% Drive the arm through the sequence of poses in all_steps
     else
@@ -137,7 +158,9 @@ if ~isempty(find(round(tempQ(1:6)-rad2deg(Q)), 1))
         releaserobot(rob_h)
         %if we are interacting with RTA project version
         if nargin==2
-          ARM_AnimateMoveHokyo(hFigure);
+          if iptcheckhandle(hFigure)
+            ARM_AnimateMoveHokyo(hFigure);
+          end
         end
     end    
 end
