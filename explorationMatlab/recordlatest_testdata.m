@@ -6,9 +6,10 @@ function recordlatest_testdata()
 global workspace
 
 
-global robmap_h RangeData
+global RangeData
+hCOM=getappdata(gcf,'hCOM');
 aabb = [workspace.min; workspace.max];
-hMesh = robmap_h.Mesh(aabb);
+hMesh = hCOM.mapHandle.Mesh(aabb);
 f = hMesh.FaceData;
 v = hMesh.VertexData;
 workspace.testdata.nummeshfaces=size(f);

@@ -24,14 +24,9 @@ function use_real_robot_SCAN_q6(vargin)
 display('Clearing all global scan variables before starting a new scan');
 clear global PoseData RangeData IntensityData PointData;
 
-global scan Q r PointData IntensityData RangeData robot_maxreach robmap_h;
+global scan Q r PointData IntensityData RangeData robot_maxreach;
 
-%make sure their is a surface map object
-if isempty(robmap_h)
-    display('Surface Map object has been deleted previously so I am recreating it')
-    robmap_h=actxserver('EyeInHand.SurfaceMap');
-    robmap_h.registerevent(@myhandler);
-end
+hCOM=getappdata(gcf,'hCOM');
 
 if size(Q,2)~=6
     error('Q - Joints have not been defined properly, should be a global');
@@ -58,25 +53,25 @@ scan.origin=tr(1:3,4)';
 
 %% Start Scanning/robot communication
 %give it an initial pose for base position)
-robscan_h=robmap_h.ScannerCommand(eye(4));
-robscan_h.TraceTo(['C:\data\', datestr(clock, 30), '_']);
 
-robscan_h.Type='RangeScan';
-robscan_h.TiltSpeed=robot_maxreach.scan_speed;
+hCOM.Laser.AddObserver(hCOM.mapHandle);
 
-%robscan_h.Mode='RangeOnly';
-robscan_h.Mode='RangeAndAveragedIntensity';        
+hCOM.Laser.Type='RangeScan';
+hCOM.Laser.TiltSpeed=robot_maxreach.scan_speed;
+
+%hCOM.Laser.Mode='RangeOnly';
+hCOM.Laser.Mode='RangeAndAveragedIntensity';        
 
 %this is 120' either side so 2* 120
-robscan_h.width=2*scan.theta*180/pi;
+hCOM.Laser.width=2*scan.theta*180/pi;
 
 %display scan details
-display(['Current Scan mode is: ',robscan_h.Mode,...
-    '. Total width is: ',num2str(robscan_h.width)]);
+display(['Current Scan mode is: ',hCOM.Laser.Mode,...
+    '. Total width is: ',num2str(hCOM.Laser.width)]);
 
 %tilt through desired scan range in the negative direction so laser is safe
 %(might be confusing)
-robscan_h.Start(-1);
+hCOM.Laser.Start(-1);
 
 %if we are just moving joint 6 then determine some steps
 if isempty(all_steps)
@@ -90,7 +85,7 @@ end
 use_real_robot_MOVE(all_steps);
 Q=all_steps(end,:);
 
-robscan_h.Stop;   
+hCOM.Laser.Stop;   
 scan.PointData=PointData;
 scan.IntensityData=IntensityData;
 scan.RangeData=RangeData;

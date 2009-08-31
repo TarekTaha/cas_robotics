@@ -22,16 +22,10 @@ if ~displayon
 end
 
 %% Setup the pose sel object
-try global robmap_h; 
-    if isempty(robmap_h) 
-        try robmap_h.release;pause(1);end;
-        robmap_h=actxserver('EyeInHand.SurfaceMap');
-        robmap_h.registerevent(@myhandler);
-    end
+try 
     %get the Denso Blasting Cost Function
     try global DensoBlasting_h
         if isempty(DensoBlasting_h)
-%             DensoBlasting_h = robmap_h.GetDensoBlastingCostFunction;
             DensoBlasting_h = actxserver('EyeInHand.DensoBlastingCost');
         end
     catch

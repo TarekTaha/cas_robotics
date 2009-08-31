@@ -1,7 +1,3 @@
-                                                                     
-                                                                     
-                                                                     
-                                             
 %% exGUI
 %
 % *Description:*  This is the main GUI file. Goes with the exGUI.fig figure
@@ -57,6 +53,16 @@ function exGUI_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
+
+%Add the coms directory to path
+if exist([matlabroot,'\work\0906 UI\RTA_Proj02\COM'],'dir')
+  addpath([matlabroot,'\work\0906 UI\RTA_Proj02\COM']);
+else
+  error(['Cant fined necessary COM setup components ',...
+    'SVN latest from https://develop.eng.uts.edu.au/projects/cas/grit_blasting/svn/trunk/Projects/0906%20Matlab%20UI/RTA_Proj02 ',...
+    'Then place in: matlabroot,\work\0906 UI\RTA_Proj02']);
+end
+
 % Clear the GUI and global variables
 do_clear(handles);
 
@@ -70,30 +76,27 @@ reply = input('Do you want to delete the mesh from memory and release object 1/0
 if isempty(reply)
     reply = 1;
 end
-if reply
-    global robmap_h;
-    try robmap_h.release;end
+if ~reply
+    global hCOM
+    hCOM=getappdata(gcf,'hCOM');    
+    display('Setting hCOM to be a global var and deleting figure, please get surface map from this variable');
 end
-%try and release platform object
-global platform_h;
-try platform_h.release;end
+
+%delete coms
+COM_Delete_Coms(gcf)
+
 
 delete(hObject);
 
 
 %% Executes on button press in clear_pushbutton.
 function clear_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-%clc
 do_clear(handles);
 
 % this is the do_clear function sets up most stuff
 function do_clear(handles)
 
-%add path 
-% keyboard
-% addpath('./EnvironmentalData')
-
-%MANUAL CHECKS: To do before start work
+% MANUAL CHECKS: To do before start work
 display('Make sure you have done the following');
 display('1) Checked the laser is on by running the checklaser.exe file (power cycle if necessary)');
 display('2) The ROBOT is powered on');
@@ -107,40 +110,10 @@ display('Pausing so you can do these things');
 pause
 
 
-%sets up the surface map object and then this is used for scanning
-try global robmap_h;
-    try robmap_h.release;pause(1);end
-robmap_h=actxserver('EyeInHand.SurfaceMap');
-robmap_h.registerevent(@myhandler);
-catch
-    display('EyeInHand Problem: Unable to create surface map')
-end
+% Create COMS (MUST BE FIRST)
+setupCOMs()
 
-% try and setup platform object
-try global platform_h;
-    try platform_h.release;pause(1);end
-    platform_h = actxserver('EyeInHand.PlatformCommand');
-catch
-    display('EyeInHand Problem: Unable to create platform object')
-end
-
-% Used to continually monitor the joint state
-try DensoState_h = actxserver('EyeInHand.DensoState');
-    DensoState_h.registerevent(@updateQlistener);
-catch
-    display('EyeInHand Problem: Unable to create DensoState object')
-end
-
-%used for planning and to keep track of unexplored
-try global occHandle
-  occHandle= actxserver('EyeInHand.OccupancyMap');
-catch
-  display('EyeInHand Problem: Unable to create OccupancyMap object')
-end
-
-
-
-%clear the main axis
+%% Clear the main axis
 set(gcf,'CurrentAxes',handles.axes3);
 colordef white
 cla('reset')
@@ -155,18 +128,21 @@ set(handles.useRealRobot_checkbox,'Value',0);
 drawnow;
 
 %clear the globals for scan, workspace, robot(r,Q), bestviews, PointData, RangeData
-clear global workspace scan bestviews Q r PointData RangeData guiglobal densoobj all_views robot_maxreach classunkn_optimise alldirectedpoints graf_obs;
+clear global workspace scan bestviews Q r PointData RangeData densoobj all_views robot_maxreach classunkn_optimise alldirectedpoints graf_obs;
+
+
+
 
 %Sets up the robot
 % profile clear;profile on;
 setuprobot()
 % profile off;profile viewer;
 
-global guiglobal
 guiglobal.ellipseplots=[];
 guiglobal.checkFF=1;
 guiglobal.plot_ellipse=0;
 guiglobal.plotpath=false;
+setappdata(gcf,'guiglobal',guiglobal);
 
 % Sets up the scanner (scan)
 setupscanner();
@@ -502,28 +478,10 @@ if ~get(handles.useRealRobot_checkbox,'Value')
 end
 
 %check that PointData exists and is valid
-if isfield(scan,'PointData')
-    if size(scan.PointData,2)==0
-      error('Cant classify since there is no PointData available');
-    end
-else error('Cant classify since no PointData has been saved to the scan structure - Take a scan with real robot');    
+if ~isfield(scan,'PointData') || ~isfield(scan,'IntensityData') || ~isfield(scan,'RangeData')
+  error('Cant classify since no PointData/IntensityData/RangeData has been saved to the scan structure - Take a scan with real robot');    
 end
 
-%check that IntensityData exists and is valid
-if isfield(scan,'IntensityData')
-    if size(scan.IntensityData,2)==0
-      error('Cant classify since there is no IntensityData available');
-    end
-else error('Cant classify since no IntensityData has been saved to the scan structure - Take a scan with real robot');    
-end
-
-%check that PointData exists and is valid
-if isfield(scan,'RangeData')
-    if size(scan.RangeData,2)==0
-      error('Cant classify since there is no RangeData available');
-    end
-else error('Cant classify since no RangeData has been saved to the scan structure - Take a scan with real robot');    
-end
 
 %do classification with data
 display('Classifying the LATEST set of data that has been scanned');
@@ -542,8 +500,7 @@ scan.ClassificationData=[];
 
 
 try [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData); 
-% profile clear;profile on;    
-  try update_ocstatus(ClassifiedData); %profile off; profile viewer;
+  try update_ocstatus(ClassifiedData);
 %     UNclassifiedvoxels=update_ocstatus(ClassifiedData); %profile off; profile viewer;
 %         display(['You still have not classified ', num2str(size(UNclassifiedvoxels,1)/size(workspace.ocgrid,1)*100),' percent of known voxels']);
         display('....Classification completed successfully');    
@@ -566,114 +523,9 @@ for i=1:numofintplanes
 end
 
 
-
-% --- Executes on button press in plot_classified_pushbutton.
-% function plot_classified_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-% global scan
-% 
-% if ~isfield(scan,'ClassificationData') || size(scan.ClassificationData,1)==0
-%     error('Classification has not happened correctly');
-% end
-% %case 1 = 'Grey Metal '; case 2 = 'Shiny Metal'; case 3 = 'Cloth/Wood'; % OR RED OR WHITE --- JUST CLOTH or WOOD!!! case 4 = 'Do not know';
-% 
-% maxclasval=max(scan.ClassificationData(:,4))
-% 
-% %Go through and plot the different data
-% figure(2);hold on;axis equal;
-% %set(gcf,'CurrentAxes',handles.axes3);
-% for current_mat=1:maxclasval
-%     temp=find(scan.ClassificationData(:,4)==current_mat);
-%     if ~isempty(temp)
-%         switch(current_mat)
-%             case (1) 
-%                 plotcolor=[.6 .6 .6];
-%             case (2) 
-%                 plotcolor=[.4 .4 .4];
-%             case (3) 
-%                 plotcolor=[1 0 0];
-%             case (4) 
-%                 plotcolor=[0.8 0.8 1];
-%         end        
-%         if current_mat~=5 plot3(scan.ClassificationData(temp,1),scan.ClassificationData(temp,2),scan.ClassificationData(temp,3),'Marker','.','Color',[plotcolor],'LineStyle','none');end;
-%     end
-% end
-% 
-% ClassifiedData=[];
-% colsiz=size(scan.ClassificationData,1)/size(scan.PointData,1);
-% 
-% for current_row=1:size(scan.PointData,1)
-%     ClassifiedData=[ClassifiedData;(scan.ClassificationData((current_row-1)*colsiz+1:current_row*colsiz,4)/maxclasval)'];
-% end
-% 
-% %figure, imshow(ClassifiedData);
-% 
-% %Median filtering
-% I2=medfilt2(ClassifiedData,[14 14]);
-% figure, imshow(I2);
-% 
-% Iedges=edge(I2,'canny');
-% %figure, imshow(Iedges);
-% 
-% [row,col]=ginput(1);  
-% while col>0 && col<size(Iedges,1) && row>0 && row<size(Iedges,2)        
-%     if col>0 && col<size(Iedges,1) && row>0 && row<size(Iedges,2)
-%         row=round(row)-1+find(Iedges(round(col),round(row):end)>0,1);
-%         boundary=bwtraceboundary(Iedges,[round(col), round(row)],'N');
-%         hold on;
-%         plot(boundary(:,2),boundary(:,1),'r','LineWidth',3);
-%     end
-%     [row,col]=ginput(1);
-% end
-
-
-%% Robot Functionality
-% --- Executes on button press in blasting_pushbutton.
-function blasting_pushbutton_Callback(hObject, eventdata, handles)
-keyboard
-return
-
-global robmap_h
-figure(2)
-view(2)
-
-try 
-    if exist('verts.mat','file')==2 
-        load verts.mat;
-        surface_making_simple(verts,0.04)
-        global plane
-        
-        pathPlannerV4(handles);
-    else
-        rect_vars=getrect;
-        min_max=[rect_vars(1),rect_vars(2),1.4;
-        rect_vars(1)+rect_vars(3),rect_vars(2)+rect_vars(4),1.6];
-
-        hMesh = robmap_h.Mesh(min_max);
-        verts = hMesh.VertexData;
-        save verts
-
-        surface_making_simple(verts,0.04)
-        global plane
-
-        if size(plane,2)>30
-            plane=plane(1:30);
-        end
-        save plane
-    end
-catch
-    error('failed to get verts or create targets');
-end
-
-%this will be andrew's function
-cd RTA
-setupoptimisation
-keyboard
-PathplannerV5(handles)
-
-
 % --- Executes on button press in tilt_scan_pushbutton.
 function tilt_scan_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global r Q guiglobal
+global r Q
 if get(handles.useRealRobot_checkbox,'Value')==0
     doscan();
 else
@@ -681,13 +533,14 @@ else
     use_real_robot_SCAN(deg2scan);
     organise_data();
     use_real_robot_GETJs();
+    guiglobal=getappdata(gcf,'guiglobal');   
     plotdenso(r, Q, guiglobal.checkFF, guiglobal.plot_ellipse);    
     
 end
 
 % --- Executes on button press in rot_scan_pushbutton.
 function rot_scan_pushbutton_Callback(hObject, eventdata, handles) %#ok<DEFNU>
-global r Q guiglobal
+global r Q
 if get(handles.useRealRobot_checkbox,'Value')==0
     error('Cant do this type of scan yet');
 else
@@ -695,6 +548,7 @@ else
     use_real_robot_SCANandMOVE(deg2scan);
     organise_data()
     use_real_robot_GETJs();
+    guiglobal=getappdata(gcf,'guiglobal');
     plotdenso(r, Q, guiglobal.checkFF, guiglobal.plot_ellipse);
 end
 
@@ -720,6 +574,7 @@ set(handles.move_to_J4_edit,'String',num2str(actual_Q(4)));
 set(handles.move_to_J5_edit,'String',num2str(actual_Q(5)));
 set(handles.move_to_J6_edit,'String',num2str(actual_Q(6)));
 
+%% PLATFORM COMMANDS
 % --- Executes on button press in alloff_pushbutton.
 %turns off all the stuff on the platform
 function alloff_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
@@ -727,77 +582,39 @@ allOff()
 
 % --- Executes on button press in move2start_platform_pushbutton.
 function move2start_platform_pushbutton_Callback(hObject, eventdata, handles)
-global platform_h
-if isempty(platform_h)
-    platform_h = actxserver('EyeInHand.PlatformCommand');
-end
+hCOM=getappdata(gcf,'hCOM');
+platform_h=hCOM.PlatformCommand;
 platform_h.Type = 'MoveToHome';
 platform_h.Start;
 
-
 % --- Executes on button press in move2end_platform_pushbutton.
 function move2end_platform_pushbutton_Callback(hObject, eventdata, handles)
-global platform_h
-if isempty(platform_h)
-    platform_h = actxserver('EyeInHand.PlatformCommand');
-end
+hCOM=getappdata(gcf,'hCOM');
+platform_h=hCOM.PlatformCommand;
 platform_h.Type = 'MoveToEnd';
 platform_h.Start;
 
-
 % --- Executes on button press in moveback_platform_pushbutton.
 function moveback_platform_pushbutton_Callback(hObject, eventdata, handles)
-global platform_h
-if isempty(platform_h)
-    platform_h = actxserver('EyeInHand.PlatformCommand');
-end
+hCOM=getappdata(gcf,'hCOM');
+platform_h=hCOM.PlatformCommand;
 platform_h.Type = 'MoveBackward';
 platform_h.Start;
 
-
 % --- Executes on button press in moveforward_platform_pushbutton.
 function moveforward_platform_pushbutton_Callback(hObject, eventdata, handles)
-global platform_h
-if isempty(platform_h)
-    platform_h = actxserver('EyeInHand.PlatformCommand');
-end
+hCOM=getappdata(gcf,'hCOM');
+platform_h=hCOM.PlatformCommand;
 platform_h.Type = 'MoveForward';
 platform_h.Start;
-%     platform_h.WaitUntilCompleted(20);
-% allOff()
-
-
-% platform_h.Type = 'NoMotion';
-% platform_h.Type = 'MoveForward';
-% platform_h.Type = 'MoveBackward';
-% platform_h.Type = 'MoveToHome';
-% platform_h.Type = 'MoveToEnd';
-
-
-% platform_h = actxserver('EyeInHand.PlatformState');
-%  get(platform_h,'Status')==0 && get(platform_h,'EmergencyStop')==0 %%this means OK
-%     platform_h.WarningLight = 1; % Turn on
-% 
-%     % platform_h.WarningNoise = 1;
-%     % pause(1)
-%     % platform_h.WarningNoise = 0;
-% 
-%     platform_h.AirSupply = 1; % Turn on
-%     platform_h.Brake = 0; % Turn off
-%     platform_h.Motors = 'Forward';
-%     pause(2.0);
-%     platform_h.Motors = 'Off';
-%     platform_h.Brake = 1; % Turn on
-%     platform_h.WarningLight = 0; % Turn on
-%     platform_h.AirSupply = 0; % Turn off
-     
-% platform_h.release
 
 
 %% Plotting and display simple functions
 % --- Executes on button press in plot_special_checkbox.
 function plot_special_checkbox_Callback(hObject, eventdata, handles)
-global workspace guiglobal
+global workspace
+guiglobal=getappdata(gcf,'guiglobal');
+
 %can't plot before moving the robot once
 if size(workspace.spec_pnts,1)==0
    error('not valid when there are no spec_pnts'); 
@@ -815,9 +632,12 @@ else
     end
 end
 
+setappdata(gcf,'guiglobal',guiglobal);
+
 % --- Executes on button press in plot_arm_carved_checkbox.
 function plot_arm_carved_checkbox_Callback(hObject, eventdata, handles)
-global robot_maxreach guiglobal
+global robot_maxreach
+guiglobal=getappdata(gcf,'guiglobal');
 %can't plot before moving the robot once
 if size(robot_maxreach.pointcarvedout,1)==0
    error('not valid when there are no points carved out yet'); 
@@ -834,11 +654,12 @@ else
         guiglobal=rmfield(guiglobal,'pointcarvedout');
     end
 end
+setappdata(gcf,'guiglobal',guiglobal);
 
 % --- Executes on button press in plotmesh_pushbutton.
 function plotmesh_pushbutton_Callback(hObject, eventdata, handles)
-global robmap_h guiglobal
-
+hCOM=getappdata(gcf,'hCOM');
+guiglobal=getappdata(gcf,'guiglobal');
 try delete(guiglobal.mesh_h);
 catch
     % figure(2)
@@ -851,7 +672,7 @@ catch
     if get(handles.all_mesh_checkbox,'value')==1
         aabb = [-20, -20, -20; 20, 20, 20];
     end
-    hMesh = robmap_h.Mesh(aabb);
+    hMesh = hCOM.mapHandle.Mesh(aabb);
     f = hMesh.FaceData;
     v = hMesh.VertexData;
     % save('datafile.mat','v');
@@ -859,11 +680,13 @@ catch
     guiglobal.mesh_h=trisurf(f, v(:,1), v(:,2), v(:,3), 'FaceColor', 'None');
     axis equal
 end
-
+setappdata(gcf,'guiglobal',guiglobal);
 
 % --- Executes on button press in plot_planes_checkbox.
 function plot_planes_checkbox_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global plane guiglobal 
+global plane
+guiglobal=getappdata(gcf,'guiglobal');
+
 temp_mew=str2double(get(handles.temp_mew_edit,'String'));
 
 theval=get(hObject,'Value');
@@ -878,13 +701,14 @@ else
     for current_plane=1:size(guiglobal.plane_plot_handles,1); try delete(guiglobal.plane_plot_handles(current_plane)); end; end;
     guiglobal=rmfield(guiglobal, 'plane_plot_handles');
 end
+setappdata(gcf,'guiglobal',guiglobal);
 
 % --- Executes on button press in make_surface_pushbutton.
 function make_surface_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global robmap_h 
+hCOM=getappdata(gcf,'hCOM');
       
 try aabb = [-1.5, -1.5, -1; 2, 1.5, 2];
-hMesh = robmap_h.Mesh(aabb);
+hMesh = hCOM.mapHandle.Mesh(aabb);
 obsticlepoints = hMesh.VertexData(GetImpLevInfo(hMesh.VertexData),:);
 
 catch; error('In getting the mesh needed for surface making');
@@ -905,7 +729,7 @@ rotate3d;
 
 % --- Executes on button press in ResetView.
 function ResetView_Callback(hObject, eventdata, handles)%#ok<INUSD,DEFNU>
-global guiglobal
+guiglobal=getappdata(gcf,'guiglobal');
 try delete(guiglobal.mesh_h);end
 set(gcf,'CurrentAxes',handles.axes3);
 cla('reset')
@@ -914,6 +738,7 @@ lighting gouraud
 axis equal
 view(2);
 colordef white
+setappdata(gcf,'guiglobal',guiglobal);
 
 % --- Executes on button press in sideon_pushbutton.
 function sideon_pushbutton_Callback(hObject, eventdata, handles)%#ok<INUSD,DEFNU>
@@ -922,7 +747,8 @@ view(3);
 
 % --- Executes on button press in plotexplored_pushbutton.
 function plotexplored_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
-global workspace guiglobal
+global workspace
+guiglobal=getappdata(gcf,'guiglobal');
 %can't plot before moving the robot once
 if size(workspace.knowncoords,1)==0
    error('not valid when there are no explored (known) points'); 
@@ -939,10 +765,12 @@ else
         guiglobal=rmfield(guiglobal,'exploredplot');
     end
 end
+setappdata(gcf,'guiglobal',guiglobal);
 
 % --- Executes on button press in plot_obstacles_pushbutton.
 function plot_obstacles_pushbutton_Callback(hObject, eventdata, handles) %#ok<DEFNU>
-global  workspace guiglobal
+global  workspace
+guiglobal=getappdata(gcf,'guiglobal');
 if size(workspace.indexedobsticles,1)==0
    error('not valid when there are no indexedobsticles points'); 
 else
@@ -957,6 +785,7 @@ else
         guiglobal=rmfield(guiglobal,'obsticleplot');
     end
 end
+setappdata(gcf,'guiglobal',guiglobal);
 
 % --- Executes on button press in plot_classified_checkbox.
 function plot_classified_checkbox_Callback(hObject, eventdata, handles)
@@ -989,35 +818,6 @@ if get(hObject,'Value')
       end
       
     end
-    
-% OLD WAY
-%     %determine the unknown places and the know metal or wood
-%     sumofclass=workspace.ocgrid(:,4)+workspace.ocgrid(:,5);
-%     warning('off','MATLAB:divideByZero')
-%     try classifiedvoxels=find(sumofclass>=workspace.minclassifications &...
-%                          (workspace.ocgrid(:,4)./workspace.ocgrid(:,5)>workspace.classfierthreshhold |...
-%                           workspace.ocgrid(:,5)./workspace.ocgrid(:,4)>workspace.classfierthreshhold));end
-%     try UNclassifiedvoxels=find(sumofclass<workspace.minclassifications | ...
-%                          (workspace.ocgrid(:,4)./workspace.ocgrid(:,5)<=workspace.classfierthreshhold &...
-%                           workspace.ocgrid(:,5)./workspace.ocgrid(:,4)<=workspace.classfierthreshhold));end
-%     warning('on','MATLAB:divideByZero')
-    
-%now plot this
-%     hold on;
-%     try classifiedplotHa(end+1)=plot3(workspace.ocgrid(UNclassifiedvoxels,1)*class_cubesize,...
-%           workspace.ocgrid(UNclassifiedvoxels,2)*class_cubesize,...
-%           workspace.ocgrid(UNclassifiedvoxels,3)*class_cubesize,'y','marker','.','markersize',0.5,'linestyle','none');end
-    %plot metal and wood voxels
-
-%     metalvoxels=workspace.ocgrid(classifiedvoxels(workspace.ocgrid(classifiedvoxels,4)>workspace.ocgrid(classifiedvoxels,5)),1:3);
-%     if size(metalvoxels,1)>0
-%         try classifiedplotHa(end+1)=plot3(metalvoxels(:,1)*class_cubesize,metalvoxels(:,2)*class_cubesize,metalvoxels(:,3)*class_cubesize,'r.');end
-%     end
-% 
-%     woodvoxels=workspace.ocgrid(classifiedvoxels(workspace.ocgrid(classifiedvoxels,4)<workspace.ocgrid(classifiedvoxels,5)),1:3);
-%     if size(woodvoxels,1)>0
-%         try classifiedplotHa(end+1)=plot3(woodvoxels(:,1)*class_cubesize,woodvoxels(:,2)*class_cubesize,woodvoxels(:,3)*class_cubesize,'b.');end
-%     end
 
     drawnow
 
@@ -1030,7 +830,8 @@ end
 
 % --- Executes on button press in show_unknownpoints_checkbox.
 function show_unknownpoints_checkbox_Callback(hObject, eventdata, handles) %#ok<INUSD,DEFNU>
-global guiglobal workspace
+global workspace
+guiglobal=getappdata(gcf,'guiglobal');
 if ~get(hObject,'value')
     if isfield (guiglobal,'unknownplot')
         for i=1:size(guiglobal.unknownplot,2)
@@ -1053,13 +854,14 @@ else
                                    '.','Color',[1-workspace.dotweight(1) 1-workspace.dotweight(1) 1]);
     else
         display('No Unknown coordinates to plot');
-    end
-    
+    end    
 end
+setappdata(gcf,'guiglobal',guiglobal);
 
 % --- Executes on button press in show_ellipses_checkbox.
 function show_ellipses_checkbox_Callback(hObject, eventdata, handles) %#ok<DEFNU>
-global r Q guiglobal densoobj
+global r Q densoobj
+guiglobal=getappdata(gcf,'guiglobal');
 theval=get(hObject,'Value');
 plotrob=get(handles.show_robot_checkbox,'Value');
 
@@ -1072,10 +874,12 @@ else
 end
 %deletes the robot if it is not needed
 if ~plotrob try for piece=1:size(densoobj,2); delete(densoobj(piece).patches); end; end; end;
-    
+setappdata(gcf,'guiglobal',guiglobal);
+
 % --- Executes on button press in show_robot_checkbox.
 function show_robot_checkbox_Callback(hObject, eventdata, handles) %#ok<DEFNU>
-global r Q guiglobal densoobj
+global r Q densoobj
+guiglobal=getappdata(gcf,'guiglobal');
 theval=get(hObject,'Value');
 if theval
     plotdenso(r, Q, guiglobal.checkFF, guiglobal.plot_ellipse);
@@ -1106,6 +910,8 @@ end
 %this function is used to collect the data for exploration to compare new info
 function state_data=collectdata(state_data,handles,stepcount)
 global workspace Q bestviews
+hCOM=getappdata(gcf,'hCOM');
+       
 if isempty(state_data)
     state_data.knownweight=calknownweight();
     state_data.unknownweight=calunknownweight();   
@@ -1132,8 +938,8 @@ if nargin>1
        testdir=['C:\MATLAB\R2007a\work\Gavin\PhD\PhD_Disertation\Code\Ch8\Stage 1\Test ',num2str(testnumber),'\'];
        save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_workspaceSTATE.mat'],'workspace');
        save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_bestviews.mat'],'bestviews');
-       global robmap_h
-       robmap_h.StoreSurfaceMap([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_newDistanceField.ply']);
+
+       hCOM.mapHandle.StoreSurfaceMap([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_newDistanceField.ply']);
        
        save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_bestviews.mat'],'bestviews');
        
@@ -1153,13 +959,13 @@ end
 
 % --- Executes on button press in savePly_pushbutton.
 function savePly_pushbutton_Callback(hObject, eventdata, handles)
-global robmap_h
+hCOM=getappdata(gcf,'hCOM');
 filename=inputdlg('Enter a file name for ply file');
 if isempty(filename)
   filename='you_should_enter_a_filename';
 end
 directory=pwd;
-robmap_h.StoreSurfaceMap([directory,'\',char(filename),'.ply']);
+hCOM.mapHandle.StoreSurfaceMap([directory,'\',char(filename),'.ply']);
 
 
 
@@ -1302,35 +1108,9 @@ function all_mesh_checkbox_Callback(hObject, eventdata, handles)
 
 %% dont know why this is needed, can't find the button for it
 function Untitled_1_Callback(hObject, eventdata, handles)
-
-
-% --- Executes on button press in testing_checkbox.
 function testing_checkbox_Callback(hObject, eventdata, handles)
-% hObject    handle to testing_checkbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of testing_checkbox
-
-
-
-function testnumber_edit_Callback(hObject, eventdata, handles)
-% hObject    handle to testnumber_edit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of testnumber_edit as text
-%        str2double(get(hObject,'String')) returns contents of testnumber_edit as a double
-
-
-% --- Executes during object creation, after setting all properties.
 function testnumber_edit_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to testnumber_edit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
 
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
