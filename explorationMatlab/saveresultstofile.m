@@ -1,6 +1,7 @@
 function saveresultstofile(testnum) 
 cd journal
-global workspace robot_maxreach robmap_h
+global workspace robot_maxreach 
+hCOM=getappdata(gcf,'hCOM');
 
 %save workspace
 try save(['test',num2str(testnum),'workspace.mat'],'workspace');
@@ -10,7 +11,7 @@ try save(['test',num2str(testnum),'robot_maxreach.mat'],'robot_maxreach');
 catch; keyboard;end
 %save mesh
 aabb = [-1.5, -1.5, -1; 2, 1.5, 2];
-hMesh = robmap_h.Mesh(aabb);
+hMesh = hCOM.mapHandle.Mesh(aabb);
 hMeshdata.v=hMesh.v;
 hMeshdata.f=hMesh.f;
 

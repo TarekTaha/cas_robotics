@@ -6,7 +6,7 @@
 
 function update_ocstatus(ClassifiedData)
 
-global workspace PointData RangeData robmap_h
+global workspace PointData RangeData
 %get the variables from the workspace 
 class_cubesize=workspace.class_cubesize;
 minclassifications=workspace.minclassifications;
@@ -99,9 +99,9 @@ end
 try     
     aabb = [workspace.min; workspace.max];
     % aabb = [-inf, -inf, -inf; inf, inf, inf];
-    try hCOM=getappdata(gcf,'hCOM');
-      hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
-    catch hMesh = robmap_h.Mesh(aabb);
+    hCOM=getappdata(gcf,'hCOM');
+    try  hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
+    catch hMesh = hCOM.mapHandle.Mesh(aabb);
     end
       
     % f = hMesh.FaceData;
@@ -165,9 +165,9 @@ try
     aabb = [-1.5, -1.5, 0.2; 1.5, 1.5, 1.8];
     % aabb = [-inf, -inf, -inf; inf, inf, inf];
     %allowances for RTA proj code
-    try hCOM=getappdata(gcf,'hCOM');
-    hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
-    catch hMesh = robmap_h.Mesh(aabb);
+    hCOM=getappdata(gcf,'hCOM');
+    try hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
+    catch hMesh = hCOM.mapHandle.Mesh(aabb);
     end
 
     % f = hMesh.FaceData;

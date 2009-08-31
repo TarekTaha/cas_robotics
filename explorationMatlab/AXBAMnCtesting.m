@@ -19,7 +19,7 @@ plot_the_current_classification_and_robot=false;
 save_the_workspace_datafile_at_that_point=true;
 
 %plot the current mesh and robot
-global r Q robmap_h workspace AXBAMnCtestdata
+global r Q workspace AXBAMnCtestdata
 if nargin==0
 %     plotdirectedC=input('Do you want to plot the directed classification? 1=Yes, 0=No');
 %     try if plotdirectedC~=1 && plotdirectedC~=0
@@ -51,7 +51,8 @@ recordlatest_testdata();
 %   plotdenso(r,Q)
 %   camlight
 %   aabb = [-1.5, -1.5, -1; 2, 1.5, 2];
-%   hMesh = robmap_h.Mesh(aabb);
+% hCOM=getappdata(gcf,'hCOM');
+%   hMesh = hCOM.mapHandle.Mesh(aabb);
 %   f = hMesh.FaceData;
 %   v = hMesh.VertexData;
 %   hold on;

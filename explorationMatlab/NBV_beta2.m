@@ -297,28 +297,6 @@ end
 %order the best views
 %order_bestviews()
 
-%% NEW RRT PLANNER FROM STEVE
-% global occHandle
-% MotionPlanner = actxserver('EyeInHand.DensoMotionPlan');
-% % MotionPlanner.OccupancyData = occHandle;
-% MotionPlanner.SurfaceData=robmap_h;
-% for current_view=1:size(bestviews,2)
-%   MotionPlanner.InitialConfiguration=rad2deg(Q);
-%   MotionPlanner.TargetConfiguration=rad2deg(bestviews(current_view).Q);
-% %   MotionPlanner.CanStart
-%   MotionPlanner.Start; 
-%   tic
-%   MotionPlanner.WaitUntilCompleted(1.0);
-%   toc
-%   if strcmpi(MotionPlanner.Status, 'Started')
-%     MotionPlanner.Stop;
-%     display(['Stopping',num2str(current_view)]);
-%     pause(1);
-%   end
-% 
-%   bestviews(current_view).all_steps=deg2rad(MotionPlanner.ConfigurationPath);
-% end
-
 %% Do new wavefront based planner
 newQ=zeros([size(bestviews,2),6]);
 for current_view=1:size(bestviews,2)
