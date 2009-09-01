@@ -9,7 +9,7 @@ global workspace
 global RangeData
 hCOM=getappdata(gcf,'hCOM');
 aabb = [workspace.min; workspace.max];
-hMesh = hCOM.mapHandle.Mesh(aabb);
+hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
 f = hMesh.FaceData;
 v = hMesh.VertexData;
 workspace.testdata.nummeshfaces=size(f);

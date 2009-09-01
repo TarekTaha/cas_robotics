@@ -100,9 +100,7 @@ try
     aabb = [workspace.min; workspace.max];
     % aabb = [-inf, -inf, -inf; inf, inf, inf];
     hCOM=getappdata(gcf,'hCOM');
-    try  hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
-    catch hMesh = hCOM.mapHandle.Mesh(aabb);
-    end
+    hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
       
     % f = hMesh.FaceData;
     v = hMesh.VertexData;
@@ -166,9 +164,7 @@ try
     % aabb = [-inf, -inf, -inf; inf, inf, inf];
     %allowances for RTA proj code
     hCOM=getappdata(gcf,'hCOM');
-    try hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
-    catch hMesh = hCOM.mapHandle.Mesh(aabb);
-    end
+    hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
 
     % f = hMesh.FaceData;
     v = hMesh.VertexData;

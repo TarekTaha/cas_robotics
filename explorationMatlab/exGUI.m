@@ -440,8 +440,7 @@ global bestviews;
 for cur_view=1:size(bestviews,2)
     if bestviews(cur_view).valid
         bestview_stringcell{cur_view}=...
-                strcat('#',num2str(cur_view),': ',num2str(bestviews(cur_view).overall),', is@(',num2str(bestviews(cur_view).scanorigin(:)'),...
-               '), pose(',num2str(bestviews(cur_view).chosenview),'), Valid(',num2str(bestviews(cur_view).valid),'), addinfoweight=(',num2str(bestviews(cur_view).addinfoweight),'), JointMoveWeight=(',num2str(bestviews(cur_view).jointmoveweight),'), Q=[',num2str(bestviews(cur_view).Q),']');
+                ['#',num2str(cur_view),': info=',num2str(bestviews(cur_view).addinfo),', @(',num2str(bestviews(cur_view).tr(1:3,4)'),'),mw=',num2str(sum(sum(abs(diff(bestviews(cur_view).all_steps)))))];
      end
 end
 
@@ -672,7 +671,7 @@ catch
     if get(handles.all_mesh_checkbox,'value')==1
         aabb = [-20, -20, -20; 20, 20, 20];
     end
-    hMesh = hCOM.mapHandle.Mesh(aabb);
+    hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
     f = hMesh.FaceData;
     v = hMesh.VertexData;
     % save('datafile.mat','v');
@@ -708,7 +707,7 @@ function make_surface_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU
 hCOM=getappdata(gcf,'hCOM');
       
 try aabb = [-1.5, -1.5, -1; 2, 1.5, 2];
-hMesh = hCOM.mapHandle.Mesh(aabb);
+hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));;
 obsticlepoints = hMesh.VertexData(GetImpLevInfo(hMesh.VertexData),:);
 
 catch; error('In getting the mesh needed for surface making');
@@ -939,7 +938,7 @@ if nargin>1
        save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_workspaceSTATE.mat'],'workspace');
        save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_bestviews.mat'],'bestviews');
 
-       hCOM.mapHandle.StoreSurfaceMap([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_newDistanceField.ply']);
+       hCOM.Surface.StoreSurfaceMap([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_newDistanceField.ply']);
        
        save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_bestviews.mat'],'bestviews');
        
@@ -965,7 +964,7 @@ if isempty(filename)
   filename='you_should_enter_a_filename';
 end
 directory=pwd;
-hCOM.mapHandle.StoreSurfaceMap([directory,'\',char(filename),'.ply']);
+hCOM.Surface.StoreSurfaceMap([directory,'\',char(filename),'.ply']);
 
 
 
@@ -1106,8 +1105,9 @@ workspace.classfierthreshhold=str2double(get(hObject,'String'));
 
 function all_mesh_checkbox_Callback(hObject, eventdata, handles)
 
-%% dont know why this is needed, can't find the button for it
-function Untitled_1_Callback(hObject, eventdata, handles)
+function testnumber_edit_Callback(hObject, eventdata, handles)
+function plot_classified_pushbutton_Callback(hObject, eventdata, handles)
+
 function testing_checkbox_Callback(hObject, eventdata, handles)
 function testnumber_edit_CreateFcn(hObject, eventdata, handles)
 
@@ -1115,4 +1115,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+%% dont know why this is needed, can't find the button for it
+function Untitled_1_Callback(hObject, eventdata, handles)
 

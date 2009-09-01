@@ -52,7 +52,7 @@ recordlatest_testdata();
 %   camlight
 %   aabb = [-1.5, -1.5, -1; 2, 1.5, 2];
 % hCOM=getappdata(gcf,'hCOM');
-%   hMesh = hCOM.mapHandle.Mesh(aabb);
+%   hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
 %   f = hMesh.FaceData;
 %   v = hMesh.VertexData;
 %   hold on;
