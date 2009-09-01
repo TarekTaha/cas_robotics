@@ -57,7 +57,7 @@ scan.origin=tr(1:3,4)';
 
 %% Start Scanning/robot communication
 %give it an initial pose for base position)
-hCOM.Laser.AddObserver(hCOM.mapHandle);
+hCOM.Laser.AddObserver(hCOM.Surface);
 
 hCOM.Laser.Type='RangeScan';
 hCOM.Laser.TiltSpeed=robot_maxreach.scan_speed;

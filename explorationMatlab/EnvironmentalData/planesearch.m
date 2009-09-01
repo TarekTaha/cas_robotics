@@ -33,14 +33,14 @@ elseif loadplanes1_makeplanes0==0
     display('Loading map');
     try 
         hCOM=getappdata(gcf,'hCOM');
-        if isempty(hCOM.mapHandle) 
+        if isempty(hCOM.Surface) 
             error('There is no map handle');
-%             hCOM.mapHandle=actxserver('EyeInHand.SurfaceMap');
-%             hCOM.mapHandle.registerevent(@myhandler);
+%             hCOM.Surface=actxserver('EyeInHand.SurfaceMap');
+%             hCOM.Surface.registerevent(@myhandler);
         end
         %get the Denso Blasting Cost Function
         try global DensoBlasting_h
-            if isempty(DensoBlasting_h);DensoBlasting_h = hCOM.mapHandle.GetDensoBlastingCostFunction; end
+            if isempty(DensoBlasting_h);DensoBlasting_h = hCOM.Surface.GetDensoBlastingCostFunction; end
         catch
             display('EyeInHand Problem: Unable to create DensoBlastingCost from surface map')
         end
@@ -48,16 +48,16 @@ elseif loadplanes1_makeplanes0==0
         display('EyeInHand Problem: Unable to create surface map')
     end
     directory=pwd;
-    hCOM.mapHandle.Resolution=0.01;
-    hCOM.mapHandle.SurfaceFusionDistance = 0.1;
-    hCOM.mapHandle.SurfaceDeviation = 0.01;
+    hCOM.Surface.Resolution=0.01;
+    hCOM.Surface.SurfaceFusionDistance = 0.1;
+    hCOM.Surface.SurfaceDeviation = 0.01;
     aabbExtent = [-2, -1, 0; 2, 1, 3];
-    hCOM.mapHandle.Extent = aabbExtent;
-    hCOM.mapHandle.AddRangeGrid([directory,'\','grid_1.ply']);
+    hCOM.Surface.Extent = aabbExtent;
+    hCOM.Surface.AddRangeGrid([directory,'\','grid_1.ply']);
     aabb.lower = [-2, -1, 0];
     aabb.upper = [2, 1, 3];
     if isempty(hMesh)
-        hMesh = hCOM.mapHandle.SurfacesInsideBox(aabb.lower, aabb.upper);
+        hMesh = hCOM.Surface.SurfacesInsideBox(aabb.lower, aabb.upper);
     end
     % f = hMesh.FaceData;
     v = hMesh.VertexData;

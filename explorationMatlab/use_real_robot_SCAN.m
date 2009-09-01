@@ -24,6 +24,9 @@ global scan Q r PointData IntensityData RangeData robot_maxreach vid_object;
 
 hCOM=getappdata(gcf,'hCOM');
 
+%resync the robot and laser clock (must happen before every scan)
+hCOM.App.ResyncDensoClock();
+
 %if we are required to take images
 if ~isempty(vid_object)
   cur_frame=1;
@@ -58,7 +61,7 @@ attemptingscan=4; %used to set how many times we try before giving up
 
 while attemptingscan
     %give it an initial pose for base position)
-    hCOM.Laser.AddObserver(hCOM.mapHandle);
+    hCOM.Laser.AddObserver(hCOM.Surface);
        
     hCOM.Laser.Type='TiltingRangeScan';
     hCOM.Laser.TiltSpeed=robot_maxreach.scan_speed;
