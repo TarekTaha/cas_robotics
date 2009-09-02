@@ -3,7 +3,7 @@ clear all;
 h = actxserver('EyeInHand.ScannerCommand');
 global PointData IntensityData AutoGainData
 h.Status
-h.registerevent(@myhandler);
+h.registerevent(@myhandler_doscan_test);
 % h.Type = 'RangeScan';
 % h.Mode = 'RangeAndAveragedIntensity';
 % h.Width = 240;

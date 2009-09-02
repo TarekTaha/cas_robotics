@@ -1,4 +1,4 @@
-function myhandler(varargin)
+function myhandler_doscan_test(varargin)
 global   IntensityData  PointData
 if strcmpi(varargin{end}, 'ScanComplete')
 scan = varargin{3}; % A COM handle to an IRangeScan object

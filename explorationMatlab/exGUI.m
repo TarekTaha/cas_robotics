@@ -110,9 +110,6 @@ display('Pausing so you can do these things');
 pause
 
 
-% Create COMS (MUST BE FIRST)
-setupCOMs()
-
 %% Clear the main axis
 set(gcf,'CurrentAxes',handles.axes3);
 colordef white
@@ -130,14 +127,10 @@ drawnow;
 %clear the globals for scan, workspace, robot(r,Q), bestviews, PointData, RangeData
 clear global workspace scan bestviews Q r PointData RangeData densoobj all_views robot_maxreach classunkn_optimise alldirectedpoints graf_obs;
 
-
-
-
 %Sets up the robot
-% profile clear;profile on;
 setuprobot()
-% profile off;profile viewer;
 
+% Setup GUI variables
 guiglobal.ellipseplots=[];
 guiglobal.checkFF=1;
 guiglobal.plot_ellipse=0;
@@ -156,46 +149,26 @@ set(gcf,'CurrentAxes',handles.axes3);
 
 setupworkspace(get(handles.show_unknownpoints_checkbox,'Value'));
 
+% Create COMS (must be after the workspace is setup)
+setupCOMs()
 
 global all_views
-% if isempty(all_views)
-%     warning('not calculating allviews even though it dosent exist');
-% %     display('Having to calculate all_views for exploration, this happens ones only');
-% %     calc_all_views();
-% %     load all_views.mat
-% end
-
-%clc;
 
 set(handles.dialog_text,'String','Setup Complete: Lets Explore');
 
 
 %% Exploration Functionality
-% --- Executes on button press in stopflag_checkbox.
-function stopflag_checkbox_Callback(hObject, eventdata, handles)
-set(handles.stopflag_checkbox,'Visible','off')
-% hObject    handle to stopflag_checkbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of stopflag_checkbox
-
-
 % --- Executes on button press in go_pushbutton.
 function go_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
 set(handles.stopflag_checkbox,'Value',0)
 set(handles.stopflag_checkbox,'Visible','on')
 
-%%%CHOOSE THE CURRENT TEST CASE
-current_test_case=2; %1 = random, 2 = Next best view search
+NBV_TEST=1;RAND_TEST=2;%%%CHOOSE THE CURRENT TEST CASE
+current_test_case=NBV_TEST; %NBV_TEST = Next best view search, RAND_TEST = random, 
 show_new_info_details=false;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% profile clear; profile on;
-global robot_maxreach optimise workspace scan Q
-
-%update Q to the latest actual value of the robot
-if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end   
+global robot_maxreach workspace scan Q
 
 %start data collection
 state_data=collectdata([]);
@@ -205,7 +178,6 @@ set(gcf,'CurrentAxes',handles.axes3)
 %% intial safe pose default scans
 %since we wish to choose our own default start points
 for stepcount=2:size(robot_maxreach.default_Q,1)+1
-%     want_to_continue=true;
     want_to_continue=~get(handles.stopflag_checkbox,'Value');
     while want_to_continue && scan.tries<size(robot_maxreach.default_Q,1)
         try explore(handles,useNBV); 
@@ -218,72 +190,29 @@ for stepcount=2:size(robot_maxreach.default_Q,1)+1
             if want_to_continue==2; keyboard; end
             if want_to_continue==0; error('User chose to exit');end
             if get(handles.useRealRobot_checkbox,'Value')==1;  
-                use_real_robot_GETJs();
                 set(handles.stopflag_checkbox,'Value',0);
                 set(handles.stopflag_checkbox,'Visible','on');
             end   
         end; 
     end
-    state_data=collectdata(state_data,handles,stepcount); 
-    
-
+    state_data=collectdata(state_data,handles,stepcount);   
 end
 
 want_to_continue=~get(handles.stopflag_checkbox,'Value');
 
-%% TEST 1 - random points
-if current_test_case==1 && want_to_continue
-    global r bestviews
-    qlimits=r.qlim;
-    for stepcount=1:20
-        %%This is the random find next point
-        pathfound=false;
-        while ~pathfound
-            useNBV=true;
-            tempendQs=rand(1,6);newQ=[];
-            for i=1:6
-                newQ=[newQ,tempendQs(:,i)*(-qlimits(i,1)+qlimits(i,2))+qlimits(i,1)];
-            end
-            tr=fkine(r,newQ);
-            tr_indexed=round(tr(1:3,4)/workspace.inc_size)*workspace.inc_size;
-            if ~isempty(find(tr_indexed(1)==workspace.knowncoords(:,1)&...
-                             tr_indexed(2)==workspace.knowncoords(:,2)&...
-                             tr_indexed(3)==workspace.knowncoords(:,3), 1))                  
-                [pathfound,all_steps]=pathplanner_new(newQ);
-                if pathfound; plotdenso(r,newQ,false,false); end;
-            end
-        end
-
-        bestviews.scanorigin=tr(1:3,4)';
-        bestviews.chosenview=sum(tr(1:3,1:3));
-        bestviews.tr=tr;            
-        bestviews.Q=newQ;
-        bestviews.all_steps=all_steps;
-        bestviews.valid=true;
-        try explore(handles,useNBV,1);
-        catch display(lasterr);
-        end
-        %data collection
-        state_data=collectdata(state_data,handles,stepcount);
-    end
-
-%% TEST 2 - Non points -using algorithm
-elseif current_test_case>1 && want_to_continue
+%% TEST 1 - Non points -using algorithm
+if current_test_case==NBV_TEST && want_to_continue
     %now go through and get NBV and then use them to explore
     for stepcount=stepcount+1:15;
         if ~get(handles.stopflag_checkbox,'Value')
             %do next best view exploration search
-%             profile clear; profile on;
-try 
-            NBV_beta2();
-catch
-  lasterr
-  display('No views found or some error, removing self scanning and trying again');
-  workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
-  try NBV_beta2();catch; lasterr;display('Still no best views fond or some error: handing over control to you master');keyboard;end
-end
-  
-%             profile off; profile viewer;
+          try NBV_beta2();
+          catch
+            lasterr
+            display('No views found or some error, removing self scanning and trying again');
+            workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
+            try NBV_beta2();catch; lasterr;display('Still no best views fond or some error: handing over control to you master');keyboard;end
+          end
           
             current_bestview=stepcount-1;
             global bestviews;        
@@ -300,17 +229,14 @@ end
                         display('User has control');
                         keyboard
 
-                        %tac on the actual position here just in case
-                        %it isn't exactly where it was supposed to
-                        %finish
+                        %tac on the actual position here just in case it isn't exactly where it was supposed to finish
                         robot_maxreach.path(end).all_steps(end+1,:)=Q;
                         %move back along the path taken to get here
                         if ~movetonewQ(handles,rad2deg(robot_maxreach.path(end).all_steps(1,:)),robot_maxreach.path(end).all_steps(end:-1:1,:));
                             display('some major problem if we cant follow the same path back');
                             keyboard                                
                         end
-                        %try once again to move to the actual desired
-                        %newQ for exploration
+                        %try once again to move to the actual desired newQ for exploration
                         if movetonewQ(handles,rad2deg(bestviews(1).Q),bestviews(1).all_steps);
                             scan.done_bestviews_orfailed=[scan.done_bestviews_orfailed;bestviews(1).Q];explore(handles,useNBV,1);validpathfound=true;break;
                         else % last resort is to remove surrounding obstacle points remove indexed and normal obsticle points within robot FF since not valid
@@ -353,37 +279,49 @@ end
                     display('Termination condition reached');
                     break;
                 end
-            end
-                    
-                %this is suboptimal if we have lots of bestviews since we
-                %are going back through all of them and doing nbv_volume
-                %which is ray tracing, but out of the sample we don't have
-                %necesarialy the best possible views and the end of the 10
-                %seconds we still don't have paths whereas the other gives paths    
-                
-%                 if size(bestviews,2)>1  
-%                     %Resize bestviews so as to get rid of the first element
-%                     clear temp_bestviews;
-%                     for cur_view=2:size(bestviews,2); temp_bestviews(cur_view-1)=bestviews(cur_view);end
-%                         bestviews=temp_bestviews;
-%                         %if we actually found a place to move and explore
-%                         %from record new data
-%                         if validpathfound==true
-%                             state_data=collectdata(state_data); 
-%                         end
-% 
-%                         redo_nbv_vol=true;
-%                         order_bestviews(redo_nbv_vol);
-%                 else
-%                     bestviews=[];
-%                 end
-%             end
+            end                   
 
           %save the state and save testing values
           state_data=collectdata(state_data,handles,stepcount); 
 
         end
     end
+    
+%% TEST 2 - random points
+elseif current_test_case==RAND_TEST && want_to_continue
+    global r bestviews
+    qlimits=r.qlim;
+    for stepcount=1:20
+        %%This is the random find next point
+        pathfound=false;
+        while ~pathfound
+            useNBV=true;
+            tempendQs=rand(1,6);newQ=[];
+            for i=1:6
+                newQ=[newQ,tempendQs(:,i)*(-qlimits(i,1)+qlimits(i,2))+qlimits(i,1)];
+            end
+            tr=fkine(r,newQ);
+            tr_indexed=round(tr(1:3,4)/workspace.inc_size)*workspace.inc_size;
+            if ~isempty(find(tr_indexed(1)==workspace.knowncoords(:,1)&...
+                             tr_indexed(2)==workspace.knowncoords(:,2)&...
+                             tr_indexed(3)==workspace.knowncoords(:,3), 1))                  
+                [pathfound,all_steps]=pathplanner_new(newQ);
+                if pathfound; plotdenso(r,newQ,false,false); end;
+            end
+        end
+
+        bestviews.scanorigin=tr(1:3,4)';
+        bestviews.chosenview=sum(tr(1:3,1:3));
+        bestviews.tr=tr;            
+        bestviews.Q=newQ;
+        bestviews.all_steps=all_steps;
+        bestviews.valid=true;
+        try explore(handles,useNBV,1);
+        catch display(lasterr);
+        end
+        %data collection
+        state_data=collectdata(state_data,handles,stepcount);
+    end    
 end
 
 
@@ -427,6 +365,10 @@ if bestviews(selection).valid
 else
     msgbox('Not a valid robot pose selected')
 end
+
+% --- Executes on button press in stopflag_checkbox.
+function stopflag_checkbox_Callback(hObject, eventdata, handles)
+set(handles.stopflag_checkbox,'Visible','off')
 
 % --- Executes on button press in find_best_view_pushbutton.
 function find_best_view_pushbutton_Callback(hObject, eventdata, handles)%#ok<DEFNU>
@@ -891,8 +833,12 @@ end
 % --- Executes on button press in zoom_pushbutton.
 function zoom_pushbutton_Callback(hObject, eventdata, handles)
 % zoom on;
+global workspace
+hCOM=getappdata(gcf,'hCOM');
 view(116,18)
 keyboard
+% v = hCOM.occHandle.UnknownInsideBox(workspace.min, workspace.max);
+
 
 % --- Executes on button press in imageAq_checkbox.
 function imageAq_checkbox_Callback(hObject, eventdata, handles)
