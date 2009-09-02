@@ -17,7 +17,7 @@ global scan r Q all_views
 
 %the first scan origin is where the robot arm is
 initialpoint=fkine(r,Q);
-scan.origin=[initialpoint(1:3,4)]';
+%scan . origin=[initialpoint(1:3,4)]';
 
 %sets up the chosen view vector
 scan.chosenview=unit([1,1,1]);
@@ -35,7 +35,7 @@ scan.ALLorigin=[];
 %Laser Angualar VARIABLES
 %this is the angle either side of the bearing of the center of the scan \|/
 %scan.theta=pi/6;
-scan.theta=120*pi/180; %used to be pi/2;
+scan.theta=90*pi/180; %used to be pi/2;
 
 %this is the incremental steps
 scan.theta_incr=0.36*(pi/180);

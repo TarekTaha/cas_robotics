@@ -40,8 +40,6 @@ else
     if get(h.start_with_default_poses_checkbox,'value') && scan.tries<=size(robot_maxreach.default_Q,1)-1
         newQ=robot_maxreach.default_Q(scan.tries+1,:);       
         set(h.dialog_text,'String',strcat('Using default vals, now taking scan NO.',num2str(scan.tries+1)));
-        tr=fkine(r,Q);
-        scan.origin=[tr(1,4),tr(2,4),tr(3,4)];
     else 
         display('You have asked for not a NBV scan and there are no more default poses so doing NBV_beta2');
         NBV_beta2();
@@ -119,10 +117,14 @@ end
 %% Display results
 
 % print results this exploration step details
-display('. . . . . . . . . . . . . . . . . . . . . . . . ');
-display(strcat('The scan origin is (',num2str(scan.origin),'),TRY # :',num2str(scan.tries)));
-
-scan.ALLorigin=[scan.ALLorigin;scan.origin];
+try 
+    tr=fkine(r,Q);
+    display('. . . . . . . . . . . . . . . . . . . . . . . . ');
+    display(strcat('The scan origin is (',num2str([tr(1,4),tr(2,4),tr(3,4)]),'),TRY # :',num2str(scan.tries)));
+    scan.ALLorigin=[scan.ALLorigin;[tr(1,4),tr(2,4),tr(3,4)]];
+catch
+    display('cant print out the scan origin');
+end
 
 % Calculate the WEIGHTED known/unknown/obstacle knowledge
 unknownweight=calunknownweight();

@@ -880,7 +880,8 @@ if nargin>1
    if get(handles.testing_checkbox,'value')==1
        testnumber=get(handles.testnumber_edit,'string');
        recordlatest_testdata()
-       testdir=['C:\MATLAB\R2007a\work\Gavin\PhD\PhD_Disertation\Code\Ch8\Stage 1\Test ',num2str(testnumber),'\'];
+%        testdir=['C:\MATLAB\R2007a\work\Gavin\PhD\PhD_Disertation\Code\Ch8\Stage 1\Test ',num2str(testnumber),'\'];
+      testdir='C:\MATLAB\R2007a\work\Gavin\PhD\explorationMatlab\Testing Functions\results\';display('saving to testing directory');
        save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_workspaceSTATE.mat'],'workspace');
        save([testdir,'AXBAMnC_Test',num2str(testnumber),'Scan',num2str(stepcount-1),'_bestviews.mat'],'bestviews');
 
