@@ -8,7 +8,8 @@ if nargin<1
     add1_remove0=1;
 end
 
-global guiglobal
+% global guiglobal
+guiglobal=getappdata(gcf,'guiglobal');
 
 if add1_remove0==1
     deletehandles()
@@ -26,19 +27,19 @@ if add1_remove0==1
 else
     deletehandles()
 end
-    
+setappdata(gcf,'guiglobal',guiglobal);                                 
 
 %% try and delete all the handles
 function deletehandles()
-global guiglobal
+guiglobal=getappdata(gcf,'guiglobal');
 if isfield(guiglobal,'cartnRails')
     for i=1:size(guiglobal.cartnRails,2)
         try delete(guiglobal.cartnRails(i));
         end
     end
 end
-
 guiglobal.cartnRails=[];
+setappdata(gcf,'guiglobal',guiglobal);  
 
 
 

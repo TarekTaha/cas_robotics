@@ -112,8 +112,6 @@ laser_pos=[laser_pos_ice_cream_bounds;laser_pos_noreturnplaces];
 laser_pos=laser_pos(whichones,:);
 
 %% Setup ray tracing variables
-% Where the laser is at start of scan (used thoughout as origin)
-% laser_pos=scan.origin;
 % Min and max cubes
 space_min_and_max=[workspace.min/workspace.inc_size,workspace.max/workspace.inc_size];
 % The cubes that rays pass through

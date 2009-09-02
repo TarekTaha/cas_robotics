@@ -23,13 +23,9 @@ function use_real_robot_SCANandMOVE(vargin)
 % display('Clearing all global scan variables before starting a new scan');
 clear global PoseData RangeData IntensityData PointData;
 
-global scan Q r PointData IntensityData RangeData robot_maxreach;
+global scan PointData IntensityData RangeData robot_maxreach;
 
 hCOM=getappdata(gcf,'hCOM');
-
-if size(Q,2)~=6
-    error('Q - Joints have not been defined properly, should be a global');
-end
 
 if nargin<1
     error('Need to pass in either the deg to scan with joint 6 or all_steps');
@@ -50,27 +46,13 @@ else
     end
 end
     
-%update the actual scanning origin
-tr=fkine(r,Q);
-scan.origin=tr(1:3,4)';
-
 
 %% Start Scanning/robot communication
-%give it an initial pose for base position)
-hCOM.Laser.AddObserver(hCOM.Surface);
-
 hCOM.Laser.Type='RangeScan';
 hCOM.Laser.TiltSpeed=robot_maxreach.scan_speed;
 
 %hCOM.Laser.Mode='RangeOnly';
 hCOM.Laser.Mode='RangeAndAveragedIntensity';        
-
-%this is 120' either side so 2* 120
-hCOM.Laser.width=2*scan.theta*180/pi;
-
-%display scan details
-% display(['Current Scan mode is: ',hCOM.Laser.Mode,...
-%     '. Total width is: ',num2str(hCOM.Laser.width)]);
 
 %tilt through desired scan range in the negative direction so laser is safe
 %(might be confusing)
