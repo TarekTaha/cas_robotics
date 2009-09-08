@@ -226,8 +226,11 @@ if pathfound && size(all_steps,1)>0
                 robot_maxreach.path(end).all_steps=[robot_maxreach.path(end).all_steps;all_steps];
             end
             
-        catch try set(handles.dialog_text,'String','Error: Did not complete movement - Emergency Stop Probably Hit');
-            catch display('Error: Did not complete movement - Emergency Stop Probably Hit'); end
+        catch
+          lasterr;
+          keyboard;
+          try set(handles.dialog_text,'String','Error: Did not complete movement - Emergency Stop Probably Hit');
+          catch display('Error: Did not complete movement - Emergency Stop Probably Hit'); end
             lasterr;
             error('Did not complete movement');
         end

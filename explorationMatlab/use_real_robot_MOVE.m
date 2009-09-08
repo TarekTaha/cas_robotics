@@ -157,10 +157,10 @@ if ~isempty(find(round(tempQ(1:6)-rad2deg(Q)), 1))
         %% Release movement object
         releaserobot(rob_h)
         %if we are interacting with RTA project version
-        if nargin==2
-          if iptcheckhandle(hFigure)
-            ARM_AnimateMoveHokyo(hFigure);
-          end
+        if nargin>2
+%           if iptcheckhandle(hFigure)
+            try ARM_AnimateMoveHokyo(hFigure);end
+%           end
         end
     end    
 end
