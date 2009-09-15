@@ -58,9 +58,11 @@ guidata(hObject, handles);
 if exist([matlabroot,'\work\0906 UI\RTA_Proj02\COM'],'dir')
   addpath([matlabroot,'\work\0906 UI\RTA_Proj02\COM']);
 else
-  error(['Cant fined necessary COM setup components ',...
-    'SVN latest from https://develop.eng.uts.edu.au/projects/cas/grit_blasting/svn/trunk/Projects/0906%20Matlab%20UI/RTA_Proj02 ',...
-    'Then place in: matlabroot,\work\0906 UI\RTA_Proj02']);
+    if ~exist('COM_Create_Coms.m','file')
+      error(['Cant fined necessary COM setup components ',...
+        'SVN latest from https://develop.eng.uts.edu.au/projects/cas/grit_blasting/svn/trunk/Projects/0906%20Matlab%20UI/RTA_Proj02 ',...
+        'Then place in: matlabroot,\work\0906 UI\RTA_Proj02']);
+    end
 end
 
 % Clear the GUI and global variables
