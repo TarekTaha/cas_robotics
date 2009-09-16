@@ -13,7 +13,9 @@
 %
 % *Returns:* NULL
 
-function use_real_robot_SCAN(deg2scan)
+function use_real_robot_SCAN(deg2scan,fname)
+
+if nargin<2; fname=[];end
 
 %% Variables:  Declarations and checks
 %THIS CLEARS GLOBAL VARS USED IN SCANS SO THEY DON'T BUILD UP
@@ -30,12 +32,18 @@ hCOM.App.ResyncDensoClock();
 hCOM.Laser.Type='TiltingRangeScan';
 hCOM.Laser.TiltSpeed=robot_maxreach.scan_speed;
 
+if ~isempty(fname)
+  hCOM.Laser.TraceTo([fname, '_']); % raw data file made unique by using platform position and sequence number
+end
+
 %robscan_h.Mode='RangeOnly';
 hCOM.Laser.Mode='RangeAndAveragedIntensity';        
 
 %tilt through desired scan range in the negative direction so laser is safe (might be confusing)
 hTask=hCOM.Laser.Start(deg2scan);
-msg{1}={'Please wait Scanning...'};msg{2}={'Timing out...'};
+pause(0.5);
+
+msg{1}={'Please wait Scanning...'};msg{2}={'Possibly Timing out...'};
 
 hWaitbar = waitbar(0, 'Please wait ...', 'name', 'Scanning');
 stepCount = 0;
@@ -57,5 +65,9 @@ delete(hWaitbar);
 scan.PointData=PointData;
 scan.IntensityData=IntensityData;
 scan.RangeData=RangeData;
+temp=sqrt(hCOM.Surface.LastSurfaceVariance);
+disp(sprintf('Standard deviation at surface = %.5f',temp))
+
+ARM_SetSpeed(gcf, robot_maxreach.move_speed);
 
     

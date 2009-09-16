@@ -41,7 +41,7 @@ if ~isempty(find(all_steps_indegs(:,2)>90 & all_steps_indegs(:,3)>90,1))
 end
 
 %% if we have some poses with J3>140' Check new EE piece for self collision
-if ~isempty(find(all_steps_indegs(:,3)>140,1))  
+if ~isempty(find(all_steps_indegs(:,3)>140,1)) 
   %get the steps we need to test
   J4between90s=find(all_steps_indegs(:,4)<=90 & all_steps_indegs(:,4)>=-90 & all_steps_indegs(:,3)>140);
   %the polyfit vals I collected from experimentation (for J4 between -90 and 90)
@@ -139,3 +139,32 @@ end
 % plot(xvals,yvals,'b')
 % %   end
 % % end
+
+%% New Proposed approach
+%it seems that this 'new' approach has actually been done above before
+% 
+% p3n4 = 1.0e+003 *[   0.0000   -0.0172    1.6054];
+% p3n5 = 1.0e+003 *[  -0.0002    0.0577   -4.6839];
+% 
+% step1=find(all_steps_indegs(:,3)>140);
+% if ~isempty(step1) & false
+% %% do j5 positive
+% %   positive_j5=find(all_steps_indegs(step1,5)>0);
+%   
+%   
+% %% do j5 negative
+%   negative_j5=find(all_steps_indegs(step1,5)>0);
+%   j4_limit = polyval(p3n4,deg2rad(all_steps_indegs(step1(negative_j5))),3);  
+%   %if there are any abs j4s grewater than the combinational boundary
+%   if ~isempty(find(abs(all_steps_indegs(step1(negative_j5),4))>j4_limit,1))
+%     result=false;
+%     return
+%   end
+%   
+%   j5_limit = polyval(p3n5,deg2rad(all_steps_indegs(step1(negative_j5))),3);
+%   %if there are any abs j5s less than the combinational boundary
+%   if ~isempty(find(all_steps_indegs(step1(negative_j5),5)<j5_limit,1))
+%     result=false;
+%     return
+%   end 
+% end
