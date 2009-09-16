@@ -14,13 +14,14 @@
 function myhandler(varargin)
 
 %% Variables
-global PoseData RangeData IntensityData PointData
+global PoseData RangeData IntensityData PointData AutoGainData
 
 %% Check the value passed in
 if strcmpi(varargin{end}, 'ScanComplete')
      scan = varargin{3}; % A COM handle to an IRangeScan object
      RangeData(end+1,:) = scan.RangeData;
      IntensityData(end+1,:) = scan.IntensityData;
+     AutoGainData(end+1,:) = hScan.AutoGainData;
      PointData(end+1,:,:) = scan.PointData;
      if scan.HasPose
          PoseData(end+1,:,:) = scan.Pose;
