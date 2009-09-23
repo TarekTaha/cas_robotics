@@ -37,7 +37,7 @@ scan_data=PointData;
 
 
 % The threashold of plane fit
-eigen_value_thresh=2;
+eigen_value_thresh=20;
 
 %other variables
 plane_num=1;
