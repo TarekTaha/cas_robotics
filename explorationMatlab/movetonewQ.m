@@ -30,7 +30,13 @@ function pathfound=movetonewQ(handles,newQ,all_steps,NOhandleOPTIONS,hFigure)
 %% Variables
 global r Q workspace robot_maxreach;
 
-guiglobal=getappdata(gcf,'guiglobal');
+%if there is a figure then try and get guiglobal from it
+fig_H=get(0,'CurrentFigure');
+if ~isempty(fig_H)
+    guiglobal=getappdata(fig_H,'guiglobal');
+else
+    guiglobal=[];
+end
 
 % check we have got passed a newQ otherwise use from the GUI
 if nargin<4

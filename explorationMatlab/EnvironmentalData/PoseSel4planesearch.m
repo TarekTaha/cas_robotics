@@ -16,6 +16,8 @@ if nargin<4
   end
 end
 
+numQguesses=9;
+
 % Turn off warning messages if we dont care
 if ~displayon
     warning off
@@ -62,16 +64,18 @@ end
 Links = r.link;
 qlimits=r.qlim; 
 t_base = r.base;
-try DensoBlasting_h.MinimumMillimetersToSurface = optimise.mintargetdis*1000;
-catch
+try hParam=DensoBlasting_h.invoke('IBlastingTaskParameters');
+catch ME
+  display(ME)
   display('PoseSel4planesearch:: trying to restart the server: EyeInHand.DensoBlastingCost')
   DensoBlasting_h = actxserver('EyeInHand.DensoBlastingCost');
-  DensoBlasting_h.MinimumMillimetersToSurface = optimise.mintargetdis*1000;
+  hParam=DensoBlasting_h.invoke('IBlastingTaskParameters');
 end
-DensoBlasting_h.MaximumMillimetersToSurface = optimise.maxtargetdis*1000;
-DensoBlasting_h.MinimumDegreesToSurfaceNormal = rad2deg(optimise.minDeflectionError);
-DensoBlasting_h.MaximumDegreesToSurfaceNormal = rad2deg(optimise.maxDeflectionError);
-DensoBlasting_h.ToolFrameReferencePoint = [0, 0, 0];
+hParam.MinimumMillimetersToSurface = optimise.mintargetdis*1000;
+hParam.MaximumMillimetersToSurface = optimise.maxtargetdis*1000;
+hParam.MinimumDegreesToSurfaceNormal = rad2deg(optimise.minDeflectionError);
+hParam.MaximumDegreesToSurfaceNormal = rad2deg(optimise.maxDeflectionError);
+hParam.ToolFrameReferencePoint = [0, 0, 0];
 DensoBlasting_h.MinimumFunctionGradient = optimise.stol;
 
 %this will store where collision checks have been done
@@ -93,9 +97,13 @@ display('Starting 1st phase...............');
 
 
 
-jointConfig=ikine_g_plane(r,plane(1).home_point, plane(1).equ, currQ);
-jointConfig(jointConfig'<qlimits(:,1)*0.96)=qlimits(jointConfig'<qlimits(:,1)*0.96,1)*0.96;
-jointConfig(jointConfig'>qlimits(:,2)*0.96)=qlimits(jointConfig'>qlimits(:,2)*0.96,2)*0.96;
+% jointConfig=ikine_g_plane(r,plane(1).home_point, plane(1).equ, currQ);
+% jointConfig(jointConfig'<qlimits(:,1)*0.96)=qlimits(jointConfig'<qlimits(:,1)*0.96,1)*0.96;
+% jointConfig(jointConfig'>qlimits(:,2)*0.96)=qlimits(jointConfig'>qlimits(:,2)*0.96,2)*0.96;
+
+jointConfig=currQ;
+
+
 if ~check_path_for_col(jointConfig)
     jointConfig=currQ;
 else %its ok so add to list of checks done
@@ -117,6 +125,8 @@ for i = 1:length(plane)
         else
             DensoBlasting_h.TargetNormal = plane(i).equ(1:3);
         end
+        
+
 %         plot3([plane(i).home_point(1),plane(i).home_point(1)+plane(i).equ(1)],[plane(i).home_point(2),plane(i).home_point(2)+plane(i).equ(2)],[plane(i).home_point(3),plane(i).home_point(3)+plane(i).equ(3)],'r')
 %         plot3([plane(i).home_point(1),plane(i).home_point(1)-plane(i).equ(1)],[plane(i).home_point(2),plane(i).home_point(2)-plane(i).equ(2)],[plane(i).home_point(3),plane(i).home_point(3)-plane(i).equ(3)],'b')
         
@@ -152,23 +162,19 @@ for i = 1:length(plane)
         if valid && ~useMyMethodOnly
             foundby='. Found by 1) DensoBlasting_h ';                        
         else
-          if useMyMethodOnly
-            [jointConfig_temp,valid] = new_blasting_posesel(plane(i).home_point, plane(i).equ, jointConfig_temp,true);
-          else
-            [jointConfig_temp,valid] = new_blasting_posesel(plane(i).home_point, plane(i).equ, jointConfig_temp,false);
-          end
-           
+            if useMyMethodOnly
+                [jointConfig_temp,valid] = new_blasting_posesel(plane(i).home_point, plane(i).equ, jointConfig_temp,useMyMethodOnly);
+            end               
             %Store that a collision check has been performed
             if valid
                 jointConfigCollisionChecked=[jointConfigCollisionChecked;jointConfig_temp];
-            end
-        
-            if valid 
                 jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig_temp(1:6)))),0];
-                foundby='. Found by 2) new_blasting_posesel';
-            end            
-        end
-    catch
+                if useMyMethodOnly;  foundby='. Found by 2) new_blasting_posesel';end
+            end
+         end
+        
+    catch ME;
+        display(ME);
         if displayon
             display(['Error in pose selection of plane', num2str(i)]);
         end
@@ -179,62 +185,6 @@ for i = 1:length(plane)
     %if not valid we don't want to use that found joint angle because it is crap
     if valid
         jointConfig=jointConfig_temp;
-        
-%     else
-%         plot3(plane(i).home_point(1),plane(i).home_point(2),plane(i).home_point(3),'k*');if rand >0.95 drawnow;end
-        
-%% Used to go through and use a few successes poses as an intial guess 
-% but it takes a long time and is only sometimes successful. It is better
-% to do this process at the end once all sucessess have been found.
-
-%         %go back through previous poses and try and use one of these as
-%         %a starter (don't use the latest which is obviously jointConfig
-%         %and has already been tried
-%         tries=0;
-%         if exist('pose','var') && size(pose,2)>1
-%             for current_pose=randperm(size(pose,2)-1)
-%                 %don't attempt to use too many poses this may be an
-%                 %impossible pose after all
-%                 if tries>8; break; else tries=tries+1;end
-% 
-%                 if pose(current_pose).validPose
-%                     try 
-%                         [jointConfig_temp,valid] = new_blasting_posesel(plane(i).home_point, plane(i).equ, pose(current_pose).Q);
-%                         if valid jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig_temp(1:6)))),0];end
-%                     end
-%                     if valid
-%                         display('Found pose using PREVIOUS VALID as starter');
-%                         jointConfig=jointConfig_temp;
-%                         break;
-% %                         else
-% %                             display('DIDNT find pose using previous valid pose as starter');
-%                     end
-%                 end
-%             end            
-%         end
-
-%% Trying the Ikine as initial guess never seems to do much
-%         if ~valid
-%             %try Ikine method for starter pose
-%             if ~exist('ikine_jointConfig_temp','var')
-%                 ikine_jointConfig_temp=ikine_g_plane(r,plane(i).home_point, plane(i).equ, jointConfig); 
-%             end
-%             %use previous pose as the guess
-%             jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig(1:6)))),0];
-%             %check if valid
-%             [valid]=classunkcheck_newQ(jointConfig_temp,qlimits,plane(i).home_point,t_base,Links,numlinks,plane(i).equ,false);
-%             if ~valid            
-%                 try 
-%                     [jointConfig_temp,valid] = new_blasting_posesel(plane(i).home_point, plane(i).equ, jointConfig_temp);
-%                     if valid jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig_temp(1:6)))),0];end
-%                 end
-%             end
-%             
-%             if valid
-%                 display('Found a pose in hard spot using IKINE starter');
-%                 jointConfig=jointConfig_temp;
-%             end
-%         end
     end
 
     % This should never happen but it must be stopped if it does
@@ -290,7 +240,7 @@ disttomean=sqrt((all_valid(:,1)-mew(1)).^2+(all_valid(:,2)-mew(2)).^2+(all_valid
 for i=1:length(plane)
     %display('only doing 60');
     if ~pose(i).validPose
-        [jointConfig,valid,foundby]=tryuseallasstarters(pose,plane(i),qlimits,t_base,Links,numlinks,all_valid(index,:),collchk4eyeinhand_ang,linkvals);
+        [jointConfig,valid,foundby]=tryuseallasstarters(pose,plane(i),qlimits,t_base,Links,numlinks,all_valid(index,:),collchk4eyeinhand_ang,linkvals,numQguesses);
         
         %increase by if valid is true or false
         valid_count=valid_count+valid;
@@ -337,7 +287,7 @@ end
 
 
 %% This fucntion tries to find missing poses
-function [jointConfig,valid,foundby]=tryuseallasstarters(pose,plane,qlimits,t_base,Links,numlinks,Q_guess_order,collchk4eyeinhand_ang,linkvals,maxtries)
+function [jointConfig,valid,foundby]=tryuseallasstarters(pose,plane,qlimits,t_base,Links,numlinks,Q_guess_order,collchk4eyeinhand_ang,linkvals,maxtries,numQguesses)
 global DensoBlasting_h jointConfigCollisionChecked
 if nargin<10    
     maxtries=30;
@@ -397,7 +347,24 @@ if size(Q_guess_order,1)>1
     end            
 end
 
-%go back through previous poses and try and some of these 60 as
+
+%% new Qguess methodology
+qGuess = deg2rad(DensoBlasting_h.NearbyConfiguration(int32(numQguesses)));
+for currQguess=1:numQguesses
+    jointConfig_temp=[qGuess(currQguess,:),0];
+    jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig_temp(1:6)))),0];
+    docollcheck=isempty(find((jointConfigCollisionChecked(:,1)-jointConfig_temp(1)<collchk4eyeinhand_ang & jointConfigCollisionChecked(:,2)-jointConfig_temp(2)<collchk4eyeinhand_ang & jointConfigCollisionChecked(:,3)-jointConfig_temp(3)<collchk4eyeinhand_ang & jointConfigCollisionChecked(:,4)-jointConfig_temp(4)<collchk4eyeinhand_ang & jointConfigCollisionChecked(:,5)-jointConfig_temp(5)<collchk4eyeinhand_ang),1));
+    [valid,dist]=classunkcheck_newQ(jointConfig_temp,qlimits,plane(i).home_point,t_base,Links,numlinks,plane(i).equ,false,linkvals,docollcheck);
+    if docollcheck && valid;  jointConfigCollisionChecked=[jointConfigCollisionChecked;jointConfig_temp]; break; end              
+end
+if valid
+    foundby='. Found by 2) EyeinHand_guess_n Check';
+    jointConfig=jointConfig_temp;
+    return;
+end
+                
+                
+%% go back through previous poses and try and some of these 60 as
 %a starter (don't use the latest which is obviously jointConfig
 %and has already been tried
 tries=0;
