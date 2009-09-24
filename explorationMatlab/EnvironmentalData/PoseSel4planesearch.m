@@ -287,9 +287,9 @@ end
 
 
 %% This fucntion tries to find missing poses
-function [jointConfig,valid,foundby]=tryuseallasstarters(pose,plane,qlimits,t_base,Links,numlinks,Q_guess_order,collchk4eyeinhand_ang,linkvals,maxtries,numQguesses)
+function [jointConfig,valid,foundby]=tryuseallasstarters(pose,plane,qlimits,t_base,Links,numlinks,Q_guess_order,collchk4eyeinhand_ang,linkvals,numQguesses,maxtries)
 global DensoBlasting_h jointConfigCollisionChecked
-if nargin<10    
+if nargin<11    
     maxtries=30;
 end
 valid=false;
@@ -354,7 +354,7 @@ for currQguess=1:numQguesses
     jointConfig_temp=[qGuess(currQguess,:),0];
     jointConfig_temp =[deg2rad(DensoBlasting_h.MinimumNear(rad2deg(jointConfig_temp(1:6)))),0];
     docollcheck=isempty(find((jointConfigCollisionChecked(:,1)-jointConfig_temp(1)<collchk4eyeinhand_ang & jointConfigCollisionChecked(:,2)-jointConfig_temp(2)<collchk4eyeinhand_ang & jointConfigCollisionChecked(:,3)-jointConfig_temp(3)<collchk4eyeinhand_ang & jointConfigCollisionChecked(:,4)-jointConfig_temp(4)<collchk4eyeinhand_ang & jointConfigCollisionChecked(:,5)-jointConfig_temp(5)<collchk4eyeinhand_ang),1));
-    [valid,dist]=classunkcheck_newQ(jointConfig_temp,qlimits,plane(i).home_point,t_base,Links,numlinks,plane(i).equ,false,linkvals,docollcheck);
+    [valid,dist]=classunkcheck_newQ(jointConfig_temp,qlimits,plane.home_point,t_base,Links,numlinks,plane.equ,false,linkvals,docollcheck);
     if docollcheck && valid;  jointConfigCollisionChecked=[jointConfigCollisionChecked;jointConfig_temp]; break; end              
 end
 if valid

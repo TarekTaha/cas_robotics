@@ -9,7 +9,7 @@ weighting = 10; % A predetermined starting weighting factor for distance
 show_progress = true; 
 show_results = false;
 pfig=[];
-display_rate = 3;
+display_rate = 4;
 
 if vidCap == true
     movieHandle = avifile('GA_RTA.avi');
@@ -118,11 +118,13 @@ end
 joint_matx=zeros([size(pose,2),size(pose,2)]);
 for i=1:size(pose,2)
     for j=i:size(pose,2)
+        %it was originally only the first 5 joints now it is all 6
         joint_matx(i,j)=sqrt((temp_pose(i,1)-temp_pose(j,1))^2)+...
                         sqrt((temp_pose(i,2)-temp_pose(j,2))^2)+...
                         sqrt((temp_pose(i,3)-temp_pose(j,3))^2)+...
                         sqrt((temp_pose(i,4)-temp_pose(j,4))^2)+...
-                        sqrt((temp_pose(i,5)-temp_pose(j,5))^2);
+                        sqrt((temp_pose(i,5)-temp_pose(j,5))^2)+...
+                        sqrt((temp_pose(i,6)-temp_pose(j,6))^2);
         joint_matx(j,i)=joint_matx(i,j);
     end
 end
@@ -143,10 +145,19 @@ weightList = zeros(num_iter,1);
 
 % Initialize Population
 pop = zeros(pop_size, num_cities);
-if pop_size<10; error('cant have such a small population size make it more the 11');end
-for k=1:pop_size
+% if pop_size<10; error('cant have such a small population size make it more the 11');end
+for k=1:min(pop_size,num_cities)
     pop(k, :) = ([k:-1:1,k+1:num_cities]);
 end
+%if when making up the cities there are less citites then population then
+%we have to make up some randome ones to put on the end
+if pop_size>num_cities
+   for k=num_cities+1:pop_size
+       pop(k, :) = randperm(num_cities);
+   end 
+end
+    
+
 % for k = 11:pop_size
 %     staysame=k*floor(num_cities/pop_size);
 %     if k<pop_size/2        
