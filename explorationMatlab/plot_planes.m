@@ -42,7 +42,16 @@ for i=1:length(plane)
     %angle between 2 lines
     angofrot=acos(dot(plane(i).equ(1:3),[0,0,1]));
     axisofrot=cross(plane(i).equ(1:3),[0,0,1]);
-    val=rot_vec([x,y,z],axisofrot,angofrot);
+    
+    %is the angle positive or negative
+    vec_pos=rot_vec([0,0,1],axisofrot,angofrot);    
+    vec_neg=rot_vec([0,0,1],axisofrot,-angofrot);    
+
+    if dist2pts(vec_pos,plane(i).equ(1:3))<dist2pts(vec_neg,plane(i).equ(1:3))
+        val=rot_vec([x,y,z],axisofrot,angofrot);
+    else
+        val=rot_vec([x,y,z],axisofrot,-angofrot);
+    end
 
     toplot=[val(:,1)+plane(i).home_point(1),...
             val(:,2)+plane(i).home_point(2),...
