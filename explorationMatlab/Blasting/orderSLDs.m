@@ -15,7 +15,7 @@ pose=[];cities=[];geo_dist=[];joint_dist=[];
 
 validindex=0;
 for i=1:size(planeSet,2)   
-    if all_poses(i,8)
+    if size(all_poses,2)<8 || all_poses(i,8)
         validindex=validindex+1;
         cities(validindex,:)=planeSet(validindex).home_point;
         pose(validindex).Q = all_poses(validindex,1:7);        
@@ -28,7 +28,7 @@ end
 
 % MUST DO THIS REORDERING
 %if all poses are valid (EASY CASE)
-if isempty(find(all_poses(i,8)==0,1))    
+if size(all_poses,2)<8 || isempty(find(all_poses(i,8)==0,1))    
     planeSet=planeSet(best_route);
     all_poses=all_poses(best_route,:);
 else %need to reconstruct planeSet and all_poses (HARD CASE)
