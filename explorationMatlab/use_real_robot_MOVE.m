@@ -79,7 +79,7 @@ rob_h=actxserver('EyeInHand.DensoCommand');
 % display(strcat('Current Joint State is:',num2str(rob_h2.JointStatee),' and the desired is:', num2str(tempQ)));
 
 %% Check if all joints are the same as what we want them to be within 1degree
-if ~isempty(find(round(tempQ(1:6)-rad2deg(Q)), 1))
+if ~isempty(find(rad2deg(sum(diff(all_steps)))>1,1))%~isempty(find(round(tempQ(1:6)-rad2deg(Q)), 1))
     %Set the speed
     rob_h.Type='SetSpeed';
     rob_h.Params=[robot_maxreach.move_speed,0];

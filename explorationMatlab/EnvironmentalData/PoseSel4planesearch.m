@@ -65,8 +65,8 @@ Links = r.link;
 qlimits=r.qlim; 
 t_base = r.base;
 try hParam=DensoBlasting_h.invoke('IBlastingTaskParameters');
-catch ME
-  display(ME)
+catch %ME
+  %display(ME)
   display('PoseSel4planesearch:: trying to restart the server: EyeInHand.DensoBlastingCost')
   DensoBlasting_h = actxserver('EyeInHand.DensoBlastingCost');
   hParam=DensoBlasting_h.invoke('IBlastingTaskParameters');
@@ -173,8 +173,8 @@ for i = 1:length(plane)
             end
          end
         
-    catch ME;
-        display(ME);
+    catch %ME;
+        %display(ME);
         if displayon
             display(['Error in pose selection of plane', num2str(i)]);
         end
