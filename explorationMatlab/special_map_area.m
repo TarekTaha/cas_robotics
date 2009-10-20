@@ -1,14 +1,14 @@
 function special_map_area()
 
-global RangeData PointData workspace
+global G_scan workspace
 
 % load ScanforClassifier-0to-60
 % workspace.spec_pnts=[];
 
-[zeroRangeCol,zeroRangeRow]=find(RangeData<20);
+[zeroRangeCol,zeroRangeRow]=find(G_scan.RangeData<20);
 
 %diff te pan direction
-diffval=diff(RangeData,1,2);
+diffval=diff(G_scan.RangeData,1,2);
 
 [diffCol,diffRow]=find(diffval>workspace.inc_size*1000);
 
@@ -42,13 +42,13 @@ for i=1:2:size(diffCol,1)
     if isempty(find(diffCol(i)==zeroRangeCol & zeroRangeRow==diffRow(i),1)) &&...
             isempty(find(diffCol(i)==zeroRangeCol & zeroRangeRow==diffRow(i)+1,1))
         
-        radius=sqrt(sum(((PointData(diffCol(i),diffRow(i),:)-PointData(diffCol(i),diffRow(i)+1,:))/2).^2));
+        radius=sqrt(sum(((G_scan.PointData(diffCol(i),diffRow(i),:)-G_scan.PointData(diffCol(i),diffRow(i)+1,:))/2).^2));
         %make sure the radius is not too large
         if radius>2*workspace.inc_size; radius=2*workspace.inc_size; end
 
         %Determine the mid point between the points with the big
         %differential
-        special_point=squeeze((PointData(diffCol(i),diffRow(i),:)+PointData(diffCol(i),diffRow(i)+1,:))/2)';
+        special_point=squeeze((G_scan.PointData(diffCol(i),diffRow(i),:)+G_scan.PointData(diffCol(i),diffRow(i)+1,:))/2)';
         [nothing,level2]=GetImpLevInfo(special_point);
         if size(level2,1)>0 %then we know its inside level 2 at least so go on
 %         workspace.spec_pnts=[workspace.spec_pnts;...
@@ -103,4 +103,4 @@ if size(ALLspec_pnts_ind,1)>0
 end
 % plot3(workspace.spec_pnts(:,1),workspace.spec_pnts(:,2),workspace.spec_pnts(:,3),'k*');
 % hold on;
-% plot3(PointData(:,:,1),PointData(:,:,2),PointData(:,:,3),'g.')
+% plot3(G_scan.PointData(:,:,1),G_scan.PointData(:,:,2),G_scan.PointData(:,:,3),'g.')

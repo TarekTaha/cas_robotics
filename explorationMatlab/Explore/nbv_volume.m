@@ -1,15 +1,15 @@
 %% nbv_volume
 %
-% *Description:*  this function works out one scan at a given position, 
+% *Description:*  this function works out 1 set of data for exploration at a given position, 
 % by;
-% 1) first calculate an optimal scan (once) by using the scan range, pan
-% bearing and scan tilt (6th joint assumed 0 so the robot can actual move
-% with the second last joint so as to maximise the scan everytime)
-% 2) then (and subsequent times as long as scan pan and tilt is not changed)  
-% it will shift this block of point scan to the desired position and desired bearing
+% 1) first calculate an optimal sensing data set (once) by using the sensor range, pan
+% bearing and tilt (6th joint assumed 0 so the robot can actual move
+% with the second last joint so as to maximise the data everytime)
+% 2) then (and subsequent times as long as pan and tilt values are not changed)  
+% it will shift this block of point data to the desired position and desired bearing
 % 3) then if there are any obsticles defined in the workspace it will work
 % out the point to carve out these are the points obstructed because of the
-% surface from the laser scan pos
+% surface from the laser pos
 % Note: setupworkspace (or something) to set workspace variables should
 % have been run
 
@@ -28,16 +28,16 @@
 function points=nbv_volume(tr,newQ)
 
 %% Variables
-global scan workspace
+global G_scan workspace
   
-if ~isfield(scan,'basescan')
-    scan.basescan=dobasic_scan(workspace.inc_size);
-    save basic_scan_data.mat -struct scan basescan;
+if ~isfield(G_scan,'basescan')
+    G_scan.basescan=dobasic_scan(workspace.inc_size);
+    save basic_scan_data.mat -struct G_scan basescan;
 end
 
 %% Do the transformation shift and rotation of the points
 %get the points from memory
-points=scan.basescan;
+points=G_scan.basescan;
 
 %if we are using the square vectors where chosen pose goes to, else we have a legitimate tr passed in 
 % Used for NBV only (leave here for now)
@@ -135,7 +135,7 @@ if ~isempty(obstructingPNTS)
                      plane_equ(i,3)*points(:,3)+...
                      ones([size(points,1),1])*plane_equ(i,4))>0;
                  
-        %what side is the scan origin on?
+        %what side is the scan_origin on?
         scan_origin_sign=(plane_equ(i,1)*current_scan_origin(1)+...
                           plane_equ(i,2)*current_scan_origin(2)+...
                           plane_equ(i,3)*current_scan_origin(3)+...
@@ -159,7 +159,7 @@ if ~isempty(obstructingPNTS)
                    current_scan_origin(2)-points_on_oposite_side(:,2),...
                    current_scan_origin(3)-points_on_oposite_side(:,3)];               
 
-            %find intersection point between surface and the scan line between scan origin and point
+            %find intersection point between surface and the ray between sensor origin and point
             bottomof_t_var=plane_equ(i,1)*r_var(:,1)+...
                            plane_equ(i,2)*r_var(:,2)+...
                            plane_equ(i,3)*r_var(:,3);
@@ -216,11 +216,10 @@ end
 % delete(e);
 
 %% FUNCTION: Basic scan
-% Description: this traces out the lines and gets a group of points as the
-% basic scan 
+% Description: this traces out the lines and gets a group of points
 function points=dobasic_scan(cube_size)
 
-global scan workspace
+global G_scan workspace
 
 %starttime=clock;
 
@@ -231,15 +230,13 @@ bear=[1,0,1]; %used to be [0,0,1]
 tilt_rotate_vec=[0,1,0];
 
 %max range of laser
-las_range=scan.size;
+las_range=G_scan.size;
 
 %Laser Angualar VARIABLES
-%this is the angle either side of the bearing of the center of the scan \|/
-theta=scan.theta;
-%the increment angle used in both 
-%theta_incr=scan.theta_incr;
+%this is the angle either side of the bearing of the center sensor ray \|/
+theta=G_scan.theta;
 %this is the angle from the tilt, - is up, + is down, angle must be from -2pi to 2pi
-alpha=-scan.alpha;
+alpha=-G_scan.alpha;
 
 % %SETUP WORKSPACE
 
@@ -249,14 +246,14 @@ alpha=-scan.alpha;
 %resolution for this simulation
 theta_incr=atan((cube_size/3)/las_range);
 %we have an actual min resoltion in hardware so this is the minmum
-if theta_incr<scan.theta_incr
-    theta_incr=scan.theta_incr;
+if theta_incr<G_scan.theta_incr
+    theta_incr=G_scan.theta_incr;
 end
     
-%% Take the scan - work out end points
+%% Sense and then - work out end points
 % This is the most important vector
-% it describes the center of the first laser pan scan 
-% we will rotate to ge the pan scan
+% it describes the first center laser ray
+% we will rotate the ray to get the pan effect
 dir_vec=las_range*(bear);
 %this is the vector that we will pan rotate around, it is always at origin
 %so we get cross product of the two vectors on the plane to get normal
@@ -395,7 +392,7 @@ end
 % keyboard
 % end  
 % 
-% % Delete the scan handles
+% % Delete the plot handles
 % delete_scan_lines(scan_line_handles,scan_point_handles)
 % clear scan_line_handles scan_point_handles
 

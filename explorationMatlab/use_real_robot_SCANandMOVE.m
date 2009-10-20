@@ -1,9 +1,8 @@
 %% use_real_robot_SCANandMOVE
 %
-% *Description:*  This is called to do the actual scan and is a way to
-% modulate the scanning routine. Simply input the degrees that are to be
-% scanned Q must be globally defined, scan width should be globally defined
-% This will move while scanning and collect data like normal
+% *Description:*  This is called to move the sensor and is a way to
+% modulate the scanning routine. Send the set of movements required while scanning  Q 
+% must be globally defined.
 
 %% Function Call
 %
@@ -19,11 +18,8 @@
 function use_real_robot_SCANandMOVE(vargin)
 
 %% Variables:  Declarations and checks
-%THIS CLEARS GLOBAL VARS USED IN SCANS SO THEY DON'T BUILD UP
-% display('Clearing all global scan variables before starting a new scan');
-clear global PoseData RangeData IntensityData PointData;
-
-global scan PointData IntensityData RangeData robot_maxreach;
+global G_scan robot_maxreach;
+G_scan.PoseData=[];G_scan.RangeData=[];G_scan.IntensityData=[];G_scan.PointData=[];
 
 hCOM=getappdata(gcf,'hCOM');
 
@@ -54,7 +50,7 @@ hCOM.Laser.TiltSpeed=robot_maxreach.scan_speed;
 %hCOM.Laser.Mode='RangeOnly';
 hCOM.Laser.Mode='RangeAndAveragedIntensity';        
 
-%tilt through desired scan range in the negative direction so laser is safe
+%tilt q_5 in the negative direction so laser is safe
 %(might be confusing)
 hCOM.Laser.Start(-1);
 
@@ -71,7 +67,4 @@ use_real_robot_MOVE(all_steps);
 Q=all_steps(end,:);
 
 hCOM.Laser.Stop;   
-scan.PointData=PointData;
-scan.IntensityData=IntensityData;
-scan.RangeData=RangeData;
 

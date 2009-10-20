@@ -1,23 +1,22 @@
 %function for updating the voxels status
-%pass in a block of classified data that corresponds with the last scans
-%PointData and RangeData
+%pass in a block of classified data that corresponds with the last scans data
 
 % should return nothing
 
 function update_ocstatus(ClassifiedData)
 
-global workspace PointData RangeData
+global workspace G_scan
 %get the variables from the workspace 
 class_cubesize=workspace.class_cubesize;
 minclassifications=workspace.minclassifications;
 classfierthreshhold=workspace.classfierthreshhold;
 
-pointswithclass=zeros([size(PointData,1)*size(PointData,2),4]);
-CorrespondingRange=zeros([size(PointData,1)*size(PointData,2),1]);
+pointswithclass=zeros([size(G_scan.PointData,1)*size(G_scan.PointData,2),4]);
+CorrespondingRange=zeros([size(G_scan.PointData,1)*size(G_scan.PointData,2),1]);
 
-for i=1:min(size(PointData,1),size(ClassifiedData,1))
-    pointswithclass((i-1)*size(PointData,2)+1:i*size(PointData,2),:)=[squeeze(PointData(i,:,:)),ClassifiedData(i,:)'];
-    CorrespondingRange((i-1)*size(PointData,2)+1:i*size(PointData,2),:)=RangeData(i,:);
+for i=1:min(size(G_scan.PointData,1),size(ClassifiedData,1))
+    pointswithclass((i-1)*size(G_scan.PointData,2)+1:i*size(G_scan.PointData,2),:)=[squeeze(G_scan.PointData(i,:,:)),ClassifiedData(i,:)'];
+    CorrespondingRange((i-1)*size(G_scan.PointData,2)+1:i*size(G_scan.PointData,2),:)=G_scan.RangeData(i,:);
 end;
 
 %only use the points that are greater than 0 range since the others make no

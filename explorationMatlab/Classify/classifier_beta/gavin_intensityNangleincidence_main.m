@@ -297,7 +297,7 @@ end
 %     title(description,  'FontSize', 20);
 %     legend('Metal', 'Wood');
 %     
-%     % find the most perpendicular scan 
+%     % find the most perpendicular viewpoint 
 %     scanNumber = source(source(:,4)==min(source(ptMask1|ptMask2,4)),6);
 % %     scanNumber = 110;
 %     scanMask1 = source(:,6) == scanNumber(1);
@@ -312,5 +312,5 @@ end
 % %     plot(normalised(vertices(scanMask1,1)),'color', 'g');
 %     plot(rayNumber, normalised(vertices(scanMask1,2)),'color', 'g');
 %     legend('Range', 'Autogain', 'Angle of incidence', 'Y-coordinate');
-%     title(['Data from scan ', int2str(scanNumber(1))], 'FontSize', 16);
+%     title(['Data from sensor ', int2str(scanNumber(1))], 'FontSize', 16);
 %     xlabel('Ray number', 'FontSize', 16);    ylabel('Normalised value', 'FontSize', 16);

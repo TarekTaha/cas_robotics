@@ -7,7 +7,7 @@ function poseclassunknown_Imp_newest(numofintplanes)
 
 %% Setup and Variables
 % close all
-global PointData RangeData IntensityData workspace classPlanePlotHa AXBAMnCtestdata alldirectedpoints Q
+global workspace classPlanePlotHa AXBAMnCtestdata alldirectedpoints Q
 
 % figure(1)
 % plot_planes(plane,mew);
@@ -30,7 +30,7 @@ NOhandleOPTIONS.remv_unkn_in_mv=false;
 
 %must start from a reasonable pose
  try movetonewQ(0,rad2deg([Q(1:3),0,0,0]),[],NOhandleOPTIONS); 
- catch
+ catch %#ok<CTCH>
    error('The start must have joint 4-6 =0')
  end
 
@@ -38,29 +38,23 @@ NOhandleOPTIONS.remv_unkn_in_mv=false;
 %this is how many we go after at once
 maxindexsize=30;
 
-%take one scan from an initial pose
+%take one laser sweep from an initial pose
 % newQ=[0,-88*pi/180,140*pi/180,0,0*pi/180,0];
 %move to the next place
 % movetonewQ(0,rad2deg(newQ),[],NOhandleOPTIONS);
 % Q=newQ;
 
-% % and do a scan to classify
+% % and collect data to classify
 % if NOhandleOPTIONS.useRealRobot
 %     try use_real_robot_SCAN(90); catch; display('Couldnt scan');end
 % end
 %             
-
-            
+           
 
 %% More Vars
-class_cubesize=workspace.class_cubesize;
-
-% minclassifications=workspace.minclassifications;
-% classfierthreshhold=workspace.classfierthreshhold;
-
 % the classifier reterns a classification of this number is unknown
 % unknownclass=8;
-%size of the surfaces which is 1/2 of 20' scan at ideal distance 0.5*tan(20*pi/180)
+% size of the surfaces which is 1/2 of 20' scan at ideal distance 0.5*tan(20*pi/180)
 mew=workspace.classifyMew;
 % This is how many sets of data we will classify
 % numofintplanes=20;
@@ -79,16 +73,6 @@ classunkn_optimise.distAwayfromTarget=0.47;
 classunkn_optimise.maxAngle=42*pi/180;
 % classunkn_optimise.iLimit=500;
 % classunkn_optimise.stol=1e-6;
-
-%% Classify
-% try [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData); catch; display('Couldnt classify');end
-% load tempdata.mat
-
-% Updated ocgrid status
-% display('TEMP LOADING DATA');load GavData;ClassifiedData=ClassifiedDatawEdges;
-% try UNclassifiedvoxels=update_ocstatus(ClassifiedData);
-% catch; keyboard;
-% end
 
 %% determine regions of uncertainty
 [index,UNclassifiedvoxels]=get_unknown_identification();    
@@ -155,9 +139,9 @@ while solsfound<numofintplanes
             continue;
         end
             % and do a scan to classify
-%% If we are doing with real robot then move the 5th joint through a scan            
+%% If we are doing with real robot then move the 5th joint
         if NOhandleOPTIONS.useRealRobot
-            %try and move through a complete scan so we have to make newQ standard
+            %try and move through a complete sensing sweep so we have to make newQ standard
             if newQ(5)>-45*pi/180 
                 if newQ(5)<60*pi/180
                     newQ=[newQ(1:4),newQ(5)+30*pi/180,0];
@@ -170,7 +154,7 @@ while solsfound<numofintplanes
 
             try 
               movetonewQ(0,rad2deg(newQ),[],NOhandleOPTIONS);
-            catch; 
+            catch  %#ok<CTCH>
               error('Could move to correct position');
             end
             
@@ -181,18 +165,22 @@ while solsfound<numofintplanes
             AXBAMnCtestdata.allE=pose(indextoblast).allE;
 %% end fortesting         
             
-            try use_real_robot_SCAN(-60); organise_data();catch; error('Could scan anything');end
+            try use_real_robot_SCAN(-60); organise_data();catch; error('Could sense anything');end
             use_real_robot_GETJs();
-            % and do a scan to classify           
-            global PointData IntensityData RangeData
-            try [ClassifiedData] = Block_Classifier(PointData, IntensityData, RangeData); catch; error('Couldnt classify');end                                
+            % and sense and classify           
+            global G_scan;
+            try [ClassifiedData] = Block_Classifier(G_scan.PointData, G_scan.IntensityData); 
+            catch  %#ok<CTCH>
+                error('Couldnt classify');
+            end                                
             
             %update oc grid status
             update_ocstatus(ClassifiedData);
             
 %             move back to zeros for last 4
             try movetonewQ(0,rad2deg([Q(1:3),0,0,0]),[],NOhandleOPTIONS);  %try moving to all zeros
-            catch movetonewQ(0,[0,-85,90,0,0,0],[],NOhandleOPTIONS); %try moving back to the assumed safe pose starting guess
+            catch %#ok<CTCH>
+                movetonewQ(0,[0,-85,90,0,0,0],[],NOhandleOPTIONS); %try moving back to the assumed safe pose starting guess
             end 
         end
         
@@ -207,7 +195,8 @@ while solsfound<numofintplanes
 %% Testing
 %          uiwait(msgbox('press OK button to continue'));
         try AXBAMnCtesting(false);
-        catch display('Some error when saving testing data');
+        catch %#ok<CTCH>
+            display('Some error when saving testing data');
           keyboard
         end
 %% End testing 
@@ -221,16 +210,16 @@ while solsfound<numofintplanes
         %% Determine poses and paths
         try [planeSet,pose,pathval]=determinePathsNposes(index,maxindexsize,alldirectedpoints);
           if size(planeSet,1)==0; error('do it again');end
-        catch
+        catch %#ok<CTCH>
           display('No poses found, trying again with 4* maxindexsize, and removing self scanning')
           workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles);
           
         try [planeSet,pose,pathval]=determinePathsNposes(index,4*maxindexsize);
           if size(planeSet,1)==0; error('Still no pose');end
-        catch
+        catch %#ok<CTCH>
           display('No poses found, trying again with all index')
           try [planeSet,pose,pathval]=determinePathsNposes(index,size(index,1));
-          catch
+          catch %#ok<CTCH>
             display('Still no luck so handing over to you');
             keyboard
           end
@@ -243,11 +232,11 @@ while solsfound<numofintplanes
         
     end
     
-  catch;
-    lasterr
-    display('some problem in the while loop, you have control')
-    keyboard
-   end
+    catch %#ok<CTCH>
+        lasterr
+        display('some problem in the while loop, you have control')
+        keyboard
+    end
 end
 
 

@@ -30,12 +30,12 @@ function pathfound=movetonewQ(handles,newQ,all_steps,NOhandleOPTIONS,hFigure)
 %% Variables
 global r Q workspace robot_maxreach;
 
-%if there is a figure then try and get guiglobal from it
+%if there is a figure then try and get guiParams from it
 fig_H=get(0,'CurrentFigure');
 if ~isempty(fig_H)
-    guiglobal=getappdata(fig_H,'guiglobal');
+    guiParams=getappdata(fig_H,'guiParams');
 else
-    guiglobal=[];
+    guiParams=[];
 end
 
 % check we have got passed a newQ otherwise use from the GUI
@@ -73,7 +73,7 @@ if size(newQ,2)>r.n
 end
 
   
-if isstruct(guiglobal); plotpath=guiglobal.plotpath; else plotpath=false;end
+if isstruct(guiParams); plotpath=guiParams.plotpath; else plotpath=false;end
 
 %if we don't have any handles
 if isstruct(handles)==0
@@ -121,7 +121,7 @@ if isempty(find(abs(Q-newQ)>robot_maxreach.minjointres, 1));
     catch; display('Already at destination'); end
     
     if show_robot
-        plotdenso(r, newQ, guiglobal.checkFF, guiglobal.plot_ellipse);
+        plotdenso(r, newQ, guiParams.checkFF, guiParams.plot_ellipse);
     end
     %since we are already there
     pathfound=1;
@@ -168,7 +168,7 @@ end
 if pathfound==0 || pathfound==-1
   if pathfound==0 %no path found, update GUI accordingly      
     if show_robot
-        plotdenso(r, Q, guiglobal.checkFF, guiglobal.plot_ellipse);
+        plotdenso(r, Q, guiParams.checkFF, guiParams.plot_ellipse);
     end
     try set(handles.dialog_text,'String','End valid but no path found');
     catch; display('End valid but no path found');end
@@ -203,7 +203,7 @@ if pathfound && size(all_steps,1)>0
     end
     %plot the end effector in place
     if show_robot
-        plotdenso(r, all_steps(end,:), guiglobal.checkFF, guiglobal.plot_ellipse);
+        plotdenso(r, all_steps(end,:), guiParams.checkFF, guiParams.plot_ellipse);
     end
     try set(handles.dialog_text,'String','Path found - animation updated');
     catch; display('Path found - animation updated'); end
@@ -228,7 +228,7 @@ if pathfound && size(all_steps,1)>0
             if (size(all_steps,1)>3 && ~isempty(find(abs(all_steps(1,1:4)-all_steps(end,1:4))>pi/180,1))) ||...
                     isempty(robot_maxreach.path)
                 robot_maxreach.path(end+1).all_steps=all_steps;
-            else %add the slight movement (scan move/adjust) onto the end of last path
+            else %add the slight movement (scan+move&adjust) onto the end of last path
                 robot_maxreach.path(end).all_steps=[robot_maxreach.path(end).all_steps;all_steps];
             end
             

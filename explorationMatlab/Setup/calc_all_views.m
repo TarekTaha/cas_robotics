@@ -45,7 +45,7 @@ all_possible=round(   workspace.unknowncoords(workspace.lev1unknown   ,:)/worksp
 unknown_points=workspace.unknowncoords(workspace.lev1unknown(index),:);
 %%ENDADDED
 
-unknownweight=calunknownweight();
+unknownweight=calcweight(0.5);
 
 q1=qlimit(1,1):(qlimit(1,2)-qlimit(1,1))/numNBVanglesteps:qlimit(1,2);
 q2=qlimit(2,1):(qlimit(2,2)-qlimit(2,1))/numNBVanglesteps:qlimit(2,2);

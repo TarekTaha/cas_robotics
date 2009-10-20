@@ -7,7 +7,7 @@
 % 
 % *Inputs:* 
 %
-% _PointData_ (3*many double) x,y,z cartesian points
+% _scan_data_ (3*many double) x,y,z cartesian points
 %
 % _mew_ (double) size of the surfaces
 %
@@ -15,7 +15,7 @@
 %
 % *Returns:* NULL
 
-function surface_making_simple(PointData,mew,DISPON,min_num_pts_in_plane)
+function surface_making_simple(scan_data,mew,DISPON,min_num_pts_in_plane)
 
 %% Variables
 clear global plane
@@ -31,10 +31,6 @@ if nargin<4
         DISPON=false;
     end
 end
-
-%Scan data is the Point data 3*many cartisian points passed in
-scan_data=PointData;
-
 
 % The threashold of plane fit
 eigen_value_thresh=20;

@@ -63,7 +63,7 @@ workspace.knowncoords=[workspace.knowncoords;workspace.unknowncoords(workspace.l
 % workspace.Nobsticlepoints=[workspace.Nobsticlepoints;workspace.unknowncoords(workspace.lev1unknown(index(OBtofilterout)),:)];
 %update indexed obstacle points
 % workspace.indexedobsticles=unique(round(workspace.Nobsticlepoints/workspace.inc_size)*workspace.inc_size,'rows');
-workspace.indexedobsticles=unique([workspace.indexedobsticles,workspace.unknowncoords(workspace.lev1unknown(index(OBtofilterout)),:)],'rows');
+workspace.indexedobsticles=unique([workspace.indexedobsticles;workspace.unknowncoords(workspace.lev1unknown(index(OBtofilterout)),:)],'rows');
 
 %% Additional Future work to remove unknown points in ellipses on a path
 
