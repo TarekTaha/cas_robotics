@@ -20,7 +20,7 @@ load(['test',num2str(testnum),'workspace.mat']);
 cd ..
 
 qlim=r.qlim.*0.98;
-unknownweight=calunknownweight();
+unknownweight=calcweight(0.5);
 
 indexed_knowncoords=round(setdiff(workspace.knowncoords(GetImpLevInfo(workspace.knowncoords),:),workspace.indexedobsticles,'rows')/workspace.inc_size);
 obsticle_points=workspace.indexedobsticles(GetImpLevInfo(workspace.indexedobsticles),:);

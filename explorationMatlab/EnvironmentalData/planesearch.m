@@ -35,8 +35,6 @@ elseif loadplanes1_makeplanes0==0
         hCOM=getappdata(gcf,'hCOM');
         if isempty(hCOM.Surface) 
             error('There is no map handle');
-%             hCOM.Surface=actxserver('EyeInHand.SurfaceMap');
-%             hCOM.Surface.registerevent(@myhandler);
         end
         %get the Denso Blasting Cost Function
         try global DensoBlasting_h

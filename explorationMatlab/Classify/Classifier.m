@@ -221,19 +221,19 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
 %% THIS SECTION ROTATES THE TEST LINE TO BE HORIZONTAL
     rotation_angle = -atan(found_lines.found_lines_gradients(i));
     data_range_to_classify =  [found_lines.line_start_end_points_smoothed(i,1)+2, found_lines.line_start_end_points_smoothed(i,2)-2];
-    rotated_scan.rangeX = scans_cart.rangeX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle) - scans_cart.rangeY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle);
-    rotated_scan.rangeY = scans_cart.rangeX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle) + scans_cart.rangeY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle);
-    rotated_scan.intensityX = scans_cart.intensityX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle) - scans_cart.intensityY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle);
-    rotated_scan.intensityY = scans_cart.intensityX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle) + scans_cart.intensityY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle);
+    rotated_laser_data.rangeX = scans_cart.rangeX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle) - scans_cart.rangeY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle);
+    rotated_laser_data.rangeY = scans_cart.rangeX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle) + scans_cart.rangeY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle);
+    rotated_laser_data.intensityX = scans_cart.intensityX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle) - scans_cart.intensityY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle);
+    rotated_laser_data.intensityY = scans_cart.intensityX((data_range_to_classify(1,1):data_range_to_classify(1,2)))*sin(rotation_angle) + scans_cart.intensityY((data_range_to_classify(1,1):data_range_to_classify(1,2)))*cos(rotation_angle);
     
 %% MANIPULATE DATA TO GIVE BEST CHANCE FOR CLASSIFICATION
 % Manipulation is done based on where on the line the perpindicular ray
 % intersects, if it does intersect
 % Options are --> Leave as is - Mirror - Mirror + empty region
-    rotated_scan.rangeXM = 0; % this is used to hold the manipulated data
-    rotated_scan.rangeYM = 0;
-    rotated_scan.intensityXM = 0;
-    rotated_scan.intensityYM = 0;
+    rotated_laser_data.rangeXM = 0; % this is used to hold the manipulated data
+    rotated_laser_data.rangeYM = 0;
+    rotated_laser_data.intensityXM = 0;
+    rotated_laser_data.intensityYM = 0;
     % intialise variables
     size_data = data_range_to_classify(1,2) - data_range_to_classify(1,1) + 1;
     scan_split_point = found_lines.perpindicular_intersecting_ray_numbers(i) - 4; % the four adjsuts as both edges of the line are trimmed by 2 points to remove noise
@@ -259,7 +259,7 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
     % perp ray in the middle - do nothing
     if abs((data_range_to_classify(1,2) - data_range_to_classify(1,1))/2 - scan_split_point) <= 3 &&...
             scan_split_point  >= 0 &&...
-            sum(rotated_scan.intensityY)/size(rotated_scan.intensityY,1) > 1500
+            sum(rotated_laser_data.intensityY)/size(rotated_laser_data.intensityY,1) > 1500
     	scan_split_point = found_lines.perpindicular_intersecting_ray_numbers(i) - 4; % the four adjsuts as both edges of the line are trimmed by 2 points to remove noise
         type_of_interaction = 3;% perp ray in the middle - do nothing
     end    
@@ -281,155 +281,155 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
     switch (type_of_interaction)
         case(1)  % perp ray on the high ray side - mirror the low 
             % writes orignal data from far low to SP as is
-            rotated_scan.rangeYM = rotated_scan.rangeY;
+            rotated_laser_data.rangeYM = rotated_laser_data.rangeY;
             % takes data from the far low and writes it far high up to SP
             for k = (scan_split_point - (data_range_to_classify(1,1)-3))+1:((scan_split_point - (data_range_to_classify(1,1)-3))*2)-1
-            	rotated_scan.rangeYM(k) = rotated_scan.rangeY(end-k+(scan_split_point-(data_range_to_classify(1,1)-3))); 
+            	rotated_laser_data.rangeYM(k) = rotated_laser_data.rangeY(end-k+(scan_split_point-(data_range_to_classify(1,1)-3))); 
             end
             % the magnitude of X doesn't matter, but, the spacing between the
             % points must be the same post mirroring
             
-            rotated_scan.rangeXM = rotated_scan.rangeX;
+            rotated_laser_data.rangeXM = rotated_laser_data.rangeX;
             for k = (scan_split_point - (data_range_to_classify(1,1)-3))+1:((scan_split_point - (data_range_to_classify(1,1)-3))*2)-1
-                add_this_to_mirrored_X = rotated_scan.rangeX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3))+1) - rotated_scan.rangeX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3)));
-                rotated_scan.rangeXM(k) = rotated_scan.rangeXM(k-1) + add_this_to_mirrored_X;
+                add_this_to_mirrored_X = rotated_laser_data.rangeX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3))+1) - rotated_laser_data.rangeX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3)));
+                rotated_laser_data.rangeXM(k) = rotated_laser_data.rangeXM(k-1) + add_this_to_mirrored_X;
             end
             
             % writes orignal data from far low to SP as is
-            rotated_scan.intensityYM = rotated_scan.intensityY;
+            rotated_laser_data.intensityYM = rotated_laser_data.intensityY;
             % takes data from the far low and writes it far high up to SP
             for k = (scan_split_point - (data_range_to_classify(1,1)-3))+1:((scan_split_point - (data_range_to_classify(1,1)-3))*2)-1
-            	rotated_scan.intensityYM(k) = rotated_scan.intensityY(end-k+(scan_split_point-(data_range_to_classify(1,1)-3))); 
+            	rotated_laser_data.intensityYM(k) = rotated_laser_data.intensityY(end-k+(scan_split_point-(data_range_to_classify(1,1)-3))); 
             end
             % the magnitude of X doesn't matter, but, the spacing between the
             % points must be the same post mirroring
             
-            rotated_scan.intensityXM = rotated_scan.intensityX;
+            rotated_laser_data.intensityXM = rotated_laser_data.intensityX;
             for k = (scan_split_point - (data_range_to_classify(1,1)-3))+1:((scan_split_point - (data_range_to_classify(1,1)-3))*2)-1
-                add_this_to_mirrored_X = rotated_scan.intensityX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3))+1) - rotated_scan.intensityX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3)));
-                rotated_scan.intensityXM(k) = rotated_scan.intensityXM(k-1) + add_this_to_mirrored_X;
+                add_this_to_mirrored_X = rotated_laser_data.intensityX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3))+1) - rotated_laser_data.intensityX(end-k+(scan_split_point-(data_range_to_classify(1,1)-3)));
+                rotated_laser_data.intensityXM(k) = rotated_laser_data.intensityXM(k-1) + add_this_to_mirrored_X;
             end
             
         case(2) % perp ray on the low side - mirror the high    
             % takes data from the far high and writes it far low down to SP
             for k = 1:(data_range_to_classify(1,2))-scan_split_point
-                rotated_scan.rangeYM(k,1) = rotated_scan.rangeY(end-k+1);
+                rotated_laser_data.rangeYM(k,1) = rotated_laser_data.rangeY(end-k+1);
             end
             % writes orignal data from SP to far high as is
-            rotated_scan.rangeYM = [rotated_scan.rangeYM; rotated_scan.rangeY(scan_split_point-(data_range_to_classify(1,1))+2+1:end)];
+            rotated_laser_data.rangeYM = [rotated_laser_data.rangeYM; rotated_laser_data.rangeY(scan_split_point-(data_range_to_classify(1,1))+2+1:end)];
            
             % the magnitude of X doesn't matter, but, the spacing between the
             % points must be the same post mirroring
-            rotated_scan.rangeXM((data_range_to_classify(1,2)-2)-scan_split_point+1:((data_range_to_classify(1,2)-2)-scan_split_point)*2+3,1) = rotated_scan.rangeX(scan_split_point-(data_range_to_classify(1,1))+1:end);
+            rotated_laser_data.rangeXM((data_range_to_classify(1,2)-2)-scan_split_point+1:((data_range_to_classify(1,2)-2)-scan_split_point)*2+3,1) = rotated_laser_data.rangeX(scan_split_point-(data_range_to_classify(1,1))+1:end);
             for k = 1:(data_range_to_classify(1,2))-scan_split_point
-                add_this_to_mirrored_X = rotated_scan.rangeXM(k+1+(data_range_to_classify(1,2)-2)-scan_split_point) - rotated_scan.rangeXM(k+(data_range_to_classify(1,2)-2)-scan_split_point);
-                rotated_scan.rangeXM((data_range_to_classify(1,2))-scan_split_point-k+1,1) = rotated_scan.rangeXM((data_range_to_classify(1,2))-scan_split_point-k+2) - add_this_to_mirrored_X;
+                add_this_to_mirrored_X = rotated_laser_data.rangeXM(k+1+(data_range_to_classify(1,2)-2)-scan_split_point) - rotated_laser_data.rangeXM(k+(data_range_to_classify(1,2)-2)-scan_split_point);
+                rotated_laser_data.rangeXM((data_range_to_classify(1,2))-scan_split_point-k+1,1) = rotated_laser_data.rangeXM((data_range_to_classify(1,2))-scan_split_point-k+2) - add_this_to_mirrored_X;
             end
           
             % takes data from the far high and writes it far low down to SP
             for k = 1:(data_range_to_classify(1,2))-scan_split_point
-                rotated_scan.intensityYM(k,1) = rotated_scan.intensityY(end-k+1);
+                rotated_laser_data.intensityYM(k,1) = rotated_laser_data.intensityY(end-k+1);
             end
             % writes orignal data from SP to far high as is
-            rotated_scan.intensityYM = [rotated_scan.intensityYM; rotated_scan.intensityY(scan_split_point-(data_range_to_classify(1,1))+2+1:end)];
+            rotated_laser_data.intensityYM = [rotated_laser_data.intensityYM; rotated_laser_data.intensityY(scan_split_point-(data_range_to_classify(1,1))+2+1:end)];
            
             % the magnitude of X doesn't matter, but, the spacing between the
             % points must be the same post mirroring
-            rotated_scan.intensityXM((data_range_to_classify(1,2)-2)-scan_split_point+1:((data_range_to_classify(1,2)-2)-scan_split_point)*2+3,1) = rotated_scan.intensityX(scan_split_point-(data_range_to_classify(1,1))+1:end);
+            rotated_laser_data.intensityXM((data_range_to_classify(1,2)-2)-scan_split_point+1:((data_range_to_classify(1,2)-2)-scan_split_point)*2+3,1) = rotated_laser_data.intensityX(scan_split_point-(data_range_to_classify(1,1))+1:end);
             for k = 1:(data_range_to_classify(1,2))-scan_split_point
-                add_this_to_mirrored_X = rotated_scan.intensityXM(k+1+(data_range_to_classify(1,2)-2)-scan_split_point) - rotated_scan.intensityXM(k+(data_range_to_classify(1,2)-2)-scan_split_point);
-                rotated_scan.intensityXM((data_range_to_classify(1,2))-scan_split_point-k+1,1) = rotated_scan.intensityXM((data_range_to_classify(1,2))-scan_split_point-k+2) - add_this_to_mirrored_X;
+                add_this_to_mirrored_X = rotated_laser_data.intensityXM(k+1+(data_range_to_classify(1,2)-2)-scan_split_point) - rotated_laser_data.intensityXM(k+(data_range_to_classify(1,2)-2)-scan_split_point);
+                rotated_laser_data.intensityXM((data_range_to_classify(1,2))-scan_split_point-k+1,1) = rotated_laser_data.intensityXM((data_range_to_classify(1,2))-scan_split_point-k+2) - add_this_to_mirrored_X;
             end
             
         case(3) % perp ray in the middle - do nothing
-            rotated_scan.rangeXM = rotated_scan.rangeX; % this is used to hold the manipulated data
-            rotated_scan.rangeYM = rotated_scan.rangeY;
-            rotated_scan.intensityXM = rotated_scan.intensityX;
-            rotated_scan.intensityYM = rotated_scan.intensityY;
+            rotated_laser_data.rangeXM = rotated_laser_data.rangeX; % this is used to hold the manipulated data
+            rotated_laser_data.rangeYM = rotated_laser_data.rangeY;
+            rotated_laser_data.intensityXM = rotated_laser_data.intensityX;
+            rotated_laser_data.intensityYM = rotated_laser_data.intensityY;
 
         case(4) % perp ray not on line but off to high side
            
             % writes orignal data from far low to SP as is
-            rotated_scan.rangeYM = rotated_scan.rangeY;
+            rotated_laser_data.rangeYM = rotated_laser_data.rangeY;
             % puts in fake centre points
             num_fake_points_to_add = found_lines.would_be_perp_ray(i) - (data_range_to_classify(1,2)-2);
-            rotated_scan.rangeYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = mean(rotated_scan.rangeYM);
+            rotated_laser_data.rangeYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = mean(rotated_laser_data.rangeYM);
             % takes data from the far low and writes it far high up to SP
             for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
-            	rotated_scan.rangeYM(k) = rotated_scan.rangeY(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add); 
+            	rotated_laser_data.rangeYM(k) = rotated_laser_data.rangeY(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add); 
             end
             % the magnitude of X doesn't matter, but, the spacing between the
             % points must be the same post mirroring
-            rotated_scan.rangeXM = rotated_scan.rangeX;
-            rotated_scan.rangeXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
+            rotated_laser_data.rangeXM = rotated_laser_data.rangeX;
+            rotated_laser_data.rangeXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
             for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
-                rotated_scan.rangeXM(k) = rotated_scan.rangeXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
+                rotated_laser_data.rangeXM(k) = rotated_laser_data.rangeXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
             end
             
             % writes orignal data from far low to SP as is
-            rotated_scan.intensityYM = rotated_scan.intensityY;
+            rotated_laser_data.intensityYM = rotated_laser_data.intensityY;
             % puts in fake centre points
-            rotated_scan.intensityYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = 2100;
+            rotated_laser_data.intensityYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = 2100;
             % takes data from the far low and writes it far high up to SP
             for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
-            	rotated_scan.intensityYM(k) = rotated_scan.intensityY(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add); 
+            	rotated_laser_data.intensityYM(k) = rotated_laser_data.intensityY(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add); 
             end
             % the magnitude of X doesn't matter, but, the spacing between the
             % points must be the same post mirroring
-            rotated_scan.intensityXM = rotated_scan.intensityX;
-            rotated_scan.intensityXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
+            rotated_laser_data.intensityXM = rotated_laser_data.intensityX;
+            rotated_laser_data.intensityXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
             for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
-                rotated_scan.intensityXM(k) = rotated_scan.intensityXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
+                rotated_laser_data.intensityXM(k) = rotated_laser_data.intensityXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
             end
             
         case(5) % perp ray not on line but off to low side
             
             % reverses order of data so I can reuse MOST of the code from case(4)
-            rotated_scan.rangeXFlipped = [];
-            rotated_scan.rangeYFlipped = [];
-            rotated_scan.intensityXFlipped = [];
-            rotated_scan.intensityYFlipped = [];
-            rotated_scan.rangeXFlipped = wrev(rotated_scan.rangeX);
-            rotated_scan.rangeYFlipped = wrev(rotated_scan.rangeY);
-            rotated_scan.intensityXFlipped = wrev(rotated_scan.intensityX);
-            rotated_scan.intensityYFlipped = wrev(rotated_scan.intensityY);
-%             rotated_scan.rangeXFlipped(1:end,1) = rotated_scan.rangeX(end:-1:1,1);
-%             rotated_scan.rangeYFlipped(1:end,1) = rotated_scan.rangeY(end:-1:1,1);
-%             rotated_scan.intensityXFlipped(1:end,1) = rotated_scan.intensityX(end:-1:1,1);
-%             rotated_scan.intensityYFlipped(1:end,1) =
-%             rotated_scan.intensityY(end:-1:1,1);
+            rotated_laser_data.rangeXFlipped = [];
+            rotated_laser_data.rangeYFlipped = [];
+            rotated_laser_data.intensityXFlipped = [];
+            rotated_laser_data.intensityYFlipped = [];
+            rotated_laser_data.rangeXFlipped = wrev(rotated_laser_data.rangeX);
+            rotated_laser_data.rangeYFlipped = wrev(rotated_laser_data.rangeY);
+            rotated_laser_data.intensityXFlipped = wrev(rotated_laser_data.intensityX);
+            rotated_laser_data.intensityYFlipped = wrev(rotated_laser_data.intensityY);
+%             rotated_laser_data.rangeXFlipped(1:end,1) = rotated_laser_data.rangeX(end:-1:1,1);
+%             rotated_laser_data.rangeYFlipped(1:end,1) = rotated_laser_data.rangeY(end:-1:1,1);
+%             rotated_laser_data.intensityXFlipped(1:end,1) = rotated_laser_data.intensityX(end:-1:1,1);
+%             rotated_laser_data.intensityYFlipped(1:end,1) =
+%             rotated_laser_data.intensityY(end:-1:1,1);
             
             % writes orignal data from far low to SP as is
-            rotated_scan.rangeYM = rotated_scan.rangeYFlipped;
+            rotated_laser_data.rangeYM = rotated_laser_data.rangeYFlipped;
             % puts in fake centre points - DIFFERENT FROM CASE 4
             num_fake_points_to_add = (data_range_to_classify(1,1)+2)-found_lines.would_be_perp_ray(i);
-            rotated_scan.rangeYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = mean(rotated_scan.rangeYM);
+            rotated_laser_data.rangeYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = mean(rotated_laser_data.rangeYM);
             % takes data from the far low and writes it far high up to SP
             for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
-            	rotated_scan.rangeYM(k) = rotated_scan.rangeYFlipped(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add); 
+            	rotated_laser_data.rangeYM(k) = rotated_laser_data.rangeYFlipped(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add); 
             end
             % the magnitude of X doesn't matter, but, the spacing between the
             % points must be the same post mirroring
-            rotated_scan.rangeXM = rotated_scan.rangeXFlipped;
-            rotated_scan.rangeXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
+            rotated_laser_data.rangeXM = rotated_laser_data.rangeXFlipped;
+            rotated_laser_data.rangeXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
             for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
-                rotated_scan.rangeXM(k) = rotated_scan.rangeXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
+                rotated_laser_data.rangeXM(k) = rotated_laser_data.rangeXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
             end
             
             % writes orignal data from far low to SP as is
-            rotated_scan.intensityYM = rotated_scan.intensityYFlipped;
+            rotated_laser_data.intensityYM = rotated_laser_data.intensityYFlipped;
             % puts in fake centre point
-            rotated_scan.intensityYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = 2100;
+            rotated_laser_data.intensityYM((scan_split_point - (data_range_to_classify(1,1)-3))+1:(scan_split_point - (data_range_to_classify(1,1)-3))+1+num_fake_points_to_add) = 2100;
             % takes data from the far low and writes it far high up to SP
             for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
-            	rotated_scan.intensityYM(k) = rotated_scan.intensityYFlipped(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add); 
+            	rotated_laser_data.intensityYM(k) = rotated_laser_data.intensityYFlipped(end-k+2+(scan_split_point-(data_range_to_classify(1,1)-3))+num_fake_points_to_add); 
             end
             % the magnitude of X doesn't matter, but, the spacing between the
             % points must be the same post mirroring
-            rotated_scan.intensityXM = rotated_scan.intensityXFlipped;
-            rotated_scan.intensityXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
+            rotated_laser_data.intensityXM = rotated_laser_data.intensityXFlipped;
+            rotated_laser_data.intensityXM((scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add:(scan_split_point - (data_range_to_classify(1,1)-3))+num_fake_points_to_add)=0;
             for k = (scan_split_point - (data_range_to_classify(1,1)-3))+2+num_fake_points_to_add:((scan_split_point - (data_range_to_classify(1,1)-3))*2)+1+num_fake_points_to_add
-                rotated_scan.intensityXM(k) = rotated_scan.intensityXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
+                rotated_laser_data.intensityXM(k) = rotated_laser_data.intensityXM((scan_split_point-(data_range_to_classify(1,1)-3))*2-(k-num_fake_points_to_add)+2)*-1;
             end
     end
 
@@ -439,42 +439,42 @@ while (i<size(found_lines.line_start_end_points_smoothed,1))
     
     %poly fit for the range data
     if usegavin_func; %new one
-        polyfit_coefs_range = polyfit_gp(rotated_scan.rangeXM(:), rotated_scan.rangeYM(:), 2);
+        polyfit_coefs_range = polyfit_gp(rotated_laser_data.rangeXM(:), rotated_laser_data.rangeYM(:), 2);
     else % old one
-        polyfit_coefs_range =    polyfit(rotated_scan.rangeXM(:), rotated_scan.rangeYM(:), order);
+        polyfit_coefs_range =    polyfit(rotated_laser_data.rangeXM(:), rotated_laser_data.rangeYM(:), order);
     end             
     
-    fitted_line_vals_range= [polyfit_coefs_range(1)*rotated_scan.rangeXM(:).^2+...
-                            polyfit_coefs_range(2)*rotated_scan.rangeXM(:)+...
-                            polyfit_coefs_range(3),rotated_scan.rangeXM(:)];
+    fitted_line_vals_range= [polyfit_coefs_range(1)*rotated_laser_data.rangeXM(:).^2+...
+                            polyfit_coefs_range(2)*rotated_laser_data.rangeXM(:)+...
+                            polyfit_coefs_range(3),rotated_laser_data.rangeXM(:)];
 
 
 %     fitted_line_vals_width = size(fitted_line_vals_range, 2);
 
     %poly fit for the intensity data
     if usegavin_func; %new one
-        polyfit_coefs_intensity = polyfit_gp(rotated_scan.intensityXM(:), rotated_scan.intensityYM(:), 2);
-        fitted_line_vals_intensity = [polyfit_coefs_intensity(1)*rotated_scan.intensityXM(:).^2+...
-                                      polyfit_coefs_intensity(2)*rotated_scan.intensityXM(:)+...
-                                      polyfit_coefs_intensity(3),rotated_scan.intensityXM(:)];                         
+        polyfit_coefs_intensity = polyfit_gp(rotated_laser_data.intensityXM(:), rotated_laser_data.intensityYM(:), 2);
+        fitted_line_vals_intensity = [polyfit_coefs_intensity(1)*rotated_laser_data.intensityXM(:).^2+...
+                                      polyfit_coefs_intensity(2)*rotated_laser_data.intensityXM(:)+...
+                                      polyfit_coefs_intensity(3),rotated_laser_data.intensityXM(:)];                         
     else % old one
-        polyfit_coefs_intensity = polyfit(rotated_scan.intensityXM(:), rotated_scan.intensityYM(:), order);
-        fitted_line_vals_intensity = [polyval(polyfit_coefs_intensity, rotated_scan.intensityXM(:)) , rotated_scan.intensityXM(:)];
+        polyfit_coefs_intensity = polyfit(rotated_laser_data.intensityXM(:), rotated_laser_data.intensityYM(:), order);
+        fitted_line_vals_intensity = [polyval(polyfit_coefs_intensity, rotated_laser_data.intensityXM(:)) , rotated_laser_data.intensityXM(:)];
     end
     
 %     figure(2);
 %     subplot(2,1,1)
-%     plot(rotated_scan.rangeXM(:),fitted_line_vals_range(:,1),'r-')
-%     hold on;plot(rotated_scan.rangeXM(:), rotated_scan.rangeYM(:),'b.');hold off;
+%     plot(rotated_laser_data.rangeXM(:),fitted_line_vals_range(:,1),'r-')
+%     hold on;plot(rotated_laser_data.rangeXM(:), rotated_laser_data.rangeYM(:),'b.');hold off;
 %     subplot(2,1,2)
-%     plot(rotated_scan.intensityXM(:),fitted_line_vals_intensity(:,1),'r-')
-%     hold on;plot(rotated_scan.intensityXM(:), rotated_scan.intensityYM(:),'b.');hold off;
+%     plot(rotated_laser_data.intensityXM(:),fitted_line_vals_intensity(:,1),'r-')
+%     hold on;plot(rotated_laser_data.intensityXM(:), rotated_laser_data.intensityYM(:),'b.');hold off;
 
 %% CALCULATE THE REQUIRED RESIDUALS FOR THE POLYs BEING TESTED
 
 %     size_fitted_line_vals = size(fitted_line_vals_intensity,2);
-    residual_range = rotated_scan.rangeYM(:) - fitted_line_vals_range(:,1);
-    residual_intensity = rotated_scan.intensityYM(:) - fitted_line_vals_intensity(:,1);
+    residual_range = rotated_laser_data.rangeYM(:) - fitted_line_vals_range(:,1);
+    residual_intensity = rotated_laser_data.intensityYM(:) - fitted_line_vals_intensity(:,1);
 %     size_residual = size(residual_range,2);
     if usegavin_func; %new one
         mse_range = mse_gp(residual_range(:));

@@ -16,7 +16,7 @@ function NBV_beta2()
 % clear the plots and global bestviews variable
 clear global bestviews;
 
-global workspace all_views bestviews scan r Q optimise;
+global workspace all_views bestviews G_scan r Q optimise;
 
 
 %must be able to get to 0 and from current pose
@@ -68,7 +68,7 @@ unknown_points=workspace.unknowncoords(workspace.lev1unknown(index),:);
 
 all_known=sortrows([workspace.knowncoords;workspace.indexedobsticles]);
 
-unknownweight=calunknownweight();
+unknownweight=calcweight(0.5);
 
 % find valid configs
 % pos_validconfigs=find(all_views.result==-1);
@@ -86,11 +86,11 @@ for cur_con=pos_validconfigs'
     end   
 end
 
-if size(scan.done_bestviews_orfailed,1)>0
-    [nothing,nolongervalid]=intersect(all_views.newQ,scan.done_bestviews_orfailed,'rows');
+if size(G_scan.done_bestviews_orfailed,1)>0
+    [nothing,nolongervalid]=intersect(all_views.newQ,G_scan.done_bestviews_orfailed,'rows');
     %set the result to 0 since we have already done it or it has failed somewhere
     all_views.result(nolongervalid)=0;
-    scan.done_bestviews_orfailed=[inf,inf,inf,inf,inf,inf];
+    G_scan.done_bestviews_orfailed=[inf,inf,inf,inf,inf,inf];
 end
 
 %delete all unneeded ones from memory
@@ -193,7 +193,7 @@ for cur_con=validconfigs'
                      plane_equ(i,3)*points(:,3)+...
                      ones([size(points,1),1])*plane_equ(i,4))>0;
 
-        %what side is the scan origin on?
+        %what side is the sensor origin on?
         scan_origin_sign=(plane_equ(i,1)*current_scan_origin(1)+...
                           plane_equ(i,2)*current_scan_origin(2)+...
                           plane_equ(i,3)*current_scan_origin(3)+...
@@ -217,7 +217,7 @@ for cur_con=validconfigs'
                    current_scan_origin(2)-points_on_oposite_side(:,2),...
                    current_scan_origin(3)-points_on_oposite_side(:,3)];               
 
-            %find intersection point between surface and the scan line between scan origin and point
+            %find intersection point between surface and the ray line between sensor origin and point
             bottomof_t_var=plane_equ(i,1)*r_var(:,1)+...
                            plane_equ(i,2)*r_var(:,2)+...
                            plane_equ(i,3)*r_var(:,3);

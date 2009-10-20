@@ -1,4 +1,4 @@
-%% FUNCTION: Basic scan
+%% FUNCTION: basic_scan
 %
 % Description: this traces out the lines and gets a group of points as the
 % basic scan 
@@ -11,7 +11,7 @@
 %
 % *Returns:* 
 % 
-% _points_ (3 *many) points where the scan finishes (discretised)
+% _points_ (3 *many) points where the laser rays finishes (discretised)
 %
 % _ice_cream_bounds_ (3 *many) points but undiscretised.... I think
 % 
@@ -19,7 +19,7 @@
 function [points,ice_cream_bounds]=basic_scan(cube_size)
 
 %% Variables
-
+global G_scan
 %starttime=clock;
 
 %this will actually be x or y axis from end effector but not sure which
@@ -29,18 +29,14 @@ bear=[1,0,1]; %used to be [0,0,1]
 tilt_rotate_vec=[0,1,0];
 
 %max range of laser
-% las_range=scan.size;
-las_range=0.4;
+las_range=G_scan.size;
 
 %Laser Angualar VARIABLES
-%this is the angle either side of the bearing of the center of the scan \|/
-% theta=scan.theta;
-theta=70*pi/180;
-%the increment angle used in both 
-%theta_incr=scan.theta_incr;
+%this is the angle either side of the bearing of the center of the sensor ray \|/
+theta=G_scan.theta;
 %this is the angle from the tilt, - is up, + is down, angle must be from -2pi to 2pi
-% alpha=-scan.alpha;
-alpha=-20*pi/180;
+alpha=-G_scan.alpha;
+
 
 % %SETUP WORKSPACE
 
@@ -56,7 +52,7 @@ end
     
 %% Take the scan - work out end points
 % This is the most important vector
-% it describes the center of the first laser pan scan 
+% it describes the center of the first laser pan ray 
 % we will rotate to ge the pan scan
 dir_vec=las_range*(bear);
 %this is the vector that we will pan rotate around, it is always at origin
@@ -196,7 +192,7 @@ end
 % keyboard
 % end  
 % 
-% % Delete the scan handles
+% % Delete the scanning handles
 % delete_scan_lines(scan_line_handles,scan_point_handles)
 % clear scan_line_handles scan_point_handles
 

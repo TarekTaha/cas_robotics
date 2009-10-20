@@ -56,9 +56,9 @@ recordlatest_testdata();
 %   f = hMesh.FaceData;
 %   v = hMesh.VertexData;
 %   hold on;
-%   guiglobal=getappdata(gcf,'guiglobal');
-%   guiglobal.mesh_h=trisurf(f, v(:,1), v(:,2), v(:,3), 'FaceColor', 'None');
-%   setappdata(gcf,'guiglobal',guiglobal);                             
+%   guiParams=getappdata(gcf,'guiParams');
+%   guiParams.mesh_h=trisurf(f, v(:,1), v(:,2), v(:,3), 'FaceColor', 'None');
+%   setappdata(gcf,'guiParams',guiParams);                             
 %   axis equal
 %   view(116,18)
 %   saveas(gcf,[testdir,'AXBAMnC_Test',testnum,'Scan',scannum,'_meshNrobot.fig']);

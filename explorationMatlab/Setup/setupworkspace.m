@@ -17,7 +17,7 @@ function setupworkspace(showunknownpnts)
 %Declare global variables
 global workspace r Q;
 
-guiglobal=getappdata(gcf,'guiglobal');
+guiParams=getappdata(gcf,'guiParams');
 
 % Check Inputs: default is not to show the points
 if nargin<1
@@ -188,11 +188,11 @@ if showunknownpnts
 %     level3=setdiff(level3,union(level1,level2));
    
    % Plots for different weightings a different color
-   guiglobal.unknownplot=plot3(workspace.unknowncoords(level1,1),...
+   guiParams.unknownplot=plot3(workspace.unknowncoords(level1,1),...
                                workspace.unknowncoords(level1,2),...
                                workspace.unknowncoords(level1,3),...
                                '.','Color',[1-workspace.dotweight(1) 1-workspace.dotweight(1) 1]);
-    setappdata(gcf,'guiglobal',guiglobal);                             
+    setappdata(gcf,'guiParams',guiParams);                             
 %     _Old_ Gives the ability to plot all 3 levels of unknown
 %    plot3(workspace.unknowncoords(level2,1),workspace.unknowncoords(level2,2),workspace.unknowncoords(level2,3),'.','Color',[1-workspace.dotweight(2) 1-workspace.dotweight(2) 1])
 %    plot3(workspace.unknowncoords(level3,1),workspace.unknowncoords(level3,2),workspace.unknowncoords(level3,3),'.','Color',[1-workspace.dotweight(3) 1-workspace.dotweight(3) 1])

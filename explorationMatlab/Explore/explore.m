@@ -24,34 +24,34 @@
 function explore(h,useNBV,selection)
 
 %% Variables
-global workspace scan bestviews r Q robot_maxreach
+global workspace G_scan bestviews r Q robot_maxreach
 
 %% Selection of Scan Pose and direction
 
 % this is either using a calculated NBV or choose our own
 if true(useNBV)
 %     db=bestviews(selection).scanorigin;
-    scan.chosenview=bestviews(selection).chosenview;
+    G_scan.chosenview=bestviews(selection).chosenview;
     % Make it so that the last angle is 0
     newQ=[bestviews(selection).Q(1:5),0];
     %display('final angle has been change to 0 so we can get the largest scan')
 else
-    %Assume the first scan is from the (only) or at least first known point 
-    if get(h.start_with_default_poses_checkbox,'value') && scan.tries<=size(robot_maxreach.default_Q,1)-1
-        newQ=robot_maxreach.default_Q(scan.tries+1,:);       
-        set(h.dialog_text,'String',strcat('Using default vals, now taking scan NO.',num2str(scan.tries+1)));
+    %Assume the first exploration step is from the (only) or at least first known point 
+    if get(h.start_with_default_poses_checkbox,'value') && G_scan.tries<=size(robot_maxreach.default_Q,1)-1
+        newQ=robot_maxreach.default_Q(G_scan.tries+1,:);       
+        set(h.dialog_text,'String',strcat('Using default vals, now taking at exploration pose NO.',num2str(scan.tries+1)));
     else 
-        display('You have asked for not a NBV scan and there are no more default poses so doing NBV_beta2');
+        display('You have asked to use a NBV and there are no more default poses so doing NBV_beta2');
         NBV_beta2();
         global bestviews;
 %         db=bestviews(1).scanorigin;
-        scan.chosenview=bestviews(1).chosenview;
+        G_scan.chosenview=bestviews(1).chosenview;
         newQ=[bestviews(1).Q(1:5),0];
     end
 end
 
 %% Calculate what was known previously
-previously_known=calknownweight();
+previously_known=calcweight(0);
 
 %% Save predicted information gain _for this timestep_ 
 % Note:wont work when there is no selection
@@ -68,21 +68,21 @@ if (get(h.useRealRobot_checkbox,'Value')==0)
 %% Do the Scan _real_
 else
     % Change newQ so if scanning on the downside (+ angles) -> start from max place and goes to the center, 
-    % Alternately,it goes to +30', and then scan to the max negative possible
+    % Alternately,it goes to +30', and then tilts to the max negative possible
     qlimits=r.qlim;
     minimum_alpha=qlimits(5,1)*0.9;
     %determine the maximum angle
-    if newQ(3)>scan.alpha_limited_condition
-        maximum_alpha=scan.alpha_limited;
+    if newQ(3)>G_scan.alpha_limited_condition
+        maximum_alpha=G_scan.alpha_limited;
     else 
-        maximum_alpha=scan.alpha;
+        maximum_alpha=G_scan.alpha;
     end    
     %determine where to start and where to tilt through too
-    if scan.chosenview(3)>0
-        newQ(5)=min(maximum_alpha,newQ(5)+scan.alpha/2);
+    if G_scan.chosenview(3)>0
+        newQ(5)=min(maximum_alpha,newQ(5)+G_scan.alpha/2);
         tilt_scan_range=minimum_alpha-newQ(5);
     else
-        newQ(5)=max(minimum_alpha,newQ(5)-scan.alpha/2);
+        newQ(5)=max(minimum_alpha,newQ(5)-G_scan.alpha/2);
         tilt_scan_range=maximum_alpha-newQ(5);
     end
     
@@ -91,7 +91,7 @@ else
         error('No path could be found for the end position even if it is valid')
     end
     
-    %take a scan through determined tilt_scan_range
+    %Tilt laser through determined tilt_scan_range
     use_real_robot_SCAN(tilt_scan_range*180/pi);
     %update the latest position of robot
     use_real_robot_GETJs();    
@@ -99,8 +99,8 @@ else
     organise_data();
     %if we want to do the classify and update voxels then we will do this here
     if get(h.doclassification_checkbox,'value')
-        global PointData IntensityData RangeData;
-        [ClassifiedData] = Block_Classifier(PointData, IntensityData,RangeData); 
+        global G_scan;
+        [ClassifiedData] = Block_Classifier(G_scan.PointData, G_scan.ntensityData); 
         update_ocstatus(ClassifiedData); 
         %try and save the current status, if user ctrl+c s out it dosen't matter
 %         try AXBAMnCtesting(false);
@@ -120,16 +120,16 @@ end
 try 
     tr=fkine(r,Q);
     display('. . . . . . . . . . . . . . . . . . . . . . . . ');
-    display(strcat('The scan origin is (',num2str([tr(1,4),tr(2,4),tr(3,4)]),'),TRY # :',num2str(scan.tries)));
-    scan.ALLorigin=[scan.ALLorigin;[tr(1,4),tr(2,4),tr(3,4)]];
+    display(strcat('The sensor origin is (',num2str([tr(1,4),tr(2,4),tr(3,4)]),'),TRY # :',num2str(G_scan.tries)));
+    G_scan.ALLorigin=[G_scan.ALLorigin;[tr(1,4),tr(2,4),tr(3,4)]];
 catch
-    display('cant print out the scan origin');
+    display('cant print out the sensor origin point');
 end
 
 % Calculate the WEIGHTED known/unknown/obstacle knowledge
-unknownweight=calunknownweight();
-knownweight=calknownweight();
-obstacleweight=calobstacleweight();
+knownweight=calcweight(0);
+unknownweight=calcweight(0.5);
+obstacleweight=calcweight(1);
 
 % Print out the details of WEIGHTED known/unknown/obstacle knowledge
 display(strcat('NEW Free Weight:',num2str(knownweight-previously_known),...
@@ -142,4 +142,4 @@ set(h.total_text,'String',num2str(size(workspace.unknowncoords,1)));
 drawnow;
 
 %increment the number of tries
-scan.tries=scan.tries+1;
+G_scan.tries=G_scan.tries+1;

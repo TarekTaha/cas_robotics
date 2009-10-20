@@ -58,7 +58,7 @@ function [valid,dist,targetdist,correctway,theta]=classunkcheck_newQ(qt,qlimits,
 
     r_var=-tr(1:3,3);
 
-    %find intersection point between surface and the scan line between scan origin and point
+    %find intersection point between surface and the ray between scan origin and point
     bottomof_t_var=plane_equ(1)*r_var(1)+...
                    plane_equ(2)*r_var(2)+...
                    plane_equ(3)*r_var(3);

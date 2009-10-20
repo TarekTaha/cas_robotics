@@ -1,5 +1,7 @@
-% function [ClassifiedDatawEdges] = Block_Classifier(PointData, IntensityData, RangeData) % this one uses edges from IntensityData Image
-function [ClassifiedData] = Block_Classifier(PointData, IntensityData, RangeData) % this one uses edges from IntensityData Image
+function [ClassifiedData] = Block_Classifier(P_Data, I_Data) 
+
+% P_Data is for the points data
+% I_Data is for the intesity data
 
 warning('off');
 load('Classification_Criteria.mat');
@@ -16,7 +18,7 @@ replace_hoks_false_intensity_data = 1; %This  replaces the hokuyo's false data w
 
 %____________LOOK AT ME!!!!_______________
 classiy_scan_range_start = 1;
-classiy_scan_range_end = size(PointData,1);
+classiy_scan_range_end = size(P_Data,1);
 %_________________________________________
 
 colordef white;
@@ -24,31 +26,31 @@ colordef white;
 %% The hokuyo uses the last data for a ray if no return is recieved - This
 % causes a problem with edge detection. This cell replaces the hokuyo's
 % false data with the intensity reading from the ray next to the non-returned 
-% ray but on the same scan - so in other waords, more false data, but more
+% ray but from the same sensing data set - so in other words, more false data, but more
 % realistic false data
 if replace_hoks_false_intensity_data == 1;
-    IntensityDataFlaseDataFixed = IntensityData;
-    last_known_good_data(size(IntensityDataFlaseDataFixed,2)) = 0;
-    last_known_good_data(:) = IntensityDataFlaseDataFixed(1,1);
+    I_DataFlaseDataFixed = I_Data;
+    last_known_good_data(size(I_DataFlaseDataFixed,2)) = 0;
+    last_known_good_data(:) = I_DataFlaseDataFixed(1,1);
 
-    for i = 2:size(IntensityDataFlaseDataFixed,2);
-        for j = 2:size(IntensityDataFlaseDataFixed,1);
-            if IntensityDataFlaseDataFixed(j,i) == last_known_good_data(i)
-                IntensityDataFlaseDataFixed(j,i) = IntensityDataFlaseDataFixed(j,i-1);
+    for i = 2:size(I_DataFlaseDataFixed,2);
+        for j = 2:size(I_DataFlaseDataFixed,1);
+            if I_DataFlaseDataFixed(j,i) == last_known_good_data(i)
+                I_DataFlaseDataFixed(j,i) = I_DataFlaseDataFixed(j,i-1);
             else 
-                last_known_good_data(i) = IntensityDataFlaseDataFixed(j,i);
+                last_known_good_data(i) = I_DataFlaseDataFixed(j,i);
             end
         end
     end
 end
 
 if replace_hoks_false_intensity_data == 1;
-    IntensityDatatoUse = IntensityDataFlaseDataFixed;
+    I_DatatoUse = I_DataFlaseDataFixed;
 else
-    IntensityDatatoUse = IntensityData;
+    I_DatatoUse = I_Data;
 end
 
-%% Edge detecting in IntensityData image
+%% Edge detecting in I_Data image
 % --- Method to use ---
 % edge_finding_method_to_use = 'sobel';
 % edge_finding_method_to_use = 'prewitt';
@@ -57,7 +59,7 @@ end
 % edge_finding_method_to_use = 'zerocross';
 % edge_finding_method_to_use = 'canny';
 
-InData4Image = IntensityDatatoUse/max(max(IntensityDatatoUse));
+InData4Image = I_DatatoUse/max(max(I_DatatoUse));
 image_being_used = InData4Image;
 
 %finds edges in the image
@@ -71,20 +73,20 @@ end
 
 %% Init's classification result matrix and does classify
 if run_classifier == 1
-    ClassifiedData = IntensityDatatoUse; % creats a variable of the correct size - one classifcation per point
+    ClassifiedData = I_DatatoUse; % creats a variable of the correct size - one classifcation per point
     ClassifiedData(:,:) = 8; % sets all points classification to 8 - 'don't know'
-    ClassifiedDatawEdges = IntensityDatatoUse; % creats a variable of the correct size - one classifcation per point
+    ClassifiedDatawEdges = I_DatatoUse; % creats a variable of the correct size - one classifcation per point
     ClassifiedData(:,:) = 8; % sets all points classification to 8 - 'don't know'
     
-    %% Sends data to the classifier one scan at a time and creates a matrix of classification results - one for each point
+    %% Sends data to the classifier one scan_set at a time and creates a matrix of classification results - one for each point
     for i = classiy_scan_range_start:classiy_scan_range_end  
     if mod(i,20) == 0 % puts something in debug so I know its working
         disp([int2str(ceil((i/(classiy_scan_range_end-classiy_scan_range_start))*100)), '% complete']);
     end
         try % I use try as sometimes the classifier crashes for an unknown reason
-            found_lines = Classifier(PointData(i,:,:), IntensityDatatoUse(i,:,:), 1, Iedges,HParas); % this one uses edges from IntensityData Image
+            found_lines = Classifier(P_Data(i,:,:), I_DatatoUse(i,:,:), 1, Iedges,HParas); % this one uses edges from I_Data Image
             % This creates the classfier output matrix. The matrix is in the same
-            % format as PointData, IntensityData, etc      
+            % format as P_Data, I_Data, etc      
             number_of_lines = size(found_lines.line_start_end_points_smoothed,1); 
             for j = 1:number_of_lines
                 if found_lines.line_start_end_points_smoothed(j,1) > 0
@@ -152,7 +154,7 @@ if draw_PC == 1
                 if k~=7
                     a=find(data_to_display(i,:)==k);
                     hold on;
-                    plot3(PointData(i,a,1),PointData(i,a,2),PointData(i,a,3),'color', output_colours(j+1,:),'linestyle','none','marker','.','markersize',2);
+                    plot3(P_Data(i,a,1),P_Data(i,a,2),P_Data(i,a,3),'color', output_colours(j+1,:),'linestyle','none','marker','.','markersize',2);
                 end
             end
         end 

@@ -29,7 +29,7 @@ tr=fkine(r,newQ) * linkFromLaserTransform;
 % plot3([tr(1,4) tr(1,4)+tr(1,2)],[tr(2,4) tr(2,4)+tr(2,2)],[tr(3,4) tr(3,4)+tr(3,2)],'color','green')
 % plot3([tr(1,4) tr(1,4)+tr(1,3)],[tr(2,4) tr(2,4)+tr(2,3)],[tr(3,4) tr(3,4)+tr(3,3)],'color','blue')
 
-%% Do a scan at a transform in space
+%% Pretend to sense then transform freespace
 %get the projected scan for this direction, it will cover a number of
 %points if there are any obsticles (read surfaces) within this area then we
 %need to check which points it will make NOT potentially viewable

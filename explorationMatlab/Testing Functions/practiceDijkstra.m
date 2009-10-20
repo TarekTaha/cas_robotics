@@ -157,7 +157,7 @@ for i=1:numofpaths
         
         %it won't get here unless there is a valid path
         if size(all_steps,1)>0 && DISPON 
-             demopath(all_steps);             
+             demopath_new(all_steps);             
         end
         %update latest actual Q and save in alljoints of path
         Q=newQ;
@@ -204,4 +204,4 @@ pathdata.failurecount=failurecount;
 % hold on;    toplot=setdiff(knownindex(1:maxpnt,:),prac_dijk.startandend(:,1:3),'rows');
 % plot3(toplot(:,1),toplot(:,2),toplot(:,3),'.','Color',[0.9,0.9,0.9]);
 % 
-% demopath(prac_dijk.alljoints);
+% demopath_new(prac_dijk.alljoints);
