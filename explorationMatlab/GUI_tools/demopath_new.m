@@ -30,7 +30,7 @@ end
 %setup path data and obsticle data
 if nargin==0
     %make a test case and then act these out
-    %testpathplanner(30);
+    testpathplanner(30);
     load pathdata.mat;
     DISPON=false;
     %to check the differentials
@@ -39,7 +39,7 @@ if nargin==0
       overallabsstart_end_diff=0;
       
     diffrad2check=optimise.max_angle_for123;
-    showOBpoints=false;;
+    showOBpoints=false;
     
     points=workspace.indexedobsticles;
     check_all_Js=false;

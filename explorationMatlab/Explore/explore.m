@@ -92,9 +92,7 @@ else
     end
     
     %Tilt laser through determined tilt_scan_range
-    use_real_robot_SCAN(tilt_scan_range*180/pi);
-    %update the latest position of robot
-    use_real_robot_GETJs();    
+    use_real_robot_SCAN(tilt_scan_range*180/pi);    
     %this sort out the points that we have got from a scan
     organise_data();
     %if we want to do the classify and update voxels then we will do this here

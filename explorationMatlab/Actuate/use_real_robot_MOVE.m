@@ -53,9 +53,6 @@ else
 end
 
 
-%can use the old way of updating the joint state
-please_use_GETjsFunc=true;
-
 %% Check that no steps exceed soft limits
 if Do_Path_Check
   if ~joint_softlimit_check(all_steps)
@@ -136,7 +133,6 @@ if ~isempty(find(rad2deg(sum(diff(all_steps)))>1,1))%~isempty(find(round(tempQ(1
                         error('emergency stop pressed - exiting');                    
                     else
                         %try alternate method of getting joint state
-                        use_real_robot_GETJs()
                         rob_h.Params=current_step_DEG;
                         rob_h.Start;
                     end
@@ -150,8 +146,6 @@ if ~isempty(find(rad2deg(sum(diff(all_steps)))>1,1))%~isempty(find(round(tempQ(1
                       oldQ=Q;
                     end
                 end
-                %if we need to update the old way
-                if please_use_GETjsFunc;use_real_robot_GETJs();end
             end
         end
         %% Release movement object

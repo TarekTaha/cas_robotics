@@ -21,7 +21,6 @@ elseif strcmp(option,'pan');
         deg2scan=str2double(get(handles.rot_scan_deg_edit,'String'));
         use_real_robot_SCANandMOVE(deg2scan);
         organise_data()
-        use_real_robot_GETJs();
         guiParams=getappdata(gcf,'guiParams');
         plotdenso(r, Q, guiParams.checkFF, guiParams.plot_ellipse);
     end

@@ -64,7 +64,6 @@ end
 
 %now we move through the desired steps
 use_real_robot_MOVE(all_steps);
-Q=all_steps(end,:);
 
 hCOM.Laser.Stop;   
 

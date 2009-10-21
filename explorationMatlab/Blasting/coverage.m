@@ -1,4 +1,4 @@
-%% streamOnto_mine_manystarts
+%% coverage
 %
 % *Description:* This determines the path and coverage for each
 

@@ -3,7 +3,7 @@
 % a certain amount of tests (numtests). It then finds paths for each on of
 % these if they are possible. If they are not possible then 
 
-function testpathplanner(numtests,tryalternate,useMiddleQ2,check_arm_perms,makenewgoals,useDijkstra,waterplanner,groupplan)
+function testpathplanner(numtests,useMiddleQ2,check_arm_perms,makenewgoals,useDijkstra,waterplanner,groupplan)
 global Q r densoobj workspace optimise
 
 n = r.n;
@@ -12,24 +12,22 @@ t = r.base;
 qlimits=r.qlim;
 
 %% going through and setting up the default variables
-if nargin<8
+if nargin<7
     groupplan=false;
-    if nargin<7
+    if nargin<6
         waterplanner=true;
-        if nargin<6
+        if nargin<5
             useDijkstra=false;
-            if nargin<5
+            if nargin<4
                 makenewgoals=true;
-                if nargin<4   
+                if nargin<3   
                     check_arm_perms=true;
-                    if nargin<3   
+                    if nargin<2   
                         useMiddleQ2=true;
-                        if nargin<2
-                            tryalternate=false;
-                            if nargin==0
-                                numtests=1000;
-                                display(strcat('Setting number of tests to:',num2str(numtests),' since nothing was passed'));
-end; end; end; end; end; end; end; end
+                        if nargin==0
+                            numtests=1000;
+                            display(strcat('Setting number of tests to:',num2str(numtests),' since nothing was passed'));
+end; end; end; end; end; end; end
 
 %can delete if dijkstra is not used
 if useDijkstra; dijkstracounter=0;end 
@@ -142,7 +140,7 @@ else
             temppathfound=path_val(1).result;
             all_steps=path_val(1).all_steps;
         else
-            [temppathfound,all_steps]=pathplanner(newQ,tryalternate,check_arm_perms,useMiddleQ2,optimise.numofPPiterations,false);
+            [temppathfound,all_steps]=pathplanner(newQ,check_arm_perms,useMiddleQ2,optimise.numofPPiterations,false);
         end
 
         %if we want to try and get a path with dijkstra algorithm
@@ -192,8 +190,7 @@ display(strcat('Num of impossible end posses = ',num2str(impossiblepathcnt)));
 display(strcat('..of which No. alternate paths = ',num2str(numofaltpathsused)));
 % display(strcat('Num of times no path found = ',num2str(length(find(allpathsfound==0)))));
 % display('Saving all steps of all paths to file pathdata.mat');
-display(strcat('Variables are as follows{tryalternate=',num2str(tryalternate),...
-                '; useMiddleQ2=',num2str(useMiddleQ2),...
+display(strcat('Variables are as follows{useMiddleQ2=',num2str(useMiddleQ2),...
                 '; check_arm_perms=',num2str(check_arm_perms)));
 display('..........................................................................................');
 save('pathdata.mat','pathdata');

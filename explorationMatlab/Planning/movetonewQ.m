@@ -79,7 +79,6 @@ if isstruct(guiParams); plotpath=guiParams.plotpath; else plotpath=false;end
 if isstruct(handles)==0
     display('Handles not passed in so not updating the GUI');
     scanwhilemove=false;
-    tryalternate=true;
     if NOhandleOPTIONS.useRealRobot; useRealRobot=true;else useRealRobot=false;end
     if NOhandleOPTIONS.show_robot; show_robot=true;else show_robot=false;end
     if NOhandleOPTIONS.animate_move; animate_move=true;else animate_move=false;end
@@ -87,12 +86,6 @@ if isstruct(handles)==0
     %whether to plot paths in water path planner or not    
 else
     scanwhilemove=get(handles.scanwhilemove_checkbox,'value');
-%% Check if we only want to go to the exact destination
-    if get(handles.exact_joints_only_checkbox,'Value')
-        tryalternate=false;
-    else
-        tryalternate=true;
-    end
     if 	get(handles.useRealRobot_checkbox,'Value'); useRealRobot=true; else useRealRobot=false; end
     if 	get(handles.show_robot_checkbox,'Value'); show_robot=true; else show_robot=false; end
     if 	get(handles.animate_move_checkbox,'Value'); animate_move=true; else animate_move=false; end
@@ -103,14 +96,6 @@ end
 newQ=newQ*pi/180;
 
 
-
-
-%% Get the latest Q from the robot if we are using it
-if 	useRealRobot
-    use_real_robot_GETJs();
-end
-
-
 %% Check if we are already at destination or very close (rounding error)
 %check if we are already at the destination and return if we are
 %eps is a very small value and if there is less than this angular distance
@@ -118,7 +103,7 @@ end
 if isempty(find(abs(Q-newQ)>robot_maxreach.minjointres, 1));
     %since we are already at the correct path
     try set(handles.dialog_text,'String','Already at destination');drawnow;
-    catch; display('Already at destination'); end
+    catch; display('Already at destination'); end %#ok<CTCH>
     
     if show_robot
         plotdenso(r, newQ, guiParams.checkFF, guiParams.plot_ellipse);
@@ -141,7 +126,7 @@ if ~isempty(all_steps) && ...
         display('The passed in path is not valid - calculating another');
         %try and move directly to the goal with several combinations of
         %joints but with no middle points
-        try [pathfound,all_steps]=pathplanner_new(newQ,false,true,false,0,false);end
+        try [pathfound,all_steps]=pathplanner_new(newQ,true,false,0,false);end %#ok<TRYNC>
         if pathfound==0
           pathval=pathplanner_water(newQ,plotpath);pathfound=pathval.result;all_steps=pathval.all_steps;
         end
@@ -153,7 +138,7 @@ else % no valid path has been passed
         pathfound=0;
         %try and move directly to the goal with several combinations of
         %joints but with no middle points
-        try [pathfound,all_steps]=pathplanner_new(newQ,false,true,false,0,false);end
+        try [pathfound,all_steps]=pathplanner_new(newQ,true,false,0,false);end
         if pathfound==0
           pathval=pathplanner_water(newQ,plotpath);pathfound=pathval.result;all_steps=pathval.all_steps;
         end

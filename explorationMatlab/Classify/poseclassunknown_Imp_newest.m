@@ -7,7 +7,7 @@ function poseclassunknown_Imp_newest(numofintplanes)
 
 %% Setup and Variables
 % close all
-global workspace classPlanePlotHa AXBAMnCtestdata alldirectedpoints Q
+global workspace classPlanePlotHa AXBAMnCtestdata alldirectedpoints Q G_scan
 
 % figure(1)
 % plot_planes(plane,mew);
@@ -165,10 +165,7 @@ while solsfound<numofintplanes
             AXBAMnCtestdata.allE=pose(indextoblast).allE;
 %% end fortesting         
             
-            try use_real_robot_SCAN(-60); organise_data();catch; error('Could sense anything');end
-            use_real_robot_GETJs();
-            % and sense and classify           
-            global G_scan;
+            try use_real_robot_SCAN(-60); organise_data();catch; error('Could sense anything');end %#ok<CTCH>
             try [ClassifiedData] = Block_Classifier(G_scan.PointData, G_scan.IntensityData); 
             catch  %#ok<CTCH>
                 error('Couldnt classify');

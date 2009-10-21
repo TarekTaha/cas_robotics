@@ -89,7 +89,6 @@ if want_to_continue
                     want_to_continue=input(' Type (0) to go to new best view, (1) to continue trying for a path, (2) for keyboard command, (3) to exit\n');            
                     if want_to_continue==2; keyboard; end
                     if want_to_continue==3; error('User chose to exit');end
-                    if get(handles.useRealRobot_checkbox,'Value')==1;  use_real_robot_GETJs();end 
                     display(['No Valid path available or found, on #',num2str(current_bestview)]);
                     validpathfound=false;
                 end;
