@@ -297,7 +297,7 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
             pathval(i).result=1;
             [J1,J2,J3]=mapindextojoints(pathval(i).val(pnode+1,1),pathval(i).val(pnode+1,2),pathval(i).val(pnode+1,3),qlimits,matsize);
             newQ=[J1,J2,J3,zeros(size(J3,1),1),zeros(size(J3,1),1),zeros(size(J3,1),1)];
-            [result,tempsteps]=pathplanner_new(newQ,0,1,0,0,0);
+            [result,tempsteps]=pathplanner_new(newQ,1,0,0,0);
             if result==1
                 pathval(i).allsteps=[pathval(i).allsteps;tempsteps];
             else

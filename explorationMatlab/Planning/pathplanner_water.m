@@ -140,7 +140,7 @@ if size(newQ,1)==1
         return;
     %if the only differnce is the last 3 joints do old way 
     elseif isempty(find(newQ(1:3)~=currQ(1:3), 1))
-        [pathval(1).result,pathval(1).all_steps] = pathplanner_new(newQ,0,1,0,0,0);
+        [pathval(1).result,pathval(1).all_steps] = pathplanner_new(newQ,1,0,0,0);
         return
     end
 end
@@ -402,7 +402,7 @@ if ~isempty(find(table((endN(:,3)-1)*matsize(1)*matsize(2)+(endN(:,2)-1)*matsize
 
                     %use original path planer to get between nodes, if this is
                     %not possible you should use the graphs search again
-                    [result,tempsteps]=pathplanner_new(nextQnode,0,1,0,0,0,currQtemp);
+                    [result,tempsteps]=pathplanner_new(nextQnode,1,0,0,0,currQtemp);
 
 
 

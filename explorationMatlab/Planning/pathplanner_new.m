@@ -9,8 +9,6 @@
 %
 % _newQ_ (1*6 double) radians - The new joint configuration that want to be in
 %
-% _tryalternate_ (binary) If you want to try and get another possible joint configuration
-%
 % _check_arm_perms_ (binary)  If you want to check each of the joints 1-3 perms for a solution
 %
 % _useMiddleQ2_ (binary) If you want to try and put a second point in from middleQ to end if there is no direct path
@@ -27,7 +25,7 @@
 %
 % _all_steps_ = 6 collums of joints * many steps
 
-function [pathfound,all_steps] = pathplanner_new(newQ,tryalternate,check_arm_perms,useMiddleQ2,numofPPiterations,disON,currQ)
+function [pathfound,all_steps] = pathplanner_new(newQ,check_arm_perms,useMiddleQ2,numofPPiterations,disON,currQ)
 
 %% Variables
 global r Q optimise workspace robot_maxreach
@@ -37,24 +35,20 @@ all_steps=[];
 
 
 %% Check passed arguments set defaults where appropriate
-if nargin<7
+if nargin<6
     currQ=Q;
-    if nargin<6
+    if nargin<5
         disON=false;
-        if nargin<5
+        if nargin<4
             %default nu of interations assuming that there IS an alternate solution
             numofPPiterations=optimise.numofPPiterations;
-            if nargin<4
+            if nargin<3
                 % It will make more than one middle possition and try and reach this
                 useMiddleQ2=true;
-                if nargin<3        
+                if nargin<2        
                     %if we want to use the different arm movement permutations
                     check_arm_perms=true;
-                    if nargin<2
-                        %default is to get an alternate pose just in case
-                        tryalternate=true;
-                        if nargin==0; error('You must pass at least a newQ value to try and reach from the current (global) Q');end
-                    end
+                    if nargin==0; error('You must pass at least a newQ value to try and reach from the current (global) Q');end
                 end
             end
         end
@@ -80,11 +74,6 @@ end
 
 %these are the obstacle point within the arm range that are present during this iteration of path planning
 obsticle_points=workspace.indexedobsticles(GetImpLevInfo(workspace.indexedobsticles),:);
-
-%if we are not going to try and use alternate solution then go through 1/2 amount of times
-if ~tryalternate
-    numofPPiterations=numofPPiterations/2;
-end
 
 %what the max angle is or the joints 1,2,3 so we work out steps from this
 max_angle_for123=optimise.max_angle_for123;
@@ -117,33 +106,6 @@ if pathfound;
     return; 
 end
 
-%% If we are trying to find an alternate end work this out
-if tryalternate
-    try 
-        requiredT=fkine(r,newQ);
-        if disON; display('using new pose selection method which includes collision detection');end
-        [alternate_newQ,valid_pose]=streamOnto_mine_manystarts(r,requiredT(1:3,4),requiredT(1:3,3),currQ);
-        if ~valid_pose 
-            numofPPiterations=numofPPiterations/2;
-            tryalternate=0; %we wont try this section again
-            if disON; display('Did not find a valid solution using many starts');end        
-        end            
-    catch
-        numofPPiterations=numofPPiterations/2;
-        tryalternate=0; %we wont try this section again
-    end
-end
-%try and get a path with the alternate end and same begining
-if tryalternate
-    [pathfound,all_steps]=checkdirectpath(currQ,alternate_newQ,max_angle_for123,check_arm_perms,obsticle_points,maxangleJ4to6,minjointres);
-    if pathfound; 
-        if disON; display('Complete safe path found');end; 
-        if make7jointrobot; all_steps=padarray(all_steps,[0,1],'post');end   
-        return; 
-    end
-end
-
-
 %% Go through required number of iterations and try and find a path
 for gothroughtimes=1:numofPPiterations    
 if pathfound==0
@@ -154,16 +116,8 @@ if pathfound==0
     end
 
     %setup a start Q variable that won't alter the global
-    startQ=currQ;
-       
-    %this will try the Alternat path on the even numbers for gothroughtimes
-    if (-1)^(gothroughtimes)==1 && tryalternate
-        endQ=alternate_newQ;
-        if disON; display(strcat('Using an alternate end Q:',num2str(alternate_newQ)));end
-    else
-        % just do the normal endQ which is newQ
-        endQ=newQ;
-    end    
+    startQ=currQ;       
+    endQ=newQ;
 
     %this var will hold all the intermediate steps between currQ and newQ
     all_steps=startQ;  

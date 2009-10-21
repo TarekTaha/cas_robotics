@@ -32,9 +32,6 @@ global r Q densoobj
 if nargin<3
     removefactor=2.5;
     if nargin<2
-        %% try to get the latest Q from the robot if we are using it will
-        %% fail if there if not using real robot
-        %try  use_real_robot_GETJs(); end
         newQ=Q;
     end    
 end

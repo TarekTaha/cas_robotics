@@ -101,7 +101,7 @@ for J1=q1
                     %could be on known free or unknown spot
                     
                     if all_views.result(count)~=0
-                      try [all_views.path(count).valid,all_views.path(count).all_steps]=pathplanner_new(all_views.newQ(count,:),false,true,false,0,false);end
+                      try [all_views.path(count).valid,all_views.path(count).all_steps]=pathplanner_new(all_views.newQ(count,:),true,false,0,false);end
                         if all_views.path(count).valid==0
                           pathval=pathplanner_water(all_views.newQ(count,:),false);all_views.path(count).valid;all_views.path(count).all_steps=pathval.all_steps;
                         end

@@ -47,7 +47,8 @@ handles.output = hObject;
 guidata(hObject, handles);
 
 % Clear the GUI and global variables
-do_clear(handles);
+do_clear();
+setupexplorationmain(handles);
 
 
 %% RETURNS
@@ -79,7 +80,8 @@ delete(hObject);
 
 %% Executes on button press in clear_pushbutton.
 function clear_pushbutton_Callback(hObject, eventdata, handles)%#ok<INUSL,DEFNU>
-do_clear(handles);
+do_clear();
+setupexplorationmain(handles);
 
 
 %% Exploration Functionality (GO pushbutton)
@@ -122,8 +124,8 @@ classify_and_update_GUI(handles);
 
 %% MOVEMENT
 function get_current_Js_pushbutton_Callback(hObject, eventdata, handles)%#ok<INUSL,DEFNU>
+%assuming Q is updated with Qlistener 
 global Q;
-if get(handles.useRealRobot_checkbox,'Value'); use_real_robot_GETJs();end
 actual_Q=rad2deg(Q);
 display(strcat('the current joint state of the real robot is:',num2str(actual_Q)));
 set(handles.move_to_J1_edit,'String',num2str(actual_Q(1)));
@@ -521,8 +523,6 @@ end
 function start_with_default_poses_checkbox_Callback(hObject, eventdata, handles)%#ok<INUSD,DEFNU>
 % --- Executes on button press in animate_move_checkbox.
 function animate_move_checkbox_Callback(hObject, eventdata, handles)%#ok<INUSD,DEFNU>
-% --- Executes on button press in exact_joints_only_checkbox.
-function exact_joints_only_checkbox_Callback(hObject, eventdata, handles)%#ok<INUSD,DEFNU>
 % --- Executes during object creation, after setting all properties.
 function temp_mew_edit_Callback(hObject, eventdata, handles)%#ok<INUSD,DEFNU>
 function temp_mew_edit_CreateFcn(hObject, eventdata, handles)%#ok<INUSD,DEFNU>
@@ -580,4 +580,3 @@ end
 
 %% dont know why this is needed, can't find the button for it
 % function Untitled_1_Callback(hObject, eventdata, handles)
-

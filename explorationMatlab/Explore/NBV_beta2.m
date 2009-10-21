@@ -20,10 +20,10 @@ global workspace all_views bestviews G_scan r Q optimise;
 
 
 %must be able to get to 0 and from current pose
-[pathfound,all_steps_to0]=pathplanner_new([Q(1:3)+eps,zeros([1,r.n-3])],0,1,0,optimise.numofPPiterations,0);
+[pathfound,all_steps_to0]=pathplanner_new([Q(1:3)+eps,zeros([1,r.n-3])],1,0,optimise.numofPPiterations,0);
 if pathfound==0
   workspace.indexedobsticles=remove_self_scanning(workspace.indexedobsticles,Q);
-  [pathfound,all_steps_to0]=pathplanner_new([Q(1:3)+eps,zeros([1,r.n-3])],0,1,0,optimise.numofPPiterations,0);
+  [pathfound,all_steps_to0]=pathplanner_new([Q(1:3)+eps,zeros([1,r.n-3])],1,0,optimise.numofPPiterations,0);
   if pathfound==0
     warning('You must be able to get back to zero from the current pose')
     keyboard
@@ -301,7 +301,7 @@ end
 newQ=zeros([size(bestviews,2),6]);
 for current_view=1:size(bestviews,2)
   
-  try [pathfound,bestviews(current_view).all_steps_from0]=pathplanner_new([bestviews(current_view).Q(1:3)+eps,bestviews(current_view).Q(4:6)],0,1,0,optimise.numofPPiterations,0,[bestviews(current_view).Q(1:3),zeros([1,r.n-3])]);
+  try [pathfound,bestviews(current_view).all_steps_from0]=pathplanner_new([bestviews(current_view).Q(1:3)+eps,bestviews(current_view).Q(4:6)],1,0,optimise.numofPPiterations,0,[bestviews(current_view).Q(1:3),zeros([1,r.n-3])]);
   catch
     pathfound=0;
     bestviews(current_view).all_steps_from0=[];

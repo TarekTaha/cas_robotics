@@ -21,7 +21,6 @@ guiParams=getappdata(gcf,'guiParams');
 
 % Check Inputs: default is not to show the points
 if nargin<1
-    display('You should tell me wether you want to show the weighted unknown poitns');
     showunknownpnts=false;
 end
 

@@ -12,6 +12,8 @@ path([pathstr,'\..\Explore'],path);
 path([pathstr,'\..\GUI_tools'],path);
 path([pathstr,'\..\Planning'],path);
 path([pathstr,'\..\Tools'],path);
+path([pathstr,'\..\Actuate'],path);
+
 
 
 %also need to have added to the path something like 
