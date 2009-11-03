@@ -230,7 +230,7 @@ bear=[1,0,1]; %used to be [0,0,1]
 tilt_rotate_vec=[0,1,0];
 
 %max range of laser
-las_range=G_scan.size;
+las_range=G_scan.range;
 
 %Laser Angualar VARIABLES
 %this is the angle either side of the bearing of the center sensor ray \|/

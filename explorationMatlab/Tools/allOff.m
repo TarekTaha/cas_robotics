@@ -14,6 +14,7 @@ function allOff()
 %% Turn off everything on platform
 hPlatform = actxserver('EyeInHand.PlatformState');
 pause(0.1);
+hPlatform.Motors = 'Off';
 hPlatform.AirSupply = 0;
 hPlatform.Brake = 0;
 hPlatform.WarningLight = 0;

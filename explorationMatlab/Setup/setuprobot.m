@@ -21,17 +21,12 @@ end
 global Q r densoobj robot_maxreach;
 
 %New robot - start pose
-Q=[0,-75,160,0,30,0]*pi/180;
-% Default poses - add additional ones as needed
-default_Q=[Q;[0,-88*pi/180,140*pi/180,0,-15*pi/180,0]];
-default_Q=[default_Q;[0,-88*pi/180,98*pi/180,0,-15*pi/180,0]];
+Q=deg2rad([0,-88,140,0,-15,0]);
 
-% uiwait(msgbox('Changing the default Q - delete me later'));
-display('Changing the default Q - delete me later');
-Q=[0,-88*pi/180,140*pi/180,0,-15*pi/180,0];
-default_Q=[Q;[0,-88*pi/180,98*pi/180,0,-15*pi/180,0]];
-
-
+% a set of default poses to use
+default_Q=[Q;        deg2rad([0,-88,98,0,-15,0])];
+default_Q=[default_Q;deg2rad([90,-88,98,0,-15,0])];
+default_Q=[default_Q;deg2rad([-90,-88,98,0,-15,0])];
 
 if numjoints==6
     robot_maxreach.default_Q=default_Q;

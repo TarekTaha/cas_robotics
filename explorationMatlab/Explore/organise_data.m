@@ -52,7 +52,7 @@ if ~isempty(G_scan.RangeData)
             %off they are not good, if they are multiple then 1 is enough
             %even at 1.6 met
             for j=1:2:size(angularofnoreturn,2)
-                rotatedpoint=rot_vec(G_scan.size*G_scan.PoseData(i,1:3,3),G_scan.PoseData(i,1:3,1),-angularofnoreturn(j));
+                rotatedpoint=rot_vec(G_scan.range*G_scan.PoseData(i,1:3,3),G_scan.PoseData(i,1:3,1),-angularofnoreturn(j));
 
                 countnoreturns=countnoreturns+1;
                 noreturnplaces(countnoreturns,:)=rotatedpoint+G_scan.PoseData(i,1:3,4);

@@ -11,3 +11,7 @@ catch %#ok<CTCH>
     display('Some problems running COM_Delete_Coms in do_clear');
 end 
 
+
+% Deleting all timers
+display('Deleting all timers');
+delete(timerfind());
