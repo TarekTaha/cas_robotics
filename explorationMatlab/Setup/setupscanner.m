@@ -19,10 +19,14 @@ global G_scan
 G_scan.chosenview=unit([1,1,1]);
 
 %max range of laser - made smaller so estimate is smaller
-G_scan.size=1.6; 
+G_scan.range=1.6; 
 
 % How many times we have scanned
 G_scan.tries=0;
+
+%the maximum exporation steps
+G_scan.maxtries=8;
+
 
 % The origin of all scans so far
 G_scan.ALLorigin=[];

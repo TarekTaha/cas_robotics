@@ -26,4 +26,3 @@ setappdata(gcf,'guiParams',guiParams);
 %this funciton sets up the workspace
 set(handles.dialog_text,'String','Setup Complete: Lets Explore');
 set(gcf,'CurrentAxes',handles.axes3);
-

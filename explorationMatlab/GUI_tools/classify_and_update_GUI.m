@@ -5,7 +5,7 @@ global G_scan
 G_scan.ClassificationData=[];
 
 %ORIGINAL COLOUR
-% case 1 = 'Grey Metal '; case 2 = 'Shiny Metal'; case 3 = 'Cloth/Wood'; OR RED OR WHITE --- JUST CLOTH or WOOD!!! case 4 = 'Do not know';
+% 1 = 'Grey Metal'; 2 = 'Shiny Metal'; 3 = 'Cloth/Wood'; 4 = 'Do not know';
 
 %if NOT USING real robot load data
 if ~get(handles.useRealRobot_checkbox,'Value')

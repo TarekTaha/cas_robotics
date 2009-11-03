@@ -26,7 +26,7 @@ try
     %set the paths used in exGUI
     setuppath()
     
-    %setup the GUI
+    %setup the GUI (only if exGUI) otherwise dont
     if DOsetupGUI; setupGUI(handles); end
 
     %Sets up the robot
@@ -43,6 +43,9 @@ try
 
     % Create COMS (must be after the workspace is setup)
     setupCOMs(gcf);
+    
+    % this sets status variables for updating GUIs
+%     setupStatus();
 
 catch  %#ok<CTCH>
     lasterr %#ok<LERR>

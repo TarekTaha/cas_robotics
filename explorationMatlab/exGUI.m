@@ -93,6 +93,9 @@ plot_NBV(selectionORhandles);
 % --- Executes on button press in stopflag_checkbox.
 function stopflag_checkbox_Callback(hObject, eventdata, handles)%#ok<INUSL,DEFNU>
 set(handles.stopflag_checkbox,'Visible','off')
+guiParams=getappdata(gcf,'guiParams');
+guiParams.want_to_continue=false;
+setappdata(gcf,'guiParams',guiParams);
 % --- Executes on button press in find_best_view_pushbutton.
 function find_best_view_pushbutton_Callback(hObject, eventdata, handles)%#ok<INUSL,DEFNU>
 NBV_beta2();
@@ -204,26 +207,7 @@ end
 setappdata(gcf,'guiParams',guiParams);
 % --- Executes on button press in plotmesh_pushbutton.
 function plotmesh_pushbutton_Callback(hObject, eventdata, handles)%#ok<INUSL,DEFNU>
-hCOM=getappdata(gcf,'hCOM');
-guiParams=getappdata(gcf,'guiParams');
-try delete(guiParams.mesh_h);
-catch %#ok<CTCH>
-    set(gcf,'CurrentAxes',handles.axes3);
-    % if we want to show the whole environment
-    if get(handles.all_mesh_checkbox,'value')==1
-        aabb = [-20, -20, -20; 20, 20, 20];
-    else
-        aabb = [-1.5, -1.5, -1; 2, 1.5, 2];
-    end
-    hMesh = hCOM.Surface.SurfacesInsideBox(aabb(1,:), aabb(2,:));
-    f = hMesh.FaceData;
-    v = hMesh.VertexData;
-    % save('datafile.mat','v');
-    hold on;
-    guiParams.mesh_h=trisurf(f, v(:,1), v(:,2), v(:,3), 'FaceColor', 'None');
-    axis equal
-end
-setappdata(gcf,'guiParams',guiParams);
+update_surface_plot(handles)
 % --- Executes on button press in plot_planes_checkbox.
 function plot_planes_checkbox_Callback(hObject, eventdata, handles)%#ok<INUSL,DEFNU>
 global plane

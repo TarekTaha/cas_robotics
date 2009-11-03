@@ -57,8 +57,6 @@ workspace.robotplanes.home_points=round([zeros([3,3]);...
 workspace.robotplanes.equ=[1,0,0,0; 0,1,0,0; 0,0,1,0;
                            1,0,0,0; 0,1,0,0; 0,0,1,sum(workspace.robotsize(3,:))/2];
 
-%this will hold the points which are obsticles and obviously known
-% workspace.Nobsticlepoints=[];
 %this will hold the obstacles in voxeles (using inc_size)
 workspace.indexedobsticles=[];
 
@@ -89,8 +87,6 @@ workspace.impLev(3).z=[workspace.min(3),workspace.max(3)];
 % each (1), points in level 2 are also in 3 so they get both
 %made them add to 1 in accordamce with PhD working
 workspace.dotweight=[0.6,0.35,0.05];
-%used in NBV so say if all info is in top bracket then what would the weight be?
-workspace.dotweight_Sum=sum(workspace.dotweight);
 %so as it would be smaller increments
 workspace.unknowncoords=zeros([round(((workspace.max(1)-workspace.min(1))*...
                                       (workspace.max(2)-workspace.min(2))*...
@@ -129,7 +125,6 @@ points=[points;[tempx,tempy,tempz]];
 % Only use points within the correct range
 level1=GetImpLevInfo(points);
 points=points(level1,:);
-% workspace.Nobsticlepoints=points;
 % workspace.indexedobsticles=unique(round(workspace.Nobsticlepoints/tempInc)*(tempInc),'rows');
 workspace.indexedobsticles=unique(round(points/tempInc)*(tempInc),'rows');
 
@@ -232,3 +227,6 @@ workspace.class_cubesize=workspace.inc_size/4;
 workspace.minclassifications=30;
 % minimmum majority classification to make it useful
 workspace.classfierthreshhold=1.5;
+
+
+

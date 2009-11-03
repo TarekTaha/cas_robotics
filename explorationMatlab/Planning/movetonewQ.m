@@ -15,7 +15,7 @@
 %
 % _all_steps_ (many*6) path of all 6 joints in RADs
 %
-% _NOhandleOPTIONS_ (Struc) MUST FILL IN ALL FIELDS:
+% _NOhandleOPTIONS_ (Struc) SHOULD FILL IN ALL FIELDS:
 % useRealRobot, show_robot, animate_move, remv_unkn_in_mv
 %
 % _hFigure_ (Struc) This is the handle which can be passed on so as to
@@ -28,7 +28,9 @@
 function pathfound=movetonewQ(handles,newQ,all_steps,NOhandleOPTIONS,hFigure)
 
 %% Variables
-global r Q workspace robot_maxreach;
+global r Q workspace robot_maxreach G_status;
+
+G_status.hTaskPrompt_string='Moving to new pose';
 
 %if there is a figure then try and get guiParams from it
 fig_H=get(0,'CurrentFigure');
@@ -40,9 +42,9 @@ end
 
 % check we have got passed a newQ otherwise use from the GUI
 if nargin<4
-    if isstruct(handles)==0
-        error('You must pass the handle to exGUI or set boolean parameters (useRealRobot, show_robot, animate_move, remv_unkn_in_mv) in NOhandleOPTIONS');
-    end
+%     if isstruct(handles)==0
+%          error('You must pass the handle to exGUI or set boolean parameters (useRealRobot, show_robot, animate_move, remv_unkn_in_mv) in NOhandleOPTIONS');
+%     end
     if nargin<3
         all_steps=[];
         if nargin<2
@@ -73,17 +75,23 @@ if size(newQ,2)>r.n
 end
 
   
-if isstruct(guiParams); plotpath=guiParams.plotpath; else plotpath=false;end
+if isfield(guiParams,'plotpath'); plotpath=guiParams.plotpath; else plotpath=false;end
 
 %if we don't have any handles
 if isstruct(handles)==0
     display('Handles not passed in so not updating the GUI');
     scanwhilemove=false;
-    if NOhandleOPTIONS.useRealRobot; useRealRobot=true;else useRealRobot=false;end
-    if NOhandleOPTIONS.show_robot; show_robot=true;else show_robot=false;end
-    if NOhandleOPTIONS.animate_move; animate_move=true;else animate_move=false;end
-    if NOhandleOPTIONS.remv_unkn_in_mv; remv_unkn_in_mv=true;else remv_unkn_in_mv=false;end    
-    %whether to plot paths in water path planner or not    
+    if isstruct(NOhandleOPTIONS)==true               
+        if NOhandleOPTIONS.useRealRobot; useRealRobot=true;else useRealRobot=false;end
+        if NOhandleOPTIONS.show_robot; show_robot=true;else show_robot=false;end
+        if NOhandleOPTIONS.animate_move; animate_move=true;else animate_move=false;end
+        if NOhandleOPTIONS.remv_unkn_in_mv; remv_unkn_in_mv=true;else remv_unkn_in_mv=false;end    
+    else %these are the default values
+        useRealRobot=true;
+        show_robot=false;
+        animate_move=false;
+        remv_unkn_in_mv=true;
+    end
 else
     scanwhilemove=get(handles.scanwhilemove_checkbox,'value');
     if 	get(handles.useRealRobot_checkbox,'Value'); useRealRobot=true; else useRealRobot=false; end
