@@ -1,6 +1,6 @@
 %% robot_transform_matrix
-function tr=robot_transform_matrix(newQ,linkvals_quick,numjoints_to_go_through)
-    if nargin<3
+function tr=robot_transform_matrix(newQ,linkvals_quick,tr,numjoints_to_go_through)
+    if nargin<4
         numjoints_to_go_through=length(newQ);
     end
     an = linkvals_quick(:,1);
@@ -9,7 +9,7 @@ function tr=robot_transform_matrix(newQ,linkvals_quick,numjoints_to_go_through)
     sa = linkvals_quick(:,4); 
     ca = linkvals_quick(:,5);
 
-    tr=zeros([4,4,numjoints_to_go_through],'single');
+    
 
     tr(:,:,1)=linktransform_quick_priv(an(1),...
                                        dn(1),...
