@@ -1,4 +1,4 @@
-function points=transform_to_rob_base(points,rob_base)
+function points=trans2robBase(points,rob_base)
 
 %transform with respect to robot base
 temp_points=rob_base * [points';ones([1,size(points,1)])];
