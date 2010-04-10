@@ -22,7 +22,7 @@
 #define HRITAB_H
  
 #include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
+#include <libplayerinterface/player.h>
  
 #include <QtGui/QWidget>
 #include "ui_hritab.h"

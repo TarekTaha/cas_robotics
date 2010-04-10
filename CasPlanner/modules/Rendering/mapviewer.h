@@ -22,7 +22,7 @@
 #define MAPVIEWER_H
 
 #include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
+#include <libplayerinterface/player.h>
 
 #include <QtOpenGL>
 #include <GL/glut.h>

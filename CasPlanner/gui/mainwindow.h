@@ -23,7 +23,7 @@
 #include <boost/signal.hpp>
 #include <boost/bind.hpp>
 #include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
+#include <libplayerinterface/player.h>
 
 #include <QMainWindow>
 

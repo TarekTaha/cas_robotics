@@ -36,17 +36,17 @@
 
 #include <replace.h>
 
-#include <libplayercore/player.h>
-#include <libplayercore/playercommon.h>
-#include <libplayercore/error.h>
+#include <libplayerinterface/interface_util.h>
+#include <libplayerinterface/player.h>
+#include <libplayercommon/playercommon.h>
+#include <libplayercommon/error.h>
 #include <libplayercore/configfile.h>
-#include <libplayercore/interface_util.h>
 #include <libplayercore/driver.h>
 #include <libplayercore/drivertable.h>
 #include <libplayercore/devicetable.h>
 #include <libplayercore/globals.h>
 #include <libplayercore/plugins.h>
-#include <libplayercore/addr_util.h>
+#include <libplayerinterface/addr_util.h>
 
 //extern int global_playerport;
 

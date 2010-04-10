@@ -22,7 +22,7 @@
 #define SENSORS_H
 
 #include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
+#include <libplayerinterface/player.h>
 
 #include <QWidget>
 #include "robotmanager.h"

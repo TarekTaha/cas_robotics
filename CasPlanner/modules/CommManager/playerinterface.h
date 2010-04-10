@@ -21,7 +21,7 @@
 #ifndef PLAYERINTERFACE_H
 #define PLAYERINTERFACE_H
 #include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
+#include <libplayerinterface/player.h>
 
 #include <QThread> 
 #include <QReadWriteLock>
