@@ -22,7 +22,7 @@
 #define ASTAR_H_
 
 #include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
+#include <libplayerinterface/player.h>
 
 #include <QPointF>
 #include <QHash>

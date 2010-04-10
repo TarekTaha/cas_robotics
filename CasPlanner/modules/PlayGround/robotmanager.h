@@ -21,7 +21,7 @@
 #ifndef ROBOTMANAGER_H
 #define ROBOTMANAGER_H
 #include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
+#include <libplayerinterface/player.h>
 #include "commmanager.h"
 #include "planningmanager.h"
 #include "navigator.h"

@@ -22,7 +22,7 @@
 #define PLAYGROUNDTAB_H_
 
 #include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
+#include <libplayerinterface/player.h>
 
 #include <QtCore/QVariant>
 #include <QtGui/QAction>

@@ -22,7 +22,7 @@
 #define NAVIGATOR_H_
 
 #include <libplayerc++/playerc++.h>
-#include <libplayercore/player.h>
+#include <libplayerinterface/player.h>
 
 #include <QObject>
 #include <QString>
