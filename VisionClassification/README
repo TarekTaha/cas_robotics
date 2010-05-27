@@ -1,0 +1,30 @@
+Brief instructions to install and run VisualClassification Library
+-----------------------------------------------------
+
+Author:Tarek Taha (tataha@cas.edu.au)
+based on the EyePatch Windows Library http://hci.stanford.edu/research/eyepatch/
+
+Sections:
+---------
+
+* Dependencies
+* Compiling
+* Using
+
+Dependencies:
+-------------
+
+1) Opencv : 1.1pre or 2.1
+2) Boost
+3) Tesseract : (optional, necessary if you want to use text OCR) 
+4) CMake
+
+Compiling:
+-------------
+1) cd build
+2) cmake ..
+3) make
+
+Using:
+-------------
+To be added later
