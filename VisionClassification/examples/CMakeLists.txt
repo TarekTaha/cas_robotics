@@ -41,6 +41,7 @@ FIND_PACKAGE(Boost COMPONENTS system filesystem REQUIRED)
 
 new_executable(backgroundSubtraction)
 new_executable(brightnessClassification)
+new_executable(textOCR)
 
 INCLUDE_DIRECTORIES( 
     ${CMAKE_BINARY_DIR}

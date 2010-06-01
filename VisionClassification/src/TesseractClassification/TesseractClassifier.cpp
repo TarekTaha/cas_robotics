@@ -75,7 +75,7 @@ ClassifierOutputData TesseractClassifier::classifyFrame(IplImage *frame)
     cvCvtColor(frame, frameGray, CV_BGR2GRAY);
     cvThreshold(frameGray, frameGray, 0, 255, CV_THRESH_BINARY+CV_THRESH_OTSU);
 
-    char * output = api.TesseractRect( (unsigned char*)frameGray->imageData,frameGray->depth,frameGray->widthStep,0,0,frameGray->width,frameGray->height);
+    char * output = api.TesseractRect( (unsigned char*)frameGray->imageData,frameGray->depth/8,frameGray->widthStep,0,0,frameGray->width,frameGray->height);
     //ETEXT_DESC* output = api.Recognize_all_Words();
     /*
     char buffer[TESSERACT_MAX_CHARS];
@@ -83,7 +83,7 @@ ClassifierOutputData TesseractClassifier::classifyFrame(IplImage *frame)
 
     for (int i = 0; i < output->count; i++)
     {
-        const char* ch = &output->text[i];
+        const char* ch = output;
         for (int b = 0; b < ch->blanks; ++b)
         {
             buffer[len] = ' ';

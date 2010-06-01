@@ -20,31 +20,46 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02110-1301, USA.          *
  ***************************************************************************/
-#ifndef TESSERACTCLASSIFIER_H
-#define TESSERACTCLASSIFIER_H
-
-#include "constants.h"
-#include "TrainingSample.h"
+#include "iostream"
+#include "cv.h"
+#include "highgui.h"
+#include "cvaux.h"
+#include "TesseractClassifier.h"
 #include "TrainingSet.h"
-#include "Classifier.h"
-#include "precomp.h"
-#include "baseapi.h"
 
-class TesseractClassifier : public Classifier
+int main()
 {
-public:
-    TesseractClassifier();
-    TesseractClassifier(const char * pathname);
-    ~TesseractClassifier();
+    TesseractClassifier tesseractClassifier;
+    cvNamedWindow("Detected Text", 1);
+    cvNamedWindow("Text Image", 1);
+    CvFont font;
 
-    bool containsSufficientSamples(TrainingSet*);
-    void startTraining(TrainingSet*);
-    ClassifierOutputData classifyFrame(IplImage*);
-    void save();
-    void resetRunningState();
+    cvInitFont(&font,CV_FONT_HERSHEY_COMPLEX,0.7,0.7,0,1);
 
-private:
-        TessBaseAPI api;
-};
+    IplImage * textFrame = cvLoadImage("helloworld.bmp",CV_LOAD_IMAGE_GRAYSCALE);
+    IplImage * gray      = cvCreateImage(cvGetSize(textFrame),8,3);
+    IplImage * displayImg= cvCreateImage(cvGetSize(textFrame),8,3);
+    cvZero(displayImg);
 
-#endif
+    cvCvtColor(textFrame,gray,CV_GRAY2BGR);
+
+    string detectedText;
+
+
+    ClassifierOutputData outputData= tesseractClassifier.classifyFrame(gray);
+    cvShowImage("Text Image", textFrame);
+
+    if (outputData.hasVariable("Text"))
+    {
+        detectedText = outputData.getStringData("Text");
+        cout<<"Text detected:"<<detectedText;
+        cvPutText(displayImg,detectedText.c_str(),cvPoint(20,20),&font,cvScalar(0,255,255));
+        cvShowImage("Detected Text", displayImg);
+    }
+    // Display the result for 5 seconds then quit
+    cvWaitKey(5000);
+    cvReleaseImage(&textFrame);
+    cvReleaseImage(&gray);
+    cvReleaseImage(&displayImg);
+    return 0;
+}
