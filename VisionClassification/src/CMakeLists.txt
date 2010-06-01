@@ -107,4 +107,7 @@ TARGET_LINK_LIBRARIES( visualClassification
     ${OPENCV_LIBRARIES}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
+    sift
+    tesseract_full
+    cvhaartraining
 )

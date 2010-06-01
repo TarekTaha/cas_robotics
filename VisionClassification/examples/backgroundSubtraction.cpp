@@ -20,36 +20,45 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02110-1301, USA.          *
  ***************************************************************************/
-#ifndef MOTIONCLASSIFIER_H
-#define MOTIONCLASSIFIER_H
+#include "cv.h"
+#include "highgui.h"
+#include "cvaux.h"
+#include "BackgroundSubtraction.h"
 
-#include "constants.h"
-#include "TrainingSample.h"
-#include "TrainingSet.h"
-#include "common.h"
-#include "Classifier.h"
-#include "precomp.h"
-
-class MotionClassifier : public Classifier
+int main()
 {
-public:
-    MotionClassifier();
-    MotionClassifier(const char *pathname);
-    ~MotionClassifier();
 
-    bool containsSufficientSamples(TrainingSet*);
-    void startTraining(TrainingSet*);
-    ClassifierOutputData classifyFrame(IplImage*);
-    ClassifierOutputData classifyMotion(IplImage*, double);
-    void save();
-    /*!
-       This classifier doesn't have store any new state info while running live
-     */
-    void resetRunningState() {}
-    void setGraphics(Graphics *);
-private:
-    list<double> motionAngles;
-    Graphics *graphics;
-};
+    IplImage* frame = NULL,*guessMask=NULL;
+    CvCapture* cap = NULL;
 
-#endif
+    cap   = cvCreateCameraCapture(0);
+    frame = cvQueryFrame(cap);
+    if(!frame)
+    {
+        printf("Cant find a camera \n");
+        exit(0);
+    }
+    BackgroundSubtraction backgroundSubtraction;
+    //create windows to show background and foreground images
+    cvNamedWindow("Background", 1);
+    cvNamedWindow("Foreground", 1);
+    for(;;)
+    {
+        frame = cvQueryFrame(cap);
+        ClassifierOutputData outputData= backgroundSubtraction.classifyFrame(frame);
+        cvShowImage("Foreground", frame);
+
+        if (outputData.hasVariable("Mask"))
+        {
+            guessMask = outputData.getImageData("Mask");
+        }
+        cvShowImage("Background", guessMask);
+        int k = cvWaitKey(2);
+        if( k == 27 )
+            break;
+    }
+    //release capture
+    cvReleaseCapture(&cap);
+    return 0;
+
+}

@@ -2,7 +2,7 @@
  *   Vision Classification Library                                         *
  *   Copyright (C) 2010 by:                                                *
  *      Tarek Taha, CAS-UTS  <tataha@cas.edu.au>                           *
- *      Dan Maynes-Aminzade  <monzy@stanford.edu>                          *
+ *      Dan Maynes-Aminzade  <monzy@cs.stanford.edu>                       *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -43,7 +43,7 @@ public:
     /*!
      Run classifier on current entire motion track
      */
-    ClassifierOutputData ClassifyTrack(MotionTrack mt);
+    ClassifierOutputData classifyTrack(MotionTrack mt);
     void save();
     /*!
         This classifier doesn't have store any new state info while running live
@@ -51,7 +51,7 @@ public:
     void resetRunningState() {}
     void setGraphics(Graphics *);
 private:
-    void UpdateTrajectoryImage();
+    void updateTrajectoryImage();
     Recognizer rec;
     Graphics *graphics;
     int nTemplates;

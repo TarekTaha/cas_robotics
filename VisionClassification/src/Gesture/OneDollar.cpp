@@ -2,7 +2,7 @@
  *   Vision Classification Library                                         *
  *   Copyright (C) 2010 by:                                                *
  *      Tarek Taha, CAS-UTS  <tataha@cas.edu.au>                           *
- *      Dan Maynes-Aminzade  <monzy@stanford.edu>                          *
+ *      Dan Maynes-Aminzade  <monzy@cs.stanford.edu>                       *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -129,7 +129,7 @@ Recognizer::Recognizer()
 	*/
 }
 
-Result Recognizer::Recognize(vector<OneDollarPoint> points)
+Result Recognizer::recognize(vector<OneDollarPoint> points)
 {
     Result error("NONE", 0, -1);
     if (m_templates.size() == 0) return error;
@@ -155,7 +155,7 @@ Result Recognizer::Recognize(vector<OneDollarPoint> points)
     return r;
 }
 
-Result Recognizer::BackRecognize(vector<OneDollarPoint> points)
+Result Recognizer::backRecognize(vector<OneDollarPoint> points)
 {
     Result r("NONE", 0, -1);
     if (m_templates.size() == 0) return r;
@@ -238,7 +238,7 @@ int Recognizer::addTemplate(string name, vector<OneDollarPoint> points)
     return num;
 }
 
-int Recognizer::DeleteUserTemplates()
+int Recognizer::deleteUserTemplates()
 {
     m_templates.erase(m_templates.begin() + NumTemps, m_templates.end());
     return NumTemps;

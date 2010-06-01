@@ -2,7 +2,7 @@
  *   Vision Classification Library                                         *
  *   Copyright (C) 2010 by:                                                *
  *      Tarek Taha, CAS-UTS  <tataha@cas.edu.au>                           *
- *      Dan Maynes-Aminzade  <monzy@stanford.edu>                          *
+ *      Dan Maynes-Aminzade  <monzy@cs.stanford.edu>                       *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -65,12 +65,12 @@ void ClassifierTester::runClassifierOnCurrentFrame(Classifier *classifier, CVide
 
     if (recognizerMode == MOTION_FILTER)
     {
-        outdata = ((MotionClassifier*)classifier)->ClassifyMotion(vl->getMotionHistory(), MOTION_NUM_HISTORY_FRAMES);
+        outdata = ((MotionClassifier*)classifier)->classifyMotion(vl->getMotionHistory(), MOTION_NUM_HISTORY_FRAMES);
     }
     else if (recognizerMode == GESTURE_FILTER)
     {
         MotionTrack mt = vl->getTrajectoryAtCurrentFrame();
-        outdata = ((GestureClassifier*)classifier)->ClassifyTrack(mt);
+        outdata = ((GestureClassifier*)classifier)->classifyTrack(mt);
     }
     else
     {

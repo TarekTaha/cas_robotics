@@ -2,7 +2,7 @@
  *   Vision Classification Library                                         *
  *   Copyright (C) 2010 by:                                                *
  *      Tarek Taha, CAS-UTS  <tataha@cas.edu.au>                           *
- *      Dan Maynes-Aminzade  <monzy@stanford.edu>                          *
+ *      Dan Maynes-Aminzade  <monzy@cs.stanford.edu>                       *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -68,7 +68,7 @@ GestureClassifier::GestureClassifier(const char * pathname) :
     outputData.addVariable("IsMatch", (int)0);
     outputData.addVariable("Gesture", (int)0);
 
-    UpdateTrajectoryImage();
+    updateTrajectoryImage();
 }
 
 GestureClassifier::~GestureClassifier()
@@ -83,7 +83,7 @@ void GestureClassifier::startTraining(TrainingSet *sampleSet)
 
     if (isTrained)
     { // delete the old models
-        rec.DeleteUserTemplates();
+        rec.deleteUserTemplates();
     }
     maxTemplateLength = 0;
 
@@ -114,7 +114,7 @@ void GestureClassifier::startTraining(TrainingSet *sampleSet)
     isTrained = true;
 
     // update demo image
-    UpdateTrajectoryImage();
+    updateTrajectoryImage();
 }
 
 bool GestureClassifier::containsSufficientSamples(TrainingSet *sampleSet)
@@ -124,13 +124,13 @@ bool GestureClassifier::containsSufficientSamples(TrainingSet *sampleSet)
 
 ClassifierOutputData GestureClassifier::classifyFrame(IplImage *frame)
 {
-    // not implemented: this class uses ClassifyTrack instead
+    // not implemented: this class uses classifyTrack instead
     assert(false);
     ClassifierOutputData data;
     return data;
 }    
 
-ClassifierOutputData GestureClassifier::ClassifyTrack(MotionTrack mt)
+ClassifierOutputData GestureClassifier::classifyTrack(MotionTrack mt)
 {
     cvZero(guessMask);
     outputData.setVariable("IsMatch", 0);
@@ -144,7 +144,7 @@ ClassifierOutputData GestureClassifier::ClassifyTrack(MotionTrack mt)
 
     cvZero(applyImage);
 
-    Result r = rec.BackRecognize(mt);
+    Result r = rec.backRecognize(mt);
 
     if (r.m_score > threshold)
     {
@@ -170,7 +170,7 @@ ClassifierOutputData GestureClassifier::ClassifyTrack(MotionTrack mt)
     return outputData;
 }
 
-void GestureClassifier::UpdateTrajectoryImage()
+void GestureClassifier::updateTrajectoryImage()
 {
     if (nTemplates < 1) return;
 

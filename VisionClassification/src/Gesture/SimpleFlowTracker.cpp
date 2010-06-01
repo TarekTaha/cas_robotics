@@ -2,7 +2,7 @@
  *   Vision Classification Library                                         *
  *   Copyright (C) 2010 by:                                                *
  *      Tarek Taha, CAS-UTS  <tataha@cas.edu.au>                           *
- *      Dan Maynes-Aminzade  <monzy@stanford.edu>                          *
+ *      Dan Maynes-Aminzade  <monzy@cs.stanford.edu>                       *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -37,10 +37,10 @@ SimpleFlowTracker::SimpleFlowTracker(Graphics *_graphics):
 
 SimpleFlowTracker::~SimpleFlowTracker()
 {
-    if (isInitialized) StopTracking();
+    if (isInitialized) stopTracking();
 }
 
-void SimpleFlowTracker::StartTracking(IplImage *firstFrame)
+void SimpleFlowTracker::startTracking(IplImage *firstFrame)
 {
     // Allocate images to store previous frame
     outputFrame = cvCloneImage(firstFrame);
@@ -65,7 +65,7 @@ void SimpleFlowTracker::StartTracking(IplImage *firstFrame)
     numInactiveFrames = 0;
 }
 
-void SimpleFlowTracker::StopTracking()
+void SimpleFlowTracker::stopTracking()
 {
     if (!isInitialized)
         return;
@@ -82,11 +82,11 @@ void SimpleFlowTracker::StopTracking()
 }
 
 
-void SimpleFlowTracker::ProcessFrame(IplImage *frame)
+void SimpleFlowTracker::processFrame(IplImage *frame)
 {
     if (!isInitialized)
     {
-        StartTracking(frame);
+        startTracking(frame);
     }
 
     cvCopy(frame, outputFrame);
@@ -140,7 +140,7 @@ void SimpleFlowTracker::ProcessFrame(IplImage *frame)
             numInactiveFrames++;
             if (numInactiveFrames > FLOW_INACTIVE_THRESHOLD)
             {
-                ClearCurrentTrajectory();
+                clearCurrentTrajectory();
                 numInactiveFrames = 0;
             }
         }
@@ -154,7 +154,7 @@ void SimpleFlowTracker::ProcessFrame(IplImage *frame)
         numInactiveFrames++;
         if (numInactiveFrames > FLOW_INACTIVE_THRESHOLD)
         {
-            ClearCurrentTrajectory();
+            clearCurrentTrajectory();
             numInactiveFrames = 0;
         }
     }
@@ -189,7 +189,7 @@ MotionTrack SimpleFlowTracker::GetCurrentTrajectory()
     return mt;
 }
 
-void SimpleFlowTracker::ClearCurrentTrajectory()
+void SimpleFlowTracker::clearCurrentTrajectory()
 {
     // this function is called after a successful match when running live
     trajectory.clear();

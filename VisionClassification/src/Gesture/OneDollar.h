@@ -2,7 +2,7 @@
  *   Vision Classification Library                                         *
  *   Copyright (C) 2010 by:                                                *
  *      Tarek Taha, CAS-UTS  <tataha@cas.edu.au>                           *
- *      Dan Maynes-Aminzade  <monzy@stanford.edu>                          *
+ *      Dan Maynes-Aminzade  <monzy@cs.stanford.edu>                       *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -97,12 +97,12 @@ class Recognizer
 public:
     vector<Template> m_templates;
     Recognizer();
-    Result Recognize(vector<OneDollarPoint> points);
-    Result BackRecognize(vector<OneDollarPoint> points);
+    Result recognize(vector<OneDollarPoint> points);
+    Result backRecognize(vector<OneDollarPoint> points);
     int addTemplate(string name, OneDollarPoint* points, int npoints);
     int addTemplate(string name, vector<OneDollarPoint> points);
     int addTemplate(string name, Template t);
-    int DeleteUserTemplates();
+    int deleteUserTemplates();
 };
 
 vector<OneDollarPoint> Resample(vector<OneDollarPoint> points, int n);
