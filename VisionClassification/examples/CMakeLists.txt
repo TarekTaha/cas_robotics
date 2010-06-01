@@ -42,6 +42,7 @@ FIND_PACKAGE(Boost COMPONENTS system filesystem REQUIRED)
 new_executable(backgroundSubtraction)
 new_executable(brightnessClassification)
 new_executable(textOCR)
+new_executable(trainFindObject)
 
 INCLUDE_DIRECTORIES( 
     ${CMAKE_BINARY_DIR}
@@ -52,7 +53,9 @@ INCLUDE_DIRECTORIES(
     ../src/BrightnessClassification
     ../src/common
     ../src/SIFT
+    ../src/SiftClassification
     ../src/ClassifierCore
+    ../src/ColorClassification
     ../src/CVHaar
     ../src/Gesture
     ../src/GestureClassification

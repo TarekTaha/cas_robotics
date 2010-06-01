@@ -20,6 +20,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02110-1301, USA.          *
  ***************************************************************************/
+#include "iostream"
 #include "cv.h"
 #include "highgui.h"
 #include "cvaux.h"
@@ -32,6 +33,16 @@ int main()
     CvCapture* cap = NULL;
 
     cap   = cvCreateCameraCapture(0);
+    if(cap)
+    {
+        cvSetCaptureProperty(cap,CV_CAP_PROP_FRAME_WIDTH,640);
+        cvSetCaptureProperty(cap,CV_CAP_PROP_FRAME_HEIGHT,480);
+    }
+    else
+    {
+        std::cout<<"\nCouldnt Find a camera";
+        return 0;
+    }
     frame = cvQueryFrame(cap);
     if(!frame)
     {
@@ -52,9 +63,19 @@ int main()
         {
             guessMask = outputData.getImageData("Mask");
         }
+        /*
+        CvSeq * contours;
+        if (outputData.hasVariable("Contours"))
+        {
+            contours = outputData.getSequenceData("Contours");
+            if (contours != NULL)
+            {
+                cvDrawContours(guessMask, contours, cvScalar(0xFF), cvScalar(0x00), 1, 1, CV_AA);
+            }
+        }
+        */
         cvShowImage("Background", guessMask);
-        int k = cvWaitKey(2);
-        if( k == 27 )
+        if( cvWaitKey( 10 ) >= 0 )
             break;
     }
     //release capture
