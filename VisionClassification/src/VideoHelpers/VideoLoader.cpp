@@ -24,7 +24,7 @@
 
 CVideoLoader::CVideoLoader()
 {
-    videoLoaded = FALSE;
+    videoLoaded = false;
     videoCapture = NULL;
     copyFrame = NULL;
     motionHistory = NULL;
@@ -59,7 +59,7 @@ bool CVideoLoader::openVideoFile(const char * filename)
 
     if (vc == NULL)
     {
-        return FALSE;
+        return false;
     }
 
     if (videoLoaded)  // We already loaded a video, so this will be a new one
@@ -98,13 +98,13 @@ bool CVideoLoader::openVideoFile(const char * filename)
     }
 
     loadFrame(0);
-    videoLoaded = TRUE;
+    videoLoaded = true;
 
     // create a new blob tracker for the new video
     if (m_flowTracker != NULL)
         delete m_flowTracker;
     m_flowTracker = new FlowTracker();
-    return TRUE;
+    return true;
 }
 
 void CVideoLoader::loadFrame(long framenum)

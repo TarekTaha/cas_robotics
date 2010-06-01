@@ -103,7 +103,7 @@ INCLUDE_DIRECTORIES(
 
 ADD_LIBRARY( visualClassification SHARED ${VC_SRCS})
 
-TARGET_LINK_LIBRARIES( visualClassification
+TARGET_LINK_LIBRARIES( visualClassification  
     ${OPENCV_LIBRARIES}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}

@@ -40,7 +40,7 @@ TesseractClassifier::TesseractClassifier(const char * pathname) :
         Classifier()
 {
     // We will never load standard filters from disk, so this should never be called
-    assert(FALSE);
+    assert(false);
 }
 
 TesseractClassifier::~TesseractClassifier()
@@ -51,7 +51,7 @@ TesseractClassifier::~TesseractClassifier()
 bool TesseractClassifier::containsSufficientSamples(TrainingSet *sampleSet)
 {
     // Standard filters don't need training samples
-    assert(FALSE);
+    assert(false);
     return true;
 }
 
@@ -59,7 +59,7 @@ void TesseractClassifier::startTraining(TrainingSet *sampleSet)
 {
 
     // Standard filters don't use training (this should never be called)
-    assert(FALSE);
+    assert(false);
 }
 
 ClassifierOutputData TesseractClassifier::classifyFrame(IplImage *frame)
@@ -114,7 +114,7 @@ ClassifierOutputData TesseractClassifier::classifyFrame(IplImage *frame)
 void TesseractClassifier::save()
 {
     // We can't save built-in classifiers, so this should never be called
-    assert(FALSE);
+    assert(false);
 }
 
 void TesseractClassifier::resetRunningState()

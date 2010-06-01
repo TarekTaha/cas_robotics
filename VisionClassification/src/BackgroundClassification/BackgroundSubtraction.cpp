@@ -43,7 +43,7 @@ BackgroundSubtraction::BackgroundSubtraction(const char* pathname) :
         Classifier()
 {
     // We will never load standard filters from disk, so this should never be called
-    assert(FALSE);
+    assert(false);
 }
 
 BackgroundSubtraction::~BackgroundSubtraction()
@@ -58,7 +58,7 @@ BackgroundSubtraction::~BackgroundSubtraction()
 bool BackgroundSubtraction::containsSufficientSamples(TrainingSet *sampleSet)
 {
     // Standard filters don't need training samples
-    assert(FALSE);
+    assert(false);
     return true;
 }
 
@@ -66,7 +66,7 @@ void BackgroundSubtraction::startTraining(TrainingSet *sampleSet)
 {
 
     // Standard filters don't use training (this should never be called)
-    assert(FALSE);
+    assert(false);
 }
 
 ClassifierOutputData BackgroundSubtraction::classifyFrame(IplImage *frame)
@@ -127,7 +127,7 @@ ClassifierOutputData BackgroundSubtraction::classifyFrame(IplImage *frame)
 void BackgroundSubtraction::save()
 {
     // We can't save built-in classifiers, so this should never be called
-    assert(FALSE);
+    assert(false);
 }
 
 void BackgroundSubtraction::resetRunningState()
