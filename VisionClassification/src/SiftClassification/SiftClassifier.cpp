@@ -2,7 +2,7 @@
  *   Vision Classification Library                                         *
  *   Copyright (C) 2010 by:                                                *
  *      Tarek Taha, CAS-UTS  <tataha@cas.edu.au>                           *
- *      Dan Maynes-Aminzade  <monzy@stanford.edu>                          *
+ *      Dan Maynes-Aminzade  <monzy@cs.stanford.edu>                       *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -61,7 +61,7 @@ SiftClassifier::SiftClassifier(const char * pathname) :
     // set the type
     classifierType = SIFT_FILTER;
 
-    UpdateSiftImage();
+    updateSiftImage();
 }
 
 SiftClassifier::~SiftClassifier()
@@ -119,7 +119,7 @@ void SiftClassifier::startTraining(TrainingSet *sampleSet)
     // update member variables
     isTrained = true;
 
-    UpdateSiftImage();
+    updateSiftImage();
 }
 
 ClassifierOutputData SiftClassifier::classifyFrame(IplImage *frame)
@@ -245,7 +245,7 @@ ClassifierOutputData SiftClassifier::classifyFrame(IplImage *frame)
     return outputData;
 }
 
-void SiftClassifier::UpdateSiftImage()
+void SiftClassifier::updateSiftImage()
 {
     IplImage *featureImage = cvCloneImage(sampleCopy);
     draw_features(featureImage, sampleFeatures, numSampleFeatures);

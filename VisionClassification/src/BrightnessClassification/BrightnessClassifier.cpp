@@ -2,7 +2,7 @@
  *   Vision Classification Library                                         *
  *   Copyright (C) 2010 by:                                                *
  *      Tarek Taha, CAS-UTS  <tataha@cas.edu.au>                           *
- *      Dan Maynes-Aminzade  <monzy@stanford.edu>                          *
+ *      Dan Maynes-Aminzade  <monzy@cs.stanford.edu>                       *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -132,8 +132,10 @@ void BrightnessClassifier::startTraining(TrainingSet *sampleSet)
 ClassifierOutputData BrightnessClassifier::classifyFrame(IplImage *frame)
 {
     cvZero(guessMask);
-    if (!isTrained) return outputData;
-    if(!frame) return outputData;
+    if (!isTrained)
+        return outputData;
+    if(!frame)
+        return outputData;
 
     IplImage *image = cvCreateImage( cvGetSize(frame), IPL_DEPTH_8U, 3 );
     IplImage *brightness = cvCreateImage( cvGetSize(frame), IPL_DEPTH_8U, 1 );

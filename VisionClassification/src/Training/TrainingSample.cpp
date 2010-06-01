@@ -2,7 +2,7 @@
  *   Vision Classification Library                                         *
  *   Copyright (C) 2010 by:                                                *
  *      Tarek Taha, CAS-UTS  <tataha@cas.edu.au>                           *
- *      Dan Maynes-Aminzade  <monzy@stanford.edu>                          *
+ *      Dan Maynes-Aminzade  <monzy@cs.stanford.edu>                       *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -128,7 +128,8 @@ TrainingSample::TrainingSample(char *filename, int groupId):
     motionHistory = NULL;
 
     fullImageCopy = cvLoadImage(filename, 1);
-    if (fullImageCopy == NULL) {
+    if (fullImageCopy == NULL)
+    {
         fullImageCopy = cvCreateImage(cvSize(LISTVIEW_SAMPLE_X,LISTVIEW_SAMPLE_Y),IPL_DEPTH_8U, 3);
         cvZero(fullImageCopy);
     }
@@ -136,9 +137,12 @@ TrainingSample::TrainingSample(char *filename, int groupId):
     resizedImage = cvCreateImage(cvSize(LISTVIEW_SAMPLE_X,LISTVIEW_SAMPLE_Y),IPL_DEPTH_8U, 3); 
     bmpImage = cvCreateImage(cvSize(LISTVIEW_SAMPLE_X, LISTVIEW_SAMPLE_Y),IPL_DEPTH_8U, 3);
 
-    if (fullImageCopy->width >= LISTVIEW_SAMPLE_X && fullImageCopy->height >= LISTVIEW_SAMPLE_Y) {
+    if (fullImageCopy->width >= LISTVIEW_SAMPLE_X && fullImageCopy->height >= LISTVIEW_SAMPLE_Y)
+    {
         cvResize(fullImageCopy, resizedImage, CV_INTER_AREA);
-    } else { 
+    }
+    else
+    {
         cvResize(fullImageCopy, resizedImage, CV_INTER_LINEAR);
     }
 
@@ -158,9 +162,12 @@ TrainingSample::TrainingSample(TrainingSample *toClone):
     motionTrack = toClone->motionTrack;
 
     fullImageCopy = cvCloneImage(toClone->fullImageCopy);
-    if ((iOrigId == GROUPID_MOTIONSAMPLES) && (toClone->motionHistory != NULL)) {
+    if ((iOrigId == GROUPID_MOTIONSAMPLES) && (toClone->motionHistory != NULL))
+    {
         motionHistory = cvCloneImage(toClone->motionHistory);
-    } else {
+    }
+    else
+    {
         motionHistory = NULL;
     }
     resizedImage = cvCloneImage(toClone->resizedImage);

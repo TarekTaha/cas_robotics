@@ -2,7 +2,7 @@
  *   Vision Classification Library                                         *
  *   Copyright (C) 2010 by:                                                *
  *      Tarek Taha, CAS-UTS  <tataha@cas.edu.au>                           *
- *      Dan Maynes-Aminzade  <monzy@stanford.edu>                          *
+ *      Dan Maynes-Aminzade  <monzy@cs.stanford.edu>                       *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -169,13 +169,13 @@ void MotionClassifier::startTraining(TrainingSet *sampleSet)
 }
 
 ClassifierOutputData MotionClassifier::classifyFrame(IplImage *frame) {
-    // not implemented: this classifier uses ClassifyMotion instead
+    // not implemented: this classifier uses classifyMotion instead
     assert(false);
 	ClassifierOutputData data;
 	return data;
 }
 
-ClassifierOutputData MotionClassifier::ClassifyMotion(IplImage *frame, double timestamp)
+ClassifierOutputData MotionClassifier::classifyMotion(IplImage *frame, double timestamp)
 {
     cvZero(guessMask);
     if (!isTrained) return outputData;

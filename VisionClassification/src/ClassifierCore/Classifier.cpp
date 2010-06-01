@@ -2,7 +2,7 @@
  *   Vision Classification Library                                         *
  *   Copyright (C) 2010 by:                                                *
  *      Tarek Taha, CAS-UTS  <tataha@cas.edu.au>                           *
- *      Dan Maynes-Aminzade  <monzy@stanford.edu>                          *
+ *      Dan Maynes-Aminzade  <monzy@cs.stanford.edu>                       *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *

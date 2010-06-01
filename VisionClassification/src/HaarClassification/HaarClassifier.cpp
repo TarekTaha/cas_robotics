@@ -2,7 +2,7 @@
  *   Vision Classification Library                                         *
  *   Copyright (C) 2010 by:                                                *
  *      Tarek Taha, CAS-UTS  <tataha@cas.edu.au>                           *
- *      Dan Maynes-Aminzade  <monzy@stanford.edu>                          *
+ *      Dan Maynes-Aminzade  <monzy@cs.stanford.edu>                       *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -102,7 +102,7 @@ bool HaarClassifier::containsSufficientSamples(TrainingSet *sampleSet)
     return ((sampleSet->posSampleCount > 3) && (sampleSet->negSampleCount > 3));
 }
 
-void HaarClassifier::PrepareData(TrainingSet *sampleSet)
+void HaarClassifier::prepareData(TrainingSet *sampleSet)
 {
     int gridSize = (int) ceil(sqrt((double)sampleSet->posSampleCount));
     int gridX = 0;
@@ -200,7 +200,7 @@ void HaarClassifier::startTraining(TrainingSet* sampleSet)
 {
 	// Make a copy of the set used for training (we'll want to save it later)
         sampleSet->copyTo(&trainSet);
-	PrepareData(sampleSet);
+	prepareData(sampleSet);
 }
 
 ClassifierOutputData HaarClassifier::classifyFrame(IplImage *frame)

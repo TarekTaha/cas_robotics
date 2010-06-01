@@ -2,7 +2,7 @@
  *   Vision Classification Library                                         *
  *   Copyright (C) 2010 by:                                                *
  *      Tarek Taha, CAS-UTS  <tataha@cas.edu.au>                           *
- *      Dan Maynes-Aminzade  <monzy@stanford.edu>                          *
+ *      Dan Maynes-Aminzade  <monzy@cs.stanford.edu>                       *
  *                                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -36,7 +36,7 @@ public:
     ~TrainingSet(void);
     void getImageList();
     void addSample(TrainingSample *sample);
-    int getOriginalSampleGroup(uint sampleId);
+    int  getOriginalSampleGroup(uint sampleId);
     void setSampleGroup(uint sampleId, int groupId);
     void removeSample(uint sampleId);
     void copyTo(TrainingSet *target);
