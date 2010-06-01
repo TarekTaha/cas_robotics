@@ -35,5 +35,6 @@ if( COMMAND cmake_policy )
 endif( COMMAND cmake_policy )
 
 add_subdirectory( src/SIFT )
+add_subdirectory( src/CVHaar )
 add_subdirectory( src )
 add_subdirectory( examples )

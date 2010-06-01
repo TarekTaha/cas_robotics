@@ -1,30 +1,44 @@
 project(haartraining)
 
-include_directories(
-    "${CMAKE_CURRENT_SOURCE_DIR}"
-    "${CMAKE_SOURCE_DIR}/modules/core/include"
-    "${CMAKE_SOURCE_DIR}/modules/imgproc/include"
-    "${CMAKE_SOURCE_DIR}/modules/objdetect/include"
-    "${CMAKE_SOURCE_DIR}/modules/ml/include"
-    "${CMAKE_SOURCE_DIR}/modules/highgui/include"
-    "${CMAKE_SOURCE_DIR}/modules/video/include"
-    "${CMAKE_SOURCE_DIR}/modules/features2d/include"
-    "${CMAKE_SOURCE_DIR}/modules/calib3d/include"
-    "${CMAKE_SOURCE_DIR}/modules/legacy/include"
-    )
+IF(CMAKE_COMPILER_IS_GNUCC)
+    SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -g -O0 -o -fmessage-length=0")
+ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
-if(WIN32)
-    link_directories(${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/bin ${CMAKE_CURRENT_BINARY_DIR})
-endif()
+IF(CMAKE_COMPILER_IS_GNUCXX)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -o -fmessage-length=0")
+ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
-set(haartraining_libs opencv_core opencv_imgproc opencv_highgui opencv_objdetect opencv_calib3d opencv_haartraining_engine)
+# Optimization Level
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math -march=pentium-m -msse2 -mfpmath=sse")
 
-link_libraries(${haartraining_libs})
+# enable warnings
+ADD_DEFINITIONS( -Wall )
+
+INCLUDE( ${CMAKE_ROOT}/Modules/FindPkgConfig.cmake )
+INCLUDE( ${CMAKE_ROOT}/Modules/UsePkgConfig.cmake )
+
+IF(PKG_CONFIG_FOUND)
+	pkg_check_modules(OPENCV REQUIRED opencv)
+ELSE(PKG_CONFIG_FOUND)
+	MESSAGE("Cannot find pkg-config")
+ENDIF(PKG_CONFIG_FOUND)
+
+IF(OPENCV_FOUND)
+	#do something ?
+ELSE(OPENCV_FOUND)
+	MESSAGE("Cannot find opencv version 2.1 or above")
+ENDIF(OPENCV_FOUND)
+
+INCLUDE_DIRECTORIES( 
+    ${CMAKE_BINARY_DIR}
+    ${OPENCV_INCLUDE_DIRS}
+    .
+)
 
 # -----------------------------------------------------------
 #  Library
 # -----------------------------------------------------------
-set(cvhaartraining_lib_src
+SET(cvhaartraining_lib_src
     _cvcommon.h
     cvclassifier.h
     _cvhaartraining.h
@@ -36,41 +50,4 @@ set(cvhaartraining_lib_src
     cvsamples.cpp
     )
 
-add_library(opencv_haartraining_engine STATIC ${cvhaartraining_lib_src})
-
-# -----------------------------------------------------------
-#  haartraining
-# -----------------------------------------------------------
-
-add_executable(opencv_haartraining cvhaartraining.h haartraining.cpp)
-add_dependencies(opencv_haartraining ${haartraining_libs})
-set_target_properties(opencv_haartraining PROPERTIES
-                      DEBUG_POSTFIX "${OPENCV_DEBUG_POSTFIX}"
-                      OUTPUT_NAME "opencv_haartraining")
-
-# -----------------------------------------------------------
-#  createsamples
-# -----------------------------------------------------------
-
-add_executable(opencv_createsamples cvhaartraining.h createsamples.cpp)
-add_dependencies(opencv_createsamples ${haartraining_libs})
-set_target_properties(opencv_createsamples PROPERTIES
-                      DEBUG_POSTFIX "${OPENCV_DEBUG_POSTFIX}"
-                      OUTPUT_NAME "opencv_createsamples")
-
-# -----------------------------------------------------------
-#  performance
-# -----------------------------------------------------------
-add_executable(opencv_performance performance.cpp)
-add_dependencies(opencv_performance ${haartraining_libs})
-set_target_properties(opencv_performance PROPERTIES
-                      DEBUG_POSTFIX "${OPENCV_DEBUG_POSTFIX}"
-                      OUTPUT_NAME "opencv_performance")
-
-# -----------------------------------------------------------
-#  Install part
-# -----------------------------------------------------------
-
-install(TARGETS opencv_haartraining RUNTIME DESTINATION bin COMPONENT main)
-install(TARGETS opencv_createsamples RUNTIME DESTINATION bin COMPONENT main)
-install(TARGETS opencv_performance RUNTIME DESTINATION bin COMPONENT main)
+ADD_LIBRARY(cvhaartraining STATIC ${cvhaartraining_lib_src})
