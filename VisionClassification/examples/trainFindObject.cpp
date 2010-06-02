@@ -67,7 +67,16 @@ int main()
     {
         frame = cvQueryFrame(cap);
         ClassifierOutputData outputData= backgroundSubrationClassifier.classifyFrame(frame);
-
+        if(!backgroundSubrationClassifier.isTrained)
+        {
+            char txt[200];
+            sprintf(txt,"Training background subtraction, frame:%d",numFrames);
+            cvPutText(frame,txt,cvPoint(50,50),&font,cvScalar(255,255,0));
+            cvShowImage("Foreground", frame);
+            //sleep for 100 msec
+            cvWaitKey( 100 );
+            continue;
+        }
         if (outputData.hasVariable("Mask"))
         {
             guessMask = outputData.getImageData("Mask");
@@ -101,26 +110,41 @@ int main()
                         maxIndex = j;
                     }
                 }
-                TrainingSample * sample = new TrainingSample(frame,(*boxes)[maxIndex],GROUPID_POSSAMPLES);
-                trainingSet.addSample(sample);
                 // Draw the largest rect on the original frame
                 CvPoint p1 = cvPoint((*boxes)[maxIndex].x,(*boxes)[maxIndex].y);
                 CvPoint p2 = cvPoint((*boxes)[maxIndex].x + (*boxes)[maxIndex].width,(*boxes)[maxIndex].y + (*boxes)[maxIndex].height);
+                double xScale = frame->width/guessMask->width;
+                double yScale = frame->height/guessMask->height;
                 cvDrawRect(guessMask,p1,p2,cvScalar(255,255,0),1);
+                CvRect scaledRect;
+                scaledRect.x = (*boxes)[maxIndex].x * xScale;
+                scaledRect.y = (*boxes)[maxIndex].y * yScale;
+                scaledRect.width  = (*boxes)[maxIndex].width  * xScale;
+                scaledRect.height = (*boxes)[maxIndex].height * yScale;
+                TrainingSample * sample = new TrainingSample(frame,scaledRect,GROUPID_POSSAMPLES);
+                trainingSet.addSample(sample);
+                char filename[200];
+                sprintf(filename,"frame-%d.png",numFrames);
+                cvSetImageROI(frame,scaledRect);
+                cvSaveImage(filename,frame);
+                cvResetImageROI(frame);
             }
         }
             //Show the frame number
         char txt[200];
-        sprintf(txt,"Training, frame:%d",numFrames);
+        sprintf(txt,"Collecting Training samples, frame:%d",numFrames);
         cvPutText(frame,txt,cvPoint(50,50),&font,cvScalar(255,255,0));
         cvShowImage("Foreground", frame);
         cvShowImage("Classifier Mask", guessMask);
-        if( cvWaitKey( 10 ) >= 0 )
+        if( cvWaitKey( 100 ) >= 0 )
             break;
     }
 
-    ColorClassifier colorClassifier;
-    colorClassifier.startTraining(&trainingSet);
+    //ColorClassifier colorClassifier;
+    //colorClassifier.startTraining(&trainingSet);
+
+    SiftClassifier siftClassifier;
+    siftClassifier.startTraining(&trainingSet);
 
     IplImage * outputAccImage    = cvCreateImage(cvSize(frameX,frameY),IPL_DEPTH_8U,3);
     IplImage * contourMask       = cvCreateImage(cvSize(GUESSMASK_WIDTH, GUESSMASK_HEIGHT), IPL_DEPTH_8U, 1);
@@ -129,7 +153,8 @@ int main()
     for(;;)
     {
         frame = cvQueryFrame(cap);
-        ClassifierOutputData outputData= colorClassifier.classifyFrame(frame);
+        //ClassifierOutputData outputData= colorClassifier.classifyFrame(frame);
+        ClassifierOutputData outputData= siftClassifier.classifyFrame(frame);
         cvShowImage("Foreground", frame);
 
         if (outputData.hasVariable("Mask"))
