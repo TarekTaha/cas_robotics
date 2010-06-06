@@ -188,7 +188,6 @@ ClassifierOutputData BrightnessClassifier::classifyFrame(IplImage *frame)
 
     // update IplImage* demo image
     cvResize(image, applyImage);
-    cvCopyImage(applyImage, applyIplImage);
 
     cvReleaseMemStorage(&storage);
 
@@ -236,7 +235,6 @@ void BrightnessClassifier::updateHistogramImage()
             CV_RGB(255,0,0), 2, 8, 0);
 
     cvResize(histimg, filterImage);
-    cvCopyImage(filterImage,filterIplImage);
     cvReleaseImage(&histimg);
 }
 

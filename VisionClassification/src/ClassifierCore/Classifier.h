@@ -60,7 +60,7 @@ public:
     float threshold;
 
 protected:
-    IplImage *filterIplImage, *applyIplImage;
+    //IplImage *filterIplImage, *applyIplImage;
     IplImage *filterImage, *applyImage, *guessMask;
     CvMemStorage *contourStorage;
     vector<CvRect> boundingBoxes;

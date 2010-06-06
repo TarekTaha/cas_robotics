@@ -57,9 +57,8 @@ int main()
     cvNamedWindow("Classifier Mask", 1);
     cvNamedWindow("Foreground", 1);
 
-    BackgroundSubtraction backgroundSubrationClassifier;
-    TrainingSet trainingSet;
-
+/*
+     BackgroundSubtraction backgroundSubrationClassifier;
     int numFrames=0;
     const int  numClassificationFrames = 50;
     // Use the first "numClassificationFrames" frames to train the color classifier
@@ -128,6 +127,7 @@ int main()
                 cvSetImageROI(frame,scaledRect);
                 cvSaveImage(filename,frame);
                 cvResetImageROI(frame);
+                cvDrawRect(frame,cvPoint(scaledRect.x,scaledRect.y),cvPoint(scaledRect.x+scaledRect.width,scaledRect.y+scaledRect.height),cvScalar(255,255,0),1);
             }
         }
             //Show the frame number
@@ -139,22 +139,26 @@ int main()
         if( cvWaitKey( 100 ) >= 0 )
             break;
     }
+*/
+    TrainingSet trainingSet;
+    TrainingSample *sample1 = new TrainingSample((char*)"colormodel.png",GROUPID_POSSAMPLES);
+    trainingSet.addSample(sample1);
 
-    //ColorClassifier colorClassifier;
-    //colorClassifier.startTraining(&trainingSet);
+    ColorClassifier colorClassifier;
+    colorClassifier.startTraining(&trainingSet);
 
-    SiftClassifier siftClassifier;
-    siftClassifier.startTraining(&trainingSet);
+    //SiftClassifier siftClassifier;
+    //siftClassifier.startTraining(&trainingSet);
 
-    IplImage * outputAccImage    = cvCreateImage(cvSize(frameX,frameY),IPL_DEPTH_8U,3);
+    IplImage * outputAccImage    = cvCreateImage(cvSize(GUESSMASK_WIDTH,GUESSMASK_HEIGHT),IPL_DEPTH_8U,3);
     IplImage * contourMask       = cvCreateImage(cvSize(GUESSMASK_WIDTH, GUESSMASK_HEIGHT), IPL_DEPTH_8U, 1);
 
     int  nCurrentFilter = 1;
     for(;;)
     {
         frame = cvQueryFrame(cap);
-        //ClassifierOutputData outputData= colorClassifier.classifyFrame(frame);
-        ClassifierOutputData outputData= siftClassifier.classifyFrame(frame);
+        ClassifierOutputData outputData= colorClassifier.classifyFrame(frame);
+        //ClassifierOutputData outputData= siftClassifier.classifyFrame(frame);
         cvShowImage("Foreground", frame);
 
         if (outputData.hasVariable("Mask"))
@@ -174,7 +178,7 @@ int main()
                 cvSet(outputAccImage, colorSwatch[nCurrentFilter%COLOR_SWATCH_SIZE], guessMask);
             }
         }
-        cvShowImage("Classifier Mask", guessMask);
+        cvShowImage("Classifier Mask", colorClassifier.getApplyImage());
         if( cvWaitKey( 10 ) >= 0 )
             break;
     }
