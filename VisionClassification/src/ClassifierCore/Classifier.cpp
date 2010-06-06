@@ -32,8 +32,6 @@ Classifier::Classifier()
     filterImage = cvCreateImage(cvSize(FILTERIMAGE_WIDTH, FILTERIMAGE_HEIGHT), IPL_DEPTH_8U, 3);
     applyImage = cvCreateImage(cvSize(FILTERIMAGE_WIDTH, FILTERIMAGE_HEIGHT), IPL_DEPTH_8U, 3);
     guessMask = cvCreateImage(cvSize(GUESSMASK_WIDTH, GUESSMASK_HEIGHT), IPL_DEPTH_8U, 1);
-    filterIplImage  = cvCreateImage(cvSize(FILTERIMAGE_WIDTH, FILTERIMAGE_HEIGHT), IPL_DEPTH_8U, 3);
-    applyIplImage  = cvCreateImage(cvSize(FILTERIMAGE_WIDTH, FILTERIMAGE_HEIGHT), IPL_DEPTH_8U, 3);
 
     // set the standard "friendly name"
     strcpy(friendlyName,"Generic Classifier");
@@ -67,8 +65,6 @@ Classifier::Classifier(const char* pathname)
     filterImage = cvCreateImage(cvSize(FILTERIMAGE_WIDTH, FILTERIMAGE_HEIGHT), IPL_DEPTH_8U, 3);
     applyImage = cvCreateImage(cvSize(FILTERIMAGE_WIDTH, FILTERIMAGE_HEIGHT), IPL_DEPTH_8U, 3);
     guessMask = cvCreateImage(cvSize(GUESSMASK_WIDTH, GUESSMASK_HEIGHT), IPL_DEPTH_8U, 1);
-    filterIplImage  = cvCreateImage(cvSize(FILTERIMAGE_WIDTH, FILTERIMAGE_HEIGHT), IPL_DEPTH_8U, 3);
-    applyIplImage  = cvCreateImage(cvSize(FILTERIMAGE_WIDTH, FILTERIMAGE_HEIGHT), IPL_DEPTH_8U, 3);
 
     // save the directory name for later
     strcpy(directoryName, pathname);
@@ -94,7 +90,6 @@ Classifier::Classifier(const char* pathname)
     IplImage *filterImageCopy = cvLoadImage(filename);
     cvCopy(filterImageCopy, filterImage);
     cvReleaseImage(&filterImageCopy);
-    cvCopyImage(filterImage, filterIplImage);
 
     // Initialize contour storage
     contourStorage = cvCreateMemStorage(0);
@@ -113,8 +108,6 @@ Classifier::~Classifier()
 {
     cvReleaseImage(&filterImage);
     cvReleaseImage(&applyImage);
-    cvReleaseImage(&filterIplImage);
-    cvReleaseImage(&applyIplImage);
     cvReleaseImage(&guessMask);
     cvReleaseMemStorage(&contourStorage);
 }
@@ -177,12 +170,12 @@ CvSeq* Classifier::getMaskContours()
 
 IplImage* Classifier::getFilterImage()
 {
-    return filterIplImage;
+    return filterImage;
 }
 
 IplImage* Classifier::getApplyImage()
 {
-    return applyIplImage;
+    return applyImage;
 }
 
 const char * Classifier::getName()
