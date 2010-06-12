@@ -27,7 +27,8 @@ message( STATUS "Setting project version to ${VC_PROJECT_VERSION}" )
 #
 # Set CMake policies
 # For help on policy CMPxxxx: $ cmake --help-policy CMPxxxx
-# 
+#
+
 if( COMMAND cmake_policy )
     if( POLICY CMP0011 )
         cmake_policy(SET CMP0011 NEW )

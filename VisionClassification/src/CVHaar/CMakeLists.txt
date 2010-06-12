@@ -51,3 +51,12 @@ SET(cvhaartraining_lib_src
     )
 
 ADD_LIBRARY(cvhaartraining STATIC ${cvhaartraining_lib_src})
+
+INSTALL(FILES
+        _cvcommon.h
+        cvclassifier.h
+        _cvhaartraining.h
+        cvhaartraining.h
+        DESTINATION
+        /usr/local/include/visionclassification
+        )
