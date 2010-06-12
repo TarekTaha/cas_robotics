@@ -113,3 +113,30 @@ TARGET_LINK_LIBRARIES( visualClassification
     tesseract_full
     cvhaartraining
 )
+INSTALL(TARGETS visualClassification
+  LIBRARY DESTINATION /usr/local/lib
+)
+INSTALL(FILES
+        BackgroundClassification/BackgroundSubtraction.h
+        BrightnessClassification/BrightnessClassifier.h
+        CamshiftClassification/CamshiftClassifier.h
+        ClassifierCore/Classifier.h
+        ClassifierCore/ClassifierOutputData.h
+        ClassifierCore/ClassifierTester.h
+        ColorClassification/ColorClassifier.h
+        Gesture/FlowTracker.h
+        Gesture/OneDollar.h
+        Gesture/SimpleFlowTracker.h
+        GestureClassification/GestureClassifier.h
+        MotionClassification/MotionClassifier.h
+        ShapeClassification/ShapeClassifier.h
+        SiftClassification/SiftClassifier.h
+        SurfClassification/SurfClassifier.h
+        Training/TrainingSample.h
+        Training/TrainingSet.h
+        common/Graphics.h
+        common/constants.h
+        common/precomp.h
+        DESTINATION
+        /usr/local/include/visionclassification
+        )

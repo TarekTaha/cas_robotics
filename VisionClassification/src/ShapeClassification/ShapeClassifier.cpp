@@ -261,8 +261,7 @@ void ShapeClassifier::save()
 
     const char* contour_attrs[] =
     {
-        "recursive", "1",
-        0
+        "recursive", "1", 0
     };
     cvSave(filename, templateContours, 0, 0, cvAttrList(contour_attrs,0));
 }

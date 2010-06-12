@@ -6,7 +6,7 @@ MACRO(new_executable exec)
                               ${Boost_SYSTEM_LIBRARY}
                               visualClassification
                              )
-        INSTALL(PROGRAMS ${exec} DESTINATION bin)
+#        INSTALL(PROGRAMS ${exec} DESTINATION bin)
 ENDMACRO(new_executable exec)
 
 IF(CMAKE_COMPILER_IS_GNUCC)

@@ -159,6 +159,7 @@ int main()
 
     ShapeClassifier shapeClassifier;
     shapeClassifier.startTraining(&shapeTrainingSet);
+    //shapeClassifier.save();
     //siftClassifier.startTraining(&shapeTrainingSet);
 
     IplImage * outputAccImage    = cvCreateImage(cvSize(GUESSMASK_WIDTH,GUESSMASK_HEIGHT),IPL_DEPTH_8U,3);

@@ -59,9 +59,20 @@ INCLUDE_DIRECTORIES(
     .
 )
 
-ADD_LIBRARY( sift SHARED ${SIFT_SRCS} ${SIFT_HDRS} )
+ADD_LIBRARY( sift STATIC ${SIFT_SRCS} ${SIFT_HDRS} )
 
 TARGET_LINK_LIBRARIES( sift
     ${OPENCV_LIBRARIES}
     ${GTK_LIBRARIES}
 )
+
+INSTALL(FILES
+        imgfeatures.h
+        kdtree.h
+        minpq.h
+        sift.h
+        utils.h
+        xform.h
+        DESTINATION
+        /usr/local/include/visionclassification
+        )
