@@ -30,6 +30,8 @@
 #include "TrainingSet.h"
 #include "Graphics.h"
 #include "ColorClassifier.h"
+#include "ShapeClassifier.h"
+
 int main()
 {
     IplImage* frame = NULL,*guessMask=NULL;
@@ -39,8 +41,8 @@ int main()
     cap   = cvCreateCameraCapture(0);
     if(cap)
     {
-        cvSetCaptureProperty(cap,CV_CAP_PROP_FRAME_WIDTH,640);
-        cvSetCaptureProperty(cap,CV_CAP_PROP_FRAME_HEIGHT,480);
+        cvSetCaptureProperty(cap,CV_CAP_PROP_FRAME_WIDTH,frameX);
+        cvSetCaptureProperty(cap,CV_CAP_PROP_FRAME_HEIGHT,frameY);
     }
     else
     {
@@ -55,6 +57,7 @@ int main()
     }
     cvInitFont(&font,CV_FONT_HERSHEY_COMPLEX,0.7,0.7,0,1);
     cvNamedWindow("Classifier Mask", 1);
+    cvNamedWindow("Classifier Out", 1);
     cvNamedWindow("Foreground", 1);
 
 /*
@@ -140,15 +143,23 @@ int main()
             break;
     }
 */
-    TrainingSet trainingSet;
-    TrainingSample *sample1 = new TrainingSample((char*)"colormodel.png",GROUPID_POSSAMPLES);
-    trainingSet.addSample(sample1);
+    TrainingSet trainingSet,shapeTrainingSet;
+    //TrainingSample *sample1 = new TrainingSample((char*)"colormodel.png",GROUPID_POSSAMPLES);
+    //trainingSet.addSample(sample1);
 
-    ColorClassifier colorClassifier;
-    colorClassifier.startTraining(&trainingSet);
+    //ColorClassifier colorClassifier;
+    //colorClassifier.startTraining(&trainingSet);
 
     //SiftClassifier siftClassifier;
     //siftClassifier.startTraining(&trainingSet);
+    TrainingSample *sample2 = new TrainingSample((char*)"can.png",GROUPID_POSSAMPLES);
+    TrainingSample *sample3 = new TrainingSample((char*)"can2.png",GROUPID_POSSAMPLES);
+    shapeTrainingSet.addSample(sample2);
+    shapeTrainingSet.addSample(sample3);
+
+    ShapeClassifier shapeClassifier;
+    shapeClassifier.startTraining(&shapeTrainingSet);
+    //siftClassifier.startTraining(&shapeTrainingSet);
 
     IplImage * outputAccImage    = cvCreateImage(cvSize(GUESSMASK_WIDTH,GUESSMASK_HEIGHT),IPL_DEPTH_8U,3);
     IplImage * contourMask       = cvCreateImage(cvSize(GUESSMASK_WIDTH, GUESSMASK_HEIGHT), IPL_DEPTH_8U, 1);
@@ -157,7 +168,8 @@ int main()
     for(;;)
     {
         frame = cvQueryFrame(cap);
-        ClassifierOutputData outputData= colorClassifier.classifyFrame(frame);
+        ClassifierOutputData outputData = shapeClassifier.classifyFrame(frame);
+        //ClassifierOutputData outputData= colorClassifier.classifyFrame(frame);
         //ClassifierOutputData outputData= siftClassifier.classifyFrame(frame);
         cvShowImage("Foreground", frame);
 
@@ -178,7 +190,9 @@ int main()
                 cvSet(outputAccImage, colorSwatch[nCurrentFilter%COLOR_SWATCH_SIZE], guessMask);
             }
         }
-        cvShowImage("Classifier Mask", colorClassifier.getApplyImage());
+        //cvShowImage("Classifier Mask", colorClassifier.getApplyImage());
+        cvShowImage("Classifier Out", shapeClassifier.getApplyImage());
+        cvShowImage("Classifier Mask",guessMask);
         if( cvWaitKey( 10 ) >= 0 )
             break;
     }

@@ -102,11 +102,13 @@ void ShapeClassifier::startTraining(TrainingSet *sampleSet)
             CvSeq *sampleContours = NULL;
 
             cvFindContours(grayscale, storage, &sampleContours, sizeof(CvContour), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_TC89_KCOS);
-            if (sampleContours != NULL) {
+            if (sampleContours != NULL)
+            {
                 sampleContours = cvApproxPoly(sampleContours, sizeof(CvContour), storage, CV_POLY_APPROX_DP, 0.2, 1 );
                 for (CvSeq *contour = sampleContours; contour != NULL; contour = contour->h_next)
                 {
-                    if ((contour->total > SHAPE_MIN_CONTOUR_POINTS) && (contour->flags & CV_SEQ_FLAG_CLOSED)){
+                    if ((contour->total > SHAPE_MIN_CONTOUR_POINTS) && (contour->flags & CV_SEQ_FLAG_CLOSED))
+                    {
                         if (!templateContours)
                         {
                             templateContours = cvCloneSeq(contour, templateStorage);
@@ -173,13 +175,12 @@ ClassifierOutputData ShapeClassifier::classifyFrame(IplImage *frame)
             int contourNum = 0;
             for (CvSeq *matchContour = templateContours; matchContour != NULL; matchContour = matchContour->h_next)
             {
-                //                double match_error = cvMatchShapes(contour, matchContour, CV_CONTOURS_MATCH_I1, 0);
+                //double match_error = cvMatchShapes(contour, matchContour, CV_CONTOURS_MATCH_I1, 0);
                 double match_error = pghMatchShapes(contour, matchContour);
                 if (match_error < (0.75-threshold*.75))
                 {
                     cvDrawContours(copy, contour, colorSwatch[contourNum], CV_RGB(0,0,0), 0, 3, 8, cvPoint(0,0));
                     CvRect rect = cvBoundingRect(contour, 1);
-
                     // draw rectangle in mask image
                     cvRectangle(newMask, cvPoint(rect.x, rect.y), cvPoint(rect.x+rect.width, rect.y+rect.height), cvScalar(0xFF), CV_FILLED, 8);
                 }
