@@ -23,7 +23,9 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define EYEPATCH_VERSION L"0.75"
+#define VERSION_MAJOR "1"
+#define VERSION_MINOR "0"
+#define VERSION_PATCH "1"
 
 // Listview Icon size
 #define LISTVIEW_SAMPLE_X 64
@@ -137,6 +139,7 @@
 #define FILE_CASCADE_NAME       "/classifier.xml"
 #define FILE_DEMOIMAGE_NAME     "/demo-image.jpg"
 #define FILE_SIFTIMAGE_NAME     "/sift-image.jpg"
+#define FILE_SURFIMAGE_NAME     "/surf-image.jpg"
 #define FILE_CLASSIFIER_PREFIX  "epc"
 #define FILE_POSIMAGE_PREFIX    "/pos"
 #define FILE_NEGIMAGE_PREFIX    "/neg"
@@ -154,6 +157,7 @@
 #define FILE_MOTION_SUFFIX      "_MOT"
 #define FILE_SHAPE_SUFFIX       "_SHP"
 #define FILE_SIFT_SUFFIX        "_SIF"
+#define FILE_SURF_SUFFIX        "_SUR"
 
 // filter IDs (also used as combo box indices)
 #define COLOR_FILTER		0
@@ -163,16 +167,17 @@
 #define ADABOOST_FILTER		4
 #define MOTION_FILTER		5
 #define GESTURE_FILTER		6
+#define SURF_FILTER             7
 
-#define APP_CLASS "Eyepatch"
-#define FILTER_CREATE_CLASS "VideoMarkup"
-#define FILTER_COMPOSE_CLASS "FilterComposer"
+#define APP_CLASS               "VisionClassificationLibrary"
+#define FILTER_CREATE_CLASS     "VideoMarkup"
+#define FILTER_COMPOSE_CLASS    "FilterComposer"
 
 // Classifier type for standard built-in classifiers
 #define FILTER_BUILTIN 10001
 
 // Number of classifier types in the system
-#define NUM_FILTERS 7
+#define NUM_FILTERS 8
 
 // listview group IDs
 typedef enum {

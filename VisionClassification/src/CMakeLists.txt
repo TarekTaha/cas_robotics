@@ -18,6 +18,7 @@ SET( VC_HDRS
   MotionClassification/MotionClassifier.h
   ShapeClassification/ShapeClassifier.h
   SiftClassification/SiftClassifier.h
+  SurfClassification/SurfClassifier.h
   VideoHelpers/VideoLoader.h
   common/common.h
   common/Graphics.h
@@ -44,6 +45,7 @@ SET( VC_SRCS
   MotionClassification/MotionClassifier.cpp
   ShapeClassification/ShapeClassifier.cpp
   SiftClassification/SiftClassifier.cpp
+  SurfClassification/SurfClassifier.cpp
   VideoHelpers/VideoLoader.cpp
   common/Graphics.cpp
   common/precomp.cpp
