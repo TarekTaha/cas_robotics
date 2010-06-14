@@ -103,9 +103,9 @@ INCLUDE_DIRECTORIES(
 
 
 
-ADD_LIBRARY( visualClassification SHARED ${VC_SRCS})
+ADD_LIBRARY( visionClassification SHARED ${VC_SRCS})
 
-TARGET_LINK_LIBRARIES( visualClassification  
+TARGET_LINK_LIBRARIES( visionClassification
     ${OPENCV_LIBRARIES}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
@@ -113,7 +113,7 @@ TARGET_LINK_LIBRARIES( visualClassification
     tesseract_full
     cvhaartraining
 )
-INSTALL(TARGETS visualClassification
+INSTALL(TARGETS visionClassification
   LIBRARY DESTINATION /usr/local/lib
 )
 INSTALL(FILES

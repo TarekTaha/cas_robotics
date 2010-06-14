@@ -71,4 +71,11 @@ MotionTrack ReadTrackFromFile (const char* filename);
 extern CvScalar colorSwatch[];
 extern char *filterNames[];
 
+enum FilterCombineMethods
+{
+    COMBINE_AND,
+    COMBINE_OR,
+    COMBINE_LIST,
+    COMBINE_CASCADE
+};
 #endif
