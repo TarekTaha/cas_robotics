@@ -4,7 +4,7 @@ MACRO(new_executable exec)
                               ${OPENCV_LIBRARIES}
                               ${Boost_FILESYSTEM_LIBRARY}
                               ${Boost_SYSTEM_LIBRARY}
-                              visualClassification
+                              visionClassification
                              )
 #        INSTALL(PROGRAMS ${exec} DESTINATION bin)
 ENDMACRO(new_executable exec)
