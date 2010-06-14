@@ -57,7 +57,6 @@ bool TesseractClassifier::containsSufficientSamples(TrainingSet *sampleSet)
 
 void TesseractClassifier::startTraining(TrainingSet *sampleSet)
 {
-
     // Standard filters don't use training (this should never be called)
     assert(false);
 }

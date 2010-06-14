@@ -64,7 +64,6 @@ bool BackgroundSubtraction::containsSufficientSamples(TrainingSet *sampleSet)
 
 void BackgroundSubtraction::startTraining(TrainingSet *sampleSet)
 {
-
     // Standard filters don't use training (this should never be called)
     assert(false);
 }

@@ -45,8 +45,7 @@ SurfClassifier::SurfClassifier(const char * pathname) :
     sampleFeatures = NULL;
 
     char filename[MAX_PATH];
-    strcpy(filename, pathname);
-    strcat(filename, FILE_DATA_NAME);
+    sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
 
     // load the features from the data file
     numSampleFeatures = import_features(filename, FEATURE_LOWE, &sampleFeatures);
@@ -79,6 +78,9 @@ bool SurfClassifier::containsSufficientSamples(TrainingSet *sampleSet)
 
 void SurfClassifier::startTraining(TrainingSet *sampleSet)
 {
+    // just to filter empty sets (and YES it happens)
+    if(sampleSet->posSampleCount<1)
+        return;
     // Make a copy of the set used for training (we'll want to save it later)
     sampleSet->copyTo(&trainSet);
 

@@ -48,6 +48,8 @@ ShapeClassifier::ShapeClassifier() :
     classifierType = SHAPE_FILTER;            
     // append identifier to directory name
     strcat(directoryName, FILE_SHAPE_SUFFIX);
+    // default shape classifier data name, override the classifier's name
+    sprintf(classifierDataFileName,"%s",FILE_CONTOUR_NAME);
 }
 
 ShapeClassifier::ShapeClassifier(const char *pathname) :
@@ -56,9 +58,7 @@ ShapeClassifier::ShapeClassifier(const char *pathname) :
     templateStorage = cvCreateMemStorage(0);
 
     char filename[MAX_PATH];
-    strcpy(filename, pathname);
-    strcat(filename, FILE_CONTOUR_NAME);
-
+    sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
     // load the contours from the data file
     templateContours = (CvSeq*)cvLoad(filename, templateStorage, 0, 0);
 
@@ -80,6 +80,9 @@ bool ShapeClassifier::containsSufficientSamples(TrainingSet *sampleSet)
 
 void ShapeClassifier::startTraining(TrainingSet *sampleSet)
 {
+    // just to filter empty sets (and YES it happens)
+    if(sampleSet->posSampleCount<1)
+        return;
     // Make a copy of the set used for training (we'll want to save it later)
     sampleSet->copyTo(&trainSet);
 
@@ -125,7 +128,8 @@ void ShapeClassifier::startTraining(TrainingSet *sampleSet)
             cvReleaseMemStorage(&storage);
             cvReleaseImage(&grayscale);
 
-        } else if (sample->iGroupId == GROUPID_NEGSAMPLES)
+        }
+        else if (sample->iGroupId == GROUPID_NEGSAMPLES)
         {
             // negative sample
             // do nothing for now
@@ -256,8 +260,7 @@ void ShapeClassifier::save()
     char filename[MAX_PATH];
 
     // save the contour data
-    strcpy(filename,directoryName);
-    strcat(filename, FILE_CONTOUR_NAME);
+    sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
 
     const char* contour_attrs[] =
     {

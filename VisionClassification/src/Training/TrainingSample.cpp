@@ -116,7 +116,7 @@ TrainingSample::TrainingSample(IplImage *frame, MotionTrack mt, int groupId):
 }
 
 // Constructor for loading sample from image file
-TrainingSample::TrainingSample(char *filename, int groupId):
+TrainingSample::TrainingSample(const char *filename, int groupId):
         graphics(NULL)
 {
     // this constructor should only be called for positive and negative sample types

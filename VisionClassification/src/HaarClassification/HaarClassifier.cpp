@@ -63,6 +63,8 @@ HaarClassifier::HaarClassifier() :
     classifierType = ADABOOST_FILTER;        
     // append identifier to directory name
     strcat(directoryName, FILE_HAAR_SUFFIX);
+    // default haar classifier data name, override the classifier's name
+    sprintf(classifierDataFileName,"%s",FILE_CASCADE_NAME);
 }
 
 HaarClassifier::HaarClassifier(const char * pathname) :
@@ -76,8 +78,9 @@ HaarClassifier::HaarClassifier(const char * pathname) :
     nStagesCompleted = 0;
 
     char filename[MAX_PATH];
-    strcpy(filename, pathname);
-    strcat(filename, FILE_CASCADE_NAME);
+    sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
+    //strcpy(filename, pathname);
+    //strcat(filename, FILE_CASCADE_NAME);
 
     // load the cascade from the data file
     cascade = cvLoadHaarClassifierCascade(filename, cvSize(HAAR_SAMPLE_X, HAAR_SAMPLE_Y));
@@ -257,7 +260,6 @@ void HaarClassifier::save()
     char filename[MAX_PATH];
 
     // save the cascade data
-    strcpy(filename,directoryName);
-    strcat(filename, FILE_CASCADE_NAME);
+    sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
     cvSave(filename, cascade, 0, 0, cvAttrList(0,0));
 }

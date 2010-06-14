@@ -44,8 +44,8 @@ GestureClassifier::GestureClassifier(const char * pathname) :
         graphics(NULL)
 {
     char filename[MAX_PATH];
-    strcpy(filename, pathname);
-    strcat(filename, FILE_DATA_NAME);
+
+    sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
 
     // load the templates from the data file
     FILE *datafile = fopen( (filename), "rb");
@@ -78,6 +78,10 @@ GestureClassifier::~GestureClassifier()
 
 void GestureClassifier::startTraining(TrainingSet *sampleSet)
 {
+    // just to filter empty sets (and YES it happens)
+    if(sampleSet->posSampleCount<1)
+        return;
+
     // Make a copy of the set used for training (we'll want to save it later)
     sampleSet->copyTo(&trainSet);
 
@@ -215,8 +219,7 @@ void GestureClassifier::save()
     char filename[MAX_PATH];
 
     // save the template data
-    strcpy(filename,directoryName);
-    strcat(filename, FILE_DATA_NAME);
+    sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
     FILE *datafile = fopen( (filename), "wb");
 
     // write out the number of templates

@@ -28,6 +28,7 @@
 #include "TrainingSet.h"
 #include "constants.h"
 #include "precomp.h"
+#include <iostream>
 
 class Classifier
 {
@@ -49,7 +50,12 @@ public:
     IplImage* getFilterImage();
     IplImage* getApplyImage();
     const char* getName();
+    // sets the filter name
     void setName(const char* newName);
+    // sets the classifier data file name
+    const char * getClassifierDataFileName();
+    void setClassifierDataFileName(const char* datafileName);
+    void setDataRootDirName(const char* newName);
     void activateVariable(const char* varName, bool state);
     void updateStandardOutputData();
 
@@ -67,6 +73,7 @@ protected:
     TrainingSet trainSet;	// samples last used to train classifier
     char friendlyName[MAX_PATH];
     char directoryName[MAX_PATH];
+    char classifierDataFileName[MAX_PATH];
 };
 
 #endif

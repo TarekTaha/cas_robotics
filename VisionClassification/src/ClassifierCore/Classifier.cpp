@@ -30,8 +30,8 @@ Classifier::Classifier()
     classifierType = 0;
     threshold = 0.5;
     filterImage = cvCreateImage(cvSize(FILTERIMAGE_WIDTH, FILTERIMAGE_HEIGHT), IPL_DEPTH_8U, 3);
-    applyImage = cvCreateImage(cvSize(FILTERIMAGE_WIDTH, FILTERIMAGE_HEIGHT), IPL_DEPTH_8U, 3);
-    guessMask = cvCreateImage(cvSize(GUESSMASK_WIDTH, GUESSMASK_HEIGHT), IPL_DEPTH_8U, 1);
+    applyImage  = cvCreateImage(cvSize(FILTERIMAGE_WIDTH, FILTERIMAGE_HEIGHT), IPL_DEPTH_8U, 3);
+    guessMask   = cvCreateImage(cvSize(GUESSMASK_WIDTH, GUESSMASK_HEIGHT), IPL_DEPTH_8U, 1);
 
     // set the standard "friendly name"
     strcpy(friendlyName,"Generic Classifier");
@@ -41,6 +41,8 @@ Classifier::Classifier()
     int classifiernum = (int)time(0);
     string rootPath=full_path.string();
     sprintf(directoryName, "%s/%s/%s%d", rootPath.c_str(), APP_CLASS, FILE_CLASSIFIER_PREFIX, classifiernum);
+
+    sprintf(classifierDataFileName,"%s",FILE_DATA_NAME);
 
     // Initialize contour storage
     contourStorage = cvCreateMemStorage(0);
@@ -63,29 +65,39 @@ Classifier::Classifier(const char* pathname)
     threshold = 0.5;
 
     filterImage = cvCreateImage(cvSize(FILTERIMAGE_WIDTH, FILTERIMAGE_HEIGHT), IPL_DEPTH_8U, 3);
-    applyImage = cvCreateImage(cvSize(FILTERIMAGE_WIDTH, FILTERIMAGE_HEIGHT), IPL_DEPTH_8U, 3);
-    guessMask = cvCreateImage(cvSize(GUESSMASK_WIDTH, GUESSMASK_HEIGHT), IPL_DEPTH_8U, 1);
+    applyImage  = cvCreateImage(cvSize(FILTERIMAGE_WIDTH, FILTERIMAGE_HEIGHT), IPL_DEPTH_8U, 3);
+    guessMask   = cvCreateImage(cvSize(GUESSMASK_WIDTH, GUESSMASK_HEIGHT), IPL_DEPTH_8U, 1);
 
-    // save the directory name for later
-    strcpy(directoryName, pathname);
+    boost::filesystem::path full_path(pathname);
+    if(boost::filesystem::is_directory(full_path))
+    {
+        strcpy(directoryName,(full_path.string()).c_str());
+        sprintf(classifierDataFileName,"%s/%s",(full_path.string()).c_str(),FILE_DATA_NAME);
+    }
+    else
+    {
+        strcpy(directoryName,(full_path.parent_path().string()).c_str());
+        strcpy(classifierDataFileName,(full_path.filename()).c_str());
+    }
+    std::cout<<"\nDirname:"<<directoryName<<" classifier datafile name:"<<classifierDataFileName;fflush(stdout);
 
     // load the "friendly name"
     char filename[MAX_PATH];
-    strcpy(filename, pathname);
+    strcpy(filename, directoryName);
     strcat(filename, FILE_FRIENDLY_NAME);
     FILE *namefile = fopen(filename, "r");
     fgets(friendlyName, MAX_PATH, namefile);
     fclose(namefile);
 
     // load the threshold
-    strcpy(filename, pathname);
+    strcpy(filename, directoryName);
     strcat(filename, FILE_THRESHOLD_NAME);
     FILE *threshfile = fopen(filename, "r");
     fread(&threshold, sizeof(float), 1, threshfile);
     fclose(threshfile);
 
     // load the filter sample image
-    strcpy(filename, pathname);
+    strcpy(filename, directoryName);
     strcat(filename, FILE_DEMOIMAGE_NAME);
     IplImage *filterImageCopy = cvLoadImage(filename);
     cvCopy(filterImageCopy, filterImage);
@@ -142,6 +154,16 @@ void Classifier::save()
     isOnDisk = true;
 }
 
+void Classifier::setClassifierDataFileName(const char* datafileName)
+{
+    strcpy(classifierDataFileName, datafileName);
+}
+
+void Classifier::setDataRootDirName(const char* pathname)
+{
+    strcpy(directoryName, pathname);
+}
+
 void Classifier::configure()
 {
 }
@@ -176,6 +198,11 @@ IplImage* Classifier::getFilterImage()
 IplImage* Classifier::getApplyImage()
 {
     return applyImage;
+}
+
+const char * Classifier::getClassifierDataFileName()
+{
+    return classifierDataFileName;
 }
 
 const char * Classifier::getName()

@@ -140,7 +140,7 @@
 #define FILE_DEMOIMAGE_NAME     "/demo-image.jpg"
 #define FILE_SIFTIMAGE_NAME     "/sift-image.jpg"
 #define FILE_SURFIMAGE_NAME     "/surf-image.jpg"
-#define FILE_CLASSIFIER_PREFIX  "epc"
+#define FILE_CLASSIFIER_PREFIX  "/epc"
 #define FILE_POSIMAGE_PREFIX    "/pos"
 #define FILE_NEGIMAGE_PREFIX    "/neg"
 #define FILE_MOTIMAGE_PREFIX    "/mot"

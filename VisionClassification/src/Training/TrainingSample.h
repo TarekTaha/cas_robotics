@@ -39,7 +39,7 @@ public:
     TrainingSample(IplImage* srcImage,CvRect bounds, int groupId);
     TrainingSample(IplImage* srcImage, IplImage* motionHist, CvRect bounds, int groupId);
     TrainingSample(IplImage *frame, MotionTrack mt, int groupId);
-    TrainingSample(char *filename, int groupId);
+    TrainingSample(const char *filename, int groupId);
     TrainingSample(TrainingSample *toClone);
     ~TrainingSample(void);
     void draw(Graphics*);
