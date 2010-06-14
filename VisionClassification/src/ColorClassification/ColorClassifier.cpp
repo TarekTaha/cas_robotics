@@ -51,8 +51,7 @@ ColorClassifier::ColorClassifier(const char * pathname) :
     hist = cvCreateHist( 1, &hdims, CV_HIST_ARRAY, &hranges, 1 );
 
     char filename[MAX_PATH];
-    strcpy(filename, pathname);
-    strcat(filename, FILE_DATA_NAME);
+    sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
 
     // load the data from the histogram file
     FILE *datafile = fopen(filename, "rb");
@@ -81,6 +80,9 @@ bool ColorClassifier::containsSufficientSamples(TrainingSet *sampleSet)
 
 void ColorClassifier::startTraining(TrainingSet *sampleSet)
 {
+    // just to filter empty sets (and YES it happens)
+    if(sampleSet->posSampleCount<1)
+        return;
     // Make a copy of the set used for training (we'll want to save it later)
     sampleSet->copyTo(&trainSet);
 
@@ -91,8 +93,9 @@ void ColorClassifier::startTraining(TrainingSet *sampleSet)
     for (map<uint, TrainingSample*>::iterator i = sampleSet->sampleMap.begin(); i != sampleSet->sampleMap.end(); i++)
     {
         TrainingSample *sample = (*i).second;
+        // positive sample
         if (sample->iGroupId == GROUPID_POSSAMPLES)
-        { // positive sample
+        {
 
             // allocate image buffers
             IplImage *hsv = cvCreateImage( cvGetSize(sample->fullImageCopy), 8, 3 );
@@ -115,8 +118,9 @@ void ColorClassifier::startTraining(TrainingSet *sampleSet)
             cvReleaseImage(&mask);
 
         }
+        // negative sample
         else if (sample->iGroupId == GROUPID_NEGSAMPLES)
-        { // negative sample
+        {
             // TODO: we could potentially subtract this from histogram
         }
     }
@@ -234,14 +238,14 @@ void ColorClassifier::updateHistogramImage()
 
 void ColorClassifier::save()
 {
-    if (!isTrained) return;
+    if (!isTrained) 
+        return;
 
     Classifier::save();
     char filename[MAX_PATH];
 
-    // save the histogram data
-    strcpy(filename,directoryName);
-    strcat(filename, FILE_DATA_NAME);
+    sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
+
     FILE *datafile = fopen(filename, "wb");
     for(int i = 0; i < hdims; i++)
     {

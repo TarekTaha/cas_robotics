@@ -49,6 +49,9 @@ CamshiftClassifier::~CamshiftClassifier()
 
 void CamshiftClassifier::startTraining(TrainingSet *sampleSet)
 {
+    // just to filter empty sets (and YES it happens)
+    if(sampleSet->posSampleCount<1)
+        return;
     // clear out the histogram
     cvClearHist(hist);
 

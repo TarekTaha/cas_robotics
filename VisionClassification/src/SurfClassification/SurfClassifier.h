@@ -20,8 +20,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02110-1301, USA.          *
  ***************************************************************************/
-#ifndef SIFTCLASSIFIER_H
-#define SIFTCLASSIFIER_H
+#ifndef SURFCLASSIFIER_H
+#define SURFCLASSIFIER_H
 
 #include "constants.h"
 #include "TrainingSample.h"

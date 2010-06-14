@@ -51,8 +51,8 @@ BrightnessClassifier::BrightnessClassifier(const char* pathname) :
     hist = cvCreateHist( 1, &hdims, CV_HIST_ARRAY, &hranges, 1 );
 
     char filename[MAX_PATH];
-    strcpy(filename, pathname);
-    strcat(filename, FILE_DATA_NAME);
+
+    sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
 
     // load the data from the histogram file (and compute average level)
     FILE *datafile = fopen(filename, "rb");
@@ -86,6 +86,9 @@ bool BrightnessClassifier::containsSufficientSamples(TrainingSet *sampleSet)
 
 void BrightnessClassifier::startTraining(TrainingSet *sampleSet)
 {
+    // just to filter empty sets (and YES it happens)
+    if(sampleSet->posSampleCount<1)
+        return;
     // Make a copy of the set used for training (we'll want to save it later)
     sampleSet->copyTo(&trainSet);
 
@@ -247,8 +250,7 @@ void BrightnessClassifier::save()
     char filename[MAX_PATH];
 
     // save the histogram data
-    strcat(filename,directoryName);
-    strcat(filename, FILE_DATA_NAME);
+    sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
     FILE *datafile = fopen(filename, "wb");
     for(int i = 0; i < hdims; i++)
     {
