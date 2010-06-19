@@ -37,7 +37,9 @@ public:
     void load(string fileName);
     void startTraining(TrainingSet*);
     void classifyFrame(IplImage*, list<CvRect>*);
-
+    bool containsSufficientSamples(TrainingSet*);
+    ClassifierOutputData classifyFrame(IplImage*);
+    void resetRunningState();
 private:
     IplImage *image, *hsv, *hue, *mask, *backproject, *histimg;
     CvHistogram *hist;

@@ -27,11 +27,29 @@
 #include "TesseractClassifier.h"
 #include "TrainingSet.h"
 #include "CamshiftClassifier.h"
+#include "GestureClassifier.h"
+#include "ColorClassifier.h"
+#include "HaarClassifier.h"
+#include "SiftClassifier.h"
+#include "SurfClassifier.h"
+#include "ShapeClassifier.h"
+#include "BackgroundSubtraction.h"
+#include "BrightnessClassifier.h"
+#include "MotionClassifier.h"
 
 int main()
 {
     TesseractClassifier tesseractClassifier;
     CamshiftClassifier camShiftClassifier;
+    GestureClassifier gestureClassifier;
+    ColorClassifier colorClassifier;
+    HaarClassifier haarClassifier;
+    SurfClassifier surfClassifier;
+    ShapeClassifier shapeClassifier;
+    BackgroundSubtraction backgroundSubtraction;
+    BrightnessClassifier brightnessClassifier;
+    MotionClassifier motionClassifier;
+
     cvNamedWindow("Detected Text", 1);
     cvNamedWindow("Text Image", 1);
     CvFont font;
