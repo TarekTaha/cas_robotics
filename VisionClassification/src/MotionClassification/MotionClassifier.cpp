@@ -37,10 +37,21 @@ MotionClassifier::MotionClassifier() :
 MotionClassifier::MotionClassifier(const char * pathname) :
     Classifier(pathname)
 {
+    // set the type
+    classifierType = MOTION_FILTER;
     // load the motion directions from the data file
     char filename[MAX_PATH];
     sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
-    FILE *datafile = fopen(filename, "rb");
+    load(filename);
+}
+
+MotionClassifier::~MotionClassifier()
+{
+}
+
+void MotionClassifier::load(const char * fileName)
+{
+    FILE *datafile = fopen(fileName, "rb");
     int numAngles;
     fread(&numAngles, sizeof(int), 1, datafile);
     motionAngles.clear();
@@ -51,14 +62,15 @@ MotionClassifier::MotionClassifier(const char * pathname) :
         motionAngles.push_back(angle);
     }
     fclose(datafile);
-    // set the type
-    classifierType = MOTION_FILTER;
 }
 
-MotionClassifier::~MotionClassifier() {
+void MotionClassifier::load(string fileName)
+{
+    load(fileName.c_str());
 }
 
-bool MotionClassifier::containsSufficientSamples(TrainingSet *sampleSet) {
+bool MotionClassifier::containsSufficientSamples(TrainingSet *sampleSet)
+{
     return (sampleSet->motionSampleCount > 0);
 }
 
@@ -80,10 +92,13 @@ void MotionClassifier::startTraining(TrainingSet *sampleSet)
     cvZero(filterImageArrows);
 
     // TODO: call into trainingset class to do this instead of accessing samplemap
-    for (map<uint, TrainingSample*>::iterator i = sampleSet->sampleMap.begin(); i != sampleSet->sampleMap.end(); i++) {
+    for (map<uint, TrainingSample*>::iterator i = sampleSet->sampleMap.begin(); i != sampleSet->sampleMap.end(); i++)
+    {
         TrainingSample *sample = (*i).second;
-        if (sample->iGroupId == GROUPID_MOTIONSAMPLES) { // motion sample
-            if (sample->motionHistory == NULL) {
+        if (sample->iGroupId == GROUPID_MOTIONSAMPLES)
+        { // motion sample
+            if (sample->motionHistory == NULL)
+            {
                 // no motion history associated with this sample so we skip to the next one
                 continue;
             }
@@ -109,7 +124,8 @@ void MotionClassifier::startTraining(TrainingSet *sampleSet)
             //			int motion_min_component_area = 50+threshold*100.0;
             int motion_min_component_area = 100.0;
             // iterate through the motion components
-            for(int i = 0; i < seq->total; i++) {
+            for(int i = 0; i < seq->total; i++)
+            {
                 CvRect comp_rect = ((CvConnectedComp*)cvGetSeqElem(seq, i ))->rect;
                 if(comp_rect.width * comp_rect.height < motion_min_component_area ) // reject very small components
                     continue;
@@ -125,7 +141,8 @@ void MotionClassifier::startTraining(TrainingSet *sampleSet)
 
                 // calculate orientation
                 double motionAngle = cvCalcGlobalOrientation( orient, mask, sample->motionHistory, 1.0, MOTION_MHI_DURATION);
-                //				motionAngle = 360.0 - motionAngle;  // adjust for images with top-left origin
+                //motionAngle = 360.0 - motionAngle;
+                // adjust for images with top-left origin
                 motionAngles.push_back(motionAngle);
 
                 cvResetImageROI(sample->motionHistory);
@@ -162,7 +179,9 @@ void MotionClassifier::startTraining(TrainingSet *sampleSet)
     cvReleaseImage(&filterImageMotion);
     cvReleaseImage(&filterImageArrows);
 
-    if (isOnDisk) { // this classifier has been saved so we'll update the files
+    if (isOnDisk)
+    {
+        // this classifier has been saved so we'll update the files
         save();        
     }
 
@@ -170,7 +189,8 @@ void MotionClassifier::startTraining(TrainingSet *sampleSet)
     isTrained = true;
 }
 
-ClassifierOutputData MotionClassifier::classifyFrame(IplImage *frame) {
+ClassifierOutputData MotionClassifier::classifyFrame(IplImage *frame)
+{
     // not implemented: this classifier uses classifyMotion instead
     assert(false);
 	ClassifierOutputData data;
@@ -212,7 +232,8 @@ ClassifierOutputData MotionClassifier::classifyMotion(IplImage *frame, double ti
     int motion_min_component_area = 50+threshold*100.0;
 
     // iterate through the motion components
-    for(int i = 0; i < seq->total; i++) {
+    for(int i = 0; i < seq->total; i++)
+    {
         CvRect comp_rect = ((CvConnectedComp*)cvGetSeqElem(seq, i ))->rect;
         if(comp_rect.width * comp_rect.height < motion_min_component_area ) // reject very small components
             continue;
@@ -237,12 +258,15 @@ ClassifierOutputData MotionClassifier::classifyMotion(IplImage *frame, double ti
         int angle_diff_threshold = 60-threshold*58.0;
 
         // check if the direction of this component matches the direction in one of the samples
-        for (list<double>::iterator i = motionAngles.begin(); i!=motionAngles.end(); i++) {
+        for (list<double>::iterator i = motionAngles.begin(); i!=motionAngles.end(); i++)
+        {
             double angleDiff = fabs((*i)-motionAngle);
             // for angles close to 360
-            if (angleDiff > (360-angle_diff_threshold)) angleDiff = 360-angleDiff;
+            if (angleDiff > (360-angle_diff_threshold))
+                angleDiff = 360-angleDiff;
 
-            if (angleDiff < angle_diff_threshold) { // add to list of guesses
+            if (angleDiff < angle_diff_threshold)
+            { // add to list of guesses
                 color = CV_RGB(255,255,255);
 
                 // draw rectangle in mask image
@@ -277,7 +301,8 @@ ClassifierOutputData MotionClassifier::classifyMotion(IplImage *frame, double ti
 
 void MotionClassifier::save()
 {
-    if (!isTrained) return;
+    if (!isTrained)
+        return;
 
     Classifier::save();
 

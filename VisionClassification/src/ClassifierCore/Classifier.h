@@ -42,7 +42,8 @@ public:
     virtual bool containsSufficientSamples(TrainingSet*) = 0;
     virtual ClassifierOutputData classifyFrame(IplImage*) = 0;
     virtual void resetRunningState() = 0;
-
+    virtual void load(const char * pathname) = 0;
+    virtual void load(string) = 0;
     virtual void save();
     void configure();
     void deleteFromDisk();

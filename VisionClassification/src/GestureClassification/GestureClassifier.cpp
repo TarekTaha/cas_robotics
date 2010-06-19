@@ -43,12 +43,23 @@ GestureClassifier::GestureClassifier(const char * pathname) :
         Classifier(pathname),
         graphics(NULL)
 {
+    // set the type
+    classifierType = GESTURE_FILTER;
     char filename[MAX_PATH];
-
     sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
+    //Load previous data
+    load(filename);
+    // Create the custom output variables for this classifier
+    outputData.addVariable("IsMatch", (int)0);
+    outputData.addVariable("Gesture", (int)0);
 
+    updateTrajectoryImage();
+}
+
+void GestureClassifier::load(const char * fileName)
+{
     // load the templates from the data file
-    FILE *datafile = fopen( (filename), "rb");
+    FILE *datafile = fopen( (fileName), "rb");
     fread(&nTemplates, sizeof(int), 1, datafile);
 
     for(int i = 0; i < nTemplates; i++)
@@ -60,15 +71,11 @@ GestureClassifier::GestureClassifier(const char * pathname) :
         rec.addTemplate(tname, t);
     }
     fclose(datafile);
+}
 
-    // set the type
-    classifierType = GESTURE_FILTER;
-
-    // Create the custom output variables for this classifier
-    outputData.addVariable("IsMatch", (int)0);
-    outputData.addVariable("Gesture", (int)0);
-
-    updateTrajectoryImage();
+void GestureClassifier::load(string fileName)
+{
+    load(fileName.c_str());
 }
 
 GestureClassifier::~GestureClassifier()

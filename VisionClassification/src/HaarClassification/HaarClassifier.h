@@ -34,7 +34,8 @@ public:
     HaarClassifier();
     HaarClassifier(const char * pathname);
     ~HaarClassifier();
-
+    void load(const char * fileName);
+    void load(string fileName);
     bool containsSufficientSamples(TrainingSet*);
     void startTraining(TrainingSet*);
     ClassifierOutputData classifyFrame(IplImage*);

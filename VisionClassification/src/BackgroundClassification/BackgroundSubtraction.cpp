@@ -123,6 +123,17 @@ ClassifierOutputData BackgroundSubtraction::classifyFrame(IplImage *frame)
     return outputData;
 }
 
+void BackgroundSubtraction::load(const char * )
+{
+    // We can't load anything with this classifier, so this should never be called
+    assert(false);
+}
+
+void BackgroundSubtraction::load(string fileName)
+{
+    load(fileName.c_str());
+}
+
 void BackgroundSubtraction::save()
 {
     // We can't save built-in classifiers, so this should never be called

@@ -35,7 +35,8 @@ public:
     SurfClassifier();
     SurfClassifier(const char * pathname);
     ~SurfClassifier();
-
+    void load(const char * fileName);
+    void load(string fileName);
     bool containsSufficientSamples(TrainingSet*);
     void startTraining(TrainingSet*);
     ClassifierOutputData classifyFrame(IplImage*);

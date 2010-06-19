@@ -43,6 +43,8 @@ BrightnessClassifier::BrightnessClassifier() :
 BrightnessClassifier::BrightnessClassifier(const char* pathname) :
         Classifier(pathname)
 {
+    // set the type
+    classifierType = BRIGHTNESS_FILTER;
     // allocate histogram
     hdims = 16;
     float hranges_arr[2];
@@ -53,24 +55,7 @@ BrightnessClassifier::BrightnessClassifier(const char* pathname) :
     char filename[MAX_PATH];
 
     sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
-
-    // load the data from the histogram file (and compute average level)
-    FILE *datafile = fopen(filename, "rb");
-    avg_level = 0;
-    for(int i = 0; i < hdims; i++)
-    {
-        float val;
-        fread(&val, sizeof(float), 1, datafile);
-        cvSetReal1D(hist->bins,i,val);
-        avg_level += val;
-    }
-    avg_level /= hdims;
-    fclose(datafile);
-
-    // set the type
-    classifierType = BRIGHTNESS_FILTER;
-
-    updateHistogramImage();
+    load(filename);
 }
 
 BrightnessClassifier::~BrightnessClassifier()
@@ -239,6 +224,28 @@ void BrightnessClassifier::updateHistogramImage()
 
     cvResize(histimg, filterImage);
     cvReleaseImage(&histimg);
+}
+
+void BrightnessClassifier::load(const char * fileName)
+{
+    // load the data from the histogram file (and compute average level)
+    FILE *datafile = fopen(fileName, "rb");
+    avg_level = 0;
+    for(int i = 0; i < hdims; i++)
+    {
+        float val;
+        fread(&val, sizeof(float), 1, datafile);
+        cvSetReal1D(hist->bins,i,val);
+        avg_level += val;
+    }
+    avg_level /= hdims;
+    fclose(datafile);
+    updateHistogramImage();
+}
+
+void BrightnessClassifier::load(string fileName)
+{
+    load(fileName.c_str());
 }
 
 void BrightnessClassifier::save()

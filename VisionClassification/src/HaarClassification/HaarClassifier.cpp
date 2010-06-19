@@ -70,6 +70,8 @@ HaarClassifier::HaarClassifier() :
 HaarClassifier::HaarClassifier(const char * pathname) :
         Classifier(pathname)
 {
+    // set the type
+    classifierType = ADABOOST_FILTER;
     cascade = NULL;
     nStages = START_HAAR_STAGES;
     storage = cvCreateMemStorage(0);
@@ -79,18 +81,24 @@ HaarClassifier::HaarClassifier(const char * pathname) :
 
     char filename[MAX_PATH];
     sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
-    //strcpy(filename, pathname);
-    //strcat(filename, FILE_CASCADE_NAME);
-
     // load the cascade from the data file
-    cascade = cvLoadHaarClassifierCascade(filename, cvSize(HAAR_SAMPLE_X, HAAR_SAMPLE_Y));
+    load(filename);
+}
+
+void HaarClassifier::load(const char * fileName)
+{
+    // load the cascade from the data file
+    cascade = cvLoadHaarClassifierCascade(fileName, cvSize(HAAR_SAMPLE_X, HAAR_SAMPLE_Y));
     if (cascade != NULL)
     {
         isTrained = true;
         isOnDisk = true;
     }
-    // set the type
-    classifierType = ADABOOST_FILTER;
+}
+
+void HaarClassifier::load(string fileName)
+{
+    load(fileName.c_str());
 }
 
 HaarClassifier::~HaarClassifier()

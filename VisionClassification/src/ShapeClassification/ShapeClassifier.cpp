@@ -55,17 +55,26 @@ ShapeClassifier::ShapeClassifier() :
 ShapeClassifier::ShapeClassifier(const char *pathname) :
         Classifier(pathname)
 {
+    // set the type
+    classifierType = SHAPE_FILTER;
     templateStorage = cvCreateMemStorage(0);
 
     char filename[MAX_PATH];
     sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
     // load the contours from the data file
-    templateContours = (CvSeq*)cvLoad(filename, templateStorage, 0, 0);
-
-    // set the type
-    classifierType = SHAPE_FILTER;
-
+    load(filename);
     updateContourImage();
+}
+
+void ShapeClassifier::load(const char * fileName)
+{
+    // load the contours from the data file
+    templateContours = (CvSeq*)cvLoad(fileName, templateStorage, 0, 0);
+}
+
+void ShapeClassifier::load(string fileName)
+{
+    load(fileName.c_str());
 }
 
 ShapeClassifier::~ShapeClassifier()

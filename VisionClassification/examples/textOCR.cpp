@@ -26,10 +26,12 @@
 #include "cvaux.h"
 #include "TesseractClassifier.h"
 #include "TrainingSet.h"
+#include "CamshiftClassifier.h"
 
 int main()
 {
     TesseractClassifier tesseractClassifier;
+    CamshiftClassifier camShiftClassifier;
     cvNamedWindow("Detected Text", 1);
     cvNamedWindow("Text Image", 1);
     CvFont font;
