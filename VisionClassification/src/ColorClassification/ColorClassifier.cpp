@@ -43,6 +43,7 @@ ColorClassifier::ColorClassifier() :
 ColorClassifier::ColorClassifier(const char * pathname) :
         Classifier(pathname)
 {
+    classifierType = COLOR_FILTER;
     // allocate histogram
     hdims = 16;
     float hranges_arr[2];
@@ -54,23 +55,33 @@ ColorClassifier::ColorClassifier(const char * pathname) :
     sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
 
     // load the data from the histogram file
-    FILE *datafile = fopen(filename, "rb");
-    for(int i = 0; i < hdims; i++)
-    {
-        float val;
-        fread(&val, sizeof(float), 1, datafile);
-        cvSetReal1D(hist->bins,i,val);
-    }
-    fclose(datafile);    
-    // set the type
-    classifierType = COLOR_FILTER;
-    updateHistogramImage();
+    load(filename);
 }
 
 ColorClassifier::~ColorClassifier()
 {
     // free histogram
     cvReleaseHist(&hist);
+}
+
+void ColorClassifier::load(const char * fileName)
+{
+    // load the data from the histogram file
+    FILE *datafile = fopen(fileName, "rb");
+    for(int i = 0; i < hdims; i++)
+    {
+        float val;
+        fread(&val, sizeof(float), 1, datafile);
+        cvSetReal1D(hist->bins,i,val);
+    }
+    fclose(datafile);
+    // set the type
+    updateHistogramImage();
+}
+
+void ColorClassifier::load(string fileName)
+{
+    load(fileName.c_str());
 }
 
 bool ColorClassifier::containsSufficientSamples(TrainingSet *sampleSet)

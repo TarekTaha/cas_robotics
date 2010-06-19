@@ -40,26 +40,15 @@ SurfClassifier::SurfClassifier() :
 SurfClassifier::SurfClassifier(const char * pathname) :
         Classifier(pathname)
 {
+    // set the type
+    classifierType = SURF_FILTER;
     numSampleFeatures = 0;
     sampleCopy = NULL;
     sampleFeatures = NULL;
 
     char filename[MAX_PATH];
     sprintf(filename,"%s/%s",directoryName,classifierDataFileName);
-
-    // load the features from the data file
-    numSampleFeatures = import_features(filename, FEATURE_LOWE, &sampleFeatures);
-
-    // load the filter sample image
-    strcpy(filename, pathname);
-    strcat(filename, FILE_SURFIMAGE_NAME);
-    sampleCopy = cvLoadImage(filename);
-    sampleWidth = sampleCopy->width;
-    sampleHeight = sampleCopy->height;
-
-    // set the type
-    classifierType = SURF_FILTER;
-
+    load(filename);
     updateSiftImage();
 }
 
@@ -71,6 +60,24 @@ SurfClassifier::~SurfClassifier()
         free(sampleFeatures);
 }
 
+void SurfClassifier::load(const char * fileName)
+{
+    // load the features from the data file
+    numSampleFeatures = import_features((char*)fileName, FEATURE_LOWE, &sampleFeatures);
+     char siftSampleImage[MAX_PATH];
+    // load the filter sample image
+    strcpy(siftSampleImage, fileName);
+    strcat(siftSampleImage, FILE_SIFTIMAGE_NAME);
+    sampleCopy = cvLoadImage(siftSampleImage);
+    sampleWidth = sampleCopy->width;
+    sampleHeight = sampleCopy->height;
+    updateSiftImage();
+}
+
+void SurfClassifier::load(string fileName)
+{
+    load(fileName.c_str());
+}
 bool SurfClassifier::containsSufficientSamples(TrainingSet *sampleSet)
 {
     return (sampleSet->posSampleCount > 0);

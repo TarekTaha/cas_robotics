@@ -36,7 +36,8 @@ public:
     MotionClassifier();
     MotionClassifier(const char *pathname);
     ~MotionClassifier();
-
+    void load(const char * fileName);
+    void load(string fileName);
     bool containsSufficientSamples(TrainingSet*);
     void startTraining(TrainingSet*);
     ClassifierOutputData classifyFrame(IplImage*);

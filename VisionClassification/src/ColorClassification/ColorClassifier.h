@@ -36,6 +36,8 @@ public:
     ColorClassifier(const char * pathname);
     ~ColorClassifier();
 
+    void load(const char * fileName);
+    void load(string fileName);
     bool containsSufficientSamples(TrainingSet*);
     void startTraining(TrainingSet*);
     ClassifierOutputData classifyFrame(IplImage*);

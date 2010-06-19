@@ -33,7 +33,8 @@ class CamshiftClassifier : public Classifier
 public:
     CamshiftClassifier();
     ~CamshiftClassifier();
-
+    void load(const char * fileName);
+    void load(string fileName);
     void startTraining(TrainingSet*);
     void classifyFrame(IplImage*, list<CvRect>*);
 

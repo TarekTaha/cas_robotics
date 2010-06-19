@@ -48,6 +48,18 @@ TesseractClassifier::~TesseractClassifier()
     api.End();
 }
 
+void TesseractClassifier::load(const char *)
+{
+    // We will never load standard filters from disk, so this should never be called
+    assert(false);
+}
+
+void TesseractClassifier::load(string)
+{
+    // We will never load standard filters from disk, so this should never be called
+    assert(false);
+}
+
 bool TesseractClassifier::containsSufficientSamples(TrainingSet *sampleSet)
 {
     // Standard filters don't need training samples

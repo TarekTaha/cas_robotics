@@ -36,6 +36,8 @@ public:
     ~BackgroundSubtraction();
     bool containsSufficientSamples(TrainingSet*);
     void startTraining(TrainingSet*);
+    void load(const char * fileName);
+    void load(string fileName);
     ClassifierOutputData classifyFrame(IplImage*);
     void save();
     void resetRunningState();

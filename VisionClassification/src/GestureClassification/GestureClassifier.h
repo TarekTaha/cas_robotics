@@ -35,7 +35,8 @@ public:
     GestureClassifier();
     GestureClassifier(const char * pathname);
     ~GestureClassifier();
-
+    void load(const char * fileName);
+    void load(string fileName);
     bool containsSufficientSamples(TrainingSet*);
     void startTraining(TrainingSet*);
     ClassifierOutputData classifyFrame(IplImage*);
