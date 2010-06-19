@@ -43,6 +43,7 @@ ColorClassifier::ColorClassifier() :
 ColorClassifier::ColorClassifier(const char * pathname) :
         Classifier(pathname)
 {
+    // set the type
     classifierType = COLOR_FILTER;
     // allocate histogram
     hdims = 16;
@@ -75,7 +76,7 @@ void ColorClassifier::load(const char * fileName)
         cvSetReal1D(hist->bins,i,val);
     }
     fclose(datafile);
-    // set the type
+    isTrained = true;
     updateHistogramImage();
 }
 
@@ -150,9 +151,10 @@ void ColorClassifier::startTraining(TrainingSet *sampleSet)
 ClassifierOutputData ColorClassifier::classifyFrame(IplImage *frame)
 {
     cvZero(guessMask);
-    if (!isTrained) return outputData;
-    if(!frame) return outputData;
-
+    if (!isTrained)
+        return outputData;
+    if(!frame)
+        return outputData;
     IplImage *image = cvCreateImage( cvGetSize(frame), 8, 3 );
     IplImage *hsv = cvCreateImage( cvGetSize(frame), 8, 3 );
     IplImage *hue = cvCreateImage( cvGetSize(frame), 8, 1 );
@@ -245,7 +247,6 @@ void ColorClassifier::updateHistogramImage()
     cvResize(histimg, filterImage);
     cvReleaseImage(&histimg);
 }
-
 
 void ColorClassifier::save()
 {
