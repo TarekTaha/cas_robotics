@@ -46,13 +46,32 @@ CamshiftClassifier::~CamshiftClassifier()
     // free histogram
     cvReleaseHist(&hist);
 }
+
 void CamshiftClassifier::load(const char *)
+{
+    // We should never call this
+    assert(false);
+}
+
+void CamshiftClassifier::load(string)
+{
+    // We should never call this
+    assert(false);
+}
+
+bool CamshiftClassifier::containsSufficientSamples(TrainingSet*)
+{
+    // We should never call this
+    assert(false);
+}
+
+ClassifierOutputData CamshiftClassifier::classifyFrame(IplImage*)
 {
     // We will never load standard filters from disk, so this should never be called
     assert(false);
 }
 
-void CamshiftClassifier::load(string)
+void CamshiftClassifier::resetRunningState()
 {
     // We will never load standard filters from disk, so this should never be called
     assert(false);

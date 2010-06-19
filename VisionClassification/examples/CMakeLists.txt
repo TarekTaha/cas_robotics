@@ -54,9 +54,11 @@ INCLUDE_DIRECTORIES(
     ../src/common
     ../src/SIFT
     ../src/SiftClassification
+    ../src/SurfClassification
     ../src/ShapeClassification
     ../src/ClassifierCore
     ../src/CamshiftClassification
+    ../src/HaarClassification
     ../src/ColorClassification
     ../src/CVHaar
     ../src/Gesture
