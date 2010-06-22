@@ -193,66 +193,64 @@ int WheelChair::sendCommand(int WCcmd, bool param)
             }
         }
         break;
+    case HORN:
+        printf("\n	+-->Processing Horn Request !!!");
+        //if (param)
+        {
+            // Turn horn on
+            status |= 0x04;
+            sprintf(cmd,"O00%02X", status);
+            if(controlUnit->SendCommand(cmd)!=0)
+            {
+                PLAYER_ERROR("Failed to enable horn\n");
+                return -1;
+            }
+        }
+        //else
+        usleep(100000);
+        {
+            // Turn horn off
+            status &= ~0x04;
+            sprintf(cmd,"O00%02X", status);
+            if(controlUnit->SendCommand(cmd)!=0)
+            {
+                PLAYER_ERROR("Failed to enable horn\n");
+                return -1;
+            }
+        }
+        break;
+    case GETMODE:
+        printf("\n	+-->Processing Get Mode Request ->");
+        sprintf(cmd, "U8\r");
+        controlUnit->Write(cmd, 3);
+        controlUnit->ReadByte(&retbyte);
+        if ((char)retbyte != 'U')
+        {
+            PLAYER_ERROR("\n	-->Failed to read auto/man status from Wheelchair Interface Unit\n");
+            return -1;
+        }
+        controlUnit->ReadByte(&retbyte);
+        controlUnit->ReadByte(&retbyte2);
+        controlUnit->ReadByte(&retbyte);
+        controlUnit->ReadByte(&retbyte);
+        controlUnit->ReadByte(&retbyte);
 
-		case HORN:   
-                    printf("\n	+-->Processing Horn Request !!!");
-                    //if (param)
-                    {
-                        // Turn horn on
-                        status |= 0x04;
-                        sprintf(cmd,"O00%02X", status);
-                        if(controlUnit->SendCommand(cmd)!=0)
-                        {
-                            PLAYER_ERROR("Failed to enable horn\n");
-                            return -1;
-                        }
-                    }
-                    //else
-                    usleep(100000);
-                    {
-                        // Turn horn off
-                        status &= ~0x04;
-                        sprintf(cmd,"O00%02X", status);
-                        if(controlUnit->SendCommand(cmd)!=0)
-                        {
-                            PLAYER_ERROR("Failed to enable horn\n");
-                            return -1;
-                        }
-                    }
-                    break;
-		case GETMODE:
-                    printf("\n	+-->Processing Get Mode Request ->");
-                    sprintf(cmd, "U8\r");
-                    controlUnit->Write(cmd, 3);
-                    controlUnit->ReadByte(&retbyte);
-                    if ((char)retbyte != 'U')
-                    {
-                        PLAYER_ERROR("\n	-->Failed to read auto/man status from Wheelchair Interface Unit\n");
-                        return -1;
-                    }
-                    controlUnit->ReadByte(&retbyte);
-                    controlUnit->ReadByte(&retbyte2);
-                    controlUnit->ReadByte(&retbyte);
-                    controlUnit->ReadByte(&retbyte);
-                    controlUnit->ReadByte(&retbyte);
-
-                    if ((char)retbyte2 == '0')
-                    {
-                        printf("Control is  Manual");
-                        return (int) MANUAL;
-                    }
-                    else
-                    {
-                        printf("Control is  Automatic");
-                        return (int) AUTO;
-                    }
-                    break;
-		default:
-                    PLAYER_ERROR("Unknown command\n");
-                    return -1;
-                }
+        if ((char)retbyte2 == '0')
+        {
+            printf("Control is  Manual");
+            return (int) MANUAL;
+        }
+        else
+        {
+            printf("Control is  Automatic");
+            return (int) AUTO;
+        }
+        break;
+    default:
+        PLAYER_ERROR("Unknown command\n");
+        return -1;
+    }
     return 0;
-
 };
 
 int WheelChair::getReading(char channel)
