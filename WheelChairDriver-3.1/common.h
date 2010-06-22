@@ -2,6 +2,7 @@
 #define COMMON_H_
 
 #include <iostream>
+#include <stdint.h>
 
 #define PLAYER_WHEELCHAIR_SOUND_HORN_REQ      ((uint8_t)1)
 #define PLAYER_WHEELCHAIR_SET_MODE_REQ        ((uint8_t)2)

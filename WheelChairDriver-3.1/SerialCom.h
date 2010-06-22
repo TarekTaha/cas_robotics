@@ -14,19 +14,19 @@
 class SerialCom
 {
 public:
-		SerialCom(){};
-		SerialCom(char * port, int rate);
-		~SerialCom();
-		int ReadByte(unsigned int *buf);
-		int Read(unsigned int *buf,int numChars);
-		void WriteByte(char buf);
-		void Write(char buf[], int numChars);
-		int SendCommand(char cmd[]);
-		void Flush(void);
+    SerialCom(){};
+    SerialCom(char * port, int rate);
+    ~SerialCom();
+    int ReadByte(unsigned int *buf);
+    int Read(unsigned int *buf,int numChars);
+    void WriteByte(char buf);
+    void Write(char buf[], int numChars);
+    int SendCommand(char cmd[]);
+    void Flush(void);
 	private:
-		int fd;
-		struct termios oldtio;
-		pthread_mutex_t lock;	
+    int fd;
+    struct termios oldtio;
+    pthread_mutex_t lock;
 };
 
 #endif /*SERIALCOM_H_*/
