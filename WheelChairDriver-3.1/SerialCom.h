@@ -14,7 +14,7 @@
 class SerialCom
 {
 public:
-    SerialCom(){};
+    SerialCom(){}
     SerialCom(char * port, int rate);
     ~SerialCom();
     int ReadByte(unsigned int *buf);
