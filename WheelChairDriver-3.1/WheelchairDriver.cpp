@@ -162,8 +162,8 @@ class WheelchairDriver : public Driver
 {
 public:
     // Must implement the following methods.
-    virtual int MainSetup();
-    virtual int MainQuit();
+    virtual int Setup();
+    virtual int Shutdown();
     virtual int ProcessMessage(QueuePointer &resp_queue,
                                player_msghdr * hdr,
                                void * data);
@@ -295,6 +295,7 @@ void  WheelchairDriver :: Velocity_Controller(void)
             wheelChair->driveMotors(0.0f,0.0f);
             this->turnOnWheelchair=false;
             usleep(100000);
+            cout <<"\n--->> WheelChair's Power is turned ON, Mode is AUTONOMOUS\n";
         }
         if(turnOffWheelchair)
         {
@@ -401,13 +402,13 @@ WheelchairDriver::WheelchairDriver(ConfigFile* cf, int section)  : Driver(cf, se
     this->posdata.pos.pa = 0;
     // Create an instance of the Wheelchair and initialize it
     wheelChair = new WheelChair(cf,section);
-    cout<<"\nParameters Read"; fflush(stdout);
+    cout<<"\nParameters Read\n"; fflush(stdout);
     return;
 }
 
-int WheelchairDriver::MainSetup()
+int WheelchairDriver::Setup()
 {
-    printf("\n- Setting UP WheelChair Plugin Driver.");
+    printf("\n- Setting UP WheelChair Plugin Driver.");fflush(stdout);
     if(!wheelChair)
     {
         cout<<"\nWheelChair Not Initialized Yet !!!";
@@ -426,11 +427,13 @@ int WheelchairDriver::MainSetup()
     kwp=0.8; kwi=3; kwd=0.015;
     if(log)
         file=fopen("odomlog.txt","wb");
+    Start_Velocity_Thread();
     return(0);
 }
 
-int WheelchairDriver::MainQuit()
-{
+int WheelchairDriver::Shutdown()
+{  
+    printf("\n Quitting Wheelchair Driver."); fflush(stdout);
     vint=vdem=vset=vact=vdiff=vact_last=vdem_last=0; // Liner   Velocity Control Parameters Reset
     wint=wdem=wset=wact=wdiff=wact_last=wdem_last=0; // Angular Velocity Control Parameters Reset
     if(log)
@@ -462,7 +465,6 @@ int WheelchairDriver::Subscribe(player_devaddr_t addr)
             {
                 driverInitialized = true;
                 turnOnWheelchair=true;
-                cout <<"\n--->> WheelChair's Power is turned ON, Mode is AUTONOMOUS\n";
                 fflush(stdout);
             }
 	}
@@ -475,7 +477,6 @@ int WheelchairDriver::Subscribe(player_devaddr_t addr)
             {
                 driverInitialized = true;
                 turnOnWheelchair = true;
-                cout <<"\n--->> WheelChair's Power is turned ON, Mode is AUTONOMOUS\n";
                 fflush(stdout);
             }
 	}
