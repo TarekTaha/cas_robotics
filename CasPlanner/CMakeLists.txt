@@ -139,11 +139,11 @@ SET(CasPlanner_RCS resources/icons.qrc)
 # which is the default gcc behavior. This is used to force gcc to generate single
 # line error messages with no line wrapping
 IF(CMAKE_COMPILER_IS_GNUCC)
-    SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -g -O0 -o -fmessage-length=0")
+    SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -g -O0 -o -fmessage-length=0 -Wno-deprecated ")
 ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -o -fmessage-length=0")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -o -fmessage-length=0 -Wno-deprecated")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 # Optimization Level

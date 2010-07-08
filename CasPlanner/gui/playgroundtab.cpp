@@ -60,7 +60,7 @@ void Interfaces::createIcons(QVector <DeviceType> * devices)
 			delete devicesBox[i];
 	}		
  	update();
-	char section[256];
+	//char section[256];
 	this->devicesBox.clear();
 	this->chk2Dev.clear();
   	for (int i = 0; i < devices->size(); i++)

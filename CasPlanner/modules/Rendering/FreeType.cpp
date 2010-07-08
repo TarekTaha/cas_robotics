@@ -68,7 +68,7 @@ void make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base ) {
 
 
 	//Now we just setup some texture paramaters.
-    glBindTexture( GL_TEXTURE_2D, tex_base[ch]);
+    glBindTexture( GL_TEXTURE_2D, tex_base[int(ch)]);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 
@@ -84,7 +84,7 @@ void make_dlist ( FT_Face face, char ch, GLuint list_base, GLuint * tex_base ) {
 	//So now we can create the display list
 	glNewList(list_base+ch,GL_COMPILE);
 
-	glBindTexture(GL_TEXTURE_2D,tex_base[ch]);
+	glBindTexture(GL_TEXTURE_2D,tex_base[int(ch)]);
 
 	//first we need to move over a little so that
 	//the character has the right amount of space

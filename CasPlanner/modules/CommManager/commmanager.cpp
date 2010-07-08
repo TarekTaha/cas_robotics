@@ -25,9 +25,9 @@ robot(rob),
 playGround(playG)
 {
 	if (!rob)
-		throw CasPlannerException("CommManager::Null Pointer to Robot");
+		throw CasPlannerException((char*)"CommManager::Null Pointer to Robot");
 	if (!playG)
-		throw CasPlannerException("CommManager::Null Pointer to PlayGround");
+		throw CasPlannerException((char*)"CommManager::Null Pointer to PlayGround");
 	startConnected 	= false;
 	activateControl = false;
 	laserEnabled	= false;

@@ -469,7 +469,7 @@ void IntentionRecognizer::run()
 			/* 
 			 * Added for testing the Social Planning
 			 */
-			int destination = playGround->mapManager->mapSkeleton.destIndexes[maxDestBeliefIndex];
+//			int destination = playGround->mapManager->mapSkeleton.destIndexes[maxDestBeliefIndex];
 //			cout<<"Destination is:="<<destination;
 //			Pose e(playGround->mapManager->mapSkeleton.verticies[destination].location.x(),playGround->mapManager->mapSkeleton.verticies[destination].location.y(),DTOR(90));
 //			socialPlanner->setEnd(e);
