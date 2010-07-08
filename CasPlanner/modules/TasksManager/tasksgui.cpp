@@ -86,7 +86,6 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
     connect(&randomTasksBtn,   SIGNAL(pressed()),this, SLOT(runRandomTasks()));
     connect(&tasksList,        SIGNAL(currentRowChanged(int)),this, SLOT(taskSelected(int)));
     connect(&testModelBtn,     SIGNAL(pressed()),tasksGui, SLOT(testModel()));
-//	connect(&tasksList,        SIGNAL(itemClicked(QListWidgetItem * item )),this, SLOT(taskClicked(QListWidgetItem * item)));
 }
 
 
@@ -105,8 +104,12 @@ void TasksControlPanel::runRandomTasks()
     t.start();
     for(int i=0;i<numRandomRuns.value();i++)
     {
+        // find a random source state, any stata can be used
         sourceVertixId = rand()%tasksGui->playGround->mapManager->mapSkeleton.getNumVerticies();
+        // chose randomly one of the destinations
         destVertexId   = rand()%tasksGui->playGround->mapManager->mapSkeleton.getNumDestinations();
+        // find the destination's actual index
+        destVertexId = tasksGui->playGround->mapManager->mapSkeleton.destIndexes[destVertexId];
         qDebug()<<"\n Source Vertex is:"<<sourceVertixId<<" destination Vertex is:"<<destVertexId;
         //tasksList.setCurrentRow(r);
         //qDebug("Using Task %s %d ",qPrintable(tasksGui->tasks[sourceVertixId].getName()),sourceVertixId);
@@ -147,7 +150,7 @@ void TasksControlPanel::updateSelectedVoronoiMethod(bool)
 
 void TasksControlPanel::save()
 {
-//	navContainer->mapViewer->saveImage();
+
 }
 
 void TasksControlPanel::taskSelected(int r)
@@ -162,29 +165,16 @@ void TasksControlPanel::taskSelected(int r)
 
 void TasksControlPanel::setMap(QImage)
 {
-//	if(this->currRobot)
-//	{
-//		currRobot->planningManager->setMap(imageMap);
-//	}
-//	else
-//	{
-//		qDebug("No Robot is Selected");
-//	}
+
 }
 
 void TasksControlPanel::exportHtml()
 {
-//    QString url=mapManager->exportHtml();
-//    QProcess *firefox = new QProcess();
-//    QString command = QString("firefox ").append(url);
-//    qDebug("Opening %s", qPrintable(command));
-//    firefox->start(command);
-//    firefox->waitForStarted();
+
 }
 
-MapGL::MapGL(TasksGui *tsg, QWidget *parent):
+MapGL::MapGL(Map*og,TasksGui *tsg, QWidget *parent):
 	QGLWidget(QGLFormat(QGL::AlphaChannel), parent),
-	//sskel(ssk),
 	tasksGui(tsg),
 	zoomFactor(10),
 	xOffset(0),
@@ -194,24 +184,25 @@ MapGL::MapGL(TasksGui *tsg, QWidget *parent):
 	pitch(0),
 	fudgeFactor(3),
 	showGrids(true),
-	firstTime(true)
+	firstTime(true),
+	mainMapBuilt(false),
+	mapSkeleton(NULL),
+	ogMap(og)
 {
 	renderTimer = new QTimer(this);
 	connect(renderTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
-	renderTimer->start(100);
+	renderTimer->start(200);
 	setFocusPolicy(Qt::StrongFocus);
 }
 
 QSize MapGL::sizeHint()
 {
-	//return QSize(800,600);
-	return QSize(800,800);
+    return QSize(800,800);
 }
 
 QSize MapGL::setMinimumSizeHint()
 {
-    //return QSize(400,300);
-        return QSize(400,400);
+    return QSize(400,400);
 }
 
 void MapGL::initializeGL()
@@ -219,6 +210,7 @@ void MapGL::initializeGL()
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glFlush();
     skeletonList = glGenLists(1);
+    mapList = glGenLists(1);
 }
 
 void MapGL::resizeGL(int w, int h)
@@ -227,9 +219,7 @@ void MapGL::resizeGL(int w, int h)
     // Reset the coordinate system before modifying
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-
     gluPerspective(180, aspectRatio, 1,1000);
-    //    qDebug("Resize NEW w = %d h = %d", w, h);
     glViewport(0,0,w,h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -239,6 +229,11 @@ void MapGL::resizeGL(int w, int h)
     updateGL();
 }
 
+void MapGL::setMapSkeleton(MapSkeleton *mapS)
+{
+    this->mapSkeleton = mapS;
+}
+
 void MapGL::config()
 {
 
@@ -246,370 +241,421 @@ void MapGL::config()
 
 void MapGL::drawProbHisto(QPointF pos, double prob)
 {
-	QString str = QString("%1 \%").arg((int)(prob*100));
-	if(prob==0)
-		return;
-	glPushMatrix();
-	glTranslatef(pos.x(),pos.y(),0.0f);
+    QString str = QString("%1 \%").arg((int)(prob*100));
+    if(prob==0)
+        return;
+    glPushMatrix();
+    glTranslatef(pos.x(),pos.y(),0.0f);
     glColor4f(0,0,0,1);
-        renderText(0 ,0 + 0.2, prob + 0.2, str);
-        glScalef(1/12.0, 1/12.0, prob);
-        //glRotatef(rotqube,0.0f,1.0f,0.0f);	// Rotate The cube around the Y axis
-        //glRotatef(rotqube,1.0f,1.0f,1.0f);
-        glBegin(GL_QUADS);		// Draw The Cube Using quads
+    renderText(0 ,0 + 0.2, prob + 0.2, str);
+    glScalef(1/12.0, 1/12.0, prob);
+    //glRotatef(rotqube,0.0f,1.0f,0.0f);	// Rotate The cube around the Y axis
+    //glRotatef(rotqube,1.0f,1.0f,1.0f);
+    glBegin(GL_QUADS);		// Draw The Cube Using quads
 
-		//glColor3f(1.0f,0.0f,1.0f);	// Color Violet
-		glColor4f(0.0f,1.0f,0.0f,1.0f);
+    //glColor3f(1.0f,0.0f,1.0f);	// Color Violet
+    glColor4f(0.0f,1.0f,0.0f,1.0f);
 
-//	    glColor3f(0.0f,1.0f,0.0f);	// Color Blue
-	    glVertex3f( 1.0f, 1.0f,-0.0f);	// Top Right Of The Quad (Top)
-	    glVertex3f(-1.0f, 1.0f,-0.0f);	// Top Left Of The Quad (Top)
-	    glVertex3f(-1.0f, 1.0f, 1.0f);	// Bottom Left Of The Quad (Top)
-	    glVertex3f( 1.0f, 1.0f, 1.0f);	// Bottom Right Of The Quad (Top)
+    //	    glColor3f(0.0f,1.0f,0.0f);	// Color Blue
+    glVertex3f( 1.0f, 1.0f,-0.0f);	// Top Right Of The Quad (Top)
+    glVertex3f(-1.0f, 1.0f,-0.0f);	// Top Left Of The Quad (Top)
+    glVertex3f(-1.0f, 1.0f, 1.0f);	// Bottom Left Of The Quad (Top)
+    glVertex3f( 1.0f, 1.0f, 1.0f);	// Bottom Right Of The Quad (Top)
 
-//	    glColor3f(1.0f,0.5f,0.0f);	// Color Orange
-	    glVertex3f( 1.0f,-1.0f, 1.0f);	// Top Right Of The Quad (Bottom)
-	    glVertex3f(-1.0f,-1.0f, 1.0f);	// Top Left Of The Quad (Bottom)
-	    glVertex3f(-1.0f,-1.0f,-0.0f);	// Bottom Left Of The Quad (Bottom)
-	    glVertex3f( 1.0f,-1.0f,-0.0f);	// Bottom Right Of The Quad (Bottom)
+    //	    glColor3f(1.0f,0.5f,0.0f);	// Color Orange
+    glVertex3f( 1.0f,-1.0f, 1.0f);	// Top Right Of The Quad (Bottom)
+    glVertex3f(-1.0f,-1.0f, 1.0f);	// Top Left Of The Quad (Bottom)
+    glVertex3f(-1.0f,-1.0f,-0.0f);	// Bottom Left Of The Quad (Bottom)
+    glVertex3f( 1.0f,-1.0f,-0.0f);	// Bottom Right Of The Quad (Bottom)
 
-//	    glColor3f(1.0f,0.0f,0.0f);	// Color Red
-	    glVertex3f( 1.0f, 1.0f, 1.0f);	// Top Right Of The Quad (Front)
-	    glVertex3f(-1.0f, 1.0f, 1.0f);	// Top Left Of The Quad (Front)
-	    glVertex3f(-1.0f,-1.0f, 1.0f);	// Bottom Left Of The Quad (Front)
-	    glVertex3f( 1.0f,-1.0f, 1.0f);	// Bottom Right Of The Quad (Front)
+    //	    glColor3f(1.0f,0.0f,0.0f);	// Color Red
+    glVertex3f( 1.0f, 1.0f, 1.0f);	// Top Right Of The Quad (Front)
+    glVertex3f(-1.0f, 1.0f, 1.0f);	// Top Left Of The Quad (Front)
+    glVertex3f(-1.0f,-1.0f, 1.0f);	// Bottom Left Of The Quad (Front)
+    glVertex3f( 1.0f,-1.0f, 1.0f);	// Bottom Right Of The Quad (Front)
 
-//	    glColor3f(1.0f,1.0f,0.0f);	// Color Yellow
-	    glVertex3f( 1.0f,-1.0f,-0.0f);	// Top Right Of The Quad (Back)
-	    glVertex3f(-1.0f,-1.0f,-0.0f);	// Top Left Of The Quad (Back)
-	    glVertex3f(-1.0f, 1.0f,-0.0f);	// Bottom Left Of The Quad (Back)
-	    glVertex3f( 1.0f, 1.0f,-0.0f);	// Bottom Right Of The Quad (Back)
+    //	    glColor3f(1.0f,1.0f,0.0f);	// Color Yellow
+    glVertex3f( 1.0f,-1.0f,-0.0f);	// Top Right Of The Quad (Back)
+    glVertex3f(-1.0f,-1.0f,-0.0f);	// Top Left Of The Quad (Back)
+    glVertex3f(-1.0f, 1.0f,-0.0f);	// Bottom Left Of The Quad (Back)
+    glVertex3f( 1.0f, 1.0f,-0.0f);	// Bottom Right Of The Quad (Back)
 
-//	    glColor3f(0.0f,0.0f,1.0f);	// Color Blue
-	    glVertex3f(-1.0f, 1.0f, 1.0f);	// Top Right Of The Quad (Left)
-	    glVertex3f(-1.0f, 1.0f,-0.0f);	// Top Left Of The Quad (Left)
-	    glVertex3f(-1.0f,-1.0f,-0.0f);	// Bottom Left Of The Quad (Left)
-	    glVertex3f(-1.0f,-1.0f, 1.0f);	// Bottom Right Of The Quad (Left)
+    //	    glColor3f(0.0f,0.0f,1.0f);	// Color Blue
+    glVertex3f(-1.0f, 1.0f, 1.0f);	// Top Right Of The Quad (Left)
+    glVertex3f(-1.0f, 1.0f,-0.0f);	// Top Left Of The Quad (Left)
+    glVertex3f(-1.0f,-1.0f,-0.0f);	// Bottom Left Of The Quad (Left)
+    glVertex3f(-1.0f,-1.0f, 1.0f);	// Bottom Right Of The Quad (Left)
 
-//	    glColor3f(1.0f,0.0f,1.0f);	// Color Violet
-	    glVertex3f( 1.0f, 1.0f,-0.0f);	// Top Right Of The Quad (Right)
-	    glVertex3f( 1.0f, 1.0f, 1.0f);	// Top Left Of The Quad (Right)
-	    glVertex3f( 1.0f,-1.0f, 1.0f);	// Bottom Left Of The Quad (Right)
-	    glVertex3f( 1.0f,-1.0f,-0.0f);	// Bottom Right Of The Quad (Right)
-	glEnd();			// End Drawing The Cube
-	glPopMatrix();
-	return;
+    //	    glColor3f(1.0f,0.0f,1.0f);	// Color Violet
+    glVertex3f( 1.0f, 1.0f,-0.0f);	// Top Right Of The Quad (Right)
+    glVertex3f( 1.0f, 1.0f, 1.0f);	// Top Left Of The Quad (Right)
+    glVertex3f( 1.0f,-1.0f, 1.0f);	// Bottom Left Of The Quad (Right)
+    glVertex3f( 1.0f,-1.0f,-0.0f);	// Bottom Right Of The Quad (Right)
+    glEnd();			// End Drawing The Cube
+    glPopMatrix();
+    return;
 }
 
 void MapGL::renderSkeleton()
 {
-//  	const Halfedge_const_handle null_halfedge ;
-//  	const Vertex_const_handle   null_vertex ;
-//
-//    if ( !this->sskel )
-//      return ;
-//
-//	fflush(stdout);
-//    int watchdog_limit = sskel->size_of_halfedges();
-//
-//	glPushMatrix();
-//	//glLineWidth(2);
-//	for ( Face_const_iterator fit = sskel->faces_begin(), efit = sskel->faces_end(); fit != efit; ++ fit)
-//    {
-//      	Halfedge_const_handle hstart = fit->halfedge();
-//     	Halfedge_const_handle he     = hstart ;
-//      	int watchdog = watchdog_limit ;
-//      	do
-//      	{
-//        	if ( he == null_halfedge )
-//          		break ;
-//        	if ( he->is_bisector() )
-//        	{
-//	          	bool lVertexOK      = he->vertex() != null_vertex ;
-//	          	bool lOppositeOK    = he->opposite() != null_halfedge ;
-//	          	bool lOppVertexOK   = lOppositeOK && he->opposite()->vertex() != null_vertex ;
-//	          	bool lVertexHeOK    = lVertexOK && he->vertex()->halfedge() != null_halfedge ;
-//	          	bool lOppVertexHeOK = lOppVertexOK && he->opposite()->vertex()->halfedge() != null_halfedge ;
-//          		if ( lVertexOK && lOppVertexOK && lVertexHeOK && lOppVertexHeOK )
-//          		{
-//			    	he->is_inner_bisector()? glColor4f(0,0,1,1) : glColor4f(1,0,0,1);
-//					glBegin(GL_LINES);
-//						//if(he->opposite()->vertex()->is_skeleton())
-//						glVertex2f(he->opposite()->vertex()->point().x(),he->opposite()->vertex()->point().y());
-//		    			glVertex2f(he->vertex()->point().x(),he->vertex()->point().y());
-//					glEnd();
-////					if (firstTime)
-////					{
-////						std::cout<<"\nDrawing Line at Start X:"<<he->opposite()->vertex()->point().x()<<" Y:"<<he->opposite()->vertex()->point().y();
-////						std::cout<<" End X:"<<he->vertex()->point().x()<<" Y:"<<he->vertex()->point().y();
-////					}
-////					if(he->vertex()->is_skeleton())
-////					{
-////						glBegin(GL_POLYGON);
-////							glVertex2f(he->vertex()->point().x()- 0.1, he->vertex()->point().y()+0.1);
-////							glVertex2f(he->vertex()->point().x()+ 0.1, he->vertex()->point().y()+0.1);
-////							glVertex2f(he->vertex()->point().x()+ 0.1, he->vertex()->point().y()-0.1);
-////							glVertex2f(he->vertex()->point().x()- 0.1, he->vertex()->point().y()-0.1);
-////						glEnd();
-////					}
-////					if(he->opposite()->vertex()->is_skeleton())
-////					{
-////						glBegin(GL_POLYGON);
-////							glVertex2f(he->opposite()->vertex()->point().x()- 0.1, he->opposite()->vertex()->point().y()+0.1);
-////							glVertex2f(he->opposite()->vertex()->point().x()+ 0.1, he->opposite()->vertex()->point().y()+0.1);
-////							glVertex2f(he->opposite()->vertex()->point().x()+ 0.1, he->opposite()->vertex()->point().y()-0.1);
-////							glVertex2f(he->opposite()->vertex()->point().x()- 0.1, he->opposite()->vertex()->point().y()-0.1);
-////						glEnd();
-////					}
-//          		}
-//        	}
-//        	he = he->next();
-//      	}
-//      	while ( -- watchdog > 0 && he != hstart ) ;
-//    }
-//    for(int i=0;i<tasksGui->playGround->mapManager->mapSkeleton.verticies.size();i++)
-//    {
-//		drawProbHisto(tasksGui->playGround->mapManager->mapSkeleton.verticies[i].location,tasksGui->playGround->mapManager->mapSkeleton.verticies[i].prob);
-//    }
-//	firstTime = false;
-//    glPopMatrix();
+    if(!mapSkeleton)
+        return;
+    glPushMatrix();
+    glLineWidth(2);
+
+    for(int i=0;i<mapSkeleton->getNumVerticies();i++)
+    {
+        glColor4f(0,1,0,1);;
+        QPointF parentVertex = mapSkeleton->verticies[i].getLocation();
+        for(int j=0;j<mapSkeleton->verticies[i].connections.size();j++)
+        {
+            QPointF child = mapSkeleton->verticies[mapSkeleton->verticies[i].connections[j].nodeIndex].getLocation();
+            glBegin(GL_LINES);
+                glVertex2f(parentVertex.x(),parentVertex.y());
+                glVertex2f(child.x(),child.y());
+            glEnd();
+        }
+        if(mapSkeleton->destIndexes.contains(i))
+        {
+            glBegin(GL_POLYGON);
+                glColor4f(1,0,0,1);
+                glVertex2f(parentVertex.x()- 0.2, parentVertex.y()+0.2);
+                glVertex2f(parentVertex.x()+ 0.2, parentVertex.y()+0.2);
+                glVertex2f(parentVertex.x()+ 0.2, parentVertex.y()-0.2);
+                glVertex2f(parentVertex.x()- 0.2, parentVertex.y()-0.2);
+            glEnd();
+        }
+        drawProbHisto(tasksGui->playGround->mapManager->mapSkeleton.verticies[i].location,tasksGui->playGround->mapManager->mapSkeleton.verticies[i].prob);
+    }
+    firstTime = false;
+    glPopMatrix();
 }
 
 void MapGL::renderPath()
 {
-	if(!tasksGui->voronoiPlanner)
-	{
-		//qDebug("WHAT THEEEE !!!");
-		return;
-	}
-	if(tasksGui->voronoiPlanner->path)
-	{
-		Node * path = tasksGui->voronoiPlanner->path;
-		//glColor4f(1,1,1,1);
-		glPushMatrix();
-		glColor4f(0,0,1,1);
-		glLineWidth(5);
-	    glBegin(GL_LINE_STRIP);
-		while(path)
-		{
-		glVertex2f(path->pose.p.x(),path->pose.p.y());
-			path = path->next;
-		}
-	    glEnd();
-	    glLineWidth(1);
-		glPopMatrix();
-	}
-	//qDebug("WHAT THEEEE !!!");
+    if(!tasksGui->voronoiPlanner)
+    {
+        //qDebug("WHAT THEEEE !!!");
+        return;
+    }
+    if(tasksGui->voronoiPlanner->path)
+    {
+        Node * path = tasksGui->voronoiPlanner->path;
+        //glColor4f(1,1,1,1);
+        glPushMatrix();
+        glColor4f(0,0,1,1);
+        glLineWidth(5);
+        glBegin(GL_LINE_STRIP);
+        while(path)
+        {
+            glVertex2f(path->pose.p.x(),path->pose.p.y());
+            path = path->next;
+        }
+        glEnd();
+        glLineWidth(1);
+        glPopMatrix();
+    }
+}
+
+void MapGL::loadTexture()
+{
+    newWidth =  (int) std::pow(2.0f, (int)ceil(log((float)ogMap->width) / log(2.f)));
+    newHeight = (int) std::pow(2.0f, (int)ceil(log((float)ogMap->height) / log(2.f)));
+    ratioW  = ((float) ogMap->width)/newWidth;
+    ratioH  = ((float) ogMap->height)/newHeight;;
+    if (newWidth != ogMap->width || newHeight != ogMap->height)
+        ogMap->scale(newWidth,newHeight);
+    unsigned char imgData[ogMap->width*ogMap->height*4];
+    long int count=0;
+    for(int i=0; i < ogMap->width; i++)
+    {
+        for(int j=0; j < ogMap->height; j++)
+        {
+            if(ogMap->grid[i][j] == true)
+            {
+                count++;
+                imgData[(j*ogMap->width+i)*4]   = 0;
+                imgData[(j*ogMap->width+i)*4+1] = 0;
+                imgData[(j*ogMap->width+i)*4+2] = 0;
+                imgData[(j*ogMap->width+i)*4+3] = 255;
+            }
+            else
+            {
+                imgData[(j*ogMap->width+i)*4]   = 255;
+                imgData[(j*ogMap->width+i)*4+1] = 255;
+                imgData[(j*ogMap->width+i)*4+2] = 255;
+                imgData[(j*ogMap->width+i)*4+3] = 50;
+            }
+        }
+    }
+
+    glEnable(GL_TEXTURE_2D);       /* Enable Texture Mapping */
+    glGenTextures(1, &texId);
+    glBindTexture(GL_TEXTURE_2D, texId);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ogMap->width, ogMap->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glDisable(GL_TEXTURE_2D);
+    mainMapBuilt = true;
+};
+
+///*!
+// *  Renders The main Map loaded from the image file
+// */
+void MapGL::renderMap()
+{
+    glNewList(mapList, GL_COMPILE);
+    glEnable(GL_TEXTURE_2D);       /* Enable Texture Mapping */
+    glPushMatrix();
+    glBindTexture(GL_TEXTURE_2D, texId);
+    // Inverse the Y-axis
+    glScalef(1,-1,1);
+    glTranslatef(-(newWidth*ogMap->mapRes)/2.0f,-(newHeight*ogMap->mapRes)/2.0f,0);
+    //glColor4f(1,1,1,0.8);
+    // Define Coordinate System
+    glBegin(GL_QUADS);
+    //	    glTexCoord2f(1,float(newHeight)/float(newWidth));			glVertex2f(newWidth*ogMap->mapRes,newHeight*ogMap->mapRes);
+    //	    glTexCoord2f(1,0.0);		glVertex2f(newWidth*ogMap->mapRes,0.0);
+    //	    glTexCoord2f(0.0,0.0);		glVertex2f(0.0,0.0);
+    //	    glTexCoord2f(0.0,float(newHeight)/float(newWidth));    		glVertex2f(0.0,newHeight*ogMap->mapRes);
+    //
+    ratioH = 1;
+    ratioW = float(newHeight)/float(newWidth);
+    glTexCoord2f(0.0,0.0);  glVertex2f(0.0,0.0);
+    glTexCoord2f(1.0,0.0);  glVertex2f(newWidth*ogMap->mapRes,0.0);
+    glTexCoord2f(1.0,1.0);  glVertex2f(newWidth*ogMap->mapRes,newHeight*ogMap->mapRes);
+    glTexCoord2f(0.0,1.0);  glVertex2f(0.0,newHeight*ogMap->mapRes);
+    glEnd();
+
+    // Surrounding BOX
+    glColor4f(0,1.0,0,1.0);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(0,0);
+    glVertex2f(0.0,newHeight*ogMap->mapRes);
+    glVertex2f(newWidth*ogMap->mapRes,newHeight*ogMap->mapRes);
+    glVertex2f(newWidth*ogMap->mapRes,0.0);
+    glEnd();
+    glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+    glEndList();
 }
 
 void MapGL::paintGL()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glEnable(GL_DEPTH_TEST);
-	//glDisable(GL_BLEND);
-	//glEnable(GL_POINT_SMOOTH);
-	//glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-	//glEnable(GL_LINE_SMOOTH);
-	//glEnable(GL_POLYGON_SMOOTH);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glEnable(GL_DEPTH_TEST);
+    //glDisable(GL_BLEND);
+    //glEnable(GL_POINT_SMOOTH);
+    //glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    //glEnable(GL_LINE_SMOOTH);
+    //glEnable(GL_POLYGON_SMOOTH);
 
-	glPushMatrix();
-	glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
+    glPushMatrix();
+    glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
     glColor4f(0,0,0,1);
-        renderText(zoomFactor*aspectRatio*0.90-1, -0.9*zoomFactor, 0, "grid: 1 m");
+    renderText(zoomFactor*aspectRatio*0.90-1, -0.9*zoomFactor, 0, "grid: 1 m");
 
-	glRotatef(pitch,1,0,0);
-	glRotatef(yaw,0,0,1);
+    glRotatef(pitch,1,0,0);
+    glRotatef(yaw,0,0,1);
 
-	glTranslatef(xOffset, yOffset, zOffset);
-	glPushMatrix();
-	showGrids = true;
-	//glLineWidth(1);
-	if(showGrids)
-	{
-		for(int i=-(int) zoomFactor*3; i < (int) zoomFactor*3; i++)
-		{
-			glBegin(GL_LINES);
-			if(i==0)
-			{
-				glColor4f(0,0,0,0.5);
-			}
-			else
-			{
-				glColor4f(0.5,0.5,0.5,0.5);
-			}
-			glVertex3f(-zoomFactor*3, i, 0);
-			glVertex3f(zoomFactor*3, i, 0);
-			glVertex3f(i,-zoomFactor*3, 0);
-			glVertex3f(i, zoomFactor*3, 0);
-			glEnd();
-		}
-// 		// X-axis indicator
-// 		int i = int((mapData->width*mapData->resolution)/2.0 + 2);
-// 		{
-// 			glBegin(GL_LINE_LOOP);
-// 			glColor4f(0,0,0,0.5);
-// //				glColor4f(1,1,1,0.5);
-// 			glVertex3f(i-1,0.5,0);
-// 			glVertex3f(i,0,0);
-// 			glVertex3f(i-1,-0.5,0);
-// 			glEnd();
-// 			renderText(i,-1,0, "X");
-// 		}
-// 		 //Y-axis indicator
-// 		int j = int((mapData->height*mapData->resolution)/2.0 + 2);
-// 		{
-// 			glBegin(GL_LINE_LOOP);
-// 			glColor4f(0,0,0,0.5);
-// //				glColor4f(1,1,1,0.5);
-// 			glVertex3f(-0.5,j-1,0);
-// 			glVertex3f(0,j,0);
-// 			glVertex3f(0.5,j-1,0);
-// 			glEnd();
-// 			renderText(1,j,0, "Y");
-// 		}
-	}
-	glPopMatrix();
-	renderSkeleton();
-	renderPath();
-	if(tasksGui->skeletonGenerated && firstTime)
-	{
-//		glNewList(skeletonList, GL_COMPILE);
-////			tasksGui->cvd->draw_diagram();
-////			tasksGui->cvd->draw_sites();
-		glEndList();
-		glCallList(skeletonList);
-		firstTime = false;
-	}
-	else
-		glCallList(skeletonList);
-	glDisable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_POINT_SMOOTH);
-	glDisable(GL_LINE_SMOOTH);
-	glDisable(GL_POLYGON_SMOOTH);
-	glPopMatrix();
-	glFlush();
+    glTranslatef(xOffset, yOffset, zOffset);
+    glPushMatrix();
+    showGrids = true;
+    //glLineWidth(1);
+    if(showGrids)
+    {
+        for(int i=-(int) zoomFactor*3; i < (int) zoomFactor*3; i++)
+        {
+            glBegin(GL_LINES);
+            if(i==0)
+            {
+                glColor4f(0,0,0,0.5);
+            }
+            else
+            {
+                glColor4f(0.5,0.5,0.5,0.5);
+            }
+            glVertex3f(-zoomFactor*3, i, 0);
+            glVertex3f(zoomFactor*3, i, 0);
+            glVertex3f(i,-zoomFactor*3, 0);
+            glVertex3f(i, zoomFactor*3, 0);
+            glEnd();
+        }
+        // 		// X-axis indicator
+        // 		int i = int((mapData->width*mapData->resolution)/2.0 + 2);
+        // 		{
+        // 			glBegin(GL_LINE_LOOP);
+        // 			glColor4f(0,0,0,0.5);
+        // //				glColor4f(1,1,1,0.5);
+        // 			glVertex3f(i-1,0.5,0);
+        // 			glVertex3f(i,0,0);
+        // 			glVertex3f(i-1,-0.5,0);
+        // 			glEnd();
+        // 			renderText(i,-1,0, "X");
+        // 		}
+        // 		 //Y-axis indicator
+        // 		int j = int((mapData->height*mapData->resolution)/2.0 + 2);
+        // 		{
+        // 			glBegin(GL_LINE_LOOP);
+        // 			glColor4f(0,0,0,0.5);
+        // //				glColor4f(1,1,1,0.5);
+        // 			glVertex3f(-0.5,j-1,0);
+        // 			glVertex3f(0,j,0);
+        // 			glVertex3f(0.5,j-1,0);
+        // 			glEnd();
+        // 			renderText(1,j,0, "Y");
+        // 		}
+    }
+    glPopMatrix();
+    renderSkeleton();
+    renderPath();
+    if(tasksGui->skeletonGenerated && firstTime)
+    {
+        glNewList(skeletonList, GL_COMPILE);
+        glEndList();
+        glCallList(skeletonList);
+        firstTime = false;
+    }
+    else
+        glCallList(skeletonList);
+    if(this->ogMap)
+    {
+        glDisable( GL_DEPTH_TEST );
+        if(!mainMapBuilt)
+        {
+            loadTexture();
+            renderMap();
+        }
+        glEnable(GL_DEPTH_TEST);
+    }
+    glCallList(mapList);
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_POINT_SMOOTH);
+    glDisable(GL_LINE_SMOOTH);
+    glDisable(GL_POLYGON_SMOOTH);
+    glPopMatrix();
+    glFlush();
 }
 
 void MapGL::keyPressEvent(QKeyEvent *e)
 {
-	if(e->key() == Qt::Key_C)
-	{
-		if(e->modifiers() && Qt::ShiftModifier)
-		{
-		}
-		else
-		{
-		}
-	}
-	else if(e->key() == Qt::Key_W)
-	{
-		if(e->modifiers() && Qt::ShiftModifier)
-		{
+    if(e->key() == Qt::Key_C)
+    {
+        if(e->modifiers() && Qt::ShiftModifier)
+        {
+        }
+        else
+        {
+        }
+    }
+    else if(e->key() == Qt::Key_W)
+    {
+        if(e->modifiers() && Qt::ShiftModifier)
+        {
 
-		}
-		else
-		{
-			yOffset += 0.1*zoomFactor;
-		}
-	}
-	else if(e->key() == Qt::Key_S)
-	{
-		if(e->modifiers() && Qt::ShiftModifier)
-		{
+        }
+        else
+        {
+            yOffset += 0.1*zoomFactor;
+        }
+    }
+    else if(e->key() == Qt::Key_S)
+    {
+        if(e->modifiers() && Qt::ShiftModifier)
+        {
 
-		}
-		else
-		{
-			yOffset -= 0.1*zoomFactor;
-		}
-	}
-	else if(e->key() == Qt::Key_A)
-	{
-		if(e->modifiers() && Qt::ShiftModifier)
-		{
+        }
+        else
+        {
+            yOffset -= 0.1*zoomFactor;
+        }
+    }
+    else if(e->key() == Qt::Key_A)
+    {
+        if(e->modifiers() && Qt::ShiftModifier)
+        {
 
-		}
-		else
-		{
-			xOffset -= 0.1*zoomFactor;
-		}
-	}
-	else if(e->key() == Qt::Key_D)
-	{
-		if(e->modifiers() && Qt::ShiftModifier)
-		{
+        }
+        else
+        {
+            xOffset -= 0.1*zoomFactor;
+        }
+    }
+    else if(e->key() == Qt::Key_D)
+    {
+        if(e->modifiers() && Qt::ShiftModifier)
+        {
 
-		}
-		else
-		{
-			xOffset += 0.1*zoomFactor;
-		}
-	}
-	else if(e->key() == Qt::Key_BracketLeft)
-	{
-		zoomFactor *= 1.1;
-		qDebug("ZoomFactor set to %f", zoomFactor);
-	}
-	else if(e->key() == Qt::Key_BracketRight)
-	{
-		zoomFactor /= 1.1;
-		qDebug("ZoomFactor set to %f", zoomFactor);
-	}
-	else if(e->key() == Qt::Key_Left)
-	{
-		if(e->modifiers() && Qt::ShiftModifier)
-		{
+        }
+        else
+        {
+            xOffset += 0.1*zoomFactor;
+        }
+    }
+    else if(e->key() == Qt::Key_BracketLeft)
+    {
+        zoomFactor *= 1.1;
+    }
+    else if(e->key() == Qt::Key_BracketRight)
+    {
+        zoomFactor /= 1.1;
+    }
+    else if(e->key() == Qt::Key_Left)
+    {
+        if(e->modifiers() && Qt::ShiftModifier)
+        {
 
-		}
-		else
-		{
-			yaw += 5;
-		}
-	}
-	else if(e->key() == Qt::Key_Right)
-	{
-		if(e->modifiers() && Qt::ShiftModifier)
-		{
+        }
+        else
+        {
+            yaw += 5;
+        }
+    }
+    else if(e->key() == Qt::Key_Right)
+    {
+        if(e->modifiers() && Qt::ShiftModifier)
+        {
 
-		}
-		else
-		{
-			yaw -= 5;
-		}
-	}
-	else if(e->key() == Qt::Key_Up)
-	{
-		pitch += 5;
-		if(pitch > 90) pitch = 90;
-	}
-	else if(e->key() == Qt::Key_Down)
-	{
-		pitch -= 5;
-		if(pitch < -90) pitch = -90;
-	}
-	else if(e->key() == Qt::Key_R)
-	{
-		zoomFactor=10;
-		xOffset= yOffset=zOffset=yaw=pitch=0;
-	}
-	else if(e->text() == "=")
-	{
-		fudgeFactor *=1.25;
-		qDebug("Fudge factor set to %f", fudgeFactor);
-	}
-	else if(e->text()=="-")
-	{
-		fudgeFactor /=1.25;
-		qDebug("Fudge factor set to %f", fudgeFactor);
-	}
-	else if(e->text() == "0")
-	{
-		fudgeFactor=3;
-		qDebug("Fudge factor set to %f", fudgeFactor);
-	}
-	updateGL();
+        }
+        else
+        {
+            yaw -= 5;
+        }
+    }
+    else if(e->key() == Qt::Key_Up)
+    {
+        pitch += 5;
+        if(pitch > 90) pitch = 90;
+    }
+    else if(e->key() == Qt::Key_Down)
+    {
+        pitch -= 5;
+        if(pitch < -90) pitch = -90;
+    }
+    else if(e->key() == Qt::Key_R)
+    {
+        zoomFactor=10;
+        xOffset= yOffset=zOffset=yaw=pitch=0;
+    }
+    else if(e->text() == "=")
+    {
+        fudgeFactor *=1.25;
+    }
+    else if(e->text()=="-")
+    {
+        fudgeFactor /=1.25;
+    }
+    else if(e->text() == "0")
+    {
+        fudgeFactor=3;
+    }
+    updateGL();
 }
 
 TasksGui::TasksGui(QWidget *parent,PlayGround *playG):
@@ -619,7 +665,7 @@ TasksGui::TasksGui(QWidget *parent,PlayGround *playG):
 	playGround(playG),
 	tabContainer((QTabWidget*) parent),
 	tasksControlPanel(this,parent),
-	mapGL(this,parent),
+	mapGL(playG->mapManager->globalMap,this,parent),
 	speed(0.15),
 	turnRatio(5),
 	ptzPan(0),
@@ -634,7 +680,6 @@ TasksGui::TasksGui(QWidget *parent,PlayGround *playG):
     updateGeometry();
     setFocusPolicy(Qt::StrongFocus);
     config();
-    //	sskel = defs::SSkelPtr();
     loadTasks("/home/BlackCoder/workspace/CasPlanner/modules/TasksManager/tasks.txt");
 }
 
@@ -653,7 +698,6 @@ int TasksGui::config()
     //connect( staticRadBtn, SIGNAL(clicked()), this, SLOT(renderStatic()));
     // robotManager->commManager->start();
     return 1;
-
 }
 
 void TasksGui::loadTasks(string filename)
@@ -726,204 +770,16 @@ void TasksGui::provideSpeed( double &in_speed, double &in_turnRate)
 // }
 
 
-// void TasksGui::keyPressEvent(QKeyEvent *e)
-// {
-//     QString text;
-//     bool ok;
-//
-//     //qDebug("Key pressed %s", qPrintable(e->text()));
-//         if(e->key() == Qt::Key_Up)
-//         {
-//             qDebug("Cursor moved up");
-//             //emit cursorMove(0,1);
-//         }
-//         else if(e->key() == Qt::Key_Down)
-//         {
-//             //emit cursorMove(0,-1);
-//         }
-//         else if(e->key() == Qt::Key_Left)
-//         {
-//             //emit cursorMove(-1,0);
-//         }
-//         else if(e->key() == Qt::Key_Right)
-//         {
-//             //emit cursorMove(1,0);
-//         }
-//         switch(e->text().at(0).toAscii())
-//         {
-//             case 'w':
-// //                robotManager->commManager->setSpeed(speed);
-//                 break;
-//             case 'a':
-// //                robotManager->commManager->setTurnRate(turnRatio*speed);
-//                 break;
-//             case 's':
-// //                robotManager->commManager->setSpeed(-speed);
-//                 break;
-//             case 'd':
-// //                robotManager->commManager->setTurnRate(-turnRatio*speed);
-//                 break;
-//             case 'z':
-//
-//             case '.':
-//                 //emit cursorCentre();
-//                 break;
-// 	    case 'n':
-// 		// Start new patch
-// 		//robotManager->commManager->requestNewPatch(0);
-// 		break;
-//             case 'v':
-// 	       		text = QInputDialog::getText(this, "Name Dialog", "Please Enter your name: ",
-//                	QLineEdit::Normal, QString::null, &ok);
-// 				if ( ok )
-// 				{
-// 		    		if(text.isEmpty())
-// 		    		{
-//     					text = "NoName";
-// 		    		}
-// 			        int index = tabContainer->indexOf(this);
-// 			        tabContainer->setTabText(index, "CAS PLANNER");
-// 				}
-//                 break;
-//             case 'l':
-//                 //
-//                 break;
-//             case 'c':
-//                 //emit newMode(linkmode);
-//                 break;
-//             case 'm':
-//                 //mouseInvert = (-1)*mouseInvert;
-//                 break;
-//             case 'I':
-//                 //emit cancelMode();
-//                 break;
-//             case 'f':
-// //                if(isFullScreen()){
-// //                    fullScreenOff();
-// //                }
-// //                else {
-// //                    fullScreenOn();
-// //                }
-//                 break;
-//             case 'h':
-//                 //hideHUD = !hideHUD;
-//                 break;
-//             case 'x':
-//                 //hideExtras = !hideExtras;
-//                 break;
-//             case  '\'':
-//                 break;
-//             case '/':
-//                 break;
-//             case '1':
-//             case '2':
-//             case '3':
-//             case '4':
-//             case '5':
-//             case '6':
-//             case '7':
-//             case '8':
-//             case '9':
-//             case '0':
-//                 break;
-//             case 'b':
-//                 break;
-//             default:
-//                 e->ignore();
-//         }
-//
-// }
-
-// void TasksGui::keyReleaseEvent(QKeyEvent *e)
-// {
-//     if(!e->isAutoRepeat())
-//     {
-//         // Stop
-//         switch(e->text().at(0).toAscii())
-//         {
-//         case 'w':
-//         case 's':
-// //            robotManager->commManager->setSpeed(0);
-//             break;
-//         case 'a':
-//         case 'd':
-// //            robotManager->commManager->setTurnRate(0);
-//             break;
-//         }
-//     }
-// }
-
-// void TasksGui::wheelEvent( QWheelEvent *we)
-// {
-//     // check for mouse move direction
-//     int deltaMoved = we->delta();
-//     if( deltaMoved < 0 )
-//         speed -= 0.01; // decrease Homer speed a bit
-//     else
-//         speed += 0.01; // increase speed
-// }
-
 TasksGui::~TasksGui()
 {
-}
-
-void TasksGui::renderOG()
-{
-    //resetTab();
-        setRadMode(0);
-}
-
-void TasksGui::renderLaser()
-{
-    //resetTab();
-        setRadMode(1);
-}
-void TasksGui::renderStatic()
-{
-    //resetTab();
-        setRadMode(2);
-}
-
-void TasksGui::setRadMode(int mode)
-{
-        qDebug("Radio Button Clicked");
-    switch(mode)
-    {
-        case 0: // AUTO_TELEOP
-//        	mapGL.mapEnabled   = true;
-//        	mapGL.laserEnabled = false;
-//        	mapGL.speedEnabled = false;
-//            OGRadBtn->setChecked(true);
-            qDebug("OG MAP enabled");
-            break;
-        case 1: // AUTO_PAUSED
-//            mapGL.mapEnabled   = false;
-//        	mapGL.laserEnabled = true;
-//        	mapGL.speedEnabled = false;
-//            laserRadBtn->setChecked(true);
-            qDebug("Laser Enabled");
-            break;
-        case 2: // AUTO_FULL
-//           	mapGL.mapEnabled   = false;
-//        	mapGL.laserEnabled = false;
-//        	mapGL.speedEnabled = true;
-//            staticRadBtn->setChecked(true);
-            qDebug("Speed Enabled");
-            break;
-        default:
-            qDebug("Mode is incorrect");
-    }
 }
 
 void TasksGui::resetTab()
 {
     // get this tab index
     int index = tabContainer->indexOf(this);
-
     // set tab title
     tabContainer->setTabText(index, "Cas Planner");
-
-    //tabContainer->setTabIcon(index, QIcon("../ui/rescuegui-branchCommsRefactor/blank.xpm"));
 }
 
 void TasksGui::requestSnap()
@@ -1076,6 +932,7 @@ void TasksGui::generateSkeleton()
             voronoiPlanner = new VoronoiPathPlanner(playGround->mapManager->mapSkeleton);
             voronoiPlanner->setMap(playGround->mapManager->globalMap);
             voronoiPlanner->setRobot(playGround->robotPlatforms[0]->robot);
+            mapGL.setMapSkeleton(&playGround->mapManager->mapSkeleton);
         }
     }
 }
