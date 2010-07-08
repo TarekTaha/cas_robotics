@@ -62,9 +62,6 @@
 using namespace std;
 using namespace zmdp;
 
-//#include "mapskeleton.h"
-//#include "voronoidiagram.h"
-
 class TasksGui;
 class TasksControlPanel;
 class QMessageBox;
@@ -75,134 +72,127 @@ using namespace CasPlanner;
 
 class TasksControlPanel: public QWidget
 {
-        Q_OBJECT
-    public:
-                TasksControlPanel(TasksGui *,QWidget *);
-                void updateRobotSetting();
+    Q_OBJECT
+public:
+    TasksControlPanel(TasksGui *,QWidget *);
+    void updateRobotSetting();
         public slots:
-                void updateSelectedVoronoiMethod(bool);
-//		void updateSelectedRobot(bool);
-		void save();
-		void exportHtml();
-		void loadMap();
-		void setMap(QImage);
-		void taskSelected(int);
-		void runRandomTasks();
-//		void taskClicked(QListWidgetItem * item);
-// 	signals:
-//		void generateSkeleton();
-    private:
+    void updateSelectedVoronoiMethod(bool);
+    void save();
+    void exportHtml();
+    void loadMap();
+    void setMap(QImage);
+    void taskSelected(int);
+    void runRandomTasks();
+private:
 
-		TasksGui *tasksGui;
-		// BayesianNetwork Parameters
-		QGroupBox randomTasksGB;
-		QDoubleSpinBox numRandomRuns;
+    TasksGui *tasksGui;
+    // BayesianNetwork Parameters
+    QGroupBox randomTasksGB;
+    QDoubleSpinBox numRandomRuns;
 
-		// Voronoi Method
-		QGroupBox voronoiGB;
-		QRadioButton innerSkeletonBtn;
-		QRadioButton outerSkeletonBtn;
+    // Voronoi Method
+    QGroupBox voronoiGB;
+    QRadioButton innerSkeletonBtn;
+    QRadioButton outerSkeletonBtn;
 
-		QVector <QRadioButton *> availableRobots;
+    QVector <QRadioButton *> availableRobots;
 
-		// Command Actions
-		QGroupBox   actionGB;
-		QPushButton pauseBtn;
-		QPushButton randomTasksBtn;
-		QPushButton generateSkeletonBtn;
-		QPushButton captureImage;
-		QPushButton testModelBtn;
-		//Pointers to the currently selected Robot
-		QGroupBox tasksGB;
-		QTreeWidgetItem *robotItem;
-		QListWidget tasksList;
+    // Command Actions
+    QGroupBox   actionGB;
+    QPushButton pauseBtn;
+    QPushButton randomTasksBtn;
+    QPushButton generateSkeletonBtn;
+    QPushButton captureImage;
+    QPushButton testModelBtn;
+    //Pointers to the currently selected Robot
+    QGroupBox tasksGB;
+    QTreeWidgetItem *robotItem;
+    QListWidget tasksList;
 
-		QTreeWidget selectedRobot;
-//		QHash<QTreeWidgetItem *, RobotManager *> widget2RobMan;
-//		QHash<RobotManager *, QTreeWidgetItem *> robMan2Widget;
-		friend class TasksGui;
-		static unsigned *image, *null;
-	static int width, height, components;
-		static const int AutonomousNav = QTreeWidgetItem::UserType+1;
-		static const int ManualNav     = QTreeWidgetItem::UserType+2;
+    QTreeWidget selectedRobot;
+    friend class TasksGui;
+    static unsigned *image, *null;
+    static int width, height, components;
+    static const int AutonomousNav = QTreeWidgetItem::UserType+1;
+    static const int ManualNav     = QTreeWidgetItem::UserType+2;
 };
 
 class MapGL: public QGLWidget
 {
-        Q_OBJECT
-    public:
-// 		MapGL(QWidget *parent,SSkelPtr & sskel);
-    MapGL(TasksGui *,QWidget *parent);
-        void initializeGL();
-        void renderSkeleton();
-        void renderPath();
-        void drawProbHisto(QPointF pos, double prob);
-        void paintGL();
-        void resizeGL(int w, int h);
-//        void setSSkelPtr(SSkelPtr sskel);
-                QSize sizeHint();
-        void config();
-        QSize setMinimumSizeHint();
-        public slots:
-                void keyPressEvent(QKeyEvent *e);
-    private:
-                TasksGui *tasksGui;
-//		SSkelPtr  sskel;
-		float zoomFactor;
-		float xOffset, yOffset, zOffset;
-		float yaw, pitch;
-		float aspectRatio;
-		float fudgeFactor;
-		bool showGrids;
-		bool firstTime;
-		QTimer * renderTimer;
-	int skeletonList;
-		friend class TasksGui;
+    Q_OBJECT
+public:
+    MapGL(Map*,TasksGui *,QWidget *parent);
+    void initializeGL();
+    void renderSkeleton();
+    void renderPath();
+    void drawProbHisto(QPointF pos, double prob);
+    void paintGL();
+    void resizeGL(int w, int h);
+    void setMapSkeleton(MapSkeleton *);
+    void loadTexture();
+    void renderMap();
+    QSize sizeHint();
+    void config();
+    QSize setMinimumSizeHint();
+    public slots:
+        void keyPressEvent(QKeyEvent *e);
+private:
+    TasksGui *tasksGui;
+    float zoomFactor;
+    float xOffset, yOffset, zOffset;
+    float yaw, pitch;
+    float aspectRatio;
+    float fudgeFactor;
+    bool showGrids;
+    bool firstTime;
+    bool mainMapBuilt;
+    GLuint texId;
+    QTimer * renderTimer;
+    int skeletonList,mapList;
+    MapSkeleton *mapSkeleton;
+    Map *ogMap;
+    float ratioW, ratioH;
+    int newWidth,newHeight;
+    friend class TasksGui;
 };
 
 
 class TasksGui :public QWidget
 {
     Q_OBJECT
-    public:
-        TasksGui(QWidget *parent = 0,PlayGround *playG=0);
-        ~TasksGui();
-        virtual int config();
-                void requestSnap();
-                void resetTab();
-        void setRadMode(int mode);
-                void loadTasks(string filename);
-        VoronoiPathPlanner * voronoiPlanner;
-        QVector <Task> tasks;
-        bool skeletonGenerated;
-        int totalVisits;
-        PlayGround * playGround;
-//		Virtual_Voronoi_diagram_2*      vvd;
-//		VoronoiDiagram *     cvd;
-    public slots:
-        void updateData();
-        void provideSpeed(double &speed, double &turnRate);
-        void generateSkeleton();
-        void renderLaser();
-        void renderOG();
-        void renderStatic();
-        void testModel();
-    signals:
-        void newData();
-    private:
-                QTabWidget *tabContainer;
-                TasksControlPanel tasksControlPanel;
-//		SSkelPtr  sskel;
-        MapGL mapGL;
-//        MapViewer mapGL;
-        double speed;
-        double turnRatio;
-        double startX, startY;
-                double ptzPan;
-                double ptzTilt;
-                bool ptzEnabled;
-        double radPerPixel;
-        double msperWheel;
+public:
+    TasksGui(QWidget *parent = 0,PlayGround *playG=0);
+    ~TasksGui();
+    virtual int config();
+    void requestSnap();
+    void resetTab();
+    void setRadMode(int mode);
+    void loadTasks(string filename);
+    VoronoiPathPlanner * voronoiPlanner;
+    QVector <Task> tasks;
+    bool skeletonGenerated;
+    int totalVisits;
+    PlayGround * playGround;
+public slots:
+    void updateData();
+    void provideSpeed(double &speed, double &turnRate);
+    void generateSkeleton();
+    void testModel();
+signals:
+    void newData();
+private:
+    QTabWidget *tabContainer;
+    TasksControlPanel tasksControlPanel;
+    MapGL mapGL;
+    double speed;
+    double turnRatio;
+    double startX, startY;
+    double ptzPan;
+    double ptzTilt;
+    bool ptzEnabled;
+    double radPerPixel;
+    double msperWheel;
 };
 
 #endif
