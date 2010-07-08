@@ -854,7 +854,7 @@ void TasksGui::testModel()
             belief_vector newB = em->currentState;
             double max = 0;
             int index=0;
-                for(int j=0; j < newB.size();j++)
+                for(unsigned int j=0; j < newB.size();j++)
                 {
                         if(newB(j)&& newB(j)>max)
                         {
