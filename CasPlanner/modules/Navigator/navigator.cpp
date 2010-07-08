@@ -535,7 +535,7 @@ void Navigator::run()
 	QVector <Robot *> availableRobots;
 	ControlAction cntrl;
 	Timer amcl_timer,delta_timer,redraw_timer,control_timer;
-	double closest_obst=10;
+	//double closest_obst=10;
 	Pose loc;
 	if(!local_planner)
 	{
@@ -720,7 +720,7 @@ void Navigator::run()
 		displacement =  distance;
 		y1 = Dist2Seg(l,tracking_point);
 //		assert (distance > y1);
-//		s1 = sqrt(distance*distance- y1*y1);
+		s1 = sqrt(distance*distance- y1*y1);
 //		printf("\n y1=%f s1=%f",y1,s1); fflush(stdout);
 		//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
 		//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
@@ -775,7 +775,7 @@ void Navigator::run()
 					exit(1);
 			 	}
 				 //Find the farest way Point on the global path
-				 //* that belongs to the local map
+				 // that belongs to the local map
 			 	printf("\n Debug Location 6"); fflush(stdout);
 				double dist=0;
 				temp = closestPathSeg(EstimatedPos.p,global_path);
@@ -811,12 +811,11 @@ void Navigator::run()
 			 		temp= temp->next;
 			 	}
 				
-				 /*Search Start location is the center of the Robot			
-				 * currently it's the center of the laser, this will have
-				 * to be modified to translate the laser location to the 
-				 * robot's coordinate : TODO
-				 */
-				/* 
+				 //Search Start location is the center of the Robot
+				 // currently it's the center of the laser, this will have
+				 // to be modified to translate the laser location to the
+				 // robot's coordinate : TODO
+				 //
 			 	printf("\n Debug Location 7"); fflush(stdout);
 			 	start.p.setX(local_planner->pathPlanner->map->center.x());
 			 	start.p.setY(local_planner->pathPlanner->map->center.y()); 	

@@ -126,7 +126,7 @@ void Astar::findRoot() throw (CasPlannerException)
     SearchSpaceNode * temp;
     if(!this->search_space)
     {
-        throw(CasPlannerException("No SearchSpace Defined"));
+        throw(CasPlannerException((char*)"No SearchSpace Defined"));
         return;
     }
     double distance,shortest_distance = 100000;
@@ -166,7 +166,7 @@ void Astar::findDest() throw (CasPlannerException)
     SearchSpaceNode * temp;
     if(!this->search_space)
     {
-        throw(CasPlannerException("No SearchSpace Defined"));
+        throw(CasPlannerException((char*)"No SearchSpace Defined"));
         return;
     }
     double distance,shortest_distance = 100000;

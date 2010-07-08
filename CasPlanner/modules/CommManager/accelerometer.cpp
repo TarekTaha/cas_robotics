@@ -4,7 +4,7 @@ Accelerometer::Accelerometer():
 connected(false)
 {
 	// My N95's BTooth's MAC address
-	connectBT(5,"00:1A:DC:CF:B8:08");
+	connectBT(5,(char*)"00:1A:DC:CF:B8:08");
 }
 
 int Accelerometer::connectBT(uint8_t port, char MAC[18])
