@@ -99,8 +99,8 @@ Q_OBJECT
         void moveMODown();
         void yawMOPos();
         void yawMONeg();
-        virtual void  setStart(Pose);
-        virtual void    setEnd(Pose);
+        void setStart(Pose);
+        void setEnd(Pose);
     private:
         int screenWidth,count,step;
         PlayGround *playGround;

@@ -104,6 +104,8 @@ public:
     int  getCurrentSpatialState(Pose p);
     double  getDist2SpatialState(Pose P,int stateIndex);
     int getDestIndex(int state);
+    int getNumDestinations();
+    int getNumVerticies();
     int numStates;
     int numDestinations;
     void clear();
