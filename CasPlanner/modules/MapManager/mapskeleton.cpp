@@ -108,6 +108,16 @@ int MapSkeleton::getDestIndex(int state)
     return i;
 }
 
+int MapSkeleton::getNumDestinations()
+{
+    return destIndexes.size();
+}
+
+int MapSkeleton::getNumVerticies()
+{
+    return verticies.size();
+}
+
 int MapSkeleton::getCurrentSpatialState(Pose P)
 {
     double dist,closest = Dist(P.p,verticies[0].location);

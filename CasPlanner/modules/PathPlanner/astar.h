@@ -47,29 +47,31 @@ namespace CasPlanner
 
 class Astar: public SearchSpace
 {
-	private:
-		void   findRoot() throw(CasPlannerException);
-		void   findDest() throw(CasPlannerException);		
-		Node  *makeChildrenNodes(Node *parent) ;
-	public:
-		Astar(Robot *,double dG, QString heuristicType);
-		Astar();
-		long int MAXNODES;
-		QString hType;
-		double	distGoal;
-		Heuristic *heuristic;
-		Map    * map;
-		Pose start,end;
-		Robot *robot;
-		Node *root, *dest, *current, *childList, *curChild, *q, * test,*path, *p;
-		LList *openList,*closedList;
-		vector <Tree> tree;
-		void   setSocialReward(QHash<QString, int>*);
-		void   freeNode     (Node *);
-		int    inObstacle   (QPointF p, double angle);
-		bool   goalReached  (Node *n);
-		Node*  startSearch  (Pose start,Pose end,int);
-		virtual ~Astar();
+private:
+    void   findRoot() throw(CasPlannerException);
+    void   findDest() throw(CasPlannerException);
+    Node  *makeChildrenNodes(Node *parent) ;
+public:
+    Astar(Robot *,double dG, QString heuristicType);
+    Astar();
+    void setRobot(Robot *);
+    long int MAXNODES;
+    QString hType;
+    double distGoal;
+    double orientation2Goal;
+    Heuristic *heuristic;
+    Map    * map;
+    Pose start,end;
+    Robot *robot;
+    Node *root, *dest, *current, *childList, *curChild, *q, * test,*path, *p;
+    LList *openList,*closedList;
+    vector <Tree> tree;
+    void   setSocialReward(QHash<QString, int>*);
+    void   freeNode     (Node *);
+    int    inObstacle   (QPointF p, double angle);
+    bool   goalReached  (Node *n);
+    Node*  startSearch  (Pose start,Pose end,int);
+    virtual ~Astar();
 };
 
 }

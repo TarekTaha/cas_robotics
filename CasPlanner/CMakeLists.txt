@@ -197,14 +197,30 @@ IF(PLAYER_FOUND)
 ELSE(PLAYER_FOUND)
 	MESSAGE("Cannot find playerstage version 2.1 or above")
 ENDIF(PLAYER_FOUND)
-  
+
+ ##########################
+#  BlueTooth/bluez STUFF #
+#########################
+
+IF(PKG_CONFIG_FOUND)
+        pkg_check_modules(BLUEZ REQUIRED bluez)
+ELSE(PKG_CONFIG_FOUND)
+        MESSAGE("Cannot find bluez using pkg-config")
+ENDIF(PKG_CONFIG_FOUND)
+
+IF(PLAYER_FOUND)
+        MESSAGE("Bluetooth Bluez Found")
+ELSE(PLAYER_FOUND)
+        MESSAGE("Cannot find playerstage version 2.1 or above")
+ENDIF(PLAYER_FOUND)
+
 # we need this to be able to include headers produced by uic in our code
 # (CMAKE_BINARY_DIR holds a path to the build directory, while INCLUDE_DIRECTORIES() works just like INCLUDEPATH from qmake)
 INCLUDE_DIRECTORIES( 
     ${QT_INCLUDES} 
-	${OPENGL_INCLUDE_DIR}
+    ${OPENGL_INCLUDE_DIR}
     ${CMAKE_BINARY_DIR}
-	${PLAYER_INCLUDE_DIRS}    
+    ${PLAYER_INCLUDE_DIRS}
     ./modules/PathPlanner 
     ./modules/ObstacleAvoidance 
     ./modules/ScanMatching 
@@ -236,8 +252,8 @@ TARGET_LINK_LIBRARIES( ../CasPlanner
     ${QT_QTCORE_LIBRARY} 
     ${QT_QTOPENGL_LIBRARY}
     ${QT_QTXML_LIBRARY}	
-	${QT_LIBRARIES}
-	${PLAYER_LIBRARIES}
-	 freetype
-	 bluetooth
+    ${QT_LIBRARIES}
+    ${PLAYER_LIBRARIES}
+    ${BLUEZ_LIBRARIES}
+    freetype
 )

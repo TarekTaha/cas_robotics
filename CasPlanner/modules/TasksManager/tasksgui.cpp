@@ -46,32 +46,32 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
     this->setLayout(hlayout);
 
 
-	QVBoxLayout *tasksLayout = new QVBoxLayout;    
-	tasksLayout->addWidget(&tasksList);
-    tasksLayout->addWidget(&numRandomRuns);	
-	tasksGB.setLayout(tasksLayout);
-	
-	QHBoxLayout *parHLayout = new QHBoxLayout; 
-	QVBoxLayout *parVLayout = new QVBoxLayout;	
+    QVBoxLayout *tasksLayout = new QVBoxLayout;
+    tasksLayout->addWidget(&tasksList);
+    tasksLayout->addWidget(&numRandomRuns);
+    tasksGB.setLayout(tasksLayout);
+
+    QHBoxLayout *parHLayout = new QHBoxLayout;
+    QVBoxLayout *parVLayout = new QVBoxLayout;
     parHLayout->addWidget(new QLabel("Random Runs"));
     parHLayout->addWidget(&numRandomRuns);
-	
-	parVLayout->addLayout(parHLayout);
-    parVLayout->addWidget(&randomTasksBtn);    
+
+    parVLayout->addLayout(parHLayout);
+    parVLayout->addWidget(&randomTasksBtn);
     randomTasksGB.setLayout(parVLayout);
 
     numRandomRuns.setMinimum(0);
     numRandomRuns.setMaximum(100);
-	numRandomRuns.setSingleStep(1);
-	numRandomRuns.setValue(10);
+    numRandomRuns.setSingleStep(1);
+    numRandomRuns.setValue(10);
 
     QVBoxLayout *showL = new QVBoxLayout;
     showL->addWidget(&innerSkeletonBtn);
     showL->addWidget(&outerSkeletonBtn);
     innerSkeletonBtn.setChecked(true);
-	updateSelectedVoronoiMethod(true);
+    updateSelectedVoronoiMethod(true);
     voronoiGB.setLayout(showL);
-	
+
     QVBoxLayout *actionLayout = new QVBoxLayout;
     actionLayout->addWidget(&testModelBtn);
     actionLayout->addWidget(&pauseBtn);
@@ -79,15 +79,14 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
     actionLayout->addWidget(&generateSkeletonBtn);
     actionGB.setLayout(actionLayout);
 
-//	connect(&numRandomRuns,  SIGNAL(valueChanged(double)), this, SLOT(updateSelectedObject(double)));
     connect(&innerSkeletonBtn, SIGNAL(toggled(bool )), this,SLOT(updateSelectedVoronoiMethod(bool)));
-  	connect(&outerSkeletonBtn, SIGNAL(toggled(bool )), this,SLOT(updateSelectedVoronoiMethod(bool)));
-	connect(&generateSkeletonBtn, SIGNAL(pressed()),tasksGui, SLOT(generateSkeleton()));
-	connect(&captureImage,     SIGNAL(pressed()),this, SLOT(save()));
-	connect(&randomTasksBtn,   SIGNAL(pressed()),this, SLOT(runRandomTasks()));
-	connect(&tasksList,        SIGNAL(currentRowChanged(int)),this, SLOT(taskSelected(int)));
-	connect(&testModelBtn,     SIGNAL(pressed()),tasksGui, SLOT(testModel()));
-//	connect(&tasksList,        SIGNAL(itemClicked(QListWidgetItem * item )),this, SLOT(taskClicked(QListWidgetItem * item)));	
+    connect(&outerSkeletonBtn, SIGNAL(toggled(bool )), this,SLOT(updateSelectedVoronoiMethod(bool)));
+    connect(&generateSkeletonBtn, SIGNAL(pressed()),tasksGui, SLOT(generateSkeleton()));
+    connect(&captureImage,     SIGNAL(pressed()),this, SLOT(save()));
+    connect(&randomTasksBtn,   SIGNAL(pressed()),this, SLOT(runRandomTasks()));
+    connect(&tasksList,        SIGNAL(currentRowChanged(int)),this, SLOT(taskSelected(int)));
+    connect(&testModelBtn,     SIGNAL(pressed()),tasksGui, SLOT(testModel()));
+//	connect(&tasksList,        SIGNAL(itemClicked(QListWidgetItem * item )),this, SLOT(taskClicked(QListWidgetItem * item)));
 }
 
 
@@ -98,39 +97,47 @@ void TasksControlPanel::loadMap()
 
 void TasksControlPanel::runRandomTasks()
 {
-	QTime t;
-	Node * p;
-	if(!tasksGui->skeletonGenerated)
-		tasksGui->generateSkeleton();
-	int r;
-	t.start();
-	for(int i=0;i<numRandomRuns.value();i++)
-	{
-		r = rand()%tasksGui->tasks.size();
-		//tasksList.setCurrentRow(r);
-		qDebug("Using Task %s %d ",qPrintable(tasksGui->tasks[r].getName()),r);
-		Pose start(tasksGui->tasks[r].getStart().x(),tasksGui->tasks[r].getStart().y(),0);
-		Pose   end(tasksGui->tasks[r].getEnd().x(),tasksGui->tasks[r].getEnd().y(),0);		
-		tasksGui->voronoiPlanner->startSearch(start,end,METRIC);
-		if(tasksGui->voronoiPlanner->path)
-		{
-			tasksGui->voronoiPlanner->printNodeList();				
-			p = tasksGui->voronoiPlanner->path;
-			while(p)
-			{
-//				for(int j=0; j<tasksGui->playGround->mapManager->mapSkeleton.verticies.size(); j++)
-//				{
-//					if((p->pose.p.x() == tasksGui->playGround->mapManager->mapSkeleton.verticies[j].location.x())&&
-//					   (p->pose.p.y() == tasksGui->playGround->mapManager->mapSkeleton.verticies[j].location.y()))
-//					   {
-//					   		tasksGui->playGround->mapManager->mapSkeleton.verticies[j].prob = (++tasksGui->playGround->mapManager->mapSkeleton.verticies[j].visits)/double(++tasksGui->totalVisits); 
-//					   }
-//				}		
-				p = p->next;
-			}
-		}	
-	}
-	qDebug("Generationg %f Random Paths took:%d",numRandomRuns.value(),t.elapsed());
+    QTime t;
+    Node * p;
+    if(!tasksGui->skeletonGenerated)
+        tasksGui->generateSkeleton();
+    int sourceVertixId,destVertexId;
+    t.start();
+    for(int i=0;i<numRandomRuns.value();i++)
+    {
+        sourceVertixId = rand()%tasksGui->playGround->mapManager->mapSkeleton.getNumVerticies();
+        destVertexId   = rand()%tasksGui->playGround->mapManager->mapSkeleton.getNumDestinations();
+        qDebug()<<"\n Source Vertex is:"<<sourceVertixId<<" destination Vertex is:"<<destVertexId;
+        //tasksList.setCurrentRow(r);
+        //qDebug("Using Task %s %d ",qPrintable(tasksGui->tasks[sourceVertixId].getName()),sourceVertixId);
+        Pose start(tasksGui->playGround->mapManager->mapSkeleton.verticies[sourceVertixId].getLocation().x(),
+                   tasksGui->playGround->mapManager->mapSkeleton.verticies[sourceVertixId].getLocation().y(),
+                   0);
+        Pose end (tasksGui->playGround->mapManager->mapSkeleton.verticies[destVertexId].getLocation().x(),
+                   tasksGui->playGround->mapManager->mapSkeleton.verticies[destVertexId].getLocation().y(),
+                   0);
+        tasksGui->voronoiPlanner->startSearch(start,end,METRIC);
+        int step=0;
+        if(tasksGui->voronoiPlanner->path)
+        {
+            tasksGui->voronoiPlanner->printNodeList();
+            p = tasksGui->voronoiPlanner->path;
+            while(p)
+            {
+                for(int j=0; j<tasksGui->playGround->mapManager->mapSkeleton.verticies.size(); j++)
+                {
+                    if((p->pose.p.x() == tasksGui->playGround->mapManager->mapSkeleton.verticies[j].location.x())&&
+                       (p->pose.p.y() == tasksGui->playGround->mapManager->mapSkeleton.verticies[j].location.y()))
+                    {
+                        tasksGui->playGround->mapManager->mapSkeleton.verticies[j].prob = (++tasksGui->playGround->mapManager->mapSkeleton.verticies[j].visits)/double(++tasksGui->totalVisits);
+                    }
+                }
+                qDebug()<<"Set:"<<step++<<" has index:"<<tasksGui->playGround->mapManager->mapSkeleton.getCurrentSpatialState(p->pose);
+                p = p->next;
+            }
+        }
+    }
+    qDebug("Generationg %f Random Paths took:%d",numRandomRuns.value(),t.elapsed());
 }
 
 void TasksControlPanel::updateSelectedVoronoiMethod(bool)
@@ -145,11 +152,11 @@ void TasksControlPanel::save()
 
 void TasksControlPanel::taskSelected(int r)
 {
-	qDebug("Selected Task is:%d",r);	
+	qDebug("Selected Task is:%d",r);
 	Pose start(tasksGui->tasks[r].getStart().x(),tasksGui->tasks[r].getStart().y(),0);
 	Pose   end(tasksGui->tasks[r].getEnd().x(),tasksGui->tasks[r].getEnd().y(),0);
-	if(tasksGui->voronoiPlanner)		
-		tasksGui->voronoiPlanner->startSearch(start,end,METRIC);	
+	if(tasksGui->voronoiPlanner)
+		tasksGui->voronoiPlanner->startSearch(start,end,METRIC);
 	fflush(stdout);
 }
 
@@ -180,12 +187,12 @@ MapGL::MapGL(TasksGui *tsg, QWidget *parent):
 	//sskel(ssk),
 	tasksGui(tsg),
 	zoomFactor(10),
- 	xOffset(0),
- 	yOffset(0),
- 	zOffset(0),
- 	yaw(0),
- 	pitch(0),
- 	fudgeFactor(3),
+	xOffset(0),
+	yOffset(0),
+	zOffset(0),
+	yaw(0),
+	pitch(0),
+	fudgeFactor(3),
 	showGrids(true),
 	firstTime(true)
 {
@@ -204,7 +211,7 @@ QSize MapGL::sizeHint()
 QSize MapGL::setMinimumSizeHint()
 {
     //return QSize(400,300);
-	return QSize(400,400);    
+        return QSize(400,400);
 }
 
 void MapGL::initializeGL()
@@ -216,20 +223,20 @@ void MapGL::initializeGL()
 
 void MapGL::resizeGL(int w, int h)
 {
-	aspectRatio = ((float) w)/((float) h);
-	// Reset the coordinate system before modifying
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	gluPerspective(180, aspectRatio, 1,1000);
-//    qDebug("Resize NEW w = %d h = %d", w, h);
-	glViewport(0,0,w,h);
+    aspectRatio = ((float) w)/((float) h);
+    // Reset the coordinate system before modifying
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-	glOrtho(-aspectRatio, aspectRatio, -1, 1, -1, 1);
+
+    gluPerspective(180, aspectRatio, 1,1000);
+    //    qDebug("Resize NEW w = %d h = %d", w, h);
+    glViewport(0,0,w,h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-aspectRatio, aspectRatio, -1, 1, -1, 1);
     glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	updateGL();
+    glLoadIdentity();
+    updateGL();
 }
 
 void MapGL::config()
@@ -239,58 +246,58 @@ void MapGL::config()
 
 void MapGL::drawProbHisto(QPointF pos, double prob)
 {
-	QString str = QString("%1 \%").arg((int)(prob*100));  
+	QString str = QString("%1 \%").arg((int)(prob*100));
 	if(prob==0)
 		return;
 	glPushMatrix();
 	glTranslatef(pos.x(),pos.y(),0.0f);
     glColor4f(0,0,0,1);
- 	renderText(0 ,0 + 0.2, prob + 0.2, str);
-	glScalef(1/12.0, 1/12.0, prob);
-  	//glRotatef(rotqube,0.0f,1.0f,0.0f);	// Rotate The cube around the Y axis
-  	//glRotatef(rotqube,1.0f,1.0f,1.0f);
-  	glBegin(GL_QUADS);		// Draw The Cube Using quads  
-	
- 		//glColor3f(1.0f,0.0f,1.0f);	// Color Violet
-		glColor4f(0.0f,1.0f,0.0f,1.0f); 		
-	    
+        renderText(0 ,0 + 0.2, prob + 0.2, str);
+        glScalef(1/12.0, 1/12.0, prob);
+        //glRotatef(rotqube,0.0f,1.0f,0.0f);	// Rotate The cube around the Y axis
+        //glRotatef(rotqube,1.0f,1.0f,1.0f);
+        glBegin(GL_QUADS);		// Draw The Cube Using quads
+
+		//glColor3f(1.0f,0.0f,1.0f);	// Color Violet
+		glColor4f(0.0f,1.0f,0.0f,1.0f);
+
 //	    glColor3f(0.0f,1.0f,0.0f);	// Color Blue
 	    glVertex3f( 1.0f, 1.0f,-0.0f);	// Top Right Of The Quad (Top)
 	    glVertex3f(-1.0f, 1.0f,-0.0f);	// Top Left Of The Quad (Top)
 	    glVertex3f(-1.0f, 1.0f, 1.0f);	// Bottom Left Of The Quad (Top)
 	    glVertex3f( 1.0f, 1.0f, 1.0f);	// Bottom Right Of The Quad (Top)
-	    
+
 //	    glColor3f(1.0f,0.5f,0.0f);	// Color Orange
 	    glVertex3f( 1.0f,-1.0f, 1.0f);	// Top Right Of The Quad (Bottom)
 	    glVertex3f(-1.0f,-1.0f, 1.0f);	// Top Left Of The Quad (Bottom)
 	    glVertex3f(-1.0f,-1.0f,-0.0f);	// Bottom Left Of The Quad (Bottom)
 	    glVertex3f( 1.0f,-1.0f,-0.0f);	// Bottom Right Of The Quad (Bottom)
-	    
-//	    glColor3f(1.0f,0.0f,0.0f);	// Color Red	
+
+//	    glColor3f(1.0f,0.0f,0.0f);	// Color Red
 	    glVertex3f( 1.0f, 1.0f, 1.0f);	// Top Right Of The Quad (Front)
 	    glVertex3f(-1.0f, 1.0f, 1.0f);	// Top Left Of The Quad (Front)
 	    glVertex3f(-1.0f,-1.0f, 1.0f);	// Bottom Left Of The Quad (Front)
 	    glVertex3f( 1.0f,-1.0f, 1.0f);	// Bottom Right Of The Quad (Front)
-	    
+
 //	    glColor3f(1.0f,1.0f,0.0f);	// Color Yellow
 	    glVertex3f( 1.0f,-1.0f,-0.0f);	// Top Right Of The Quad (Back)
 	    glVertex3f(-1.0f,-1.0f,-0.0f);	// Top Left Of The Quad (Back)
 	    glVertex3f(-1.0f, 1.0f,-0.0f);	// Bottom Left Of The Quad (Back)
 	    glVertex3f( 1.0f, 1.0f,-0.0f);	// Bottom Right Of The Quad (Back)
-	    
+
 //	    glColor3f(0.0f,0.0f,1.0f);	// Color Blue
 	    glVertex3f(-1.0f, 1.0f, 1.0f);	// Top Right Of The Quad (Left)
 	    glVertex3f(-1.0f, 1.0f,-0.0f);	// Top Left Of The Quad (Left)
 	    glVertex3f(-1.0f,-1.0f,-0.0f);	// Bottom Left Of The Quad (Left)
 	    glVertex3f(-1.0f,-1.0f, 1.0f);	// Bottom Right Of The Quad (Left)
-	    
+
 //	    glColor3f(1.0f,0.0f,1.0f);	// Color Violet
 	    glVertex3f( 1.0f, 1.0f,-0.0f);	// Top Right Of The Quad (Right)
 	    glVertex3f( 1.0f, 1.0f, 1.0f);	// Top Left Of The Quad (Right)
 	    glVertex3f( 1.0f,-1.0f, 1.0f);	// Bottom Left Of The Quad (Right)
 	    glVertex3f( 1.0f,-1.0f,-0.0f);	// Bottom Right Of The Quad (Right)
-  	glEnd();			// End Drawing The Cube
-	glPopMatrix();  	
+	glEnd();			// End Drawing The Cube
+	glPopMatrix();
 	return;
 }
 
@@ -298,7 +305,7 @@ void MapGL::renderSkeleton()
 {
 //  	const Halfedge_const_handle null_halfedge ;
 //  	const Vertex_const_handle   null_vertex ;
-//  		
+//
 //    if ( !this->sskel )
 //      return ;
 //
@@ -353,8 +360,8 @@ void MapGL::renderSkeleton()
 ////							glVertex2f(he->opposite()->vertex()->point().x()+ 0.1, he->opposite()->vertex()->point().y()-0.1);
 ////							glVertex2f(he->opposite()->vertex()->point().x()- 0.1, he->opposite()->vertex()->point().y()-0.1);
 ////						glEnd();
-////					}				
-//          		}	
+////					}
+//          		}
 //        	}
 //        	he = he->next();
 //      	}
@@ -362,7 +369,7 @@ void MapGL::renderSkeleton()
 //    }
 //    for(int i=0;i<tasksGui->playGround->mapManager->mapSkeleton.verticies.size();i++)
 //    {
-//		drawProbHisto(tasksGui->playGround->mapManager->mapSkeleton.verticies[i].location,tasksGui->playGround->mapManager->mapSkeleton.verticies[i].prob);    	
+//		drawProbHisto(tasksGui->playGround->mapManager->mapSkeleton.verticies[i].location,tasksGui->playGround->mapManager->mapSkeleton.verticies[i].prob);
 //    }
 //	firstTime = false;
 //    glPopMatrix();
@@ -385,14 +392,14 @@ void MapGL::renderPath()
 	    glBegin(GL_LINE_STRIP);
 		while(path)
 		{
-	    	glVertex2f(path->pose.p.x(),path->pose.p.y());
+		glVertex2f(path->pose.p.x(),path->pose.p.y());
 			path = path->next;
 		}
 	    glEnd();
 	    glLineWidth(1);
-		glPopMatrix();	    
+		glPopMatrix();
 	}
-	//qDebug("WHAT THEEEE !!!");	
+	//qDebug("WHAT THEEEE !!!");
 }
 
 void MapGL::paintGL()
@@ -409,7 +416,7 @@ void MapGL::paintGL()
 	glPushMatrix();
 	glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
     glColor4f(0,0,0,1);
- 	renderText(zoomFactor*aspectRatio*0.90-1, -0.9*zoomFactor, 0, "grid: 1 m");
+        renderText(zoomFactor*aspectRatio*0.90-1, -0.9*zoomFactor, 0, "grid: 1 m");
 
 	glRotatef(pitch,1,0,0);
 	glRotatef(yaw,0,0,1);
@@ -467,7 +474,7 @@ void MapGL::paintGL()
 	renderPath();
 	if(tasksGui->skeletonGenerated && firstTime)
 	{
-//		glNewList(skeletonList, GL_COMPILE);	
+//		glNewList(skeletonList, GL_COMPILE);
 ////			tasksGui->cvd->draw_diagram();
 ////			tasksGui->cvd->draw_sites();
 		glEndList();
@@ -612,8 +619,8 @@ TasksGui::TasksGui(QWidget *parent,PlayGround *playG):
 	playGround(playG),
 	tabContainer((QTabWidget*) parent),
 	tasksControlPanel(this,parent),
-	mapGL(this,parent),	
-    speed(0.15),
+	mapGL(this,parent),
+	speed(0.15),
 	turnRatio(5),
 	ptzPan(0),
 	ptzTilt(0),
@@ -621,14 +628,14 @@ TasksGui::TasksGui(QWidget *parent,PlayGround *playG):
 	msperWheel(0.0005)
 {
     QHBoxLayout *layout = new QHBoxLayout();
-	layout->addWidget(&mapGL,4);
-	layout->addWidget(&tasksControlPanel,1);
+    layout->addWidget(&mapGL,4);
+    layout->addWidget(&tasksControlPanel,1);
     setLayout(layout);
     updateGeometry();
     setFocusPolicy(Qt::StrongFocus);
     config();
-//	sskel = defs::SSkelPtr();
-	loadTasks("/home/BlackCoder/workspace/CasPlanner/modules/TasksManager/tasks.txt");	
+    //	sskel = defs::SSkelPtr();
+    loadTasks("/home/BlackCoder/workspace/CasPlanner/modules/TasksManager/tasks.txt");
 }
 
 void TasksGui::updateData()
@@ -657,23 +664,23 @@ void TasksGui::loadTasks(string filename)
 //	if ( in )
 //    {
 //    	while ( ! in.eof() )
-//      	{ 
+//      	{
 //          	double x1,x2,y1,y2 ;
 //          	string name;
 //          	//char name[20];
 //          	in >> x1 >> y1 >> x2 >> y2>> name ;
 //          	Task t(QPointF(x1,y1),QPointF(x2,y2),name.c_str());
 //	        tasks.push_back(t);
-//	        
+//
 //	        QListWidgetItem *newItem = new QListWidgetItem;
 //	        newItem->setText(name.c_str());
-//	        tasksControlPanel.tasksList.insertItem(row++, newItem);          	 
+//	        tasksControlPanel.tasksList.insertItem(row++, newItem);
 //      	}
 //    }
 //	else
 //	{
 //		std::cout<<"\n File Not Found";
-//	}    
+//	}
 //	for(int i=0; i<tasks.size();i++)
 //	{
 //		qDebug("Task %d: from [%f %f] to [%f %f] Name:%s ",i+1,tasks[i].getStart().x(),tasks[i].getStart().y(),
@@ -863,23 +870,23 @@ TasksGui::~TasksGui()
 void TasksGui::renderOG()
 {
     //resetTab();
-	setRadMode(0);
+        setRadMode(0);
 }
 
 void TasksGui::renderLaser()
 {
     //resetTab();
-	setRadMode(1);
+        setRadMode(1);
 }
 void TasksGui::renderStatic()
 {
     //resetTab();
-	setRadMode(2);
+        setRadMode(2);
 }
 
 void TasksGui::setRadMode(int mode)
 {
-	qDebug("Radio Button Clicked");
+        qDebug("Radio Button Clicked");
     switch(mode)
     {
         case 0: // AUTO_TELEOP
@@ -904,7 +911,7 @@ void TasksGui::setRadMode(int mode)
             qDebug("Speed Enabled");
             break;
         default:
-	    qDebug("Mode is incorrect");
+            qDebug("Mode is incorrect");
     }
 }
 
@@ -945,7 +952,7 @@ void TasksGui::testModel()
   config->setString("policyOutputFile", "none");
   BoundPairExec* em = new BoundPairExec();
   printf("initializing\n");
-  
+
   em->initReadFiles("/home/BlackCoder/Desktop/paperexperiment.pomdp","/home/BlackCoder/Desktop/out.policy", *config);
 
 //  MDPExec* e = em;
@@ -953,7 +960,7 @@ void TasksGui::testModel()
 //  belief_vector b(((Pomdp*)em->mdp)->getBeliefSize());
   belief_vector b;
   dvector initialBeliefD;
-  initialBeliefD.resize(((Pomdp*)em->mdp)->getBeliefSize());  
+  initialBeliefD.resize(((Pomdp*)em->mdp)->getBeliefSize());
   //belief_vector b = ((Pomdp*)em->mdp)->getInitialBelief();
 //  initialBeliefD(5)=1;
 //  copy(b, initialBeliefD);
@@ -977,35 +984,35 @@ void TasksGui::testModel()
 //	  	printf("\nBelief%d=%f",i,newB(i));
 //	  	fflush(stdout);
 //  	}
-//  } 
+//  }
   int obs[]={2,2,2,2,2,2,2,2,2,2,2,2,2,0,4};
   int NUM_TRIALS = 15 ;
-  for (int i=0; i < NUM_TRIALS; i++) 
+  for (int i=0; i < NUM_TRIALS; i++)
   {
-	    printf("  step %d\n", i);
-	    int a = em->chooseAction();
-	    printf("    chose action %d\n", a);
-	    int o = obs[i];//em->getRandomOutcome(a);
-	    em->advanceToNextState(a,o);
-	    printf("    updated belief\n");
-	    belief_vector newB = em->currentState;
-	    double max = 0;
-	    int index=0;
-		for(int j=0; j < newB.size();j++)
-		{
-			if(newB(j)&& newB(j)>max)
-			{
-				max=newB(j);
-				index=j;
-			}
-		}
-		printf("\nNew Belief: %d=%f",index,max);
-		fflush(stdout);
-		if (em->getStateIsTerminal())
-	    {
-			printf("  [belief is terminal, ending trial]\n");
-			break;
-	    } 
+            printf("  step %d\n", i);
+            int a = em->chooseAction();
+            printf("    chose action %d\n", a);
+            int o = obs[i];//em->getRandomOutcome(a);
+            em->advanceToNextState(a,o);
+            printf("    updated belief\n");
+            belief_vector newB = em->currentState;
+            double max = 0;
+            int index=0;
+                for(int j=0; j < newB.size();j++)
+                {
+                        if(newB(j)&& newB(j)>max)
+                        {
+                                max=newB(j);
+                                index=j;
+                        }
+                }
+                printf("\nNew Belief: %d=%f",index,max);
+                fflush(stdout);
+                if (em->getStateIsTerminal())
+            {
+                        printf("  [belief is terminal, ending trial]\n");
+                        break;
+            }
     }
 //  int s, sp, a, o;
 //
@@ -1054,27 +1061,21 @@ void TasksGui::testModel()
 
 void TasksGui::generateSkeleton()
 {
-//	if(!playGround->mapManager->skeletonGenerated)
-//	{
-//		playGround->mapManager->generateSkeleton();
-//		this->sskel = playGround->mapManager->sskel;
-//		if (! this->sskel)
-//		{
-//			skeletonGenerated = false;		
-//			qDebug("\nNo Skeleton Generated");
-//			return;
-//		}
-//		else
-//		{
-//			skeletonGenerated = true;
-//			mapGL.setSSkelPtr(playGround->mapManager->mapSkeleton.getSSkelPtr());
-//			mapGL.paintGL();
-//			if (voronoiPlanner)
-//			{
-//				delete voronoiPlanner;
-//			}
-//			voronoiPlanner = new VoronoiPathPlanner(this->sskel);
-//			voronoiPlanner->buildSpace();
-//		}
-//	}
+    if(!playGround->mapManager->skeletonGenerated)
+    {
+        playGround->mapManager->generateSkeleton();
+        if(playGround->mapManager->mapSkeleton.numStates !=0)
+        {
+            skeletonGenerated = true;
+            //mapGL.setSSkelPtr(playGround->mapManager->mapSkeleton.getSSkelPtr());
+            mapGL.paintGL();
+            if (voronoiPlanner)
+            {
+                delete voronoiPlanner;
+            }
+            voronoiPlanner = new VoronoiPathPlanner(playGround->mapManager->mapSkeleton);
+            voronoiPlanner->setMap(playGround->mapManager->globalMap);
+            voronoiPlanner->setRobot(playGround->robotPlatforms[0]->robot);
+        }
+    }
 }

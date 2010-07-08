@@ -23,16 +23,16 @@
 namespace CasPlanner
 {
 
-//VoronoiPathPlanner::VoronoiPathPlanner(SSkelPtr & sskel):sskel(sskel)
-//{
-//}
-
+VoronoiPathPlanner::VoronoiPathPlanner(MapSkeleton &mapSkeleton)
+{
+    setMapSkeleton(mapSkeleton);
+}
 
 VoronoiPathPlanner :: ~VoronoiPathPlanner()
 {
 	freeResources();
 	cout<<"\n	--->>> Allocated Memory FREED <<<---";
-};
+}
 
 void VoronoiPathPlanner::freeResources()
 {
@@ -49,76 +49,102 @@ void VoronoiPathPlanner::freePath()
 		delete path;
 		path = p;
 	}
-};
+}
 
 void VoronoiPathPlanner::setStart(Pose start)
 {
 	this->start = start;
-};
+}
 
 void VoronoiPathPlanner::setEnd(Pose end)
 {
 	this->end= end;
-};
+}
+
 bool VoronoiPathPlanner::readSpaceFromFile(const char *filename)
 {
-  	double locationx,locationy,obstacle_cost;
-  	SearchSpaceNode *temp;
-  	assert(filename != NULL);
-  	filename = strdup(filename);
-  	FILE *file = fopen(filename, "r");
-  	if (!file)
-  	{
-  		qDebug("Error Opening File");
-    	fclose(file);
-    	return false;
-  	}
-  	while (!feof(file))
-  	{
-  		fscanf(file,"%lf %lf %lf\n",&locationx,&locationy,&obstacle_cost);
-		if (search_space == NULL ) // Constructing the ROOT NODE
-		{
-			temp = new SearchSpaceNode;
-			temp->location.setX(locationx);
-			temp->location.setY(locationy);
-			temp->obstacle_cost = obstacle_cost;
-			temp->parent   = NULL;
-			temp->next     = NULL;
-			search_space = temp;
-		}
-		else
-		{
-			temp = new SearchSpaceNode;
-			temp->location.setX(locationx);
-			temp->location.setY(locationy);
-			temp->parent = NULL;
-			temp->next   = search_space;
-			search_space = temp;
-		}
-  	}
-  	fclose(file);
-  	return true;
+        double locationx,locationy,obstacle_cost;
+        SearchSpaceNode *temp;
+        assert(filename != NULL);
+        filename = strdup(filename);
+        FILE *file = fopen(filename, "r");
+        if (!file)
+        {
+                qDebug("Error Opening File");
+        fclose(file);
+        return false;
+        }
+        while (!feof(file))
+        {
+                fscanf(file,"%lf %lf %lf\n",&locationx,&locationy,&obstacle_cost);
+                if (search_space == NULL ) // Constructing the ROOT NODE
+                {
+                        temp = new SearchSpaceNode;
+                        temp->location.setX(locationx);
+                        temp->location.setY(locationy);
+                        temp->obstacle_cost = obstacle_cost;
+                        temp->parent   = NULL;
+                        temp->next     = NULL;
+                        search_space = temp;
+                }
+                else
+                {
+                        temp = new SearchSpaceNode;
+                        temp->location.setX(locationx);
+                        temp->location.setY(locationy);
+                        temp->parent = NULL;
+                        temp->next   = search_space;
+                        search_space = temp;
+                }
+        }
+        fclose(file);
+        return true;
+}
+
+void VoronoiPathPlanner::setMapSkeleton(MapSkeleton & mapSkeleton)
+{
+    for(int i=0;i<mapSkeleton.verticies.size();i++)
+    {
+        qDebug()<<"Adding Vertex:"<<i<<" to the searchSpace";
+        //This checks if the node already exists and add a new one if it doesnt
+        SearchSpaceNode *parentNode = insertNode(mapSkeleton.verticies[i].getLocation(),i);
+        for(int j=0;j<mapSkeleton.verticies[i].connections.size();j++)
+        {
+            qDebug()<<"    Adding Child:"<<j<<" to parent"<<i;
+            int connectionVertixId = mapSkeleton.verticies[i].connections[j].nodeIndex;
+            // child will be inserted only if it doesn't Exist
+            SearchSpaceNode * childNode = insertNode(mapSkeleton.verticies[connectionVertixId].getLocation());
+            parentNode->children.push_back(childNode);
+        }
+    }
+    MAXNODES = 500;
 }
 
 bool VoronoiPathPlanner::saveSpace2File(const char *filename)
 {
-  	assert(filename != NULL);
-  	filename = strdup(filename);
-  	FILE *file = fopen(filename, "wb");
-  	if (!file)
-  	{
-  		qDebug("Error Opening File");
-    	fclose(file);
-    	return false;
-  	}
-  	SearchSpaceNode *temp=search_space;
-  	while (temp)
-  	{
-  		fprintf(file,"%f %f %f\n",temp->location.x(),temp->location.y(),temp->obstacle_cost);
-		temp = temp->next;
-  	}
-  	fclose(file);
-  	return true;
+        assert(filename != NULL);
+        filename = strdup(filename);
+        FILE *file = fopen(filename, "wb");
+        if (!file)
+        {
+                qDebug("Error Opening File");
+        fclose(file);
+        return false;
+        }
+        SearchSpaceNode *temp=search_space;
+        while (temp)
+        {
+                fprintf(file,"%f %f %f\n",temp->location.x(),temp->location.y(),temp->obstacle_cost);
+                temp = temp->next;
+        }
+        fclose(file);
+        return true;
+}
+
+void VoronoiPathPlanner :: setMap(Map * map_in)
+{
+    this->map = map_in;
+    qDebug("MAP SET"); fflush(stdout);
 }
 
 void VoronoiPathPlanner :: printNodeList()
@@ -152,12 +178,11 @@ void VoronoiPathPlanner::showConnections()
 	int m=0,n=0;
 	while (temp != NULL)
 	{
+	    qDebug()<<"Node at Location x:"<<temp->location.x()<<" y:"<<temp->location.y();
 		for(int i=0; i < temp->children.size();i++)
 		{
 			loc1 = temp->location;
-			map->convert2Pix(&loc1);
 			loc2 = temp->children[i]->location;
-			map->convert2Pix(&loc2);
 			m++;
 		}
 		temp = temp->next;
@@ -215,7 +240,6 @@ void VoronoiPathPlanner::buildSpace()
 //    MAXNODES = 500;
 }
 
-
 void VoronoiPathPlanner::saveSearchSpace()
 {
 	QPointF p;
@@ -229,15 +253,4 @@ void VoronoiPathPlanner::saveSearchSpace()
 	}
 }
 
-/*! Sets the converted QImage or the Laser Scan Map to
- * the Current Planner
- */
-//void VoronoiPathPlanner :: setSkeleton(SSkelPtr & ssk)
-//{
-//	if(!ssk)
-//		qDebug("Why the hell ur giving me an empty Skeleton ???");
-//	this->sskel = ssk;
-//	skelInitialize = true;
-//};
-
-}
+}//CasPlanner namespace

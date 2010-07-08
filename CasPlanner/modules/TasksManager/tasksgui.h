@@ -75,20 +75,20 @@ using namespace CasPlanner;
 
 class TasksControlPanel: public QWidget
 {
-	Q_OBJECT
+        Q_OBJECT
     public:
-		TasksControlPanel(TasksGui *,QWidget *);
-		void updateRobotSetting();
-	public slots:
-		void updateSelectedVoronoiMethod(bool);
+                TasksControlPanel(TasksGui *,QWidget *);
+                void updateRobotSetting();
+        public slots:
+                void updateSelectedVoronoiMethod(bool);
 //		void updateSelectedRobot(bool);
 		void save();
 		void exportHtml();
 		void loadMap();
 		void setMap(QImage);
 		void taskSelected(int);
-		void runRandomTasks();		
-//		void taskClicked(QListWidgetItem * item);		
+		void runRandomTasks();
+//		void taskClicked(QListWidgetItem * item);
 // 	signals:
 //		void generateSkeleton();
     private:
@@ -101,7 +101,7 @@ class TasksControlPanel: public QWidget
 		// Voronoi Method
 		QGroupBox voronoiGB;
 		QRadioButton innerSkeletonBtn;
- 		QRadioButton outerSkeletonBtn;
+		QRadioButton outerSkeletonBtn;
 
 		QVector <QRadioButton *> availableRobots;
 
@@ -122,17 +122,17 @@ class TasksControlPanel: public QWidget
 //		QHash<RobotManager *, QTreeWidgetItem *> robMan2Widget;
 		friend class TasksGui;
 		static unsigned *image, *null;
-        static int width, height, components;
+	static int width, height, components;
 		static const int AutonomousNav = QTreeWidgetItem::UserType+1;
 		static const int ManualNav     = QTreeWidgetItem::UserType+2;
 };
 
 class MapGL: public QGLWidget
 {
-	Q_OBJECT
+        Q_OBJECT
     public:
 // 		MapGL(QWidget *parent,SSkelPtr & sskel);
-		MapGL(TasksGui *,QWidget *parent);
+    MapGL(TasksGui *,QWidget *parent);
         void initializeGL();
         void renderSkeleton();
         void renderPath();
@@ -140,13 +140,13 @@ class MapGL: public QGLWidget
         void paintGL();
         void resizeGL(int w, int h);
 //        void setSSkelPtr(SSkelPtr sskel);
-		QSize sizeHint();
+                QSize sizeHint();
         void config();
         QSize setMinimumSizeHint();
-	public slots:
-		void keyPressEvent(QKeyEvent *e);
+        public slots:
+                void keyPressEvent(QKeyEvent *e);
     private:
-		TasksGui *tasksGui;
+                TasksGui *tasksGui;
 //		SSkelPtr  sskel;
 		float zoomFactor;
 		float xOffset, yOffset, zOffset;
@@ -156,7 +156,7 @@ class MapGL: public QGLWidget
 		bool showGrids;
 		bool firstTime;
 		QTimer * renderTimer;
-        int skeletonList;		
+	int skeletonList;
 		friend class TasksGui;
 };
 
@@ -168,21 +168,21 @@ class TasksGui :public QWidget
         TasksGui(QWidget *parent = 0,PlayGround *playG=0);
         ~TasksGui();
         virtual int config();
-		void requestSnap();
-  		void resetTab();
+                void requestSnap();
+                void resetTab();
         void setRadMode(int mode);
-		void loadTasks(string filename);        
-    	VoronoiPathPlanner * voronoiPlanner;    
-    	QVector <Task> tasks;
-    	bool skeletonGenerated;
-        int totalVisits;		    	    
-    	PlayGround * playGround;
-//		Virtual_Voronoi_diagram_2*      vvd;    
-//		VoronoiDiagram *     cvd;	
+                void loadTasks(string filename);
+        VoronoiPathPlanner * voronoiPlanner;
+        QVector <Task> tasks;
+        bool skeletonGenerated;
+        int totalVisits;
+        PlayGround * playGround;
+//		Virtual_Voronoi_diagram_2*      vvd;
+//		VoronoiDiagram *     cvd;
     public slots:
         void updateData();
         void provideSpeed(double &speed, double &turnRate);
-		void generateSkeleton();
+        void generateSkeleton();
         void renderLaser();
         void renderOG();
         void renderStatic();
@@ -190,17 +190,17 @@ class TasksGui :public QWidget
     signals:
         void newData();
     private:
-		QTabWidget *tabContainer;
-		TasksControlPanel tasksControlPanel;
+                QTabWidget *tabContainer;
+                TasksControlPanel tasksControlPanel;
 //		SSkelPtr  sskel;
         MapGL mapGL;
 //        MapViewer mapGL;
         double speed;
         double turnRatio;
         double startX, startY;
-		double ptzPan;
-		double ptzTilt;
-		bool ptzEnabled;
+                double ptzPan;
+                double ptzTilt;
+                bool ptzEnabled;
         double radPerPixel;
         double msperWheel;
 };
