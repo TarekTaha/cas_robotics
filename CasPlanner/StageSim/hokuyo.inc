@@ -6,6 +6,5 @@ define hokuyo_laser laser
   fov 240.0
   samples 768
   color "LightBlue"
-  size [ 0.05 0.05 ]	
+  size [ 0.05 0.05 2]	
 )
-

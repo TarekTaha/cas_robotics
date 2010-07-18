@@ -1,27 +1,34 @@
 ****************************************************************************
 *      
-* README.CasPlanner  - Tarek Taha - CasPlanner 0.1v                                                                          
+* CasPlanner
+*             Authors: Tarek Taha      , UTS-CAS <tataha@eng.uts.edu.au>
+*                      Jaime Valls Miro, UTS-CAS <javalls@eng.uts.edu.au>
+*             Version: CasPlanner 1.0v
 *
 ****************************************************************************
 
-----------------------------------
+----------------------------------------------------------------------
 CasPlanner - multi-Robot task allocation and collaboration Platform
-----------------------------------
+----------------------------------------------------------------------
 
-This is a Robot Software platform that supports (ORCA and PlayerStage). It allows an easy 
-control of single/multiple Robots using a GUI interface. Some of the features that are
-partially supported for the time being and are specific for our application:
+This is a Robot High Level Client Platform that typically would sit on a robotic platform like
+PlayerStage, Orca and ROS. At the moment it only supports PlayerStage, but their is enough
+abstraction in the software architecture to allow the usage of different robotic platforms, feel
+free to contact me for help on how to add the support to your robotic platform.
+
+This Client Platform allows easy control of single/multiple Robots using a GUI interface.
+Some of the features that are partially supported for the time being and are specific
+for our application:
    
-	- Map construction using ICP (Iterative Closest Point).
+	- Map construction using MRICP (Map Reference Iterative Closest Point).
 	- Robot Localization annd Obstacle Avoidance using the corresponding drivers in PlayerStage and ORCA.
-	- Robot WayPoint Navigation. 
+	- Robot WayPoint Navigation, using our own CSTEP method.
    	- Path Planning and replanning using Modified A* with sampling ( http://www.tarektaha.com/research/download.php?view.20 ).
-   	- Task Allocation and Management.
-   	- Voronio Map Skeleton Extraction (in progress).
-   	- Reinforcement Learning in POMDP worlds (early Stages).
+   	- Task Allocation and Management. Monitoring navigation activities, recording and simulating them.
+   	- Very specific POMDP modelling for wheenchair navigation.
 
 At this stage, this software platform is very specific to our application and is not intended
-for general use but it can be adapoted to your own specific application with some modifications
+for general use but it can be adapoted to your own specific application with some modifications,
 any recommendations or suggestions are welcomed.
 	- 
 
@@ -29,21 +36,23 @@ any recommendations or suggestions are welcomed.
 
 Dependencies
 ------------
-   - PlayerStage 2.0.2 or greater, ORCA will be supported soon.
-   - QT4.2.x or greater.
-   - CGAL (Computational Geometry Algorithms Library) available from http://www.cgal.org/ 
-   - OpenGL library support.
-   - GLU or the equivalent FREE-GLU library.
-   
-   
-   
+   - CMake 2.4 and greater
+   - PlayerStage 3.1.0 or greater, ORCA will be supported soon.
+   - QT4.2.x or greater (with QtQl module)
+   - BlueTooth - bluez lib, for accelerometer integration.
+   - OpenGL library support with FREE-GLUT library.
+   - FreeType library (for rendering text in OpenGL).
+
 Installation
 ------------
-For most people, the following sequence should be enough unless you have a missing dependency:
+For most people, the following sequence should be enough unless you have a missing dependency,
+from inside the project root folder do the following:
 
-  	$ qmake casgui.pro or qmake-qt4 casgui.pro
-  	$ make
- 
+        $ mkdir build
+        $ cd build
+        $ cmake ..
+        $ make
+This will generate a CasPlanner binary file in the project main folder
 
 Config File
 ------------
@@ -54,8 +63,8 @@ This file contains the following sections:
 	- ROBOT 	 :defines a robot and it's parameters.
 	- Planner 	 :defines the sampling method parameters for Path Planning.
 	- Map  		 :defines the map parameters.
-	- Navigation :defines the path following/obstacle avoidance parameters.
-	- ForceField :defines the parameters for the force field Obstacle Avoidance Method.
+	- Navigation     :defines the path following/obstacle avoidance parameters.
+	- ForceField     :defines the parameters for the force field Obstacle Avoidance Method.
 
 Description of the parameters used in each section and their values:
 
@@ -168,7 +177,7 @@ Description of the parameters used in each section and their values:
 	  - Default: 0.5
 	  - How close should we can come to obstacles.
 	- obst_avoid (string) 
-	  - Default: "FORCE_FIELD"
+	  - Default: "VFH", (FORCE_FIELD depreciated, please don't use)
 	  - The obstacle avoidance method used ("FORCE_FIELD","VFH")
   	- traversable_dist (float)
   	  - Default: 3
@@ -198,14 +207,14 @@ Description of the parameters used in each section and their values:
   	  - Default: 0.03
   	  - The maximium allowed velocity.
 
-	ForceField: (To be added Later)
+	ForceField: (depreciated, please ignore)
 
 NOTE: the current version supports modifying the configuration file through the GUI but it's
 still experimental, new versions will support loading/Saving and parsing configuration files
 directly from GUI without having to give it as a command parameter.
   	
 Running
------------- 
+------------
 	$ ./CasPlanner config-filename.cfg
 	
 

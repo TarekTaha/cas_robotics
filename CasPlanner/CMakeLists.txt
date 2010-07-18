@@ -4,132 +4,132 @@ PROJECT( CasPlanner )
 cmake_minimum_required(VERSION 2.4)
 
 SET( CasPlanner_MOC_HDRS
-    ./modules/CommManager/commmanager.h 
-    ./modules/CommManager/comms.h 
-    ./modules/Rendering/glrender.h 
-    ./modules/Rendering/laserrender.h 
-    ./gui/hritab.h 
-    ./gui/mainwindow.h 
-    ./gui/navigationtab.h 
-    ./gui/planningtab.h 
-    ./gui/playgroundtab.h 
-    ./gui/statusbar.h 
-    ./gui/tabcontainer.h 
-    ./modules/Rendering/mapviewer.h 
-    ./modules/Navigator/navigator.h 
-    ./modules/Rendering/ogrender.h 
-    ./modules/CommManager/playerinterface.h 
+    ./modules/CommManager/commmanager.h
+    ./modules/CommManager/comms.h
+    ./modules/Rendering/glrender.h
+    ./modules/Rendering/laserrender.h
+    ./gui/hritab.h
+    ./gui/mainwindow.h
+    ./gui/navigationtab.h
+    ./gui/planningtab.h
+    ./gui/playgroundtab.h
+    ./gui/statusbar.h
+    ./gui/tabcontainer.h
+    ./modules/Rendering/mapviewer.h
+    ./modules/Navigator/navigator.h
+    ./modules/Rendering/ogrender.h
+    ./modules/CommManager/playerinterface.h
     ./modules/Parser/xmlparser.h
-    ./modules/PathPlanner/planningmanager.h 
-    ./modules/PlayGround/playground.h 
-    ./modules/PlayGround/robotmanager.h 
-    ./modules/Rendering/robotrender.h 
+    ./modules/PathPlanner/planningmanager.h
+    ./modules/PlayGround/playground.h
+    ./modules/PlayGround/robotmanager.h
+    ./modules/Rendering/robotrender.h
     ./modules/Sensors/sensors.h
-    ./modules/TasksManager/tasksgui.h 
+    ./modules/TasksManager/tasksgui.h
 )
 
 SET( CasPlanner_SRCS
-    ./modules/CommManager/commmanager.cpp 
-    ./modules/CommonTools/bandmat.cpp 
-    ./modules/CommonTools/cholesky.cpp 
-    ./modules/CommonTools/evalue.cpp 
-    ./modules/CommonTools/fft.cpp 
-    ./modules/CommonTools/hholder.cpp 
-    ./modules/CommonTools/jacobi.cpp 
-    ./modules/CommonTools/myexcept.cpp 
-    ./modules/CommonTools/newfft.cpp 
-    ./modules/CommonTools/newmat1.cpp 
-    ./modules/CommonTools/newmat2.cpp 
-    ./modules/CommonTools/newmat3.cpp 
-    ./modules/CommonTools/newmat4.cpp 
-    ./modules/CommonTools/newmat5.cpp 
-    ./modules/CommonTools/newmat6.cpp 
-    ./modules/CommonTools/newmat7.cpp 
-    ./modules/CommonTools/newmat8.cpp 
-    ./modules/CommonTools/newmat9.cpp 
-    ./modules/CommonTools/newmatex.cpp 
-    ./modules/CommonTools/newmatnl.cpp 
-    ./modules/CommonTools/newmatrm.cpp 
-    ./modules/CommonTools/nm_misc.cpp 
-    ./modules/CommonTools/solution.cpp 
-    ./modules/CommonTools/sort.cpp 
-    ./modules/CommonTools/submat.cpp 
-    ./modules/CommonTools/svd.cpp 
-    ./modules/Parser/configfile.cc 
-    ./modules/Navigator/controller.cpp 
-    ./modules/Rendering/laserrender.cpp 
-    ./gui/hritab.cpp 
-    ./gui/main.cpp 
-    ./gui/mainwindow.cpp 
-    ./gui/navigationtab.cpp 
-    ./gui/planningtab.cpp 
-    ./gui/playgroundtab.cpp 
-    ./gui/statusbar.cpp 
-    ./gui/tabcontainer.cpp 
-    ./modules/Rendering/mapviewer.cpp 
-    ./modules/MapManager/mapmanager.cpp 
-    ./modules/Navigator/navigator.cpp 
-    ./modules/Rendering/ogrender.cpp 
-    ./modules/CommManager/playerinterface.cpp 
+    ./modules/CommManager/commmanager.cpp
+    ./modules/CommonTools/bandmat.cpp
+    ./modules/CommonTools/cholesky.cpp
+    ./modules/CommonTools/evalue.cpp
+    ./modules/CommonTools/fft.cpp
+    ./modules/CommonTools/hholder.cpp
+    ./modules/CommonTools/jacobi.cpp
+    ./modules/CommonTools/myexcept.cpp
+    ./modules/CommonTools/newfft.cpp
+    ./modules/CommonTools/newmat1.cpp
+    ./modules/CommonTools/newmat2.cpp
+    ./modules/CommonTools/newmat3.cpp
+    ./modules/CommonTools/newmat4.cpp
+    ./modules/CommonTools/newmat5.cpp
+    ./modules/CommonTools/newmat6.cpp
+    ./modules/CommonTools/newmat7.cpp
+    ./modules/CommonTools/newmat8.cpp
+    ./modules/CommonTools/newmat9.cpp
+    ./modules/CommonTools/newmatex.cpp
+    ./modules/CommonTools/newmatnl.cpp
+    ./modules/CommonTools/newmatrm.cpp
+    ./modules/CommonTools/nm_misc.cpp
+    ./modules/CommonTools/solution.cpp
+    ./modules/CommonTools/sort.cpp
+    ./modules/CommonTools/submat.cpp
+    ./modules/CommonTools/svd.cpp
+    ./modules/Parser/configfile.cc
+    ./modules/Navigator/controller.cpp
+    ./modules/Rendering/laserrender.cpp
+    ./gui/hritab.cpp
+    ./gui/main.cpp
+    ./gui/mainwindow.cpp
+    ./gui/navigationtab.cpp
+    ./gui/planningtab.cpp
+    ./gui/playgroundtab.cpp
+    ./gui/statusbar.cpp
+    ./gui/tabcontainer.cpp
+    ./modules/Rendering/mapviewer.cpp
+    ./modules/MapManager/mapmanager.cpp
+    ./modules/Navigator/navigator.cpp
+    ./modules/Rendering/ogrender.cpp
+    ./modules/CommManager/playerinterface.cpp
     ./modules/Parser/xmlparser.cpp
-    ./modules/PathPlanner/planningmanager.cpp 
-    ./modules/PlayGround/playground.cpp 
-    ./modules/PlayGround/robotmanager.cpp 
-    ./modules/Rendering/robotrender.cpp 
-    ./modules/Sensors/sensors.cpp 
-    ./modules/TasksManager/task.cpp 
-    ./modules/TasksManager/tasksgui.cpp 
-    ./modules/Rendering/speedrender.cpp 
-    ./modules/PathPlanner/astar.cpp 
-    ./modules/ObstacleAvoidance/forcefield.cpp 
-    ./modules/ScanMatching/geometry2D.cpp 
-    ./modules/ScanMatching/icp.cpp 
-    ./modules/ScanMatching/nn.cpp 
-    ./modules/PathPlanner/llist.cpp 
-    ./modules/PathPlanner/node.cpp 
-    ./modules/PathPlanner/pathplanner.cpp 
-    ./modules/PathPlanner/robot.cpp 
-    ./modules/PathPlanner/searchspace.cpp 
-    ./modules/PathPlanner/searchspacenode.cpp 
-    ./modules/PathPlanner/voronoipathplanner.cpp 
-    ./modules/Misc/timer.cpp 
-    ./modules/GeometricTools/Vector2d.cpp 
-    ./modules/PomdpCore/CassandraModel.cc 
-    ./modules/PomdpCore/CassandraParser.cc 
-    ./modules/PomdpCore/decision-tree.c 
-    ./modules/PomdpCore/imm-reward.c 
-    ./modules/PomdpCore/mdp.c 
-    ./modules/PomdpCore/Pomdp.cc 
-    ./modules/PomdpCore/sparse-matrix.c 
-    ./modules/PomdpCore/zmdpCommonTime.cc 
-    ./modules/PomdpCore/zmdpCommonTypes.cc 
-    ./modules/PomdpCore/zmdpConfig.cc 
-    ./modules/PomdpCore/pomdp_spec.tab.cc 
-    ./modules/PomdpCore/pomdp_spec.yy.cc 
-    ./modules/PomdpCore/parse_err.c 
-    ./modules/PomdpCore/parse_hash.c 
-    ./modules/PomdpCore/BoundPairExec.cc 
-    ./modules/PomdpCore/MDPExec.cc 
-    ./modules/PomdpCore/MaxPlanesLowerBound.cc 
-    ./modules/PomdpCore/BoundPairCore.cc 
-    ./modules/PomdpCore/BoundPair.cc 
-    ./modules/PomdpCore/MDPCache.cc 
-    ./modules/PomdpCore/BlindLBInitializer.cc 
-    ./modules/MapManager/mapskeleton.cpp 
-    ./modules/MapManager/map.cpp 
-    ./modules/HumanRobotInteraction/IntentionRecognizer.cpp 
-    ./modules/HumanRobotInteraction/activityLogger.cpp 
-    ./modules/Controller/wheelchairproxy.cpp 
-    ./modules/Rendering/FreeType.cpp 
-    ./modules/CommManager/accelerometer.cpp 
-    ./modules/PathPlanner/socialplanner.cpp 
-    ./modules/ExceptionHandling/casplannerexception.cpp 
+    ./modules/PathPlanner/planningmanager.cpp
+    ./modules/PlayGround/playground.cpp
+    ./modules/PlayGround/robotmanager.cpp
+    ./modules/Rendering/robotrender.cpp
+    ./modules/Sensors/sensors.cpp
+    ./modules/TasksManager/task.cpp
+    ./modules/TasksManager/tasksgui.cpp
+    ./modules/Rendering/speedrender.cpp
+    ./modules/PathPlanner/astar.cpp
+    ./modules/ObstacleAvoidance/forcefield.cpp
+    ./modules/ScanMatching/geometry2D.cpp
+    ./modules/ScanMatching/icp.cpp
+    ./modules/ScanMatching/nn.cpp
+    ./modules/PathPlanner/llist.cpp
+    ./modules/PathPlanner/node.cpp
+    ./modules/PathPlanner/pathplanner.cpp
+    ./modules/PathPlanner/robot.cpp
+    ./modules/PathPlanner/searchspace.cpp
+    ./modules/PathPlanner/searchspacenode.cpp
+    ./modules/PathPlanner/voronoipathplanner.cpp
+    ./modules/Misc/timer.cpp
+    ./modules/GeometricTools/Vector2d.cpp
+    ./modules/PomdpCore/CassandraModel.cc
+    ./modules/PomdpCore/CassandraParser.cc
+    ./modules/PomdpCore/decision-tree.c
+    ./modules/PomdpCore/imm-reward.c
+    ./modules/PomdpCore/mdp.c
+    ./modules/PomdpCore/Pomdp.cc
+    ./modules/PomdpCore/sparse-matrix.c
+    ./modules/PomdpCore/zmdpCommonTime.cc
+    ./modules/PomdpCore/zmdpCommonTypes.cc
+    ./modules/PomdpCore/zmdpConfig.cc
+    ./modules/PomdpCore/pomdp_spec.tab.cc
+    ./modules/PomdpCore/pomdp_spec.yy.cc
+    ./modules/PomdpCore/parse_err.c
+    ./modules/PomdpCore/parse_hash.c
+    ./modules/PomdpCore/BoundPairExec.cc
+    ./modules/PomdpCore/MDPExec.cc
+    ./modules/PomdpCore/MaxPlanesLowerBound.cc
+    ./modules/PomdpCore/BoundPairCore.cc
+    ./modules/PomdpCore/BoundPair.cc
+    ./modules/PomdpCore/MDPCache.cc
+    ./modules/PomdpCore/BlindLBInitializer.cc
+    ./modules/MapManager/mapskeleton.cpp
+    ./modules/MapManager/map.cpp
+    ./modules/HumanRobotInteraction/IntentionRecognizer.cpp
+    ./modules/HumanRobotInteraction/activityLogger.cpp
+    ./modules/Controller/wheelchairproxy.cpp
+    ./modules/Rendering/FreeType.cpp
+    ./modules/CommManager/accelerometer.cpp
+    ./modules/PathPlanner/socialplanner.cpp
+    ./modules/ExceptionHandling/casplannerexception.cpp
     ./modules/PathPlanner/heuristic.cpp
 )
 
 # UI .ui files
-SET(CasPlanner_UIS 
-    gui/hritab.ui 
+SET(CasPlanner_UIS
+    gui/hritab.ui
     gui/configparsertab.ui
     )
 # Resources files
@@ -214,46 +214,53 @@ ELSE(PLAYER_FOUND)
         MESSAGE("Cannot find playerstage version 2.1 or above")
 ENDIF(PLAYER_FOUND)
 
+include( cmake/FindFreeType.cmake )
+
+IF(FREETYPE_FOUND)
+    MESSAGE("FreeType Found")
+ELSE(FREETYPE_FOUND)
+    MESSAGE("Cannot find freetype lib")
+ENDIF(FREETYPE_FOUND)
+
 # we need this to be able to include headers produced by uic in our code
-# (CMAKE_BINARY_DIR holds a path to the build directory, while INCLUDE_DIRECTORIES() works just like INCLUDEPATH from qmake)
-INCLUDE_DIRECTORIES( 
-    ${QT_INCLUDES} 
+INCLUDE_DIRECTORIES(
+    ${QT_INCLUDES}
     ${OPENGL_INCLUDE_DIR}
     ${CMAKE_BINARY_DIR}
     ${PLAYER_INCLUDE_DIRS}
-    ./modules/PathPlanner 
-    ./modules/ObstacleAvoidance 
-    ./modules/ScanMatching 
-    ./modules/Misc 
-    ./modules/GeometricTools 
-    ./modules/Controller 
-    ./modules/CommManager 
-    ./modules/CommonTools/ 
-    ./modules/MapManager 
-    ./modules/Navigator 
-    ./modules/Parser 
-    ./modules/PlanningManager 
-    ./modules/PlayGround 
-    ./modules/Rendering 
-    ./modules/Sensors 
-    ./modules/TasksManager 
-    ./modules/ExceptionHandling 
-    ./gui 
-    ./modules/PomdpCore 
-    ./modules/HumanRobotInteraction 
-    /usr/include/freetype2
+    ${FREETYPE_INCLUDE_DIR_freetype2}
+    ./modules/PathPlanner
+    ./modules/ObstacleAvoidance
+    ./modules/ScanMatching
+    ./modules/Misc
+    ./modules/GeometricTools
+    ./modules/Controller
+    ./modules/CommManager
+    ./modules/CommonTools/
+    ./modules/MapManager
+    ./modules/Navigator
+    ./modules/Parser
+    ./modules/PlanningManager
+    ./modules/PlayGround
+    ./modules/Rendering
+    ./modules/Sensors
+    ./modules/TasksManager
+    ./modules/ExceptionHandling
+    ./gui
+    ./modules/PomdpCore
+    ./modules/HumanRobotInteraction
 )
 
 # here we instruct CMake to build "CasPlanner" executable from all of the source files
 ADD_EXECUTABLE( ../CasPlanner ${CasPlanner_SRCS} ${CasPlanner_MOC_SRCS} ${CasPlanner_RC_SRCS} ${CasPlanner_UI_HDRS} )
 
-TARGET_LINK_LIBRARIES( ../CasPlanner 
-    ${QT_QTGUI_LIBRARY} 
-    ${QT_QTCORE_LIBRARY} 
+TARGET_LINK_LIBRARIES( ../CasPlanner
+    ${QT_QTGUI_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
     ${QT_QTOPENGL_LIBRARY}
-    ${QT_QTXML_LIBRARY}	
+    ${QT_QTXML_LIBRARY}
     ${QT_LIBRARIES}
     ${PLAYER_LIBRARIES}
     ${BLUEZ_LIBRARIES}
-    freetype
+    ${FREETYPE_LIBRARY}
 )
