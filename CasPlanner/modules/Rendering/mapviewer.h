@@ -37,7 +37,6 @@
 
 #include "FreeType.h"
 
-//class RobotRender;
 class PlayGround;
 class NavControlPanel;
 
