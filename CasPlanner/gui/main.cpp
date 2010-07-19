@@ -23,10 +23,10 @@
 
 int main( int argc, char ** argv ) 
 {
-	QApplication a( argc, argv );
+    QApplication a( argc, argv );
     if(argc > 1)
     {
-		MainWindow* main_win = new MainWindow(QApplication::arguments());
+        MainWindow* main_win = new MainWindow(QApplication::arguments());
         main_win->setWindowTitle( "CAS Navigation System" );
         main_win->show();
         a.connect( &a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()) );

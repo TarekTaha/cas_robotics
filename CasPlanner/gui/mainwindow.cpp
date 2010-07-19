@@ -32,6 +32,8 @@ QMainWindow(parent)
 MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     QMainWindow(parent), logCount(0)
 {
+    Logger& logger = Logger::getLogger();
+    logger.init("log.txt",true);
     createActions();
     createMenus();
     // Create the PlayGround where all the RobotManagers will run
@@ -77,13 +79,12 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
         // Data Logging Timer
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(logData()));
-    //connect(timer, SIGNAL(timeout()), this, SLOT(captureScreenShot()));
     imageCounter = 0;
     timer->start(6000);
+
 }
 void MainWindow::logData()
 {
-    //QApplication::beep();
     return;
 }
 

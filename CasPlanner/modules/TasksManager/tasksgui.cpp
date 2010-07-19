@@ -140,7 +140,7 @@ void TasksControlPanel::runRandomTasks()
             }
         }
     }
-    qDebug("Generationg %f Random Paths took:%d",numRandomRuns.value(),t.elapsed());
+    qDebug()<<QString("Generationg %1 Random Paths took:%2").arg(numRandomRuns.value(),t.elapsed());
 }
 
 void TasksControlPanel::updateSelectedVoronoiMethod(bool)
@@ -155,7 +155,7 @@ void TasksControlPanel::save()
 
 void TasksControlPanel::taskSelected(int r)
 {
-	qDebug("Selected Task is:%d",r);
+        qDebug()<<"Selected Task is:"<<r;
 	Pose start(tasksGui->tasks[r].getStart().x(),tasksGui->tasks[r].getStart().y(),0);
 	Pose   end(tasksGui->tasks[r].getEnd().x(),tasksGui->tasks[r].getEnd().y(),0);
 	if(tasksGui->voronoiPlanner)

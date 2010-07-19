@@ -32,22 +32,25 @@
 #include "mapviewer.h"
 #include "planningtab.h"
 #include "hritab.h"
+#include "loggerview.h"
+#include "logger.h"
 
 class TabContainer : public QTabWidget
 {
-Q_OBJECT
+    Q_OBJECT
     public:
-		TabContainer(QWidget *parent=0,PlayGround *rob=0);
-		void setPlayGround(PlayGround *playG);
-		~TabContainer();
+        TabContainer(QWidget *parent=0,PlayGround *rob=0);
+        void setPlayGround(PlayGround *playG);
+        ~TabContainer();
     public:
-    	PlayGroundTab*playGroundTab;
-	    PlanningTab *planningTab;
-	    HriTab		*hriTab;
-    	PlayGround   *playGround;
-		NavContainer *navCon;
-		TasksGui *tasksGui;
-		MapViewer *mapViewer;
+        PlayGroundTab*playGroundTab;
+        PlanningTab *planningTab;
+        HriTab		*hriTab;
+        PlayGround   *playGround;
+        NavContainer *navCon;
+        TasksGui *tasksGui;
+        MapViewer *mapViewer;
+        loggerview *loggerView;
 };
 
 #endif

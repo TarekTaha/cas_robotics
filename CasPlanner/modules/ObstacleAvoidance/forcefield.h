@@ -23,6 +23,8 @@
 #include <QPointF>
 #include <QVector>
 #include <math.h>
+#include <libplayerc++/playerc++.h>
+#include <libplayerinterface/player.h>
 
 #include "utils.h"
 #include "robot.h"

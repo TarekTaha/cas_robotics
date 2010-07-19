@@ -34,6 +34,7 @@
 #include <QPointF>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "logger.h"
 
 class RobotManager;
 using namespace CasPlanner;

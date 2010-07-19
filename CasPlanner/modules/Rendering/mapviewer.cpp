@@ -135,7 +135,7 @@ void MapViewer::setProvider(MapProvider *)
 
 void MapViewer::updateMap(Map *newMap)
 {
-    qDebug("Updating Map");
+    qDebug()<<"Updating Map";
     this->ogMap = newMap;
     mainMapBuilt = false;
     updateGL();
@@ -145,7 +145,7 @@ void MapViewer::renderPaths()
 {
     if(!playGround)
     {
-        qDebug("WHAT THEEEE !!!");
+        qDebug()<<"WHAT THEEEE !!!";
         exit(1);
     }
     for(int i=0;i<playGround->robotPlatforms.size();i++)
@@ -265,7 +265,7 @@ void MapViewer::renderLaser()
 {
     if(!playGround)
     {
-        qDebug("WTFFFF !!!");
+        qDebug()<<"WTFFFF !!!";
         exit(1);
     }
     for(int i=0;i<playGround->robotPlatforms.size();i++)
@@ -345,7 +345,7 @@ void MapViewer::renderSearchSpace()
                 child = temp->children[j];
                 if(!child)
                 {
-                    qDebug("Why the hell there is an empty CHILD ???");
+                    qDebug()<<"Why the hell there is an empty CHILD ???";
                     fflush(stdout);
                     continue;
                 }
@@ -414,7 +414,7 @@ void MapViewer::renderRobot()
 {
     if(!playGround)
     {
-        qDebug("WHAT THEEEE !!!");
+        qDebug()<<"WHAT THEEEE !!!";
         exit(1);
     }
     for(int i=0;i<playGround->robotPlatforms.size();i++)
@@ -1220,7 +1220,7 @@ void MapViewer::mousePressEvent(QMouseEvent *me)
     {
         start.phi = atan2(p.y() - start.p.y(),p.x() - start.p.x());
         emit setStart(start);
-        qDebug("Start Angle =%f",RTOD(start.phi));
+        qDebug()<<"Start Angle ="<<RTOD(start.phi);
         step++;
         update();
         setMouseTracking(false);
@@ -1228,7 +1228,7 @@ void MapViewer::mousePressEvent(QMouseEvent *me)
     else if(step == 4)
     {
         end.phi = atan2(p.y() - end.p.y(),p.x() - end.p.x());
-        qDebug("End Angle =%f",RTOD(end.phi));
+        qDebug()<<"End Angle ="<<RTOD(end.phi);
         emit setEnd(end)	;
         end_initialized = true;
         step = 1;
@@ -1255,7 +1255,6 @@ QPointF MapViewer::getOGLPos(double x, double y)
     winY = (float)viewport[3] - y;
     glReadPixels( (int)x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
     gluUnProject( winX, winY, winZ, modelMatrix, projMatrix, viewport, &posX, &posY, &posZ);
-    //	qDebug("Translated to x: %f y: %f z:%f",posX,posY,posZ);
     position[0] = posX;
     position[1] = posY;
     retval.setX(position[0]);
@@ -1373,17 +1372,14 @@ void MapViewer::keyPressEvent(QKeyEvent *e)
     else if(e->text() == "=")
     {
         fudgeFactor *=1.25;
-        qDebug("Fudge factor set to %f", fudgeFactor);
     }
     else if(e->text()=="-")
     {
         fudgeFactor /=1.25;
-        qDebug("Fudge factor set to %f", fudgeFactor);
     }
     else if(e->text() == "0")
     {
         fudgeFactor=3;
-        qDebug("Fudge factor set to %f", fudgeFactor);
     }
     updateGL();
 }

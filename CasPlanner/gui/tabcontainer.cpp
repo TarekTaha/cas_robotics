@@ -39,6 +39,11 @@ TabContainer::TabContainer(QWidget *parent,PlayGround *playG)
     hriTab = new HriTab(parent,playGround);
     addTab(hriTab, "HRI Settings");
 
+    loggerView = new loggerview(parent);
+    addTab(loggerView,"Logger");
+
+    Logger& logger = Logger::getLogger();
+    connect(&logger,SIGNAL(logMsg(int,QString)),loggerView,SLOT(logMsg(int,QString)));
     updateGeometry();
 }
 

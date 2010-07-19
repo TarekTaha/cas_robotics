@@ -385,7 +385,7 @@ bool Navigator::mapModified(LaserScan laserScan,Pose rob_location)
 		temp.y = t.y();
 		laser_scan_icp.push_back(temp);
 	}
-	qDebug("Local Map size is:%d Laser Scan size:%d",local_map_icp.size(),laserScan.points.size());	
+        qDebug()<<"Local Map size is:"<<local_map_icp.size()<<"Laser Scan size:"<<laserScan.points.size();
 	Geom2D::Pose loc;
 	loc.p.x = 0;
 	loc.p.y = 0;	
@@ -543,17 +543,17 @@ void Navigator::run()
 	}
 	if(!global_path)
 	{
-		qDebug("\n --->>> No PATH TO FOLLOW <<<---");
+                qDebug()<<" --->>> No PATH TO FOLLOW <<<---";
 		return ;
 	}
 	if(!robotManager->commManager)
 	{
-		qDebug("\t - Communication Manager Not Initialized");
+                qDebug()<<"\t - Communication Manager Not Initialized";
 		return;
 	}
 	if(!robotManager->commManager->isConnected())
 	{
-		qDebug("\t - Your not Connected to the Robot, Connect First");
+                qDebug()<<"\t - Your not Connected to the Robot, Connect First";
 		return;		
 	}
 	path2Draw = GLOBALPATH;
@@ -581,7 +581,7 @@ void Navigator::run()
 			while(!robotManager->commManager->getLocalized())
 			{
 				loc = robotManager->commManager->getLocation();
-				qDebug("NO Accurate Estimation yet, best current is: x:%f y:%f phi:%f",loc.p.x(),loc.p.y(),RTOD(loc.phi));
+                                qDebug()<<"NO Accurate Estimation yet, best current is: x:"<<loc.p.x()<<" y:"<<loc.p.y()<<"phi:"<<RTOD(loc.phi);
 				usleep(300000);
 			}
 		}
@@ -678,7 +678,7 @@ void Navigator::run()
 		first = closestPathSeg(tracking_point,global_path);
 		if(!first)
 		{
-			qDebug("Path Doesn't contain any segment to follow !!!");
+                        qDebug()<<"Path Doesn't contain any segment to follow !!!";
 			break;
 		}
 		// Is it the last Segment ?
@@ -697,7 +697,7 @@ void Navigator::run()
 //				}
 //				else
 				{
-					qDebug("--->>> Destination Reached !!!"); fflush(stdout);
+                                        qDebug()<<"--->>> Destination Reached !!!"; fflush(stdout);
 					emit addMsg(0,INFO,QString("--->>> Destination Reached !!!"));
 					emit pathTraversed();
 		 			end_reached = true;
@@ -904,16 +904,14 @@ void Navigator::run()
 					//Force Field
 					velVector action;
 					ff_time.restart();
-					//qDebug("================================= FORCE FIELD STARTS ===============================");
-					qDebug("Current Robot      --->>> Turn Rate:%lf and Speed is:%lf Delta Time:%lf",turnRate,speed,delta_t);
-				 	qDebug("Current Robot Pose --->>> x:%f y:%f phi:%f",currentPose.p.x(),currentPose.p.y(),RTOD(currentPose.phi));
+                                        qDebug()<<QString("Current Robot      --->>> Turn Rate:%1 and Speed is:%2 Delta Time:%3").arg(turnRate,speed,delta_t);
+                                        qDebug()<<QString("Current Robot Pose --->>> x:%1 y:%2 phi:%3").arg(currentPose.p.x(),currentPose.p.y(),RTOD(currentPose.phi));
 				 	control_timer.restart();
 					action = FF->GenerateField(currentPose,laserScan,wayPoint,speed,turnRate,availableRobots,delta_t);
 //					qDebug("Force Field Returned     --->>> Speed is:%f TurnRate is:%f  time to calculate FF is:%dms Loop Delta_t:%fsec",action.speed,action.turnRate,ff_time.elapsed(),delta_t);	
 					robotManager->commManager->setSpeed(action.speed);						
 					robotManager->commManager->setTurnRate(action.turnRate);		
 					control_timer.restart();				
-					//qDebug("================================= FORCE FIELD ENDS  ===============================\n");		
 					break;		
 				case CONFIG_SPACE:
 					break;
@@ -952,11 +950,11 @@ void Navigator::run()
 					}
 					wayPoint = goal;	
 					// Vector Field Histogram
-					qDebug("\nSending to VFH goto X:%f Y:%f Phi:%f",goal.p.x(),goal.p.y(),RTOD(goal.phi));
+                                        qDebug()<<QString("\nSending to VFH goto X:%1 Y:%2 Phi:%3").arg(goal.p.x(),goal.p.y(),RTOD(goal.phi));
 					robotManager->commManager->vfhGoto(wayPoint);	
 					break;		
 				default:
-					qDebug("Unknown Obstacle Avoidance Algorithm used !!!");
+                                        qDebug()<<"Unknown Obstacle Avoidance Algorithm used !!!";
 			}	
 		}
 		else
@@ -965,12 +963,11 @@ void Navigator::run()
 			robotManager->commManager->setTurnRate(0);
 		}
 		loc = EstimatedPos;
-//		printf("\n Debug Location 10"); fflush(stdout);
 	}
 	robotManager->commManager->setSpeed(0);
 	robotManager->commManager->setTurnRate(0);
 	//local_planner->pathPlanner->freeResources();
-	qDebug("\nNavigator: Thread Loop Terminated Normally !!!");
+        qDebug()<<"\nNavigator: Thread Loop Terminated Normally !!!";
 	this->quit();
 	return;
 }

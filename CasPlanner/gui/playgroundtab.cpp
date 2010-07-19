@@ -47,7 +47,7 @@ void Interfaces::addInterface(DeviceType dev,QString name)
 
 void Interfaces::checkChanged(int state)
 {
-        qDebug("State is %d",state);
+    qDebug()<<"State is :"<<state;
 }
 
 void Interfaces::createIcons(QVector <DeviceType> * devices)
@@ -311,17 +311,17 @@ void RobotConfigPage::updateSelection(int r)
     //	robotInterfaces->clear();
     if(!playGround)
     {
-        qDebug("playGround NULL"); fflush(stdout);
+        qDebug()<<"playGround NULL"; fflush(stdout);
         return;
     }
     if(!playGround->robotPlatforms[r])
     {
-        qDebug("robotPlatform NULL"); fflush(stdout);
+        qDebug()<<"robotPlatform NULL"; fflush(stdout);
         return;
     }
     if(!playGround->robotPlatforms[r]->commManager)
     {
-        qDebug("commManager NULL"); fflush(stdout);
+        qDebug()<<"commManager NULL"; fflush(stdout);
         return;
     }
     //	QVector <DeviceType> * d = playGround->robotPlatforms[r]->commManager->getDevices();

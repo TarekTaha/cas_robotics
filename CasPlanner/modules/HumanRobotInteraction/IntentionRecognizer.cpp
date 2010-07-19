@@ -65,7 +65,7 @@ path(NULL)
 	}
 	else
 	{
-		qDebug("No path Found");
+                qDebug()<<"No path Found";
 	}
 	
 	/**
@@ -105,7 +105,7 @@ void IntentionRecognizer::setInteractionStrategy(int strategy)
 {
 	if(strategy != CONTINIOUS_INPUT && strategy != MINIMAL_INPUT)
 	{
-		qDebug("\n Undefined Interaction Method");
+                qDebug()<<"\n Undefined Interaction Method";
 		return;
 	}
 	this->interactionStrategy = strategy;
@@ -290,18 +290,18 @@ void IntentionRecognizer::run()
 		msleep(50);
 		if(!robotManager->commManager)
 		{
-			qDebug("\t - (IR): Communication Manager Not Initialized");
+                        qDebug()<<"\t - (IR): Communication Manager Not Initialized";
 			continue;
 		}
 		if(!robotManager->commManager->isConnected())
 		{
-			qDebug("\t - (IR): Your not Connected to the Robot, Connect First");
+                        qDebug()<<"\t - (IR): Your not Connected to the Robot, Connect First";
 			continue;		
 		}
 		while(!robotManager->commManager->getLocalized())
 		{
 			currentPose = robotManager->commManager->getLocation();
-			qDebug("\n---IR:NO Accurate Estimation yet, best current is: x:%f y:%f phi:%f",currentPose.p.x(),currentPose.p.y(),RTOD(currentPose.phi));
+                        qDebug()<<QString("\n---IR:NO Accurate Estimation yet, best current is: x:%1 y:%2 phi:%3").arg(currentPose.p.x(),currentPose.p.y(),RTOD(currentPose.phi));
 		  	if(robotManager->commManager)
 		  		robotManager->commManager->stop();
 			usleep(300000);
