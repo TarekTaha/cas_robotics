@@ -40,35 +40,35 @@ enum{MINIMAL_INPUT,CONTINIOUS_INPUT};
 
 class RobotManager : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
     public:
-    	RobotManager();
-		RobotManager(PlayGround *playG,ConfigFile *cf,int secId);
-		~RobotManager();
-		void readRobotConfigs(ConfigFile *cf,int secId);
-		void readCommManagerConfigs(ConfigFile *cf,int secId);
-		void readPlannerConfigs(ConfigFile *cf);
-		void readNavigatorConfigs(ConfigFile *cf);
-		void setupSocialPlanner();
-		void start();
-		void stop();
-		void startPlanner();
-		void startNavigator();
-		void startComms();
-		void startIntentionRecognizer();
-		PlayGround 		*playGround;
-		CommManager     *commManager;
-		PlanningManager *planningManager;
-		Navigator       *navigator;
-		IntentionRecognizer *intentionRecognizer;
-		Robot           *robot;
-		SocialPlanner   *socialPlanner;
-		bool notPaused,notFollowing;
-	public 
-	slots:
-		void updateMap(Map * mapData);
-	signals:
-		void addMsg(int,int,QString);
+        RobotManager();
+        RobotManager(PlayGround *playG,ConfigFile *cf,int secId);
+        ~RobotManager();
+        void readRobotConfigs(ConfigFile *cf,int secId);
+        void readCommManagerConfigs(ConfigFile *cf,int secId);
+        void readPlannerConfigs(ConfigFile *cf);
+        void readNavigatorConfigs(ConfigFile *cf);
+        void setupSocialPlanner();
+        void start();
+        void stop();
+        void startPlanner();
+        void startNavigator();
+        void startComms();
+        void startIntentionRecognizer();
+        PlayGround 		*playGround;
+        CommManager     *commManager;
+        PlanningManager *planningManager;
+        Navigator       *navigator;
+        IntentionRecognizer *intentionRecognizer;
+        Robot           *robot;
+        SocialPlanner   *socialPlanner;
+        bool notPaused,notFollowing;
+        public
+    slots:
+                void updateMap(Map * mapData);
+    signals:
+        void addMsg(int,int,QString);
 };
 
 #endif

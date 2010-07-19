@@ -41,6 +41,12 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
     showRobots(true),
     showPointclouds(true),
     showPatchBorders(true),
+    showSearchSpaceSamples(true),
+    showSearchSpaceTree(true),
+    showSearchTree(false),
+    showPath(true),
+    showRobotTrail(true),
+    searchSpaceListCreated(false),
     hideGoals(false),
     start_initialized(false),
     end_initialized(false),
@@ -94,7 +100,8 @@ void MapViewer::initializeGL()
     beginRenderText(screenWidth,screenHeight);
 
     glFlush();
-    mapList = glGenLists(1);
+    mapList         = glGenLists(1);
+    searchSpaceList = glGenLists(1);
     //    font2Render.init("resources/Test.ttf", 16);
     glInitNames();
 }
@@ -310,12 +317,13 @@ void MapViewer::renderLaser()
     }
 }
 
-void MapViewer::renderSearchSpaceTree()
+void MapViewer::renderSearchSpace()
 {
+    glNewList(searchSpaceList, GL_COMPILE);
     for(int i=0;i<1;i++)
     {
         SearchSpaceNode * temp,*child;
-        if(!playGround->robotPlatforms[i]->planningManager->getRenderSearchSpaceTree())
+        if(!showSearchSpaceTree)
             continue;
         temp =  playGround->robotPlatforms[i]->planningManager->pathPlanner->search_space;
         /*
@@ -330,7 +338,7 @@ void MapViewer::renderSearchSpaceTree()
         while(temp)
         {
             glColor4f(1,0,0,0.5);
-            glLineWidth(2);
+            glLineWidth(1);
             for(int j=0;j<temp->children.size();j++)
             {
                 //qDebug("J is:%d",j); fflush(stdout);
@@ -341,9 +349,16 @@ void MapViewer::renderSearchSpaceTree()
                     fflush(stdout);
                     continue;
                 }
-                glBegin(GL_LINE_LOOP);
-                glVertex2f(temp->location.x(),temp->location.y());
-                glVertex2f(child->location.x(),child->location.y());
+                glBegin(GL_LINE);
+                    glVertex2f(temp->location.x(),temp->location.y());
+                    glVertex2f(child->location.x(),child->location.y());
+                glEnd();
+            }
+            if(showSearchSpaceSamples)
+            {
+                glColor4f(0,0,1,0.5);
+                glBegin(GL_POINTS);
+                    glVertex2f(temp->location.x(),temp->location.y());
                 glEnd();
             }
             temp = temp->next;
@@ -351,6 +366,8 @@ void MapViewer::renderSearchSpaceTree()
         glLineWidth(2);
         glPopMatrix();
     }
+    glEndList();
+    searchSpaceListCreated = true;
 }
 
 void MapViewer::renderExpandedTree()
@@ -362,7 +379,7 @@ void MapViewer::renderExpandedTree()
     {
         vector <Tree> tree;
         QPointF child;
-        if(!playGround->robotPlatforms[i]->planningManager->getRenderSearchTree())
+        if(!showSearchTree)
             continue;
         if(playGround->robotPlatforms[i]->intentionRecognizer)
         {
@@ -1011,10 +1028,67 @@ void MapViewer::paintGL()
         renderSpatialStates();
         renderAction();
         renderExpandedTree();
-        renderSearchSpaceTree();
+        if(!searchSpaceListCreated)
+            renderSearchSpace();
+        glCallList(searchSpaceList);
     }
     glCallList(mapList);
     glPopMatrix();
+}
+
+void MapViewer::searchSpaceGenerated()
+{
+    searchSpaceListCreated = false;
+    qDebug()<<"SearchSpace Generated";
+}
+
+void MapViewer::setShowSearchSpaceSamples(int state)
+{
+    if(state)
+    {
+        showSearchSpaceSamples = true;
+        searchSpaceListCreated = false;
+    }
+    else
+        showSearchSpaceSamples = false;
+}
+
+void MapViewer::setShowSearchSpaceTree(int state)
+{
+    if(state)
+    {
+        showSearchSpaceTree = true;
+        searchSpaceListCreated = false;
+    }
+    else
+        showSearchSpaceTree = false;
+}
+
+void MapViewer::setShowSearchTree(int state)
+{
+    if(state)
+    {
+        showSearchTree = true;
+        searchSpaceListCreated = false;
+    }
+    else
+        showSearchTree = false;
+}
+
+void MapViewer::setShowPath(int state)
+{
+    if(state)
+        showPath = true;
+    else
+        showPath = false;
+}
+
+void MapViewer::setShowRobotTrail(int state)
+{
+    if(state)
+        showRobotTrail = true;
+    else
+        showRobotTrail = false;
 }
 
 void MapViewer::setShowOGs(int state)

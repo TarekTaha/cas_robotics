@@ -45,61 +45,61 @@ using namespace CasPlanner;
 
 class NavControlPanel: public QWidget
 {
-Q_OBJECT
-    public:
-		NavControlPanel(NavContainer *container,PlayGround *playG);
-	public slots:
-		void save();
-		void setNavigation();
-		void pathPlan();
-		void loadMap();
-		void generateSpace();
-		void pathFollow();
-		void pathTraversed();
-		void setStart(Pose);
-		void setEnd(Pose);
-		void setMap(Map * map);
-		void startIntentionRecognition();
-		void resetDestinationBelief();
-		void updateSelectedRobot(bool);
-    private:
-		NavContainer *navContainer;
-		PlayGround * playGround;
+    Q_OBJECT
+public:
+    NavControlPanel(NavContainer *container,PlayGround *playG);
+    public slots:
+        void save();
+        void setNavigation();
+        void pathPlan();
+        void loadMap();
+        void generateSpace();
+        void pathFollow();
+        void pathTraversed();
+        void setStart(Pose);
+        void setEnd(Pose);
+        void setMap(Map * map);
+        void startIntentionRecognition();
+        void resetDestinationBelief();
+        void updateSelectedRobot(bool);
+private:
+    NavContainer *navContainer;
+    PlayGround * playGround;
 
-		QVector <QRadioButton *> availableRobots;
-		// Command Actions
-		QGroupBox actionGB;
-		QPushButton pauseBtn;
-		QPushButton pathPlanBtn;
-		//QPushButton generateSpaceBtn;
-		QPushButton resetBeliefBtn;
-		QPushButton pathFollowBtn;
-		QPushButton captureImage;
-		QPushButton intentionRecognitionBtn;
+    QVector <QRadioButton *> availableRobots;
+    // Command Actions
+    QGroupBox actionGB;
+    QPushButton pauseBtn;
+    QPushButton pathPlanBtn;
+    //QPushButton generateSpaceBtn;
+    QPushButton resetBeliefBtn;
+    QPushButton pathFollowBtn;
+    QPushButton captureImage;
+    QPushButton intentionRecognitionBtn;
 
-		//Pointers to the currently selected Robot
-		QGroupBox robotsGB;
-		QTreeWidgetItem *robotItem;
-		bool robotInitialization;
-		friend class NavContainer;
-		static unsigned *image, *null;
-       	Node * path;
-        static int width, height, components;
-		static const int AutonomousNav = QTreeWidgetItem::UserType+1;
-		static const int ManualNav     = QTreeWidgetItem::UserType+2;
+    //Pointers to the currently selected Robot
+    QGroupBox robotsGB;
+    QTreeWidgetItem *robotItem;
+    bool robotInitialization;
+    friend class NavContainer;
+    static unsigned *image, *null;
+    Node * path;
+    static int width, height, components;
+    static const int AutonomousNav = QTreeWidgetItem::UserType+1;
+    static const int ManualNav     = QTreeWidgetItem::UserType+2;
 };
 
 class NavContainer : public QWidget
 {
-Q_OBJECT
-    public:
-		~NavContainer();
-		NavContainer(QWidget *parent ,PlayGround *playGround);
-		MapViewer  * mapViewer;
-    private:
-    	PlayGround * playGround;
-		NavControlPanel navControlPanel;
-		friend class NavControlPanel;
+    Q_OBJECT
+public:
+    ~NavContainer();
+    NavContainer(QWidget *parent ,PlayGround *playGround);
+    MapViewer  * mapViewer;
+private:
+    PlayGround * playGround;
+    NavControlPanel navControlPanel;
+    friend class NavControlPanel;
 };
 
 #endif

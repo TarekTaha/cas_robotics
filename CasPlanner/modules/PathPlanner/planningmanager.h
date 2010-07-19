@@ -48,9 +48,6 @@ class PlanningManager : public QObject
             int readConfigs(ConfigFile *cf);
             int setupPlanner();
             int stop();
-            bool getRenderSearchSpaceTree();
-            bool getRenderSearchTree();
-            bool getRenderPaths();
             PathPlanner * pathPlanner;
             bool renderSearchSpaceTree;
             bool renderSearchTree;
@@ -67,9 +64,6 @@ class PlanningManager : public QObject
             void  setRegGrid(int);
             void  setObstPen(int);
             void  setExpObst(int);
-            void  setShowSearchTree(int);
-            void  setShowSearchSpaceTree(int);
-            void  setShowPaths(int);
             void  setBridgeTestValue(double);
             void  setConnNodesValue(double);
             void  setRegGridValue(double);
@@ -81,6 +75,7 @@ class PlanningManager : public QObject
        signals:
             void addMsg(int,int, QString);
             void updateMap(Map* map);
+            void searchSpaceGenerated();
         protected:
             double pixel_res,dist_goal,bridge_len,bridge_res,reg_grid,obst_exp,reg_grid_conn_rad,obst_pen,bridge_conn_rad;
             RobotManager *robotManager;

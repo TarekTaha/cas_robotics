@@ -24,7 +24,7 @@
 // #include "robotmanager.h" -> #include "commmanager.h" -> #include "playerinterface.h" -> boost Signal Shit
 #include "robotmanager.h"
 #include <QVector>
-#include <QStatusBar> 
+#include <QStatusBar>
 #include "navigationtab.h"
 #include "mapviewer.h"
 #include "configfile.h"
@@ -39,26 +39,27 @@ class MapViewer;
 
 class PlayGround: public QObject
 {
-	Q_OBJECT
-	public:
-		PlayGround();
-		PlayGround(QStringList configFiles,QStatusBar *in_statusBar);
-		virtual ~PlayGround();
-		int renderingMethod;
-		NavContainer *navCon;
-		MapViewer    *mapViewer;
-		MapManager   *mapManager;
-		StatusLogger *statusLogger;	
-		QVector <RobotManager* > robotPlatforms;
-		RobotManager *activeRobot;
-		int  setNavContainer(NavContainer* con);
-	public slots:	
-		void startRobotsComm();
-		void stopRobots();
-		void loadMap(QString name,float res,bool negate, Pose p);
-		void addMsg(int id,int type,QString msg);				
-    signals:
-	    void mapUpdated(Map * mapData);		
+    Q_OBJECT
+public:
+    PlayGround();
+    PlayGround(QStringList configFiles,QStatusBar *in_statusBar);
+    virtual ~PlayGround();
+    int renderingMethod;
+    NavContainer *navCon;
+    MapViewer    *mapViewer;
+    MapManager   *mapManager;
+    StatusLogger *statusLogger;
+    QVector <RobotManager* > robotPlatforms;
+    RobotManager *activeRobot;
+    int  setNavContainer(NavContainer* con);
+    void setMapViewer(MapViewer *);
+   public slots:
+        void startRobotsComm();
+        void stopRobots();
+        void loadMap(QString name,float res,bool negate, Pose p);
+        void addMsg(int id,int type,QString msg);
+signals:
+    void mapUpdated(Map * mapData);
 };
 
 #endif /*PLAYGROUND_H_*/

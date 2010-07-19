@@ -208,9 +208,10 @@ void PlanningTab::updateRobotSetting()
     connect(&regGrid, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setRegGrid( int )));
     connect(&obstPenalty, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setObstPen( int )));
     connect(&expandObst, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setExpObst( int )));
-    connect(&showSearchSpaceTree, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setShowSearchSpaceTree( int )));
-    connect(&showSearchTree, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setShowSearchTree( int )));
-    connect(&showPaths, SIGNAL(stateChanged(int)),currRobot->planningManager,SLOT(setShowPaths( int )));
+
+    connect(&showSearchSpaceTree, SIGNAL(stateChanged(int)),playGround->mapViewer,SLOT(setShowSearchSpaceTree(int)));
+    connect(&showSearchTree, SIGNAL(stateChanged(int)),playGround->mapViewer,SLOT(setShowSearchTree(int)));
+    connect(&showPaths, SIGNAL(stateChanged(int)),playGround->mapViewer,SLOT(setShowPath(int)));
 
     switch(currRobot->navigator->getObstAvoidAlgo())
     {

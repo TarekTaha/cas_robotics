@@ -58,7 +58,6 @@ PlanningManager::PlanningManager(RobotManager *robMan,
     robotManager->robot->setCheckPoints(obst_exp);
     connect(this, SIGNAL(addMsg(int,int,QString)), robMan->playGround,SLOT(addMsg(int,int,QString)));
     this->setupPlanner();
-//	qDebug("Pixel Res in Navigator =%f",this->pixel_res);
 }
 
 PlanningManager::PlanningManager(RobotManager *robMan):
@@ -129,48 +128,6 @@ void PlanningManager:: setExpObst(int bt)
         expObstEnabled = false;
     else
         expObstEnabled = true;
-}
-
-void PlanningManager:: setShowSearchSpaceTree(int bt)
-{
-    qDebug("setShowSearchSpaceTree is set to %d",bt);
-    if(!bt)
-        renderSearchSpaceTree = false;
-    else
-        renderSearchSpaceTree = true;
-}
-
-void PlanningManager:: setShowSearchTree(int bt)
-{
-    qDebug("setShowSearchTree is set to %d",bt);
-    if(!bt)
-        renderSearchTree = false;
-    else
-        renderSearchTree = true;
-}
-
-void PlanningManager:: setShowPaths(int bt)
-{
-    qDebug("setShowPaths is set to %d",bt);
-    if(!bt)
-        renderPaths = false;
-    else
-        renderPaths = true;
-}
-
-bool PlanningManager::getRenderSearchSpaceTree()
-{
-    return this->renderSearchSpaceTree;
-}
-
-bool PlanningManager::getRenderSearchTree()
-{
-    return this->renderSearchTree;
-}
-
-bool PlanningManager::getRenderPaths()
-{
-    return this->renderPaths;
 }
 
 void PlanningManager::setBridgeTestValue(double val)
@@ -281,6 +238,7 @@ void PlanningManager::generateSpace()
         if(connNodesEnabled)
             pathPlanner->connectNodes();
         pathPlanner->saveSpace2File(filename);
+        emit searchSpaceGenerated();
         qDebug("Space Generation took:%f sec",timer.elapsed()/double(1000.00));
     }
     pathPlanner->showConnections();
