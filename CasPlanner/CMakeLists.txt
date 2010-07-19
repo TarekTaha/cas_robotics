@@ -8,6 +8,7 @@ SET( CasPlanner_MOC_HDRS
     ./modules/CommManager/comms.h
     ./modules/Rendering/glrender.h
     ./modules/Rendering/laserrender.h
+    ./modules/Logger/logger.h
     ./gui/hritab.h
     ./gui/mainwindow.h
     ./gui/navigationtab.h
@@ -15,6 +16,7 @@ SET( CasPlanner_MOC_HDRS
     ./gui/playgroundtab.h
     ./gui/statusbar.h
     ./gui/tabcontainer.h
+    ./gui/loggerview.h
     ./modules/Rendering/mapviewer.h
     ./modules/Navigator/navigator.h
     ./modules/Rendering/ogrender.h
@@ -55,9 +57,11 @@ SET( CasPlanner_SRCS
     ./modules/CommonTools/sort.cpp
     ./modules/CommonTools/submat.cpp
     ./modules/CommonTools/svd.cpp
+    ./modules/Logger/logger.cpp
     ./modules/Parser/configfile.cc
     ./modules/Navigator/controller.cpp
     ./modules/Rendering/laserrender.cpp
+    ./gui/loggerview.cpp
     ./gui/hritab.cpp
     ./gui/main.cpp
     ./gui/mainwindow.cpp
@@ -130,6 +134,7 @@ SET( CasPlanner_SRCS
 # UI .ui files
 SET(CasPlanner_UIS
     gui/hritab.ui
+    gui/loggerview.ui
     gui/configparsertab.ui
     )
 # Resources files
@@ -229,6 +234,7 @@ INCLUDE_DIRECTORIES(
     ${CMAKE_BINARY_DIR}
     ${PLAYER_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIR_freetype2}
+    ./modules/Logger
     ./modules/PathPlanner
     ./modules/ObstacleAvoidance
     ./modules/ScanMatching
@@ -250,7 +256,7 @@ INCLUDE_DIRECTORIES(
     ./modules/PomdpCore
     ./modules/HumanRobotInteraction
 )
-
+ADD_DEFINITIONS(-DQT_NO_DEBUG)
 # here we instruct CMake to build "CasPlanner" executable from all of the source files
 ADD_EXECUTABLE( ../CasPlanner ${CasPlanner_SRCS} ${CasPlanner_MOC_SRCS} ${CasPlanner_RC_SRCS} ${CasPlanner_UI_HDRS} )
 

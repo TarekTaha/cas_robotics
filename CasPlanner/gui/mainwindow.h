@@ -26,36 +26,36 @@
 #include <libplayerinterface/player.h>
 
 #include <QMainWindow>
-
+#include "logger.h"
 #include "playground.h"
 #include "statusbar.h"
 #include "tabcontainer.h"
 class MainWindow : public QMainWindow 
 {
-Q_OBJECT
+    Q_OBJECT
 public:
-	MainWindow(QWidget *parent=0); 
-	MainWindow(QStringList strings, QWidget *parent=0); 
-	~MainWindow();
-	void createMenus();
-	void createActions();
-    public slots:
-		void logData();
-		void commStart(); 
-		void captureScreenShot();
+    MainWindow(QWidget *parent=0);
+    MainWindow(QStringList strings, QWidget *parent=0);
+    ~MainWindow();
+    void createMenus();
+    void createActions();
+public slots:
+    void logData();
+    void commStart();
+    void captureScreenShot();
 private: 
     TabContainer * tabcontainer;
-	PlayGround   * playGround;
-	int logCount,imageCounter;
-	QPixmap originalPixmap; 
-	QString fileName;
+    PlayGround   * playGround;
+    int logCount,imageCounter;
+    QPixmap originalPixmap;
+    QString fileName;
     QMenu 	*fileMenu;
     QMenu 	*helpMenu;
     QAction *openAct;
     QAction *saveAsAct;
     QAction *exitAct;
     QAction *aboutAct;
-    QAction *aboutQtAct;	
+    QAction *aboutQtAct;
 };
 #endif
 

@@ -75,7 +75,7 @@ bool SocialPlanner::loadActivities(const char *filename)
     char line[250],obs[10];
     if (!file)
     {
-        qDebug("Error Opening File");
+        qDebug()<<"Error Opening File";
         fclose(file);
         return false;
     }
@@ -180,7 +180,7 @@ bool SocialPlanner::readSpaceFromFile(const char *filename)
     FILE *file = fopen(filename, "r");
     if (!file)
     {
-        qDebug("Error Opening File");
+        qDebug()<<"Error Opening File";
         fclose(file);
         return false;
     }
@@ -218,7 +218,7 @@ bool SocialPlanner::saveSpace2File(const char *filename)
     FILE *file = fopen(filename, "wb");
     if (!file)
     {
-        qDebug("Error Opening File");
+        qDebug()<<"Error Opening File";
         fclose(file);
         return false;
     }
@@ -238,7 +238,7 @@ void SocialPlanner :: printNodeList()
     QPointF  location;
     if(!(astar->p = astar->path))
         return ;
-    qDebug("\n  --------------------   START OF LIST ----------------------");
+    qDebug()<<"  --------------------   START OF LIST ----------------------";
     while(astar->p !=NULL)
     {
         location =  astar->p->pose.p;
@@ -253,7 +253,7 @@ void SocialPlanner :: printNodeList()
         }
         astar->p = astar->p->next;
     }
-    qDebug("\n --------------------   END OF LIST ---------------------- ");fflush(stdout);
+    qDebug()<<" --------------------   END OF LIST ---------------------- ";fflush(stdout);
 }
 
 void SocialPlanner::showConnections()
@@ -272,7 +272,7 @@ void SocialPlanner::showConnections()
         temp = temp->next;
         n++;
     }
-    qDebug("\n---->>> TOTAL NUMBER OF CONNECTIONS =%d\n---->>> Total Nodes in search Space =%d",m,n);
+    qDebug()<<QString("---->>> TOTAL NUMBER OF CONNECTIONS =%1\n---->>> Total Nodes in search Space =%2").arg(m).arg(n);
     //this->MAXNODES = 2*m;
 }
 

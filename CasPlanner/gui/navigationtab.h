@@ -35,6 +35,7 @@
 #include "playground.h"
 #include "node.h"
 #include "configfile.h"
+#include "logger.h"
 
 class RobotManager;
 class MapViewer;

@@ -570,7 +570,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
 	
 	//qDebug ("Simple FF!"); fflush(stdout);
 	realtime = 0 ;
-	qDebug ("OldSpeed=%f, OldDirec=%f, Turnate=%f", robotSpeed,robotLocation.phi,robotTurnRate);  
+        //qDebug ("OldSpeed=%f, OldDirec=%f, Turnate=%f", robotSpeed,robotLocation.phi,robotTurnRate);
 	//double FattAmp = SysQ;
   	double FattAngleA[2] = {goalLocation.p.x() - robotLocation.p.x(), goalLocation.p.y() - robotLocation.p.y()};
   	double FattAngle = atan2(FattAngleA[1], FattAngleA[0]);
@@ -587,7 +587,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
     	FrepAngle = obstacle_interaction_set[i].direction;
     	FrepX = FrepAmp * cos(FrepAngle);
     	FrepY = FrepAmp * sin(FrepAngle);
-    	qDebug ("i=%d, ObstacleX=%f, ObstacleY=%f, FrepAmp = %f, FrepAngle = %f, FrepX = %f, FrepY = %f", i, obstacle_interaction_set[i].location.x(), obstacle_interaction_set[i].location.y(), FrepAmp, FrepAngle, FrepX, FrepY);
+//    	qDebug ("i=%d, ObstacleX=%f, ObstacleY=%f, FrepAmp = %f, FrepAngle = %f, FrepX = %f, FrepY = %f", i, obstacle_interaction_set[i].location.x(), obstacle_interaction_set[i].location.y(), FrepAmp, FrepAngle, FrepX, FrepY);
     	FrepXTotal = FrepXTotal + FrepX;
     	FrepYTotal = FrepYTotal + FrepY;
     	if (FrepAmp > MaxRep)
@@ -604,7 +604,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
     	FrepAngle_robots = robots_interaction_set[i].direction;
     	FrepX_robots = FrepAmp_robots * cos(FrepAngle_robots);
     	FrepY_robots = FrepAmp_robots * sin(FrepAngle_robots);
-    	qDebug ("i=%d, robotinterX=%f, robotinerY=%f, FrepAmp = %f, FrepAngle = %f, FrepX = %f, FrepY = %f", i, robots_interaction_set[i].location.x(), robots_interaction_set[i].location.y(), FrepAmp_robots, FrepAngle_robots, FrepX_robots, FrepY_robots);
+//    	qDebug ("i=%d, robotinterX=%f, robotinerY=%f, FrepAmp = %f, FrepAngle = %f, FrepX = %f, FrepY = %f", i, robots_interaction_set[i].location.x(), robots_interaction_set[i].location.y(), FrepAmp_robots, FrepAngle_robots, FrepX_robots, FrepY_robots);
     	FrepXTotal_robots = FrepXTotal_robots + FrepX_robots;
     	FrepYTotal_robots = FrepYTotal_robots + FrepY_robots;
     	if (FrepAmp_robots > MaxRep)
@@ -641,7 +641,7 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   	
   	double ForceAngle = atan2(FtotalY, FtotalX);
 //     qDebug("Frepmag=%f, Frepangle=%f, FattAngle=%f, ForceAngle=%f", Frepmag, Frepangle, FattAngle, ForceAngle);
-    qDebug("FattX=%f, FattY=%f, FreptotalX=%f, FreptotalY=%f, FtotalX=%f, FtotalY=%f", FattX, FattY, FreptotalX, FreptotalY, FtotalX, FtotalY);  	
+//    qDebug("FattX=%f, FattY=%f, FreptotalX=%f, FreptotalY=%f, FtotalX=%f, FtotalY=%f", FattX, FattY, FreptotalX, FreptotalY, FtotalX, FtotalY);
   	double robotSpeed_new = MAX(MaxSpeed / (1 + MaxRep / SysP), 0.05);
   	double MaxSpeedIncr = 0.01;
   	if ((robotSpeed_new - robotSpeed) > MaxSpeedIncr)
@@ -660,8 +660,8 @@ void ForceField::SimFF(QVector<Interaction> obstacle_interaction_set, QVector<In
   	anglebetw = Delta_Angle (robotLocation.phi, ForceAngle);
   	robotTurnRate = DTOR(40)*((anglebetw)/M_PI);
 	//qDebug ("\tRobotTurnRate_desired=%f, Max Velocity=%f, turnRate_incr_chosen=%f", robotTurnRate_desired, velocityMax, turnRate_incr_chosen);  
-  	qDebug ("\tOUT PUT NewSpeed=%f, New Turn Rate=%f, anglebetw=%f", robotSpeed, robotTurnRate, anglebetw);
-  	qDebug ("=========================================================="); 
+//  	qDebug ("\tOUT PUT NewSpeed=%f, New Turn Rate=%f, anglebetw=%f", robotSpeed, robotTurnRate, anglebetw);
+//  	qDebug ("==========================================================");
 }
 
 
@@ -758,8 +758,8 @@ void ForceField::robotForceFieldShape(Robot * anotherrobot, QVector<QPointF> &Dm
 /******************************************************************/
 void ForceField::VSFF(QVector<Interaction> obstacle_interaction_set, QVector<Interaction> robots_interaction_set, double realtime)
 {
-	qDebug ("VSFF!");
-	qDebug ("OldSpeed=%f, OldDirec=%f, Turnate=%f, RR=%f", robotSpeed,robotLocation.phi,robotTurnRate, robotRadius);  
+//	qDebug ("VSFF!");
+//	qDebug ("OldSpeed=%f, OldDirec=%f, Turnate=%f, RR=%f", robotSpeed,robotLocation.phi,robotTurnRate, robotRadius);
 // 	double AbsSpeedX = robotSpeed * cos(robotLocation.phi);
 // 	double AbsSpeedY = robotSpeed * sin(robotLocation.phi);
  	double TransformMatrix[2][2] = {{cos(robotLocation.phi), sin(robotLocation.phi)},
@@ -803,21 +803,21 @@ void ForceField::VSFF(QVector<Interaction> obstacle_interaction_set, QVector<Int
  	double FtotalX = FattX + FrepXTotal;
  	double FtotalY = FattY + FrepYTotal;
  	double Mtotal = Matt[2] + MrepTotal;
- 	qDebug ("FtotalX = %f, FtotalY = %f, Mtotal = %f\n", FtotalX, FtotalY, Mtotal);
+// 	qDebug ("FtotalX = %f, FtotalY = %f, Mtotal = %f\n", FtotalX, FtotalY, Mtotal);
  	double AcceRX = FtotalX; // robotMass;
  	double AcceRY = FtotalY;// robotMass;
  	double SpeedX = robotSpeed + AcceRX * TimeStep;
 	double SpeedY = AcceRY * TimeStep;
-	qDebug ("AcceRX=%f, AcceRY=%f, SpeedX=%f, SpeedY=%f",AcceRX, AcceRY, SpeedX, SpeedY);
+//	qDebug ("AcceRX=%f, AcceRY=%f, SpeedX=%f, SpeedY=%f",AcceRX, AcceRY, SpeedX, SpeedY);
 	robotSpeed = sqrt(SpeedX * SpeedX + SpeedY * SpeedY);
 	double AcceRA = atan2(SpeedY, SpeedX);
-	qDebug ("AcceRA=%f", AcceRA);
+//	qDebug ("AcceRA=%f", AcceRA);
 	double Omegadot = Mtotal / 1;
-	qDebug ("Omegadot=%f", Omegadot);
+//	qDebug ("Omegadot=%f", Omegadot);
 	double robotTurnRate1 = robotTurnRate + Omegadot * TimeStep;
-	qDebug ("robotTurnRate1=%f", robotTurnRate1);
+//	qDebug ("robotTurnRate1=%f", robotTurnRate1);
 	robotTurnRate1 = robotTurnRate1 + AcceRA * TimeStep;
-	qDebug ("robotTurnRate1=%f", robotTurnRate1);
+//	qDebug ("robotTurnRate1=%f", robotTurnRate1);
 	double Limit = 0.1;
 	if ((robotTurnRate1 - robotTurnRate) > Limit)
 	{
@@ -849,6 +849,6 @@ void ForceField::VSFF(QVector<Interaction> obstacle_interaction_set, QVector<Int
  	{
    		robotTurnRate = -OmegaMax;
 	}
-	qDebug ("Omegadot=%f, robotTurnRate=%f,robotSpeed=%f, MaxSpeed=%f", Omegadot, robotTurnRate, robotSpeed, MaxSpeed);	
+//	qDebug ("Omegadot=%f, robotTurnRate=%f,robotSpeed=%f, MaxSpeed=%f", Omegadot, robotTurnRate, robotSpeed, MaxSpeed);
 }
 

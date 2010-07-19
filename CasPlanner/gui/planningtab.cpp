@@ -228,7 +228,7 @@ void PlanningTab::updateRobotSetting()
             noavoidRadBtn.setChecked(true);
             break;
         default:
-            qDebug("Unkown ALGO");
+            qDebug()<<"Unkown ALGO";
     }
 
     robotInitialization = false;
@@ -244,22 +244,22 @@ void PlanningTab::updateSelectedAvoidanceAlgo(bool)
         }
         if(vfhRadBtn.isChecked())
         {
-            qDebug("VFH");
+            qDebug()<<"VFH";
             currRobot->navigator->setObstAvoidAlgo(VFH);
         }
         else if(forceFieldRadBtn.isChecked())
         {
-            qDebug("Force Field");
+            qDebug()<<"Force Field";
             currRobot->navigator->setObstAvoidAlgo(FORCE_FIELD);
         }
         else if(configSpaceRadBtn.isChecked())
         {
-            qDebug("Config Space");
+            qDebug()<<"Config Space";
             currRobot->navigator->setObstAvoidAlgo(CONFIG_SPACE);
         }
         else if(noavoidRadBtn.isChecked())
         {
-            qDebug("NO Avoidace");
+            qDebug()<<"NO Avoidace";
             currRobot->navigator->setObstAvoidAlgo(NO_AVOID);
         }
     }

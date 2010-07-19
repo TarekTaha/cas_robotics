@@ -70,8 +70,8 @@ bool VoronoiPathPlanner::readSpaceFromFile(const char *filename)
         FILE *file = fopen(filename, "r");
         if (!file)
         {
-                qDebug("Error Opening File");
-        fclose(file);
+            qDebug()<<"Error Opening File";
+            fclose(file);
         return false;
         }
         while (!feof(file))
@@ -127,8 +127,8 @@ bool VoronoiPathPlanner::saveSpace2File(const char *filename)
         FILE *file = fopen(filename, "wb");
         if (!file)
         {
-                qDebug("Error Opening File");
-        fclose(file);
+            qDebug()<<"Error Opening File";
+            fclose(file);
         return false;
         }
         SearchSpaceNode *temp=search_space;
@@ -144,31 +144,33 @@ bool VoronoiPathPlanner::saveSpace2File(const char *filename)
 void VoronoiPathPlanner :: setMap(Map * map_in)
 {
     this->map = map_in;
-    qDebug("MAP SET"); fflush(stdout);
+    qDebug()<<"MAP SET";
+    fflush(stdout);
 }
 
 void VoronoiPathPlanner :: printNodeList()
 {
-	int step=1;
-	QPointF  location;
-	if(!(p = this->path))
-		return ;
-	qDebug("\n  --------------------   START OF LIST ----------------------");
-	while(p !=NULL)
-	{
-		location =  p->pose.p;
-		cout <<"\nStep [" << step++ <<"] x["<< location.x()<<"]y["<<location.y()<<"]"<<" Direction="<<p->direction;
-		cout <<"\tG cost="<<p->g_value<<"\tH cost="<<p->h_value<<"\tFcost="<<p->f_value;
-		fflush(stdout);
-		//cout<<"\tStored Angle = "<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(p->angle);
-		if (p->next !=NULL)
-		{
-			//cout<<"\tNext Angle = "<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(atan2(p->next->location.y - p->location.y, p->next->location.x - p->location.x));
-			//cout<<"\tAngle Diff ="<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(anglediff(p->angle,atan2(p->next->location.y - p->location.y, p->next->location.x - p->location.x)));
-		}
-		p = p->next;
-	}
-	qDebug("\n --------------------   END OF LIST ---------------------- ");fflush(stdout);
+    int step=1;
+    QPointF  location;
+    if(!(p = this->path))
+        return ;
+    qDebug()<<"  --------------------   START OF LIST ----------------------";
+    while(p !=NULL)
+    {
+        location =  p->pose.p;
+        cout <<"\nStep [" << step++ <<"] x["<< location.x()<<"]y["<<location.y()<<"]"<<" Direction="<<p->direction;
+        cout <<"\tG cost="<<p->g_value<<"\tH cost="<<p->h_value<<"\tFcost="<<p->f_value;
+        fflush(stdout);
+        //cout<<"\tStored Angle = "<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(p->angle);
+        if (p->next !=NULL)
+        {
+            //cout<<"\tNext Angle = "<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(atan2(p->next->location.y - p->location.y, p->next->location.x - p->location.x));
+            //cout<<"\tAngle Diff ="<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(anglediff(p->angle,atan2(p->next->location.y - p->location.y, p->next->location.x - p->location.x)));
+        }
+        p = p->next;
+    }
+    qDebug()<<" --------------------   END OF LIST ---------------------- ";
+    fflush(stdout);
 }
 
 void VoronoiPathPlanner::showConnections()
@@ -188,7 +190,7 @@ void VoronoiPathPlanner::showConnections()
 		temp = temp->next;
 		n++;
 	}
-	qDebug("\n---->>> TOTAL NUMBER OF CONNECTIONS =%d\n---->>> Total Nodes in search Space =%d",m,n);
+        qDebug()<<QString("\n---->>> TOTAL NUMBER OF CONNECTIONS =%1\n---->>> Total Nodes in search Space =%2").arg(m).arg(n);
 	this->MAXNODES = 2*m;
 }
 

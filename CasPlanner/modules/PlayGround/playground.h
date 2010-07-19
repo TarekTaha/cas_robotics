@@ -31,6 +31,7 @@
 #include "statusbar.h"
 #include "socialplanner.h"
 #include "xmlparser.h"
+#include "logger.h"
 
 class Navigator;
 class NavContainer;

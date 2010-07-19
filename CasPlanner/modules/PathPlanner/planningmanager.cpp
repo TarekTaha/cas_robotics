@@ -209,24 +209,24 @@ void PlanningManager::generateSpace()
         this->setupPlanner();
     if(pathPlanner->search_space)
     {
-        qDebug("\n Search Space already Exist");
+        qDebug()<<"\n Search Space already Exist";
         return;
         //pathPlanner->FreeSearchSpace();
     }
     timer.restart();
     if(fileExist(filename))
     {
-        qDebug("Loading Space From file ...");
+        qDebug()<<"Loading Space From file ...";
         pathPlanner->readSpaceFromFile(filename);
         if(expObstEnabled)
             pathPlanner->expandObstacles();
         if(connNodesEnabled)
             pathPlanner->connectNodes();
-        qDebug("File loading took:%f sec",timer.elapsed()/double(1000.00));
+        qDebug()<<"File loading took:"<<timer.elapsed()/double(1000.00)<<" sec";
     }
     else
     {
-        qDebug("Generating Space ...");
+        qDebug()<<"Generating Space ...";
         if(expObstEnabled)
             pathPlanner->expandObstacles();
         if(regGridEnabled)
@@ -239,7 +239,7 @@ void PlanningManager::generateSpace()
             pathPlanner->connectNodes();
         pathPlanner->saveSpace2File(filename);
         emit searchSpaceGenerated();
-        qDebug("Space Generation took:%f sec",timer.elapsed()/double(1000.00));
+        qDebug()<<"Space Generation took:"<<timer.elapsed()/double(1000.00)<<" sec";
     }
     pathPlanner->showConnections();
 }
@@ -258,11 +258,11 @@ Node * PlanningManager::findPath(int coord)
 
     if(retval)
     {
-//		pathPlanner->printNodeList();
+//	pathPlanner->printNodeList();
     }
     else
     {
-        qDebug("No Path Found");
+        qDebug()<<"No Path Found";
     }
     return retval;
 }
@@ -280,10 +280,10 @@ int PlanningManager::readConfigs( ConfigFile *cf)
             bridge_res = 			cf->ReadFloat(i, "bridge_res",0.5);
             reg_grid =				cf->ReadFloat(i, "reg_grid",0.5);
             obst_exp = 				cf->ReadFloat(i, "obst_exp",0.2);
-            reg_grid_conn_rad =		cf->ReadFloat(i, "reg_grid_conn_rad",0.8);
+            reg_grid_conn_rad =                 cf->ReadFloat(i, "reg_grid_conn_rad",0.8);
             obst_pen = 				cf->ReadFloat(i, "obst_pen",3);
             dist_goal = 			cf->ReadFloat(i, "dist_goal",0.2);
-            bridge_conn_rad =       cf->ReadFloat(i, "bridge_conn_rad",0.5);
+            bridge_conn_rad =                   cf->ReadFloat(i, "bridge_conn_rad",0.5);
         }
         if(sectionName == "Map")
         {

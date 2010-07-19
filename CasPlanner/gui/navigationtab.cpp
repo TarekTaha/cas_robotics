@@ -134,7 +134,7 @@ void NavControlPanel::resetDestinationBelief()
     }
     else
     {
-        qDebug("Select a Robot and Start the intention Recognizer First !!!");
+        qDebug()<<"Select a Robot and Start the intention Recognizer First !!!";
     }
 }
 
@@ -163,7 +163,7 @@ void NavControlPanel::startIntentionRecognition()
     }
     else
     {
-        qDebug("No Robot Selected");
+        qDebug()<<"No Robot Selected";
     }
 }
 
@@ -173,7 +173,7 @@ void NavControlPanel::pathTraversed()
     {
         playGround->activeRobot->navigator->StopNavigating();
         playGround->activeRobot->navigator->quit();
-        qDebug("Quitting Thread");
+        qDebug()<<"Quitting Thread";
     }
     pathFollowBtn.setText("Path Follow");
     pauseBtn.setText("Pause");
@@ -184,7 +184,7 @@ void NavControlPanel::pathFollow()
 {
     if(!playGround->activeRobot->commManager)
     {
-        qDebug("\t NavTab: Communication Manager Not Initialized");
+        qDebug()<<"\t NavTab: Communication Manager Not Initialized";
         return;
     }
     if(!playGround->activeRobot->commManager->isConnected())
@@ -224,7 +224,7 @@ void NavControlPanel::pathFollow()
         {
             playGround->activeRobot->navigator->StopNavigating();
             playGround->activeRobot->navigator->quit();
-            qDebug("Quitting Thread");
+            qDebug()<<"Quitting Thread";
         }
         pathFollowBtn.setText("Path Follow");
         playGround->activeRobot->notFollowing = true;
@@ -295,7 +295,7 @@ void NavControlPanel::setStart(Pose startLoc)
     }
     else
     {
-        qDebug("No Robot is Selected");
+        qDebug()<<"No Robot is Selected";
     }
 }
 
@@ -307,7 +307,7 @@ void NavControlPanel::setEnd(Pose endLoc)
     }
     else
     {
-        qDebug("No Robot is Selected");
+        qDebug()<<"No Robot is Selected";
     }
 }
 
@@ -319,6 +319,6 @@ void NavControlPanel::setMap(Map * map)
     }
     else
     {
-        qDebug("No Robot is Selected");
+        qDebug()<<"No Robot is Selected";
     }
 }
