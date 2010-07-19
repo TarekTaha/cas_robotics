@@ -33,48 +33,48 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     QMainWindow(parent), logCount(0)
 {
     createActions();
-    createMenus();	
+    createMenus();
     // Create the PlayGround where all the RobotManagers will run
-    playGround = new PlayGround (configFiles,statusBar());    
-        
-    QWidget *container = new QWidget(this); 
+    playGround = new PlayGround (configFiles,statusBar());
+
+    QWidget *container = new QWidget(this);
     tabcontainer = new TabContainer(parent,playGround);
     playGround->setNavContainer(tabcontainer->navCon);
-    
+
     // Buttons
     QVBoxLayout *vLayout 		 = new QVBoxLayout;
-    QPushButton *emergStop 		 = new QPushButton(" STOP ROBOT ");  
+    QPushButton *emergStop 		 = new QPushButton(" STOP ROBOT ");
     QPushButton *connRobot 		 = new QPushButton(" Connect to Robot ");
-    QPushButton *logButton 		 = new QPushButton(" Show Loggs");    
+    QPushButton *logButton 		 = new QPushButton(" Show Loggs");
     QPalette palette = emergStop->palette();
     palette.setColor(QPalette::Button, Qt::red);
-    emergStop->setPalette(palette); 
+    emergStop->setPalette(palette);
     palette.setColor(QPalette::Button, Qt::green);
     connRobot->setPalette(palette);
     palette.setColor(QPalette::Button, Qt::yellow);
-    logButton->setPalette(palette);    
-    
+    logButton->setPalette(palette);
+
     // Window Layout
-    setMinimumSize(QSize(900,730)); 
-    QHBoxLayout *layout = new QHBoxLayout, *layout2 = new QHBoxLayout; 
-    layout->addWidget(tabcontainer,1); 
+    setMinimumSize(QSize(900,730));
+    QHBoxLayout *layout = new QHBoxLayout, *layout2 = new QHBoxLayout;
+    layout->addWidget(tabcontainer,1);
     layout2->addWidget(logButton);
     layout2->addWidget(emergStop);
     layout2->addWidget(connRobot);
-    vLayout->addLayout(layout); 
-    vLayout->addLayout(layout2);     
+    vLayout->addLayout(layout);
+    vLayout->addLayout(layout2);
     container->setLayout(vLayout);
-    
+
     setCentralWidget(container);
 
     connect(emergStop, SIGNAL(pressed()), playGround, SLOT(stopRobots()));
     connect(connRobot, SIGNAL(pressed()), playGround, SLOT(startRobotsComm()));
-    connect(logButton, SIGNAL(clicked()), playGround->statusLogger, SLOT(showLog())); 
-    
+    connect(logButton, SIGNAL(clicked()), playGround->statusLogger, SLOT(showLog()));
 
-    statusBar()->showMessage("Welcome to CAS Navigation System ...", 20000); 
+
+    statusBar()->showMessage("Welcome to CAS Navigation System ...", 20000);
     statusBar()->showMessage("Initialization Done.");
-	// Data Logging Timer
+        // Data Logging Timer
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(logData()));
     //connect(timer, SIGNAL(timeout()), this, SLOT(captureScreenShot()));
@@ -83,15 +83,15 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
 }
 void MainWindow::logData()
 {
-//	QApplication::beep();
+    //QApplication::beep();
     return;
 }
 
 void MainWindow::captureScreenShot()
 {
-	char counter[8];
-	sprintf(counter,"%06d",imageCounter++);
-	originalPixmap = QPixmap::grabWindow(QMainWindow::centralWidget()->winId());
+    char counter[8];
+    sprintf(counter,"%06d",imageCounter++);
+    originalPixmap = QPixmap::grabWindow(QMainWindow::centralWidget()->winId());
     fileName = QString("./logs/screenshots/shot%1").arg(counter).append(".jpeg");
     originalPixmap.save(fileName,"JPEG",50);
 }
@@ -104,18 +104,18 @@ void MainWindow::createActions()
 {
     openAct = new QAction(tr("&Open..."), this);
     openAct->setShortcut(tr("Ctrl+O"));
-    connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+//    connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
     saveAsAct = new QAction(tr("&Save As..."), this);
     saveAsAct->setShortcut(tr("Ctrl+S"));
-    connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
+//    connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
     exitAct = new QAction(tr("E&xit"), this);
     exitAct->setShortcut(tr("Ctrl+Q"));
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
     aboutAct = new QAction(tr("&About"), this);
-    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+//    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
     aboutQtAct = new QAction(tr("About &Qt"), this);
     connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));

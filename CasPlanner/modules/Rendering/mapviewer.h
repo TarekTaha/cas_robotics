@@ -65,7 +65,7 @@ Q_OBJECT
         void renderRobot();
         void renderLaser();
         void renderPaths();
-        void renderSearchSpaceTree();
+        void renderSearchSpace();
         void renderExpandedTree();
         void renderSpatialStates();
         void renderDestIndicators();
@@ -83,6 +83,11 @@ Q_OBJECT
         void renderMap();
     public slots:
         void update();
+        void setShowSearchSpaceSamples(int state);
+        void setShowSearchSpaceTree   (int state);
+        void setShowSearchTree        (int state);
+        void setShowPath              (int state);
+        void setShowRobotTrail        (int state);
         void setShowOGs         (int state);
         void setShowSnaps       (int state);
         void setShowGrids       (int state);
@@ -91,6 +96,7 @@ Q_OBJECT
         void setShowPatchBorders(int state);
         void updateMap          (Map *newMap);
         void saveImage          ();
+        void searchSpaceGenerated();
     signals:
         void moveMOLeft();
         void moveMORight();
@@ -117,6 +123,12 @@ Q_OBJECT
         bool showRobots;
         bool showPointclouds;
         bool showPatchBorders;
+        bool showSearchSpaceSamples;
+        bool showSearchSpaceTree;
+        bool showSearchTree;
+        bool showPath;
+        bool showRobotTrail;
+        bool searchSpaceListCreated;
         bool hideGoals;
         freetype::font_data font2Render;
         bool start_initialized,end_initialized,mainMapBuilt;
@@ -129,7 +141,7 @@ Q_OBJECT
         QHash<QString, int> snapDLs;
         GLdouble modelMatrix[16];
         double position[3];
-        int viewport[4],mapList;
+        int viewport[4],mapList,searchSpaceList;
         GLdouble projMatrix[16];
         QTimer * renderTimer;
         friend class MapControlPanel;
