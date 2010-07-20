@@ -1,24 +1,16 @@
-
-# Desc: Device definitions for Activemedia robots.
-# Author: Andrew Howard, Richard Vaughan
-# Date: 10 Jun 2002
-# CVS: $Id: wheelchair.inc 8825 2010-07-15 11:38:41Z thjc $
-
-
-# Wheelchair standard configuration
 define wheelchair position
 (
   # actual size
   size     [0.9 0.6 1]
   origin   [0.3 0 0 0] # the wheelchairs's center of rotation is offset from its center of area / I considered it to be 30 cm from the mid Axes
-  velocity [0 0 0]    # Initial Robot Velocity
+  velocity [0 0 0 0]    # Initial Robot Velocity
   color "gray" # body colorx
   
   # GUI properties
   gui_nose 1 # draw a nose on the robot so we can see which way it points
   #gui_grid 1
-  gui_boundary 1
-  gui_movemask 1
+  #gui_boundary 1
+  #gui_movemask 1
   
   # estimated mass in KG
   mass 100.0 
@@ -27,7 +19,7 @@ define wheelchair position
   obstacle_return 1
   laser_return 1
   ranger_return 1
-  blobfinder_return 1
+  #blobfinder_return 1
   fiducial_return 1
   # differential steering model
   drive "diff"
@@ -42,6 +34,4 @@ define wheelchair position
 	    point[3] [ 0.5  0.3 ]
 	    #z[0 1] 
   )
-  #bitmap ""
-  #bitmap_resolution 0	
-) 
+)
