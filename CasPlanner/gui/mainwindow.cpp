@@ -41,7 +41,6 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
 
     QWidget *container = new QWidget(this);
     tabcontainer = new TabContainer(parent,playGround);
-    playGround->setNavContainer(tabcontainer->navCon);
 
     // Buttons
     QVBoxLayout *vLayout 		 = new QVBoxLayout;

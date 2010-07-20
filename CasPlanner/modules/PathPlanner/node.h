@@ -33,17 +33,17 @@ namespace CasPlanner
  * herustic costs.
  */
 class Node
-	{
-	public :
-		int id,depth,direction;
-		double nearest_obstacle,g_value,h_value,f_value;
-		Node  * parent, * next, * prev;
-		Pose   pose;
-		Node ();
-		bool operator == (Node);
-		bool operator != (Node);		
-		~Node();	
-	};
+{
+public :
+    int id,depth,direction;
+    double nearest_obstacle,g_value,h_value,f_value;
+    Node  * parent, * next, * prev;
+    Pose   pose;
+    Node ();
+    bool operator == (Node);
+    bool operator != (Node);
+    ~Node();
+};
 
 }
 

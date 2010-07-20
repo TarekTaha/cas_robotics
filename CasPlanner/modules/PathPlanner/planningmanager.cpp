@@ -55,6 +55,7 @@ PlanningManager::PlanningManager(RobotManager *robMan,
     this->renderSearchSpaceTree     = false;
     this->renderSearchTree          = false;
     this->renderPaths               = false;
+    this->planningStep = WAITING;
     robotManager->robot->setCheckPoints(obst_exp);
     connect(this, SIGNAL(addMsg(int,int,QString)), robMan->playGround,SLOT(addMsg(int,int,QString)));
     this->setupPlanner();
@@ -70,7 +71,8 @@ bridgeTestEnabled(true),
 connNodesEnabled(true),
 regGridEnabled(true),
 obstPenEnabled(true),
-expObstEnabled(true)
+expObstEnabled(true),
+planningStep(WAITING)
 {
     connect(this, SIGNAL(addMsg(int,int,QString)), robMan->playGround,SLOT(addMsg(int,int,QString)));
 }
@@ -85,49 +87,29 @@ void PlanningManager::setRobotManager(RobotManager *rob)
     this->robotManager = rob;
 }
 
-void PlanningManager:: setBridgeTest(int bt)
+void PlanningManager:: setBridgeTest(bool state)
 {
-    //qDebug("BridgeTest is set to %d",bt);
-    if(!bt)
-        bridgeTestEnabled = false;
-    else
-        bridgeTestEnabled = true;
+    bridgeTestEnabled = state;
 }
 
-void PlanningManager:: setConnNodes(int bt)
+void PlanningManager:: setConnNodes(bool state)
 {
-    //qDebug("setConnNodes is set to %d",bt);
-    if(!bt)
-        connNodesEnabled = false;
-    else
-        connNodesEnabled = true;
+    connNodesEnabled = state;
 }
 
-void PlanningManager:: setRegGrid(int bt)
+void PlanningManager:: setRegGrid(bool state)
 {
-    //qDebug("setRegGrid is set to %d",bt);
-    if(!bt)
-        regGridEnabled = false;
-    else
-        regGridEnabled = true;
+    regGridEnabled = state;
 }
 
-void PlanningManager:: setObstPen(int bt)
+void PlanningManager:: setObstPen(bool state)
 {
-    //qDebug("setObstPen is set to %d",bt);
-    if(!bt)
-        obstPenEnabled = false;
-    else
-        obstPenEnabled = true;
+    obstPenEnabled = state;
 }
 
-void PlanningManager:: setExpObst(int bt)
+void PlanningManager:: setExpObst(bool state)
 {
-    //qDebug("setExpObst is set to %d",bt);
-    if(!bt)
-        expObstEnabled = false;
-    else
-        expObstEnabled = true;
+    expObstEnabled = state;
 }
 
 void PlanningManager::setBridgeTestValue(double val)
@@ -194,7 +176,6 @@ void PlanningManager::setEnd(Pose end)
 
 bool PlanningManager::fileExist(const char * fname)
 {
-    //cout<<fname<<endl;
     struct stat stat_buf;
     if (stat(fname,&stat_buf) != 0)
         return false;
@@ -203,45 +184,7 @@ bool PlanningManager::fileExist(const char * fname)
 
 void PlanningManager::generateSpace()
 {
-    QTime timer;
-    const char * filename = "logs/SearchSpace.txt";
-    if(!this->pathPlanner)
-        this->setupPlanner();
-    if(pathPlanner->search_space)
-    {
-        qDebug()<<"\n Search Space already Exist";
-        return;
-        //pathPlanner->FreeSearchSpace();
-    }
-    timer.restart();
-    if(fileExist(filename))
-    {
-        qDebug()<<"Loading Space From file ...";
-        pathPlanner->readSpaceFromFile(filename);
-        if(expObstEnabled)
-            pathPlanner->expandObstacles();
-        if(connNodesEnabled)
-            pathPlanner->connectNodes();
-        qDebug()<<"File loading took:"<<timer.elapsed()/double(1000.00)<<" sec";
-    }
-    else
-    {
-        qDebug()<<"Generating Space ...";
-        if(expObstEnabled)
-            pathPlanner->expandObstacles();
-        if(regGridEnabled)
-            pathPlanner->generateRegularGrid();
-        if(bridgeTestEnabled)
-            pathPlanner->bridgeTest();
-        if(obstPenEnabled)
-            pathPlanner->addCostToNodes();
-        if(connNodesEnabled)
-            pathPlanner->connectNodes();
-        pathPlanner->saveSpace2File(filename);
-        emit searchSpaceGenerated();
-        qDebug()<<"Space Generation took:"<<timer.elapsed()/double(1000.00)<<" sec";
-    }
-    pathPlanner->showConnections();
+    planningStep = GENERATING_SPACE;
 }
 
 Node * PlanningManager::findPath(int coord)
@@ -325,6 +268,57 @@ int PlanningManager::setupPlanner()
         emit addMsg(0,INFO,logMsg);
     }
     return 1;
+}
+
+void PlanningManager::run()
+{
+    switch(planningStep)
+    {
+    case GENERATING_SPACE:
+        QTime timer;
+        const char * filename = "logs/SearchSpace.txt";
+        if(!this->pathPlanner)
+            this->setupPlanner();
+        if(pathPlanner->search_space)
+        {
+            qDebug()<<"\n Search Space already Exist";
+            break;
+        }
+        timer.restart();
+        if(fileExist(filename))
+        {
+            qDebug()<<"Loading Space From file ...";
+            pathPlanner->readSpaceFromFile(filename);
+            if(expObstEnabled)
+                pathPlanner->expandObstacles();
+            if(connNodesEnabled)
+                pathPlanner->connectNodes();
+            qDebug()<<"File loading took:"<<timer.elapsed()/double(1000.00)<<" sec";
+        }
+        else
+        {
+            qDebug()<<"Generating Space ...";
+            if(expObstEnabled)
+                pathPlanner->expandObstacles();
+            if(regGridEnabled)
+                pathPlanner->generateRegularGrid();
+            if(bridgeTestEnabled)
+                pathPlanner->bridgeTest();
+            if(obstPenEnabled)
+                pathPlanner->addCostToNodes();
+            if(connNodesEnabled)
+                pathPlanner->connectNodes();
+            pathPlanner->saveSpace2File(filename);
+            emit searchSpaceGenerated();
+            qDebug()<<"Space Generation took:"<<timer.elapsed()/double(1000.00)<<" sec";
+        }
+        pathPlanner->showConnections();
+        break;
+    case FINDING_PATH:
+        break;
+    case WAITING:
+        break;
+    }
 }
 
 int PlanningManager::stop()

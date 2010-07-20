@@ -9,10 +9,10 @@ SET( CasPlanner_MOC_HDRS
     ./modules/Rendering/glrender.h
     ./modules/Rendering/laserrender.h
     ./modules/Logger/logger.h
+    ./gui/planningsettings.h
+    ./gui/missioncontroltab.h
     ./gui/hritab.h
     ./gui/mainwindow.h
-    ./gui/navigationtab.h
-    ./gui/planningtab.h
     ./gui/playgroundtab.h
     ./gui/statusbar.h
     ./gui/tabcontainer.h
@@ -61,12 +61,12 @@ SET( CasPlanner_SRCS
     ./modules/Parser/configfile.cc
     ./modules/Navigator/controller.cpp
     ./modules/Rendering/laserrender.cpp
+    ./gui/planningsettings.cpp
+    ./gui/missioncontroltab.cpp
     ./gui/loggerview.cpp
     ./gui/hritab.cpp
     ./gui/main.cpp
     ./gui/mainwindow.cpp
-    ./gui/navigationtab.cpp
-    ./gui/planningtab.cpp
     ./gui/playgroundtab.cpp
     ./gui/statusbar.cpp
     ./gui/tabcontainer.cpp
@@ -136,6 +136,8 @@ SET(CasPlanner_UIS
     gui/hritab.ui
     gui/loggerview.ui
     gui/configparsertab.ui
+    gui/missioncontroltab.ui
+    gui/planningsettings.ui
     )
 # Resources files
 SET(CasPlanner_RCS resources/icons.qrc)

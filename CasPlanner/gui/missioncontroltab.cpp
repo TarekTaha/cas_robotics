@@ -1,66 +1,24 @@
-/***************************************************************************
- *   Copyright (C) 2006 - 2007 by                                          *
- *      Tarek Taha, CAS-UTS  <tataha@tarektaha.com>                        *
- *                                                                         *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
- ***************************************************************************/
-#include "navigationtab.h"
-#include <QProcess>
+#include "missioncontroltab.h"
+#include "ui_missioncontroltab.h"
 
-NavContainer::~NavContainer()
+MissionControlTab::MissionControlTab(QWidget *parent,PlayGround *playGround_in) :
+    QWidget(parent),
+    ui(new Ui::MissionControlTab),
+    playGround(playGround_in),
+    robotInitialization(true),
+    path(NULL)
 {
-
-}
-
-NavContainer::NavContainer(QWidget *parent,PlayGround *playGround_in)
- : QWidget(parent),
-   playGround(playGround_in),
-   navControlPanel(this,playGround_in)
-{
-    QHBoxLayout *vLayout = new QHBoxLayout;
-
-    mapViewer = new MapViewer(this,playGround,&navControlPanel);
-    vLayout->addWidget(mapViewer,4);
+    ui->setupUi(this);
+    mapViewer = new MapViewer(this,playGround);
+    ui->vLayout->addWidget(mapViewer);
+    connect(mapViewer, SIGNAL(setStart(Pose)),  this, SLOT(setStart(Pose)));
+    connect(mapViewer, SIGNAL(setEnd(Pose))  ,  this, SLOT(setEnd(Pose)));
     playGround->setMapViewer(mapViewer);
-    vLayout->addWidget(&navControlPanel,1);
-    setLayout(vLayout);
     if(playGround)
     {
         if(playGround->robotPlatforms.size()>0)
             playGround->activeRobot = playGround->robotPlatforms[0];
     }
-}
-
-NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
-	QWidget(container),
-	navContainer(container),
-	playGround(playG),
-	actionGB("Action"),
-	pauseBtn("Pause"),
-	pathPlanBtn("Path Plan"),
-	//	generateSpaceBtn("Generate Space"),
-	resetBeliefBtn("Reset Belief"),
-	pathFollowBtn("Path Follow"),
-	captureImage("Capture Image"),
-	intentionRecognitionBtn("Start IRecognition"),
-	robotsGB("Select your Robot"),
-	robotInitialization(true),
-	path(0)
-{
     RobotManager *temp= NULL;
     QRadioButton *rob;
     if(playGround)
@@ -75,41 +33,28 @@ NavControlPanel::NavControlPanel(NavContainer *container,PlayGround *playG):
             playGround->activeRobot = playGround->robotPlatforms[0];
     }
 
-    QVBoxLayout *hlayout = new QVBoxLayout;
-    hlayout->addWidget(&robotsGB,1);
-    hlayout->addWidget(&actionGB,1);
-
-    this->setLayout(hlayout);
-
-    QVBoxLayout *robotsL = new QVBoxLayout;
     for(int i=0;i<availableRobots.size();i++)
     {
-        robotsL->addWidget(availableRobots[i]);
-        connect(availableRobots[i],        SIGNAL(toggled(bool )), this,SLOT(updateSelectedRobot(bool)));
+        ui->robotsL->addWidget(availableRobots[i]);
+        connect(availableRobots[i],SIGNAL(toggled(bool )), this,SLOT(updateSelectedRobot(bool)));
     }
-
-    QVBoxLayout *actionLayout = new QVBoxLayout;
-    actionLayout->addWidget(&pauseBtn);
-    actionLayout->addWidget(&captureImage);
-    actionLayout->addWidget(&pathPlanBtn);
-    //    actionLayout->addWidget(&generateSpaceBtn);
-    actionLayout->addWidget(&pathFollowBtn);
-    actionLayout->addWidget(&intentionRecognitionBtn);
-    actionLayout->addWidget(&resetBeliefBtn);
-    actionGB.setLayout(actionLayout);
-    connect(&pathPlanBtn,      SIGNAL(pressed()),this, SLOT(pathPlan()));
-    //	connect(&generateSpaceBtn, SIGNAL(pressed()),this, SLOT(generateSpace()));
-    connect(&captureImage,     SIGNAL(pressed()),this, SLOT(save()));
-    connect(&pathFollowBtn,    SIGNAL(pressed()),this, SLOT(pathFollow()));
-    connect(&pauseBtn,         SIGNAL(pressed()),this, SLOT(setNavigation()));
-    connect(&intentionRecognitionBtn, SIGNAL(pressed()),this, SLOT(startIntentionRecognition()));
-    connect(&resetBeliefBtn, 	   SIGNAL(pressed()),this, SLOT(resetDestinationBelief()));
+    connect(ui->pathPlanBtn,            SIGNAL(pressed()),this, SLOT(pathPlan()));
+    connect(ui->captureImage,           SIGNAL(pressed()),this, SLOT(save()));
+    connect(ui->pathFollowBtn,          SIGNAL(pressed()),this, SLOT(pathFollow()));
+    connect(ui->pauseBtn,               SIGNAL(pressed()),this, SLOT(setNavigation()));
+    connect(ui->intentionRecognitionBtn,SIGNAL(pressed()),this, SLOT(startIntentionRecognition()));
+    connect(ui->resetBeliefBtn, 	SIGNAL(pressed()),this, SLOT(resetDestinationBelief()));
     if(availableRobots.size()>0)
         availableRobots[0]->setChecked(true);
-    robotsGB.setLayout(robotsL);
 }
 
-void NavControlPanel::resetDestinationBelief()
+MissionControlTab::~MissionControlTab()
+{
+    delete ui;
+}
+
+
+void MissionControlTab::resetDestinationBelief()
 {
     if(this->playGround->activeRobot)
     {
@@ -138,7 +83,7 @@ void NavControlPanel::resetDestinationBelief()
     }
 }
 
-void NavControlPanel::startIntentionRecognition()
+void MissionControlTab::startIntentionRecognition()
 {
     if(this->playGround->activeRobot)
     {
@@ -167,7 +112,7 @@ void NavControlPanel::startIntentionRecognition()
     }
 }
 
-void NavControlPanel::pathTraversed()
+void MissionControlTab::pathTraversed()
 {
     if(playGround->activeRobot->navigator->isRunning())
     {
@@ -175,12 +120,12 @@ void NavControlPanel::pathTraversed()
         playGround->activeRobot->navigator->quit();
         qDebug()<<"Quitting Thread";
     }
-    pathFollowBtn.setText("Path Follow");
-    pauseBtn.setText("Pause");
+    ui->pathFollowBtn->setText("Path Follow");
+    ui->pauseBtn->setText("Pause");
     playGround->activeRobot->notFollowing = true;
 }
 
-void NavControlPanel::pathFollow()
+void MissionControlTab::pathFollow()
 {
     if(!playGround->activeRobot->commManager)
     {
@@ -214,7 +159,7 @@ void NavControlPanel::pathFollow()
         {
             playGround->activeRobot->navigator->setPath(path);
             playGround->activeRobot->navigator->start();
-            pathFollowBtn.setText("Stop");
+            ui->pathFollowBtn->setText("Stop");
             playGround->activeRobot->notFollowing = false;
         }
     }
@@ -226,68 +171,61 @@ void NavControlPanel::pathFollow()
             playGround->activeRobot->navigator->quit();
             qDebug()<<"Quitting Thread";
         }
-        pathFollowBtn.setText("Path Follow");
+        ui->pathFollowBtn->setText("Path Follow");
         playGround->activeRobot->notFollowing = true;
     }
 }
 
-void NavControlPanel::updateSelectedRobot(bool)
+void MissionControlTab::updateSelectedRobot(bool)
 {
     for(int i=0;i<availableRobots.size();i++)
     {
         if(availableRobots[i]->isChecked())
         {
             playGround->activeRobot = playGround->robotPlatforms[i];
-            //			qDebug("Seleted Robot is:%s",qPrintable(playGround->activeRobot->robot->robotName));	fflush(stdout);
-            //			if(!playGround->activeRobot)
-            //				return;
-            //			if(!playGround->activeRobot->planningManager)
-            //				return;
-            //			if(!playGround->activeRobot->planningManager->pathPlanner)
-            //				playGround->activeRobot->startPlanner();
-            return;
+            break;
         }
     }
 }
 
-void NavControlPanel::setNavigation()
+void MissionControlTab::setNavigation()
 {
     if(playGround->activeRobot->notPaused)
     {
         playGround->activeRobot->navigator->setPause(true);
         playGround->activeRobot->notPaused = false;
-        pauseBtn.setText("Continue");
+        ui->pauseBtn->setText("Continue");
     }
     else
     {
         playGround->activeRobot->navigator->setPause(false);
         playGround->activeRobot->notPaused = true;
-        pauseBtn.setText("Pause");
+        ui->pauseBtn->setText("Pause");
     }
 }
 
-void NavControlPanel::pathPlan()
+void MissionControlTab::pathPlan()
 {
     playGround->activeRobot->planningManager->setMap(playGround->mapManager->globalMap);
     path = playGround->activeRobot->planningManager->findPath(METRIC);
 }
 
-void NavControlPanel::generateSpace()
+void MissionControlTab::generateSpace()
 {
     playGround->activeRobot->planningManager->generateSpace();
 }
 
-void NavControlPanel::loadMap()
+void MissionControlTab::loadMap()
 {
 
 }
 
-void NavControlPanel::save()
+void MissionControlTab::save()
 {
-    navContainer->mapViewer->saveImage();
+    mapViewer->saveImage();
 }
 
-void NavControlPanel::setStart(Pose startLoc)
+void MissionControlTab::setStart(Pose startLoc)
 {
     if(this->playGround->activeRobot)
     {
@@ -299,7 +237,7 @@ void NavControlPanel::setStart(Pose startLoc)
     }
 }
 
-void NavControlPanel::setEnd(Pose endLoc)
+void MissionControlTab::setEnd(Pose endLoc)
 {
     if(this->playGround->activeRobot)
     {
@@ -311,7 +249,7 @@ void NavControlPanel::setEnd(Pose endLoc)
     }
 }
 
-void NavControlPanel::setMap(Map * map)
+void MissionControlTab::setMap(Map * map)
 {
     if(this->playGround->activeRobot)
     {

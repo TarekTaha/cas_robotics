@@ -28,11 +28,10 @@
 #include "playgroundtab.h"
 #include "playground.h"
 #include "tasksgui.h"
-#include "navigationtab.h"
 #include "mapviewer.h"
-#include "planningtab.h"
 #include "hritab.h"
 #include "loggerview.h"
+#include "missioncontroltab.h"
 #include "logger.h"
 
 class TabContainer : public QTabWidget
@@ -43,14 +42,13 @@ class TabContainer : public QTabWidget
         void setPlayGround(PlayGround *playG);
         ~TabContainer();
     public:
-        PlayGroundTab*playGroundTab;
-        PlanningTab *planningTab;
-        HriTab		*hriTab;
-        PlayGround   *playGround;
-        NavContainer *navCon;
-        TasksGui *tasksGui;
-        MapViewer *mapViewer;
-        loggerview *loggerView;
+        PlayGroundTab       *playGroundTab;
+        HriTab              *hriTab;
+        PlayGround          *playGround;
+        MissionControlTab   *missionControlTab;
+        TasksGui            *tasksGui;
+        MapViewer           *mapViewer;
+        loggerview          *loggerView;
 };
 
 #endif

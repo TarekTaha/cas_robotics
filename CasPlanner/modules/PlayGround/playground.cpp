@@ -21,7 +21,6 @@
 #include "playground.h"
 
 PlayGround::PlayGround():
-    navCon(NULL),
     mapViewer(NULL),
     mapManager(NULL)
 {
@@ -29,7 +28,6 @@ PlayGround::PlayGround():
 }
 
 PlayGround::PlayGround(QStringList configFiles,QStatusBar *in_statusBar):
-    navCon(NULL),
     mapViewer(NULL),
     mapManager(NULL),
     activeRobot(NULL)
@@ -100,12 +98,6 @@ void PlayGround::setMapViewer(MapViewer *_mapViewer)
     this->mapViewer = _mapViewer;
     for(int i=0;i<robotPlatforms.size();i++)
         connect(robotPlatforms[i]->planningManager,SIGNAL(searchSpaceGenerated()),mapViewer,SLOT(searchSpaceGenerated()));
-}
-
-int PlayGround::setNavContainer(NavContainer* con)
-{
-    this->navCon = con;
-    return 1;
 }
 
 void PlayGround::startRobotsComm()
