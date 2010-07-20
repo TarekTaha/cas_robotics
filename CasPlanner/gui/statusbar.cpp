@@ -21,21 +21,21 @@
 #include "statusbar.h"
 
 StatusLogger::StatusLogger(QStatusBar *in_statusBar):
-statusBar(in_statusBar)    
+statusBar(in_statusBar)
 {
-    log.setReadOnly(true); 
+    log.setReadOnly(true);
 }
 
 StatusLogger::StatusLogger():
 statusBar(NULL)
 {
-    log.setReadOnly(true); 
+    log.setReadOnly(true);
 }
 
 void StatusLogger::showLog()
 {
-    qDebug("Displaying Log Window"); 
-    log.show(); 
+    qDebug("Displaying Log Window");
+    log.show();
 }
 StatusLogger::~StatusLogger()
 {
@@ -44,21 +44,21 @@ StatusLogger::~StatusLogger()
 
 void StatusLogger::addStatusMsg(int messageId, int messageType, QString message)
 {
-	switch (messageType)
-	{
-		case INFO:
-			log.setTextColor(Qt::black); 
-			break;
-		case ERROR:
-			log.setTextColor(Qt::red); 		
-			break;
-		case WARNING:
-			log.setTextColor(Qt::yellow); 		
-			break;
-		default:
-			log.setTextColor(Qt::black); 
-	}
-    log.append(message); 
+    switch (messageType)
+    {
+    case INFO:
+        log.setTextColor(Qt::black);
+        break;
+    case ERROR:
+        log.setTextColor(Qt::red);
+        break;
+    case WARNING:
+        log.setTextColor(Qt::yellow);
+        break;
+    default:
+        log.setTextColor(Qt::black);
+    }
+    log.append(message);
     if(statusBar)
-    	statusBar->showMessage(message); 
+        statusBar->showMessage(message);
 }

@@ -22,11 +22,10 @@
 #include "bitmap_fonts.h"
 #define ROBOT 1
 
-MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
+MapViewer::MapViewer(QWidget *parent,PlayGround *playG)
     : QGLWidget(QGLFormat(QGL::DoubleBuffer | QGL::Rgba | QGL::SampleBuffers), parent),
     step(1),
     playGround(playG),
-    navControlPanel(navCo),
     zoomFactor(15.5),
     xOffset(0),
     yOffset(0),
@@ -59,8 +58,6 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG,NavControlPanel *navCo)
     renderTimer->start(100);
     clearColor = Qt::black;
     setFocusPolicy(Qt::StrongFocus);
-    connect(this, SIGNAL(setStart(Pose)),  navControlPanel, SLOT(setStart(Pose)));
-    connect(this, SIGNAL(setEnd(Pose))  ,  navControlPanel, SLOT(setEnd(Pose)));
     connect(playGround,SIGNAL(mapUpdated(Map*)),this,       SLOT(updateMap(Map*)));
 
     RGB_COLOR[0][0] = 0.0; RGB_COLOR[0][1] = 0.7;   RGB_COLOR[0][2] = 0.7;   // Lightblue
@@ -1042,53 +1039,29 @@ void MapViewer::searchSpaceGenerated()
     qDebug()<<"SearchSpace Generated";
 }
 
-void MapViewer::setShowSearchSpaceSamples(int state)
+void MapViewer::setShowSearchSpaceSamples(bool state)
 {
-    if(state)
-    {
-        showSearchSpaceSamples = true;
-        searchSpaceListCreated = false;
-    }
-    else
-        showSearchSpaceSamples = false;
+    showSearchSpaceSamples = state;
 }
 
-void MapViewer::setShowSearchSpaceTree(int state)
+void MapViewer::setShowSearchSpaceTree(bool state)
 {
-    if(state)
-    {
-        showSearchSpaceTree = true;
-        searchSpaceListCreated = false;
-    }
-    else
-        showSearchSpaceTree = false;
+    showSearchSpaceTree = state;
 }
 
-void MapViewer::setShowSearchTree(int state)
+void MapViewer::setShowSearchTree(bool state)
 {
-    if(state)
-    {
-        showSearchTree = true;
-        searchSpaceListCreated = false;
-    }
-    else
-        showSearchTree = false;
+    showSearchTree = state;
 }
 
-void MapViewer::setShowPath(int state)
+void MapViewer::setShowPath(bool state)
 {
-    if(state)
-        showPath = true;
-    else
-        showPath = false;
+    showPath = state;
 }
 
-void MapViewer::setShowRobotTrail(int state)
+void MapViewer::setShowRobotTrail(bool state)
 {
-    if(state)
-        showRobotTrail = true;
-    else
-        showRobotTrail = false;
+    showRobotTrail = state;
 }
 
 void MapViewer::setShowOGs(int state)

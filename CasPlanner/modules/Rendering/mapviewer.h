@@ -30,7 +30,6 @@
 //#include "interfaceprovider.h"
 #include "mapmanager.h"
 #include "playground.h"
-#include "navigationtab.h"
 #include "node.h"
 //#include "robotrender.h"
 #include "map.h"
@@ -38,13 +37,12 @@
 #include "FreeType.h"
 
 class PlayGround;
-class NavControlPanel;
 
 class MapViewer : public QGLWidget
 {
 Q_OBJECT
     public:
-        MapViewer(QWidget *parent=0,PlayGround *playG=0,NavControlPanel *navControlPanel=0);
+        MapViewer(QWidget *parent=0,PlayGround *playG=0);
         ~MapViewer();
         void initializeGL();
         void paintGL();
@@ -83,11 +81,11 @@ Q_OBJECT
         void renderMap();
     public slots:
         void update();
-        void setShowSearchSpaceSamples(int state);
-        void setShowSearchSpaceTree   (int state);
-        void setShowSearchTree        (int state);
-        void setShowPath              (int state);
-        void setShowRobotTrail        (int state);
+        void setShowSearchSpaceSamples(bool state);
+        void setShowSearchSpaceTree   (bool state);
+        void setShowSearchTree        (bool state);
+        void setShowPath              (bool state);
+        void setShowRobotTrail        (bool state);
         void setShowOGs         (int state);
         void setShowSnaps       (int state);
         void setShowGrids       (int state);
@@ -109,7 +107,6 @@ Q_OBJECT
     private:
         int screenWidth,count,step;
         PlayGround *playGround;
-        NavControlPanel *navControlPanel;
         int screenHeight;
         float zoomFactor;
         float xOffset, yOffset, zOffset;

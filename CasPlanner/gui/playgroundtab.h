@@ -40,92 +40,92 @@
 #include <QFrame>
 #include <QHash>
 #include "playground.h"
+#include "planningsettings.h"
 
 class PlayGround;
 class QListWidget;
 class QListWidgetItem;
 class QStackedWidget;
 class PlayGroundTab;
+class PlanningTab;
 class QDragEnterEvent;
 class QDropEvent;
 class QMouseEvent;
 
 class Interfaces : public QWidget
 {
-	Q_OBJECT
-	public:
-		Interfaces(QWidget *parent = 0);
-		void createIcons(QVector <DeviceType> * devices);
-		void addInterface(DeviceType dev,QString name);
-	public slots:		
-		void checkChanged(int state);		
-	private:
-		QVBoxLayout * vLayout;
-		QVector <QCheckBox *> devicesBox;	
-		QHash   <QCheckBox *, DeviceType> chk2Dev;
+    Q_OBJECT
+public:
+    Interfaces(QWidget *parent = 0);
+    void createIcons(QVector <DeviceType> * devices);
+    void addInterface(DeviceType dev,QString name);
+public slots:
+    void checkChanged(int state);
+private:
+    QVBoxLayout * vLayout;
+    QVector <QCheckBox *> devicesBox;
+    QHash   <QCheckBox *, DeviceType> chk2Dev;
 };
 
 class RobotConfigPage : public QWidget
 {
-Q_OBJECT	
-	public:
-    	RobotConfigPage(QWidget *parent = 0,PlayGround *playG=0);
-    public slots:
-		void updateSelection(int r);
-	public:    	
-    	PlayGround * playGround;
-    	QComboBox  * robotsCombo;
-    	Interfaces * interfaces;
-//    	InterfacesList * interfacesList;
-//    	RobotInterfaces * robotInterfaces;
-    	QLabel robotName,robotIp,robotPort,robotLength,robotWidth,robotModel,robotCenter,robotMass,
-    		   robotInirtia;
-        QLineEdit robotNameE,robotIpE;
-    	QRadioButton modelDiff,modelCar;    
-    	QDoubleSpinBox robotCenterX,robotCenterY,robotPortE,robotLengthE,robotWidthE,robotMassE,
-    				   robotInirtiaE;    
-		QCheckBox laserInterfaceBox,posInterfaceBox,vfhInterfaceBox,LocalizerInterfaceBox;				   
+    Q_OBJECT
+public:
+    RobotConfigPage(QWidget *parent = 0,PlayGround *playG=0);
+public slots:
+    void updateSelection(int r);
+public:
+    PlayGround * playGround;
+    QComboBox  * robotsCombo;
+    Interfaces * interfaces;
+    QLabel robotName,robotIp,robotPort,robotLength,robotWidth,robotModel,robotCenter,robotMass,
+    robotInirtia;
+    QLineEdit robotNameE,robotIpE;
+    QRadioButton modelDiff,modelCar;
+    QDoubleSpinBox robotCenterX,robotCenterY,robotPortE,robotLengthE,robotWidthE,robotMassE,
+    robotInirtiaE;
+    QCheckBox laserInterfaceBox,posInterfaceBox,vfhInterfaceBox,LocalizerInterfaceBox;
 };
 
 class MapConfigPage : public QWidget
 {
-Q_OBJECT	
-	public:
-    	MapConfigPage(QWidget *parent = 0,PlayGround *playG=0);
-    	PlayGround * playGround;
-    	QGroupBox *mapGround; 
-    	QString fileName;
-    	QLabel *mapName,*mapRes ;
-    	QLineEdit *mapNameEdit ;    	
-    	QDoubleSpinBox mapResolution;
-    	QPushButton browseMapBtn,reloadMapBtn;  
-    	QRadioButton whiteFree,blackFree; 	
-    public slots:    	
-    	void getFileName();
-    	void reloadMap();
+    Q_OBJECT
+public:
+    MapConfigPage(QWidget *parent = 0,PlayGround *playG=0);
+    PlayGround * playGround;
+    QGroupBox *mapGround;
+    QString fileName;
+    QLabel *mapName,*mapRes ;
+    QLineEdit *mapNameEdit ;
+    QDoubleSpinBox mapResolution;
+    QPushButton browseMapBtn,reloadMapBtn;
+    QRadioButton whiteFree,blackFree;
+public slots:
+    void getFileName();
+    void reloadMap();
 };
 
 class ProfileConfigPage : public QWidget
 {
-Q_OBJECT	
-	public:
-    	ProfileConfigPage(QWidget *parent = 0,PlayGround *playG=0);
-    	PlayGround * playGround;
+    Q_OBJECT
+public:
+    ProfileConfigPage(QWidget *parent = 0,PlayGround *playG=0);
+    PlayGround * playGround;
 };
- 
+
 class PlayGroundTab : public  QWidget
 {
-Q_OBJECT
-	public:
-	   	virtual ~PlayGroundTab();  	
-    	PlayGroundTab(QWidget *parent=0,PlayGround *playG=0); 	
-    	PlayGround * playGround;
-	public slots:
-    	void changePage(QListWidgetItem *current, QListWidgetItem *previous);
-	private:
-    	void createIcons();
-		QListWidget 	*contentsWidget;
-    	QStackedWidget  *pagesWidget;
+    Q_OBJECT
+public:
+    virtual ~PlayGroundTab();
+    PlayGroundTab(QWidget *parent=0,PlayGround *playG=0);
+    PlayGround * playGround;
+public slots:
+    void changePage(QListWidgetItem *current, QListWidgetItem *previous);
+private:
+    void createIcons();
+    QListWidget     *contentsWidget;
+    QStackedWidget  *pagesWidget;
 };
 
 #endif /*PLAYGROUNDTAB_H_*/

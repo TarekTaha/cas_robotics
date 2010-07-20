@@ -94,7 +94,7 @@ PlayGroundTab::PlayGroundTab(QWidget * parent,PlayGround *playG):
     pagesWidget->addWidget(new RobotConfigPage(this,playGround));
     pagesWidget->addWidget(new MapConfigPage(this,playGround));
     pagesWidget->addWidget(new ProfileConfigPage(this,playGround));
-
+    pagesWidget->addWidget(new PlanningSettings(this,playGround));
     createIcons();
     contentsWidget->setCurrentRow(0);
 
@@ -134,6 +134,12 @@ void PlayGroundTab::createIcons()
     queryButton->setText(("Profile Configuration"));
     queryButton->setTextAlignment(Qt::AlignHCenter);
     queryButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+
+    QListWidgetItem *planningButton = new QListWidgetItem(contentsWidget);
+    planningButton->setIcon(QIcon(":/path.png"));
+    planningButton->setText(("Planning Configuration"));
+    planningButton->setTextAlignment(Qt::AlignHCenter);
+    planningButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
     connect(contentsWidget,SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)),
             (PlayGroundTab*)this, SLOT(changePage(QListWidgetItem *, QListWidgetItem*)));

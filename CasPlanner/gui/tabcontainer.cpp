@@ -24,17 +24,14 @@ TabContainer::TabContainer(QWidget *parent,PlayGround *playG)
     : QTabWidget(parent),
       playGround(playG)
 {
-    navCon = 	new NavContainer(parent,playGround);
-    addTab(navCon, "Navigation Panel");
+    missionControlTab = new MissionControlTab(parent,playGround);
+    addTab(missionControlTab,"Mission Control Tab");
 
     tasksGui = new TasksGui(parent,playGround);
     addTab(tasksGui, "Tasks Manager");
 
     playGroundTab = new PlayGroundTab(parent,playGround);
     addTab(playGroundTab, "PlayGround");
-
-    planningTab = new PlanningTab(parent,playGround);
-    addTab(planningTab, "Path Planning");
 
     hriTab = new HriTab(parent,playGround);
     addTab(hriTab, "HRI Settings");

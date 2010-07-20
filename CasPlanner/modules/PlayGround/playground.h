@@ -25,7 +25,6 @@
 #include "robotmanager.h"
 #include <QVector>
 #include <QStatusBar>
-#include "navigationtab.h"
 #include "mapviewer.h"
 #include "configfile.h"
 #include "statusbar.h"
@@ -34,7 +33,6 @@
 #include "logger.h"
 
 class Navigator;
-class NavContainer;
 class PlanningManager;
 class MapViewer;
 
@@ -46,13 +44,11 @@ public:
     PlayGround(QStringList configFiles,QStatusBar *in_statusBar);
     virtual ~PlayGround();
     int renderingMethod;
-    NavContainer *navCon;
     MapViewer    *mapViewer;
     MapManager   *mapManager;
     StatusLogger *statusLogger;
     QVector <RobotManager* > robotPlatforms;
     RobotManager *activeRobot;
-    int  setNavContainer(NavContainer* con);
     void setMapViewer(MapViewer *);
    public slots:
         void startRobotsComm();

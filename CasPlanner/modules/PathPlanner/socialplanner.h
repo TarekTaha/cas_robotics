@@ -6,7 +6,7 @@
 #include "astar.h"
 #include "mapskeleton.h"
 #include "map.h"
-
+#include "node.h"
 
 class PlayGround;
 class RobotManager;
@@ -27,8 +27,8 @@ class SocialPlanner
         void printNodeList ();
         void buildSpace();
         void showConnections();
-        Node * getPath();
-        SearchSpaceNode * getSearchSpace();
+        CasPlanner::Node * getPath();
+        CasPlanner::SearchSpaceNode * getSearchSpace();
         vector <Tree> getTree();
         bool loadActivities(const char *filename);
         bool readSpaceFromFile(const char *filename);

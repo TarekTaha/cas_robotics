@@ -52,46 +52,46 @@ typedef struct _connection
 
 class Vertex
 {
-    public:
-        QPointF location;
-        QVector <Connection> connections;
-        double prob;
-        int visits;
-        Vertex()
-        {
-            location.setX(0);
-            location.setY(0);
-            prob = 0;
-            visits = 0;
-        }
-        Vertex(double x,double y)
-        {
-            location.setX(x);
-            location.setY(y);
-        }
-        void setLocation(QPointF p)
-        {
-            this->location = p;
-        }
-        void setLocation(double x,double y)
-        {
-            location.setX(x);
-            location.setY(y);
-        }
-        void connect(unsigned int indx,unsigned int direction )
-        {
-            Connection con; con.direction = direction; con.nodeIndex = indx;
-            this->connections.push_back(con);
-        }
-        QPointF getLocation()
-        {
-            return this->location;
-        }
-        bool operator==(const Vertex& v) const
-        {
-            return ((this->location.x()== v.location.x()) && (this->location.y()==v.location.y()) &&
-                    (this->prob==v.prob));
-        }
+public:
+    QPointF location;
+    QVector <Connection> connections;
+    double prob;
+    int visits;
+    Vertex()
+    {
+        location.setX(0);
+        location.setY(0);
+        prob = 0;
+        visits = 0;
+    }
+    Vertex(double x,double y)
+    {
+        location.setX(x);
+        location.setY(y);
+    }
+    void setLocation(QPointF p)
+    {
+        this->location = p;
+    }
+    void setLocation(double x,double y)
+    {
+        location.setX(x);
+        location.setY(y);
+    }
+    void connect(unsigned int indx,unsigned int direction )
+    {
+        Connection con; con.direction = direction; con.nodeIndex = indx;
+        this->connections.push_back(con);
+    }
+    QPointF getLocation()
+    {
+        return this->location;
+    }
+    bool operator==(const Vertex& v) const
+    {
+        return ((this->location.x()== v.location.x()) && (this->location.y()==v.location.y()) &&
+                (this->prob==v.prob));
+    }
 };
 
 class MapSkeleton
