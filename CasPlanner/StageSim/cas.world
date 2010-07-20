@@ -1,9 +1,3 @@
-# the size of a pixel in Stage's underlying raytrace model in meters
-#resolution     0.02
-resolution     0.047
-interval_sim 100  # milliseconds per update step
-interval_real 100 # real-time milliseconds per update step
-
 # defines Pioneer-like robots
 include "wheelchair.inc"
 
@@ -17,29 +11,23 @@ include "sick.inc"
 # defines the laser model `hokuyo_laser' configured like a Hokuyo Laser
 include "hokuyo.inc"
 
-#size [16 16]
-#size [13 13 ]
-#size [47 20] #casarea
-size [32 20 2] # casrea_sub
-
-# configure the GUI window
-#window
-#( 
-#  size [ 591.000 638.000 ] 
-#  center [-0.010 -0.040] 
-#  scale 0.028 
-#)
+interval_sim            100
+quit_time               0
+resolution              0.047
+show_clock              0
+show_clock_interval     100
+threads                 0
 
 window
 (
   size [ 680 500 ] 
   center [0 0 0] 
-  #scale 0.05
-  scale 0.047
+  show_data 1
 )
 
 map
 (
+  name "CasMap"
   #bitmap "bitmaps/casareaicp2.png"
   #bitmap "bitmaps/casareaicpA.png"
   #bitmap "bitmaps/casareaicpB.png"
@@ -50,7 +38,7 @@ map
   #size [12.8 12.8]  # casareaB
   #size [46.53 19.74] # casarea.jpeg
   size [31.866 19.74 2]
-  name "casarea"
+  origin [ 0.0 0.0 0.0 0.0 ]
 )
 
 define Obstacle position
@@ -73,7 +61,7 @@ define Obstacle position
   )
 )
 
-Obstacle 
+Obstacle
 (
   localization "gps"
   localization_origin [ 0 0 0 0]
@@ -99,7 +87,7 @@ define dynamicRobot pioneer2dx
   sick_laser
   (
     pose [0.03 0 0 0 ]
-  )
+ )
   localization "gps"
   localization_origin [ 0 0 0 0]
 )
