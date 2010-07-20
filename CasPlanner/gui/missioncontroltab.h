@@ -48,6 +48,7 @@ public slots:
     void startIntentionRecognition();
     void resetDestinationBelief();
     void updateSelectedRobot(bool);
+    void pathFound(Node*);
 private:
     Ui::MissionControlTab *ui;
     MapViewer  * mapViewer;

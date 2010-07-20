@@ -21,61 +21,63 @@
 #include "IntentionRecognizer.h"
 
 IntentionRecognizer::IntentionRecognizer(PlayGround * playG, RobotManager *rManager):
-runRecognition(false),
-useNavigator(false),
-beliefInitialized(false),
-destBelief(playG->mapManager->mapSkeleton.numDestinations,0),
-goToState(-1,-1,-1),
-oldGoToState(0,0,0),
-lastObs(4),
-observation(4),
-action(4),
-spatialState(-1),
-oldSpatialState(-2),
-socialPlanner(NULL),
-interactionStrategy(CONTINIOUS_INPUT),
-//interactionStrategy(MINIMAL_INPUT),
-actionAmbiguity(false),
-playGround(playG),
-robotManager(rManager),
-path(NULL)
+    runRecognition(false),
+    useNavigator(false),
+    beliefInitialized(false),
+    destBelief(playG->mapManager->mapSkeleton.numDestinations,0),
+    goToState(-1,-1,-1),
+    oldGoToState(0,0,0),
+    lastObs(4),
+    observation(4),
+    action(4),
+    spatialState(-1),
+    oldSpatialState(-2),
+    socialPlanner(NULL),
+    interactionStrategy(CONTINIOUS_INPUT),
+    //interactionStrategy(MINIMAL_INPUT),
+    actionAmbiguity(false),
+    isPathFound(false),
+    playGround(playG),
+    robotManager(rManager),
+    path(NULL)
 {
-	if (!playGround)
-	{
-		perror("\nIR: PlayGround Not Passed Correctly");
-	}
-	/**
-	 *  Social Planner Part
-	 */
-	socialPlanner = rManager->socialPlanner;
-	socialPlanner->setMap(playGround->mapManager->globalMap);
-	socialPlanner->setMapSkeleton(&playGround->mapManager->mapSkeleton);
-	socialPlanner->buildSpace();
-	socialPlanner->showConnections();
-	socialPlanner->loadActivities("logs/exp_tasks_list_large");
-	/* TEST SMALL PATH */
-	Pose s(playGround->mapManager->mapSkeleton.verticies[37].location.x(),playGround->mapManager->mapSkeleton.verticies[37].location.y(),0);
-	socialPlanner->setStart(s);
-	Pose e(playGround->mapManager->mapSkeleton.verticies[0].location.x(),playGround->mapManager->mapSkeleton.verticies[0].location.y(),DTOR(90));
-	socialPlanner->setEnd(e);
-	Node * retval = socialPlanner->astar->startSearch(s,e,METRIC);
-	if(retval)
-	{
-		socialPlanner->printNodeList();
-	}
-	else
-	{
-                qDebug()<<"No path Found";
-	}
-	
-	/**
+    if (!playGround)
+    {
+        perror("\nIR: PlayGround Not Passed Correctly");
+    }
+    connect(robotManager->planningManager,SIGNAL(pathFound(Node*)),this,SLOT(pathFound(Node*)));
+    /**
+     *  Social Planner Part
+     */
+    socialPlanner = rManager->socialPlanner;
+    socialPlanner->setMap(playGround->mapManager->globalMap);
+    socialPlanner->setMapSkeleton(&playGround->mapManager->mapSkeleton);
+    socialPlanner->buildSpace();
+    socialPlanner->showConnections();
+    socialPlanner->loadActivities("logs/exp_tasks_list_large");
+    /* TEST SMALL PATH */
+    Pose s(playGround->mapManager->mapSkeleton.verticies[37].location.x(),playGround->mapManager->mapSkeleton.verticies[37].location.y(),0);
+    socialPlanner->setStart(s);
+    Pose e(playGround->mapManager->mapSkeleton.verticies[0].location.x(),playGround->mapManager->mapSkeleton.verticies[0].location.y(),DTOR(90));
+    socialPlanner->setEnd(e);
+    Node * retval = socialPlanner->astar->startSearch(s,e,METRIC);
+    if(retval)
+    {
+        socialPlanner->printNodeList();
+    }
+    else
+    {
+        qDebug()<<"No path Found";
+    }
+
+    /**
 	 * POMDP Part
 	 */
-	InitializePOMDP();
+    InitializePOMDP();
 
-	numStates = playGround->mapManager->mapSkeleton.numStates;
-	numDestinations = playGround->mapManager->mapSkeleton.numDestinations;
-	activityLogger = new ActivityLogger;
+    numStates = playGround->mapManager->mapSkeleton.numStates;
+    numDestinations = playGround->mapManager->mapSkeleton.numDestinations;
+    activityLogger = new ActivityLogger;
 }
 
 IntentionRecognizer::~IntentionRecognizer()
@@ -87,77 +89,91 @@ IntentionRecognizer::~IntentionRecognizer()
 
 void IntentionRecognizer::InitializePOMDP()
 {
-  	MatrixUtils::init_matrix_utils();
-  	//pomdpFileName  = "modules/PomdpModels/minimal_interaction.pomdp";
- 	pomdpFileName  = "modules/PomdpModels/paperexperiment.pomdp";
-  	//policyFileName = "modules/PomdpModels/mod11.policy";
- 	policyFileName = "modules/PomdpModels/6dest.policy";
-  	//policyFileName = "modules/PomdpModels/minimal_interaction.policy";
-  	config = new zmdp::ZMDPConfig();
-  	config->readFromFile("modules/PomdpCore/zmdp.conf");
-  	config->setString("policyOutputFile", "none");
-  	em = new zmdp::BoundPairExec();
-  	printf("initializing\n");
-  	em->initReadFiles(pomdpFileName,policyFileName, *config);
+    MatrixUtils::init_matrix_utils();
+    //pomdpFileName  = "modules/PomdpModels/minimal_interaction.pomdp";
+    pomdpFileName  = "modules/PomdpModels/paperexperiment.pomdp";
+    //policyFileName = "modules/PomdpModels/mod11.policy";
+    policyFileName = "modules/PomdpModels/6dest.policy";
+    //policyFileName = "modules/PomdpModels/minimal_interaction.policy";
+    config = new zmdp::ZMDPConfig();
+    config->readFromFile("modules/PomdpCore/zmdp.conf");
+    config->setString("policyOutputFile", "none");
+    em = new zmdp::BoundPairExec();
+    printf("initializing\n");
+    em->initReadFiles(pomdpFileName,policyFileName, *config);
 }
 
 void IntentionRecognizer::setInteractionStrategy(int strategy)
 {
-	if(strategy != CONTINIOUS_INPUT && strategy != MINIMAL_INPUT)
-	{
-                qDebug()<<"\n Undefined Interaction Method";
-		return;
-	}
-	this->interactionStrategy = strategy;
-	printf("\n Strategy:%d",strategy);
-	return;
+    if(strategy != CONTINIOUS_INPUT && strategy != MINIMAL_INPUT)
+    {
+        qDebug()<<"\n Undefined Interaction Method";
+        return;
+    }
+    this->interactionStrategy = strategy;
+    printf("\n Strategy:%d",strategy);
+    return;
 }
 
 int IntentionRecognizer::getInteractionStrategy()
 {
-	return this->interactionStrategy;
+    return this->interactionStrategy;
 }
 
 void IntentionRecognizer::navigateToWayPoint(Pose startLoc,Pose destLoc)
 {
-	robotManager->planningManager->setStart(startLoc);
-	robotManager->planningManager->setEnd(destLoc);
-	path = robotManager->planningManager->findPath(METRIC);	
+    robotManager->planningManager->pathPlanner->freePath();
+    this->path  = NULL;
+    isPathFound = false;
+    robotManager->planningManager->setStart(startLoc);
+    robotManager->planningManager->setEnd(destLoc);
+    robotManager->planningManager->findPath(METRIC);
 
-	robotManager->navigator->setPause(false);
-	robotManager->navigator->setObstAvoidAlgo(ND);
-	
-	printf("\n---IR:Commanded the Navigator");fflush(stdout);
-	if(path)
-	{
-		if(!robotManager->navigator->isRunning())
-		{
-			printf("\n---IR:Starting The Navigator");fflush(stdout);
-			robotManager->navigator->setPath(path);
-			robotManager->navigator->start();
-		}
-		else
-		{
-			robotManager->navigator->StopNavigating();
-			msleep(200); // Wait until the Thread Terminates
-			printf("\n---IR:Giving New Path to Navigator");fflush(stdout);			
-			robotManager->navigator->setPath(path);
-			robotManager->navigator->start();						
-		}
-	}
-	else
-	{
-		printf("\n---IR:Path not Found, attempting to use local navigator VFH");fflush(stdout);
-		if(robotManager->navigator->isRunning())
-		{
-			printf("\n---IR:Stopping Previous Navigator.");fflush(stdout);			
-			robotManager->navigator->StopNavigating();
-			msleep(200); // Wait until the Thread Terminates
-			robotManager->navigator->quit();
-		}
-		robotManager->navigator->start();
-		robotManager->commManager->vfhGoto(destLoc);
-	}
+    robotManager->navigator->setPause(false);
+    robotManager->navigator->setObstAvoidAlgo(ND);
+    while(!isPathFound)
+    {
+        msleep(50);
+    }
+    printf("\n---IR:Commanded the Navigator");fflush(stdout);
+    if(path)
+    {
+        if(!robotManager->navigator->isRunning())
+        {
+            printf("\n---IR:Starting The Navigator");fflush(stdout);
+            robotManager->navigator->setPath(path);
+            robotManager->navigator->start();
+        }
+        else
+        {
+            robotManager->navigator->StopNavigating();
+            msleep(200); // Wait until the Thread Terminates
+            printf("\n---IR:Giving New Path to Navigator");fflush(stdout);
+            robotManager->navigator->setPath(path);
+            robotManager->navigator->start();
+        }
+    }
+    else
+    {
+        printf("\n---IR:Path not Found, attempting to use local navigator VFH");fflush(stdout);
+        if(robotManager->navigator->isRunning())
+        {
+            printf("\n---IR:Stopping Previous Navigator.");fflush(stdout);
+            robotManager->navigator->StopNavigating();
+            msleep(200); // Wait until the Thread Terminates
+            robotManager->navigator->quit();
+        }
+        robotManager->navigator->start();
+        robotManager->commManager->vfhGoto(destLoc);
+    }
+}
+
+void IntentionRecognizer::pathFound(Node* path)
+{
+    QMutexLocker locker(&mutex);
+    this->path = path;
+    // This means that we attempted to find a path and not actually found it
+    isPathFound = true;
 }
 
 void IntentionRecognizer::followActionToNextState()
@@ -172,8 +188,8 @@ void IntentionRecognizer::followActionToNextState()
     	if(((zmdp::Pomdp*)em->mdp)->T[action](spatialState,sp) >= maxTrans)
     	{
 //    		printf("\nIndex=%d %5.3f ",sp,((Pomdp*)em->mdp)->T[action](spatialState,sp));
-			maxTrans = ((zmdp::Pomdp*)em->mdp)->T[action](spatialState,sp);
-			nextState = sp;
+            maxTrans = ((zmdp::Pomdp*)em->mdp)->T[action](spatialState,sp);
+            nextState = sp;
     	}
     }
     fprintf(file,"%d\n",nextState);
@@ -183,61 +199,61 @@ void IntentionRecognizer::followActionToNextState()
     	return;
     }
   
-	goToState.p.setX(playGround->mapManager->mapSkeleton.verticies[nextState].location.x());
-	goToState.p.setY(playGround->mapManager->mapSkeleton.verticies[nextState].location.y());
-	
+    goToState.p.setX(playGround->mapManager->mapSkeleton.verticies[nextState].location.x());
+    goToState.p.setY(playGround->mapManager->mapSkeleton.verticies[nextState].location.y());
+
 //	currentState.p.setX(l.x());
 //	currentState.p.setY(currentPose.y());
 //	currentState.phi = currentPose.phi();
 	/* 
 	 * Set Final Orientation to the direction of Motion 
 	 */
-	switch(action)
-	{
-		case North:
-			goToState.phi = DTOR(90);
-			if(robotManager->commManager->getSpeechNotificaionStatus())
-				robotManager->commManager->speechSay(QString("Going North"));
-			break;
-		case South:
-			goToState.phi = DTOR(270);
-			if(robotManager->commManager->getSpeechNotificaionStatus())
-				robotManager->commManager->speechSay(QString("Going South"));			
-			break;
-		case East:
-			goToState.phi = DTOR(0);
-			if(robotManager->commManager->getSpeechNotificaionStatus())
-				robotManager->commManager->speechSay(QString("Going East"));			
-			break;
-		case West:
-			goToState.phi = DTOR(180);
-			if(robotManager->commManager->getSpeechNotificaionStatus())
-				robotManager->commManager->speechSay(QString("Going West"));			
-			break;
-		case Nothing:
-			goToState.phi = DTOR(0);
-			if(robotManager->commManager->getSpeechNotificaionStatus())
-				robotManager->commManager->speechSay(QString("Staying in Location"));			
-			break;
-		default:
-			goToState.phi = DTOR(0);
-	}
-//	if( (oldGoToState!=goToState && observation!=NoInput) || !beliefInitialized)
-	if( (oldGoToState!=goToState) || !beliefInitialized)
-	{
-		printf("\n Going to State:%d",nextState);
-		printf(" oldGoto X=%f, Y=%f, GoTo X=%f, Y=%f Action=%d Obs=%d",oldGoToState.p.x(),oldGoToState.p.y(),goToState.p.x(),goToState.p.y(),action,observation);
+    switch(action)
+    {
+    case North:
+        goToState.phi = DTOR(90);
+        if(robotManager->commManager->getSpeechNotificaionStatus())
+            robotManager->commManager->speechSay(QString("Going North"));
+        break;
+    case South:
+        goToState.phi = DTOR(270);
+        if(robotManager->commManager->getSpeechNotificaionStatus())
+            robotManager->commManager->speechSay(QString("Going South"));
+        break;
+    case East:
+        goToState.phi = DTOR(0);
+        if(robotManager->commManager->getSpeechNotificaionStatus())
+            robotManager->commManager->speechSay(QString("Going East"));
+        break;
+    case West:
+        goToState.phi = DTOR(180);
+        if(robotManager->commManager->getSpeechNotificaionStatus())
+            robotManager->commManager->speechSay(QString("Going West"));
+        break;
+    case Nothing:
+        goToState.phi = DTOR(0);
+        if(robotManager->commManager->getSpeechNotificaionStatus())
+            robotManager->commManager->speechSay(QString("Staying in Location"));
+        break;
+    default:
+        goToState.phi = DTOR(0);
+    }
+    //	if( (oldGoToState!=goToState && observation!=NoInput) || !beliefInitialized)
+    if( (oldGoToState!=goToState) || !beliefInitialized)
+    {
+        printf("\n Going to State:%d",nextState);
+        printf(" oldGoto X=%f, Y=%f, GoTo X=%f, Y=%f Action=%d Obs=%d",oldGoToState.p.x(),oldGoToState.p.y(),goToState.p.x(),goToState.p.y(),action,observation);
 
-		if(robotManager->commManager)
-	  		robotManager->commManager->stopRelease();
+        if(robotManager->commManager)
+            robotManager->commManager->stopRelease();
 
-		if(!useNavigator)
-			robotManager->commManager->vfhGoto(goToState);
-		else
-			navigateToWayPoint(currentPose,goToState);
-			
-		oldGoToState= goToState;
-	}
+        if(!useNavigator)
+            robotManager->commManager->vfhGoto(goToState);
+        else
+            navigateToWayPoint(currentPose,goToState);
+
+        oldGoToState= goToState;
+    }
 }
 
 void IntentionRecognizer::resetBelief()
@@ -265,228 +281,228 @@ void IntentionRecognizer::resetBelief()
 
 bool IntentionRecognizer::currentStateIsDestination()
 {
-	for(int i=0; i<playGround->mapManager->mapSkeleton.destIndexes.size();i++)
-	{
-		if(spatialState == playGround->mapManager->mapSkeleton.destIndexes[i] )
-			return true;
-	}
-	return false;
+    for(int i=0; i<playGround->mapManager->mapSkeleton.destIndexes.size();i++)
+    {
+        if(spatialState == playGround->mapManager->mapSkeleton.destIndexes[i] )
+            return true;
+    }
+    return false;
 }
 
 void IntentionRecognizer::run()
 {
-	QDate date;
-	QTime time;
-	date = date.currentDate();
-	time = time.currentTime();
-	QString suffex=QString("-%1%2%3%4%5.txt").arg(time.minute()).arg(time.hour()).arg(date.day()).arg(date.month()).arg(date.year());
-	file=fopen(qPrintable(QString("logs/irLog%1").arg(suffex)),"wb");
-	odom=fopen(qPrintable(QString("logs/odom%1").arg(suffex)),"wb");
-	fprintf(file,"# Values: State, Observation, Belief Dest1 ...n, Action, Next State\n");	
-	fprintf(odom,"# Values: X, Y, Theta, Spatial State \n");
-	bool justStarted = true;
-	while(runRecognition)
-	{
-		msleep(50);
-		if(!robotManager->commManager)
-		{
-                        qDebug()<<"\t - (IR): Communication Manager Not Initialized";
-			continue;
-		}
-		if(!robotManager->commManager->isConnected())
-		{
-                        qDebug()<<"\t - (IR): Your not Connected to the Robot, Connect First";
-			continue;		
-		}
-		while(!robotManager->commManager->getLocalized())
-		{
-			currentPose = robotManager->commManager->getLocation();
-                        qDebug()<<QString("\n---IR:NO Accurate Estimation yet, best current is: x:%1 y:%2 phi:%3").arg(currentPose.p.x(),currentPose.p.y(),RTOD(currentPose.phi));
-		  	if(robotManager->commManager)
-		  		robotManager->commManager->stop();
-			usleep(300000);
-		}
-		currentPose = robotManager->commManager->getLocation();
-		spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(currentPose);
-		fprintf(odom,"%.3f %.3f %.3f %d\n",currentPose.p.x(),currentPose.p.y(),currentPose.phi,spatialState);
-		observation = robotManager->commManager->getJoyStickGlobalDir();
-		/* 
+    QDate date;
+    QTime time;
+    date = date.currentDate();
+    time = time.currentTime();
+    QString suffex=QString("-%1%2%3%4%5.txt").arg(time.minute()).arg(time.hour()).arg(date.day()).arg(date.month()).arg(date.year());
+    file=fopen(qPrintable(QString("logs/irLog%1").arg(suffex)),"wb");
+    odom=fopen(qPrintable(QString("logs/odom%1").arg(suffex)),"wb");
+    fprintf(file,"# Values: State, Observation, Belief Dest1 ...n, Action, Next State\n");
+    fprintf(odom,"# Values: X, Y, Theta, Spatial State \n");
+    bool justStarted = true;
+    while(runRecognition)
+    {
+        msleep(50);
+        if(!robotManager->commManager)
+        {
+            qDebug()<<"\t - (IR): Communication Manager Not Initialized";
+            continue;
+        }
+        if(!robotManager->commManager->isConnected())
+        {
+            qDebug()<<"\t - (IR): Your not Connected to the Robot, Connect First";
+            continue;
+        }
+        while(!robotManager->commManager->getLocalized())
+        {
+            currentPose = robotManager->commManager->getLocation();
+            qDebug()<<QString("\n---IR:NO Accurate Estimation yet, best current is: x:%1 y:%2 phi:%3").arg(currentPose.p.x(),currentPose.p.y(),RTOD(currentPose.phi));
+            if(robotManager->commManager)
+                robotManager->commManager->stop();
+            usleep(300000);
+        }
+        currentPose = robotManager->commManager->getLocation();
+        spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(currentPose);
+        fprintf(odom,"%.3f %.3f %.3f %d\n",currentPose.p.x(),currentPose.p.y(),currentPose.phi,spatialState);
+        observation = robotManager->commManager->getJoyStickGlobalDir();
+        /*
 		 * Added for testing the Social Planning
 		 */		
-//		Pose s(playGround->mapManager->mapSkeleton.verticies[spatialState].location.x(),playGround->mapManager->mapSkeleton.verticies[spatialState].location.y(),0);
-//		socialPlanner->setStart(s);		
-		/*
+        //		Pose s(playGround->mapManager->mapSkeleton.verticies[spatialState].location.x(),playGround->mapManager->mapSkeleton.verticies[spatialState].location.y(),0);
+        //		socialPlanner->setStart(s);
+        /*
 		 * End of Addition
 		 */
-		if(!beliefInitialized)
-		{
-			/*
+        if(!beliefInitialized)
+        {
+            /*
 			 *  When we first connect the readings might not be correct
 			 *  so we need to pose to let the commManager properly initialize then 
 			 *  request the odom correctly.
 			 */
-			sleep(1);
-			currentPose = robotManager->commManager->getLocation();
-			spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(currentPose);			
-			resetBelief();
-		  	beliefInitialized = true;
-		}
-  
-		/* Take observations and update Beliefs only in discrete states*/
-//		double dist = playGround->mapManager->mapSkeleton.getDist2SpatialState(currentPose,spatialState);
-		if(oldSpatialState != spatialState)
-		{
-//			if(!(dist<=1.0 || justStarted))
-//				continue;
-			/* We are now in action new State so Save it as visited */
-		    // Get an Observation
-			lastObs = observation = robotManager->commManager->getJoyStickGlobalDir();
-		    /* 
+            sleep(1);
+            currentPose = robotManager->commManager->getLocation();
+            spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(currentPose);
+            resetBelief();
+            beliefInitialized = true;
+        }
+
+        /* Take observations and update Beliefs only in discrete states*/
+        //		double dist = playGround->mapManager->mapSkeleton.getDist2SpatialState(currentPose,spatialState);
+        if(oldSpatialState != spatialState)
+        {
+            //			if(!(dist<=1.0 || justStarted))
+            //				continue;
+            /* We are now in action new State so Save it as visited */
+            // Get an Observation
+            lastObs = observation = robotManager->commManager->getJoyStickGlobalDir();
+            /*
 		     * Get an observation and if it's directional(not NoInput) then don't
 		     * take any more observations from this state.
 		     */
-		    
-			if(observation == NoInput && interactionStrategy == CONTINIOUS_INPUT) 
-		    	continue;
-			
-			if(interactionStrategy == MINIMAL_INPUT)
-			{
-				if(observation != NoInput)
-					actionAmbiguity = false;
-				else if (actionAmbiguity)	//observation == NoInput
-					continue;					
-			}
 
-			if (currentStateIsDestination())//em->getStateIsTerminal())
-		    {
-		    	resetBelief();
-				printf("\n[belief is terminal, Resetting Belief]\n");
-				activityLogger->addState(spatialState,NoInput);
-				activityLogger->startNewTask();
-		    }
+            if(observation == NoInput && interactionStrategy == CONTINIOUS_INPUT)
+                continue;
 
-		    belief_vector prevB = em->currentState;
-		    QVector <int> possibleActions;		    
-		    possibleActions.clear();
-		    int maxBeliefAction=-1;
-		    double currentMaxBelief=0;
-		    if(interactionStrategy == MINIMAL_INPUT && observation == NoInput)
-		    {
-//		    	belief_vector thisMaxBelief = em->currentState;
-//		    	currentMaxBelief = 0;
-//		    	for(unsigned int j=0; j < thisMaxBelief.size();j++)
-//		    	{
-//		    		if(thisMaxBelief(j)>currentMaxBelief)
-//		    			currentMaxBelief = thisMaxBelief(j);
-//		    	}
-		    	currentMaxBelief = 0;
-		    	for(int j=0; j < destBelief.size();j++)
-		    	{
-		    		if(destBelief[j]>currentMaxBelief)
-		    			currentMaxBelief = destBelief[j];
-		    	}
-		    	actionAmbiguity = false;
-		    	double maxBelief=0;
-			    for(int whatIfObs=0;whatIfObs<5;whatIfObs++)
-			    {
-			    	// See What the result of obtaining this observation would be
-			    	em->advanceToNextState(action,whatIfObs);
-			    	/* 
+            if(interactionStrategy == MINIMAL_INPUT)
+            {
+                if(observation != NoInput)
+                    actionAmbiguity = false;
+                else if (actionAmbiguity)	//observation == NoInput
+                    continue;
+            }
+
+            if (currentStateIsDestination())//em->getStateIsTerminal())
+            {
+                resetBelief();
+                printf("\n[belief is terminal, Resetting Belief]\n");
+                activityLogger->addState(spatialState,NoInput);
+                activityLogger->startNewTask();
+            }
+
+            belief_vector prevB = em->currentState;
+            QVector <int> possibleActions;
+            possibleActions.clear();
+            int maxBeliefAction=-1;
+            double currentMaxBelief=0;
+            if(interactionStrategy == MINIMAL_INPUT && observation == NoInput)
+            {
+                //		    	belief_vector thisMaxBelief = em->currentState;
+                //		    	currentMaxBelief = 0;
+                //		    	for(unsigned int j=0; j < thisMaxBelief.size();j++)
+                //		    	{
+                //		    		if(thisMaxBelief(j)>currentMaxBelief)
+                //		    			currentMaxBelief = thisMaxBelief(j);
+                //		    	}
+                currentMaxBelief = 0;
+                for(int j=0; j < destBelief.size();j++)
+                {
+                    if(destBelief[j]>currentMaxBelief)
+                        currentMaxBelief = destBelief[j];
+                }
+                actionAmbiguity = false;
+                double maxBelief=0;
+                for(int whatIfObs=0;whatIfObs<5;whatIfObs++)
+                {
+                    // See What the result of obtaining this observation would be
+                    em->advanceToNextState(action,whatIfObs);
+                    /*
 			    	 * Add the action to be excuted to the set of actions if
 			    	 * it's not already in the list 
 			    	 */
-			    	belief_vector thisMaxBelief = em->currentState;
-			    	maxBelief = 0;
-			    	for(unsigned int j=0; j < thisMaxBelief.size();j++)
-			    	{
-			    		if(thisMaxBelief(j) > 0.5)
-			    		{
-			    			maxBelief = thisMaxBelief(j);
-			    			break;
-			    		}
-			    		if(thisMaxBelief(j)>maxBelief)
-			    			maxBelief = thisMaxBelief(j);
-			    	}
-			    	if(possibleActions.indexOf(em->chooseAction())==-1 && maxBelief>currentMaxBelief)
-			    	{
-			    		possibleActions.push_back(em->chooseAction());
-			    		maxBeliefAction = whatIfObs;
-			    		if(possibleActions.size()>1)
-					    {
-					    	printf("\n I need an input, i don't know where you are going !!!");fflush(stdout);
-					    	actionAmbiguity = true;
-					    	em->setBelief(prevB);
-					    	break;
-					    }
-			    	}
-			    	// Get Back to original Belief and try another observation
-			    	em->setBelief(prevB);
-			    }
-			    for(int i =0;i<possibleActions.size();i++)
-			    {
-			    	printf("\nPossible action:[%d]",possibleActions[i]); fflush(stdout);
-			    }
-		    }
-		    if (actionAmbiguity)
-		    	continue;
-		    if(possibleActions.size()> 0)
-		    	observation = maxBeliefAction;
-		    oldSpatialState = spatialState;
-		    em->advanceToNextState(action,observation);
-		    belief_vector newB = em->currentState;
-		    
-		    action = em->chooseAction();
-			fprintf(file,"%d ",action);
-		    printf("\n New Chosen Action is:%d",action);			
+                    belief_vector thisMaxBelief = em->currentState;
+                    maxBelief = 0;
+                    for(unsigned int j=0; j < thisMaxBelief.size();j++)
+                    {
+                        if(thisMaxBelief(j) > 0.5)
+                        {
+                            maxBelief = thisMaxBelief(j);
+                            break;
+                        }
+                        if(thisMaxBelief(j)>maxBelief)
+                            maxBelief = thisMaxBelief(j);
+                    }
+                    if(possibleActions.indexOf(em->chooseAction())==-1 && maxBelief>currentMaxBelief)
+                    {
+                        possibleActions.push_back(em->chooseAction());
+                        maxBeliefAction = whatIfObs;
+                        if(possibleActions.size()>1)
+                        {
+                            printf("\n I need an input, i don't know where you are going !!!");fflush(stdout);
+                            actionAmbiguity = true;
+                            em->setBelief(prevB);
+                            break;
+                        }
+                    }
+                    // Get Back to original Belief and try another observation
+                    em->setBelief(prevB);
+                }
+                for(int i =0;i<possibleActions.size();i++)
+                {
+                    printf("\nPossible action:[%d]",possibleActions[i]); fflush(stdout);
+                }
+            }
+            if (actionAmbiguity)
+                continue;
+            if(possibleActions.size()> 0)
+                observation = maxBeliefAction;
+            oldSpatialState = spatialState;
+            em->advanceToNextState(action,observation);
+            belief_vector newB = em->currentState;
 
-			activityLogger->addState(spatialState,observation);
-			fprintf(file,"%d %d ",spatialState,observation);
-			
-		    QVector<double> max(numDestinations,0.0);
-		    int index=0;
-			for(unsigned int j=0; j < newB.size();j++)
-			{
-				index = (int)(j/numStates);
-				if( newB(j))//&& (newB(j) > max[index]) )
-				{
-					dataLock.lockForWrite();
-						destBelief[index] = max[index] = (newB(j) + max[index]);
-					dataLock.unlock();
-				}
-			}
-			int maxDestBeliefIndex=0;
-			double maxDestBelief=0;
-			for(int i=0;i<numDestinations;i++)
-			{
-				printf("\n Belief is now Updated to Dest:%d with %f",i,destBelief[i]);
-				if(destBelief[i]>maxDestBelief)
-				{
-					maxDestBelief = destBelief[i];
-					maxDestBeliefIndex = i;
-				}
-				fprintf(file,"%.5f ",destBelief[i]);
-			}
-			/* 
+            action = em->chooseAction();
+            fprintf(file,"%d ",action);
+            printf("\n New Chosen Action is:%d",action);
+
+            activityLogger->addState(spatialState,observation);
+            fprintf(file,"%d %d ",spatialState,observation);
+
+            QVector<double> max(numDestinations,0.0);
+            int index=0;
+            for(unsigned int j=0; j < newB.size();j++)
+            {
+                index = (int)(j/numStates);
+                if( newB(j))//&& (newB(j) > max[index]) )
+                {
+                    dataLock.lockForWrite();
+                    destBelief[index] = max[index] = (newB(j) + max[index]);
+                    dataLock.unlock();
+                }
+            }
+            int maxDestBeliefIndex=0;
+            double maxDestBelief=0;
+            for(int i=0;i<numDestinations;i++)
+            {
+                printf("\n Belief is now Updated to Dest:%d with %f",i,destBelief[i]);
+                if(destBelief[i]>maxDestBelief)
+                {
+                    maxDestBelief = destBelief[i];
+                    maxDestBeliefIndex = i;
+                }
+                fprintf(file,"%.5f ",destBelief[i]);
+            }
+            /*
 			 * Added for testing the Social Planning
 			 */
-//			int destination = playGround->mapManager->mapSkeleton.destIndexes[maxDestBeliefIndex];
-//			cout<<"Destination is:="<<destination;
-//			Pose e(playGround->mapManager->mapSkeleton.verticies[destination].location.x(),playGround->mapManager->mapSkeleton.verticies[destination].location.y(),DTOR(90));
-//			socialPlanner->setEnd(e);
-//			Node * retval = socialPlanner->astar->startSearch(s,e,METRIC);
-//			if(retval)
-//			{
-//				socialPlanner->printNodeList();
-//			}
-//			else
-//			{
-//				qDebug("No path Found");
-//			}			
-			/*
+            //			int destination = playGround->mapManager->mapSkeleton.destIndexes[maxDestBeliefIndex];
+            //			cout<<"Destination is:="<<destination;
+            //			Pose e(playGround->mapManager->mapSkeleton.verticies[destination].location.x(),playGround->mapManager->mapSkeleton.verticies[destination].location.y(),DTOR(90));
+            //			socialPlanner->setEnd(e);
+            //			Node * retval = socialPlanner->astar->startSearch(s,e,METRIC);
+            //			if(retval)
+            //			{
+            //				socialPlanner->printNodeList();
+            //			}
+            //			else
+            //			{
+            //				qDebug("No path Found");
+            //			}
+            /*
 			 * End of Addition
 			 */
-			followActionToNextState();
-			justStarted = false;
-		}
-	}
+            followActionToNextState();
+            justStarted = false;
+        }
+    }
 }
