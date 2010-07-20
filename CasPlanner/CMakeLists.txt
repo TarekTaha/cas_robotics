@@ -28,6 +28,7 @@ SET( CasPlanner_MOC_HDRS
     ./modules/Rendering/robotrender.h
     ./modules/Sensors/sensors.h
     ./modules/TasksManager/tasksgui.h
+    ./modules/HumanRobotInteraction/IntentionRecognizer.h
 )
 
 SET( CasPlanner_SRCS

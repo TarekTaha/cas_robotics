@@ -27,6 +27,7 @@ MissionControlTab::MissionControlTab(QWidget *parent,PlayGround *playGround_in) 
         {
             temp = playGround->robotPlatforms[i];
             rob = new QRadioButton(QString("Robot: ").append(temp->robot->robotName));
+            connect( playGround->robotPlatforms[i]->planningManager,SIGNAL(pathFound(Node*)),this,SLOT(pathFound(Node*)));
             availableRobots.push_back(rob);
         }
         if(playGround->robotPlatforms.size()>0)
@@ -204,10 +205,16 @@ void MissionControlTab::setNavigation()
     }
 }
 
+void MissionControlTab::pathFound(Node*)
+{
+    ui->pathPlanBtn->setEnabled(true);
+}
+
 void MissionControlTab::pathPlan()
 {
     playGround->activeRobot->planningManager->setMap(playGround->mapManager->globalMap);
-    path = playGround->activeRobot->planningManager->findPath(METRIC);
+    playGround->activeRobot->planningManager->findPath(METRIC);
+    ui->pathPlanBtn->setEnabled(false);
 }
 
 void MissionControlTab::generateSpace()

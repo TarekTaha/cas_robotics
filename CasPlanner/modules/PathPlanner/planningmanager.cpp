@@ -185,29 +185,14 @@ bool PlanningManager::fileExist(const char * fname)
 void PlanningManager::generateSpace()
 {
     planningStep = GENERATING_SPACE;
+    QThread::start();
 }
 
-Node * PlanningManager::findPath(int coord)
+void PlanningManager::findPath(int coord)
 {
-    Node * retval;
-    if(!this->pathPlanner)
-        this->setupPlanner();
-    if(!pathPlanner->search_space)
-    {
-        generateSpace();
-    }
-
-    retval = pathPlanner->startSearch(start,end,coord);
-
-    if(retval)
-    {
-//	pathPlanner->printNodeList();
-    }
-    else
-    {
-        qDebug()<<"No Path Found";
-    }
-    return retval;
+    this->coord  = coord;
+    planningStep = FINDING_PATH;
+    QThread::start();
 }
 
 int PlanningManager::readConfigs( ConfigFile *cf)
@@ -270,51 +255,80 @@ int PlanningManager::setupPlanner()
     return 1;
 }
 
+void PlanningManager::generateSpaceState()
+{
+    QTime timer;
+    const char * filename = "logs/SearchSpace.txt";
+    if(!this->pathPlanner)
+        this->setupPlanner();
+    if(pathPlanner->search_space)
+    {
+        qDebug()<<"\n Search Space already Exist";
+        return;
+    }
+    timer.restart();
+    if(fileExist(filename))
+    {
+        qDebug()<<"Loading Space From file ...";
+        pathPlanner->readSpaceFromFile(filename);
+        if(expObstEnabled)
+            pathPlanner->expandObstacles();
+        if(connNodesEnabled)
+            pathPlanner->connectNodes();
+        qDebug()<<"File loading took:"<<timer.elapsed()/double(1000.00)<<" sec";
+    }
+    else
+    {
+        qDebug()<<"Generating Space ...";
+        if(expObstEnabled)
+            pathPlanner->expandObstacles();
+        if(regGridEnabled)
+            pathPlanner->generateRegularGrid();
+        if(bridgeTestEnabled)
+            pathPlanner->bridgeTest();
+        if(obstPenEnabled)
+            pathPlanner->addCostToNodes();
+        if(connNodesEnabled)
+            pathPlanner->connectNodes();
+        pathPlanner->saveSpace2File(filename);
+        emit searchSpaceGenerated();
+        qDebug()<<"Space Generation took:"<<timer.elapsed()/double(1000.00)<<" sec";
+    }
+    pathPlanner->showConnections();
+}
+
+void PlanningManager::findPathState()
+{
+    if(!this->pathPlanner)
+        this->setupPlanner();
+    Node * retval;
+    if(!pathPlanner->search_space)
+    {
+        generateSpaceState();
+    }
+    QTime timer;
+    retval = pathPlanner->startSearch(start,end,coord);
+    qDebug()<<"File loading took:"<<timer.elapsed()/double(1000.00)<<" sec";
+    emit pathFound(retval);
+    if(retval)
+    {
+        //	pathPlanner->printNodeList();
+    }
+    else
+    {
+        qDebug()<<"No Path Found";
+    }
+}
+
 void PlanningManager::run()
 {
     switch(planningStep)
     {
     case GENERATING_SPACE:
-        QTime timer;
-        const char * filename = "logs/SearchSpace.txt";
-        if(!this->pathPlanner)
-            this->setupPlanner();
-        if(pathPlanner->search_space)
-        {
-            qDebug()<<"\n Search Space already Exist";
-            break;
-        }
-        timer.restart();
-        if(fileExist(filename))
-        {
-            qDebug()<<"Loading Space From file ...";
-            pathPlanner->readSpaceFromFile(filename);
-            if(expObstEnabled)
-                pathPlanner->expandObstacles();
-            if(connNodesEnabled)
-                pathPlanner->connectNodes();
-            qDebug()<<"File loading took:"<<timer.elapsed()/double(1000.00)<<" sec";
-        }
-        else
-        {
-            qDebug()<<"Generating Space ...";
-            if(expObstEnabled)
-                pathPlanner->expandObstacles();
-            if(regGridEnabled)
-                pathPlanner->generateRegularGrid();
-            if(bridgeTestEnabled)
-                pathPlanner->bridgeTest();
-            if(obstPenEnabled)
-                pathPlanner->addCostToNodes();
-            if(connNodesEnabled)
-                pathPlanner->connectNodes();
-            pathPlanner->saveSpace2File(filename);
-            emit searchSpaceGenerated();
-            qDebug()<<"Space Generation took:"<<timer.elapsed()/double(1000.00)<<" sec";
-        }
-        pathPlanner->showConnections();
+        generateSpaceState();
         break;
     case FINDING_PATH:
+        findPathState();
         break;
     case WAITING:
         break;

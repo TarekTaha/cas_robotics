@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>671</width>
+    <width>689</width>
     <height>431</height>
    </rect>
   </property>
@@ -161,6 +161,13 @@
                 </widget>
                </item>
                <item>
+                <widget class="QCheckBox" name="showSearchSpaceSamples">
+                 <property name="text">
+                  <string>Show Search Space Samples</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
                 <widget class="QCheckBox" name="showSearchTree">
                  <property name="text">
                   <string>Show Search Tree</string>
@@ -178,13 +185,6 @@
                 <widget class="QCheckBox" name="showRobotTrail">
                  <property name="text">
                   <string>Show Robot Trail</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QCheckBox" name="showSearchSpaceSamples">
-                 <property name="text">
-                  <string>Show Search Space Nodes</string>
                  </property>
                 </widget>
                </item>

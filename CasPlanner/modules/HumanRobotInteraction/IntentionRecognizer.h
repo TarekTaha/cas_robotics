@@ -23,6 +23,7 @@
 
 #include "playground.h"
 #include <QThread> 
+#include <QMutexLocker>
 #include <QReadWriteLock>
 #include <QTime>
 #include <QDate>
@@ -41,6 +42,7 @@ class SocialPlanner;
 
 class IntentionRecognizer: public QThread
 {
+    Q_OBJECT
 public:
 	~IntentionRecognizer();
 	void InitializePOMDP();
@@ -62,16 +64,19 @@ public:
 	ActivityLogger *activityLogger;
 	int  lastObs,observation,action,spatialState,oldSpatialState;
 	SocialPlanner *socialPlanner;
+        public slots:
+                void pathFound(Node*);
 private:
 	dvector initialBeliefD;
 	int interactionStrategy;
-	bool actionAmbiguity;
+        bool actionAmbiguity,isPathFound;
 	string pomdpFileName, policyFileName;
 	zmdp::ZMDPConfig* config;
 	zmdp::BoundPairExec* em;
 	PlayGround * playGround;
 	RobotManager * robotManager;
 	QReadWriteLock dataLock;
+        QMutex mutex;
 	Node * path;
 	FILE *file;
 	FILE *odom;

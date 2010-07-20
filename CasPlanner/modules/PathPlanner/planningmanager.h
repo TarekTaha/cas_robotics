@@ -61,7 +61,7 @@ public:
     bool renderSearchTree;
     bool renderPaths;
 public slots:
-    Node* findPath(int coord);
+    void  findPath(int coord);
     void  generateSpace();
     void  setStart(Pose);
     void  setEnd(Pose);
@@ -84,7 +84,10 @@ signals:
     void addMsg(int,int, QString);
     void updateMap(Map* map);
     void searchSpaceGenerated();
+    void pathFound(Node*);
 protected:
+    void generateSpaceState();
+    void findPathState();
     double pixel_res,dist_goal,bridge_len,bridge_res,reg_grid,obst_exp,reg_grid_conn_rad,obst_pen,bridge_conn_rad;
     RobotManager *robotManager;
     bool bridgeTestEnabled,connNodesEnabled,regGridEnabled,obstPenEnabled,expObstEnabled,negate;
@@ -92,5 +95,6 @@ protected:
     QString robot_model;
     Pose start,end;
     int planningStep;
+    int coord;
 };
 #endif /*PLANNINGMANAGER_H_*/
