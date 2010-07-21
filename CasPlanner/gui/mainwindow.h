@@ -30,6 +30,8 @@
 #include "playground.h"
 #include "statusbar.h"
 #include "tabcontainer.h"
+#include "settings.h"
+
 class MainWindow : public QMainWindow 
 {
     Q_OBJECT
