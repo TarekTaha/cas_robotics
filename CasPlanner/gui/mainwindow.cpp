@@ -80,7 +80,8 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     connect(timer, SIGNAL(timeout()), this, SLOT(logData()));
     imageCounter = 0;
     timer->start(6000);
-
+    Settings::settings().setBrowser("FireFox");
+    qDebug()<<"Browser is:"<<Settings::settings().browser();
 }
 void MainWindow::logData()
 {

@@ -17,6 +17,7 @@ SET( CasPlanner_MOC_HDRS
     ./gui/statusbar.h
     ./gui/tabcontainer.h
     ./gui/loggerview.h
+    ./modules/Parser/settings.h
     ./modules/Rendering/mapviewer.h
     ./modules/Navigator/navigator.h
     ./modules/Rendering/ogrender.h
@@ -77,6 +78,7 @@ SET( CasPlanner_SRCS
     ./modules/Rendering/ogrender.cpp
     ./modules/CommManager/playerinterface.cpp
     ./modules/Parser/xmlparser.cpp
+    ./modules/Parser/settings.cpp
     ./modules/PathPlanner/planningmanager.cpp
     ./modules/PlayGround/playground.cpp
     ./modules/PlayGround/robotmanager.cpp
