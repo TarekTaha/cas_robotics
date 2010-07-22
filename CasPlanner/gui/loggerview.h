@@ -2,6 +2,7 @@
 #define LOGGERVIEW_H
 
 #include <QWidget>
+#include "logger.h"
 
 namespace Ui
 {
@@ -16,7 +17,7 @@ public:
     explicit loggerview(QWidget *parent = 0);
     ~loggerview();
 public slots:
-    void logMsg(int severityLvl,QString msg);
+    void showMsg(int severityLvl,QString msg);
 private:
     Ui::loggerview *ui;
 };

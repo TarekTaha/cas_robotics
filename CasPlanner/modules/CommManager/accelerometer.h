@@ -20,9 +20,9 @@
  ***************************************************************************/
 #ifndef ACCELEROMETER_H_
 #define ACCELEROMETER_H_
-#include <stdint.h> 
-#include <string.h> 
-#include <string> 
+#include <stdint.h>
+#include <string.h>
+#include <string>
 #include <iostream>
 #include <sys/socket.h>
 #include <bluetooth/bluetooth.h>
@@ -31,22 +31,22 @@
 class Accelerometer
 {
 public:
-	Accelerometer();
-	virtual ~Accelerometer();
-	int connectBT(uint8_t port, char MAC[18]);
-	void readBT();
-	int getX();
-	int getY();
-	int getZ();
-	bool isConnected();
+    Accelerometer();
+    virtual ~Accelerometer();
+    int connectBT(uint8_t port, char MAC[18]);
+    void readBT();
+    int getX();
+    int getY();
+    int getZ();
+    bool isConnected();
 private:
-	int x,y,z;
-	struct sockaddr_rc addr;
-	int s, status;
-	char n95MAC[18];
-	uint8_t port;
-	char buffer[BUFFERSIZE];
-	bool connected;
+    int x,y,z;
+    struct sockaddr_rc addr;
+    int s, status;
+    char n95MAC[18];
+    uint8_t port;
+    char buffer[BUFFERSIZE];
+    bool connected;
 };
 
 #endif /*ACCELEROMETER_H_*/

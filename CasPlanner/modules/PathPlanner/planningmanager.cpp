@@ -250,6 +250,7 @@ int PlanningManager::setupPlanner()
                                       obst_pen,
                                       bridge_conn_rad);
         logMsg.append("\n->Planner Started.");
+        LOG(Logger::Info,logMsg)
         emit addMsg(0,INFO,logMsg);
     }
     return 1;

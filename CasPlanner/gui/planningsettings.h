@@ -6,6 +6,7 @@
 
 #include <QWidget>
 #include "playground.h"
+#include "settings.h"
 
 class PlanningTab;
 class RobotManager;
@@ -29,6 +30,7 @@ public slots:
     void updateDisplaySettings(int);
 private:
     void initialiseGUI();
+    void saveSettings();
     PlayGround   *playGround;
     RobotManager *currRobot;
     Ui::PlanningSettings *ui;

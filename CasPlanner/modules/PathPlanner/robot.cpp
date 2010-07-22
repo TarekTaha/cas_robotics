@@ -56,11 +56,12 @@ int Robot::readConfigs(ConfigFile *cf,int secId)
 void Robot::setCheckPoints(double obst_r)
 {
     /*
-	 * Based on our environment, the narrowest passage is 26 pixels of width
-	 * and this should be taken into consideration while expanding and checking
-	 * for collision. check my "An Efficient Path Planner for Large Mobile Platforms" paper
-	 * for more information
-	 */ 
+         * Based on our environment, the narrowest passage is 26 pixels of width
+         * and this should be taken into consideration while expanding and checking
+         * for collision. check my "An Efficient Path Planner for Large Mobile Platforms" paper
+         * for more information
+         */
+    LOG(Logger::Info,"Robot:"<<robotName)
     narrowestPathDist = 21*0.047;
     safetyTolerance = 0.05;
     if(narrowestPathDist < 2*robotWidth)
@@ -69,7 +70,7 @@ void Robot::setCheckPoints(double obst_r)
     }
     else
         expansionRadius = robotWidth/2.0f - safetyTolerance;
-    qDebug()<<"\n Obstacle Expansion Radius="<<expansionRadius;
+    LOG(Logger::Info,"  Obstacle Expansion Radius="<<expansionRadius)
     this->obstacleRadius = obst_r;
     int point_index=0,points_per_height,points_per_width,n;
     double i,j, l = robotLength , w = robotWidth;
@@ -91,15 +92,15 @@ void Robot::setCheckPoints(double obst_r)
         local_edge_points.push_back(Trans2Global(edges[s],pose));
     }
     for (int s=0 ;s < 4; s++)
-        qDebug()<<"\nEdge->"<< s<<" X="<<local_edge_points[s].x()<<" Y="<<local_edge_points[s].y();
+        LOG(Logger::Info,"  Edge->"<< s<<" X="<<local_edge_points[s].x()<<" Y="<<local_edge_points[s].y())
     // Create a Matrix of the points to check for collision detection
     //	internal_radius = this->obstacleRadius/sqrt(2);
 
     points_per_height = 2;//(int)(ceil(l/(double)(2*expansionRadius)));
     points_per_width  = (int)(ceil(w/(double)(2*expansionRadius)));
     n = points_per_height*points_per_width;
-    qDebug()<<"\nPer H ="<<points_per_height<<" Per W="<<points_per_width<<" Total ="<<n;
-    qDebug()<<"\n Obstacle Radius="<<expansionRadius; fflush(stdout);
+    LOG(Logger::Info,"  Per H ="<<points_per_height<<" Per W="<<points_per_width<<" Total ="<<n)
+    LOG(Logger::Info,"  Obstacle Radius="<<expansionRadius; fflush(stdout))
 
     // The location of the current edges at each NODE
     i = startx + sqrt(expansionRadius*expansionRadius - pow(w/2.0f,2) - safetyTolerance);
@@ -115,8 +116,8 @@ void Robot::setCheckPoints(double obst_r)
             point_index++;
             //cout<<"\n I="<<i<<" J="<<j;
             /* Determining the next center it should be 2*r away from the previous
-			 * and it's circle should not exceed the boundaries
-			 */
+                         * and it's circle should not exceed the boundaries
+                         */
             if ( (j+2*expansionRadius + expansionRadius) >= (w + starty) )
                 j = (w + starty - expansionRadius);// Allow overlap
             else
@@ -135,7 +136,7 @@ void Robot::setCheckPoints(double obst_r)
     for (int k=0;k<check_points.size();k++)
     {
         check_points[k].setY(0);
-        qDebug() << "\nPoint to check "<<k<<"'---> X="<<check_points[k].x()<<" Y="<<check_points[k].y();
+        LOG(Logger::Info,"  Point to check "<<k<<"'---> X="<<check_points[k].x()<<" Y="<<check_points[k].y())
         fflush(stdout);
     }
     findR();

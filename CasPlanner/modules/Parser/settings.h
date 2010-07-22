@@ -31,29 +31,66 @@ public:
 
 class CasPlannerSettings : public QSettings
 {
-    Q_OBJECT   
+    Q_OBJECT
  public:
     CasPlannerSettings( QObject* parent );
     void setCurrentUsername( QString username );
 
-    QByteArray splitterState() const { return QSettings().value( "splitterState" ).toByteArray(); }
-    void setSplitterState( QByteArray state ) { QSettings().setValue( "splitterState", state ); }
+    double bridgeTestRes()              { return Planning().value( "BridgeTestRes", 0.05 ).toDouble(); }
+    void setBridgeTestRes(double res)   { Planning().setValue("BridgeTestRes", res ); }
 
-    int sidebarWidth() const { return QSettings().value( "sidebarWidth", 190 ).toInt(); }
-    void setSidebarWidth( const int width ) { QSettings().setValue( "sidebarWidth", width ); }
+    double bridgeLength()               { return Planning().value( "BridgeLength", 2.5 ).toDouble(); }
+    void setBridgeLength(double len)    { Planning().setValue("BridgeLength", len ); }
 
-    void setIsManualIpod( QString uid, bool b ) { DisplaySettings().setValue( uid + "/isManualIpod", b ); }
-    bool isManualIpod( QString uid ) const { return DisplaySettings().value( uid + "/isManualIpod", false ).toBool(); }
+    double regGridRes()                 { return Planning().value( "RegularGridRes", 0.2 ).toDouble(); }
+    void setRegGridRes(double res)      { Planning().setValue("RegularGridRes", res ); }
 
-    int  volume()     const { return QSettings().value( "volume", 50 ).toInt(); }
-    void setVolume( int v ) { QSettings().setValue( "volume", v ); }
+    double nodeConnectionR()            { return Planning().value( "NodeConnectionRadius", 0.4 ).toDouble(); }
+    void setNodeConnectionR(double rad) { Planning().setValue("NodeConnectionRadius", rad ); }
 
-    QString browser()            const { return QSettings().value( "Browser" ).toString(); }
-    void setBrowser( QString browser ) { QSettings().setValue( "Browser", browser ); }
+    double obstaclePenR()               { return Planning().value( "ObstaclePenaltyRadius", 3.0 ).toDouble(); }
+    void setObstaclePenR(double rad)    { Planning().setValue("ObstaclePenaltyRadius", rad ); }
+
+    double obstacleExpandR()            { return Planning().value( "ObstacleExpansionRadius", 0.4685 ).toDouble(); }
+    void setObstacleExpandR(double rad) { Planning().setValue("ObstacleExpansionRadius", rad ); }
+
+    int obstacleAvoidAlgo()             { return Planning().value( "ObstacleAvoidanceAlgo", 1 ).toInt(); }
+    void setObstacleAvoidAlgo(int algo) { Planning().setValue("ObstacleAvoidanceAlgo", algo ); }
+
+    bool isBridgeTestEnabled()          { return Planning().value( "BridgeTestEnabled", 1 ).toBool(); }
+    void setBridgeTest(bool ena)        { Planning().setValue("BridgeTestEnabled", ena ); }
+
+    bool isConnectNodesEnabled()        { return Planning().value( "ConnectNodesEnabled", 1 ).toBool(); }
+    void setConnectNodes(bool ena)      { Planning().setValue("ConnectNodesEnabled", ena ); }
+
+    bool isRegGridEnabled()             { return Planning().value( "RegGridEnabled", 1 ).toBool(); }
+    void setRegGrid(bool ena)           { Planning().setValue("RegGridEnabled", ena ); }
+
+    bool isObstaclePenEnabled()         { return Planning().value( "ObstaclePenaltyEnabled", 1 ).toBool(); }
+    void setObstaclePen(bool ena)       { Planning().setValue("ObstaclePenaltyEnabled", ena ); }
+
+    bool isExpandObstEnabled()          { return Planning().value( "ExpandObstaclesEnabled", 1 ).toBool(); }
+    void setExpandObst(bool ena)        { Planning().setValue("ExpandObstaclesEnabled", ena ); }
+
+    bool isShowSearchTreeEnabled()      { return DisplaySettings().value( "ShowSearchTreeEnabled", 1 ).toBool(); }
+    void setShowSearchTree(bool ena)    { DisplaySettings().setValue("ShowSearchTreeEnabled", ena ); }
+
+    bool isShowSearchSpaceTreeEnabled() { return DisplaySettings().value( "ShowSearchSpaceTreeEnabled", 1 ).toBool(); }
+    void setShowSearchSpaceTree(bool en){ DisplaySettings().setValue("ShowSearchSpaceTreeEnabled", en ); }
+
+    bool isShowPathsEnabled()           { return DisplaySettings().value( "ShowPathsEnabled", 1 ).toBool(); }
+    void setShowPaths(bool ena)         { DisplaySettings().setValue("ShowPathsEnabled", ena ); }
+
+    bool isShowRobotTrailEnabled()      { return DisplaySettings().value( "ShowRobotTrailEnabled", 1 ).toBool(); }
+    void setShowRobotTrail(bool ena)    { DisplaySettings().setValue("ShowRobotTrailEnabled", ena ); }
+
+    bool isShowSearchSpaceSamplesEnabled()  { return DisplaySettings().value( "ShowSearchSpaceSamplesEnabled", 1 ).toBool(); }
+    void setShowSearchSpaceSamples(bool ena){ DisplaySettings().setValue("ShowSearchSpaceSamplesEnabled", ena ); }
+
 };
 
 
-namespace Settings
+namespace CasPlanner
 {
     inline CasPlannerSettings &settings()
     {

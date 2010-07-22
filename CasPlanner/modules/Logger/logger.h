@@ -27,6 +27,7 @@
 #include <QString>
 #include <QDebug>
 #include <QtGlobal>
+#include <QCoreApplication>
 
 #include <string>
 #include <fstream>
@@ -40,17 +41,6 @@
 #define FUNCTION_NAME ( std::string( __FUNCTION__ ) )
 #define LINE_NUMBER ( __LINE__ )
 
-// Global LOG macro
-#define LOG(level, msg)                                                      \
-{                                                                            \
-    std::ostringstream ss;                                                   \
-    ss << msg;                                                               \
-    Logger& lg = Logger::getLogger();                                        \
-    lg.log( (Logger::Severity)level, ss.str(), FUNCTION_NAME, LINE_NUMBER ); \
-}
-
-#define LOGL(level, msg) LOG(level, msg << "\n")
-
 inline std::ostream& operator<<(std::ostream& os, const QString& qs)
 {
     os << qs.toAscii().data();
@@ -60,7 +50,7 @@ inline std::ostream& operator<<(std::ostream& os, const QString& qs)
 class Logger : public QObject
 {
     Q_OBJECT
-public:   
+public:
     enum Severity
     {
         Critical = 1,
@@ -68,39 +58,61 @@ public:
         Info,
         Debug
     };
-    std::ofstream mFileOut;
-    QMutex mMutex;
-    QtMsgHandler mDefaultMsgHandler;    
-    Logger() : mDefaultMsgHandler(NULL), mLevel(Warning) {}
+signals:
+    void showMsg(int severityLevel,QString msg);
+public:
+    Logger(QObject* parent=0) :QObject(parent), mDefaultMsgHandler(NULL), mLevel(Debug) {}
     virtual ~Logger()
     {
         mFileOut.close();
-    }    
+    }
     void init(QString sFilename, bool bOverwrite = true);
-    static Logger& getLogger();
     void log(Severity level, std::string message, std::string function, int line );
     void setLevel( Severity level) { mLevel = level; }
     int  getLevel() { return mLevel; }
-    QString getFilePath() const { return mFilePath; }
-    static std::string
-            GetTime()
+    Logger & getLogger()
     {
-        time_t now;
-        time(&now);
-        struct tm* tmnow;
-        tmnow = gmtime(&now);
-        char acTmp[128];
-        strftime(acTmp, 127, "%y%m%d %H:%M:%S", tmnow);
-        std::string sTime(acTmp);
-        return sTime;
+        static Logger instance;
+        return instance;
     }
+
+    QString getFilePath() const { return mFilePath; }
     void loggingPatch( const char* msg );
-    signals:
-        void logMsg(int severityLevel,QString msg);
+    QtMsgHandler mDefaultMsgHandler;
 private:
+    std::ofstream mFileOut;
+    QMutex mMutex;
     Severity mLevel;
     QString mFilePath;
 };
+
+inline Logger &getLogger()
+{
+    static QMutex mutex;
+    static Logger* logger = 0;
+    QMutexLocker locker( &mutex );
+    if (!logger)
+    {
+        logger = QCoreApplication::instance()->findChild<Logger*>( "CasPlanner-Logger-Instance" );
+        if (!logger)
+        {
+            logger = new Logger( QCoreApplication::instance());
+            logger->setObjectName( "CasPlanner-Logger-Instance" );
+        }
+    }
+    return *logger;
+}
+
+// Global LOG macro
+#define LOG(level, msg)                                                      \
+{                                                                            \
+    std::ostringstream ss;                                                   \
+    ss << msg;                                                               \
+    Logger& lg = getLogger();                                                \
+    lg.log( (Logger::Severity)level, ss.str(), FUNCTION_NAME, LINE_NUMBER ); \
+}
+
+#define LOGL(level, msg) LOG(level, msg << "\n")
 
 #include <QDebug>
 #ifndef QT_NO_DEBUG
@@ -109,13 +121,12 @@ private:
     #include <QVariant>
     class QDebugBlock
     {
-        mutable QString m_title; //because operator= requires a const parameter for some reason :(
+        mutable QString m_title;
         QTime m_time;
         static int &indents() { static int indent = 0; return indent; }
     public:
         QDebugBlock( QString title ) : m_title( title )
         {
-            // use data() to prevent quotes being output by QDebugStream
             debug() << "BEGIN:" << title.toLatin1().data();
             indents()++;
 
@@ -142,7 +153,6 @@ private:
             if (!m_title.isEmpty())
             {
                 indents()--;
-                // use data() to prevent quotes being output by QDebugStream
                 debug() << "END:  " << m_title.toLatin1().data() << "[elapsed:" << m_time.elapsed() << "ms]";
             }
         }
@@ -172,13 +182,12 @@ private:
     #define Q_DEBUG_BLOCK QDebugBlock mxcl_block = QDebugBlock( __PRETTY_FUNCTION__ )
     #define qDebug() QDebugBlock::debug()
 #else //Q_NO_DEBUG
-    #include <QDateTime>   
+    #include <QDateTime>
     #define Q_DEBUG_BLOCK qDebug()
-    class QDebugBlock { public: QDebugBlock( QString ) {} };    
-    #define qDebug() qDebug() << QDateTime::currentDateTime().toUTC().toString( "dd/MM/yy hh:mm:ss" ) \
-                              << '-' << QString("%1").arg( (int)QThread::currentThreadId(), 4 ) \
-                              << '-' << __PRETTY_FUNCTION__ << '(' << __LINE__<< ") - L4 - "
+    class QDebugBlock { public: QDebugBlock( QString ) {} };
+    #define qDebug() qDebug() << QDateTime::currentDateTime().toUTC().toString( "dd/MM/yy hh:mm:ss" ).toLatin1().data() \
+                              <<" - "<< QString("%1").arg( (int)QThread::currentThreadId(), 10 ).toLatin1().data() \
+                              <<" - "<< __PRETTY_FUNCTION__ << '(' << __LINE__<< ") - L4 - "
 #endif
-
 
 #endif //LOGGER_H
