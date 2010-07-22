@@ -70,12 +70,13 @@ public:
     void log(Severity level, std::string message, std::string function, int line );
     void setLevel( Severity level) { mLevel = level; }
     int  getLevel() { return mLevel; }
+    /*
     Logger & getLogger()
     {
         static Logger instance;
         return instance;
     }
-
+    */
     QString getFilePath() const { return mFilePath; }
     void loggingPatch( const char* msg );
     QtMsgHandler mDefaultMsgHandler;
