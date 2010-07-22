@@ -32,19 +32,19 @@ void loggingMsgHandler( QtMsgType   type, const char* msg )
     switch (type)
     {
         case QtDebugMsg:
-            Logger::getLogger().loggingPatch( msg );
-            break;        
+            getLogger().loggingPatch( msg );
+            break;
         case QtWarningMsg:
             LOGL(Logger::Warning, msg);
-            break;        
+            break;
         case QtCriticalMsg:
             LOGL(Logger::Critical, msg);
-            break;        
+            break;
         case QtFatalMsg:
             LOGL(Logger::Critical, msg);
-            Logger::getLogger().mDefaultMsgHandler(type, msg);
+            getLogger().mDefaultMsgHandler(type, msg);
             break;
-    }    
+    }
 #else
     // Debug build, use default handler
     QtMsgHandler& defHandler = Logger::getLogger().mDefaultMsgHandler;
@@ -63,7 +63,7 @@ void loggingMsgHandler( QtMsgType   type, const char* msg )
         case QtFatalMsg:
             defHandler(type, msg);
             break;
-    }    
+    }
 #endif // QT_NO_DEBUG
 }
 
@@ -123,37 +123,27 @@ void Logger::init( QString sFilename, bool bOverwrite)
     mDefaultMsgHandler = qInstallMsgHandler(loggingMsgHandler);
     if (mDefaultMsgHandler == 0)
     {
-        //LOGL(2, "No default message handler found." )
         mDefaultMsgHandler = defaultMsgHandler;
     }
 }
 
-Logger& Logger::getLogger()
+void Logger::log( Severity level, string message, string function, int line)
 {
-    //SINGILTON  creation
-    static Logger logger;
-    return logger;
+    QMutexLocker loggerLock(&mMutex);
+    if (mFileOut && level <= getLevel())
+    {
+        mFileOut<< QDateTime::currentDateTime().toUTC().toString( "dd/MM/yy hh:mm:ss" ) \
+                                      <<" - "<< QString("%1").arg( (int)QThread::currentThreadId(), 10 ) \
+                                      <<" - "<< function << '(' << line<< ") - L"<<level<<" - "<<message<<endl;
+    }
+    emit showMsg(level,message.c_str());
 }
 
-void Logger::log( Severity    level, string message, string function, int line)
-{
-    QMutexLocker loggerLock(&mMutex);    
-    if (mFileOut && level <= getLevel())
-    {                                           
-        mFileOut <<                          
-            GetTime() << " - " <<            
-            std::setw(4) << QThread::currentThreadId() << " - " <<           
-            function << "(" << line << ") - " <<                                            
-            "L" << level << " - " << message << std::endl;
-    }
-    emit logMsg(level,QString(message.c_str()));
-}
-    
 void Logger::loggingPatch(const char* msg)
 {
     QMutexLocker loggerLock(&mMutex);
     if (mFileOut)
     {
-        mFileOut << msg << "\n" << std::endl;
+        mFileOut << msg << std::endl;
     }
 }

@@ -39,8 +39,9 @@ TabContainer::TabContainer(QWidget *parent,PlayGround *playG)
     loggerView = new loggerview(parent);
     addTab(loggerView,"Logger");
 
-    Logger& logger = Logger::getLogger();
-    connect(&logger,SIGNAL(logMsg(int,QString)),loggerView,SLOT(logMsg(int,QString)));
+    connect(&getLogger(),SIGNAL(showMsg(int,QString)),loggerView,SLOT(showMsg(int,QString)));
+    //LOG(Logger::Info,"TEST,TEST,TEST")
+
     updateGeometry();
 }
 

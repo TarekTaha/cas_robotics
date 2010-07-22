@@ -27,7 +27,7 @@ Heuristic *  Heuristic::factory(QString type) throw(CasPlannerException)
 {
     if (type == "Distance")
     {
-        cout <<"\n Distance"; fflush(stdout);
+        LOG(Logger::Info,"Using Distance Heuristic")
         return new DistanceHeuristic;
     }
     throw (CasPlannerException((char*)"Bad Heuristic Type"));
@@ -37,7 +37,7 @@ Heuristic *  Heuristic::factory(QString type,QHash<QString, int> *soRe) throw(Ca
 {
     if (type == "Social")
     {
-        cout <<"\n Social";	fflush(stdout);
+        LOG(Logger::Info,"Using Social Heuristic")
         return new SocialHeuristic(soRe);
     }
     throw (CasPlannerException((char*)"Bad Heuristic Type"));
