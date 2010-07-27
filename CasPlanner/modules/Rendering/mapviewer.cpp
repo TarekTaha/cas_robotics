@@ -40,11 +40,6 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG)
     showRobots(true),
     showPointclouds(true),
     showPatchBorders(true),
-    showSearchSpaceSamples(true),
-    showSearchSpaceTree(true),
-    showSearchTree(false),
-    showPath(true),
-    showRobotTrail(true),
     searchSpaceListCreated(false),
     hideGoals(false),
     start_initialized(false),
@@ -70,7 +65,12 @@ MapViewer::MapViewer(QWidget *parent,PlayGround *playG)
     RGB_COLOR[7][0] = 1.0; RGB_COLOR[7][1] = 0.65;  RGB_COLOR[7][2] = 0.0;   // Orange
     RGB_COLOR[8][0] = 1.0; RGB_COLOR[8][1] = 0.078; RGB_COLOR[8][2] = 0.576; // DeepPink
     RGB_COLOR[9][0] = 0.8; RGB_COLOR[9][1] = 0.0;   RGB_COLOR[9][2] = 0.0;   // Red
-    //	qDebug("OpenGL Initialized"); fflush(stdout);
+
+    showSearchSpaceSamples   = CasPlanner::settings().isShowSearchSpaceSamplesEnabled();
+    showSearchSpaceTree      = CasPlanner::settings().isShowSearchSpaceTreeEnabled();
+    showSearchTree           = CasPlanner::settings().isShowSearchTreeEnabled();
+    showPath                 = CasPlanner::settings().isShowPathsEnabled();
+    showRobotTrail           = CasPlanner::settings().isShowRobotTrailEnabled();
 }
 
 QSize MapViewer::sizeHint()

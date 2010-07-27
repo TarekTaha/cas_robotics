@@ -19,6 +19,7 @@
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
 #include "tasksgui.h"
+#include "logger.h"
 
 TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
 	QWidget(parent),
@@ -140,7 +141,7 @@ void TasksControlPanel::runRandomTasks()
             }
         }
     }
-    qDebug()<<QString("Generationg %1 Random Paths took:%2").arg(numRandomRuns.value(),t.elapsed());
+    qDebug()<<QString("Generationg %1 Random Paths took:%2").arg(numRandomRuns.value()).arg(t.elapsed());
 }
 
 void TasksControlPanel::updateSelectedVoronoiMethod(bool)
@@ -155,12 +156,12 @@ void TasksControlPanel::save()
 
 void TasksControlPanel::taskSelected(int r)
 {
-        qDebug()<<"Selected Task is:"<<r;
-	Pose start(tasksGui->tasks[r].getStart().x(),tasksGui->tasks[r].getStart().y(),0);
-	Pose   end(tasksGui->tasks[r].getEnd().x(),tasksGui->tasks[r].getEnd().y(),0);
-	if(tasksGui->voronoiPlanner)
-		tasksGui->voronoiPlanner->startSearch(start,end,METRIC);
-	fflush(stdout);
+    //qDebug()<<"Selected Task is:"<<r;
+    Pose start(tasksGui->tasks[r].getStart().x(),tasksGui->tasks[r].getStart().y(),0);
+    Pose   end(tasksGui->tasks[r].getEnd().x(),tasksGui->tasks[r].getEnd().y(),0);
+    if(tasksGui->voronoiPlanner)
+        tasksGui->voronoiPlanner->startSearch(start,end,METRIC);
+    fflush(stdout);
 }
 
 void TasksControlPanel::setMap(QImage)
@@ -189,10 +190,10 @@ MapGL::MapGL(Map*og,TasksGui *tsg, QWidget *parent):
 	mapSkeleton(NULL),
 	ogMap(og)
 {
-	renderTimer = new QTimer(this);
-	connect(renderTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
-	renderTimer->start(200);
-	setFocusPolicy(Qt::StrongFocus);
+    renderTimer = new QTimer(this);
+    connect(renderTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
+    renderTimer->start(200);
+    setFocusPolicy(Qt::StrongFocus);
 }
 
 QSize MapGL::sizeHint()
@@ -403,9 +404,9 @@ void MapGL::loadTexture()
     mainMapBuilt = true;
 };
 
-///*!
-// *  Renders The main Map loaded from the image file
-// */
+/*!
+ *  Renders The main Map loaded from the image file
+ */
 void MapGL::renderMap()
 {
     glNewList(mapList, GL_COMPILE);
@@ -923,7 +924,6 @@ void TasksGui::generateSkeleton()
         if(playGround->mapManager->mapSkeleton.numStates !=0)
         {
             skeletonGenerated = true;
-            //mapGL.setSSkelPtr(playGround->mapManager->mapSkeleton.getSSkelPtr());
             mapGL.paintGL();
             if (voronoiPlanner)
             {

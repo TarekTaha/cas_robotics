@@ -47,9 +47,8 @@ inline std::ostream& operator<<(std::ostream& os, const QString& qs)
     return os;
 }
 
-class Logger : public QObject
+class Logger
 {
-    Q_OBJECT
 public:
     enum Severity
     {
@@ -58,10 +57,7 @@ public:
         Info,
         Debug
     };
-signals:
-    void showMsg(int severityLevel,QString msg);
-public:
-    Logger(QObject* parent=0) :QObject(parent), mDefaultMsgHandler(NULL), mLevel(Debug) {}
+    Logger() : mDefaultMsgHandler(NULL), mLevel(Debug) {}
     virtual ~Logger()
     {
         mFileOut.close();
@@ -70,13 +66,13 @@ public:
     void log(Severity level, std::string message, std::string function, int line );
     void setLevel( Severity level) { mLevel = level; }
     int  getLevel() { return mLevel; }
-    /*
+
     Logger & getLogger()
     {
         static Logger instance;
         return instance;
     }
-    */
+
     QString getFilePath() const { return mFilePath; }
     void loggingPatch( const char* msg );
     QtMsgHandler mDefaultMsgHandler;
@@ -86,7 +82,7 @@ private:
     Severity mLevel;
     QString mFilePath;
 };
-
+/*
 inline Logger &getLogger()
 {
     static QMutex mutex;
@@ -94,22 +90,22 @@ inline Logger &getLogger()
     QMutexLocker locker( &mutex );
     if (!logger)
     {
-        logger = QCoreApplication::instance()->findChild<Logger*>( "CasPlanner-Logger-Instance" );
+        logger = qApp->findChild<Logger*>("LoggerInstance");
         if (!logger)
         {
-            logger = new Logger( QCoreApplication::instance());
-            logger->setObjectName( "CasPlanner-Logger-Instance" );
+            logger = new Logger(qApp);
+            logger->setObjectName( "LoggerInstance" );
         }
     }
     return *logger;
 }
-
+*/
 // Global LOG macro
 #define LOG(level, msg)                                                      \
 {                                                                            \
     std::ostringstream ss;                                                   \
     ss << msg;                                                               \
-    Logger& lg = getLogger();                                                \
+    Logger& lg = Logger::getLogger();                                        \
     lg.log( (Logger::Severity)level, ss.str(), FUNCTION_NAME, LINE_NUMBER ); \
 }
 

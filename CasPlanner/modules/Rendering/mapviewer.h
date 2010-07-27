@@ -35,6 +35,7 @@
 #include "map.h"
 
 #include "FreeType.h"
+#include "settings.h"
 
 class PlayGround;
 
