@@ -32,7 +32,7 @@ void loggingMsgHandler( QtMsgType   type, const char* msg )
     switch (type)
     {
         case QtDebugMsg:
-            getLogger().loggingPatch( msg );
+            Logger::getLogger().loggingPatch( msg );
             break;
         case QtWarningMsg:
             LOGL(Logger::Warning, msg);
@@ -42,7 +42,7 @@ void loggingMsgHandler( QtMsgType   type, const char* msg )
             break;
         case QtFatalMsg:
             LOGL(Logger::Critical, msg);
-            getLogger().mDefaultMsgHandler(type, msg);
+            Logger::getLogger().mDefaultMsgHandler(type, msg);
             break;
     }
 #else
@@ -136,7 +136,6 @@ void Logger::log( Severity level, string message, string function, int line)
                                       <<" - "<< QString("%1").arg( (int)QThread::currentThreadId(), 10 ) \
                                       <<" - "<< function << '(' << line<< ") - L"<<level<<" - "<<message<<endl;
     }
-    emit showMsg(level,message.c_str());
 }
 
 void Logger::loggingPatch(const char* msg)

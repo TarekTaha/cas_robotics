@@ -8,7 +8,6 @@ SET( CasPlanner_MOC_HDRS
     ./modules/CommManager/comms.h
     ./modules/Rendering/glrender.h
     ./modules/Rendering/laserrender.h
-    ./modules/Logger/logger.h
     ./gui/planningsettings.h
     ./gui/missioncontroltab.h
     ./gui/hritab.h
@@ -22,6 +21,7 @@ SET( CasPlanner_MOC_HDRS
     ./modules/Navigator/navigator.h
     ./modules/Rendering/ogrender.h
     ./modules/CommManager/playerinterface.h
+    ./modules/MapManager/mapmanager.h
     ./modules/Parser/xmlparser.h
     ./modules/PathPlanner/planningmanager.h
     ./modules/PlayGround/playground.h

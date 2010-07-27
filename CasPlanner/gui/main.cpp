@@ -20,10 +20,11 @@
  ***************************************************************************/
 #include "mainwindow.h"
 #include <qapplication.h>
-
-int main( int argc, char ** argv ) 
+#include "logger.h"
+int main( int argc, char ** argv )
 {
     QApplication a( argc, argv );
+    getLogger();
     if(argc > 1)
     {
         MainWindow* main_win = new MainWindow(QApplication::arguments());
@@ -32,8 +33,8 @@ int main( int argc, char ** argv )
         a.connect( &a, SIGNAL(lastWindowClosed()), &a, SLOT(quit()) );
         return a.exec();
     }
-    else 
+    else
     {
-        qFatal("Usage: CasPlanner <cfgfile>\n"); 
+        qFatal("Usage: CasPlanner <cfgfile>\n");
     }
 }

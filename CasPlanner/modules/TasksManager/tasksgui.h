@@ -46,7 +46,6 @@
 #include "playground.h"
 #include "voronoipathplanner.h"
 #include "sensors.h"
-//#include "interfaceprovider.h"
 #include "laserrender.h"
 #include "speedrender.h"
 #include "ogrender.h"
@@ -67,7 +66,6 @@ class TasksControlPanel;
 class QMessageBox;
 class SpeedRender;
 
-//using namespace defs;
 using namespace CasPlanner;
 
 class TasksControlPanel: public QWidget

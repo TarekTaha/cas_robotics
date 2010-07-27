@@ -34,7 +34,7 @@ namespace CasPlanner
 class Heuristic
 {
 public:
-	virtual ~Heuristic(){};
+	virtual ~Heuristic(){}
 	virtual double gCost(Node *)=0;
 	virtual double hCost(Node *,Node * )=0;;
 	static Heuristic * factory(QString type) throw(CasPlannerException);
@@ -45,23 +45,23 @@ class SocialHeuristic : public Heuristic
 {
 public:
 	QHash<QString, int> *socialRewards;
-	SocialHeuristic(QHash<QString, int> *socRew){this->socialRewards=socRew;};
+	SocialHeuristic(QHash<QString, int> *socRew){this->socialRewards=socRew;}
 	friend class Heuristic;
 public:
 	double gCost(Node *n);
 	double hCost(Node *n, Node * end);
-	~SocialHeuristic(){};
+	~SocialHeuristic(){}
 };
 
 class DistanceHeuristic : public Heuristic
 {
 public:
-	DistanceHeuristic(){};
+	DistanceHeuristic(){}
 	friend class Heuristic;
 public:
 	double gCost(Node *n);
 	double hCost(Node *n, Node * end);
-	~DistanceHeuristic(){};
+	~DistanceHeuristic(){}
 };
 
 }
