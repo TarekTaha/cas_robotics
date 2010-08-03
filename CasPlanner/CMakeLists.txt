@@ -16,12 +16,12 @@ SET( CasPlanner_MOC_HDRS
     ./gui/statusbar.h
     ./gui/tabcontainer.h
     ./gui/loggerview.h
+    ./modules/Logger/logger.h
     ./modules/Parser/settings.h
     ./modules/Rendering/mapviewer.h
     ./modules/Navigator/navigator.h
     ./modules/Rendering/ogrender.h
     ./modules/CommManager/playerinterface.h
-    ./modules/MapManager/mapmanager.h
     ./modules/Parser/xmlparser.h
     ./modules/PathPlanner/planningmanager.h
     ./modules/PlayGround/playground.h

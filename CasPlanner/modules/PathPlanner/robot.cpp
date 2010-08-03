@@ -91,6 +91,7 @@ void Robot::setCheckPoints(double obst_r)
     {
         local_edge_points.push_back(Trans2Global(edges[s],pose));
     }
+    qDebug()<<"Test Test Test";
     for (int s=0 ;s < 4; s++)
         LOG(Logger::Info,"  Edge->"<< s<<" X="<<local_edge_points[s].x()<<" Y="<<local_edge_points[s].y())
     // Create a Matrix of the points to check for collision detection

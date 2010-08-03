@@ -7,6 +7,7 @@
 #include "mapskeleton.h"
 #include "map.h"
 #include "node.h"
+#include "logger.h"
 
 class PlayGround;
 class RobotManager;

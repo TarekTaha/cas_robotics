@@ -35,6 +35,7 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
 	generateSkeletonBtn("Generate Skeleton"),
 	captureImage("Capture Image"),
 	testModelBtn("Test Bayesian Model"),
+        clearAllBtn("Clear All"),
 	tasksGB("Set of Tasks"),
 	tasksList(this)
 {
@@ -53,18 +54,28 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
     tasksGB.setLayout(tasksLayout);
 
     QHBoxLayout *parHLayout = new QHBoxLayout;
+    QHBoxLayout *parHLayout2 = new QHBoxLayout;
     QVBoxLayout *parVLayout = new QVBoxLayout;
     parHLayout->addWidget(new QLabel("Random Runs"));
     parHLayout->addWidget(&numRandomRuns);
+    parHLayout2->addWidget(new QLabel("Time of Day"));
+    parHLayout2->addWidget(&timeOfDay);
 
     parVLayout->addLayout(parHLayout);
+    parVLayout->addLayout(parHLayout2);
     parVLayout->addWidget(&randomTasksBtn);
+    parVLayout->addWidget(&clearAllBtn);
     randomTasksGB.setLayout(parVLayout);
 
-    numRandomRuns.setMinimum(0);
-    numRandomRuns.setMaximum(100);
+    numRandomRuns.setMinimum(1);
+    numRandomRuns.setMaximum(1000);
     numRandomRuns.setSingleStep(1);
     numRandomRuns.setValue(10);
+
+    timeOfDay.addItem("Early Morning");
+    timeOfDay.addItem("Morning");
+    timeOfDay.addItem("Afternoon");
+    timeOfDay.addItem("Night");
 
     QVBoxLayout *showL = new QVBoxLayout;
     showL->addWidget(&innerSkeletonBtn);
@@ -83,10 +94,12 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
     connect(&innerSkeletonBtn, SIGNAL(toggled(bool )), this,SLOT(updateSelectedVoronoiMethod(bool)));
     connect(&outerSkeletonBtn, SIGNAL(toggled(bool )), this,SLOT(updateSelectedVoronoiMethod(bool)));
     connect(&generateSkeletonBtn, SIGNAL(pressed()),tasksGui, SLOT(generateSkeleton()));
-    connect(&captureImage,     SIGNAL(pressed()),this, SLOT(save()));
+    connect(&captureImage,     SIGNAL(pressed()),tasksGui, SLOT(saveImage()));
     connect(&randomTasksBtn,   SIGNAL(pressed()),this, SLOT(runRandomTasks()));
     connect(&tasksList,        SIGNAL(currentRowChanged(int)),this, SLOT(taskSelected(int)));
     connect(&testModelBtn,     SIGNAL(pressed()),tasksGui, SLOT(testModel()));
+    connect(&clearAllBtn,      SIGNAL(released()),tasksGui,SLOT(clearAll()));
+    connect(&timeOfDay,SIGNAL(currentIndexChanged(QString)),tasksGui,SLOT(timeOfDayChanged(QString)));
 }
 
 
@@ -102,6 +115,9 @@ void TasksControlPanel::runRandomTasks()
     if(!tasksGui->skeletonGenerated)
         tasksGui->generateSkeleton();
     int sourceVertixId,destVertexId;
+    tasksGui->totalVisits = 0;
+    tasksGui->playGround->mapManager->mapSkeleton.resetSegmentVisits();
+    tasksGui->playGround->mapManager->mapSkeleton.resetVertexVisits();
     t.start();
     for(int i=0;i<numRandomRuns.value();i++)
     {
@@ -111,7 +127,7 @@ void TasksControlPanel::runRandomTasks()
         destVertexId   = rand()%tasksGui->playGround->mapManager->mapSkeleton.getNumDestinations();
         // find the destination's actual index
         destVertexId = tasksGui->playGround->mapManager->mapSkeleton.destIndexes[destVertexId];
-        qDebug()<<"\n Source Vertex is:"<<sourceVertixId<<" destination Vertex is:"<<destVertexId;
+        LOG(Logger::Info,"\n Source Vertex is:"<<sourceVertixId<<" destination Vertex is:"<<destVertexId)
         //tasksList.setCurrentRow(r);
         //qDebug("Using Task %s %d ",qPrintable(tasksGui->tasks[sourceVertixId].getName()),sourceVertixId);
         Pose start(tasksGui->playGround->mapManager->mapSkeleton.verticies[sourceVertixId].getLocation().x(),
@@ -126,22 +142,42 @@ void TasksControlPanel::runRandomTasks()
         {
             tasksGui->voronoiPlanner->printNodeList();
             p = tasksGui->voronoiPlanner->path;
-            while(p)
+            while(p && p->next)
             {
-                for(int j=0; j<tasksGui->playGround->mapManager->mapSkeleton.verticies.size(); j++)
+                int j = tasksGui->playGround->mapManager->mapSkeleton.getVertexWithLocation(p->pose.p);
+                int k = tasksGui->playGround->mapManager->mapSkeleton.getVertexWithLocation(p->next->pose.p);
+                // Increment visits to this path segment
+                tasksGui->playGround->mapManager->mapSkeleton.incrementConnectionVisitsBiDir(j,k);
+                //Last Node Pairs
+                if(!p->next->next)
                 {
-                    if((p->pose.p.x() == tasksGui->playGround->mapManager->mapSkeleton.verticies[j].location.x())&&
-                       (p->pose.p.y() == tasksGui->playGround->mapManager->mapSkeleton.verticies[j].location.y()))
-                    {
-                        tasksGui->playGround->mapManager->mapSkeleton.verticies[j].prob = (++tasksGui->playGround->mapManager->mapSkeleton.verticies[j].visits)/double(++tasksGui->totalVisits);
-                    }
+                    // Increment the number of visits to each Vertex
+                    tasksGui->playGround->mapManager->mapSkeleton.verticies[j].incrementVisits(1);
+                    tasksGui->playGround->mapManager->mapSkeleton.verticies[k].incrementVisits(1);
+                    LOG(Logger::Info,"Step:"<<step++<<" has index:"<<tasksGui->playGround->mapManager->mapSkeleton.getCurrentSpatialState(p->pose))
+                    LOG(Logger::Info,"Step:"<<step++<<" has index:"<<tasksGui->playGround->mapManager->mapSkeleton.getCurrentSpatialState(p->next->pose))
                 }
-                qDebug()<<"Set:"<<step++<<" has index:"<<tasksGui->playGround->mapManager->mapSkeleton.getCurrentSpatialState(p->pose);
+                else
+                {
+                    // only increment those verticies that are not part of the destinations otherwise
+                    // the probabilities will be wrong !!!
+                    // TODO:: think about this
+                    if(!tasksGui->playGround->mapManager->mapSkeleton.destIndexes.contains(j))
+                        tasksGui->playGround->mapManager->mapSkeleton.verticies[j].incrementVisits(1);
+                    LOG(Logger::Info,"Step:"<<step++<<" has index:"<<tasksGui->playGround->mapManager->mapSkeleton.getCurrentSpatialState(p->pose))
+                }
                 p = p->next;
             }
         }
     }
-    qDebug()<<QString("Generationg %1 Random Paths took:%2").arg(numRandomRuns.value()).arg(t.elapsed());
+    for(int i=0;i<tasksGui->playGround->mapManager->mapSkeleton.destIndexes.size();i++ )
+    {
+        int vertexIndex =tasksGui->playGround->mapManager->mapSkeleton.destIndexes[i];
+        double prob = tasksGui->playGround->mapManager->mapSkeleton.verticies[vertexIndex].getNumVisits()/double(numRandomRuns.value());
+        tasksGui->playGround->mapManager->mapSkeleton.verticies[vertexIndex].setProb(prob);
+    }
+    LOG(Logger::Info,QString("Generating %1 Random Paths took:%2 msec").arg(numRandomRuns.value()).arg(t.elapsed()))
+    (tasksGui->getMapGL()).setShowPaths(false);
 }
 
 void TasksControlPanel::updateSelectedVoronoiMethod(bool)
@@ -156,12 +192,16 @@ void TasksControlPanel::save()
 
 void TasksControlPanel::taskSelected(int r)
 {
-    //qDebug()<<"Selected Task is:"<<r;
-    Pose start(tasksGui->tasks[r].getStart().x(),tasksGui->tasks[r].getStart().y(),0);
-    Pose   end(tasksGui->tasks[r].getEnd().x(),tasksGui->tasks[r].getEnd().y(),0);
+    LOG(Logger::Info,"Selected Task is:"<<r)
+    if(!tasksGui->skeletonGenerated)
+        tasksGui->generateSkeleton();
+    int startIndex = tasksGui->tasks[r].getStartVertex();
+    int endIndex   = tasksGui->tasks[r].getEndVertex();
+    Pose start(tasksGui->playGround->mapManager->mapSkeleton.verticies[startIndex].getLocation().x(),tasksGui->playGround->mapManager->mapSkeleton.verticies[startIndex].getLocation().y(), 0);
+    Pose end(tasksGui->playGround->mapManager->mapSkeleton.verticies[endIndex].getLocation().x(),tasksGui->playGround->mapManager->mapSkeleton.verticies[endIndex].getLocation().y(), 0);
     if(tasksGui->voronoiPlanner)
         tasksGui->voronoiPlanner->startSearch(start,end,METRIC);
-    fflush(stdout);
+    tasksGui->getMapGL().setShowPaths(true);
 }
 
 void TasksControlPanel::setMap(QImage)
@@ -177,7 +217,7 @@ void TasksControlPanel::exportHtml()
 MapGL::MapGL(Map*og,TasksGui *tsg, QWidget *parent):
 	QGLWidget(QGLFormat(QGL::AlphaChannel), parent),
 	tasksGui(tsg),
-	zoomFactor(10),
+        zoomFactor(15),
 	xOffset(0),
 	yOffset(0),
 	zOffset(0),
@@ -187,6 +227,7 @@ MapGL::MapGL(Map*og,TasksGui *tsg, QWidget *parent):
 	showGrids(true),
 	firstTime(true),
 	mainMapBuilt(false),
+        showPaths(false),
 	mapSkeleton(NULL),
 	ogMap(og)
 {
@@ -211,6 +252,10 @@ void MapGL::initializeGL()
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glFlush();
     skeletonList = glGenLists(1);
+    morningList  = glGenLists(1);
+    earlyMorningList = glGenLists(1);
+    afternoonList = glGenLists(1);
+    nightList = glGenLists(1);
     mapList = glGenLists(1);
 }
 
@@ -220,7 +265,7 @@ void MapGL::resizeGL(int w, int h)
     // Reset the coordinate system before modifying
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(180, aspectRatio, 1,1000);
+    gluPerspective(60, aspectRatio, -5,1000);
     glViewport(0,0,w,h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -240,22 +285,37 @@ void MapGL::config()
 
 }
 
+void MapGL::wheelEvent( QWheelEvent * event )
+{
+    int numDegrees = event->delta() / 8;
+    int numSteps = numDegrees / 15;
+    if(numSteps > 0)
+        zoomFactor /= 1.1;
+    else
+        zoomFactor *= 1.1;
+}
+
+void MapGL::mousePressEvent(QMouseEvent *me)
+{
+}
+
+void MapGL::mouseMoveEvent(QMouseEvent *me)
+{
+}
+
 void MapGL::drawProbHisto(QPointF pos, double prob)
 {
-    QString str = QString("%1 \%").arg((int)(prob*100));
     if(prob==0)
         return;
     glPushMatrix();
     glTranslatef(pos.x(),pos.y(),0.0f);
-    glColor4f(0,0,0,1);
-    renderText(0 ,0 + 0.2, prob + 0.2, str);
-    glScalef(1/12.0, 1/12.0, prob);
+    glScalef(1/12.0, 1/12.0, prob*3);
     //glRotatef(rotqube,0.0f,1.0f,0.0f);	// Rotate The cube around the Y axis
     //glRotatef(rotqube,1.0f,1.0f,1.0f);
     glBegin(GL_QUADS);		// Draw The Cube Using quads
 
     //glColor3f(1.0f,0.0f,1.0f);	// Color Violet
-    glColor4f(0.0f,1.0f,0.0f,1.0f);
+    glColor4f(0.0f,1.0f,0.0f,0.8f);
 
     //	    glColor3f(0.0f,1.0f,0.0f);	// Color Blue
     glVertex3f( 1.0f, 1.0f,-0.0f);	// Top Right Of The Quad (Top)
@@ -292,30 +352,48 @@ void MapGL::drawProbHisto(QPointF pos, double prob)
     glVertex3f( 1.0f, 1.0f, 1.0f);	// Top Left Of The Quad (Right)
     glVertex3f( 1.0f,-1.0f, 1.0f);	// Bottom Left Of The Quad (Right)
     glVertex3f( 1.0f,-1.0f,-0.0f);	// Bottom Right Of The Quad (Right)
-    glEnd();			// End Drawing The Cube
+    glEnd();                            // End Drawing The Cube
     glPopMatrix();
-    return;
 }
 
 void MapGL::renderSkeleton()
 {
     if(!mapSkeleton)
         return;
+    double shift=0;
+    int colorIndex = 0;
+    if(tasksGui->timeOfDay=="Morning")
+    {
+        glDeleteLists(morningList,1);
+        glNewList(morningList,GL_COMPILE);
+        shift = -0.30;
+        colorIndex = 1;
+    }
+    else if(tasksGui->timeOfDay=="Early Morning")
+    {
+        glDeleteLists(earlyMorningList,1);
+        glNewList(earlyMorningList,GL_COMPILE);
+        shift = -0.10;
+        colorIndex = 2;
+    }
+    else if(tasksGui->timeOfDay=="Afternoon")
+    {
+        glDeleteLists(afternoonList,1);
+        glNewList(afternoonList,GL_COMPILE);
+        shift = 0.10;
+        colorIndex = 3;
+    }
+    else if(tasksGui->timeOfDay=="Night")
+    {
+        glDeleteLists(nightList,1);
+        glNewList(nightList,GL_COMPILE);
+        shift = 0.30;
+        colorIndex = 4;
+    }
     glPushMatrix();
-    glLineWidth(2);
-
     for(int i=0;i<mapSkeleton->getNumVerticies();i++)
     {
-        glColor4f(0,1,0,1);;
         QPointF parentVertex = mapSkeleton->verticies[i].getLocation();
-        for(int j=0;j<mapSkeleton->verticies[i].connections.size();j++)
-        {
-            QPointF child = mapSkeleton->verticies[mapSkeleton->verticies[i].connections[j].nodeIndex].getLocation();
-            glBegin(GL_LINES);
-                glVertex2f(parentVertex.x(),parentVertex.y());
-                glVertex2f(child.x(),child.y());
-            glEnd();
-        }
         if(mapSkeleton->destIndexes.contains(i))
         {
             glBegin(GL_POLYGON);
@@ -325,26 +403,74 @@ void MapGL::renderSkeleton()
                 glVertex2f(parentVertex.x()+ 0.2, parentVertex.y()-0.2);
                 glVertex2f(parentVertex.x()- 0.2, parentVertex.y()-0.2);
             glEnd();
+            glPushMatrix();
+            QString str = QString("%1 \%").arg((int)(mapSkeleton->verticies[i].getProb()*100));
+            glColor4f(0,0,0,1);
+            QFont font; font.setPointSize(8);
+            if(mapSkeleton->verticies[i].getProb()!=0)
+                renderText(parentVertex.x(),parentVertex.y()+ 0.4, 0.2, str,font);
+            glPopMatrix();
+            drawProbHisto(parentVertex,mapSkeleton->verticies[i].getProb());
         }
-        drawProbHisto(tasksGui->playGround->mapManager->mapSkeleton.verticies[i].location,tasksGui->playGround->mapManager->mapSkeleton.verticies[i].prob);
+        else
+        {
+            glBegin(GL_POLYGON);
+                glColor4f(0.5,0.5,0.5,1);
+                glVertex2f(parentVertex.x()- 0.2, parentVertex.y()+0.2);
+                glVertex2f(parentVertex.x()+ 0.2, parentVertex.y()+0.2);
+                glVertex2f(parentVertex.x()+ 0.2, parentVertex.y()-0.2);
+                glVertex2f(parentVertex.x()- 0.2, parentVertex.y()-0.2);
+            glEnd();
+        }
+        switch(colorIndex)
+        {
+        case 1:
+            COLOR_YELLOW_A(0.8);
+            break;
+        case 2:
+            COLOR_SIENNAL_A(0.8);
+            break;
+        case 3:
+            COLOR_LIGHT_BLUE_A(0.8);
+            break;
+        case 4:
+            COLOR_DEEP_PINK_A(0.8);
+            break;
+        default:
+            COLOR_GREEN_A(0.8)
+            //COLOR_YELLOW_A(0.8);
+            //COLOR_LIGHT_BLUE_A(0.8);
+            //COLOR_DEEP_PINK_A(0.8);
+            //COLOR_SIENNAL_A(0.8);
+        }
+        for(int j=0;j<mapSkeleton->verticies[i].connections.size();j++)
+        {
+            QPointF child = mapSkeleton->verticies[mapSkeleton->verticies[i].connections[j].getNodeIndex()].getLocation();
+            int k = mapSkeleton->verticies[i].connections[j].getNodeIndex();
+            glLineWidth(mapSkeleton->getSegmentNumVisits(i,k)/10.0);
+            glBegin(GL_LINES);
+                glVertex2f(parentVertex.x()+shift,parentVertex.y()+shift);
+                glVertex2f(child.x()+shift,child.y()+shift);
+            glEnd();
+        }
     }
     firstTime = false;
     glPopMatrix();
+    if(colorIndex)
+        glEndList();
 }
 
 void MapGL::renderPath()
 {
     if(!tasksGui->voronoiPlanner)
     {
-        //qDebug("WHAT THEEEE !!!");
         return;
     }
     if(tasksGui->voronoiPlanner->path)
     {
         Node * path = tasksGui->voronoiPlanner->path;
-        //glColor4f(1,1,1,1);
         glPushMatrix();
-        glColor4f(0,0,1,1);
+        COLOR_BLUE_A(1)
         glLineWidth(5);
         glBegin(GL_LINE_STRIP);
         while(path)
@@ -389,8 +515,8 @@ void MapGL::loadTexture()
             }
         }
     }
-
-    glEnable(GL_TEXTURE_2D);       /* Enable Texture Mapping */
+    /* Enable Texture Mapping */
+    glEnable(GL_TEXTURE_2D);
     glGenTextures(1, &texId);
     glBindTexture(GL_TEXTURE_2D, texId);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ogMap->width, ogMap->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
@@ -402,7 +528,58 @@ void MapGL::loadTexture()
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glDisable(GL_TEXTURE_2D);
     mainMapBuilt = true;
-};
+}
+
+void MapGL::displayGrid()
+{
+    glPushMatrix();
+    showGrids = true;
+    if(showGrids)
+    {
+        for(int i=-(int) zoomFactor*3; i < (int) zoomFactor*3; i++)
+        {
+            glBegin(GL_LINES);
+            if(i==0)
+            {
+                glColor4f(0,0,0,0.5);
+            }
+            else
+            {
+                glColor4f(0.5,0.5,0.5,0.5);
+            }
+            glVertex3f(-zoomFactor*3, i, 0);
+            glVertex3f(zoomFactor*3, i, 0);
+            glVertex3f(i,-zoomFactor*3, 0);
+            glVertex3f(i, zoomFactor*3, 0);
+            glEnd();
+        }
+        // X-axis indicator
+        int i = int((ogMap->width*ogMap->mapRes)/2.0 + 2);
+        {
+            glBegin(GL_LINE_LOOP);
+            glColor4f(0,0,0,0.5);
+            //				glColor4f(1,1,1,0.5);
+            glVertex3f(i-1,0.5,0);
+            glVertex3f(i,0,0);
+            glVertex3f(i-1,-0.5,0);
+            glEnd();
+            renderText(i,-1,0, "X");
+        }
+        //Y-axis indicator
+        int j = int((ogMap->height*ogMap->mapRes)/2.0 + 2);
+        {
+            glBegin(GL_LINE_LOOP);
+            glColor4f(0,0,0,0.5);
+            //				glColor4f(1,1,1,0.5);
+            glVertex3f(-0.5,j-1,0);
+            glVertex3f(0,j,0);
+            glVertex3f(0.5,j-1,0);
+            glEnd();
+            renderText(1,j,0, "Y");
+        }
+    }
+    glPopMatrix();
+}
 
 /*!
  *  Renders The main Map loaded from the image file
@@ -410,7 +587,8 @@ void MapGL::loadTexture()
 void MapGL::renderMap()
 {
     glNewList(mapList, GL_COMPILE);
-    glEnable(GL_TEXTURE_2D);       /* Enable Texture Mapping */
+    /* Enable Texture Mapping */
+    glEnable(GL_TEXTURE_2D);
     glPushMatrix();
     glBindTexture(GL_TEXTURE_2D, texId);
     // Inverse the Y-axis
@@ -419,11 +597,6 @@ void MapGL::renderMap()
     //glColor4f(1,1,1,0.8);
     // Define Coordinate System
     glBegin(GL_QUADS);
-    //	    glTexCoord2f(1,float(newHeight)/float(newWidth));			glVertex2f(newWidth*ogMap->mapRes,newHeight*ogMap->mapRes);
-    //	    glTexCoord2f(1,0.0);		glVertex2f(newWidth*ogMap->mapRes,0.0);
-    //	    glTexCoord2f(0.0,0.0);		glVertex2f(0.0,0.0);
-    //	    glTexCoord2f(0.0,float(newHeight)/float(newWidth));    		glVertex2f(0.0,newHeight*ogMap->mapRes);
-    //
     ratioH = 1;
     ratioW = float(newHeight)/float(newWidth);
     glTexCoord2f(0.0,0.0);  glVertex2f(0.0,0.0);
@@ -448,73 +621,31 @@ void MapGL::renderMap()
 void MapGL::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glEnable(GL_DEPTH_TEST);
-    //glDisable(GL_BLEND);
-    //glEnable(GL_POINT_SMOOTH);
-    //glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-    //glEnable(GL_LINE_SMOOTH);
-    //glEnable(GL_POLYGON_SMOOTH);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_POINT_SMOOTH);
+    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_POLYGON_SMOOTH);
+
+    glColor4f(0.0f,0.0f,0.0f,0.5f);
+    renderText(0.65,-0.95, 0, (char*)"Scale:1m/Tile" );
+    glColor4f(0.78f,0.78f,0.78f,0.5f);
+    glRectf(0.64,-0.9f,aspectRatio-0.03,-0.96f);
 
     glPushMatrix();
     glScalef(1/zoomFactor, 1/zoomFactor, 1/zoomFactor);
-    glColor4f(0,0,0,1);
-    renderText(zoomFactor*aspectRatio*0.90-1, -0.9*zoomFactor, 0, "grid: 1 m");
 
     glRotatef(pitch,1,0,0);
     glRotatef(yaw,0,0,1);
 
     glTranslatef(xOffset, yOffset, zOffset);
-    glPushMatrix();
-    showGrids = true;
-    //glLineWidth(1);
-    if(showGrids)
-    {
-        for(int i=-(int) zoomFactor*3; i < (int) zoomFactor*3; i++)
-        {
-            glBegin(GL_LINES);
-            if(i==0)
-            {
-                glColor4f(0,0,0,0.5);
-            }
-            else
-            {
-                glColor4f(0.5,0.5,0.5,0.5);
-            }
-            glVertex3f(-zoomFactor*3, i, 0);
-            glVertex3f(zoomFactor*3, i, 0);
-            glVertex3f(i,-zoomFactor*3, 0);
-            glVertex3f(i, zoomFactor*3, 0);
-            glEnd();
-        }
-        // 		// X-axis indicator
-        // 		int i = int((mapData->width*mapData->resolution)/2.0 + 2);
-        // 		{
-        // 			glBegin(GL_LINE_LOOP);
-        // 			glColor4f(0,0,0,0.5);
-        // //				glColor4f(1,1,1,0.5);
-        // 			glVertex3f(i-1,0.5,0);
-        // 			glVertex3f(i,0,0);
-        // 			glVertex3f(i-1,-0.5,0);
-        // 			glEnd();
-        // 			renderText(i,-1,0, "X");
-        // 		}
-        // 		 //Y-axis indicator
-        // 		int j = int((mapData->height*mapData->resolution)/2.0 + 2);
-        // 		{
-        // 			glBegin(GL_LINE_LOOP);
-        // 			glColor4f(0,0,0,0.5);
-        // //				glColor4f(1,1,1,0.5);
-        // 			glVertex3f(-0.5,j-1,0);
-        // 			glVertex3f(0,j,0);
-        // 			glVertex3f(0.5,j-1,0);
-        // 			glEnd();
-        // 			renderText(1,j,0, "Y");
-        // 		}
-    }
-    glPopMatrix();
+
     renderSkeleton();
-    renderPath();
+    if(showPaths)
+        renderPath();
+    /*
     if(tasksGui->skeletonGenerated && firstTime)
     {
         glNewList(skeletonList, GL_COMPILE);
@@ -524,6 +655,7 @@ void MapGL::paintGL()
     }
     else
         glCallList(skeletonList);
+    */
     if(this->ogMap)
     {
         glDisable( GL_DEPTH_TEST );
@@ -532,14 +664,13 @@ void MapGL::paintGL()
             loadTexture();
             renderMap();
         }
-        glEnable(GL_DEPTH_TEST);
+        displayGrid();
     }
     glCallList(mapList);
-    glDisable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_POINT_SMOOTH);
-    glDisable(GL_LINE_SMOOTH);
-    glDisable(GL_POLYGON_SMOOTH);
+    glCallList(earlyMorningList);
+    glCallList(morningList);
+    glCallList(nightList);
+    glCallList(afternoonList);
     glPopMatrix();
     glFlush();
 }
@@ -681,7 +812,7 @@ TasksGui::TasksGui(QWidget *parent,PlayGround *playG):
     updateGeometry();
     setFocusPolicy(Qt::StrongFocus);
     config();
-    loadTasks("/home/BlackCoder/workspace/CasPlanner/modules/TasksManager/tasks.txt");
+    loadTasks("./modules/TasksManager/tasks.txt");
 }
 
 void TasksGui::updateData()
@@ -689,87 +820,59 @@ void TasksGui::updateData()
 
 }
 
+void TasksGui::clearAll()
+{
+    LOG(Logger::Info,"Clearing GUI")
+    playGround->mapManager->mapSkeleton.resetSegmentVisits();
+    playGround->mapManager->mapSkeleton.resetVertexVisits();
+    glDeleteLists(mapGL.morningList,1);
+    glDeleteLists(mapGL.earlyMorningList,1);
+    glDeleteLists(mapGL.nightList,1);
+    glDeleteLists(mapGL.afternoonList,1);
+    voronoiPlanner->freePath();
+}
+
 int TasksGui::config()
 {
     QString commsName ="Wheelchair";
-    //mapGL.config();
-    // signals for changing modes
-    //connect( OGRadBtn, SIGNAL(clicked()), this, SLOT(renderOG()));
-    //connect( laserRadBtn, SIGNAL(clicked()), this, SLOT(renderLaser()));
-    //connect( staticRadBtn, SIGNAL(clicked()), this, SLOT(renderStatic()));
-    // robotManager->commManager->start();
     return 1;
 }
 
 void TasksGui::loadTasks(string filename)
 {
-// 	std::ifstream in(filename.c_str());
-// 	tasks.clear();
-// 	int row=0;
-//	if ( in )
-//    {
-//    	while ( ! in.eof() )
-//      	{
-//          	double x1,x2,y1,y2 ;
-//          	string name;
-//          	//char name[20];
-//          	in >> x1 >> y1 >> x2 >> y2>> name ;
-//          	Task t(QPointF(x1,y1),QPointF(x2,y2),name.c_str());
-//	        tasks.push_back(t);
-//
-//	        QListWidgetItem *newItem = new QListWidgetItem;
-//	        newItem->setText(name.c_str());
-//	        tasksControlPanel.tasksList.insertItem(row++, newItem);
-//      	}
-//    }
-//	else
-//	{
-//		std::cout<<"\n File Not Found";
-//	}
-//	for(int i=0; i<tasks.size();i++)
-//	{
-//		qDebug("Task %d: from [%f %f] to [%f %f] Name:%s ",i+1,tasks[i].getStart().x(),tasks[i].getStart().y(),
-//		tasks[i].getEnd().x(),tasks[i].getEnd().y(),qPrintable(tasks[i].getName()));
-//	}
+    std::ifstream in(filename.c_str());
+    tasks.clear();
+    int row=0;
+    if ( in )
+    {
+        while ( ! in.eof() )
+        {
+            unsigned int startVertex,endVertex,timeOfDay;
+            string name;
+            in >> startVertex >> endVertex >> timeOfDay >> name ;
+            Task t(startVertex,endVertex,timeOfDay,name.c_str());
+            tasks.push_back(t);
+
+            QListWidgetItem *newItem = new QListWidgetItem;
+            newItem->setText(name.c_str());
+            tasksControlPanel.tasksList.insertItem(row++, newItem);
+        }
+    }
+    else
+    {
+        LOG(Logger::Critical,"File Not Found")
+    }
+    for(int i=0; i<tasks.size();i++)
+    {
+        LOG(Logger::Info,QString("Task %1: from [%2 %3] to [%4 %5] Name:%6 ").arg(i+1).arg(tasks[i].getStart().x()).arg(tasks[i].getStart().y()) \
+            .arg(tasks[i].getEnd().x()).arg(tasks[i].getEnd().y()).arg(qPrintable(tasks[i].getName())))
+    }
 }
-// void TasksGui::mousePressEvent(QMouseEvent *me)
-// {
-//     qDebug("Mouse pressed");
-//     startX = me->x();
-//     startY = me->y();
-// }
-//
-// void TasksGui::mouseReleaseEvent(QMouseEvent *me)
-// {
-//     qDebug("Mouse Released");
-//     startX = me->x();
-//     startY = me->y();
-// }
+
 
 void TasksGui::provideSpeed( double &in_speed, double &in_turnRate)
 {
-    in_speed = speed;
-    in_turnRate = turnRatio * speed;
 }
-
-// void TasksGui::mouseMoveEvent(QMouseEvent *me)
-// {
-//     startX = me->x();
-//     startY = me->y();
-//     //mapGL.moveDrivePan(-0.002*deltaX);
-//     mapGL.updateGL();
-//     if(ptzEnabled)
-//     {
-// 		int deltaX = int(me->x() - startX);
-// 		int deltaY = int(me->y() - startY);
-// 		ptzPan -= deltaX*radPerPixel;
-// 		ptzTilt += deltaY*radPerPixel;
-// 	    //qDebug("Intermediate arm pos: %f %f %f", currentArmPos[0], currentArmPos[1], currentArmPos[2]);
-// 		startX = me->x();
-// 		startY = me->y();
-//     }
-// }
-
 
 TasksGui::~TasksGui()
 {
@@ -786,6 +889,20 @@ void TasksGui::resetTab()
 void TasksGui::requestSnap()
 {
 
+}
+
+void TasksGui::saveImage()
+{
+    bool ok;
+    QString filename = QInputDialog::getText(this, "Image Capture","Enter a name for the Image:", QLineEdit::Normal,
+                                             QString::null, &ok);
+    const char * type = "PNG";
+    sleep(1);
+    if(ok && !filename.isEmpty())
+    {
+        QImage capturedMap = mapGL.grabFrameBuffer();
+        capturedMap.save(filename,type,-1);
+    }
 }
 
 void TasksGui::testModel()
@@ -842,34 +959,34 @@ void TasksGui::testModel()
 //	  	fflush(stdout);
 //  	}
 //  }
-  int obs[]={2,2,2,2,2,2,2,2,2,2,2,2,2,0,4};
-  int NUM_TRIALS = 15 ;
-  for (int i=0; i < NUM_TRIALS; i++)
-  {
-            printf("  step %d\n", i);
-            int a = em->chooseAction();
-            printf("    chose action %d\n", a);
-            int o = obs[i];//em->getRandomOutcome(a);
-            em->advanceToNextState(a,o);
-            printf("    updated belief\n");
-            belief_vector newB = em->currentState;
-            double max = 0;
-            int index=0;
-                for(unsigned int j=0; j < newB.size();j++)
-                {
-                        if(newB(j)&& newB(j)>max)
-                        {
-                                max=newB(j);
-                                index=j;
-                        }
-                }
-                printf("\nNew Belief: %d=%f",index,max);
-                fflush(stdout);
-                if (em->getStateIsTerminal())
+    int obs[]={2,2,2,2,2,2,2,2,2,2,2,2,2,0,4};
+    int NUM_TRIALS = 15 ;
+    for (int i=0; i < NUM_TRIALS; i++)
+    {
+        printf("  step %d\n", i);
+        int a = em->chooseAction();
+        printf("    chose action %d\n", a);
+        int o = obs[i];//em->getRandomOutcome(a);
+        em->advanceToNextState(a,o);
+        printf("    updated belief\n");
+        belief_vector newB = em->currentState;
+        double max = 0;
+        int index=0;
+        for(unsigned int j=0; j < newB.size();j++)
+        {
+            if(newB(j)&& newB(j)>max)
             {
-                        printf("  [belief is terminal, ending trial]\n");
-                        break;
+                max=newB(j);
+                index=j;
             }
+        }
+        printf("\nNew Belief: %d=%f",index,max);
+        fflush(stdout);
+        if (em->getStateIsTerminal())
+        {
+            printf("  [belief is terminal, ending trial]\n");
+            break;
+        }
     }
 //  int s, sp, a, o;
 //
@@ -914,6 +1031,11 @@ void TasksGui::testModel()
 //    }
 //    cout << endl;
 //  }
+}
+
+void TasksGui::timeOfDayChanged(QString _timeOfDay)
+{
+    timeOfDay = _timeOfDay;
 }
 
 void TasksGui::generateSkeleton()

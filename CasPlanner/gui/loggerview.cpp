@@ -6,10 +6,9 @@ loggerview::loggerview(QWidget *parent) :
     ui(new Ui::loggerview)
 {
     ui->setupUi(this);
-    //Logger &logger = getLogger();
-    //connect(&logger,SIGNAL(showMsg(int,QString)),this,SLOT(showMsg(int,QString)));
-    //connect(&mrEmitter,SIGNAL(shoutLoud(int,QString)),this,SLOT(showMsg(int,QString)));
-    //LOG(0,"TEST,TEST,TEST")
+    ui->textLogs->setReadOnly(true);
+    Logger &logger = Logger::getLogger();
+    connect(&logger,SIGNAL(showMsg(int,QString)),this,SLOT(showMsg(int,QString)));
 }
 
 loggerview::~loggerview()
@@ -19,6 +18,19 @@ loggerview::~loggerview()
 
 void loggerview::showMsg(int severityLvl,QString msg)
 {
-    LOG(Logger::Info,"I recieved a msg")
+    switch (severityLvl)
+    {
+    case Logger::Info :
+        ui->textLogs->setTextColor(Qt::black);
+        break;
+    case Logger::Critical :
+        ui->textLogs->setTextColor(Qt::red);
+        break;
+    case Logger::Warning :
+        ui->textLogs->setTextColor(Qt::yellow);
+        break;
+    default:
+        ui->textLogs->setTextColor(Qt::black);
+    }
     ui->textLogs->append(msg);
 }

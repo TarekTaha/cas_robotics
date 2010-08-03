@@ -56,9 +56,9 @@ IntentionRecognizer::IntentionRecognizer(PlayGround * playG, RobotManager *rMana
     socialPlanner->showConnections();
     socialPlanner->loadActivities("logs/exp_tasks_list_large");
     /* TEST SMALL PATH */
-    Pose s(playGround->mapManager->mapSkeleton.verticies[37].location.x(),playGround->mapManager->mapSkeleton.verticies[37].location.y(),0);
+    Pose s(playGround->mapManager->mapSkeleton.verticies[37].getLocation().x(),playGround->mapManager->mapSkeleton.verticies[37].getLocation().y(),0);
     socialPlanner->setStart(s);
-    Pose e(playGround->mapManager->mapSkeleton.verticies[0].location.x(),playGround->mapManager->mapSkeleton.verticies[0].location.y(),DTOR(90));
+    Pose e(playGround->mapManager->mapSkeleton.verticies[0].getLocation().x(),playGround->mapManager->mapSkeleton.verticies[0].getLocation().y(),DTOR(90));
     socialPlanner->setEnd(e);
     Node * retval = socialPlanner->astar->startSearch(s,e,METRIC);
     if(retval)
@@ -71,8 +71,8 @@ IntentionRecognizer::IntentionRecognizer(PlayGround * playG, RobotManager *rMana
     }
 
     /**
-	 * POMDP Part
-	 */
+         * POMDP Part
+         */
     InitializePOMDP();
 
     numStates = playGround->mapManager->mapSkeleton.numStates;
@@ -178,35 +178,35 @@ void IntentionRecognizer::pathFound(Node* path)
 
 void IntentionRecognizer::followActionToNextState()
 {
-    /* 
+    /*
      * Find where the currtent action will take us from the Transition Matrix
      * stored in the POMDP model.
-     */ 
+     */
     double maxTrans = 0;
-	for (int sp=0; sp < ((zmdp::Pomdp*)em->mdp)->getBeliefSize(); sp++) 
+        for (int sp=0; sp < ((zmdp::Pomdp*)em->mdp)->getBeliefSize(); sp++)
     {
-    	if(((zmdp::Pomdp*)em->mdp)->T[action](spatialState,sp) >= maxTrans)
-    	{
+        if(((zmdp::Pomdp*)em->mdp)->T[action](spatialState,sp) >= maxTrans)
+        {
 //    		printf("\nIndex=%d %5.3f ",sp,((Pomdp*)em->mdp)->T[action](spatialState,sp));
             maxTrans = ((zmdp::Pomdp*)em->mdp)->T[action](spatialState,sp);
             nextState = sp;
-    	}
+        }
     }
     fprintf(file,"%d\n",nextState);
     if(maxTrans==0)
     {
-    	printf("\nIR: This action is not applicable to this state."); fflush(stdout);
-    	return;
+        printf("\nIR: This action is not applicable to this state."); fflush(stdout);
+        return;
     }
-  
-    goToState.p.setX(playGround->mapManager->mapSkeleton.verticies[nextState].location.x());
-    goToState.p.setY(playGround->mapManager->mapSkeleton.verticies[nextState].location.y());
+
+    goToState.p.setX(playGround->mapManager->mapSkeleton.verticies[nextState].getLocation().x());
+    goToState.p.setY(playGround->mapManager->mapSkeleton.verticies[nextState].getLocation().y());
 
 //	currentState.p.setX(l.x());
 //	currentState.p.setY(currentPose.y());
 //	currentState.phi = currentPose.phi();
-	/* 
-	 * Set Final Orientation to the direction of Motion 
+	/*
+	 * Set Final Orientation to the direction of Motion
 	 */
     switch(action)
     {
@@ -258,25 +258,25 @@ void IntentionRecognizer::followActionToNextState()
 
 void IntentionRecognizer::resetBelief()
 {
-  	belief_vector b;
-  	initialBeliefD.resize(((zmdp::Pomdp*)em->mdp)->getBeliefSize());
-  	if(robotManager->commManager)
-  		robotManager->commManager->stop();
-  	/*
-  	 * Distribute belief Evenly accross destinations
-  	 */ 
-  	for(int i=0;i < numDestinations;i++)
-  	{
-  		destBelief[i] = initialBeliefD((numStates*i) + spatialState) = 1/float(numDestinations);
-  	}
+        belief_vector b;
+        initialBeliefD.resize(((zmdp::Pomdp*)em->mdp)->getBeliefSize());
+        if(robotManager->commManager)
+                robotManager->commManager->stop();
+        /*
+         * Distribute belief Evenly accross destinations
+         */
+        for(int i=0;i < numDestinations;i++)
+        {
+                destBelief[i] = initialBeliefD((numStates*i) + spatialState) = 1/float(numDestinations);
+        }
 //  	destBelief[0] = initialBeliefD((numStates*0) + spatialState) = 0;
 //  	destBelief[1] = initialBeliefD((numStates*1) + spatialState) = 0.25;
 //  	destBelief[2] = initialBeliefD((numStates*2) + spatialState) = 0;
 //  	destBelief[3] = initialBeliefD((numStates*3) + spatialState) = 0.75;
-  	copy(b, initialBeliefD);
-  	oldSpatialState = -2;
-  	em->setBelief(b);
-  	printf("\n Belief Reset !!!");
+        copy(b, initialBeliefD);
+        oldSpatialState = -2;
+        em->setBelief(b);
+        printf("\n Belief Reset !!!");
 }
 
 bool IntentionRecognizer::currentStateIsDestination()
@@ -327,20 +327,20 @@ void IntentionRecognizer::run()
         fprintf(odom,"%.3f %.3f %.3f %d\n",currentPose.p.x(),currentPose.p.y(),currentPose.phi,spatialState);
         observation = robotManager->commManager->getJoyStickGlobalDir();
         /*
-		 * Added for testing the Social Planning
-		 */		
+                 * Added for testing the Social Planning
+                 */
         //		Pose s(playGround->mapManager->mapSkeleton.verticies[spatialState].location.x(),playGround->mapManager->mapSkeleton.verticies[spatialState].location.y(),0);
         //		socialPlanner->setStart(s);
         /*
-		 * End of Addition
-		 */
+                 * End of Addition
+                 */
         if(!beliefInitialized)
         {
             /*
-			 *  When we first connect the readings might not be correct
-			 *  so we need to pose to let the commManager properly initialize then 
-			 *  request the odom correctly.
-			 */
+                         *  When we first connect the readings might not be correct
+                         *  so we need to pose to let the commManager properly initialize then
+                         *  request the odom correctly.
+                         */
             sleep(1);
             currentPose = robotManager->commManager->getLocation();
             spatialState = playGround->mapManager->mapSkeleton.getCurrentSpatialState(currentPose);
@@ -358,9 +358,9 @@ void IntentionRecognizer::run()
             // Get an Observation
             lastObs = observation = robotManager->commManager->getJoyStickGlobalDir();
             /*
-		     * Get an observation and if it's directional(not NoInput) then don't
-		     * take any more observations from this state.
-		     */
+                     * Get an observation and if it's directional(not NoInput) then don't
+                     * take any more observations from this state.
+                     */
 
             if(observation == NoInput && interactionStrategy == CONTINIOUS_INPUT)
                 continue;
@@ -408,9 +408,9 @@ void IntentionRecognizer::run()
                     // See What the result of obtaining this observation would be
                     em->advanceToNextState(action,whatIfObs);
                     /*
-			    	 * Add the action to be excuted to the set of actions if
-			    	 * it's not already in the list 
-			    	 */
+                                 * Add the action to be excuted to the set of actions if
+                                 * it's not already in the list
+                                 */
                     belief_vector thisMaxBelief = em->currentState;
                     maxBelief = 0;
                     for(unsigned int j=0; j < thisMaxBelief.size();j++)
@@ -483,8 +483,8 @@ void IntentionRecognizer::run()
                 fprintf(file,"%.5f ",destBelief[i]);
             }
             /*
-			 * Added for testing the Social Planning
-			 */
+                         * Added for testing the Social Planning
+                         */
             //			int destination = playGround->mapManager->mapSkeleton.destIndexes[maxDestBeliefIndex];
             //			cout<<"Destination is:="<<destination;
             //			Pose e(playGround->mapManager->mapSkeleton.verticies[destination].location.x(),playGround->mapManager->mapSkeleton.verticies[destination].location.y(),DTOR(90));
@@ -499,8 +499,8 @@ void IntentionRecognizer::run()
             //				qDebug("No path Found");
             //			}
             /*
-			 * End of Addition
-			 */
+                         * End of Addition
+                         */
             followActionToNextState();
             justStarted = false;
         }

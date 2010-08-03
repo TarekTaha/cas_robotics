@@ -95,7 +95,7 @@ void   Astar ::setSocialReward(QHash<QString, int>* soRew)
     }
     catch(CasPlannerException e)
     {
-        cout<<e.what()<<endl;
+        LOG(Logger::Critical,e.what())
     }
 }
 
@@ -157,7 +157,7 @@ void Astar::findRoot() throw (CasPlannerException)
     root->pose.phi = start.phi;
     root->direction = FORWARD;
     //Translate(root->pose,start.phi);
-    qDebug()<<QString("	---->>>Root is Set to be X=%1 Y=%2 Phi=%3").arg(root->pose.p.x(),root->pose.p.y(),RTOD(root->pose.phi));
+    LOG(Logger::Info,QString("	---->>>Root is Set to be X=%1 Y=%2 Phi=%3").arg(root->pose.p.x()).arg(root->pose.p.y()).arg(RTOD(root->pose.phi)))
 };
 
 // find the nearest node to the end
@@ -196,7 +196,6 @@ void Astar::findDest() throw (CasPlannerException)
     dest->pose.phi = end.phi;
     dest->direction = FORWARD;
     //Translate(root->pose,start.phi);
-    //	qDebug("	---->>>Root is Set to be X=%f Y=%f Phi=%f",root->pose.p.x(),root->pose.p.y(),RTOD(root->pose.phi));
 }
 
 void Astar::setRobot(Robot*rob)
@@ -223,7 +222,7 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
     closedList->Free();
     if (!this->search_space) // Make sure that we have a map to search
     {
-        qDebug()<<"Read the map and generate SearchSpace before Searching !!!";
+        LOG(Logger::Warning,"Read the map and generate SearchSpace before Searching !!!")
         return NULL;
     }
     if(coord == PIXEL)
@@ -237,10 +236,10 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
     this->end.p.setX(end.p.x());
     this->end.p.setY(end.p.y());
     this->end.phi = end.phi;
-    qDebug()<<"	--->>> Search Started <<<---";
+    LOG(Logger::Info,"	--->>> Search Started <<<---")
     findRoot();
     findDest();
-    qDebug()<<QString("	---->>>Target is Set to be X=%1 Y=%2 Phi=%3<<<---").arg(end.p.x(),end.p.y(),RTOD(end.phi));
+    LOG(Logger::Info,QString("	---->>>Target is Set to be X=%1 Y=%2 Phi=%3<<<---").arg(end.p.x()).arg(end.p.y()).arg(RTOD(end.phi)))
     openList->Add(root);				// Add the root to OpenList
     // while openList is not empty
     while (openList->Start != NULL)
@@ -254,7 +253,7 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
             // build the complete path to return
             //			qDebug("Last Node destination: %f %f",current->pose.p.x(),current->pose.p.y());
             current->next = NULL;
-            qDebug()<<QString("	--->>> Goal state reached with :%1 nodes created and :%2 nodes expanded <<<---").arg(ID,NodesExpanded);
+            LOG(Logger::Info,QString("	--->>> Goal state reached with :%1 nodes created and :%2 nodes expanded <<<---").arg(ID).arg(NodesExpanded))
             //			qDebug("	--->>> General Clean UP <<<---");
             fflush(stdout);
             //			int m=0;
@@ -286,18 +285,14 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
                 p = p->parent;
             }
             // now delete all nodes on OPEN and Closed Lists
-//            qDebug("	--->>> Freeing open list <<<---");	fflush(stdout);
             openList->Free();
-//            qDebug("	--->>> DONE  <<<---");				fflush(stdout);
-//            qDebug("	--->>> Freeing closed list <<<---");	fflush(stdout);
             closedList->Free();
-//            qDebug("	--->>> DONE  <<<---");
             return path;
         }
         // Create List of Children for the current NODE
         if(!(childList = makeChildrenNodes(current))) // No more Children => Search Ended Unsuccessfully at this path Branch
         {
-            qDebug()<<"	--->>> Search Ended On this Branch / We Reached a DEAD END <<<---";
+            LOG(Logger::Info,"	--->>> Search Ended On this Branch / We Reached a DEAD END <<<---")
         }
         // insert the children into the OPEN list according to their f values
         while (childList != NULL)
@@ -375,7 +370,7 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
         // Test to see if we have expanded too many nodes without a solution
         if (current->id > this->MAXNODES)
         {
-            qDebug()<<QString("	--->>>	Expanded %d Nodes which is more than the maximum allowed MAXNODE=%ld , Search Terminated").arg(current->id,MAXNODES);
+            LOG(Logger::Info,QString("	--->>>	Expanded %d Nodes which is more than the maximum allowed MAXNODE=%1 , Search Terminated").arg(current->id,MAXNODES))
             //Delete Nodes in Open and Closed Lists
             closedList->Free();
             openList->Free();
@@ -388,7 +383,7 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
      *  delete all nodes on CLOSED since OPEN is now empty
      */
     closedList->Free();
-    qDebug()<<"	--->>>No Path Found<<<---";
+    LOG(Logger::Info,"	--->>>No Path Found<<<---")
     return NULL;
 };
 
@@ -408,8 +403,8 @@ bool Astar :: goalReached (Node *n)
     }
     if ( delta_d <= distGoal && angle_diff <= orientation2Goal)
     {
-        cout<<" \n Desired Final Orientation ="<<RTOD(end.phi)<<" Current="<<RTOD(n->pose.phi);
-        cout<<"\n Reached Destination with Diff Orientation="<< RTOD(angle_diff);
+        LOG(Logger::Info," \n Desired Final Orientation ="<<RTOD(end.phi)<<" Current="<<RTOD(n->pose.phi))
+        LOG(Logger::Info,"\n Reached Destination with Diff Orientation="<< RTOD(angle_diff))
         return 1;
     }
     return 0;
@@ -439,13 +434,12 @@ Node *Astar :: makeChildrenNodes(Node *parent)
     }
     if (!temp)
     {
-        qDebug()<<"	--->>>	Node not found in the search Space ";
+        LOG(Logger::Info,"	--->>>	Node not found in the search Space ")
         return NULL;
     }
 //    qDebug("Node has %d children x=%f y=%f",temp->children.size(),temp->location.x(),temp->location.y());
     q = NULL;
     // Check Each neighbour
-    //qDebug("WHAT??? %d x=%f y=%f",temp->children.size(),P.x(),P.y());
     for (int i=0;i<temp->children.size();i++)
     {
         /*

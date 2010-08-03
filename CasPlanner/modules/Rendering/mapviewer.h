@@ -39,6 +39,29 @@
 
 class PlayGround;
 
+#define COLOR_LIGHT_BLUE_A(alpha)   glColor4f(0.0,0.7,0.7,alpha);
+#define COLOR_SIENNAL_A(alpha)      glColor4f(1.0,0.51,0.278,alpha);
+#define COLOR_GREEN_A(alpha)        glColor4f(0.0,0.7,0.0,alpha);
+#define COLOR_YELLOW_A(alpha)       glColor4f(0.7,0.7,0.0,alpha);
+#define COLOR_RED_A(alpha)          glColor4f(0.8,0.0,0.0,alpha);
+#define COLOR_MAGENTA_A(alpha)      glColor4f(1.0,0.0,1.0,alpha);
+#define COLOR_BLUE_A(alpha)         glColor4f(0.0,0.0,0.7,alpha);
+#define COLOR_ORANGE_A(alpha)       glColor4f(1.0,0.65,0.0,alpha);
+#define COLOR_DEEP_PINK_A(alpha)    glColor4f(1.0,0.078,0.576,alpha);
+#define COLOR_DARK_RED_A(alpha)     glColor4f(1.0,0.0,0.0,alpha);
+
+#define COLOR_LIGHT_BLUE   glColor3f(0.0,0.7,0.7);
+#define COLOR_SIENNAL      glColor3f(1.0,0.51,0.278);
+#define COLOR_GREEN        glColor3f(0.0,0.7,0.0);
+#define COLOR_YELLOW       glColor3f(0.7,0.7,0.0);
+#define COLOR_RED          glColor3f(0.8,0.0,0.0);
+#define COLOR_MAGENTA      glColor3f(1.0,0.0,1.0);
+#define COLOR_BLUE         glColor3f(0.0,0.0,0.7);
+#define COLOR_ORANGE       glColor3f(1.0,0.65,0.0);
+#define COLOR_DEEP_PINK    glColor3f(1.0,0.078,0.576);
+#define COLOR_DARK_RED     glColor3f(1.0,0.0,0.0);
+
+
 class MapViewer : public QGLWidget
 {
 Q_OBJECT

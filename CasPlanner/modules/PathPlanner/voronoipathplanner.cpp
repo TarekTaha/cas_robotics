@@ -31,7 +31,6 @@ VoronoiPathPlanner::VoronoiPathPlanner(MapSkeleton &mapSkeleton)
 VoronoiPathPlanner :: ~VoronoiPathPlanner()
 {
     freeResources();
-    cout<<"\n	--->>> Allocated Memory FREED <<<---";
 }
 
 void VoronoiPathPlanner::freeResources()
@@ -70,7 +69,7 @@ bool VoronoiPathPlanner::readSpaceFromFile(const char *filename)
     FILE *file = fopen(filename, "r");
     if (!file)
     {
-        qDebug()<<"Error Opening File";
+        LOG(Logger::Info,"Error Opening File")
         fclose(file);
         return false;
     }
@@ -105,14 +104,13 @@ void VoronoiPathPlanner::setMapSkeleton(MapSkeleton & mapSkeleton)
 {
     for(int i=0;i<mapSkeleton.verticies.size();i++)
     {
-        qDebug()<<"Adding Vertex:"<<i<<" to the searchSpace";
+        LOG(Logger::Info,"Adding Vertex:"<<i<<" to the searchSpace")
         //This checks if the node already exists and add a new one if it doesnt
         SearchSpaceNode *parentNode = insertNode(mapSkeleton.verticies[i].getLocation(),i);
         for(int j=0;j<mapSkeleton.verticies[i].connections.size();j++)
         {
-            qDebug()<<"    Adding Child:"<<j<<" to parent"<<i;
-            cout<<"    Adding Child:"<<j<<" to parent"<<i;fflush(stdout);
-            int connectionVertixId = mapSkeleton.verticies[i].connections[j].nodeIndex;
+            LOG(Logger::Info,"    Adding Child:"<<j<<" to parent"<<i)
+            int connectionVertixId = mapSkeleton.verticies[i].connections[j].getNodeIndex();
             // child will be inserted only if it doesn't Exist
             SearchSpaceNode * childNode = insertNode(mapSkeleton.verticies[connectionVertixId].getLocation());
             parentNode->children.push_back(childNode);
@@ -128,7 +126,7 @@ bool VoronoiPathPlanner::saveSpace2File(const char *filename)
     FILE *file = fopen(filename, "wb");
     if (!file)
     {
-        qDebug()<<"Error Opening File";
+        LOG(Logger::Info,"Error Opening File")
         fclose(file);
         return false;
     }
@@ -145,7 +143,7 @@ bool VoronoiPathPlanner::saveSpace2File(const char *filename)
 void VoronoiPathPlanner :: setMap(Map * map_in)
 {
     this->map = map_in;
-    qDebug()<<"MAP SET";
+    LOG(Logger::Info,"MAP SET")
     fflush(stdout);
 }
 
@@ -155,13 +153,11 @@ void VoronoiPathPlanner :: printNodeList()
     QPointF  location;
     if(!(p = this->path))
         return ;
-    qDebug()<<"  --------------------   START OF LIST ----------------------";
+    LOG(Logger::Info,"  --------------------   START OF LIST ----------------------")
     while(p !=NULL)
     {
         location =  p->pose.p;
-        cout <<"\nStep [" << step++ <<"] x["<< location.x()<<"]y["<<location.y()<<"]"<<" Direction="<<p->direction;
-        cout <<"\tG cost="<<p->g_value<<"\tH cost="<<p->h_value<<"\tFcost="<<p->f_value;
-        fflush(stdout);
+        LOG(Logger::Info,"Step [" << step++ <<"] x["<< location.x()<<"]y["<<location.y()<<"]"<<" Direction="<<p->direction<<"\tG cost="<<p->g_value<<"\tH cost="<<p->h_value<<"\tFcost="<<p->f_value)
         //cout<<"\tStored Angle = "<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(p->angle);
         if (p->next !=NULL)
         {
@@ -170,7 +166,7 @@ void VoronoiPathPlanner :: printNodeList()
         }
         p = p->next;
     }
-    qDebug()<<" --------------------   END OF LIST ---------------------- ";
+    LOG(Logger::Info," --------------------   END OF LIST ---------------------- ")
     fflush(stdout);
 }
 
@@ -181,7 +177,7 @@ void VoronoiPathPlanner::showConnections()
     int m=0,n=0;
     while (temp != NULL)
     {
-        qDebug()<<"Node at Location x:"<<temp->location.x()<<" y:"<<temp->location.y();
+        LOG(Logger::Info,"Node at Location x:"<<temp->location.x()<<" y:"<<temp->location.y())
         for(int i=0; i < temp->children.size();i++)
         {
             loc1 = temp->location;
@@ -191,7 +187,7 @@ void VoronoiPathPlanner::showConnections()
         temp = temp->next;
         n++;
     }
-    qDebug()<<QString("\n---->>> TOTAL NUMBER OF CONNECTIONS =%1\n---->>> Total Nodes in search Space =%2").arg(m).arg(n);
+    LOG(Logger::Info,QString("\n---->>> TOTAL NUMBER OF CONNECTIONS =%1\n---->>> Total Nodes in search Space =%2").arg(m).arg(n))
     this->MAXNODES = 2*m;
 }
 

@@ -21,12 +21,12 @@
 #ifndef INTERFACEPROVIDER_H
 #define INTERFACEPROVIDER_H
 
-#include <QVector> 
+#include <QVector>
 #include <QPointF>
 #include "utils.h"
 #include "map.h"
 
-/* 
+/*
  * This class specifies the must have operation that every
  * robot should have in their comminication management.
  */
@@ -34,39 +34,39 @@
 
 class LaserScan
 {
-	public:
-		QVector<QPointF> points;
-		Pose laserPose;
-		LaserScan(){};		
-		~LaserScan(){};
+    public:
+        QVector<QPointF> points;
+        Pose laserPose;
+        LaserScan(){}
+        ~LaserScan(){}
 };
 
 class MapProvider
 {
     public:
-        virtual Map getMap()=0; 
-        virtual ~MapProvider(){};
+        virtual Map getMap()=0;
+        virtual ~MapProvider(){}
 };
 
-class LaserProvider 
+class LaserProvider
 {
     public:
-        virtual LaserScan getLaserScan()=0; 
-        virtual ~LaserProvider(){}; 
+        virtual LaserScan getLaserScan()=0;
+        virtual ~LaserProvider(){}
 };
 
-class SpeedProvider 
+class SpeedProvider
 {
     public:
         virtual void provideSpeed(double &speed, double &turnRate)=0;
-        virtual ~SpeedProvider(){};
-}; 
+        virtual ~SpeedProvider(){}
+};
 
 class LocationProvider
 {
-	public:
-		virtual  Pose getLocation()=0;
-		virtual ~LocationProvider(){};
+    public:
+        virtual  Pose getLocation()=0;
+        virtual ~LocationProvider(){}
 };
 
 #endif
