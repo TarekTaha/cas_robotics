@@ -24,7 +24,7 @@
 int main( int argc, char ** argv )
 {
     QApplication a( argc, argv );
-    getLogger();
+    Logger::getLogger();
     if(argc > 1)
     {
         MainWindow* main_win = new MainWindow(QApplication::arguments());

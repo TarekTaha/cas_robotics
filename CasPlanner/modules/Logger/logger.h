@@ -37,6 +37,11 @@
 
 #include <ctime>
 #include <cstdlib>
+#include <iostream>
+//#include <cmath>
+//#include <cstring>
+//#include <ctime>
+//#include <fstream>
 
 #define FUNCTION_NAME ( std::string( __FUNCTION__ ) )
 #define LINE_NUMBER ( __LINE__ )
@@ -47,8 +52,9 @@ inline std::ostream& operator<<(std::ostream& os, const QString& qs)
     return os;
 }
 
-class Logger
+class Logger: public QObject
 {
+    Q_OBJECT
 public:
     enum Severity
     {
@@ -57,7 +63,7 @@ public:
         Info,
         Debug
     };
-    Logger() : mDefaultMsgHandler(NULL), mLevel(Debug) {}
+    Logger() : mDefaultMsgHandler(NULL), mLevel(Debug) { }
     virtual ~Logger()
     {
         mFileOut.close();
@@ -67,7 +73,7 @@ public:
     void setLevel( Severity level) { mLevel = level; }
     int  getLevel() { return mLevel; }
 
-    Logger & getLogger()
+    static Logger & getLogger()
     {
         static Logger instance;
         return instance;
@@ -76,31 +82,16 @@ public:
     QString getFilePath() const { return mFilePath; }
     void loggingPatch( const char* msg );
     QtMsgHandler mDefaultMsgHandler;
+signals:
+    void showMsg(int,QString);
 private:
     std::ofstream mFileOut;
     QMutex mMutex;
     Severity mLevel;
     QString mFilePath;
 };
-/*
-inline Logger &getLogger()
-{
-    static QMutex mutex;
-    static Logger* logger = 0;
-    QMutexLocker locker( &mutex );
-    if (!logger)
-    {
-        logger = qApp->findChild<Logger*>("LoggerInstance");
-        if (!logger)
-        {
-            logger = new Logger(qApp);
-            logger->setObjectName( "LoggerInstance" );
-        }
-    }
-    return *logger;
-}
-*/
-// Global LOG macro
+
+// Global Simplified Logging MACROS
 #define LOG(level, msg)                                                      \
 {                                                                            \
     std::ostringstream ss;                                                   \
@@ -182,9 +173,11 @@ inline Logger &getLogger()
     #include <QDateTime>
     #define Q_DEBUG_BLOCK qDebug()
     class QDebugBlock { public: QDebugBlock( QString ) {} };
+
     #define qDebug() qDebug() << QDateTime::currentDateTime().toUTC().toString( "dd/MM/yy hh:mm:ss" ).toLatin1().data() \
                               <<" - "<< QString("%1").arg( (int)QThread::currentThreadId(), 10 ).toLatin1().data() \
                               <<" - "<< __PRETTY_FUNCTION__ << '(' << __LINE__<< ") - L4 - "
+
 #endif
 
 #endif //LOGGER_H

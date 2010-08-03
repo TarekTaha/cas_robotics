@@ -23,32 +23,66 @@
 Task::Task()
 {
 }
+
 Task::Task(QPointF start,QPointF end,QString name)
 {
 	this->startLocation = start;
 	this->endLocation = end;
 	this->taskName = name;
+        mapPresentation = METRIC;
+}
+
+Task::Task(unsigned _startVertex,unsigned _endVertex,unsigned _timeOfDay,QString _name):
+        taskName(_name),
+        startVertex(_startVertex),
+        endVertex(_endVertex),
+        timeOfDay(_timeOfDay),
+        mapPresentation(TOPOLOGY)
+{
+
 }
 
 Task::Task(QPointF start,QPointF end)
 {
 	this->startLocation = start;
 	this->endLocation = end;
+        mapPresentation = METRIC;
 }
 
 QPointF Task::getStart()
 {
+    if(mapPresentation == METRIC)
 	return this->startLocation;
+    else
+        return QPointF(0,0);
 }
 
 QPointF Task::getEnd()
 {
+    if(mapPresentation == METRIC)
 	return this->endLocation;
+    else
+        return QPointF(0,0);
 }
 
 QString Task::getName()
 {
 	return this->taskName;
+}
+
+unsigned Task::getStartVertex()
+{
+    return startVertex;
+}
+
+unsigned Task::getEndVertex()
+{
+    return endVertex;
+}
+
+unsigned Task::getTimeOfDay()
+{
+    return timeOfDay;
 }
 
 Task::~Task()

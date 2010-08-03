@@ -35,13 +35,13 @@ void loggingMsgHandler( QtMsgType   type, const char* msg )
             Logger::getLogger().loggingPatch( msg );
             break;
         case QtWarningMsg:
-            LOGL(Logger::Warning, msg);
+            LOG(Logger::Warning, msg);
             break;
         case QtCriticalMsg:
-            LOGL(Logger::Critical, msg);
+            LOG(Logger::Critical, msg);
             break;
         case QtFatalMsg:
-            LOGL(Logger::Critical, msg);
+            LOG(Logger::Critical, msg);
             Logger::getLogger().mDefaultMsgHandler(type, msg);
             break;
     }
@@ -136,8 +136,11 @@ void Logger::log( Severity level, string message, string function, int line)
                                       <<" - "<< QString("%1").arg( (int)QThread::currentThreadId(), 10 ) \
                                       <<" - "<< function << '(' << line<< ") - L"<<level<<" - "<<message<<endl;
     }
+    emit showMsg(level,QString("%1").arg(message.c_str()));
 }
-
+/*
+ Needed to show the actual line and function of the first call location
+ */
 void Logger::loggingPatch(const char* msg)
 {
     QMutexLocker loggerLock(&mMutex);
@@ -145,4 +148,5 @@ void Logger::loggingPatch(const char* msg)
     {
         mFileOut << msg << std::endl;
     }
+    emit showMsg(Debug,QString("%1").arg(msg));
 }

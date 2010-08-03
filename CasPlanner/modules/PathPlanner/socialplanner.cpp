@@ -35,7 +35,6 @@ SocialPlanner::SocialPlanner(PlayGround *playGround,RobotManager * robotManager)
 SocialPlanner :: ~SocialPlanner()
 {
     freeResources();
-    cout<<"\n	--->>> Allocated Memory FREED <<<---";
 }
 
 void SocialPlanner::freeResources()
@@ -75,7 +74,7 @@ bool SocialPlanner::loadActivities(const char *filename)
     char line[250],obs[10];
     if (!file)
     {
-        qDebug()<<"Error Opening File";
+        LOG(Logger::Critical,"Error Opening Activities File")
         fclose(file);
         return false;
     }
@@ -180,7 +179,7 @@ bool SocialPlanner::readSpaceFromFile(const char *filename)
     FILE *file = fopen(filename, "r");
     if (!file)
     {
-        qDebug()<<"Error Opening File";
+        LOG(Logger::Critical,"Error Opening SearchSpace File")
         fclose(file);
         return false;
     }
@@ -218,7 +217,7 @@ bool SocialPlanner::saveSpace2File(const char *filename)
     FILE *file = fopen(filename, "wb");
     if (!file)
     {
-        qDebug()<<"Error Opening File";
+        LOG(Logger::Critical,"Error Opening SearchSpace File for saving")
         fclose(file);
         return false;
     }
@@ -238,12 +237,11 @@ void SocialPlanner :: printNodeList()
     QPointF  location;
     if(!(astar->p = astar->path))
         return ;
-    qDebug()<<"  --------------------   START OF LIST ----------------------";
+    LOG(Logger::Info," --------------------   START OF LIST ----------------------")
     while(astar->p !=NULL)
     {
         location =  astar->p->pose.p;
-        cout <<"\nStep [" << step++ <<"] state ["<<mapSkeleton->getCurrentSpatialState(astar->p->pose)<<"] x["<< location.x()<<"]y["<<location.y()<<"]"<<" Direction="<<astar->p->direction;
-        cout <<"\tG cost="<<astar->p->g_value<<"\tH cost="<<astar->p->h_value<<"\tFcost="<<astar->p->f_value;
+        LOG(Logger::Info,"Step [" << step++ <<"] state ["<<mapSkeleton->getCurrentSpatialState(astar->p->pose)<<"] x["<< location.x()<<"]y["<<location.y()<<"]"<<" Direction="<<astar->p->direction<<"\tG cost="<<astar->p->g_value<<"\tH cost="<<astar->p->h_value<<"\tFcost="<<astar->p->f_value)
         fflush(stdout);
         //cout<<"\tStored Angle = "<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(p->angle);
         if (astar->p->next !=NULL)
@@ -253,7 +251,7 @@ void SocialPlanner :: printNodeList()
         }
         astar->p = astar->p->next;
     }
-    qDebug()<<" --------------------   END OF LIST ---------------------- ";fflush(stdout);
+    LOG(Logger::Info," --------------------   END OF LIST ---------------------- ")
 }
 
 void SocialPlanner::showConnections()
@@ -272,9 +270,8 @@ void SocialPlanner::showConnections()
         temp = temp->next;
         n++;
     }
-    qDebug()<<QString("---->>> TOTAL NUMBER OF CONNECTIONS =%1\n---->>> Total Nodes in search Space =%2").arg(m).arg(n);
-    //this->MAXNODES = 2*m;
-}
+    LOG(Logger::Info,QString("---->>> TOTAL NUMBER OF CONNECTIONS =%1\n---->>> Total Nodes in search Space =%2").arg(m).arg(n))
+ }
 
 Node * SocialPlanner::getPath()
 {
@@ -307,8 +304,8 @@ void SocialPlanner::buildSpace()
         temp  = astar->insertNode(mapSkeleton->verticies[i].getLocation(),i+1);
         for(int j=0;j<mapSkeleton->verticies[i].connections.size();j++)
         {
-            QPointF s = mapSkeleton->verticies[mapSkeleton->verticies[i].connections[j].nodeIndex].getLocation();
-            child = astar->insertNode(s,mapSkeleton->verticies[i].connections[j].nodeIndex+1);
+            QPointF s = mapSkeleton->verticies[mapSkeleton->verticies[i].connections[j].getNodeIndex()].getLocation();
+            child = astar->insertNode(s,mapSkeleton->verticies[i].connections[j].getNodeIndex()+1);
             temp->children.push_back(child);
         }
     }

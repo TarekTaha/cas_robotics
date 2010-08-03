@@ -46,9 +46,8 @@
  * 2- A Laser scan.
  * 3- Occupancy Grid Map.
  */
-class MapManager : public Map, public QObject//public QThread
+class MapManager : public Map//public QThread
 {
-    Q_OBJECT
 public:
     MapManager();
     MapManager(QString name,float res,bool negate, Pose p);

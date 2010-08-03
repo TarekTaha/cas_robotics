@@ -34,6 +34,7 @@
 #include <QVector>
 #include <QString>
 #include "utils.h"
+#include "logger.h"
 
 /*
  * This structure Skeleton will contain the map topology structure.
@@ -44,19 +45,28 @@
 
 enum {U,D,R,L};
 
-typedef struct _connection
+class Connection
 {
+public:
+    Connection(){}
+    Connection(unsigned int _nodeIndex,int _direction):nodeIndex(_nodeIndex),direction(_direction),numberOfVisits(0) {}
+    ~Connection(){}
+    unsigned int getNumOfVisits() {return numberOfVisits;}
+    unsigned int getNodeIndex() {return nodeIndex;}
+    int getDirection() {return direction;}
+    void incrementNumVisits(int count) {numberOfVisits+=count;}
+    void resetNumVisits(){ numberOfVisits = 0;}
+private:
     unsigned int nodeIndex;
-    unsigned int direction;
-} Connection;
+    // Currently direction is discretized to 90 deg
+    // But ideally it can be any Value
+    int direction;
+    unsigned int numberOfVisits;
+};
 
 class Vertex
 {
 public:
-    QPointF location;
-    QVector <Connection> connections;
-    double prob;
-    int visits;
     Vertex()
     {
         location.setX(0);
@@ -68,6 +78,8 @@ public:
     {
         location.setX(x);
         location.setY(y);
+        prob = 0;
+        visits = 0;
     }
     void setLocation(QPointF p)
     {
@@ -80,18 +92,84 @@ public:
     }
     void connect(unsigned int indx,unsigned int direction )
     {
-        Connection con; con.direction = direction; con.nodeIndex = indx;
+        Connection con(indx,direction);
         this->connections.push_back(con);
     }
+
+    int getConnectNumVisits(unsigned int nodeIndex)
+    {
+        for(int i=0;i<connections.size();i++)
+        {
+            if(connections[i].getNodeIndex()==nodeIndex)
+            {
+                return connections[i].getNumOfVisits();
+            }
+        }
+        return -1;
+    }
+
+    void incrementConnectionVisits(unsigned int nodeIndex,unsigned int count)
+    {
+        for(int i=0;i<connections.size();i++)
+        {
+            if(connections[i].getNodeIndex()==nodeIndex)
+            {
+                connections[i].incrementNumVisits(count);
+                break;
+            }
+        }
+    }
+
+    void resetSegmentVisits()
+    {
+        for(int i=0;i<connections.size();i++)
+        {
+            connections[i].resetNumVisits();
+        }
+    }
+
+    void resetVisits()
+    {
+        this->visits = 0;
+        prob = 0;
+    }
+
     QPointF getLocation()
     {
         return this->location;
     }
+
     bool operator==(const Vertex& v) const
     {
         return ((this->location.x()== v.location.x()) && (this->location.y()==v.location.y()) &&
                 (this->prob==v.prob));
     }
+
+    void setProb(double _prob)
+    {
+        prob = _prob;
+    }
+
+    double getProb()
+    {
+        return prob;
+    }
+
+    void incrementVisits(int count =1)
+    {
+        visits+=count;
+    }
+
+    int getNumVisits()
+    {
+        return visits;
+    }
+
+    QVector <Connection> connections;
+private:
+    QPointF location;
+    double prob;
+    int visits;
 };
 
 class MapSkeleton
@@ -103,6 +181,15 @@ public:
     void generateInnerSkeleton();
     int  getCurrentSpatialState(Pose p);
     double  getDist2SpatialState(Pose P,int stateIndex);
+    int getVertexWithLocation(double x, double y);
+    int getVertexWithLocation(QPointF p);
+    int getSegmentNumVisits(int source, int dest);
+    void resetVertexVisits();
+    void resetSegmentVisits();
+    // Direction is important : source --> dest not equal to dest --> source
+    void incrementConnectionVisitsUniDir(unsigned int source,unsigned int dest,unsigned int count=1);
+    // Direction is not important : source --> dest is equal to dest --> source
+    void incrementConnectionVisitsBiDir(unsigned int vertex1,unsigned int vertex2,unsigned int count=1);
     int getDestIndex(int state);
     int getNumDestinations();
     int getNumVerticies();

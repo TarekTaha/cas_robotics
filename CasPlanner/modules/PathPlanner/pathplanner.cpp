@@ -361,8 +361,8 @@ void PathPlanner :: printNodeList()
     while(p !=NULL)
     {
         pixel =  p->pose.p;
-        cout <<"\nStep [" << step++ <<"] x["<< pixel.x()<<"]y["<<pixel.y()<<"]"<<" Direction="<<p->direction;
-        cout <<"\tG cost="<<p->g_value<<"\tH cost="<<p->h_value<<"\tFcost="<<p->f_value;
+        cout <<"Step [" << step++ <<"] x["<< pixel.x()<<"]y["<<pixel.y()<<"]"<<" Direction="<<p->direction;
+        LOG(Logger::Info,"\tG cost="<<p->g_value<<"\tH cost="<<p->h_value<<"\tFcost="<<p->f_value)
         //cout<<"\tStored Angle = "<< setiosflags(ios::fixed) << setprecision(2)<<RTOD(p->angle);
         if (p->next !=NULL)
         {
@@ -534,9 +534,9 @@ void PathPlanner::updateMap(Map *mapPatch)
     }
 }
 
-/*! Sets the converted QImage or the Laser Scan Map to 
+/*! Sets the converted QImage or the Laser Scan Map to
  * the Current Planner
- */ 
+ */
 void PathPlanner :: setMap(Map * map_in)
 {
     if(!map_in)

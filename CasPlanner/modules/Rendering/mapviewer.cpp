@@ -132,7 +132,7 @@ void MapViewer::setProvider(MapProvider *)
 
 void MapViewer::updateMap(Map *newMap)
 {
-    qDebug()<<"Updating Map";
+    LOG(Logger::Info,"Updating Map")
     this->ogMap = newMap;
     mainMapBuilt = false;
     updateGL();
@@ -142,85 +142,18 @@ void MapViewer::renderPaths()
 {
     if(!playGround)
     {
-        qDebug()<<"WHAT THEEEE !!!";
+        LOG(Logger::Warning,"Can't render paths with empty Paths")
         exit(1);
     }
     for(int i=0;i<playGround->robotPlatforms.size();i++)
     {
         if(playGround->robotPlatforms[i]->planningManager->pathPlanner->path)
         {
-            Node * path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;
-            glColor4f(RGB_COLOR[3][0],RGB_COLOR[3][1],RGB_COLOR[3][2],0.5);
-            glLineWidth(2);
-            glColor4f(0,0,1,0.5);
-            glBegin(GL_LINE_STRIP);
-            while(path)
+            Node * path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;       
+            glColor4f(RGB_COLOR[6][0],RGB_COLOR[6][1],RGB_COLOR[6][2],0.5);
+            if(showPath)
             {
-                glVertex2f(path->pose.p.x(),path->pose.p.y());
-                path = path->next;
-            }
-            glEnd();
-            glLineWidth(1);
-            wayPoint = playGround->robotPlatforms[i]->navigator->wayPoint;
-            // Draw Way Point
-            if(wayPoint.p.x()==0 && wayPoint.p.y()==0)
-                continue;
-            glPushMatrix();
-            glTranslatef(wayPoint.p.x(),wayPoint.p.y(),0);
-            glRotated(RTOD(wayPoint.phi),0,0,1);
-            glColor4f(1,0,0,0.5);
-            glShadeModel(GL_FLAT);
-            glBegin(GL_TRIANGLE_FAN);
-            glColor4f(1,0,0,0.5);
-            glVertex3f(0,0.1,0);
-            glVertex3f(0.3,0,0);
-            glVertex3f(0,-0.1,0);
-            glEnd();
-            glPopMatrix();
-        }
-        if(playGround->robotPlatforms[i]->intentionRecognizer)
-            if(playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner)
-            {
-            glEnable(GL_LINE_SMOOTH);
-            QHash<QString, int> socialRewards, socialTotalRewards;
-            socialRewards = playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->getSocialRewards();
-            socialTotalRewards = playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->getTotalSocialRewards();
-            QHash<QString, int>::const_iterator j = socialRewards.constBegin();
-            while (j != socialRewards.constEnd())
-            {
-                int start,end,dest,destIndex;
-                sscanf(qPrintable(j.key()),"%d-%d-%d",&start,&end,&dest);
-                destIndex = playGround->mapManager->mapSkeleton.getDestIndex(dest-1);
-                //                        printf("\n Start:=%d End:=%d Dest:=%d",start,end,destIndex);
-                //                        printf("\n Edge:=%s Reward:=%d",qPrintable(j.key()),j.value());
-                double lineW=1.0;
-                if ((int)socialTotalRewards.value(QString("%1-%2").arg(start).arg(destIndex+1))!=0)
-                {
-                    lineW = (double)j.value()/(double)socialTotalRewards.value(QString("%1-%2").arg(start).arg(dest));
-                    if (lineW!=1.0)
-                    {
-                        printf("\n J-Value:%d SocialValue:=%d Width:=%f",j.value(),socialTotalRewards.value(QString("%1-%2").arg(start).arg(dest)),lineW);
-                        printf("\n Start:=%d End:=%d Dest:=%d",start,end,destIndex);
-                    }
-                }
-                double poseShift = -0.3 + 0.1*destIndex;
-                glColor4f(RGB_COLOR[destIndex%9][0],RGB_COLOR[destIndex%9][1],RGB_COLOR[destIndex%9][2],0.5f);
-                glLineWidth(1+lineW);
-                glBegin(GL_LINES);
-                glVertex2f(playGround->mapManager->mapSkeleton.verticies[start-1].location.x() + poseShift,playGround->mapManager->mapSkeleton.verticies[start-1].location.y() + poseShift);
-                glVertex2f(playGround->mapManager->mapSkeleton.verticies[end-1].location.x() + poseShift,playGround->mapManager->mapSkeleton.verticies[end-1].location.y() + poseShift);
-                glEnd();
-                ++j;
-            }
-            glDisable(GL_LINE_SMOOTH);
-            glLineWidth(1);
-
-            if(playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->getPath())
-            {
-                Node * path = playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->getPath();
-                glColor4f(RGB_COLOR[3][0],RGB_COLOR[3][1],RGB_COLOR[3][2],0.5);
                 glLineWidth(2);
-                glColor4f(0,0,1,0.5);
                 glBegin(GL_LINE_STRIP);
                 while(path)
                 {
@@ -229,26 +162,122 @@ void MapViewer::renderPaths()
                 }
                 glEnd();
                 glLineWidth(1);
-                wayPoint = playGround->robotPlatforms[i]->navigator->wayPoint;
-                // Draw Way Point
-                if(wayPoint.p.x()==0 && wayPoint.p.y()==0)
-                    continue;
-                glPushMatrix();
+            }
+            //re-populate the path pointer
+            path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;
+            // draw the robot trail if wanted, this will show the location and
+            // orientation of the robot at each step of the planned path
+            if(showRobotTrail)
+            {
+                while(path)
+                {
+                    glPushMatrix();
+                    glTranslatef(path->pose.p.x(),path->pose.p.y(),0);
+                    glRotated(RTOD(path->pose.phi),0,0,1);
+                    glColor4f(RGB_COLOR[3][0],RGB_COLOR[3][1],RGB_COLOR[3][2],0.5);
+                    //glBegin(GL_TRIANGLE_FAN);
+                    glBegin(GL_LINE_LOOP);
+                    for(int m=0;m<playGround->robotPlatforms[i]->robot->local_edge_points.size();m++)
+                    {
+                        glVertex2f(playGround->robotPlatforms[i]->robot->local_edge_points[m].x(),playGround->robotPlatforms[i]->robot->local_edge_points[m].y());
+                    }
+                    glEnd();
+                    glPopMatrix();
+                    path = path->next;
+                }
+            }
+            glLineWidth(1);
+            wayPoint = playGround->robotPlatforms[i]->navigator->wayPoint;
+            // Draw Way Point
+            if(wayPoint.p.x()==0 && wayPoint.p.y()==0)
+                continue;
+            glPushMatrix();
                 glTranslatef(wayPoint.p.x(),wayPoint.p.y(),0);
                 glRotated(RTOD(wayPoint.phi),0,0,1);
                 glColor4f(1,0,0,0.5);
                 glShadeModel(GL_FLAT);
                 glBegin(GL_TRIANGLE_FAN);
                 glColor4f(1,0,0,0.5);
-                glVertex3f(0,0.1,0);
-                glVertex3f(0.3,0,0);
-                glVertex3f(0,-0.1,0);
+                    glVertex3f(0,0.1,0);
+                    glVertex3f(0.3,0,0);
+                    glVertex3f(0,-0.1,0);
                 glEnd();
-                glPopMatrix();
+            glPopMatrix();
+        }
+        if(playGround->robotPlatforms[i]->intentionRecognizer)
+        {
+            if(playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner)
+            {
+                glEnable(GL_LINE_SMOOTH);
+                QHash<QString, int> socialRewards, socialTotalRewards;
+                socialRewards = playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->getSocialRewards();
+                socialTotalRewards = playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->getTotalSocialRewards();
+                QHash<QString, int>::const_iterator j = socialRewards.constBegin();
+                while (j != socialRewards.constEnd())
+                {
+                    int start,end,dest,destIndex;
+                    sscanf(qPrintable(j.key()),"%d-%d-%d",&start,&end,&dest);
+                    destIndex = playGround->mapManager->mapSkeleton.getDestIndex(dest-1);
+                    //                        printf("\n Start:=%d End:=%d Dest:=%d",start,end,destIndex);
+                    //                        printf("\n Edge:=%s Reward:=%d",qPrintable(j.key()),j.value());
+                    double lineW=1.0;
+                    if ((int)socialTotalRewards.value(QString("%1-%2").arg(start).arg(destIndex+1))!=0)
+                    {
+                        lineW = (double)j.value()/(double)socialTotalRewards.value(QString("%1-%2").arg(start).arg(dest));
+                        if (lineW!=1.0)
+                        {
+                            printf("\n J-Value:%d SocialValue:=%d Width:=%f",j.value(),socialTotalRewards.value(QString("%1-%2").arg(start).arg(dest)),lineW);
+                            printf("\n Start:=%d End:=%d Dest:=%d",start,end,destIndex);
+                        }
+                    }
+                    double poseShift = -0.3 + 0.1*destIndex;
+                    glColor4f(RGB_COLOR[destIndex%9][0],RGB_COLOR[destIndex%9][1],RGB_COLOR[destIndex%9][2],0.5f);
+                    glLineWidth(1+lineW);
+                    glBegin(GL_LINES);
+                    glVertex2f(playGround->mapManager->mapSkeleton.verticies[start-1].getLocation().x() + poseShift,playGround->mapManager->mapSkeleton.verticies[start-1].getLocation().y() + poseShift);
+                    glVertex2f(playGround->mapManager->mapSkeleton.verticies[end-1].getLocation().x() + poseShift,playGround->mapManager->mapSkeleton.verticies[end-1].getLocation().y() + poseShift);
+                    glEnd();
+                    ++j;
+                }
+                glDisable(GL_LINE_SMOOTH);
+                glLineWidth(1);
+
+                if(playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->getPath())
+                {
+                    Node * path = playGround->robotPlatforms[i]->intentionRecognizer->socialPlanner->getPath();
+                    glColor4f(RGB_COLOR[3][0],RGB_COLOR[3][1],RGB_COLOR[3][2],0.5);
+                    glLineWidth(2);
+                    glColor4f(0,0,1,0.5);
+                    glBegin(GL_LINE_STRIP);
+                    while(path)
+                    {
+                        glVertex2f(path->pose.p.x(),path->pose.p.y());
+                        path = path->next;
+                    }
+                    glEnd();
+                    glLineWidth(1);
+                    wayPoint = playGround->robotPlatforms[i]->navigator->wayPoint;
+                    // Draw Way Point
+                    if(wayPoint.p.x()==0 && wayPoint.p.y()==0)
+                        continue;
+                    glPushMatrix();
+                    glTranslatef(wayPoint.p.x(),wayPoint.p.y(),0);
+                    glRotated(RTOD(wayPoint.phi),0,0,1);
+                    glColor4f(1,0,0,0.5);
+                    glShadeModel(GL_FLAT);
+                    glBegin(GL_TRIANGLE_FAN);
+                    glColor4f(1,0,0,0.5);
+                    glVertex3f(0,0.1,0);
+                    glVertex3f(0.3,0,0);
+                    glVertex3f(0,-0.1,0);
+                    glEnd();
+                    glPopMatrix();
+                }
             }
         }
     }
 }
+
 void MapViewer::setRobotsLocation()
 {
     robotsLocation.clear();
@@ -258,6 +287,7 @@ void MapViewer::setRobotsLocation()
             robotsLocation.push_back(playGround->robotPlatforms[i]->commManager->getLocation());
     }
 }
+
 void MapViewer::renderLaser()
 {
     if(!playGround)
@@ -396,7 +426,6 @@ void MapViewer::renderExpandedTree()
         {
             for(int j=0;j<tree[k].children.size();j++)
             {
-                //qDebug("J is:%d",j); fflush(stdout);
                 child = tree[k].children[j];
                 glBegin(GL_LINE_LOOP);
                 glVertex2f(tree[k].location.x(),tree[k].location.y());
@@ -576,7 +605,8 @@ void MapViewer::loadTexture()
 void MapViewer::renderMap()
 {
     glNewList(mapList, GL_COMPILE);
-    glEnable(GL_TEXTURE_2D);       /* Enable Texture Mapping */
+    /* Enable Texture Mapping */
+    glEnable(GL_TEXTURE_2D);
     glPushMatrix();
     glBindTexture(GL_TEXTURE_2D, texId);
     // Inverse the Y-axis
@@ -585,11 +615,6 @@ void MapViewer::renderMap()
     //glColor4f(1,1,1,0.8);
     // Define Coordinate System
     glBegin(GL_QUADS);
-    //	    glTexCoord2f(1,float(newHeight)/float(newWidth));			glVertex2f(newWidth*ogMap->mapRes,newHeight*ogMap->mapRes);
-    //	    glTexCoord2f(1,0.0);		glVertex2f(newWidth*ogMap->mapRes,0.0);
-    //	    glTexCoord2f(0.0,0.0);		glVertex2f(0.0,0.0);
-    //	    glTexCoord2f(0.0,float(newHeight)/float(newWidth));    		glVertex2f(0.0,newHeight*ogMap->mapRes);
-    //
     ratioH = 1;
     ratioW = float(newHeight)/float(newWidth);
     glTexCoord2f(0.0,0.0);  glVertex2f(0.0,0.0);
@@ -609,7 +634,6 @@ void MapViewer::renderMap()
     glPopMatrix();
     glDisable(GL_TEXTURE_2D);
     glEndList();
-    //	qDebug("HERE MapRender2"); fflush(stdout);
 }
 
 void MapViewer::displayGrid()
@@ -645,8 +669,8 @@ void MapViewer::displayGrid()
             glVertex3f(i-1,-0.5,0);
             glEnd();
             glColor4f(0.0f,0.0f,0.0f,1.0f);
-            //		    renderText(i,-1,1, "X");
-            renderTextFont(i,-1, BITMAP_FONT_TYPE_HELVETICA_18, (char*)"X-axis");
+            renderText(i,-1,1, "X");
+            //renderTextFont(i,-1, BITMAP_FONT_TYPE_HELVETICA_18, (char*)"X-axis");
         }
         //Y-axis indicator
         int j = int((ogMap->height*ogMap->mapRes)/2.0 + 2);
@@ -658,8 +682,8 @@ void MapViewer::displayGrid()
             glVertex3f(0.5,j-1,0);
             glEnd();
             glColor4f(0.0f,0.0f,0.0f,1.0f);
-            //		    renderText(1,j,1, "Y");
-            renderTextFont(1,j, BITMAP_FONT_TYPE_HELVETICA_18, (char*)"Y-axis");
+            renderText(1,j,1, "Y");
+            //renderTextFont(1,j, BITMAP_FONT_TYPE_HELVETICA_18, (char*)"Y-axis");
         }
     }
     glPopMatrix();
@@ -795,7 +819,7 @@ void MapViewer::renderSpatialStates()
             glLineWidth(1);
             */
         glPushMatrix();
-        glTranslated(playGround->mapManager->mapSkeleton.verticies[i].location.x(),playGround->mapManager->mapSkeleton.verticies[i].location.y(),0);
+        glTranslated(playGround->mapManager->mapSkeleton.verticies[i].getLocation().x(),playGround->mapManager->mapSkeleton.verticies[i].getLocation().y(),0);
         glShadeModel(GL_FLAT);
         if(i==playGround->mapManager->mapSkeleton.getCurrentSpatialState(l))
         {
@@ -895,61 +919,102 @@ void MapViewer::showIndicators()
 {
     if(start_initialized)
     {
-        glPushMatrix();
-        glTranslatef(start.p.x(),start.p.y(),0);
-        glRotated(RTOD(start.phi),0,0,1);
-        glColor4f(1,1,1,0.5);
-        glShadeModel(GL_FLAT);
-        // Path Start
-        glBegin(GL_TRIANGLE_FAN);
-        glColor4f(0,1,0,0.5);
-        glVertex3f(-0.2,0.15,0);
-        glVertex3f(0.3,0,0);
-        glVertex3f(-0.2,-0.15,0);
-        glEnd();
-        glPopMatrix();
-        glPushMatrix();
         if(step == 2)
-        {
+        {                      
+            double phi = atan2((mousePos.y()-start.p.y()),(mousePos.x()-start.p.x()));
+            // Rotation Line
+            glPushMatrix();
             glBegin(GL_LINE_LOOP);
-            glColor4f(1,1,1,0.5);
+            COLOR_GREEN_A(1)
             glVertex3f(start.p.x(),start.p.y(),0);
             glVertex3f(mousePos.x(),mousePos.y(),0);
             glEnd();
+            glPopMatrix();
+            // Rotate the triangle based on the arrow
+            glPushMatrix();
+            glTranslatef(start.p.x(),start.p.y(),0);
+            glRotated(RTOD(phi),0,0,1);
+            glShadeModel(GL_FLAT);
+            // Path Start
+            glBegin(GL_TRIANGLE_FAN);
+            COLOR_DARK_RED_A(0.8)
+            glVertex3f(-0.2,0.15,0);
+            glVertex3f(0.3,0,0);
+            glVertex3f(-0.2,-0.15,0);
+            glEnd();
+            glPopMatrix();
         }
-        glColor4f(0,0,0,0.8);
-        //	        QFont font40; font40.setPointSize(14);
-        //	        renderText(0.2,0,0,QString("Start"), font40);
-        glPopMatrix();
+        else
+        {
+            glPushMatrix();
+            glTranslatef(start.p.x(),start.p.y(),0);
+            glRotated(RTOD(start.phi),0,0,1);
+            glColor4f(1,1,1,0.5);
+            glShadeModel(GL_FLAT);
+            // Path Start
+            glBegin(GL_TRIANGLE_FAN);
+            COLOR_DARK_RED_A(0.8)
+            glVertex3f(-0.2,0.15,0);
+            glVertex3f(0.3,0,0);
+            glVertex3f(-0.2,-0.15,0);
+            glEnd();
+            //Text
+            glColor4f(0,0,0,0.8);
+            QFont font40; font40.setPointSize(6);
+            renderText(0.2,0.2,0,QString("Start"), font40);
+            glPopMatrix();
+        }
     }
     if(end_initialized)
     {
-        glPushMatrix();
-        glTranslatef(end.p.x(),end.p.y(),0);
-        glRotated(RTOD(end.phi),0,0,1);
-        glColor4f(1,1,1,0.5);
-        glShadeModel(GL_FLAT);
-        // Path End
-        glBegin(GL_TRIANGLE_FAN);
-        glColor4f(0,1,0,0.5);
-        glVertex3f(-0.2,0.15,0);
-        glVertex3f(0.3,0,0);
-        glVertex3f(-0.2,-0.15,0);
-        glEnd();
-        glPopMatrix();
-        glPushMatrix();
         if(step == 4)
         {
+            double phi = atan2((mousePos.y()-end.p.y()),(mousePos.x()-end.p.x()));
+            // Rotation Line
+            glPushMatrix();
             glBegin(GL_LINE_LOOP);
-            glColor4f(1,1,1,0.5);
+            COLOR_GREEN_A(1)
             glVertex3f(end.p.x(),end.p.y(),0);
             glVertex3f(mousePos.x(),mousePos.y(),0);
             glEnd();
+            glPopMatrix();
+            // Rotate the triangle based on the arrow
+            glPushMatrix();
+            glTranslatef(end.p.x(),end.p.y(),0);
+            glRotated(RTOD(phi),0,0,1);
+            glShadeModel(GL_FLAT);
+            // Path Start
+            glBegin(GL_TRIANGLE_FAN);
+            COLOR_SIENNAL_A(0.8)
+            glVertex3f(-0.2,0.15,0);
+            glVertex3f(0.3,0,0);
+            glVertex3f(-0.2,-0.15,0);
+            glEnd();
+            glPopMatrix();
         }
-        glColor4f(0,0,0,0.5);
-        //	        QFont font40; font40.setPointSize(14);
-        //	        renderText(0.2,0,0,QString("End"), font40);
-        glPopMatrix();
+        else
+        {
+            glPushMatrix();
+            glTranslatef(end.p.x(),end.p.y(),0);
+            glRotated(RTOD(end.phi),0,0,1);
+            glColor4f(1,1,1,0.5);
+            glShadeModel(GL_FLAT);
+            // Path Start
+            glBegin(GL_TRIANGLE_FAN);
+            COLOR_SIENNAL_A(0.8)
+            glVertex3f(-0.2,0.15,0);
+            glVertex3f(0.3,0,0);
+            glVertex3f(-0.2,-0.15,0);
+            glEnd();
+            //Draw the allowed Range Circle
+            COLOR_GREEN_A(0.8)
+            drawCircle(QPointF(0,0),playGround->activeRobot->planningManager->pathPlanner->distGoal);
+            //Text
+            glColor4f(0,0,0,0.8);
+            QFont font40; font40.setPointSize(6);
+            renderText(0.2,0.2,0,QString("End"), font40);
+            glPopMatrix();
+        }
     }
 }
 
@@ -1036,7 +1101,7 @@ void MapViewer::paintGL()
 void MapViewer::searchSpaceGenerated()
 {
     searchSpaceListCreated = false;
-    qDebug()<<"SearchSpace Generated";
+    LOG(Logger::Info,"SearchSpace Generated")
 }
 
 void MapViewer::setShowSearchSpaceSamples(bool state)
@@ -1183,7 +1248,6 @@ void MapViewer::mousePressEvent(QMouseEvent *me)
 {
     QPointF p(me->x(),me->y());
     p = getOGLPos(me->x(),me->y());
-    //qDebug("Mouse pressed x: %f y: %f",x,y);
     if(me->buttons()==Qt::RightButton)
     {
         newLocation.phi = atan2(p.y() - newLocation.p.y(),p.x() - newLocation.p.x());
@@ -1193,7 +1257,7 @@ void MapViewer::mousePressEvent(QMouseEvent *me)
     {
         start.phi = atan2(p.y() - start.p.y(),p.x() - start.p.x());
         emit setStart(start);
-        qDebug()<<"Start Angle ="<<RTOD(start.phi);
+        LOG(Logger::Info,"Start Angle ="<<RTOD(start.phi))
         step++;
         update();
         setMouseTracking(false);
@@ -1201,7 +1265,7 @@ void MapViewer::mousePressEvent(QMouseEvent *me)
     else if(step == 4)
     {
         end.phi = atan2(p.y() - end.p.y(),p.x() - end.p.x());
-        qDebug()<<"End Angle ="<<RTOD(end.phi);
+        LOG(Logger::Info,"End Angle ="<<RTOD(end.phi))
         emit setEnd(end)	;
         end_initialized = true;
         step = 1;

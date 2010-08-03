@@ -94,12 +94,13 @@ MapSkeleton::~MapSkeleton()
 
 void MapSkeleton::clear()
 {
-
+    resetSegmentVisits();
+    resetVertexVisits();
 }
 
 double MapSkeleton::getDist2SpatialState(Pose P,int stateIndex)
 {
-    return Dist(P.p,verticies[stateIndex].location);
+    return Dist(P.p,verticies[stateIndex].getLocation());
 }
 
 int MapSkeleton::getDestIndex(int state)
@@ -120,11 +121,11 @@ int MapSkeleton::getNumVerticies()
 
 int MapSkeleton::getCurrentSpatialState(Pose P)
 {
-    double dist,closest = Dist(P.p,verticies[0].location);
+    double dist,closest = Dist(P.p,verticies[0].getLocation());
     int stateIndex=0,i;
     for(i=0; i < verticies.size(); i++)
     {
-        if((dist=Dist(P.p,verticies[i].location))<closest)
+        if((dist=Dist(P.p,verticies[i].getLocation()))<closest)
         {
             closest = dist;
             stateIndex = i;
@@ -136,4 +137,80 @@ int MapSkeleton::getCurrentSpatialState(Pose P)
 void MapSkeleton::generateInnerSkeleton()
 {
     Vertex v,vOpp;
+}
+
+int MapSkeleton::getVertexWithLocation(QPointF p)
+{
+    return getVertexWithLocation(p.x(),p.y());
+}
+
+int MapSkeleton::getVertexWithLocation(double x, double y)
+{
+    for(int i=0;i<verticies.size();i++)
+    {
+        if( (x == verticies[i].getLocation().x()) && (y == verticies[i].getLocation().y()) )
+        {
+            return i;
+        }
+    }
+    // not found
+    return -1;
+}
+
+// Direction is important : source --> dest not equal to dest --> source
+int MapSkeleton::getSegmentNumVisits(int source, int dest)
+{
+    if( source<verticies.size() && dest<verticies.size())
+    {
+        return verticies[source].getConnectNumVisits(dest);
+    }
+    else
+    {
+        LOG(Logger::Critical,"Incorrect Vertex Index")
+    }
+    return -1;
+}
+
+// Direction is important : source --> dest not equal to dest --> source
+void MapSkeleton::incrementConnectionVisitsUniDir(unsigned int source,unsigned int dest,unsigned int count)
+{
+    if( int(source)<verticies.size() && int(dest)<verticies.size())
+    {
+        verticies[source].incrementConnectionVisits(dest,count);
+    }
+    else
+    {
+        LOG(Logger::Critical,"Incorrect Vertex Index")
+    }
+}
+
+// Direction is not important : source --> dest is equal to dest --> source
+void MapSkeleton::incrementConnectionVisitsBiDir(unsigned int vertex1,unsigned int vertex2,unsigned int count)
+{
+    // direction is not important so do both
+    if(int(vertex1)<verticies.size() && int(vertex2)<verticies.size())
+    {
+        verticies[vertex1].incrementConnectionVisits(vertex2,count);
+        verticies[vertex2].incrementConnectionVisits(vertex1,count);
+    }
+    else
+    {
+        LOG(Logger::Critical,"Incorrect Vertex Index")
+    }
+}
+
+void MapSkeleton::resetSegmentVisits()
+{
+    for(int i=0;i<verticies.size();i++)
+    {
+        verticies[i].resetSegmentVisits();
+    }
+}
+
+void MapSkeleton::resetVertexVisits()
+{
+    for(int i=0;i<verticies.size();i++)
+    {
+        verticies[i].resetVisits();
+    }
 }

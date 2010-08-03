@@ -23,22 +23,38 @@
 #include <QPointF>
 #include <QString>
 
-/**
-	@author  <BlackCoder@localhost.localdomain>
-*/
 class Task
 {
-	public:
-	    Task();
-	    Task(QPointF,QPointF);
-	    Task(QPointF,QPointF,QString);	    
-	    ~Task();
-	    QPointF getStart();
-	    QPointF getEnd();
-	    QString getName();
-	private:
-		QString taskName;
-		QPointF startLocation, endLocation;
+public:
+    Task();
+    Task(QPointF,QPointF);
+    Task(QPointF,QPointF,QString);
+    Task(unsigned startVertex,unsigned endVertex,unsigned timeOfDay,QString name);
+    ~Task();
+    QPointF getStart();
+    QPointF getEnd();
+    QString getName();
+    unsigned getStartVertex();
+    unsigned getEndVertex();
+    unsigned getTimeOfDay();
+    enum TaskMapPresentation{
+        METRIC=1,
+        TOPOLOGY
+    };
+
+    enum TimeOfDay{
+        EARLY_MORNING=1,
+        MORNING,
+        AFTERNOON,
+        NIGHT
+    };
+
+private:
+    QString taskName;
+    QPointF startLocation, endLocation;
+    unsigned int startVertex,endVertex;
+    unsigned int timeOfDay;
+    unsigned int mapPresentation;
 };
 
 #endif

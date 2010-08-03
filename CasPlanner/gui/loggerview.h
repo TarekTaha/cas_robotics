@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "logger.h"
+#include <iostream>
 
 namespace Ui
 {

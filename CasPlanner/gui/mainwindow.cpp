@@ -32,7 +32,7 @@ QMainWindow(parent)
 MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     QMainWindow(parent), logCount(0)
 {
-    Logger& logger = getLogger();
+    Logger& logger = Logger::getLogger();
     logger.init("log.txt",true);
     logger.setLevel(Logger::Debug);
     // Create the PlayGround where all the RobotManagers will run

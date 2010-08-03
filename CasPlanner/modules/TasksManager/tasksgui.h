@@ -68,6 +68,28 @@ class SpeedRender;
 
 using namespace CasPlanner;
 
+#define COLOR_LIGHT_BLUE_A(alpha)   glColor4f(0.0,0.7,0.7,alpha);
+#define COLOR_SIENNAL_A(alpha)      glColor4f(1.0,0.51,0.278,alpha);
+#define COLOR_GREEN_A(alpha)        glColor4f(0.0,0.7,0.0,alpha);
+#define COLOR_YELLOW_A(alpha)       glColor4f(0.7,0.7,0.0,alpha);
+#define COLOR_RED_A(alpha)          glColor4f(0.8,0.0,0.0,alpha);
+#define COLOR_MAGENTA_A(alpha)      glColor4f(1.0,0.0,1.0,alpha);
+#define COLOR_BLUE_A(alpha)         glColor4f(0.0,0.0,0.7,alpha);
+#define COLOR_ORANGE_A(alpha)       glColor4f(1.0,0.65,0.0,alpha);
+#define COLOR_DEEP_PINK_A(alpha)    glColor4f(1.0,0.078,0.576,alpha);
+#define COLOR_DARK_RED_A(alpha)     glColor4f(1.0,0.0,0.0,alpha);
+
+#define COLOR_LIGHT_BLUE   glColor3f(0.0,0.7,0.7);
+#define COLOR_SIENNAL      glColor3f(1.0,0.51,0.278);
+#define COLOR_GREEN        glColor3f(0.0,0.7,0.0);
+#define COLOR_YELLOW       glColor3f(0.7,0.7,0.0);
+#define COLOR_RED          glColor3f(0.8,0.0,0.0);
+#define COLOR_MAGENTA      glColor3f(1.0,0.0,1.0);
+#define COLOR_BLUE         glColor3f(0.0,0.0,0.7);
+#define COLOR_ORANGE       glColor3f(1.0,0.65,0.0);
+#define COLOR_DEEP_PINK    glColor3f(1.0,0.078,0.576);
+#define COLOR_DARK_RED     glColor3f(1.0,0.0,0.0);
+
 class TasksControlPanel: public QWidget
 {
     Q_OBJECT
@@ -85,15 +107,15 @@ public:
 private:
 
     TasksGui *tasksGui;
+
     // BayesianNetwork Parameters
     QGroupBox randomTasksGB;
-    QDoubleSpinBox numRandomRuns;
+    QSpinBox numRandomRuns;
 
     // Voronoi Method
     QGroupBox voronoiGB;
     QRadioButton innerSkeletonBtn;
     QRadioButton outerSkeletonBtn;
-
     QVector <QRadioButton *> availableRobots;
 
     // Command Actions
@@ -103,6 +125,9 @@ private:
     QPushButton generateSkeletonBtn;
     QPushButton captureImage;
     QPushButton testModelBtn;
+    QPushButton clearAllBtn;
+    QComboBox timeOfDay;
+
     //Pointers to the currently selected Robot
     QGroupBox tasksGB;
     QTreeWidgetItem *robotItem;
@@ -121,6 +146,9 @@ class MapGL: public QGLWidget
     Q_OBJECT
 public:
     MapGL(Map*,TasksGui *,QWidget *parent);
+    void mousePressEvent(QMouseEvent *me);
+    void mouseMoveEvent ( QMouseEvent * me );
+    void wheelEvent( QWheelEvent * event );
     void initializeGL();
     void renderSkeleton();
     void renderPath();
@@ -130,9 +158,11 @@ public:
     void setMapSkeleton(MapSkeleton *);
     void loadTexture();
     void renderMap();
+    void displayGrid();
     QSize sizeHint();
     void config();
     QSize setMinimumSizeHint();
+    void setShowPaths(bool state){this->showPaths = state;}
     public slots:
         void keyPressEvent(QKeyEvent *e);
 private:
@@ -145,9 +175,10 @@ private:
     bool showGrids;
     bool firstTime;
     bool mainMapBuilt;
+    bool showPaths;
     GLuint texId;
     QTimer * renderTimer;
-    int skeletonList,mapList;
+    int skeletonList,mapList,morningList,earlyMorningList,afternoonList,nightList;
     MapSkeleton *mapSkeleton;
     Map *ogMap;
     float ratioW, ratioH;
@@ -167,16 +198,21 @@ public:
     void resetTab();
     void setRadMode(int mode);
     void loadTasks(string filename);
+    MapGL & getMapGL(){return mapGL;}
     VoronoiPathPlanner * voronoiPlanner;
     QVector <Task> tasks;
     bool skeletonGenerated;
     int totalVisits;
     PlayGround * playGround;
+    QString timeOfDay;
 public slots:
     void updateData();
     void provideSpeed(double &speed, double &turnRate);
     void generateSkeleton();
     void testModel();
+    void timeOfDayChanged(QString);
+    void clearAll();
+    void saveImage();
 signals:
     void newData();
 private:
@@ -190,7 +226,7 @@ private:
     double ptzTilt;
     bool ptzEnabled;
     double radPerPixel;
-    double msperWheel;
+    double msperWheel;    
 };
 
 #endif

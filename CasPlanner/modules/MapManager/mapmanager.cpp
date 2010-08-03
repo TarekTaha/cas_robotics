@@ -47,7 +47,7 @@ void MapManager::loadMap(QString name,float res,bool negate,Pose p)
     this->mapName = name;
     if(!image.load(name, 0))
     {
-        qDebug("Error Loading Image"); fflush(stdout);
+        LOG(Logger::Critical,"Error Loading Image")
         exit(1);
     }
     if(this->globalMap)

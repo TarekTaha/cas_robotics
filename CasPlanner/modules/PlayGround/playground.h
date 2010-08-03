@@ -50,7 +50,7 @@ public:
     QVector <RobotManager* > robotPlatforms;
     RobotManager *activeRobot;
     void setMapViewer(MapViewer *);
-   public slots:
+public slots:
         void startRobotsComm();
         void stopRobots();
         void loadMap(QString name,float res,bool negate, Pose p);
