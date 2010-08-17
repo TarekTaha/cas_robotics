@@ -47,14 +47,29 @@ PlanningManager::PlanningManager(RobotManager *robMan,
     this->bridge_conn_rad = bridge_conn_rad;
     this->pathPlanner = NULL;
     this->robotManager = robMan;
-    this->connNodesEnabled  = true;
-    this->regGridEnabled    = true;
-    this->obstPenEnabled    = true;
-    this->expObstEnabled    = true;
-    this->bridgeTestEnabled = true;
-    this->renderSearchSpaceTree     = false;
-    this->renderSearchTree          = false;
-    this->renderPaths               = false;
+    this->connNodesEnabled      = CasPlanner::settings().isConnectNodesEnabled();
+    this->regGridEnabled        = CasPlanner::settings().isRegGridEnabled();
+    this->obstPenEnabled        = CasPlanner::settings().isObstaclePenEnabled();
+    this->expObstEnabled        = CasPlanner::settings().isExpandObstEnabled();
+    this->bridgeTestEnabled     = CasPlanner::settings().isBridgeTestEnabled();
+    this->renderSearchSpaceTree = false;
+    this->renderSearchTree      = false;
+    this->renderPaths           = false;
+    this->loadSpaceFromFile     = true;
+    this->overWriteExistingSpace= false;
+    planningParameters          = 0;
+
+    if(connNodesEnabled)
+        planningParameters|=NODES_CONNECT;
+    if(regGridEnabled)
+        planningParameters|=REGULAR_GRID;
+    if(expObstEnabled)
+        planningParameters|=OBST_EXPAND;
+    if(obstPenEnabled)
+        planningParameters|=OBST_PENALTY;
+    if(bridgeTestEnabled)
+        planningParameters|=BRIDGE_TEST;
+
     this->planningStep = WAITING;
     robotManager->robot->setCheckPoints(obst_exp);
     connect(this, SIGNAL(addMsg(int,int,QString)), robMan->playGround,SLOT(addMsg(int,int,QString)));
@@ -67,14 +82,27 @@ renderSearchSpaceTree(false),
 renderSearchTree(false),
 renderPaths(false),
 robotManager(robMan),
-bridgeTestEnabled(true),
-connNodesEnabled(true),
-regGridEnabled(true),
-obstPenEnabled(true),
-expObstEnabled(true),
+loadSpaceFromFile(true),
+overWriteExistingSpace(false),
+planningParameters(0),
 planningStep(WAITING)
 {
+    this->connNodesEnabled      = CasPlanner::settings().isConnectNodesEnabled();
+    this->regGridEnabled        = CasPlanner::settings().isRegGridEnabled();
+    this->obstPenEnabled        = CasPlanner::settings().isObstaclePenEnabled();
+    this->expObstEnabled        = CasPlanner::settings().isExpandObstEnabled();
+    this->bridgeTestEnabled     = CasPlanner::settings().isBridgeTestEnabled();
     connect(this, SIGNAL(addMsg(int,int,QString)), robMan->playGround,SLOT(addMsg(int,int,QString)));
+    if(connNodesEnabled)
+        planningParameters|=NODES_CONNECT;
+    if(regGridEnabled)
+        planningParameters|=REGULAR_GRID;
+    if(expObstEnabled)
+        planningParameters|=OBST_EXPAND;
+    if(obstPenEnabled)
+        planningParameters|=OBST_PENALTY;
+    if(bridgeTestEnabled)
+        planningParameters|=BRIDGE_TEST;
 }
 
 PlanningManager::~PlanningManager()
@@ -90,26 +118,46 @@ void PlanningManager::setRobotManager(RobotManager *rob)
 void PlanningManager:: setBridgeTest(bool state)
 {
     bridgeTestEnabled = state;
+    if(state)
+        planningParameters|=BRIDGE_TEST;
+    else
+        planningParameters&=(0x1F^BRIDGE_TEST);
 }
 
 void PlanningManager:: setConnNodes(bool state)
 {
     connNodesEnabled = state;
+    if(state)
+        planningParameters^=NODES_CONNECT;
+    else
+        planningParameters&=(0x1F^NODES_CONNECT);
 }
 
 void PlanningManager:: setRegGrid(bool state)
 {
     regGridEnabled = state;
+    if(state)
+        planningParameters^=REGULAR_GRID;
+    else
+        planningParameters&=(0x1F^REGULAR_GRID);
 }
 
 void PlanningManager:: setObstPen(bool state)
 {
     obstPenEnabled = state;
+    if(state)
+        planningParameters^=OBST_PENALTY;
+    else
+        planningParameters&=(0x1F^OBST_PENALTY);
 }
 
 void PlanningManager:: setExpObst(bool state)
 {
     expObstEnabled = state;
+    if(state)
+        planningParameters^=OBST_EXPAND;
+    else
+        planningParameters&=(0x1F^OBST_EXPAND);
 }
 
 void PlanningManager::setBridgeTestValue(double val)
@@ -256,46 +304,66 @@ int PlanningManager::setupPlanner()
     return 1;
 }
 
-void PlanningManager::generateSpaceState()
+void PlanningManager::generateSearchSpace(bool loadFromFile,bool overWriteCurrent)
+{
+    loadSpaceFromFile        = loadFromFile;
+    overWriteExistingSpace   = overWriteCurrent;
+    planningStep             = GENERATING_SPACE;
+    QThread::start();
+}
+
+void PlanningManager::generateSearchSpaceState(bool loadFromFile,bool overWriteCurrent)
 {
     QTime timer;
     const char * filename = "logs/SearchSpace.txt";
     if(!this->pathPlanner)
         this->setupPlanner();
-    if(pathPlanner->search_space)
+    if(pathPlanner->search_space && !overWriteCurrent)
     {
-        qDebug()<<"\n Search Space already Exist";
+        LOG(Logger::Warning,"Search Space already Exist")
         return;
     }
-    timer.restart();
-    if(fileExist(filename))
+    if(overWriteCurrent)
     {
-        qDebug()<<"Loading Space From file ...";
-        pathPlanner->readSpaceFromFile(filename);
-        if(expObstEnabled)
-            pathPlanner->expandObstacles();
-        if(connNodesEnabled)
-            pathPlanner->connectNodes();
-        qDebug()<<"File loading took:"<<timer.elapsed()/double(1000.00)<<" sec";
+        pathPlanner->freeResources();
+    }
+    timer.restart();
+    if(fileExist(filename) && loadFromFile)
+    {
+        LOG(Logger::Info,"Loading Space From file ...")
+        if(pathPlanner->readSpaceFromFile(filename))
+        {
+            if(expObstEnabled)
+                pathPlanner->expandObstacles();
+            if(connNodesEnabled)
+                pathPlanner->connectNodes();
+            LOG(Logger::Info,"File loading took:"<<timer.elapsed()/double(1000.00)<<" secs")
+        }
+        else
+        {
+            LOG(Logger::Warning,"Could not Load Search Space from File")
+        }
     }
     else
     {
-        qDebug()<<"Generating Space ...";
-        if(expObstEnabled)
+        LOG(Logger::Info,"Generating Space ...")
+        if(planningParameters & OBST_EXPAND)
             pathPlanner->expandObstacles();
-        if(regGridEnabled)
+        if(planningParameters & REGULAR_GRID)
             pathPlanner->generateRegularGrid();
-        if(bridgeTestEnabled)
+        if(planningParameters & BRIDGE_TEST)
             pathPlanner->bridgeTest();
-        if(obstPenEnabled)
+        if(planningParameters & OBST_PENALTY)
             pathPlanner->addCostToNodes();
-        if(connNodesEnabled)
+        if(planningParameters & NODES_CONNECT)
             pathPlanner->connectNodes();
         pathPlanner->saveSpace2File(filename);
         emit searchSpaceGenerated();
-        qDebug()<<"Space Generation took:"<<timer.elapsed()/double(1000.00)<<" sec";
+        LOG(Logger::Info,"Space Generation took:"<<timer.elapsed()/double(1000.00)<<" secs")
     }
     pathPlanner->showConnections();
+    this->loadSpaceFromFile     = true;
+    this->overWriteExistingSpace= false;
 }
 
 void PlanningManager::findPathState()
@@ -303,21 +371,21 @@ void PlanningManager::findPathState()
     if(!this->pathPlanner)
         this->setupPlanner();
     Node * retval;
-    if(!pathPlanner->search_space)
+    if(!pathPlanner->search_space || planningParameters!=pathPlanner->getPlanningParameters())
     {
-        generateSpaceState();
+        generateSearchSpaceState();
     }
     QTime timer;
     retval = pathPlanner->startSearch(start,end,coord);
-    qDebug()<<"File loading took:"<<timer.elapsed()/double(1000.00)<<" sec";
+    LOG(Logger::Info,"File loading took:"<<timer.elapsed()/double(1000.00)<<" secs")
     emit pathFound(retval);
     if(retval)
     {
-        //	pathPlanner->printNodeList();
+        //pathPlanner->printNodeList();
     }
     else
     {
-        qDebug()<<"No Path Found";
+        LOG(Logger::Info,"No Path Found")
     }
 }
 
@@ -326,7 +394,7 @@ void PlanningManager::run()
     switch(planningStep)
     {
     case GENERATING_SPACE:
-        generateSpaceState();
+        generateSearchSpaceState(loadSpaceFromFile,overWriteExistingSpace);
         break;
     case FINDING_PATH:
         findPathState();

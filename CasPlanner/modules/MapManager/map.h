@@ -34,6 +34,7 @@ public:
     Map(int width, int height, double resolution,  QByteArray rawData);
     Map(float mapRes,Pose p);
     Map(Pose p);
+    Map * clone();
     void scale(int newWidth,int newHeight);
     // transfers from pixel coordinate to the main coordinate system
     void convertPix(QPointF  *p);

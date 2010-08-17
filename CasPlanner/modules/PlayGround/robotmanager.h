@@ -56,7 +56,7 @@ class RobotManager : public QObject
         void startNavigator();
         void startComms();
         void startIntentionRecognizer();
-        PlayGround 		*playGround;
+        PlayGround 	*playGround;
         CommManager     *commManager;
         PlanningManager *planningManager;
         Navigator       *navigator;

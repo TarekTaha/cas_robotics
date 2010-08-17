@@ -23,39 +23,52 @@
 
 #include <astar.h>
 #include "logger.h"
+
+static const unsigned int BRIDGE_TEST       = 1;
+static const unsigned int REGULAR_GRID      = 2;
+static const unsigned int NODES_CONNECT     = 4;
+static const unsigned int OBST_PENALTY      = 8;
+static const unsigned int OBST_EXPAND       = 16;
+
 namespace CasPlanner
 {
     class PathPlanner : public Astar
     {
     public :
-            bool map_initialized;
-    double  obstacle_radius,bridge_length,bridge_res,regGridDist,reg_grid_conn_rad,obst_dist,bridge_conn_rad;
+        bool map_initialized;
+        double  obstacle_expansion_radius,bridge_length,bridge_res,regGridRes,
+                reg_grid_conn_rad,obst_penalry_radius,bridge_conn_rad;
     public :
-            void   setExpRad(double);
-    void   setBridgeLen(double);
-    void   setBridgeRes(double);
-    void   setRegGrid(double);
-    void   setConRad(double);
-    void   setObstDist(double);
-    void   freeResources();
-    void   printNodeList ();
-    void   setMap(Map *); // Reads the map file and sets the attributes
-    void   expandObstacles();
-    void   addCostToNodes();
-    void   bridgeTest();
-    void   generateRegularGrid();
-    void   connectNodes();
-    void   showConnections();
-    void   saveSearchSpace();
-    void   determineCheckPoints();
-    void   findRoot();
-    void   freePath();
-    void   updateMap(Map *mapPatch);
-    bool   checkShortestDistance(double i,double j,double neigbhour_pixel_distance);
-    bool   readSpaceFromFile(const char *filename);
-    bool   saveSpace2File(const char *filename);
-    PathPlanner(Robot *,double dG,double bridge_len,double bridge_res,double regGridDist,double reg_grid_conn_rad,double obst_pen,double bridge_conn_rad);
-    ~PathPlanner();
+        unsigned int getPlanningParameters();
+        void   setExpRad(double);
+        void   setBridgeLen(double);
+        void   setBridgeRes(double);
+        void   setRegGrid(double);
+        void   setConRad(double);
+        void   setObstDist(double);
+        void   freeResources();
+        void   printNodeList ();
+        void   setMap(Map *); // Reads the map file and sets the attributes
+        void   expandObstacles();
+        void   addCostToNodes();
+        void   bridgeTest();
+        void   generateRegularGrid();
+        void   connectNodes();
+        void   showConnections();
+        void   saveSearchSpace();
+        void   determineCheckPoints();
+        void   findRoot();
+        void   freePath();
+        void   updateMap(Map *mapPatch);
+        bool   checkShortestDistance(double i,double j,double neigbhour_pixel_distance);
+        bool   readSpaceFromFile(const char *filename);
+        bool   saveSpace2File(const char *filename);
+        PathPlanner(Robot *,double dG,double bridge_len,double bridge_res,double regGridRes,double reg_grid_conn_rad,double obst_pen,double bridge_conn_rad);
+        ~PathPlanner();
+    private:
+        unsigned int planningParameters;
+        bool obstaclesExpanded;
+        Map *originalMap;
 };
 
 }

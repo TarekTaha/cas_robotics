@@ -26,27 +26,33 @@ PathPlanner::PathPlanner(Robot *rob,double dG,double bridge_len,
 			double bridge_r,double reg_g,double conn_rad,double obst_pen,double bridge_conn_rad_in):
 			Astar(rob,dG,"Distance"),
 			map_initialized(false),
-			obstacle_radius(rob->expansionRadius),
+			obstacle_expansion_radius(rob->expansionRadius),
 			bridge_length(bridge_len),
 			bridge_res(bridge_r),
-			regGridDist(reg_g),
+			regGridRes(reg_g),
 			reg_grid_conn_rad(conn_rad),
-			obst_dist(obst_pen),
+			obst_penalry_radius(obst_pen),
 			bridge_conn_rad(bridge_conn_rad_in)
 {
-};
+    planningParameters = 0;
+    obstaclesExpanded  = false;
+    originalMap        = NULL;
+}
 
 PathPlanner :: ~PathPlanner()
 {
     freeResources();
-    cout<<"\n	--->>> Allocated Memory FREED <<<---";
-};
+    LOG(Logger::Info,"	--->>> Allocated Memory FREED <<<---")
+}
 
 void PathPlanner::freeResources()
 {
     freeSearchSpace();
     freePath();
     p=root=test=NULL;
+    planningParameters  = 0;
+    delete originalMap;
+    delete Astar::map;
 }
 
 void PathPlanner::freePath()
@@ -57,36 +63,41 @@ void PathPlanner::freePath()
         delete path;
         path = p;
     }
-};
-
-void   PathPlanner ::setExpRad(double a)
-{
-    obstacle_radius = a;
 }
 
-void   PathPlanner ::setBridgeLen(double a)
+unsigned int PathPlanner::getPlanningParameters()
+{
+    return planningParameters;
+}
+
+void   PathPlanner::setExpRad(double a)
+{
+    obstacle_expansion_radius = a;
+}
+
+void   PathPlanner::setBridgeLen(double a)
 {
     bridge_length = a;
 }
 
-void   PathPlanner ::setBridgeRes(double a)
+void   PathPlanner::setBridgeRes(double a)
 {
     bridge_res = a;
 }
 
-void   PathPlanner ::setRegGrid(double a)
+void   PathPlanner::setRegGrid(double a)
 {
-    regGridDist = a;
+    regGridRes = a;
 }
 
-void   PathPlanner ::setConRad(double a)
+void   PathPlanner::setConRad(double a)
 {
     reg_grid_conn_rad = a;
 }
 
-void   PathPlanner ::setObstDist(double a)
+void   PathPlanner::setObstDist(double a)
 {
-    obst_dist = a;
+    obst_penalry_radius = a;
 }
 
 // Nifty way of doing an obstacle expansion, not finalized, ----->>>>> @ TO DO @ <<<<<------
@@ -94,12 +105,19 @@ void PathPlanner::expandObstacles()
 {
     if(!map_initialized)
     {
-        qDebug()<<"\n	--->>> You have to read the map before Expanding the Obstacles <<<---	";
+        LOG(Logger::Info,"    --->>> You have to read the map before Expanding the Obstacles <<<---")
+        return;
+    }
+    if(obstaclesExpanded)
+    {
+        LOG(Logger::Info,"    --->>> Obstacles have been expanded before, Skipping <<<---")
+        delete Astar::map;
+        Astar::map = originalMap->clone();
         return;
     }
     int thickness;
     int m,n,x,y,radius;
-    thickness = int(this->obstacle_radius/map->mapRes);
+    thickness = int(this->obstacle_expansion_radius/map->mapRes);
     radius =2; // This covers vertical, horizontal and diagonal cells
     Map temp_map(map->width,map->height,map->mapRes,QPointF(map->width/2.0,map->height/2.0),Pose(0,0,0));
     for(int i = 0;i<map->width;i++)
@@ -162,8 +180,9 @@ void PathPlanner::expandObstacles()
             }
         }
     }
-    qDebug()<<"	--->>> OBSTACLES EXPANDED SUCCESSFULLY <<<---	";
-    //ShowConnections();
+    LOG(Logger::Info,"	--->>> OBSTACLES EXPANDED SUCCESSFULLY <<<---	")
+    planningParameters|=OBST_EXPAND;
+    obstaclesExpanded = true;
 };
 
 bool PathPlanner::readSpaceFromFile(const char *filename)
@@ -176,7 +195,28 @@ bool PathPlanner::readSpaceFromFile(const char *filename)
     FILE *file = fopen(filename, "r");
     if (!file)
     {
-        qDebug()<<"Error Opening File";
+        LOG(Logger::Warning,"Can not open Search Space File")
+        fclose(file);
+        return false;
+    }
+    // Read metadata line, it's expected to be the first line
+    // If planning parameters are not the same as the current then we can't read it
+    double obstacle_expansion_radius_t,bridge_length_t,bridge_res_t,regGridRes_t,
+           reg_grid_conn_rad_t,obst_penalry_radius_t,bridge_conn_rad_t;
+    fscanf(file,"%lf %lf %lf %lf %lf %lf %lf\n",&obstacle_expansion_radius_t,&bridge_length_t,&bridge_res_t,&regGridRes_t,
+            &reg_grid_conn_rad_t,&obst_penalry_radius_t,&bridge_conn_rad_t);
+    if(!isEqual(obstacle_expansion_radius_t,obstacle_expansion_radius) || !isEqual(bridge_length_t,bridge_length) ||
+       !isEqual(bridge_res_t,bridge_res) || !isEqual(regGridRes_t,regGridRes) || !isEqual(reg_grid_conn_rad_t,reg_grid_conn_rad) ||
+       !isEqual(obst_penalry_radius_t,obst_penalry_radius) || !isEqual(bridge_conn_rad_t,bridge_conn_rad))
+    {
+        LOG(Logger::Warning,"Metadata Parameters mismatch, can't read search space, try to generate new one")
+                LOG(Logger::Warning,"obst exp:"<<obstacle_expansion_radius<<" _t:"<<obstacle_expansion_radius_t)
+                LOG(Logger::Warning,"bridge_l:"<<bridge_length<<" _t:"<<bridge_length_t)
+                LOG(Logger::Warning,"bridge_res:"<<bridge_res<<" _t:"<<bridge_res_t)
+                LOG(Logger::Warning,"reg_grid_res:"<<regGridRes<<" _t:"<<regGridRes_t)
+                LOG(Logger::Warning,"reg_grid_con:"<<reg_grid_conn_rad<<" _t:"<<reg_grid_conn_rad_t)
+                LOG(Logger::Warning,"obst_pen:"<<obst_penalry_radius<<" _t:"<<obst_penalry_radius_t)
+                LOG(Logger::Warning,"bridge_con:"<<bridge_conn_rad<<" _t:"<<bridge_conn_rad_t)
         fclose(file);
         return false;
     }
@@ -217,11 +257,15 @@ bool PathPlanner::saveSpace2File(const char *filename)
     FILE *file = fopen(filename, "wb");
     if (!file)
     {
-        qDebug()<<"Error Opening File";
+        LOG(Logger::Warning,"Can not open Search Space File")
         fclose(file);
         return false;
     }
     SearchSpaceNode *temp=search_space;
+    //obstacle_expansion_radius,bridge_length,bridge_res,regGridRes,reg_grid_conn_rad,obst_penalry_radius,bridge_conn_rad;
+    // Save metadata
+    fprintf(file,"%lf %lf %lf %lf %lf %lf %lf\n",obstacle_expansion_radius,bridge_length,bridge_res,regGridRes,
+            reg_grid_conn_rad,obst_penalry_radius,bridge_conn_rad);
     while (temp)
     {
         fprintf(file,"%f %f %f %d\n",temp->location.x(),temp->location.y(),temp->obstacle_cost,temp->type);
@@ -236,7 +280,7 @@ void PathPlanner::generateRegularGrid()
     SearchSpaceNode *temp;
     if(!map_initialized)
     {
-        qDebug()<<"\n	--->>> You have to read the map First <<<---	";
+        LOG(Logger::Info,"	--->>> You have to read the map First <<<---	")
         return;
     }
     QPointF p;
@@ -262,7 +306,7 @@ void PathPlanner::generateRegularGrid()
                     p.setX(i);
                     p.setY(j);
                     map->convertPix(&p);
-                    if (checkShortestDistance(p.x(),p.y(),regGridDist))
+                    if (checkShortestDistance(p.x(),p.y(),regGridRes))
                     {
                         temp = new SearchSpaceNode;
                         temp->location.setX(p.x());
@@ -276,10 +320,9 @@ void PathPlanner::generateRegularGrid()
             }
         }
     }
-    qDebug()<<"	--->>> REGULAR GRID GENERATED SUCCESSFULLY <<<---	";
-    //SaveSearchSpace();
-    //ShowConnections();
-};
+    LOG(Logger::Info,"	--->>> REGULAR GRID GENERATED SUCCESSFULLY <<<---	")
+    planningParameters|=REGULAR_GRID;
+}
 
 void PathPlanner::bridgeTest()
 {
@@ -310,8 +353,6 @@ void PathPlanner::bridgeTest()
                 y2 = (int)(- sqrt(radius*radius - (x2 - i)*(x2 - i)) + j);
                 if (y2 < 0) y2 = 0;
                 if (y2 >= this->map->height) y2 = this->map->height - 1;
-                //cout<<"\n x="<<x<<" y="<<y<<" x2="<<x2<<" y2="<<y2<<" i="<<i<<" j="<<j<<" R="<<radius;
-                //fflush(stdout);
                 if (!this->map->grid[i][j]&&this->map->grid[(int)x][(int)y]&&this->map->grid[(int)x2][(int)y2])
                 {
                     p.setX(i);
@@ -342,14 +383,11 @@ void PathPlanner::bridgeTest()
                     }
                 }
             }
-            //cout<<"\n I have iterated = "<<ab;
-            //fflush(stdout);
         }
     }
-    qDebug()<<"	--->>> BRIDGE TEST FINISHED SUCCESSFULLY <<<---";
-    //SaveSearchSpace();
-    //ShowConnections();
-};
+    LOG(Logger::Info,"	--->>> BRIDGE TEST FINISHED SUCCESSFULLY <<<---")
+    planningParameters|=BRIDGE_TEST;
+}
 
 void PathPlanner :: printNodeList()
 {
@@ -357,7 +395,7 @@ void PathPlanner :: printNodeList()
     QPointF  pixel;
     if(!(p = this->path))
         return ;
-    qDebug()<<"\n  --------------------   START OF LIST ----------------------";
+    LOG(Logger::Info,"--------------------   START OF LIST ----------------------")
     while(p !=NULL)
     {
         pixel =  p->pose.p;
@@ -371,7 +409,7 @@ void PathPlanner :: printNodeList()
         }
         p = p->next;
     }
-    qDebug()<<"\n --------------------   END OF LIST ---------------------- ";fflush(stdout);
+    LOG(Logger::Info,"--------------------   END OF LIST ---------------------- ")
 }
 
 void PathPlanner::addCostToNodes()
@@ -384,11 +422,9 @@ void PathPlanner::addCostToNodes()
     if (!search_space) // Do nothing if Search Space is not Yet Created
         return;
     S = search_space;
-    number_of_pixels = obst_dist / map->mapRes;
+    number_of_pixels = obst_penalry_radius / map->mapRes;
     while (S!=NULL)
     {
-        //cout<<"\n Node= "<<++n;
-        //fflush(stdout);
         point.setX(S->location.x());
         point.setY(S->location.y());
         map->convert2Pix(&point);
@@ -413,12 +449,12 @@ void PathPlanner::addCostToNodes()
             }
         }
         // this is a normalized cost, it will make more sense later on
-        S->obstacle_cost =  (obst_dist - nearest_obstacle*map->mapRes)/obst_dist;
+        S->obstacle_cost =  (obst_penalry_radius - nearest_obstacle*map->mapRes)/obst_penalry_radius;
         S = S->next;
     }
-    qDebug()<<"	--->>> Penalty Added <<<---	";
-    //ShowConnections();
-};
+    LOG(Logger::Info,"	--->>> Penalty Added <<<---	")
+    planningParameters|=OBST_PENALTY;
+}
 
 void PathPlanner::connectNodes()
 {
@@ -457,8 +493,9 @@ void PathPlanner::connectNodes()
         }
         temp = temp->next;
     }
-    qDebug()<<"	--->>> NODES CONNECTED <<<---	";
-};
+    LOG(Logger::Info,"	--->>> NODES CONNECTED <<<---	")
+    planningParameters|=NODES_CONNECT;
+}
 
 bool PathPlanner::checkShortestDistance(double x,double y,double neigbhour_distance)
 {
@@ -477,7 +514,7 @@ bool PathPlanner::checkShortestDistance(double x,double y,double neigbhour_dista
         return 1;
     else
         return 0;
-};
+}
 
 void PathPlanner::showConnections()
 {
@@ -497,7 +534,7 @@ void PathPlanner::showConnections()
         temp = temp->next;
         n++;
     }
-    qDebug()<<QString("\n---->>> TOTAL NUMBER OF CONNECTIONS =%1\n---->>> Total Nodes in search Space =%2").arg(m).arg(n);
+    LOG(Logger::Info,QString("\n---->>> TOTAL NUMBER OF CONNECTIONS =%1\n---->>> Total Nodes in search Space =%2").arg(m).arg(n))
     this->MAXNODES = 2*m;
 }
 
@@ -541,19 +578,20 @@ void PathPlanner :: setMap(Map * map_in)
 {
     if(!map_in)
     {
-        qDebug()<<"Why the hell ur giving me an empty map ???";
+        LOG(Logger::Warning,"Why the hell ur giving me an empty map ???")
         fflush(stdout);
         return;
     }
     if(!map_in->grid)
     {
-        qDebug()<<"Why the hell ur giving me an empty map data ???";
+        LOG(Logger::Warning,"Why the hell ur giving me an empty map data ???")
         fflush(stdout);
         return;
     }
-    this->map = map_in;
+    Astar::map        = map_in->clone();
+    this->originalMap = map_in->clone();
     MAXNODES = MaxLong;//map->height*map->width*map->width*map->height;
     map_initialized = true;
-};
+}
 
 }

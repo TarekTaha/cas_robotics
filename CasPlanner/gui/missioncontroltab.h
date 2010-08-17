@@ -39,7 +39,6 @@ public slots:
     void setNavigation();
     void pathPlan();
     void loadMap();
-    void generateSpace();
     void pathFollow();
     void pathTraversed();
     void setStart(Pose);
@@ -60,6 +59,9 @@ private:
     static unsigned *image, *null;
     Node * path;
     static int width, height, components;
+
+private slots:
+    void on_generateSearchSpace_released();
 };
 
 #endif // MISSIONCONTROLTAB_H
