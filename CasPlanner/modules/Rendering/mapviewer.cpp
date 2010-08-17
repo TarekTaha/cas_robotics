@@ -149,7 +149,7 @@ void MapViewer::renderPaths()
     {
         if(playGround->robotPlatforms[i]->planningManager->pathPlanner->path)
         {
-            Node * path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;       
+            Node * path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;
             glColor4f(RGB_COLOR[6][0],RGB_COLOR[6][1],RGB_COLOR[6][2],0.5);
             if(showPath)
             {
@@ -920,7 +920,7 @@ void MapViewer::showIndicators()
     if(start_initialized)
     {
         if(step == 2)
-        {                      
+        {
             double phi = atan2((mousePos.y()-start.p.y()),(mousePos.x()-start.p.x()));
             // Rotation Line
             glPushMatrix();
@@ -1086,7 +1086,7 @@ void MapViewer::paintGL()
         renderPaths();
         renderLaser();
         renderRobot();
-        glEnable(GL_DEPTH_TEST);
+        //glEnable(GL_DEPTH_TEST);
         renderSpatialStates();
         renderAction();
         renderExpandedTree();
@@ -1101,16 +1101,20 @@ void MapViewer::paintGL()
 void MapViewer::searchSpaceGenerated()
 {
     searchSpaceListCreated = false;
-    LOG(Logger::Info,"SearchSpace Generated")
+    LOG(Logger::Info,"SearchSpace Generated- SIGNAL Emitted")
 }
 
 void MapViewer::setShowSearchSpaceSamples(bool state)
 {
+    glDeleteLists(searchSpaceList,1);
+    searchSpaceListCreated = false;
     showSearchSpaceSamples = state;
 }
 
 void MapViewer::setShowSearchSpaceTree(bool state)
 {
+    glDeleteLists(searchSpaceList,1);
+    searchSpaceListCreated = false;
     showSearchSpaceTree = state;
 }
 

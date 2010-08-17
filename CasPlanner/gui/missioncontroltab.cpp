@@ -217,11 +217,6 @@ void MissionControlTab::pathPlan()
     ui->pathPlanBtn->setEnabled(false);
 }
 
-void MissionControlTab::generateSpace()
-{
-    playGround->activeRobot->planningManager->generateSpace();
-}
-
 void MissionControlTab::loadMap()
 {
 
@@ -266,4 +261,9 @@ void MissionControlTab::setMap(Map * map)
     {
         qDebug()<<"No Robot is Selected";
     }
+}
+
+void MissionControlTab::on_generateSearchSpace_released()
+{
+    playGround->activeRobot->planningManager->generateSearchSpace(false,true);
 }

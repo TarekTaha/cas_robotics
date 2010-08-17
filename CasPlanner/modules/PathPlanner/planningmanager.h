@@ -80,17 +80,20 @@ public slots:
     void  setBridgeResValue(double val);
     void  updateMap(LaserScan laserScan,double local_dist,Pose robotLocation);
     bool  fileExist(const char * fname);
+    void  generateSearchSpace(bool loadFromFile,bool overWriteCurrent);
 signals:
     void addMsg(int,int, QString);
     void updateMap(Map* map);
     void searchSpaceGenerated();
     void pathFound(Node*);
 protected:
-    void generateSpaceState();
     void findPathState();
+    void  generateSearchSpaceState(bool loadFromFile=true,bool overWriteCurrent=false);
     double pixel_res,dist_goal,bridge_len,bridge_res,reg_grid,obst_exp,reg_grid_conn_rad,obst_pen,bridge_conn_rad;
     RobotManager *robotManager;
-    bool bridgeTestEnabled,connNodesEnabled,regGridEnabled,obstPenEnabled,expObstEnabled,negate;
+    bool bridgeTestEnabled,connNodesEnabled,regGridEnabled,obstPenEnabled,expObstEnabled,negate,
+        loadSpaceFromFile, overWriteExistingSpace;
+    unsigned int planningParameters;
     QPointF rotation_center;
     QString robot_model;
     Pose start,end;

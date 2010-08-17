@@ -87,7 +87,7 @@ Astar::~Astar()
     }
 }
 
-void   Astar ::setSocialReward(QHash<QString, int>* soRew)
+void  Astar::setSocialReward(QHash<QString, int>* soRew)
 {
     try
     {
@@ -100,7 +100,7 @@ void   Astar ::setSocialReward(QHash<QString, int>* soRew)
 }
 
 // Tests for whether a node is in an obstacle or not
-int Astar :: inObstacle(QPointF P, double theta)
+int Astar::inObstacle(QPointF P, double theta)
 {
     int m,n;
     QPointF det_point;
@@ -387,7 +387,7 @@ Node *  Astar::startSearch(Pose start,Pose end, int coord)
     return NULL;
 };
 
-bool Astar :: goalReached (Node *n)
+bool Astar::goalReached (Node *n)
 {
     double angle_diff, delta_d;
     delta_d = Dist(n->pose.p,end.p);
@@ -410,7 +410,7 @@ bool Astar :: goalReached (Node *n)
     return 0;
 };
 
-Node *Astar :: makeChildrenNodes(Node *parent)
+Node *Astar::makeChildrenNodes(Node *parent)
 {
     QPointF P;
     Node  *p, *q;
@@ -537,7 +537,7 @@ Node *Astar :: makeChildrenNodes(Node *parent)
     return q;
 }
 // Free node function
-void Astar :: freeNode(Node *n)
+void Astar::freeNode(Node *n)
 {
     delete n;
 }
