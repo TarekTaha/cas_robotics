@@ -19,7 +19,12 @@
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
 #include "socialplanner.h"
-
+#include "socialplanner.h"
+#include "mapmanager.h"
+#include "robotmanager.h"
+#include "planningmanager.h"
+#include "navigator.h"
+#include "commmanager.h"
 
 SocialPlanner::SocialPlanner(PlayGround *playGround,RobotManager * robotManager)
 {

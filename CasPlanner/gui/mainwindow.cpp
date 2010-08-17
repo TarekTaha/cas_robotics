@@ -20,9 +20,15 @@
  ***************************************************************************/
 #include "mainwindow.h"
 #include <QPushButton>
-#include<QVBoxLayout>
-#include<QTimer>
+#include <QVBoxLayout>
+#include <QTimer>
 #include <unistd.h>
+#include "logger.h"
+#include "playground.h"
+#include "statusbar.h"
+#include "tabcontainer.h"
+#include "settings.h"
+
 MainWindow::MainWindow(QWidget *parent):
 QMainWindow(parent)
 {

@@ -26,11 +26,9 @@
 #include <libplayerinterface/player.h>
 
 #include <QMainWindow>
-#include "logger.h"
-#include "playground.h"
-#include "statusbar.h"
-#include "tabcontainer.h"
-#include "settings.h"
+
+class TabContainer;
+class PlayGround;
 
 class MainWindow : public QMainWindow
 {
@@ -39,7 +37,7 @@ public:
     MainWindow(QWidget *parent=0);
     MainWindow(QStringList strings, QWidget *parent=0);
     ~MainWindow();
-public slots:
+public Q_SLOTS:
     void commStart();
     void captureScreenShot();
 private:

@@ -19,6 +19,14 @@
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
 #include "IntentionRecognizer.h"
+#include "playground.h"
+#include "robot.h"
+#include "socialplanner.h"
+#include "mapmanager.h"
+#include "robotmanager.h"
+#include "planningmanager.h"
+#include "navigator.h"
+#include "commmanager.h"
 
 IntentionRecognizer::IntentionRecognizer(PlayGround * playG, RobotManager *rManager):
     runRecognition(false),

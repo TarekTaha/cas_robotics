@@ -23,9 +23,10 @@
 
 #include <QObject>
 #include <QFile>
-#include <QStatusBar>
-#include <QPushButton>
 #include <QTextEdit>
+class QStatusBar;
+class QPushButton;
+
 enum {INFO,WARNING,ERROR};
 class StatusLogger : public QObject
 {
@@ -34,7 +35,7 @@ public:
     StatusLogger(QStatusBar *status);
     StatusLogger();
     ~StatusLogger();
-public slots:
+public Q_SLOTS:
     void addStatusMsg(int messageId, int messageType, QString message);
     void showLog();
 private:

@@ -21,19 +21,14 @@
 #ifndef MAPVIEWER_H
 #define MAPVIEWER_H
 
-#include <libplayerc++/playerc++.h>
-#include <libplayerinterface/player.h>
-
 #include <QtOpenGL>
 #include <GL/glut.h>
 #include <QTime>
-//#include "interfaceprovider.h"
+#include <cmath>
 #include "mapmanager.h"
 #include "playground.h"
 #include "node.h"
-//#include "robotrender.h"
 #include "map.h"
-
 #include "FreeType.h"
 #include "settings.h"
 
@@ -103,7 +98,7 @@ Q_OBJECT
         QImage captureMap();
         virtual void setProvider(MapProvider *provider);
         void renderMap();
-    public slots:
+    public Q_SLOTS:
         void update();
         void setShowSearchSpaceSamples(bool state);
         void setShowSearchSpaceTree   (bool state);
@@ -119,7 +114,7 @@ Q_OBJECT
         void updateMap          (Map *newMap);
         void saveImage          ();
         void searchSpaceGenerated();
-    signals:
+    Q_SIGNALS:
         void moveMOLeft();
         void moveMORight();
         void moveMOUp();

@@ -20,20 +20,18 @@
  ***************************************************************************/
 #ifndef ROBOTMANAGER_H
 #define ROBOTMANAGER_H
-#include <libplayerc++/playerc++.h>
-#include <libplayerinterface/player.h>
-#include "commmanager.h"
-#include "planningmanager.h"
-#include "navigator.h"
-#include "configfile.h"
-#include "playground.h"
-#include "IntentionRecognizer.h"
-#include "socialplanner.h"
+
+#include <QObject>
 
 class Navigator;
 class IntentionRecognizer;
 class CommManager;
-
+class PlayGround;
+class ConfigFile;
+class PlanningManager;
+class Robot;
+class SocialPlanner;
+class Map;
 
 enum{FORCE_FIELD,VFH,CONFIG_SPACE,NO_AVOID,ND};
 enum{MINIMAL_INPUT,CONTINIOUS_INPUT};
@@ -65,9 +63,9 @@ class RobotManager : public QObject
         SocialPlanner   *socialPlanner;
         bool notPaused,notFollowing;
         public
-    slots:
+    Q_SLOTS:
                 void updateMap(Map * mapData);
-    signals:
+    Q_SIGNALS:
         void addMsg(int,int,QString);
 };
 

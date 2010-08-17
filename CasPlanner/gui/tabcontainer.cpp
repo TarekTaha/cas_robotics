@@ -19,6 +19,14 @@
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
 #include "tabcontainer.h"
+#include "playgroundtab.h"
+#include "playground.h"
+#include "tasksgui.h"
+#include "mapviewer.h"
+#include "hritab.h"
+#include "loggerview.h"
+#include "missioncontroltab.h"
+#include "logger.h"
 
 TabContainer::TabContainer(QWidget *parent,PlayGround *playG)
     : QTabWidget(parent),

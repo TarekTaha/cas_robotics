@@ -38,10 +38,6 @@
 #include <ctime>
 #include <cstdlib>
 #include <iostream>
-//#include <cmath>
-//#include <cstring>
-//#include <ctime>
-//#include <fstream>
 
 #define FUNCTION_NAME ( std::string( __FUNCTION__ ) )
 #define LINE_NUMBER ( __LINE__ )
@@ -82,7 +78,7 @@ public:
     QString getFilePath() const { return mFilePath; }
     void loggingPatch( const char* msg );
     QtMsgHandler mDefaultMsgHandler;
-signals:
+Q_SIGNALS:
     void showMsg(int,QString);
 private:
     std::ofstream mFileOut;

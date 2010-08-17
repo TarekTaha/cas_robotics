@@ -19,6 +19,16 @@
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
 #include "navigator.h"
+#include "commmanager.h"
+#include "playground.h"
+#include "robotmanager.h"
+#include "robot.h"
+#include "planningmanager.h"
+#include "controller.h"
+#include "configfile.h"
+#include "forcefield.h"
+#include "node.h"
+
 /** @ingroup Components */
 /** @{ */
 /** @defgroup ComponentNavigator Navigator
@@ -272,7 +282,7 @@ int Navigator::readConfigs( ConfigFile *cf)
 //  	qDebug("\t\t\t Safet Distance :%f",safety_dist);
 //  	qDebug("\t\t\t Tracking Distance :%f",tracking_dist);
 //    	qDebug("-> Robot Navigator Started.");   	
-	emit addMsg(0,INFO,logMsg);
+	Q_EMIT addMsg(0,INFO,logMsg);
  	return 1;
 }
 
@@ -698,8 +708,8 @@ void Navigator::run()
 //				else
 				{
                                         qDebug()<<"--->>> Destination Reached !!!"; fflush(stdout);
-					emit addMsg(0,INFO,QString("--->>> Destination Reached !!!"));
-					emit pathTraversed();
+					Q_EMIT addMsg(0,INFO,QString("--->>> Destination Reached !!!"));
+					Q_EMIT pathTraversed();
 		 			end_reached = true;
 					break;
 				}
@@ -857,7 +867,7 @@ void Navigator::run()
 			if(this->mapPatch)
 				delete mapPatch;
 			mapPatch = mapManager.provideLaserOG(laserScan,2.0,0.05,EstimatedPos);	
-			 	emit glRender();
+			 	Q_EMIT glRender();
 		 	redraw_timer.restart();	
 		}*/
 		/* Get the control Action to be applied, in this case it's a
@@ -886,7 +896,7 @@ void Navigator::run()
 		{
 			wayPoint = goal;
 		}
-		emit setWayPoint(&goal);
+		Q_EMIT setWayPoint(&goal);
 //		printf("\n Debug Location 9"); fflush(stdout);
 		QTime ff_time;
 //		Pose goal;

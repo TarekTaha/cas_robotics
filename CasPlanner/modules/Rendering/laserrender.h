@@ -37,7 +37,7 @@ Q_OBJECT
 //        virtual void setProvider(LaserProvider *provider);  
         virtual void render(); 
         virtual void setRange(double range); 
-    public slots:
+    public Q_SLOTS:
         virtual void updateData(); 
     private:
         double maxRange; 

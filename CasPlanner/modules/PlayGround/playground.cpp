@@ -19,6 +19,13 @@
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
 #include "playground.h"
+#include "planningmanager.h"
+#include "mapviewer.h"
+#include "configfile.h"
+#include "statusbar.h"
+#include "socialplanner.h"
+#include "robotmanager.h"
+#include "mapviewer.h"
 
 PlayGround::PlayGround():
     mapViewer(NULL),
@@ -90,7 +97,7 @@ void PlayGround::loadMap(QString name,float res,bool negate,Pose p)
         mapManager->loadMap(name,res,negate,p);
     logMsg.append("\nMap Manager Started");
     addMsg(0,INFO,logMsg);
-    emit mapUpdated(mapManager->globalMap);
+    Q_EMIT mapUpdated(mapManager->globalMap);
 }
 
 void PlayGround::setMapViewer(MapViewer *_mapViewer)

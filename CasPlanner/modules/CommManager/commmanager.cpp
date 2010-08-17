@@ -19,6 +19,9 @@
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
 #include "commmanager.h"
+#include "robot.h"
+#include "statusbar.h"
+#include "playground.h"
 
 CommManager::CommManager(Robot *rob,PlayGround * playG):
 robot(rob),
@@ -140,8 +143,8 @@ int CommManager::initialize()
   	else
   	{
   		if(isRunning())
-  		{
-  			emit addMsg(0,INFO,"Already Connected and running");
+                {
+                        Q_EMIT addMsg(0,INFO,"Already Connected and running");
   			return 1;
   		}
   	}
@@ -183,7 +186,7 @@ int CommManager::initialize()
 	}
     start(QThread::HighestPriority);
 	logMsg.append(QString("\n-> Communication Manager Started."));    
-    emit addMsg(0,INFO,logMsg);  	
+    Q_EMIT addMsg(0,INFO,logMsg);
     return 1;
 }
 

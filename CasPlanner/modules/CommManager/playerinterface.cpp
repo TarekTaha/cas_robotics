@@ -19,12 +19,16 @@
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
 #include "playerinterface.h"
+#include "utils.h"
+#include "map.h"
+#include "timer.h"
+#include "wheelchairproxy.h"
 
 PlayerInterface::PlayerInterface(QString host, int port)
 {
-	resetResources();
+    resetResources();
     playerHost = host;
-    playerPort = port;   
+    playerPort = port;
 }
 
 PlayerInterface::~PlayerInterface()
@@ -55,18 +59,18 @@ void PlayerInterface::resetResources()
     playerHost		= "localhost";
     voiceMessage	= "";
     playerPort		= 6665;   
-    pc				= 0; 
-    devices			= NULL;
-	drive			= NULL;
-	vfh				= NULL;
-	joyStick		= NULL;
-    wheelChairCommander= NULL;
-    map				= NULL;
-	ptz				= NULL;
-	localizer		= NULL;
-	speechP			= NULL;
-	speed			= 0;
-	turnRate		= 0;
+    pc			= 0;
+    devices		= NULL;
+    drive		= NULL;
+    vfh			= NULL;
+    joyStick		= NULL;
+    wheelChairCommander = NULL;
+    map			= NULL;
+    ptz			= NULL;
+    localizer		= NULL;
+    speechP		= NULL;
+    speed		= 0;
+    turnRate		= 0;
 }
 
 int PlayerInterface::getJoyStickGlobalDir()
@@ -761,7 +765,7 @@ void PlayerInterface::connectDevices()
 	logMsg.append(QString("\n\t\t - Test Passed, You can read Data from Player Server Now"));
 	logMsg.append(QString("\n\t\t - Connection Established"));
 	logMsg.append(QString("\n/********************************************************************/"));	
-    emit addMsg(0,INFO,logMsg);
+    Q_EMIT addMsg(0,INFO,logMsg);
 	sleep(0.5);
 }
 void PlayerInterface::run ()
@@ -917,7 +921,7 @@ void PlayerInterface::run ()
 		    	}
 		    }
 //		    cout<<"\nDebug Msg 4"; fflush(stdout);
-	    	emit newData();
+                Q_EMIT newData();
 	    }
     }
 	catch (PlayerCc::PlayerError e)

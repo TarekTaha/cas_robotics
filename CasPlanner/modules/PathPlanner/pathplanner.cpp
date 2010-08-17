@@ -51,8 +51,10 @@ void PathPlanner::freeResources()
     freePath();
     p=root=test=NULL;
     planningParameters  = 0;
-    delete originalMap;
-    delete Astar::map;
+//    if(originalMap)
+//        delete originalMap;
+//    if(Astar::map)
+//        delete Astar::map;
 }
 
 void PathPlanner::freePath()
@@ -108,13 +110,13 @@ void PathPlanner::expandObstacles()
         LOG(Logger::Info,"    --->>> You have to read the map before Expanding the Obstacles <<<---")
         return;
     }
-    if(obstaclesExpanded)
-    {
-        LOG(Logger::Info,"    --->>> Obstacles have been expanded before, Skipping <<<---")
-        delete Astar::map;
-        Astar::map = originalMap->clone();
-        return;
-    }
+//    if(obstaclesExpanded)
+//    {
+//        LOG(Logger::Info,"    --->>> Obstacles have been expanded before, Skipping <<<---")
+//        delete Astar::map;
+//        Astar::map = originalMap->clone();
+//        return;
+//    }
     int thickness;
     int m,n,x,y,radius;
     thickness = int(this->obstacle_expansion_radius/map->mapRes);
@@ -574,7 +576,7 @@ void PathPlanner::updateMap(Map *mapPatch)
 /*! Sets the converted QImage or the Laser Scan Map to
  * the Current Planner
  */
-void PathPlanner :: setMap(Map * map_in)
+void PathPlanner::setMap(Map * map_in)
 {
     if(!map_in)
     {

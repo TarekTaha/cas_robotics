@@ -32,7 +32,7 @@ class Sensors: public QWidget
     public:
         Sensors(QWidget *parent = 0,RobotManager *rob=0); 
         virtual int config()=0;
-    public slots:
+    public Q_SLOTS:
         virtual void updateData()=0; 
     protected:
         RobotManager *robotManager; 

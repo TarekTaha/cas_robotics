@@ -21,17 +21,11 @@
 #ifndef COMMMANAGER_H
 #define COMMMANAGER_H
 
-#include <libplayerc++/playerc++.h>
-#include <libplayerinterface/player.h>
-
 #include <QObject>
-
 #include "playerinterface.h"
-#include "robot.h"
-#include "statusbar.h"
-#include "playground.h"
-
 class PlayGround;
+class Robot;
+class ConfigFile;
 
 class CommManager: public PlayerInterface
 {

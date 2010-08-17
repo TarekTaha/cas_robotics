@@ -21,9 +21,6 @@
 #ifndef MAPMANAGER_H_
 #define MAPMANAGER_H_
 
-#include <libplayerc++/playerc++.h>
-#include <libplayerinterface/player.h>
-
 #include <QObject>
 #include <QThread>
 #include <QString>

@@ -23,16 +23,14 @@
 
 #include <libplayerc++/playerc++.h>
 #include <libplayerinterface/player.h>
-
 #include <QTabWidget>
-#include "playgroundtab.h"
-#include "playground.h"
-#include "tasksgui.h"
-#include "mapviewer.h"
-#include "hritab.h"
-#include "loggerview.h"
-#include "missioncontroltab.h"
-#include "logger.h"
+class PlayGround;
+class PlayGroundTab;
+class HriTab;
+class TasksGui;
+class MissionControlTab;
+class MapViewer;
+class loggerview;
 
 class TabContainer : public QTabWidget
 {

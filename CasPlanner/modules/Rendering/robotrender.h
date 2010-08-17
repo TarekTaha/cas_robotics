@@ -33,7 +33,7 @@ Q_OBJECT
         ~RobotRender();
         virtual void setRobot(Robot *);
         virtual void render();
-//    public slots:
+//    public Q_SLOTS:
 //        virtual void updateData();
     private:
         Robot *robot;

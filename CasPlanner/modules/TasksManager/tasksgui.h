@@ -96,7 +96,7 @@ class TasksControlPanel: public QWidget
 public:
     TasksControlPanel(TasksGui *,QWidget *);
     void updateRobotSetting();
-        public slots:
+        public Q_SLOTS:
     void updateSelectedVoronoiMethod(bool);
     void save();
     void exportHtml();
@@ -163,7 +163,7 @@ public:
     void config();
     QSize setMinimumSizeHint();
     void setShowPaths(bool state){this->showPaths = state;}
-    public slots:
+    public Q_SLOTS:
         void keyPressEvent(QKeyEvent *e);
 private:
     TasksGui *tasksGui;
@@ -205,7 +205,7 @@ public:
     int totalVisits;
     PlayGround * playGround;
     QString timeOfDay;
-public slots:
+public Q_SLOTS:
     void updateData();
     void provideSpeed(double &speed, double &turnRate);
     void generateSkeleton();
@@ -213,7 +213,7 @@ public slots:
     void timeOfDayChanged(QString);
     void clearAll();
     void saveImage();
-signals:
+Q_SIGNALS:
     void newData();
 private:
     QTabWidget *tabContainer;
