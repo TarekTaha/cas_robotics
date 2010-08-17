@@ -1,17 +1,9 @@
 #include "wheelchairproxy.h"
-
 #if HAVE_CONFIG_H
   #include "config.h"
 #endif
 
-#include <cassert>
-#include <sstream> 
-#include <iomanip>
-#include <iostream>
-
 using namespace std;
-using namespace PlayerCc;
-
 WheelChairProxy::WheelChairProxy(PlayerClient *aPc, uint aIndex)
   : ClientProxy(aPc, aIndex),
   mDevice(NULL)

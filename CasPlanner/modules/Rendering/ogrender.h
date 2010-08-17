@@ -36,7 +36,7 @@ Q_OBJECT
         virtual void setId(int mapId);
         virtual void setProvider(MapProvider *provider);
         virtual void render();
-    public slots:
+    public Q_SLOTS:
         virtual void updateData(); 
     private:
         double maxRange; 

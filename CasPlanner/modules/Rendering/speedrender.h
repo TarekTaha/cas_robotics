@@ -35,7 +35,7 @@ class SpeedRender: public GLRender
         void setMaxSpeed(double speed);
         void setMaxTurnRate(double turnRate); 
         void render();
-    public slots:
+    public Q_SLOTS:
         void updateData(); 
     private:
         SpeedProvider *sp; 

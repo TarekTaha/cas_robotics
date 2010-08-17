@@ -1,6 +1,23 @@
 #include "missioncontroltab.h"
 #include "ui_missioncontroltab.h"
 
+#include <QVBoxLayout>
+#include <QCheckBox>
+#include <QDoubleSpinBox>
+#include <QTreeWidget>
+#include <QPushButton>
+#include <QHash>
+#include "mapviewer.h"
+#include "playground.h"
+#include "node.h"
+#include "configfile.h"
+#include "logger.h"
+#include "IntentionRecognizer.h"
+#include "commmanager.h"
+#include "navigator.h"
+#include "robotmanager.h"
+#include "planningmanager.h"
+
 MissionControlTab::MissionControlTab(QWidget *parent,PlayGround *playGround_in) :
     QWidget(parent),
     ui(new Ui::MissionControlTab),

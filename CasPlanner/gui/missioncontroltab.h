@@ -5,28 +5,22 @@
 #include <libplayerinterface/player.h>
 
 #include <QWidget>
-#include <QVBoxLayout>
-#include <QCheckBox>
-#include <QDoubleSpinBox>
-#include <QTreeWidget>
-#include <QPushButton>
-#include <QHash>
-#include "mapviewer.h"
-#include "playground.h"
-#include "node.h"
-#include "configfile.h"
-#include "logger.h"
+#include <QVector>
+#include "pathplanner.h"
 
 class RobotManager;
 class MapViewer;
 class PlayGround;
 class NavContainer;
-
-using namespace CasPlanner;
+class Pose;
+class Map;
+class QRadioButton;
 
 namespace Ui {
     class MissionControlTab;
 }
+
+using namespace CasPlanner;
 
 class MissionControlTab : public QWidget
 {
@@ -34,7 +28,7 @@ class MissionControlTab : public QWidget
 public:
     explicit MissionControlTab(QWidget *parent,PlayGround *playGround_in);
     ~MissionControlTab();
-public slots:
+public Q_SLOTS:
     void save();
     void setNavigation();
     void pathPlan();
@@ -60,7 +54,7 @@ private:
     Node * path;
     static int width, height, components;
 
-private slots:
+private Q_SLOTS:
     void on_generateSearchSpace_released();
 };
 

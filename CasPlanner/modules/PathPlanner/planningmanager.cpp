@@ -19,6 +19,10 @@
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
 #include "planningmanager.h"
+#include "settings.h"
+#include "playground.h"
+#include "robotmanager.h"
+#include "statusbar.h"
 
 /*!
  * Constructor, parameters are provided directly rather than
@@ -299,7 +303,7 @@ int PlanningManager::setupPlanner()
                                       bridge_conn_rad);
         logMsg.append("\n->Planner Started.");
         LOG(Logger::Info,logMsg)
-        emit addMsg(0,INFO,logMsg);
+        Q_EMIT addMsg(0,INFO,logMsg);
     }
     return 1;
 }
@@ -358,7 +362,7 @@ void PlanningManager::generateSearchSpaceState(bool loadFromFile,bool overWriteC
         if(planningParameters & NODES_CONNECT)
             pathPlanner->connectNodes();
         pathPlanner->saveSpace2File(filename);
-        emit searchSpaceGenerated();
+        Q_EMIT searchSpaceGenerated();
         LOG(Logger::Info,"Space Generation took:"<<timer.elapsed()/double(1000.00)<<" secs")
     }
     pathPlanner->showConnections();
@@ -378,7 +382,7 @@ void PlanningManager::findPathState()
     QTime timer;
     retval = pathPlanner->startSearch(start,end,coord);
     LOG(Logger::Info,"File loading took:"<<timer.elapsed()/double(1000.00)<<" secs")
-    emit pathFound(retval);
+    Q_EMIT pathFound(retval);
     if(retval)
     {
         //pathPlanner->printNodeList();

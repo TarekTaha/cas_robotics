@@ -21,9 +21,6 @@
 #ifndef ASTAR_H_
 #define ASTAR_H_
 
-#include <libplayerc++/playerc++.h>
-#include <libplayerinterface/player.h>
-
 #include <QPointF>
 #include <QHash>
 #include <QBitArray>

@@ -1,6 +1,12 @@
 #include "planningsettings.h"
 #include "ui_planningsettings.h"
 
+#include "playground.h"
+#include "settings.h"
+#include "planningmanager.h"
+#include "navigator.h"
+#include "mapviewer.h"
+
 PlanningSettings::PlanningSettings(QWidget *parent, PlayGround *playG) :
         QWidget(parent),
         playGround(playG),

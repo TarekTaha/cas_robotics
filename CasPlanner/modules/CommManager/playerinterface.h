@@ -20,27 +20,33 @@
  ***************************************************************************/
 #ifndef PLAYERINTERFACE_H
 #define PLAYERINTERFACE_H
-#include <libplayerc++/playerc++.h>
-#include <libplayerinterface/player.h>
 
 #include <QThread>
 #include <QReadWriteLock>
 #include <QTime>
 #include <iostream>
 #include <QDataStream>
-
-#include "comms.h"
-#include "utils.h"
-#include "map.h"
-#include "timer.h"
-#include "wheelchairproxy.h"
 #include "accelerometer.h"
+#include <libplayerc++/playerc++.h>
+#include <libplayerc++/playerclient.h>
+#include <libplayerc/playerc.h>
+#include "comms.h"
+
+class Pose;
+class LaserScan;
+class WheelChairProxy;
 
 #define MAX_LASERS 4
-
 using namespace PlayerCc;
 using namespace std;
-
+/*
+class Position2dProxy;
+class MapProxy;
+class PtzProxy;
+class LocalizeProxy;
+class SpeechProxy;
+class LaserProxy;
+*/
 class DeviceType
 {
 public:
@@ -97,8 +103,6 @@ public:
     ~Laser(){}
 };
 
-
-
 class PlayerInterface: public Comms
 {
     Q_OBJECT
@@ -151,7 +155,7 @@ public:
     int  getJoyStickGlobalDir();
     int  getJoyStickDir();
     Pose localizeToPosition(Pose localizerWayPoint);
-signals:
+Q_SIGNALS:
     void newData();
     void addMsg(int,int,QString);
 protected:

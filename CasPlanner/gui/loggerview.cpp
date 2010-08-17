@@ -1,5 +1,7 @@
 #include "loggerview.h"
 #include "ui_loggerview.h"
+#include "logger.h"
+#include <iostream>
 
 loggerview::loggerview(QWidget *parent) :
     QWidget(parent),

@@ -21,9 +21,6 @@
 #ifndef PLANNINGMANAGER_H_
 #define PLANNINGMANAGER_H_
 
-#include <libplayerc++/playerc++.h>
-#include <libplayerinterface/player.h>
-
 #include "pathplanner.h"
 #include "configfile.h"
 #include "mapmanager.h"
@@ -60,7 +57,7 @@ public:
     bool renderSearchSpaceTree;
     bool renderSearchTree;
     bool renderPaths;
-public slots:
+public Q_SLOTS:
     void  findPath(int coord);
     void  generateSpace();
     void  setStart(Pose);
@@ -81,7 +78,7 @@ public slots:
     void  updateMap(LaserScan laserScan,double local_dist,Pose robotLocation);
     bool  fileExist(const char * fname);
     void  generateSearchSpace(bool loadFromFile,bool overWriteCurrent);
-signals:
+Q_SIGNALS:
     void addMsg(int,int, QString);
     void updateMap(Map* map);
     void searchSpaceGenerated();

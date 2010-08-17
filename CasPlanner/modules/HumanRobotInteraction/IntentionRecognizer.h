@@ -21,7 +21,6 @@
 #ifndef INTENTIONRECOGNIZER_H_
 #define INTENTIONRECOGNIZER_H_
 
-#include "playground.h"
 #include <QThread> 
 #include <QMutexLocker>
 #include <QReadWriteLock>
@@ -29,16 +28,19 @@
 #include <QDate>
 #include <iostream>
 #include <QDataStream>
-#include "robot.h"
+#include <assert.h>
 #include "MatrixUtils.h"
 #include "BoundPairExec.h"
 #include "zmdpMainConfig.h"
 #include "activityLogger.h"
 #include "Pomdp.h"
-#include "socialplanner.h"
+#include "utils.h"
+#include "node.h"
 
-//using namespace std;
 class SocialPlanner;
+class PlayGround;
+class RobotManager;
+using namespace CasPlanner;
 
 class IntentionRecognizer: public QThread
 {
@@ -64,7 +66,7 @@ public:
 	ActivityLogger *activityLogger;
 	int  lastObs,observation,action,spatialState,oldSpatialState;
 	SocialPlanner *socialPlanner;
-        public slots:
+        public Q_SLOTS:
                 void pathFound(Node*);
 private:
 	dvector initialBeliefD;

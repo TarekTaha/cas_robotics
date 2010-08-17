@@ -21,9 +21,6 @@
 #ifndef NAVIGATOR_H_
 #define NAVIGATOR_H_
 
-#include <libplayerc++/playerc++.h>
-#include <libplayerinterface/player.h>
-
 #include <QObject>
 #include <QString>
 #include <QPointF>
@@ -31,21 +28,20 @@
 #include <QReadWriteLock>
 #include <QTime>
 #include <vector>
-#include "playground.h"
-#include "robotmanager.h"
-#include "robot.h"
-#include "planningmanager.h"
 #include "mapmanager.h"
-#include "controller.h"
-#include "configfile.h"
-#include "forcefield.h"
-#include "node.h"
 #include "icp.h"
 #include "timer.h"
+#include "controller.h"
+#include "pathplanner.h"
 
+
+class ConfigFile;
 class PlanningManager;
 class RobotManager;
 class PlayGround;
+class ForceField;
+class PlayGround;
+
 using namespace CasPlanner;
 
 class Navigator : public Controller
@@ -76,10 +72,10 @@ public:
     RobotManager *robotManager;
     QVector<QPointF> trail;
     public
-slots:
+Q_SLOTS:
     void FollowPath();
     void StopNavigating();
-signals:
+Q_SIGNALS:
     void drawLocalPath(PathPlanner *,Pose *,int *);
     void pathTraversed();
     void glRender();

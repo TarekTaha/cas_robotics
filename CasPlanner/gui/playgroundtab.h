@@ -24,33 +24,36 @@
 #include <libplayerc++/playerc++.h>
 #include <libplayerinterface/player.h>
 
-#include <QtCore/QVariant>
-#include <QtGui/QAction>
-#include <QtGui/QApplication>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QGroupBox>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QListView>
-#include <QtGui/QSplitter>
-#include <QtGui/QTableWidget>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QWidget>
-#include <QtGui/QDialog>
+#include <QWidget>
+#include <QVector>
+#include <QHash>
+#include <QLabel>
+#include <QLineEdit>
+#include <QRadioButton>
+#include <QAction>
+#include <QButtonGroup>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QListView>
+#include <QSplitter>
+#include <QTableWidget>
+#include <QVBoxLayout>
+#include <QDialog>
 #include <QFrame>
 #include <QHash>
-#include "playground.h"
-#include "planningsettings.h"
+#include <QDoubleSpinBox>
+#include <QCheckBox>
+#include <QPushButton>
+
+#include "playerinterface.h"
 
 class PlayGround;
+class PlayGroundTab;
+class PlanningTab;
 class QListWidget;
 class QListWidgetItem;
 class QStackedWidget;
-class PlayGroundTab;
-class PlanningTab;
-class QDragEnterEvent;
-class QDropEvent;
-class QMouseEvent;
+class QComboBox;
 
 class Interfaces : public QWidget
 {
@@ -59,7 +62,7 @@ public:
     Interfaces(QWidget *parent = 0);
     void createIcons(QVector <DeviceType> * devices);
     void addInterface(DeviceType dev,QString name);
-public slots:
+public Q_SLOTS:
     void checkChanged(int state);
 private:
     QVBoxLayout * vLayout;
@@ -72,7 +75,7 @@ class RobotConfigPage : public QWidget
     Q_OBJECT
 public:
     RobotConfigPage(QWidget *parent = 0,PlayGround *playG=0);
-public slots:
+public Q_SLOTS:
     void updateSelection(int r);
 public:
     PlayGround * playGround;
@@ -100,7 +103,7 @@ public:
     QDoubleSpinBox mapResolution;
     QPushButton browseMapBtn,reloadMapBtn;
     QRadioButton whiteFree,blackFree;
-public slots:
+public Q_SLOTS:
     void getFileName();
     void reloadMap();
 };
@@ -120,7 +123,7 @@ public:
     virtual ~PlayGroundTab();
     PlayGroundTab(QWidget *parent=0,PlayGround *playG=0);
     PlayGround * playGround;
-public slots:
+public Q_SLOTS:
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);
 private:
     void createIcons();

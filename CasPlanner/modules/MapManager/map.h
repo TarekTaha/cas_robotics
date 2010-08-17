@@ -22,6 +22,7 @@
 #define MAP_H_
 #include "utils.h"
 #include <QByteArray>
+#include "logger.h"
 
 class QObject;
 

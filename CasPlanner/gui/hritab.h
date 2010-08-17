@@ -26,7 +26,6 @@
  
 #include <QtGui/QWidget>
 #include "ui_hritab.h"
-#include "playground.h"
 
 class RobotManager;
 class PlayGround;
@@ -39,7 +38,7 @@ class HriTab : public QWidget
 public:
     HriTab(QWidget *parent = 0,PlayGround *playG=0);
     ~HriTab();
-public slots:
+public Q_SLOTS:
 	void toggleVoiceNotification(int);
 	void toggleStrategy(bool);
 private:

@@ -20,6 +20,12 @@
  ***************************************************************************/
 #include "mapviewer.h"
 #include "bitmap_fonts.h"
+#include "planningmanager.h"
+#include "navigator.h"
+#include "IntentionRecognizer.h"
+#include "commmanager.h"
+#include "socialplanner.h"
+
 #define ROBOT 1
 
 MapViewer::MapViewer(QWidget *parent,PlayGround *playG)
@@ -1260,7 +1266,7 @@ void MapViewer::mousePressEvent(QMouseEvent *me)
     else if(step ==2)
     {
         start.phi = atan2(p.y() - start.p.y(),p.x() - start.p.x());
-        emit setStart(start);
+        Q_EMIT setStart(start);
         LOG(Logger::Info,"Start Angle ="<<RTOD(start.phi))
         step++;
         update();
@@ -1270,7 +1276,7 @@ void MapViewer::mousePressEvent(QMouseEvent *me)
     {
         end.phi = atan2(p.y() - end.p.y(),p.x() - end.p.x());
         LOG(Logger::Info,"End Angle ="<<RTOD(end.phi))
-        emit setEnd(end)	;
+        Q_EMIT setEnd(end)	;
         end_initialized = true;
         step = 1;
         update();
@@ -1327,7 +1333,7 @@ void MapViewer::keyPressEvent(QKeyEvent *e)
     {
         if(e->modifiers() && Qt::ShiftModifier)
         {
-            emit moveMOUp();
+            Q_EMIT moveMOUp();
         }
         else
         {
@@ -1338,7 +1344,7 @@ void MapViewer::keyPressEvent(QKeyEvent *e)
     {
         if(e->modifiers() && Qt::ShiftModifier)
         {
-            emit moveMODown();
+            Q_EMIT moveMODown();
         }
         else
         {
@@ -1349,7 +1355,7 @@ void MapViewer::keyPressEvent(QKeyEvent *e)
     {
         if(e->modifiers() && Qt::ShiftModifier)
         {
-            emit moveMOLeft();
+            Q_EMIT moveMOLeft();
         }
         else
         {
@@ -1360,7 +1366,7 @@ void MapViewer::keyPressEvent(QKeyEvent *e)
     {
         if(e->modifiers() && Qt::ShiftModifier)
         {
-            emit moveMORight();
+            Q_EMIT moveMORight();
         }
         else
         {
@@ -1379,7 +1385,7 @@ void MapViewer::keyPressEvent(QKeyEvent *e)
     {
         if(e->modifiers() && Qt::ShiftModifier)
         {
-            emit yawMOPos();
+            Q_EMIT yawMOPos();
         }
         else
         {
@@ -1390,7 +1396,7 @@ void MapViewer::keyPressEvent(QKeyEvent *e)
     {
         if(e->modifiers() && Qt::ShiftModifier)
         {
-            emit yawMONeg();
+            Q_EMIT yawMONeg();
         }
         else
         {

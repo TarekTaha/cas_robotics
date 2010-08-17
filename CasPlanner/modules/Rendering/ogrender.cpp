@@ -33,7 +33,6 @@ OGRenderer::~OGRenderer(){};
 
 void OGRenderer::setId(int id)
 {
-    qDebug("Map id set to %d", id); 
     mapId = id;  
 }
 

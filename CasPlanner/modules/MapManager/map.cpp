@@ -126,12 +126,14 @@ Map::~Map()
 
 Map * Map::clone()
 {
-    Map* clone = new Map(width,height,mapRes,center,global_pose);
+    Map* cloneMap = new Map(width,height,mapRes,center,global_pose);
     for(int i=0; i < width; i++)
     {
-        memcpy(clone->grid[i],grid[i],height*sizeof(bool));
+        memcpy(cloneMap->grid[i],grid[i],height*sizeof(bool));
+//        for(int j=0;j < height;j++)
+//            cloneMap->grid[i][j] = grid[i][j];
     }
-    return clone;
+    return cloneMap;
 }
 
 // transfers from pixel coordinate to the main coordinate system

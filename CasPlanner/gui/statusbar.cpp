@@ -19,6 +19,8 @@
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
 #include "statusbar.h"
+#include <QStatusBar>
+#include <QPushButton>
 
 StatusLogger::StatusLogger(QStatusBar *in_statusBar):
 statusBar(in_statusBar)

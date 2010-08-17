@@ -18,7 +18,17 @@
  *   Free Software Foundation, Inc.,                                       *
  *   51 Franklin Steet, Fifth Floor, Boston, MA  02111-1307, USA.          *
  ***************************************************************************/
+#include <QListWidget>
+#include <QListWidgetItem>
+#include <QStackedWidget>
+#include <QComboBox>
 #include "playgroundtab.h"
+#include "playground.h"
+#include "planningsettings.h"
+#include "robotmanager.h"
+#include "mapmanager.h"
+#include "robot.h"
+#include "socialplanner.h"
 
 Interfaces::Interfaces(QWidget *parent)
 :QWidget(parent),

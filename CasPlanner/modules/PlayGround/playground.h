@@ -21,21 +21,21 @@
 #ifndef PLAYGROUND_H_
 #define PLAYGROUND_H_
 
-// #include "robotmanager.h" -> #include "commmanager.h" -> #include "playerinterface.h" -> boost Signal Shit
-#include "robotmanager.h"
 #include <QVector>
 #include <QStatusBar>
-#include "mapviewer.h"
-#include "configfile.h"
-#include "statusbar.h"
-#include "socialplanner.h"
+#include <QString>
 #include "xmlparser.h"
 #include "logger.h"
+#include "utils.h"
 
 class Navigator;
 class PlanningManager;
 class MapViewer;
-
+class SocialPlanner;
+class StatusLogger;
+class MapManager;
+class RobotManager;
+class Map;
 class PlayGround: public QObject
 {
     Q_OBJECT
@@ -50,12 +50,12 @@ public:
     QVector <RobotManager* > robotPlatforms;
     RobotManager *activeRobot;
     void setMapViewer(MapViewer *);
-public slots:
+public Q_SLOTS:
         void startRobotsComm();
         void stopRobots();
         void loadMap(QString name,float res,bool negate, Pose p);
         void addMsg(int id,int type,QString msg);
-signals:
+Q_SIGNALS:
     void mapUpdated(Map * mapData);
 };
 

@@ -20,6 +20,14 @@
  ***************************************************************************/
 #include <robotmanager.h>
 
+#include "commmanager.h"
+#include "planningmanager.h"
+#include "navigator.h"
+#include "configfile.h"
+#include "playground.h"
+#include "IntentionRecognizer.h"
+#include "socialplanner.h"
+
 RobotManager::RobotManager():
         playGround(NULL),
         commManager(NULL),
@@ -104,7 +112,7 @@ void RobotManager::readRobotConfigs(ConfigFile *cf,int secId)
     logMsg.append(QString("\n\t\t Robot  name:\t%1").arg(robot->robotName));
     logMsg.append(QString("\n\t\t Robot Ip is:\t%1:%2").arg(robot->robotIp).arg(robot->robotPort));
     logMsg.append("\n*********************************************************************");
-    emit addMsg(0,INFO,logMsg);
+    Q_EMIT addMsg(0,INFO,logMsg);
 }
 
 void RobotManager::readCommManagerConfigs(ConfigFile *cf,int secId)

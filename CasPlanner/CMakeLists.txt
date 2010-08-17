@@ -157,7 +157,8 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 # Optimization Level
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math -march=pentium-m -msse2 -mfpmath=sse")
+# Qt/boost signal/slot shit
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math -march=pentium-m -msse2 -mfpmath=sse -DQT_NO_KEYWORDS ")
 
 # enable warnings
 ADD_DEFINITIONS( -Wall )

@@ -5,8 +5,6 @@
 #include <libplayerinterface/player.h>
 
 #include <QWidget>
-#include "playground.h"
-#include "settings.h"
 
 class PlanningTab;
 class RobotManager;
@@ -23,7 +21,7 @@ class PlanningSettings : public QWidget
 public:
     explicit PlanningSettings(QWidget *parent, PlayGround *playG);
     ~PlanningSettings();
-public slots:
+public Q_SLOTS:
     void updateSelectedObject(double);
     void updateSelectedAvoidanceAlgo(bool);
     void updateCheckboxStates(int);

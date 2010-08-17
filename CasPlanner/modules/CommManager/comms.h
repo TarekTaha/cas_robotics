@@ -52,10 +52,10 @@ class Comms: public QThread, public LocationProvider, public MapProvider, public
 		{
 		    return name; 
 		}
-    signals:
+    Q_SIGNALS:
         void newData();
 		void addMsg(int,int,QString); 
-    public slots:
+    public Q_SLOTS:
         virtual void stop()=0;
         virtual void stopRelease()=0;
         virtual void disconnect()=0; 

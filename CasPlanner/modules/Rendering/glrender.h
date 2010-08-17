@@ -27,12 +27,12 @@ class GLRender: public QObject
 {
 Q_OBJECT
     public: 
-        GLRender(QGLWidget *in_w): w(in_w){}; 
+        GLRender(QGLWidget *in_w): w(in_w){}
         virtual void render()=0; 
         virtual ~GLRender()
         {
         }
-    public slots:
+    public Q_SLOTS:
         virtual void updateData()=0; 
     protected:
         QGLWidget *w; 

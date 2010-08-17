@@ -1848,7 +1848,7 @@ static void yyensure_buffer_stack (void)
 								num_to_alloc * sizeof(struct yy_buffer_state*)
 								);
 
-		/* zero only the new slots.*/
+		/* zero only the new Q_SLOTS.*/
 		memset((yy_buffer_stack) + (yy_buffer_stack_max), 0, grow_size * sizeof(struct yy_buffer_state*));
 		(yy_buffer_stack_max) = num_to_alloc;
 	}
