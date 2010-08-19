@@ -45,26 +45,27 @@ enum {GPS,AMCL,ODOM};
 class Comms: public QThread, public LocationProvider, public MapProvider, public SpeedProvider, public LaserProvider 
 {
     Q_OBJECT 
-    public:
-        virtual int readConfigs(ConfigFile *cf,int secId)=0;
-        virtual void connect2Robot(QString playerHost, int playerPort)=0;
-		virtual QString getName()
-		{
-		    return name; 
-		}
-    Q_SIGNALS:
-        void newData();
-		void addMsg(int,int,QString); 
-    public Q_SLOTS:
-        virtual void stop()=0;
-        virtual void stopRelease()=0;
-        virtual void disconnect()=0; 
-    protected:
-		bool startConnected,activateControl,ptzEnabled,occMapEnabled,localizerEnabled,laserEnabled
-			 ,vfhEnabled,speechEnabled,connected, joyStickEnabled, ctrEnabled, mapEnabled, localized 
-			 ,velControl, stopped;
-    	QString name,playerIp; 
-        int positionId, playerPort,positionControlId,ptzId,mapId,localizerId,vfhId,speechId,joyStickId;
+public:
+    virtual int readConfigs(ConfigFile *cf,int secId)=0;
+    virtual void connect2Robot(QString playerHost, int playerPort)=0;
+    virtual QString getName()
+    {
+        return name;
+    }
+Q_SIGNALS:
+    void newData();
+    void addMsg(int,int,QString);
+public Q_SLOTS:
+    virtual void stop()=0;
+    virtual void stopRelease()=0;
+    virtual void disconnect()=0;
+protected:
+    bool startConnected,activateControl,ptzEnabled,occMapEnabled,localizerEnabled,laserEnabled
+            ,vfhEnabled,speechEnabled,connected, joyStickEnabled, ctrEnabled, mapEnabled, localized
+            ,velControl, stopped;
+    bool ptzConnected,localizerConnected,laserConnected,vfhConnected,speechConnected,joyStickConnected,mapConnected,ctrlConnected;
+    QString name,playerIp;
+    int positionId, playerPort,positionControlId,ptzId,mapId,localizerId,vfhId,speechId,joyStickId;
 };
 
 #endif 

@@ -182,7 +182,7 @@ pause(false),
 local_planner(NULL),
 global_planner(r->planningManager)
 {
-   	connect(this, SIGNAL(addMsg(int,int,QString)), playGround,SLOT(addMsg(int,int,QString)));
+    connect(this, SIGNAL(addMsg(int,int,QString)), playGround,SLOT(addMsg(int,int,QString)));
 }
 
 Navigator::~Navigator()
@@ -192,123 +192,115 @@ Navigator::~Navigator()
 
 void Navigator::setupLocalPlanner()
 {
-	if(!local_planner)
-	{
-		local_planner = new PlanningManager(robotManager,
-											  pixel_res,
-											  dist_goal,
-											  bridge_len,
-											  bridge_res,
-											  reg_grid,
-											  obst_exp,
-											  conn_rad,
-											  obst_pen,
-											  bridge_conn_rad
-										   );					   
-	}
+    if(!local_planner)
+    {
+        local_planner = new PlanningManager(robotManager,
+                                            pixel_res,
+                                            dist_goal,
+                                            bridge_len,
+                                            bridge_res,
+                                            reg_grid,
+                                            obst_exp,
+                                            conn_rad,
+                                            obst_pen,
+                                            bridge_conn_rad
+                                            );
+    }
 }
 
 int Navigator::readConfigs( ConfigFile *cf)
 {
-	int numSec; 
-	numSec = cf->GetSectionCount(); 
-	for(int i=0; i < numSec; i++)
-	{
-	    QString sectionName = cf->GetSectionType(i);
-	    if(sectionName == "Navigator")
-	    {
-		   	obst_avoid    =   cf->ReadString(i, "obst_avoid", "non");
-		   	if(obst_avoid == "VFH")
-		   	{
-		   		this->obstAvoidAlgo = VFH;
-		   	}
-		   	else if(obst_avoid == "FORCE_FIELD")
-		   	{
-		   		this->obstAvoidAlgo = FORCE_FIELD;		   		
-		   	}
-		   	else if(obst_avoid == "CONFIG_SPACE")
-		   	{
-		   		this->obstAvoidAlgo = CONFIG_SPACE;
-		   	}
-		   	else if(obst_avoid == "NO_AVOID")
-		   	{
-		   		this->obstAvoidAlgo = NO_AVOID;		   		
-		   	}
-		 	k_dist        =   cf->ReadFloat (i, "k_dist", 1.8);
-		  	k_theta       =   cf->ReadFloat (i, "k_theta", 2.5);
-		  	safety_dist   =   cf->ReadFloat (i, "safety_dist", 0.5);
-		  	tracking_dist =   cf->ReadFloat (i, "tracking_dist", 0);
-			dist_goal    = 	  cf->ReadFloat (i, "dist_goal", 0.6);
-			bridge_len   = 	  cf->ReadFloat (i, "bridge_len", 2);
-			bridge_res   = 	  cf->ReadFloat (i, "bridge_res", 0.1);
-			reg_grid     = 	  cf->ReadFloat (i, "reg_grid", 0.2);
-			obst_exp     = 	  cf->ReadFloat (i, "obst_exp", 0.1);
-			conn_rad     = 	  cf->ReadFloat (i, "conn_rad", 0.6);
-			obst_pen     = 	  cf->ReadFloat (i, "obst_pen", 3);
-			local_dist   = 	  cf->ReadFloat (i, "local_dist", 2);	
-			traversable_dist= cf->ReadFloat (i, "traversable_dist", 2);
-			linear_velocity = cf->ReadFloat (i, "linear_velocity", 0.2);
-			int cnt =	 			cf->GetTupleCount(i,"laser_pose");
-			if (cnt != 3)
-			{
-				cout<<"\n ERROR: Laser Pose should consist of 3 tuples !!!";
-				exit(1);
-			}
-			laser_pose.p.setX(cf->ReadTupleFloat(i,"laser_pose",0 ,0));
-			laser_pose.p.setY(cf->ReadTupleFloat(i,"laser_pose",1 ,0));
-			laser_pose.phi = (cf->ReadTupleFloat(i,"laser_pose",2 ,0));			
+    int numSec;
+    numSec = cf->GetSectionCount();
+    for(int i=0; i < numSec; i++)
+    {
+        QString sectionName = cf->GetSectionType(i);
+        if(sectionName == "Navigator")
+        {
+            obst_avoid    =   cf->ReadString(i, "obst_avoid", "non");
+            if(obst_avoid == "VFH")
+            {
+                this->obstAvoidAlgo = VFH;
+            }
+            else if(obst_avoid == "FORCE_FIELD")
+            {
+                this->obstAvoidAlgo = FORCE_FIELD;
+            }
+            else if(obst_avoid == "CONFIG_SPACE")
+            {
+                this->obstAvoidAlgo = CONFIG_SPACE;
+            }
+            else if(obst_avoid == "NO_AVOID")
+            {
+                this->obstAvoidAlgo = NO_AVOID;
+            }
+            k_dist        =   cf->ReadFloat (i, "k_dist", 1.8);
+            k_theta       =   cf->ReadFloat (i, "k_theta", 2.5);
+            safety_dist   =   cf->ReadFloat (i, "safety_dist", 0.5);
+            tracking_dist =   cf->ReadFloat (i, "tracking_dist", 0);
+            dist_goal    = 	  cf->ReadFloat (i, "dist_goal", 0.6);
+            bridge_len   = 	  cf->ReadFloat (i, "bridge_len", 2);
+            bridge_res   = 	  cf->ReadFloat (i, "bridge_res", 0.1);
+            reg_grid     = 	  cf->ReadFloat (i, "reg_grid", 0.2);
+            obst_exp     = 	  cf->ReadFloat (i, "obst_exp", 0.1);
+            conn_rad     = 	  cf->ReadFloat (i, "conn_rad", 0.6);
+            obst_pen     = 	  cf->ReadFloat (i, "obst_pen", 3);
+            local_dist   = 	  cf->ReadFloat (i, "local_dist", 2);
+            traversable_dist= cf->ReadFloat (i, "traversable_dist", 2);
+            linear_velocity = cf->ReadFloat (i, "linear_velocity", 0.2);
+            int cnt =	 			cf->GetTupleCount(i,"laser_pose");
+            if (cnt != 3)
+            {
+                LOG(Logger::Critical,"ERROR: Laser Pose should consist of 3 tuples !!!")
+                exit(1);
+            }
+            laser_pose.p.setX(cf->ReadTupleFloat(i,"laser_pose",0 ,0));
+            laser_pose.p.setY(cf->ReadTupleFloat(i,"laser_pose",1 ,0));
+            laser_pose.phi = (cf->ReadTupleFloat(i,"laser_pose",2 ,0));
 
-	    }
-	    if(sectionName == "Map")
-	    {
-			pixel_res    = 	  cf->ReadFloat (i, "pixel_res", 0.028);
-	    }
-		FF = new ForceField(*robotManager->robot,cf);
-	}
-	QString logMsg;
-	logMsg.append("\n-> Starting Robot Navigator.");
-	logMsg.append("\n\tNavigation Parameters:");
-	logMsg.append(QString("\n\t\t\t Obstacle Avoidance:\t%1").arg(obst_avoid));
-	logMsg.append(QString("\n\t\t\t Controller Distance Gain:%1").arg(k_dist));
-	logMsg.append(QString("\n\t\t\t Controller Theta    Gain:%1").arg(k_theta));
-	logMsg.append(QString("\n\t\t\t Safet Distance :%1").arg(safety_dist));
-	logMsg.append(QString("\n\t\t\t Tracking Distance :%1").arg(tracking_dist));
-	logMsg.append("\n-> Robot Navigator Started.");		
-//    	qDebug("-> Starting Robot Navigator."); 	
-//		qDebug("\tNavigation Parameters:"); 
-//		qDebug("\t\t\t Obstacle Avoidance:\t%s", qPrintable(obst_avoid)); 
-//    	qDebug("\t\t\t Controller Distance Gain:%f",k_dist); 
-//  	qDebug("\t\t\t Controller Theta    Gain:%f",k_theta);
-//  	qDebug("\t\t\t Safet Distance :%f",safety_dist);
-//  	qDebug("\t\t\t Tracking Distance :%f",tracking_dist);
-//    	qDebug("-> Robot Navigator Started.");   	
-	Q_EMIT addMsg(0,INFO,logMsg);
- 	return 1;
+        }
+        if(sectionName == "Map")
+        {
+            pixel_res    = 	  cf->ReadFloat (i, "pixel_res", 0.028);
+        }
+        FF = new ForceField(*robotManager->robot,cf);
+    }
+    QString logMsg;
+    LOG(Logger::Info,"-> Starting Robot Navigator.")
+    LOG(Logger::Info,"\tNavigation Parameters:")
+    LOG(Logger::Info,"\t\t\t Obstacle Avoidance:"<<obst_avoid)
+    LOG(Logger::Info,"\t\t\t Controller Distance Gain:"<<k_dist)
+    LOG(Logger::Info,"\t\t\t Controller Theta    Gain:"<<k_theta)
+    LOG(Logger::Info,"\t\t\t Safet Distance :"<<safety_dist)
+    LOG(Logger::Info,"\t\t\t Tracking Distance :"<<tracking_dist)
+    LOG(Logger::Info,"-> Robot Navigator Started.")
+    Q_EMIT addMsg(0,INFO,logMsg);
+    return 1;
 }
 
 double Navigator::nearestObstacle(LaserScan laserScan)
 {
-	QPointF ray_end,temp[4],intersection;
-	Line L1;
-	double dist,shortest_dist=10000;
-	for(int i=0;i<4;i++)
-	{
-		temp[i] = robotManager->robot->local_edge_points[i];
-	}
-	for(int i=0;i<laserScan.points.size();i++)
-	{
-		ray_end = Trans2Global(laserScan.points[i],laserScan.laserPose);
-		for(int j=0;j<4;j++)
-		{
-			L1.SetStart(temp[j%4]);      L1.SetEnd(temp[(j+1)%4]);
-			dist = Dist2Seg(L1,ray_end);
-			if(dist < shortest_dist)
-			{
-				shortest_dist = dist;
-			}
-		}
-	}
-	return shortest_dist;	
+    QPointF ray_end,temp[4],intersection;
+    Line L1;
+    double dist,shortest_dist=10000;
+    for(int i=0;i<4;i++)
+    {
+        temp[i] = robotManager->robot->local_edge_points[i];
+    }
+    for(int i=0;i<laserScan.points.size();i++)
+    {
+        ray_end = Trans2Global(laserScan.points[i],laserScan.laserPose);
+        for(int j=0;j<4;j++)
+        {
+            L1.SetStart(temp[j%4]);      L1.SetEnd(temp[(j+1)%4]);
+            dist = Dist2Seg(L1,ray_end);
+            if(dist < shortest_dist)
+            {
+                shortest_dist = dist;
+            }
+        }
+    }
+    return shortest_dist;
 };
 
 /*!
@@ -317,42 +309,44 @@ double Navigator::nearestObstacle(LaserScan laserScan)
  */
 void Navigator::generateLocalMap(LaserScan laserScan, Pose rob_location)
 {
-	double farest_laser_dist = 0,dist, num_pixels;
-	QPointF grid_start,temp;
-	local_map.clear();
-	for(int i=0;i<laserScan.points.size();i++)	
-	{
-		double d = sqrt(pow(laserScan.points[i].x(),2)+pow(laserScan.points[i].y(),2));
-		if( d > farest_laser_dist)
-			farest_laser_dist = d;
-	}
-//	qDebug("Longest Laser Ray = %f",farest_laser_dist);
-	dist = sqrt(pow(laserScan.laserPose.p.x(),2)+pow(laserScan.laserPose.p.y(),2)); 
-	num_pixels = (dist + farest_laser_dist + 10)/global_planner->pathPlanner->map->mapRes;
+    double farest_laser_dist = 0,dist, num_pixels;
+    QPointF grid_start,temp;
+    local_map.clear();
+    for(int i=0;i<laserScan.points.size();i++)
+    {
+        double d = sqrt(pow(laserScan.points[i].x(),2)+pow(laserScan.points[i].y(),2));
+        if( d > farest_laser_dist)
+            farest_laser_dist = d;
+    }
+    dist = sqrt(pow(laserScan.laserPose.p.x(),2)+pow(laserScan.laserPose.p.y(),2));
+    num_pixels = (dist + farest_laser_dist + 10)/global_planner->pathPlanner->map->mapRes;
 
-	mapManager.globalMap->convert2Pix(&rob_location.p);
+    mapManager.globalMap->convert2Pix(&rob_location.p);
 
-	grid_start.setX(rob_location.p.x() - num_pixels);
-	if(grid_start.x() < 0) 
-		grid_start.setX(0);
+    grid_start.setX(rob_location.p.x() - num_pixels);
+    if(grid_start.x() < 0)
+        grid_start.setX(0);
 
-	grid_start.setY(rob_location.p.y() - num_pixels);
-	if(grid_start.y() < 0) 
-		grid_start.setY(0);
-//    cout<<"\nStart grid: "<<grid_start.x()<<" y:"<<grid_start.y()<<" pixels:"<<num_pixels; fflush(stdout);
-	for(int i= (int)(grid_start.x()) ; i< (2*num_pixels + grid_start.x()); i++)
-		for(int j=(int)(grid_start.y());j<(2*num_pixels + grid_start.y()); j++)
-		{
-			if(i<(global_planner->pathPlanner->map->width - 1)  && j<(global_planner->pathPlanner->map->height - 1)) 
-				if (global_planner->pathPlanner->map->grid[i][j])
-				{
-					temp.setX(i);
-					temp.setY(j);
-					mapManager.globalMap->convertPix(&temp);
-					local_map.push_back(temp);
-				}
-		}
-	return;
+    grid_start.setY(rob_location.p.y() - num_pixels);
+    if(grid_start.y() < 0)
+        grid_start.setY(0);
+    for(int i= (int)(grid_start.x()) ; i< (2*num_pixels + grid_start.x()); i++)
+    {
+        for(int j=(int)(grid_start.y());j<(2*num_pixels + grid_start.y()); j++)
+        {
+            if(i<(global_planner->pathPlanner->map->width - 1)  && j<(global_planner->pathPlanner->map->height - 1))
+            {
+                if (global_planner->pathPlanner->map->grid[i][j])
+                {
+                    temp.setX(i);
+                    temp.setY(j);
+                    mapManager.globalMap->convertPix(&temp);
+                    local_map.push_back(temp);
+                }
+            }
+        }
+    }
+    return;
 };
 
 void Navigator::setPause(bool pause)
@@ -371,91 +365,89 @@ void Navigator::setObstAvoidAlgo(int algo)
 
 int Navigator::getObstAvoidAlgo()
 {
-	return this->obstAvoidAlgo;
+    return this->obstAvoidAlgo;
 }
 
 bool Navigator::mapModified(LaserScan laserScan,Pose rob_location)
 {
-	local_map_icp.clear();
-	laser_scan_icp.clear();
-	this->generateLocalMap(laserScan,rob_location);
-	Geom2D::Point temp;
-	for(int i=0;i<local_map.size();i++)
-	{
-		temp.x = local_map[i].x();
-		temp.y = local_map[i].y();
-		local_map_icp.push_back(temp);
-	}
-	Pose ps = Trans2Global(laserScan.laserPose,rob_location);
-	for(int i=0;i<laserScan.points.size();i++)
-	{	
-		QPointF t(laserScan.points[i].x(),laserScan.points[i].y());
-		t = Trans2Global(t,ps);
-		temp.x = t.x();
-		temp.y = t.y();
-		laser_scan_icp.push_back(temp);
-	}
-        qDebug()<<"Local Map size is:"<<local_map_icp.size()<<"Laser Scan size:"<<laserScan.points.size();
-	Geom2D::Pose loc;
-	loc.p.x = 0;
-	loc.p.y = 0;	
-	loc.p.laser_index = 0;
-	loc.phi = 0;
-	delta_pose = icp.align(local_map_icp,laser_scan_icp,loc, 0.5, 10,true);
-	if(delta_pose.p.x ==-1 && delta_pose.p.y ==-1 && delta_pose.phi==-1)
-	{
-		cout <<"\nWARNING: possible misalignment ICP";
-		return  true;
-	}
-	else
-	{
-		cout <<"\nDelta Pose X:"<<delta_pose.p.x<<" Y:"<<delta_pose.p.y<<" Phi:"<<RTOD(delta_pose.phi);		
-		return false;
-	}
+    local_map_icp.clear();
+    laser_scan_icp.clear();
+    this->generateLocalMap(laserScan,rob_location);
+    Geom2D::Point temp;
+    for(int i=0;i<local_map.size();i++)
+    {
+        temp.x = local_map[i].x();
+        temp.y = local_map[i].y();
+        local_map_icp.push_back(temp);
+    }
+    Pose ps = Trans2Global(laserScan.laserPose,rob_location);
+    for(int i=0;i<laserScan.points.size();i++)
+    {
+        QPointF t(laserScan.points[i].x(),laserScan.points[i].y());
+        t = Trans2Global(t,ps);
+        temp.x = t.x();
+        temp.y = t.y();
+        laser_scan_icp.push_back(temp);
+    }
+    LOG(Logger::Info,"Local Map size is:"<<local_map_icp.size()<<"Laser Scan size:"<<laserScan.points.size())
+    Geom2D::Pose loc;
+    loc.p.x = 0;
+    loc.p.y = 0;
+    loc.p.laser_index = 0;
+    loc.phi = 0;
+    delta_pose = icp.align(local_map_icp,laser_scan_icp,loc, 0.5, 10,true);
+    if(delta_pose.p.x ==-1 && delta_pose.p.y ==-1 && delta_pose.phi==-1)
+    {
+        LOG(Logger::Info,"\nWARNING: possible misalignment ICP")
+        return  true;
+    }
+    else
+    {
+        LOG(Logger::Info,"\nDelta Pose X:"<<delta_pose.p.x<<" Y:"<<delta_pose.p.y<<" Phi:"<<RTOD(delta_pose.phi))
+        return false;
+    }
 };
 
 Node * Navigator::closestPathSeg(QPointF location,Node * all_path)
 {
-//	qDebug("did i segment here ?"); fflush(stdout);
-	Node * nearest = NULL;
-	double dist,shortest= 100000;
-	while(all_path && all_path->next)
-	{
-		Line l(all_path->pose.p,all_path->next->pose.p);
-		dist = Dist2Seg(l,location);
-//		qDebug("\nDist is %f\n",dist); fflush(stdout);
-		if(dist <= shortest)
-		{
-			shortest = dist;
-			nearest = all_path;
-		}
-		all_path = all_path->next;
-	}
-//	if (shortest <= 0.02)
-//	{
-//		if(nearest->next)
-//			if(nearest->next->next)
-//				nearest = nearest->next;
-//	}
-//	qDebug("\nShortest is %f\n",shortest); fflush(stdout);	
-	return nearest;
+    Node * nearest = NULL;
+    double dist,shortest= 100000;
+    while(all_path && all_path->next)
+    {
+        Line l(all_path->pose.p,all_path->next->pose.p);
+        dist = Dist2Seg(l,location);
+        if(dist <= shortest)
+        {
+            shortest = dist;
+            nearest = all_path;
+        }
+        all_path = all_path->next;
+    }
+    //	if (shortest <= 0.02)
+    //	{
+    //		if(nearest->next)
+    //			if(nearest->next->next)
+    //				nearest = nearest->next;
+    //	}
+    //	qDebug("\nShortest is %f\n",shortest); fflush(stdout);
+    return nearest;
 }
 
 Node * Navigator::closestPathNode(QPointF location,Node * all_path)
 {
-	Node * nearest = NULL;
-	double dist,shortest= 100000;
-	while(all_path)
-	{
-		dist = Dist(all_path->pose.p,location);
-		if(dist < shortest)
-		{
-			shortest = dist;
-			nearest = all_path;
-		}
-		all_path = all_path->next;
-	}
-	return nearest;
+    Node * nearest = NULL;
+    double dist,shortest= 100000;
+    while(all_path)
+    {
+        dist = Dist(all_path->pose.p,location);
+        if(dist < shortest)
+        {
+            shortest = dist;
+            nearest = all_path;
+        }
+        all_path = all_path->next;
+    }
+    return nearest;
 }
 
 void Navigator::setPath(Node *p)
@@ -481,60 +473,58 @@ void Navigator::StopNavigating()
  */
 bool Navigator::inLaserSpace(LaserScan laserScan,Pose robotLocation,QPointF wayPoint)
 {
-	laserScan.laserPose = Trans2Global(laserScan.laserPose,robotLocation);
-	double ang, angle = ATAN2(wayPoint,laserScan.laserPose.p);
-	for(int i=0;i<laserScan.points.size();i++)
-	{
-		laserScan.points[i] = Trans2Global(laserScan.points[i],laserScan.laserPose);
-		ang = ATAN2(laserScan.points[i],laserScan.laserPose.p);
-		if(RTOD(fabs(anglediffs(angle,ang))) <= 0.5f)
-		{
-			if(Dist(laserScan.laserPose.p,laserScan.points[i]) < Dist(laserScan.laserPose.p,wayPoint))
-				return false;
-		}
-	}
-	return true;
+    laserScan.laserPose = Trans2Global(laserScan.laserPose,robotLocation);
+    double ang, angle = ATAN2(wayPoint,laserScan.laserPose.p);
+    for(int i=0;i<laserScan.points.size();i++)
+    {
+        laserScan.points[i] = Trans2Global(laserScan.points[i],laserScan.laserPose);
+        ang = ATAN2(laserScan.points[i],laserScan.laserPose.p);
+        if(RTOD(fabs(anglediffs(angle,ang))) <= 0.5f)
+        {
+            if(Dist(laserScan.laserPose.p,laserScan.points[i]) < Dist(laserScan.laserPose.p,wayPoint))
+                return false;
+        }
+    }
+    return true;
 }
 
 bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
 {
-	Node *temp;
-	bool retval = false;
-	Pose robotLocation = robotManager->robot->robotLocation;
-	double angleToWayPoint,prev_angle=0,angle=robotLocation.phi, longestDist=0.2,d,maxAllowedTurn=60;
-//	temp = global_path;
-	temp = closestPathNode(robotLocation.p,global_path);
- 	while(temp)
- 	{
-		prev_angle = angle;
-		if(temp->next)
-	 		angle = ATAN2(temp->next->pose.p,temp->pose.p);
-	 	else
-	 		angle = prev_angle;
- 		d = Dist(robotLocation.p,temp->pose.p);
- 		angleToWayPoint = ATAN2(temp->pose.p,robotLocation.p);
- 		if( d > traversable_dist || d < longestDist)
- 		{
- 			temp= temp->next;
- 			continue;
- 		}
- 		if (inLaserSpace(laserScan,robotLocation,temp->pose.p))
- 		{
- 			/* 
- 			 * if we are turning too much starting from this segment
- 			 * then take the last acceptable goal as the new waypoint.
- 			 */
- 			if(fabs(anglediffs(angle,prev_angle)) > DTOR(maxAllowedTurn))
- 				break;
-			d= longestDist;
- 			goal.p = temp->pose.p;
- 			goal.phi = prev_angle;
- 			retval = true;
- 		}
- 		 temp= temp->next;
- 	}
-// 	printf("\n longest Visible waypoint Along the Path=%f",longestDist);
- 	return retval;
+    Node *temp;
+    bool retval = false;
+    Pose robotLocation = robotManager->robot->robotLocation;
+    double angleToWayPoint,prev_angle=0,angle=robotLocation.phi, longestDist=0.2,d,maxAllowedTurn=60;
+    temp = closestPathNode(robotLocation.p,global_path);
+    while(temp)
+    {
+        prev_angle = angle;
+        if(temp->next)
+            angle = ATAN2(temp->next->pose.p,temp->pose.p);
+        else
+            angle = prev_angle;
+        d = Dist(robotLocation.p,temp->pose.p);
+        angleToWayPoint = ATAN2(temp->pose.p,robotLocation.p);
+        if( d > traversable_dist || d < longestDist)
+        {
+            temp= temp->next;
+            continue;
+        }
+        if (inLaserSpace(laserScan,robotLocation,temp->pose.p))
+        {
+            /*
+             * if we are turning too much starting from this segment
+             * then take the last acceptable goal as the new waypoint.
+             */
+            if(fabs(anglediffs(angle,prev_angle)) > DTOR(maxAllowedTurn))
+                break;
+            d= longestDist;
+            goal.p = temp->pose.p;
+            goal.phi = prev_angle;
+            retval = true;
+        }
+        temp= temp->next;
+    }
+    return retval;
 }
 
 /*!
@@ -542,199 +532,195 @@ bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
  */ 
 void Navigator::run()
 {
-	QVector <Robot *> availableRobots;
-	ControlAction cntrl;
-	Timer amcl_timer,delta_timer,redraw_timer,control_timer;
-	//double closest_obst=10;
-	Pose loc;
-	if(!local_planner)
-	{
-		setupLocalPlanner();
-	}
-	if(!global_path)
-	{
-                qDebug()<<" --->>> No PATH TO FOLLOW <<<---";
-		return ;
-	}
-	if(!robotManager->commManager)
-	{
-                qDebug()<<"\t - Communication Manager Not Initialized";
-		return;
-	}
-	if(!robotManager->commManager->isConnected())
-	{
-                qDebug()<<"\t - Your not Connected to the Robot, Connect First";
-		return;		
-	}
-	path2Draw = GLOBALPATH;
-	redraw_timer.restart();
-	control_timer.restart();
-	lastWayPoint.p.setX(-10);
-	lastWayPoint.p.setY(-10);
-	lastWayPoint.phi= -10;
-	//Set our Initial Location Estimation in case AMCL is used
-	if(robotManager->commManager->getLocalizerType() == AMCL)
-	{
-		if(!robotManager->commManager->getLocalized())
-		{
-			Pose initial_pos;
-			initial_pos.p.setX(global_path->pose.p.x());
-			initial_pos.p.setY(global_path->pose.p.y());	
-			initial_pos.phi = global_path->pose.phi;
-			robotManager->commManager->setLocation(initial_pos);
-			sleep(1);
-			/*
-			 * Wait until it localizes accurately (It doesn't work all the time)!!!
-			 * and you might have to manually provide an accurate estimate to get
-			 * out of this loop.
-			 */
-			while(!robotManager->commManager->getLocalized())
-			{
-				loc = robotManager->commManager->getLocation();
-                                qDebug()<<"NO Accurate Estimation yet, best current is: x:"<<loc.p.x()<<" y:"<<loc.p.y()<<"phi:"<<RTOD(loc.phi);
-				usleep(300000);
-			}
-		}
-	}
-	/**********************         Start by the Global Path     ************************/
-	path2Follow = global_path;
-	/************************************************************************************/
-	amcl_timer.restart();	delta_timer.restart();
-	// Reset Times
-	last_time=0; delta_t=0;	velocity=0;
-	end_reached = false;stop_navigating = false;
-	double speed,turnRate,y1,s1;
-	LaserScan laserScan;
-	trail.clear();
-	while(!end_reached && !stop_navigating)
-	{
-		delta_t = delta_timer.secElapsed();
-		delta_timer.restart();
-		usleep(30000);
-//		printf("\n Debug Location 1"); fflush(stdout);
-		// Get current Robot Location
-		currentPose = robotManager->commManager->getLocation();
-		
-		EstimatedPos = currentPose;
-		speed    =  robotManager->commManager->getSpeed();
-		turnRate =  robotManager->commManager->getTurnRate();
-		
-		// Updating the current Robot Info			
-		dataLock.lockForWrite();
-			robotManager->robot->setPose(currentPose);
-			robotManager->robot->setSpeed(speed);
-			robotManager->robot->setTurnRate(turnRate);			
-		dataLock.unlock();
-		
-		trail.push_back(currentPose.p);
-		
-//		printf("\n Debug Location 2"); fflush(stdout);		
-//		laserScan = robotManager->commManager->getLaserScan();
-//		cout<<"\n Current Location X:"<<currentPose.p.x()<<" Y:"<<currentPose.p.y()<<" Theta:"<<currentPose.phi;
-		/* If this location is new, then use it. Otherwise
-		 * estimate the location based on the last reading.
-		 */
-/*		
-		if(old_amcl != currentPose)
-		{
-			// Recording the last time Data changed
-			last_time = amcl_timer.secElapsed();
-			qDebug("last Time amcl Change took:%f",last_time);
-			// resetting the timer
-			amcl_timer.restart(); 
-			// Override the Estimated Location with the AMCL hypothesis
-			old_amcl.p.setX(currentPose.p.x()); EstimatedPos.p.setX(currentPose.p.x());
-			old_amcl.p.setY(currentPose.p.y()); EstimatedPos.p.setY(currentPose.p.y());
-			old_amcl.phi = EstimatedPos.phi = currentPose.phi;
-		}
-		else
-		{
-			// Estimate the location based on the Last AMCL location and the vehichle model
-			EstimatedPos.phi += robotManager->commManager->getTurnRate()*delta_t;
-			EstimatedPos.p.setX(EstimatedPos.p.x() + velocity*cos(EstimatedPos.phi)*delta_t);
-			EstimatedPos.p.setY(EstimatedPos.p.y() + velocity*sin(EstimatedPos.phi)*delta_t);
-			//cout<<"\nVelocity is:"<<velocity<<" Side Speed is:"<<pp->SideSpeed();
-			if (velocity!= speed) //	Velocity Changed?
-				velocity = speed;
-			//cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
-		}
-*/		
-		/* if we were following a local path and crossed the boundaried of the local
-		 * area without reaching the local destination then go back to the global path
-		 */
-/*		
-		if (path2Follow == local_path)
-		{
-			if(Dist(EstimatedPos.p,local_planner->pathPlanner->map->global_pose.p)>local_dist)
-			{
-				local_planner->pathPlanner->freeResources();
-				path2Follow = global_path;
-				path2Draw = GLOBALPATH;
-			}
-		}
-*/		
-//		first = ClosestPathSeg(EstimatedPos.p,path2Follow);
-//		qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);		
-//		printf("\n Debug Location 3"); fflush(stdout);
+    QVector <Robot *> availableRobots;
+    ControlAction cntrl;
+    Timer amcl_timer,delta_timer,redraw_timer,control_timer;
+    //double closest_obst=10;
+    Pose loc;
+    if(!local_planner)
+    {
+        setupLocalPlanner();
+    }
+    if(!global_path)
+    {
+        LOG(Logger::Info," --->>> No PATH TO FOLLOW <<<---")
+        return;
+    }
+    if(!robotManager->commManager)
+    {
+        LOG(Logger::Info,"\t - Communication Manager Not Initialized")
+        return;
+    }
+    if(!robotManager->commManager->isConnected())
+    {
+        LOG(Logger::Info,"\t - Your not Connected to the Robot, Connect First")
+        return;
+    }
+    path2Draw = GLOBALPATH;
+    redraw_timer.restart();
+    control_timer.restart();
+    lastWayPoint.p.setX(-10);
+    lastWayPoint.p.setY(-10);
+    lastWayPoint.phi= -10;
+    //Set our Initial Location Estimation in case AMCL is used
+    if(robotManager->commManager->getLocalizerType() == AMCL)
+    {
+        if(!robotManager->commManager->getLocalized())
+        {
+            Pose initial_pos;
+            initial_pos.p.setX(global_path->pose.p.x());
+            initial_pos.p.setY(global_path->pose.p.y());
+            initial_pos.phi = global_path->pose.phi;
+            robotManager->commManager->setLocation(initial_pos);
+            sleep(1);
+            /*
+             * Wait until it localizes accurately (It doesn't work all the time)!!!
+             * and you might have to manually provide an accurate estimate to get
+             * out of this loop.
+             */
+            while(!robotManager->commManager->getLocalized())
+            {
+                loc = robotManager->commManager->getLocation();
+                LOG(Logger::Info,"NO Accurate Estimation yet, best current is: x:"<<loc.p.x()<<" y:"<<loc.p.y()<<"phi:"<<RTOD(loc.phi))
+                usleep(300000);
+            }
+        }
+    }
+    /**********************         Start by the Global Path     ************************/
+    path2Follow = global_path;
+    /************************************************************************************/
+    amcl_timer.restart();	delta_timer.restart();
+    // Reset Times
+    last_time=0; delta_t=0;	velocity=0;
+    end_reached = false;stop_navigating = false;
+    double speed,turnRate,y1,s1;
+    LaserScan laserScan;
+    trail.clear();
+    while(!end_reached && !stop_navigating)
+    {
+        delta_t = delta_timer.secElapsed();
+        delta_timer.restart();
+        usleep(30000);
+        // Get current Robot Location
+        currentPose     = robotManager->commManager->getLocation();
+        EstimatedPos    = currentPose;
+        speed           = robotManager->commManager->getSpeed();
+        turnRate        = robotManager->commManager->getTurnRate();
 
-		/* If we chose to follow a virtual point on the path then calculate that point
-		 * It will not be used most of the time, but it adds accuracy in control for
-		 * long line paths.
-		 */
-		//qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",speed,EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
-//		tracking_point.setX(EstimatedPos.p.x() + tracking_dist*cos(EstimatedPos.phi) - 0*sin(EstimatedPos.phi));
-//		tracking_point.setY(EstimatedPos.p.y() + tracking_dist*sin(EstimatedPos.phi) + 0*cos(EstimatedPos.phi)); 
-//		first = closestPathSeg(EstimatedPos.p,path2Follow);
-		first = closestPathSeg(tracking_point,global_path);
-		if(!first)
-		{
-                        qDebug()<<"Path Doesn't contain any segment to follow !!!";
-			break;
-		}
-		// Is it the last Segment ?
-		if (first->next)
-		if (!first->next->next)
-		{
-			if(Dist(first->next->pose.p,EstimatedPos.p)<=0.4)
-			{
-//				if (local_planner->pathPlanner->path)
-//				{
-//					qDebug("--->>> Local Path Traversed !!!");					
-//					local_planner->pathPlanner->freePath();
-//					path2Follow = global_path;
-//					usleep(100000);
-//					continue;
-//				}
-//				else
-				{
-                                        qDebug()<<"--->>> Destination Reached !!!"; fflush(stdout);
-					Q_EMIT addMsg(0,INFO,QString("--->>> Destination Reached !!!"));
-					Q_EMIT pathTraversed();
-		 			end_reached = true;
-					break;
-				}
-			}
-		}
-		last  = first->next;
-		ni = first->pose.p;
-		SegmentStart.setX(ni.x());	SegmentStart.setY(ni.y());
-		ni = last->pose.p;
-		SegmentEnd.setX(ni.x());  SegmentEnd.setY(ni.y());	
-		direction = -1;
-		angle = atan2(SegmentEnd.y() - SegmentStart.y(),SegmentEnd.x() - SegmentStart.x());
+        // Updating the current Robot Info
+        dataLock.lockForWrite();
+        robotManager->robot->setPose(currentPose);
+        robotManager->robot->setSpeed(speed);
+        robotManager->robot->setTurnRate(turnRate);
+        dataLock.unlock();
 
-		// Distance to the path Segment
-		distance = Dist(SegmentEnd,tracking_point);
-		Line l(SegmentStart,SegmentEnd);
-//		displacement = Dist2Seg(l,tracking_point);
-		displacement =  distance;
-		y1 = Dist2Seg(l,tracking_point);
-//		assert (distance > y1);
-		s1 = sqrt(distance*distance- y1*y1);
-//		printf("\n y1=%f s1=%f",y1,s1); fflush(stdout);
-		//qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
-		//qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
-		/* If we are too close to obstacles then let the local planner takes control
+        trail.push_back(currentPose.p);
+
+        //laserScan = robotManager->commManager->getLaserScan();
+        //cout<<"\n Current Location X:"<<currentPose.p.x()<<" Y:"<<currentPose.p.y()<<" Theta:"<<currentPose.phi;
+        /* If this location is new, then use it. Otherwise
+         * estimate the location based on the last reading.
+         */
+        /*
+        if(old_amcl != currentPose)
+        {
+            // Recording the last time Data changed
+            last_time = amcl_timer.secElapsed();
+            qDebug("last Time amcl Change took:%f",last_time);
+            // resetting the timer
+            amcl_timer.restart();
+            // Override the Estimated Location with the AMCL hypothesis
+            old_amcl.p.setX(currentPose.p.x()); EstimatedPos.p.setX(currentPose.p.x());
+            old_amcl.p.setY(currentPose.p.y()); EstimatedPos.p.setY(currentPose.p.y());
+            old_amcl.phi = EstimatedPos.phi = currentPose.phi;
+        }
+        else
+        {
+            // Estimate the location based on the Last AMCL location and the vehichle model
+            EstimatedPos.phi += robotManager->commManager->getTurnRate()*delta_t;
+            EstimatedPos.p.setX(EstimatedPos.p.x() + velocity*cos(EstimatedPos.phi)*delta_t);
+            EstimatedPos.p.setY(EstimatedPos.p.y() + velocity*sin(EstimatedPos.phi)*delta_t);
+            //cout<<"\nVelocity is:"<<velocity<<" Side Speed is:"<<pp->SideSpeed();
+            if (velocity!= speed) //	Velocity Changed?
+                velocity = speed;
+            //cout<<"\n New data arrived Velocity="<<pp->Speed()<<" Angular"<<pp->SideSpeed();
+        }
+        */
+        /* if we were following a local path and crossed the boundaried of the local
+         * area without reaching the local destination then go back to the global path
+         */
+        /*
+        if (path2Follow == local_path)
+        {
+            if(Dist(EstimatedPos.p,local_planner->pathPlanner->map->global_pose.p)>local_dist)
+            {
+                local_planner->pathPlanner->freeResources();
+                path2Follow = global_path;
+                path2Draw = GLOBALPATH;
+            }
+        }
+        */
+//        first = ClosestPathSeg(EstimatedPos.p,path2Follow);
+//        qDebug("Robot Pose x:%f y:%f phi%f",EstimatedPos.p.x(),EstimatedPos.p.y(),EstimatedPos.phi);
+//        printf("\n Debug Location 3"); fflush(stdout);
+
+        /* If we chose to follow a virtual point on the path then calculate that point
+         * It will not be used most of the time, but it adds accuracy in control for
+         * long line paths.
+         */
+//        qDebug("Vel =%.3f m/sev X=[%.3f] Y=[%.3f] Theta=[%.3f] time=%g",speed,EstimatedPos.p.x(),EstimatedPos.p.y(),RTOD(EstimatedPos.phi),delta_t);
+//        tracking_point.setX(EstimatedPos.p.x() + tracking_dist*cos(EstimatedPos.phi) - 0*sin(EstimatedPos.phi));
+//        tracking_point.setY(EstimatedPos.p.y() + tracking_dist*sin(EstimatedPos.phi) + 0*cos(EstimatedPos.phi));
+//        first = closestPathSeg(EstimatedPos.p,path2Follow);
+        first = closestPathSeg(tracking_point,global_path);
+        if(!first)
+        {
+            LOG(Logger::Info,"Path Doesn't contain any segment to follow !!!")
+            break;
+        }
+        // Is it the last Segment ?
+        if (first->next)
+            if (!first->next->next)
+            {
+            if(Dist(first->next->pose.p,EstimatedPos.p)<=0.4)
+            {
+//                if (local_planner->pathPlanner->path)
+//                {
+//                    qDebug("--->>> Local Path Traversed !!!");
+//                    local_planner->pathPlanner->freePath();
+//                    path2Follow = global_path;
+//                    usleep(100000);
+//                    continue;
+//                }
+//                else
+                {
+                    LOG(Logger::Info,"--->>> Destination Reached !!!")
+                    Q_EMIT addMsg(0,INFO,QString("--->>> Destination Reached !!!"));
+                    Q_EMIT pathTraversed();
+                    end_reached = true;
+                    break;
+                }
+            }
+        }
+        last  = first->next;
+        ni = first->pose.p;
+        SegmentStart.setX(ni.x());	SegmentStart.setY(ni.y());
+        ni = last->pose.p;
+        SegmentEnd.setX(ni.x());  SegmentEnd.setY(ni.y());
+        direction = -1;
+        angle = atan2(SegmentEnd.y() - SegmentStart.y(),SegmentEnd.x() - SegmentStart.x());
+
+        // Distance to the path Segment
+        distance = Dist(SegmentEnd,tracking_point);
+        Line l(SegmentStart,SegmentEnd);
+//        displacement = Dist2Seg(l,tracking_point);
+        displacement =  distance;
+        y1 = Dist2Seg(l,tracking_point);
+//        assert (distance > y1);
+        s1 = sqrt(distance*distance- y1*y1);
+        //qDebug("First X[%.3f]Y[%.3f] Last=X[%.3f]Y[%.3f] Target Angle =[%.3f] Cur_Ang =[%.3f]", SegmentStart.x(),SegmentStart.y() ,SegmentEnd.x(),SegmentEnd.y() ,RTOD(angle),RTOD(EstimatedPos.phi));
+        //qDebug("Displ=[%.3f] Dist to Segend=[%.3f] D-Next=[%.3f]",displacement ,distance,distance_to_next);
+        /* If we are too close to obstacles then let the local planner takes control
 		 * steps :
 		 * 1- Takes a local laser Scan from the server.
 		 * 2- Build a local occupancy grid based on the laser scan.
@@ -744,241 +730,235 @@ void Navigator::run()
 		 * 5- Follow that path
 		 */
 
-//		QTime local_planning_time,icp_time;
-//		closest_obst = nearestObstacle(laserScan);
-		// ICP PART - When approaching obstacles
-		/*
-		qDebug("\n Closest Distance to Obstacles is:%f",closest_obst);
-		if(closest_obst < safety_dist)
-		{
-			icp_time.restart();
-			printf("\n Debug Location 4"); fflush(stdout);
-			// If we don't already have a local map or the local environment is changed then re-plan
-			if ( !local_planner->pathPlanner->path || mapModified(laserScan,EstimatedPos))
-			{
-				qDebug("\n Icp Check took:%d msec",icp_time.elapsed());					
-				//Stop the Robot before planning
-				robotManager->commManager->setSpeed(0);
-				robotManager->commManager->setTurnRate(0);
-				
-				// local Planning Map Distance
-				double target_angle;
-			 	Pose start,target,loc, pixel_loc = EstimatedPos;
-			 	loc = pixel_loc; target.phi = 0;
-			 	printf("\n Debug Location 5"); fflush(stdout);
-			 	// Current Locaion in the Global coordinate
-			 	global_planner->pathPlanner->convert2Pix(&pixel_loc.p);
-//				qDebug("Location Global Metric X:%f Y:%f",loc.p.x(),loc.p.y());
-//				qDebug("Location Global Pixel  X:%f Y:%f",pixel_loc.p.x(),pixel_loc.p.y());
-	
-				local_planning_time.restart();
-			 	local_planner->setMap(laserScan,local_dist,EstimatedPos);
-				local_planner->generateSpace();
-			 	Node * temp;
-			 	temp = global_path;
-			 	if(!temp)
-			 	{
-			 		qDebug("Global Path is empty, Something went wrong, Emergency Stopping ");
-					robotManager->commManager->setSpeed(0);
-					robotManager->commManager->setTurnRate(0);
-					sleep(1);
-					exit(1);
-			 	}
-				 //Find the farest way Point on the global path
-				 // that belongs to the local map
-			 	printf("\n Debug Location 6"); fflush(stdout);
-				double dist=0;
-				temp = closestPathSeg(EstimatedPos.p,global_path);
-			 	while(temp->next && dist < traversable_dist)
-			 	{
-				 	QPointF boundary_check;
-		 			//traversable_dist += Dist(temp->pose.p,temp->next->pose.p);
-					target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
-		 			dist+= Dist(temp->pose.p,temp->next->pose.p);
-				 	boundary_check.setX(temp->pose.p.x());
-				 	boundary_check.setY(temp->pose.p.y());
-//					qDebug("Target Global Metric X:%f Y:%f",boundary_check.x(),boundary_check.y());
-				 					 				 	
-				 	// Transfer to the global Pixel Coordinate
-				 	global_planner->pathPlanner->convert2Pix(&boundary_check);				 	
-//					qDebug("Target Pixel Global  X:%f Y:%f",boundary_check.x(),boundary_check.y());
-									 	
-				 	// Transfer to the local Pixel Coordinate
-				 	boundary_check.setX(boundary_check.x() - pixel_loc.p.x() + local_planner->pathPlanner->map->center.x());	
-				 	boundary_check.setY(boundary_check.y() - pixel_loc.p.y() + local_planner->pathPlanner->map->center.y());				 	
-//					qDebug("Target Pixel Local   X:%f Y:%f",boundary_check.x(),boundary_check.y());
-	
-					// Check Boundaries
-				 	if (boundary_check.x() < 0 || boundary_check.y() < 0 )
-					 	break;
-				 	if (boundary_check.x() > (local_planner->pathPlanner->map->width - 1) || boundary_check.y() > (local_planner->pathPlanner->map->height - 1))
-				 		break;
-				 	// This is a valid target in the local Map
-					target.p.setX(boundary_check.x());	 		
-					target.p.setY(boundary_check.y());	 							
-				 	target.phi = target_angle;	
-//					qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
-			 		temp= temp->next;
-			 	}
-				
-				 //Search Start location is the center of the Robot
-				 // currently it's the center of the laser, this will have
-				 // to be modified to translate the laser location to the
-				 // robot's coordinate : TODO
-				 //
-			 	printf("\n Debug Location 7"); fflush(stdout);
-			 	start.p.setX(local_planner->pathPlanner->map->center.x());
-			 	start.p.setY(local_planner->pathPlanner->map->center.y()); 	
-			 	start.phi = EstimatedPos.phi;
-			 	
-//				qDebug("Start Local Pixel  X:%f Y:%f",start.p.x(),start.p.y());			 	
-//				qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
-			 	local_planner->setStart(start);
-			 	local_planner->setEnd(target);
-			 	local_path = local_planner->findPath(METRIC);
-			 	if (local_path)
-			 	{
-			 		Node * temp = local_path;	
-			 		// Changing the Path to the Global Coordinate
-			 		pixel_loc.p -= local_planner->pathPlanner->map->center;
-			 		while(temp)
-			 		{
-			 			local_planner->pathPlanner->convert2Pix(&temp->pose.p);
-						temp->pose.p += pixel_loc.p;
-			 			global_planner->pathPlanner->convert2Pix(&temp->pose.p);
-			 			temp = temp->next;
-			 		}
-			 		qDebug("Local Path found");
-			 		path2Follow = local_path;
-			 		path2Draw = LOCALPATH;
-			 		continue;
-			 	}
-			 	else
-			 	{
-			 		path2Follow = global_path;
-			 		path2Draw = GLOBALPATH;
-			 	}
-		 		qDebug("Local Planning took %dms",local_planning_time.elapsed());
-		 		printf("\n Debug Location 8"); fflush(stdout);
-			}
-		}
- 		if (redraw_timer.msecElapsed()>100)
- 		{
-			if(this->mapPatch)
-				delete mapPatch;
-			mapPatch = mapManager.provideLaserOG(laserScan,2.0,0.05,EstimatedPos);	
-			 	Q_EMIT glRender();
-		 	redraw_timer.restart();	
-		}*/
-		/* Get the control Action to be applied, in this case it's a
-		 * simple linear control. It's accurate enough for traversing 
-		 * the generated paths.
-		 */
-		Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
-//		Pose goal;
-		laserScan = robotManager->commManager->getLaserScan();
-		//robotManager->commManager->getLaserScan(laserScan);
-		if(!getGoal(laserScan,goal))
-		{
-//			robotManager->commManager->setSpeed(0);
-//			robotManager->commManager->setTurnRate(0);			
-//			robotManager->planningManager->setStart(robotManager->robot->robotLocation);
-//			//TODO: ICP with the local Area and give the Corrected Location to the function Below
-//			robotManager->planningManager->updateMap(laserScan,local_dist,robotManager->robot->robotLocation);
-//			robotManager->planningManager->findPath(METRIC);
-//			continue;
-			printf("\nCouldn't find a visible waypoint using Segment End instead");
-			wayPoint.p.setX(SegmentEnd.x());
-			wayPoint.p.setY(SegmentEnd.y());
-			wayPoint.phi = angle;
-		}
-		else
-		{
-			wayPoint = goal;
-		}
-		Q_EMIT setWayPoint(&goal);
-//		printf("\n Debug Location 9"); fflush(stdout);
-		QTime ff_time;
-//		Pose goal;
-		if(!pause)
-		{
-			switch(obstAvoidAlgo)		 
-			{
-				case FORCE_FIELD:
-					availableRobots.clear();
-					for(int i=0;i<playGround->robotPlatforms.size();i++)
-					{
-						if(playGround->robotPlatforms[i]!= robotManager)
-							availableRobots.push_back(playGround->robotPlatforms[i]->robot);
-					}
-					//Force Field
-					velVector action;
-					ff_time.restart();
-                                        qDebug()<<QString("Current Robot      --->>> Turn Rate:%1 and Speed is:%2 Delta Time:%3").arg(turnRate,speed,delta_t);
-                                        qDebug()<<QString("Current Robot Pose --->>> x:%1 y:%2 phi:%3").arg(currentPose.p.x(),currentPose.p.y(),RTOD(currentPose.phi));
-				 	control_timer.restart();
-					action = FF->GenerateField(currentPose,laserScan,wayPoint,speed,turnRate,availableRobots,delta_t);
-//					qDebug("Force Field Returned     --->>> Speed is:%f TurnRate is:%f  time to calculate FF is:%dms Loop Delta_t:%fsec",action.speed,action.turnRate,ff_time.elapsed(),delta_t);	
-					robotManager->commManager->setSpeed(action.speed);						
-					robotManager->commManager->setTurnRate(action.turnRate);		
-					control_timer.restart();				
-					break;		
-				case CONFIG_SPACE:
-					break;
-				case NO_AVOID:
-//					// Linear Controller 
-//					cntrl = getAction(EstimatedPos.phi,angle,displacement,first->direction,linear_velocity);
-					cntrl = getAction(EstimatedPos.phi,angle,first->direction,linear_velocity,y1,s1);
-					/* Angular Velocity Thrusholded, just trying not to
-					 * exceed the accepted limits. Or setting up a safe 
-					 * turn speed.
-					 */
-//					if(cntrl.angular_velocity >   0.2)
-//						cntrl.angular_velocity =  0.2;
-//					if(cntrl.angular_velocity <  -0.2)
-//						cntrl.angular_velocity = -0.2;
-//					if(log)
-//						fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),currentPose.p.x(), currentPose.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.secElapsed(),last_time);			
-					//Normal Linear Follower
-//					qDebug("\nSpeed is:%f TurnRate is:%f",first->direction*cntrl.linear_velocity,cntrl.angular_velocity); fflush(stdout);					
-					robotManager->commManager->setSpeed(first->direction*cntrl.linear_velocity);
-					robotManager->commManager->setTurnRate(cntrl.angular_velocity);							
-					break;
-				case ND:
-				case VFH:
-					if(wayPoint == lastWayPoint)
-						continue;
-					else
-						lastWayPoint = wayPoint;
-					laserScan = robotManager->commManager->getLaserScan();
-					//robotManager->commManager->getLaserScan(laserScan);
-					if(!getGoal(laserScan,goal))
-					{
-						goal.p.setX(SegmentEnd.x());
-						goal.p.setY(SegmentEnd.y());
-						goal.phi= angle;
-					}
-					wayPoint = goal;	
-					// Vector Field Histogram
-                                        qDebug()<<QString("\nSending to VFH goto X:%1 Y:%2 Phi:%3").arg(goal.p.x(),goal.p.y(),RTOD(goal.phi));
-					robotManager->commManager->vfhGoto(wayPoint);	
-					break;		
-				default:
-                                        qDebug()<<"Unknown Obstacle Avoidance Algorithm used !!!";
-			}	
-		}
-		else
-		{
-			robotManager->commManager->setSpeed(0);
-			robotManager->commManager->setTurnRate(0);
-		}
-		loc = EstimatedPos;
-	}
-	robotManager->commManager->setSpeed(0);
-	robotManager->commManager->setTurnRate(0);
-	//local_planner->pathPlanner->freeResources();
-        qDebug()<<"\nNavigator: Thread Loop Terminated Normally !!!";
-	this->quit();
-	return;
+        //		QTime local_planning_time,icp_time;
+        //		closest_obst = nearestObstacle(laserScan);
+        // ICP PART - When approaching obstacles
+        /*
+        qDebug("\n Closest Distance to Obstacles is:%f",closest_obst);
+        if(closest_obst < safety_dist)
+        {
+            icp_time.restart();
+            printf("\n Debug Location 4"); fflush(stdout);
+            // If we don't already have a local map or the local environment is changed then re-plan
+            if ( !local_planner->pathPlanner->path || mapModified(laserScan,EstimatedPos))
+            {
+                qDebug("\n Icp Check took:%d msec",icp_time.elapsed());
+                //Stop the Robot before planning
+                robotManager->commManager->setSpeed(0);
+                robotManager->commManager->setTurnRate(0);
+
+                // local Planning Map Distance
+                double target_angle;
+                Pose start,target,loc, pixel_loc = EstimatedPos;
+                loc = pixel_loc; target.phi = 0;
+                printf("\n Debug Location 5"); fflush(stdout);
+                // Current Locaion in the Global coordinate
+                global_planner->pathPlanner->convert2Pix(&pixel_loc.p);
+                //				qDebug("Location Global Metric X:%f Y:%f",loc.p.x(),loc.p.y());
+                //				qDebug("Location Global Pixel  X:%f Y:%f",pixel_loc.p.x(),pixel_loc.p.y());
+
+                local_planning_time.restart();
+                local_planner->setMap(laserScan,local_dist,EstimatedPos);
+                local_planner->generateSpace();
+                Node * temp;
+                temp = global_path;
+                if(!temp)
+                {
+                    qDebug("Global Path is empty, Something went wrong, Emergency Stopping ");
+                    robotManager->commManager->setSpeed(0);
+                    robotManager->commManager->setTurnRate(0);
+                    sleep(1);
+                    exit(1);
+                }
+                //Find the farest way Point on the global path
+                // that belongs to the local map
+                printf("\n Debug Location 6"); fflush(stdout);
+                double dist=0;
+                temp = closestPathSeg(EstimatedPos.p,global_path);
+                while(temp->next && dist < traversable_dist)
+                {
+                    QPointF boundary_check;
+                    //traversable_dist += Dist(temp->pose.p,temp->next->pose.p);
+                    target_angle = ATAN2(temp->next->pose.p,temp->pose.p);
+                    dist+= Dist(temp->pose.p,temp->next->pose.p);
+                    boundary_check.setX(temp->pose.p.x());
+                    boundary_check.setY(temp->pose.p.y());
+                    //					qDebug("Target Global Metric X:%f Y:%f",boundary_check.x(),boundary_check.y());
+
+                    // Transfer to the global Pixel Coordinate
+                    global_planner->pathPlanner->convert2Pix(&boundary_check);
+                    //					qDebug("Target Pixel Global  X:%f Y:%f",boundary_check.x(),boundary_check.y());
+
+                    // Transfer to the local Pixel Coordinate
+                    boundary_check.setX(boundary_check.x() - pixel_loc.p.x() + local_planner->pathPlanner->map->center.x());
+                    boundary_check.setY(boundary_check.y() - pixel_loc.p.y() + local_planner->pathPlanner->map->center.y());
+                    //					qDebug("Target Pixel Local   X:%f Y:%f",boundary_check.x(),boundary_check.y());
+
+                    // Check Boundaries
+                    if (boundary_check.x() < 0 || boundary_check.y() < 0 )
+                        break;
+                    if (boundary_check.x() > (local_planner->pathPlanner->map->width - 1) || boundary_check.y() > (local_planner->pathPlanner->map->height - 1))
+                        break;
+                    // This is a valid target in the local Map
+                    target.p.setX(boundary_check.x());
+                    target.p.setY(boundary_check.y());
+                    target.phi = target_angle;
+                    //					qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
+                    temp= temp->next;
+                }
+
+                //Search Start location is the center of the Robot
+                // currently it's the center of the laser, this will have
+                // to be modified to translate the laser location to the
+                // robot's coordinate : TODO
+                //
+                printf("\n Debug Location 7"); fflush(stdout);
+                start.p.setX(local_planner->pathPlanner->map->center.x());
+                start.p.setY(local_planner->pathPlanner->map->center.y());
+                start.phi = EstimatedPos.phi;
+
+                //				qDebug("Start Local Pixel  X:%f Y:%f",start.p.x(),start.p.y());
+                //				qDebug("Target Local Pixel X:%f Y:%f",target.p.x(),target.p.y());
+                local_planner->setStart(start);
+                local_planner->setEnd(target);
+                local_path = local_planner->findPath(METRIC);
+                if (local_path)
+                {
+                    Node * temp = local_path;
+                    // Changing the Path to the Global Coordinate
+                    pixel_loc.p -= local_planner->pathPlanner->map->center;
+                    while(temp)
+                    {
+                        local_planner->pathPlanner->convert2Pix(&temp->pose.p);
+                        temp->pose.p += pixel_loc.p;
+                        global_planner->pathPlanner->convert2Pix(&temp->pose.p);
+                        temp = temp->next;
+                    }
+                    qDebug("Local Path found");
+                    path2Follow = local_path;
+                    path2Draw = LOCALPATH;
+                    continue;
+                }
+                else
+                {
+                    path2Follow = global_path;
+                    path2Draw = GLOBALPATH;
+                }
+                qDebug("Local Planning took %dms",local_planning_time.elapsed());
+                printf("\n Debug Location 8"); fflush(stdout);
+            }
+        }
+        if (redraw_timer.msecElapsed()>100)
+        {
+            if(this->mapPatch)
+                delete mapPatch;
+            mapPatch = mapManager.provideLaserOG(laserScan,2.0,0.05,EstimatedPos);
+            Q_EMIT glRender();
+            redraw_timer.restart();
+        }*/
+        /* Get the control Action to be applied, in this case it's a
+         * simple linear control. It's accurate enough for traversing
+         * the generated paths.
+         */
+        Pose goal(SegmentEnd.x(),SegmentEnd.y(),angle);
+//        Pose goal;
+        laserScan = robotManager->commManager->getLaserScan();
+        if(!getGoal(laserScan,goal))
+        {
+//            robotManager->commManager->setSpeed(0);
+//            robotManager->commManager->setTurnRate(0);
+//            robotManager->planningManager->setStart(robotManager->robot->robotLocation);
+//            //TODO: ICP with the local Area and give the Corrected Location to the function Below
+//            robotManager->planningManager->updateMap(laserScan,local_dist,robotManager->robot->robotLocation);
+//            robotManager->planningManager->findPath(METRIC);
+//            continue;
+            LOG(Logger::Warning,"Couldn't find a visible waypoint using Segment End instead")
+            wayPoint.p.setX(SegmentEnd.x());
+            wayPoint.p.setY(SegmentEnd.y());
+            wayPoint.phi = angle;
+        }
+        else
+        {
+            wayPoint = goal;
+        }
+        Q_EMIT setWayPoint(&goal);
+        QTime ff_time;
+        if(!pause)
+        {
+            switch(obstAvoidAlgo)
+            {
+            case FORCE_FIELD:
+                availableRobots.clear();
+                for(int i=0;i<playGround->robotPlatforms.size();i++)
+                {
+                    if(playGround->robotPlatforms[i]!= robotManager)
+                        availableRobots.push_back(playGround->robotPlatforms[i]->robot);
+                }
+                //Force Field
+                velVector action;
+                ff_time.restart();
+                control_timer.restart();
+                action = FF->GenerateField(currentPose,laserScan,wayPoint,speed,turnRate,availableRobots,delta_t);
+                robotManager->commManager->setSpeed(action.speed);
+                robotManager->commManager->setTurnRate(action.turnRate);
+                control_timer.restart();
+                break;
+        case CONFIG_SPACE:
+                break;
+        case NO_AVOID:
+//                Linear Controller
+//                cntrl = getAction(EstimatedPos.phi,angle,displacement,first->direction,linear_velocity);
+                cntrl = getAction(EstimatedPos.phi,angle,first->direction,linear_velocity,y1,s1);
+                /* Angular Velocity Thrusholded, just trying not to
+                 * exceed the accepted limits. Or setting up a safe
+                 * turn speed.
+                */
+//                if(cntrl.angular_velocity >   0.2)
+//                    cntrl.angular_velocity =  0.2;
+//                if(cntrl.angular_velocity <  -0.2)
+//                    cntrl.angular_velocity = -0.2;
+//                if(log)
+//                    fprintf(file,"%.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %g %g\n",EstimatedPos.p.x(),EstimatedPos.p.y(),currentPose.p.x(), currentPose.p.y(), displacement ,error_orientation ,cntrl.angular_velocity,SegmentStart.x(),SegmentStart.y(),SegmentEnd.x(),SegmentEnd.y(),delta_timer.secElapsed(),last_time);
+                //Normal Linear Follower
+//                qDebug("\nSpeed is:%f TurnRate is:%f",first->direction*cntrl.linear_velocity,cntrl.angular_velocity); fflush(stdout);
+                robotManager->commManager->setSpeed(first->direction*cntrl.linear_velocity);
+                robotManager->commManager->setTurnRate(cntrl.angular_velocity);
+                break;
+        case ND:
+        case VFH:
+                if(wayPoint == lastWayPoint)
+                    continue;
+                else
+                    lastWayPoint = wayPoint;
+                laserScan = robotManager->commManager->getLaserScan();
+                //robotManager->commManager->getLaserScan(laserScan);
+                if(!getGoal(laserScan,goal))
+                {
+                    goal.p.setX(SegmentEnd.x());
+                    goal.p.setY(SegmentEnd.y());
+                    goal.phi= angle;
+                }
+                wayPoint = goal;
+                // Vector Field Histogram
+                //LOG(Logger::Info,QString("\nSending to VFH goto X:%1 Y:%2 Phi:%3").arg(goal.p.x(),goal.p.y(),RTOD(goal.phi)))
+                robotManager->commManager->vfhGoto(wayPoint);
+                break;
+        default:
+                LOG(Logger::Info,"Unknown Obstacle Avoidance Algorithm used !!!")
+            }
+        }
+        else
+        {
+            robotManager->commManager->setSpeed(0);
+            robotManager->commManager->setTurnRate(0);
+        }
+        loc = EstimatedPos;
+    }
+    robotManager->commManager->setSpeed(0);
+    robotManager->commManager->setTurnRate(0);
+    //local_planner->pathPlanner->freeResources();
+    LOG(Logger::Info,"Navigator: Thread Loop Terminated Normally !!!")
+    this->quit();
+    return;
 }
 

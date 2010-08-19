@@ -39,14 +39,7 @@ class WheelChairProxy;
 #define MAX_LASERS 4
 using namespace PlayerCc;
 using namespace std;
-/*
-class Position2dProxy;
-class MapProxy;
-class PtzProxy;
-class LocalizeProxy;
-class SpeechProxy;
-class LaserProxy;
-*/
+
 class DeviceType
 {
 public:
@@ -63,13 +56,21 @@ public:
     {
         this->addr = addr;
     }
-    void setName(QString name)
+    void setDriverName(QString name)
     {
         this->driverName = name;
     }
     void setInterfaceName(QString name)
     {
         this->interfaceName= name;
+    }
+    void setInterfaceCode(int code)
+    {
+        this->interfaceCode = code;
+    }
+    void setInterfaceIndex(int index)
+    {
+        this->index= index;
     }
     void setSubscribed(bool sub)
     {
@@ -83,6 +84,14 @@ public:
     {
         return interfaceName;
     }
+    int getInterfaceCode()
+    {
+        return interfaceCode;
+    }
+    int getInterfaceIndex()
+    {
+        return index;
+    }
     bool isSubscribed()
     {
         return subscribed;
@@ -91,6 +100,8 @@ private:
     player_devaddr_t addr;
     QString driverName;
     QString interfaceName;
+    int interfaceCode;
+    int index;
     bool subscribed;
 };
 
@@ -130,6 +141,7 @@ public:
     double getSpeed();
     double getTurnRate();
     bool isConnected();
+    bool isDeviceAvailable(QString interfaceName,int interfaceIndex);
     bool getLocalized();
     Pose getLocation();
     Pose getAmclLocation();

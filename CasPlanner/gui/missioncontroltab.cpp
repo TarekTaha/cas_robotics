@@ -145,9 +145,10 @@ void MissionControlTab::pathTraversed()
 
 void MissionControlTab::pathFollow()
 {
+    LOG(Logger::Info,"Trying to Initiate path following")
     if(!playGround->activeRobot->commManager)
     {
-        qDebug()<<"\t NavTab: Communication Manager Not Initialized";
+        LOG(Logger::Warning,"\t NavTab: Communication Manager Not Initialized")
         return;
     }
     if(!playGround->activeRobot->commManager->isConnected())
@@ -173,13 +174,15 @@ void MissionControlTab::pathFollow()
         {
             playGround->activeRobot->navigator->quit();
         }
-        if(path)
+        if(playGround->activeRobot->planningManager->pathPlanner->path)
         {
-            playGround->activeRobot->navigator->setPath(path);
+            playGround->activeRobot->navigator->setPath(playGround->activeRobot->planningManager->pathPlanner->path);
             playGround->activeRobot->navigator->start();
             ui->pathFollowBtn->setText("Stop");
             playGround->activeRobot->notFollowing = false;
         }
+        else
+            LOG(Logger::Warning,"No Path Found")
     }
     else
     {
@@ -187,7 +190,7 @@ void MissionControlTab::pathFollow()
         {
             playGround->activeRobot->navigator->StopNavigating();
             playGround->activeRobot->navigator->quit();
-            qDebug()<<"Quitting Thread";
+            LOG(Logger::Warning,"Quitting Thread")
         }
         ui->pathFollowBtn->setText("Path Follow");
         playGround->activeRobot->notFollowing = true;
