@@ -90,11 +90,11 @@ protected:
     RobotManager *robotManager;
     bool bridgeTestEnabled,connNodesEnabled,regGridEnabled,obstPenEnabled,expObstEnabled,negate,
         loadSpaceFromFile, overWriteExistingSpace;
-    unsigned int planningParameters;
+    unsigned int planningSteps;
     QPointF rotation_center;
     QString robot_model;
     Pose start,end;
-    int planningStep;
+    int executionStep;
     int coord;
 };
 #endif /*PLANNINGMANAGER_H_*/
