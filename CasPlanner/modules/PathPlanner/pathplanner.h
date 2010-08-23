@@ -39,7 +39,7 @@ namespace CasPlanner
         double  obstacle_expansion_radius,bridge_length,bridge_res,regGridRes,
                 reg_grid_conn_rad,obst_penalry_radius,bridge_conn_rad;
     public :
-        unsigned int getPlanningParameters();
+        unsigned int getPlanningSteps();
         void   setExpRad(double);
         void   setBridgeLen(double);
         void   setBridgeRes(double);
@@ -61,12 +61,12 @@ namespace CasPlanner
         void   freePath();
         void   updateMap(Map *mapPatch);
         bool   checkShortestDistance(double i,double j,double neigbhour_pixel_distance);
-        bool   readSpaceFromFile(const char *filename);
+        bool   readSpaceFromFile(const char *filename,unsigned _planningSteps);
         bool   saveSpace2File(const char *filename);
         PathPlanner(Robot *,double dG,double bridge_len,double bridge_res,double regGridRes,double reg_grid_conn_rad,double obst_pen,double bridge_conn_rad);
         ~PathPlanner();
     private:
-        unsigned int planningParameters;
+        unsigned int planningSteps;
         bool obstaclesExpanded;
         Map *originalMap;
 };

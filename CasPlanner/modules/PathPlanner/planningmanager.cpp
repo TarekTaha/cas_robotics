@@ -61,20 +61,20 @@ PlanningManager::PlanningManager(RobotManager *robMan,
     this->renderPaths           = false;
     this->loadSpaceFromFile     = true;
     this->overWriteExistingSpace= false;
-    planningParameters          = 0;
+    planningSteps          = 0;
 
     if(connNodesEnabled)
-        planningParameters|=NODES_CONNECT;
+        planningSteps|=NODES_CONNECT;
     if(regGridEnabled)
-        planningParameters|=REGULAR_GRID;
+        planningSteps|=REGULAR_GRID;
     if(expObstEnabled)
-        planningParameters|=OBST_EXPAND;
+        planningSteps|=OBST_EXPAND;
     if(obstPenEnabled)
-        planningParameters|=OBST_PENALTY;
+        planningSteps|=OBST_PENALTY;
     if(bridgeTestEnabled)
-        planningParameters|=BRIDGE_TEST;
+        planningSteps|=BRIDGE_TEST;
 
-    this->planningStep = WAITING;
+    this->executionStep = WAITING;
     robotManager->robot->setCheckPoints(obst_exp);
     connect(this, SIGNAL(addMsg(int,int,QString)), robMan->playGround,SLOT(addMsg(int,int,QString)));
     this->setupPlanner();
@@ -88,8 +88,8 @@ renderPaths(false),
 robotManager(robMan),
 loadSpaceFromFile(true),
 overWriteExistingSpace(false),
-planningParameters(0),
-planningStep(WAITING)
+planningSteps(0),
+executionStep(WAITING)
 {
     this->connNodesEnabled      = CasPlanner::settings().isConnectNodesEnabled();
     this->regGridEnabled        = CasPlanner::settings().isRegGridEnabled();
@@ -98,15 +98,15 @@ planningStep(WAITING)
     this->bridgeTestEnabled     = CasPlanner::settings().isBridgeTestEnabled();
     connect(this, SIGNAL(addMsg(int,int,QString)), robMan->playGround,SLOT(addMsg(int,int,QString)));
     if(connNodesEnabled)
-        planningParameters|=NODES_CONNECT;
+        planningSteps|=NODES_CONNECT;
     if(regGridEnabled)
-        planningParameters|=REGULAR_GRID;
+        planningSteps|=REGULAR_GRID;
     if(expObstEnabled)
-        planningParameters|=OBST_EXPAND;
+        planningSteps|=OBST_EXPAND;
     if(obstPenEnabled)
-        planningParameters|=OBST_PENALTY;
+        planningSteps|=OBST_PENALTY;
     if(bridgeTestEnabled)
-        planningParameters|=BRIDGE_TEST;
+        planningSteps|=BRIDGE_TEST;
 }
 
 PlanningManager::~PlanningManager()
@@ -123,45 +123,50 @@ void PlanningManager:: setBridgeTest(bool state)
 {
     bridgeTestEnabled = state;
     if(state)
-        planningParameters|=BRIDGE_TEST;
+        planningSteps^=BRIDGE_TEST;
     else
-        planningParameters&=(0x1F^BRIDGE_TEST);
+        planningSteps&=(0x1F^BRIDGE_TEST);
+    LOG(Logger::Info,"PlanningSteps:"<<planningSteps)
 }
 
 void PlanningManager:: setConnNodes(bool state)
 {
     connNodesEnabled = state;
     if(state)
-        planningParameters^=NODES_CONNECT;
+        planningSteps^=NODES_CONNECT;
     else
-        planningParameters&=(0x1F^NODES_CONNECT);
+        planningSteps&=(0x1F^NODES_CONNECT);
+    LOG(Logger::Info,"PlanningSteps:"<<planningSteps)
 }
 
 void PlanningManager:: setRegGrid(bool state)
 {
     regGridEnabled = state;
     if(state)
-        planningParameters^=REGULAR_GRID;
+        planningSteps^=REGULAR_GRID;
     else
-        planningParameters&=(0x1F^REGULAR_GRID);
+        planningSteps&=(0x1F^REGULAR_GRID);
+    LOG(Logger::Info,"PlanningSteps:"<<planningSteps)
 }
 
 void PlanningManager:: setObstPen(bool state)
 {
     obstPenEnabled = state;
     if(state)
-        planningParameters^=OBST_PENALTY;
+        planningSteps^=OBST_PENALTY;
     else
-        planningParameters&=(0x1F^OBST_PENALTY);
+        planningSteps&=(0x1F^OBST_PENALTY);
+    LOG(Logger::Info,"PlanningSteps:"<<planningSteps)
 }
 
 void PlanningManager:: setExpObst(bool state)
 {
     expObstEnabled = state;
     if(state)
-        planningParameters^=OBST_EXPAND;
+        planningSteps^=OBST_EXPAND;
     else
-        planningParameters&=(0x1F^OBST_EXPAND);
+        planningSteps&=(0x1F^OBST_EXPAND);
+    LOG(Logger::Info,"PlanningSteps:"<<planningSteps)
 }
 
 void PlanningManager::setBridgeTestValue(double val)
@@ -236,14 +241,14 @@ bool PlanningManager::fileExist(const char * fname)
 
 void PlanningManager::generateSpace()
 {
-    planningStep = GENERATING_SPACE;
+    executionStep = GENERATING_SPACE;
     QThread::start();
 }
 
 void PlanningManager::findPath(int coord)
 {
     this->coord  = coord;
-    planningStep = FINDING_PATH;
+    executionStep = FINDING_PATH;
     QThread::start();
 }
 
@@ -312,8 +317,11 @@ void PlanningManager::generateSearchSpace(bool loadFromFile,bool overWriteCurren
 {
     loadSpaceFromFile        = loadFromFile;
     overWriteExistingSpace   = overWriteCurrent;
-    planningStep             = GENERATING_SPACE;
-    QThread::start();
+    executionStep             = GENERATING_SPACE;
+    if(!this->isRunning())
+    {
+        QThread::start();
+    }
 }
 
 void PlanningManager::generateSearchSpaceState(bool loadFromFile,bool overWriteCurrent)
@@ -322,7 +330,7 @@ void PlanningManager::generateSearchSpaceState(bool loadFromFile,bool overWriteC
     const char * filename = "logs/SearchSpace.txt";
     if(!this->pathPlanner)
         this->setupPlanner();
-    if(pathPlanner->search_space && !overWriteCurrent)
+    if(pathPlanner->search_space && !overWriteCurrent && planningSteps==pathPlanner->getPlanningSteps())
     {
         LOG(Logger::Warning,"Search Space already Exist")
         return;
@@ -332,34 +340,39 @@ void PlanningManager::generateSearchSpaceState(bool loadFromFile,bool overWriteC
         pathPlanner->freeResources();
     }
     timer.restart();
+    bool generateNewSearchSpace = true;
     if(fileExist(filename) && loadFromFile)
     {
         LOG(Logger::Info,"Loading Space From file ...")
-        if(pathPlanner->readSpaceFromFile(filename))
+        if(pathPlanner->readSpaceFromFile(filename,planningSteps))
         {
             if(expObstEnabled)
                 pathPlanner->expandObstacles();
             if(connNodesEnabled)
                 pathPlanner->connectNodes();
-            LOG(Logger::Info,"File loading took:"<<timer.elapsed()/double(1000.00)<<" secs")
+            generateNewSearchSpace = false;
+            LOG(Logger::Info,"File loading took:"<<timer.elapsed()/double(1000.00)<<" secs")                   
         }
         else
         {
-            LOG(Logger::Warning,"Could not Load Search Space from File")
+            LOG(Logger::Warning,"Could not Load Search Space from File, or meta-data mismatch")
         }
     }
-    else
+    // We come here only if the file doesn't exist, or when we fail to load a file
+    // with similar planning parameters and steps
+    if(generateNewSearchSpace)
     {
         LOG(Logger::Info,"Generating Space ...")
-        if(planningParameters & OBST_EXPAND)
+        LOG(Logger::Info,"PlanningSteps:"<<planningSteps)
+        if(planningSteps & OBST_EXPAND)
             pathPlanner->expandObstacles();
-        if(planningParameters & REGULAR_GRID)
+        if(planningSteps & REGULAR_GRID)
             pathPlanner->generateRegularGrid();
-        if(planningParameters & BRIDGE_TEST)
+        if(planningSteps & BRIDGE_TEST)
             pathPlanner->bridgeTest();
-        if(planningParameters & OBST_PENALTY)
+        if(planningSteps & OBST_PENALTY)
             pathPlanner->addCostToNodes();
-        if(planningParameters & NODES_CONNECT)
+        if(planningSteps & NODES_CONNECT)
             pathPlanner->connectNodes();
         pathPlanner->saveSpace2File(filename);
         Q_EMIT searchSpaceGenerated();
@@ -375,13 +388,13 @@ void PlanningManager::findPathState()
     if(!this->pathPlanner)
         this->setupPlanner();
     Node * retval;
-    if(!pathPlanner->search_space || planningParameters!=pathPlanner->getPlanningParameters())
+    if(!pathPlanner->search_space || planningSteps!=pathPlanner->getPlanningSteps())
     {
         generateSearchSpaceState();
     }
     QTime timer;
     retval = pathPlanner->startSearch(start,end,coord);
-    LOG(Logger::Info,"File loading took:"<<timer.elapsed()/double(1000.00)<<" secs")
+    LOG(Logger::Info,"Path Finding took:"<<(timer.elapsed()/double(1000.00))<<" secs")
     Q_EMIT pathFound(retval);
     if(retval)
     {
@@ -395,12 +408,14 @@ void PlanningManager::findPathState()
 
 void PlanningManager::run()
 {
-    switch(planningStep)
+    switch(executionStep)
     {
     case GENERATING_SPACE:
+        LOG(Logger::Info,"PlanningManager Thread is performing Space Generation State")
         generateSearchSpaceState(loadSpaceFromFile,overWriteExistingSpace);
         break;
     case FINDING_PATH:
+        LOG(Logger::Info,"PlanningManager Thread is performing Path Finding State")
         findPathState();
         break;
     case WAITING:

@@ -34,7 +34,7 @@ PathPlanner::PathPlanner(Robot *rob,double dG,double bridge_len,
 			obst_penalry_radius(obst_pen),
 			bridge_conn_rad(bridge_conn_rad_in)
 {
-    planningParameters = 0;
+    planningSteps = 0;
     obstaclesExpanded  = false;
     originalMap        = NULL;
 }
@@ -50,11 +50,12 @@ void PathPlanner::freeResources()
     freeSearchSpace();
     freePath();
     p=root=test=NULL;
-    planningParameters  = 0;
-//    if(originalMap)
-//        delete originalMap;
-//    if(Astar::map)
-//        delete Astar::map;
+    /*
+    if(originalMap)
+        delete originalMap;
+    if(Astar::map)
+        delete Astar::map;
+    */
 }
 
 void PathPlanner::freePath()
@@ -67,9 +68,9 @@ void PathPlanner::freePath()
     }
 }
 
-unsigned int PathPlanner::getPlanningParameters()
+unsigned int PathPlanner::getPlanningSteps()
 {
-    return planningParameters;
+    return planningSteps;
 }
 
 void   PathPlanner::setExpRad(double a)
@@ -110,13 +111,12 @@ void PathPlanner::expandObstacles()
         LOG(Logger::Info,"    --->>> You have to read the map before Expanding the Obstacles <<<---")
         return;
     }
-//    if(obstaclesExpanded)
-//    {
-//        LOG(Logger::Info,"    --->>> Obstacles have been expanded before, Skipping <<<---")
-//        delete Astar::map;
-//        Astar::map = originalMap->clone();
-//        return;
-//    }
+    if(obstaclesExpanded)
+    {
+        LOG(Logger::Info,"    --->>> Obstacles have been expanded before, Skipping <<<---")
+        delete Astar::map;
+        Astar::map = originalMap->clone();
+    }
     int thickness;
     int m,n,x,y,radius;
     thickness = int(this->obstacle_expansion_radius/map->mapRes);
@@ -183,11 +183,11 @@ void PathPlanner::expandObstacles()
         }
     }
     LOG(Logger::Info,"	--->>> OBSTACLES EXPANDED SUCCESSFULLY <<<---	")
-    planningParameters|=OBST_EXPAND;
+    planningSteps|=OBST_EXPAND;
     obstaclesExpanded = true;
 };
 
-bool PathPlanner::readSpaceFromFile(const char *filename)
+bool PathPlanner::readSpaceFromFile(const char *filename,unsigned _planningSteps)
 {
     double locationx,locationy,obstacle_cost;
     int type;
@@ -205,23 +205,27 @@ bool PathPlanner::readSpaceFromFile(const char *filename)
     // If planning parameters are not the same as the current then we can't read it
     double obstacle_expansion_radius_t,bridge_length_t,bridge_res_t,regGridRes_t,
            reg_grid_conn_rad_t,obst_penalry_radius_t,bridge_conn_rad_t;
-    fscanf(file,"%lf %lf %lf %lf %lf %lf %lf\n",&obstacle_expansion_radius_t,&bridge_length_t,&bridge_res_t,&regGridRes_t,
-            &reg_grid_conn_rad_t,&obst_penalry_radius_t,&bridge_conn_rad_t);
+    unsigned int planningSteps_t;
+    fscanf(file,"%lf %lf %lf %lf %lf %lf %lf %d\n",&obstacle_expansion_radius_t,&bridge_length_t,&bridge_res_t,&regGridRes_t,
+            &reg_grid_conn_rad_t,&obst_penalry_radius_t,&bridge_conn_rad_t,&planningSteps_t);
     if(!isEqual(obstacle_expansion_radius_t,obstacle_expansion_radius) || !isEqual(bridge_length_t,bridge_length) ||
        !isEqual(bridge_res_t,bridge_res) || !isEqual(regGridRes_t,regGridRes) || !isEqual(reg_grid_conn_rad_t,reg_grid_conn_rad) ||
-       !isEqual(obst_penalry_radius_t,obst_penalry_radius) || !isEqual(bridge_conn_rad_t,bridge_conn_rad))
+       !isEqual(obst_penalry_radius_t,obst_penalry_radius) || !isEqual(bridge_conn_rad_t,bridge_conn_rad) || planningSteps_t!=_planningSteps)
     {
         LOG(Logger::Warning,"Metadata Parameters mismatch, can't read search space, try to generate new one")
-                LOG(Logger::Warning,"obst exp:"<<obstacle_expansion_radius<<" _t:"<<obstacle_expansion_radius_t)
-                LOG(Logger::Warning,"bridge_l:"<<bridge_length<<" _t:"<<bridge_length_t)
-                LOG(Logger::Warning,"bridge_res:"<<bridge_res<<" _t:"<<bridge_res_t)
-                LOG(Logger::Warning,"reg_grid_res:"<<regGridRes<<" _t:"<<regGridRes_t)
-                LOG(Logger::Warning,"reg_grid_con:"<<reg_grid_conn_rad<<" _t:"<<reg_grid_conn_rad_t)
-                LOG(Logger::Warning,"obst_pen:"<<obst_penalry_radius<<" _t:"<<obst_penalry_radius_t)
-                LOG(Logger::Warning,"bridge_con:"<<bridge_conn_rad<<" _t:"<<bridge_conn_rad_t)
+                LOG(Logger::Warning,"Expected obst exp:"<<obstacle_expansion_radius<<" _t:"<<obstacle_expansion_radius_t)
+                LOG(Logger::Warning,"Expected bridge_l:"<<bridge_length<<" found:"<<bridge_length_t)
+                LOG(Logger::Warning,"Expected bridge_res:"<<bridge_res<<" found:"<<bridge_res_t)
+                LOG(Logger::Warning,"Expected reg_grid_res:"<<regGridRes<<" found:"<<regGridRes_t)
+                LOG(Logger::Warning,"Expected reg_grid_con:"<<reg_grid_conn_rad<<" found:"<<reg_grid_conn_rad_t)
+                LOG(Logger::Warning,"Expected obst_pen:"<<obst_penalry_radius<<" found:"<<obst_penalry_radius_t)
+                LOG(Logger::Warning,"Expected bridge_con:"<<bridge_conn_rad<<" found:"<<bridge_conn_rad_t)
+                LOG(Logger::Warning,"Expected planningSteps:"<<_planningSteps<<" found:"<<planningSteps_t)
         fclose(file);
         return false;
     }
+    // overwrite the planning steps to reflect those in the file
+    planningSteps = _planningSteps;
     while (!feof(file))
     {
         fscanf(file,"%lf %lf %lf %d\n",&locationx,&locationy,&obstacle_cost,&type);
@@ -266,8 +270,8 @@ bool PathPlanner::saveSpace2File(const char *filename)
     SearchSpaceNode *temp=search_space;
     //obstacle_expansion_radius,bridge_length,bridge_res,regGridRes,reg_grid_conn_rad,obst_penalry_radius,bridge_conn_rad;
     // Save metadata
-    fprintf(file,"%lf %lf %lf %lf %lf %lf %lf\n",obstacle_expansion_radius,bridge_length,bridge_res,regGridRes,
-            reg_grid_conn_rad,obst_penalry_radius,bridge_conn_rad);
+    fprintf(file,"%lf %lf %lf %lf %lf %lf %lf %d\n",obstacle_expansion_radius,bridge_length,bridge_res,regGridRes,
+            reg_grid_conn_rad,obst_penalry_radius,bridge_conn_rad,planningSteps);
     while (temp)
     {
         fprintf(file,"%f %f %f %d\n",temp->location.x(),temp->location.y(),temp->obstacle_cost,temp->type);
@@ -323,7 +327,7 @@ void PathPlanner::generateRegularGrid()
         }
     }
     LOG(Logger::Info,"	--->>> REGULAR GRID GENERATED SUCCESSFULLY <<<---	")
-    planningParameters|=REGULAR_GRID;
+    planningSteps|=REGULAR_GRID;
 }
 
 void PathPlanner::bridgeTest()
@@ -388,7 +392,7 @@ void PathPlanner::bridgeTest()
         }
     }
     LOG(Logger::Info,"	--->>> BRIDGE TEST FINISHED SUCCESSFULLY <<<---")
-    planningParameters|=BRIDGE_TEST;
+    planningSteps|=BRIDGE_TEST;
 }
 
 void PathPlanner :: printNodeList()
@@ -455,7 +459,7 @@ void PathPlanner::addCostToNodes()
         S = S->next;
     }
     LOG(Logger::Info,"	--->>> Penalty Added <<<---	")
-    planningParameters|=OBST_PENALTY;
+    planningSteps|=OBST_PENALTY;
 }
 
 void PathPlanner::connectNodes()
@@ -496,7 +500,7 @@ void PathPlanner::connectNodes()
         temp = temp->next;
     }
     LOG(Logger::Info,"	--->>> NODES CONNECTED <<<---	")
-    planningParameters|=NODES_CONNECT;
+    planningSteps|=NODES_CONNECT;
 }
 
 bool PathPlanner::checkShortestDistance(double x,double y,double neigbhour_distance)

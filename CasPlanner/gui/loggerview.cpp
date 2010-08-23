@@ -11,6 +11,9 @@ loggerview::loggerview(QWidget *parent) :
     ui->textLogs->setReadOnly(true);
     Logger &logger = Logger::getLogger();
     connect(&logger,SIGNAL(showMsg(int,QString)),this,SLOT(showMsg(int,QString)));
+    ui->textLogs->setTextBackgroundColor(Qt::gray);
+//    QPalette palette = ui->textLogs->palette();
+//    palette.setColor(QPalette::Background, Qt::gray);
 }
 
 loggerview::~loggerview()
