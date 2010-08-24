@@ -120,6 +120,18 @@ public:
         }
     }
 
+    int getConnectionDirection(unsigned int destVertex)
+    {
+        for(int i=0;i<connections.size();i++)
+        {
+            if(connections[i].getNodeIndex()==destVertex)
+            {
+                return connections[i].getDirection();
+            }
+        }
+        return -1;
+    }
+
     void resetSegmentVisits()
     {
         for(int i=0;i<connections.size();i++)
@@ -184,6 +196,7 @@ public:
     int getVertexWithLocation(double x, double y);
     int getVertexWithLocation(QPointF p);
     int getSegmentNumVisits(int source, int dest);
+    int getConnectionDirection(int startVertex,int endVertex);
     void resetVertexVisits();
     void resetSegmentVisits();
     // Direction is important : source --> dest not equal to dest --> source

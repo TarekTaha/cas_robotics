@@ -134,6 +134,11 @@ int MapSkeleton::getCurrentSpatialState(Pose P)
     return stateIndex;
 }
 
+int MapSkeleton::getConnectionDirection(int startVertex,int endVertex)
+{
+    return verticies[startVertex].getConnectionDirection(endVertex);
+}
+
 void MapSkeleton::generateInnerSkeleton()
 {
     Vertex v,vOpp;

@@ -35,7 +35,8 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
 	generateSkeletonBtn("Generate Skeleton"),
 	captureImage("Capture Image"),
 	testModelBtn("Test Bayesian Model"),
-        clearAllBtn("Clear All"),
+	clearAllBtn("Clear All"),
+	saveData("Save Data"),
 	tasksGB("Set of Tasks"),
 	tasksList(this)
 {
@@ -55,14 +56,17 @@ TasksControlPanel::TasksControlPanel(TasksGui *tasksGui,QWidget *parent):
 
     QHBoxLayout *parHLayout = new QHBoxLayout;
     QHBoxLayout *parHLayout2 = new QHBoxLayout;
+    QHBoxLayout *parHLayout3 = new QHBoxLayout;
     QVBoxLayout *parVLayout = new QVBoxLayout;
     parHLayout->addWidget(new QLabel("Random Runs"));
     parHLayout->addWidget(&numRandomRuns);
     parHLayout2->addWidget(new QLabel("Time of Day"));
     parHLayout2->addWidget(&timeOfDay);
+    parHLayout3->addWidget(&saveData);
 
     parVLayout->addLayout(parHLayout);
     parVLayout->addLayout(parHLayout2);
+    parVLayout->addLayout(parHLayout3);
     parVLayout->addWidget(&randomTasksBtn);
     parVLayout->addWidget(&clearAllBtn);
     randomTasksGB.setLayout(parVLayout);
@@ -119,6 +123,30 @@ void TasksControlPanel::runRandomTasks()
     tasksGui->playGround->mapManager->mapSkeleton.resetSegmentVisits();
     tasksGui->playGround->mapManager->mapSkeleton.resetVertexVisits();
     t.start();
+    // store the state here so that if it changes during data generation
+    // we wont end up with open file handler
+    bool saveData2File = saveData.isChecked();
+    LOG(Logger::Info,"Save 2 Data is:"<<saveData2File)
+    QTextStream stream,mismaskStream;
+    QFile file,mismaskFile;
+    if(saveData2File)
+    {
+        QString timeCode  =  QDateTime().currentDateTime().toString("hh:mmAP-dd-MM-yyyy");
+        file.setFileName(QString("logs/simulatedData%1.txt").arg(timeCode));
+        mismaskFile.setFileName(QString("logs/mismaskSimulatedData%1.txt").arg(timeCode));
+        if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
+        {
+            LOG(Logger::Critical,"Can't create file:"<<file.fileName())
+            return;
+        }
+        if (!mismaskFile.open(QIODevice::ReadWrite | QIODevice::Text))
+        {
+            LOG(Logger::Critical,"Can't create mismaskFile:"<<mismaskFile.fileName())
+            return;
+        }
+        stream.setDevice(&file);
+        mismaskStream.setDevice(&mismaskFile);
+    }
     for(int i=0;i<numRandomRuns.value();i++)
     {
         // find a random source state, any stata can be used
@@ -127,6 +155,7 @@ void TasksControlPanel::runRandomTasks()
         destVertexId   = rand()%tasksGui->playGround->mapManager->mapSkeleton.getNumDestinations();
         // find the destination's actual index
         destVertexId = tasksGui->playGround->mapManager->mapSkeleton.destIndexes[destVertexId];
+        int destIndex = tasksGui->playGround->mapManager->mapSkeleton.getDestIndex(destVertexId);
         LOG(Logger::Info,"\n Source Vertex is:"<<sourceVertixId<<" destination Vertex is:"<<destVertexId)
         //tasksList.setCurrentRow(r);
         //qDebug("Using Task %s %d ",qPrintable(tasksGui->tasks[sourceVertixId].getName()),sourceVertixId);
@@ -156,6 +185,16 @@ void TasksControlPanel::runRandomTasks()
                     tasksGui->playGround->mapManager->mapSkeleton.verticies[k].incrementVisits(1);
                     LOG(Logger::Info,"Step:"<<step++<<" has index:"<<tasksGui->playGround->mapManager->mapSkeleton.getCurrentSpatialState(p->pose))
                     LOG(Logger::Info,"Step:"<<step++<<" has index:"<<tasksGui->playGround->mapManager->mapSkeleton.getCurrentSpatialState(p->next->pose))
+                    if(saveData2File)
+                    {
+                        //vec(dest1,joy1,loc1,time1),
+                        int obs = tasksGui->playGround->mapManager->mapSkeleton.getConnectionDirection(j,k);
+                        stream<<destIndex<<" "<<obs<<" "<<j<<" "<<timeOfDay.currentIndex()<<"\n";
+                        mismaskStream<<"1 0 0 0\n";
+                        // 4 means stop for the last step
+                        stream<<destIndex<<" "<<4<<" "<<k<<" "<<timeOfDay.currentIndex()<<"\n";
+                        mismaskStream<<"1 0 0 0\n";
+                    }
                 }
                 else
                 {
@@ -165,9 +204,20 @@ void TasksControlPanel::runRandomTasks()
                     if(!tasksGui->playGround->mapManager->mapSkeleton.destIndexes.contains(j))
                         tasksGui->playGround->mapManager->mapSkeleton.verticies[j].incrementVisits(1);
                     LOG(Logger::Info,"Step:"<<step++<<" has index:"<<tasksGui->playGround->mapManager->mapSkeleton.getCurrentSpatialState(p->pose))
+                    if(saveData2File)
+                    {
+                        int obs = tasksGui->playGround->mapManager->mapSkeleton.getConnectionDirection(j,k);
+                        stream<<destIndex<<" "<<obs<<" "<<j<<" "<<timeOfDay.currentIndex()<<"\n";
+                        mismaskStream<<"1 0 0 0\n";
+                    }
                 }
                 p = p->next;
             }
+        }
+        if(saveData2File && (i+1)<numRandomRuns.value())
+        {
+            stream<<"\n";
+            mismaskStream<<"\n";
         }
     }
     for(int i=0;i<tasksGui->playGround->mapManager->mapSkeleton.destIndexes.size();i++ )
@@ -178,6 +228,13 @@ void TasksControlPanel::runRandomTasks()
     }
     LOG(Logger::Info,QString("Generating %1 Random Paths took:%2 msec").arg(numRandomRuns.value()).arg(t.elapsed()))
     (tasksGui->getMapGL()).setShowPaths(false);
+    if(saveData2File)
+    {
+        stream.flush();
+        file.close();
+        mismaskStream.flush();
+        mismaskFile.close();
+    }
 }
 
 void TasksControlPanel::updateSelectedVoronoiMethod(bool)
@@ -217,7 +274,7 @@ void TasksControlPanel::exportHtml()
 MapGL::MapGL(Map*og,TasksGui *tsg, QWidget *parent):
 	QGLWidget(QGLFormat(QGL::AlphaChannel), parent),
 	tasksGui(tsg),
-        zoomFactor(15),
+	zoomFactor(15),
 	xOffset(0),
 	yOffset(0),
 	zOffset(0),
@@ -227,7 +284,7 @@ MapGL::MapGL(Map*og,TasksGui *tsg, QWidget *parent):
 	showGrids(true),
 	firstTime(true),
 	mainMapBuilt(false),
-        showPaths(false),
+	showPaths(false),
 	mapSkeleton(NULL),
 	ogMap(og)
 {
