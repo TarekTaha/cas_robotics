@@ -127,6 +127,7 @@ private:
     QPushButton testModelBtn;
     QPushButton clearAllBtn;
     QComboBox timeOfDay;
+    QCheckBox saveData;
 
     //Pointers to the currently selected Robot
     QGroupBox tasksGB;
@@ -226,7 +227,7 @@ private:
     double ptzTilt;
     bool ptzEnabled;
     double radPerPixel;
-    double msperWheel;    
+    double msperWheel;
 };
 
 #endif
