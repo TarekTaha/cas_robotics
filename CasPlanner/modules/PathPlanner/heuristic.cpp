@@ -58,7 +58,6 @@ double SocialHeuristic::hCost(Node *n,Node * end)
     g = n->parent->g_value + Dist(n->pose.p,n->parent->pose.p);
     cost =  h + g;
     cost -= this->socialRewards->value(QString("%1-%2-%3").arg(n->parent->id).arg(n->id).arg(end->id));
-//	cout<<qPrintable(QString("%1-%2-%3").arg(n->parent->id).arg(n->id).arg(end->id))<<":="<<this->socialRewards->value(QString("%1-%2-%3").arg(n->parent->id).arg(n->id).arg(end->id))<<endl;
     return cost;
 }
 

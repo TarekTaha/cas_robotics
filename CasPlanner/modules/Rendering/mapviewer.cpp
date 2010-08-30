@@ -156,6 +156,29 @@ void MapViewer::renderPaths()
         if(playGround->robotPlatforms[i]->planningManager->pathPlanner->path)
         {
             Node * path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;
+            // draw the robot trail if wanted, this will show the location and
+            // orientation of the robot at each step of the planned path
+            if(showRobotTrail)
+            {
+                while(path)
+                {
+                    glPushMatrix();
+                    glTranslatef(path->pose.p.x(),path->pose.p.y(),0);
+                    glRotated(RTOD(path->pose.phi),0,0,1);
+                    glColor4f(RGB_COLOR[3][0],RGB_COLOR[3][1],RGB_COLOR[3][2],0.5);
+                    glBegin(GL_TRIANGLE_FAN);
+                    //glBegin(GL_LINE_LOOP);
+                    for(int m=0;m<playGround->robotPlatforms[i]->robot->local_edge_points.size();m++)
+                    {
+                        glVertex2f(playGround->robotPlatforms[i]->robot->local_edge_points[m].x(),playGround->robotPlatforms[i]->robot->local_edge_points[m].y());
+                    }
+                    glEnd();
+                    glPopMatrix();
+                    path = path->next;
+                }
+            }
+            //re-populate the path pointer
+            path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;
             glColor4f(RGB_COLOR[6][0],RGB_COLOR[6][1],RGB_COLOR[6][2],0.5);
             if(showPath)
             {
@@ -168,29 +191,6 @@ void MapViewer::renderPaths()
                 }
                 glEnd();
                 glLineWidth(1);
-            }
-            //re-populate the path pointer
-            path = playGround->robotPlatforms[i]->planningManager->pathPlanner->path;
-            // draw the robot trail if wanted, this will show the location and
-            // orientation of the robot at each step of the planned path
-            if(showRobotTrail)
-            {
-                while(path)
-                {
-                    glPushMatrix();
-                    glTranslatef(path->pose.p.x(),path->pose.p.y(),0);
-                    glRotated(RTOD(path->pose.phi),0,0,1);
-                    glColor4f(RGB_COLOR[3][0],RGB_COLOR[3][1],RGB_COLOR[3][2],0.5);
-                    //glBegin(GL_TRIANGLE_FAN);
-                    glBegin(GL_LINE_LOOP);
-                    for(int m=0;m<playGround->robotPlatforms[i]->robot->local_edge_points.size();m++)
-                    {
-                        glVertex2f(playGround->robotPlatforms[i]->robot->local_edge_points[m].x(),playGround->robotPlatforms[i]->robot->local_edge_points[m].y());
-                    }
-                    glEnd();
-                    glPopMatrix();
-                    path = path->next;
-                }
             }
             glLineWidth(1);
             wayPoint = playGround->robotPlatforms[i]->navigator->wayPoint;
@@ -1088,16 +1088,16 @@ void MapViewer::paintGL()
             renderMap();
         }
         displayGrid();
-        showIndicators();
+        renderExpandedTree();
+        renderSpatialStates();
+        if(!searchSpaceListCreated)
+            renderSearchSpace();
         renderPaths();
         renderLaser();
         renderRobot();
+        showIndicators();
         //glEnable(GL_DEPTH_TEST);
-        renderSpatialStates();
         renderAction();
-        renderExpandedTree();
-        if(!searchSpaceListCreated)
-            renderSearchSpace();
         glCallList(searchSpaceList);
     }
     glCallList(mapList);

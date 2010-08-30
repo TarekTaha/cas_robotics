@@ -23,20 +23,24 @@
 namespace CasPlanner
 {
 
-Node :: Node ()
+Node :: Node ():
+    nearest_obstacle(0.0),
+    g_value(0.0),
+    h_value(0.0),
+    f_value(0.0)
 {
-		parent = next = prev = NULL;
-};
+    parent = next = prev = NULL;
+}
 Node :: ~Node ()
 {
-		parent = next = prev = NULL;
+    parent = next = prev = NULL;
 };
 bool Node ::operator == (Node a)
 {
-	return ( isEqual(this->pose.p.x(),a.pose.p.x()) && isEqual(this->pose.p.y(),a.pose.p.y()));
+        return ( isEqual(this->pose.p.x(),a.pose.p.x()) && isEqual(this->pose.p.y(),a.pose.p.y()));
 }
 bool Node ::operator != (Node a)
 {
-	return ( !isEqual(this->pose.p.x(),a.pose.p.x()) && isEqual(this->pose.p.y(),a.pose.p.y()));
+        return ( !isEqual(this->pose.p.x(),a.pose.p.x()) && isEqual(this->pose.p.y(),a.pose.p.y()));
 }
 }
