@@ -149,3 +149,34 @@ void Map::convert2Pix(QPointF *p)
 	p->setX(( p->x() + mapRes*center.x())/mapRes);
 	p->setY((-p->y() + mapRes*center.y())/mapRes);
 }
+
+// Save as PGM format
+void Map::savePgm()
+{
+    char filename[40];
+    int i, j;
+    signed char c;
+    unsigned char d;
+    FILE *file;
+    snprintf(filename,40,"%s%s","logs/map",".pgm");
+    file = fopen(filename, "w+");
+    if (file == NULL)
+    {
+        LOG(Logger::Critical,"error writing to file:"<<filename)
+        return;
+    }
+
+    fprintf(file, "P5 %d %d 255\n",width, height);
+
+    for (j=0;j<height;j++)
+    {
+        for (i=0; i<width;i++)
+        {
+            c = (int)(grid[i][j] * 255.0);
+            d = (unsigned char) (255 - c);
+            fwrite(&d, 1, 1,  file);
+        }
+    }
+    LOG(Logger::Info,"		--->>> Pgm Map Saved <<<--- ")
+    fclose(file);
+}

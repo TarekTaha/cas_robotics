@@ -182,6 +182,7 @@ void PathPlanner::expandObstacles()
             }
         }
     }
+    map->savePgm();
     LOG(Logger::Info,"	--->>> OBSTACLES EXPANDED SUCCESSFULLY <<<---	")
     planningSteps|=OBST_EXPAND;
     obstaclesExpanded = true;
@@ -435,6 +436,7 @@ void PathPlanner::addCostToNodes()
         point.setY(S->location.y());
         map->convert2Pix(&point);
         nearest_obstacle = 0;
+
         for(radius = (int)number_of_pixels ; radius >0 ; radius --)
         {
             for( i= (int)(point.x() - radius) ; i < (int)(point.x() + radius); i+=1)
@@ -456,6 +458,7 @@ void PathPlanner::addCostToNodes()
         }
         // this is a normalized cost, it will make more sense later on
         S->obstacle_cost =  (obst_penalry_radius - nearest_obstacle*map->mapRes)/obst_penalry_radius;
+        //S->obstacle_cost = 0;
         S = S->next;
     }
     LOG(Logger::Info,"	--->>> Penalty Added <<<---	")

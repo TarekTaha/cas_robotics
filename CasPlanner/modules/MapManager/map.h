@@ -36,6 +36,7 @@ public:
     Map(float mapRes,Pose p);
     Map(Pose p);
     Map * clone();
+    void savePgm();
     void scale(int newWidth,int newHeight);
     // transfers from pixel coordinate to the main coordinate system
     void convertPix(QPointF  *p);
