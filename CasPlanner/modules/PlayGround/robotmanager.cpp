@@ -157,7 +157,10 @@ void RobotManager::stop()
 
 void RobotManager::startComms()
 {
-    commManager->start();
+    if(!commManager->isRunning())
+    {
+        commManager->start();
+    }
 }
 
 void RobotManager::startPlanner()

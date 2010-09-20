@@ -42,6 +42,7 @@ public Q_SLOTS:
     void resetDestinationBelief();
     void updateSelectedRobot(bool);
     void pathFound(Node*);
+    void robotConnected(bool);
 private:
     Ui::MissionControlTab *ui;
     MapViewer  * mapViewer;
@@ -55,6 +56,7 @@ private:
     static int width, height, components;
 
 private Q_SLOTS:
+    void on_connect2Robot_released();
     void on_generateSearchSpace_released();
 };
 
