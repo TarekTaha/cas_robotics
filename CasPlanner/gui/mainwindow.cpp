@@ -42,7 +42,7 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     logger.init("log.txt",true);
     logger.setLevel(Logger::Debug);
     // Create the PlayGround where all the RobotManagers will run
-    playGround = new PlayGround (configFiles,statusBar());
+    playGround = new PlayGround(configFiles,statusBar());
 
     QWidget *container = new QWidget(this);
     tabcontainer = new TabContainer(parent,playGround);
@@ -50,13 +50,11 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     // Buttons
     QVBoxLayout *vLayout 		 = new QVBoxLayout;
     QPushButton *emergStop 		 = new QPushButton(" STOP ROBOT ");
-    QPushButton *connRobot 		 = new QPushButton(" Connect to Robot ");
     QPushButton *logButton 		 = new QPushButton(" Show Loggs");
     QPalette palette = emergStop->palette();
     palette.setColor(QPalette::Button, Qt::red);
     emergStop->setPalette(palette);
     palette.setColor(QPalette::Button, Qt::green);
-    connRobot->setPalette(palette);
     palette.setColor(QPalette::Button, Qt::yellow);
     logButton->setPalette(palette);
 
@@ -66,7 +64,6 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     layout->addWidget(tabcontainer,1);
     layout2->addWidget(logButton);
     layout2->addWidget(emergStop);
-    layout2->addWidget(connRobot);
     vLayout->addLayout(layout);
     vLayout->addLayout(layout2);
     container->setLayout(vLayout);
@@ -74,7 +71,6 @@ MainWindow::MainWindow(QStringList configFiles, QWidget *parent):
     setCentralWidget(container);
 
     connect(emergStop, SIGNAL(pressed()), playGround, SLOT(stopRobots()));
-    connect(connRobot, SIGNAL(pressed()), playGround, SLOT(startRobotsComm()));
     connect(logButton, SIGNAL(clicked()), playGround->statusLogger, SLOT(showLog()));
 
 

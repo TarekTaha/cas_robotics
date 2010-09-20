@@ -141,7 +141,7 @@ public:
     double getSpeed();
     double getTurnRate();
     bool isConnected();
-    bool isDeviceAvailable(QString interfaceName,int interfaceIndex);
+    DeviceType * isDeviceAvailable(QString interfaceName,int interfaceIndex);
     bool getLocalized();
     Pose getLocation();
     Pose getAmclLocation();
@@ -170,6 +170,7 @@ public:
 Q_SIGNALS:
     void newData();
     void addMsg(int,int,QString);
+    void robotConnected(bool);
 protected:
     QString playerHost;
     QString logMsg;
@@ -192,6 +193,8 @@ protected:
     LaserScan laserScan;
     double speed,turnRate,getspeed,getturnrate;
     QReadWriteLock dataLock;
+    QMutex mutex;
+    bool stopThread;
     Accelerometer n95Acc;
 };
 #endif

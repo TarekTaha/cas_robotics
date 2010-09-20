@@ -32,7 +32,7 @@ playGround(playG)
     if (!playG)
         throw CasPlannerException((char*)"CommManager::Null Pointer to PlayGround");
     startConnected 	= false;
-    activateControl = false;
+    activateControl     = false;
     laserEnabled	= false;
     ptzEnabled		= false;
     occMapEnabled	= false;

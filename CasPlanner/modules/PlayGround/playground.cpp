@@ -110,7 +110,9 @@ void PlayGround::setMapViewer(MapViewer *_mapViewer)
 void PlayGround::startRobotsComm()
 {
     for(int i=0;i<robotPlatforms.size();i++)
+    {
         robotPlatforms[i]->startComms();
+    }
 }
 
 void PlayGround::stopRobots()

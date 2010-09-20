@@ -63,6 +63,7 @@ public:
     Node * closestPathNode(QPointF location,Node * all_path);
     void generateLocalMap(LaserScan laserScan, Pose rob_location);
     bool mapModified(LaserScan laserScan, Pose rob_location);
+    Pose getDestination(Node* completePath);
     bool getGoal(LaserScan laserScan, Pose &goal);
     void stop();
     void run();

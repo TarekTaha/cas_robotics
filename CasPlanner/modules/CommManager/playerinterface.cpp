@@ -63,6 +63,7 @@ void PlayerInterface::resetResources()
     joyStickConnected   = false;
     mapConnected        = false;
     ctrlConnected       = false;
+    stopThread          = false;
     positionId		= 0;	
     playerHost		= "localhost";
     voiceMessage	= "";
@@ -229,7 +230,7 @@ int PlayerInterface::getJoyStickDir()
 
 void PlayerInterface::checkForWheelChair()
 {
-    QVector<DeviceType> * dev = getDevices();
+    QVector<DeviceType> * dev = devices;
     for(int i=0;i< dev->size(); i++)
     {
         if((*dev)[i].getDriverName() == "WheelchairDriver")
@@ -258,7 +259,6 @@ void PlayerInterface::checkForWheelChair()
 QVector<DeviceType> * PlayerInterface::getDevices()
 {
     // Connect to the server
-    dataLock.lockForWrite();
     if(devices)
         devices->clear();
     else
@@ -281,6 +281,7 @@ QVector<DeviceType> * PlayerInterface::getDevices()
     	std::string str= pc->LookupName(iter->addr.interf);
     	device.setInterfaceName(str.c_str());
         LOG(Logger::Info,"Interface Name:"<<str.c_str()<<" Interface Code:"<<iter->addr.interf<<" index:"<<iter->addr.index)
+        /*
         switch(iter->addr.interf)
         {
         case PLAYER_LASER_CODE :
@@ -319,23 +320,23 @@ QVector<DeviceType> * PlayerInterface::getDevices()
         default:
             device.setSubscribed(false);
         }
+        */
         devices->push_back(device);
     }
-    dataLock.unlock();
     return devices;
 }
 
-bool PlayerInterface::isDeviceAvailable(QString interfaceName,int interfaceIndex)
+DeviceType * PlayerInterface::isDeviceAvailable(QString interfaceName,int interfaceIndex)
 {
     QVector<DeviceType> * dev = devices;
     for(int i=0;i< dev->size(); i++)
     {
         if((*dev)[i].getInterfaceName() == interfaceName && (*dev)[i].getInterfaceIndex()==interfaceIndex)
         {
-            return true;
+            return &(*dev)[i];
         }
     }
-    return false;
+    return NULL;
 }
 
 void PlayerInterface::stopRelease()
@@ -670,29 +671,59 @@ Map PlayerInterface::getMap()
 void PlayerInterface::clearResources()
 {
     if(drive)
+    {
         delete drive;
+        drive = 0;
+    }
     if(vfh)
+    {
         delete vfh;
+        vfh = 0;
+    }
     if(joyStick)
+    {
         delete joyStick;
+        joyStick = 0;
+    }
     if(wheelChairCommander)
+    {
         delete wheelChairCommander;
+        wheelChairCommander = 0;
+    }
     if(map)
+    {
         delete map;
+        map = 0;
+    }
     if(ptz)
+    {
         delete ptz;
+        ptz = 0;
+    }
     if(localizer)
+    {
         delete localizer;
+    }
     if(speechP)
+    {
         delete speechP;
+        speechP = 0;
+    }
     if(pc)
+    {
+        pc->Stop();;
         delete pc;
+        pc = 0;
+    }
 }
 
 void PlayerInterface::disconnect()
 {
-	
+    dataLock.lockForWrite();
+    stopThread = true;
+    dataLock.unlock();
 }
+
 void PlayerInterface::connect2Robot(QString host, int port)
 {
     /*
@@ -715,15 +746,18 @@ void PlayerInterface::connectDevices()
     /* 
      * TODO: Proper check for the successfullness of the proxy creation
      */
+    getDevices();
     if(ctrEnabled)
     {
         if(drive)
         {
             delete drive;
+            drive = NULL;
         }
         checkForWheelChair();
         if(isDeviceAvailable("position2d",positionId))
         {
+            ctrlConnected = false;
             try
             {
                 drive = new Position2dProxy(pc,positionId);
@@ -741,6 +775,7 @@ void PlayerInterface::connectDevices()
     for(int i=0; i < lasers.size(); i++)
     {
     	player_pose3d_t	lp_pose;
+        laserConnected = false;
         if(isDeviceAvailable("laser",i))
         {
             try
@@ -753,7 +788,7 @@ void PlayerInterface::connectDevices()
                 lasers[i].pose.p.setY(lp_pose.py);
                 lasers[i].pose.phi = lp_pose.ppitch;//pyaw,proll
                 laserConnected = true;
-                LOG(Logger::Info,QString("\t\t - Laser interface:%1 Interface Added Successfully").arg(lasers[i].index))
+                LOG(Logger::Info,QString("\t\t - Laser index:%1 Interface Added Successfully").arg(lasers[i].index))
                 LOG(Logger::Info,QString("\t\t - Laser Pose X:%1 Y:%2 Phi:%3").arg(lasers[i].pose.p.x()).arg(lasers[i].pose.p.y()).arg(lasers[i].pose.phi))
             }
             catch(...)
@@ -766,6 +801,7 @@ void PlayerInterface::connectDevices()
     }
     if(mapEnabled)
     {
+        mapConnected = false;
         if(isDeviceAvailable("map",mapId))
         {
             try
@@ -784,6 +820,7 @@ void PlayerInterface::connectDevices()
     }
     if(ptzEnabled)
     {
+        ptzConnected = false;
         if(isDeviceAvailable("ptz",ptzId))
         {
             try
@@ -802,6 +839,7 @@ void PlayerInterface::connectDevices()
     }
     if(localizerEnabled)
     {
+        localizerConnected = false;
         if(isDeviceAvailable("localize",0))
         {
             try
@@ -828,17 +866,18 @@ void PlayerInterface::connectDevices()
     }
     if(vfhEnabled)
     {
+        vfhConnected = false;
         if(isDeviceAvailable("position2d",vfhId))
         {
             try
             {
                 vfh = new Position2dProxy(pc,vfhId);
                 vfhConnected = true;
-                LOG(Logger::Info,QString("\t\t - Vfh Started Successfully ID:%1").arg(vfhId))
+                LOG(Logger::Info,QString("\t\t - Vfh(position2d) Started Successfully ID:%1").arg(vfhId))
             }
             catch(...)
             {
-                LOG(Logger::Critical,"\t\t - Error Connecting position2d proxy with index:"<<vfhId)
+                LOG(Logger::Critical,"\t\t - Error Connecting VFH position2d proxy with index:"<<vfhId)
             }
         }
         else
@@ -847,7 +886,8 @@ void PlayerInterface::connectDevices()
     /* This is temp until the wheelchair interface is added.*/
     if(joyStickEnabled)
     {
-        if(!wheelChairCommander)
+        joyStickConnected = false;
+        if(!wheelChairCommander && joyStickId!=-1)
         {
             if(isDeviceAvailable("position2d",joyStickId))
             {
@@ -868,6 +908,7 @@ void PlayerInterface::connectDevices()
     }
     if(speechEnabled)
     {
+        speechConnected = false;
         if(isDeviceAvailable("speech",speechId))
         {
             try
@@ -902,11 +943,13 @@ void PlayerInterface::run ()
     LOG(Logger::Info,"/********************************************************************/")
     LOG(Logger::Info,"Connecting to Robot Server::")
     LOG(Logger::Info,QString("\t Connecting to %1:%2 ...").arg(qPrintable(playerHost)).arg(playerPort))
+    stopThread = false;
     try
     {
     	connectDevices();
+        Q_EMIT robotConnected(true);
 //        Timer timer;
-        while(true)
+        while(!stopThread)
         {
 //            qDebug("Loop Time is:%f",timer.msecElapsed()); fflush(stdout);
 //            timer.restart();
@@ -922,6 +965,7 @@ void PlayerInterface::run ()
             {
                 pc->Read();
             }
+//            LOG(Logger::Info,"Here1")
             /*  A Blocking Read */
 //            pc->Read();
             /*
@@ -942,9 +986,10 @@ void PlayerInterface::run ()
 
 		    drive->SetSpeed(forwardSpeed,steeringTurnRate);
             */
-//            cout<<"\nDebug Msg C"; fflush(stdout);
+//            LOG(Logger::Info,"Here2")
             for(int laser_indx=0; laser_indx < lasers.size(); laser_indx++)
             {
+                QMutexLocker locker(&mutex);
                 if (laserScan.points.size())
                     laserScan.points.clear();
                 laserScan.laserPose.p.setX(lasers[laser_indx].pose.p.x());
@@ -955,6 +1000,7 @@ void PlayerInterface::run ()
                     laserScan.points.push_back(QPointF(lasers[laser_indx].lp->GetPoint(i).px, lasers[laser_indx].lp->GetPoint(i).py));
                 }
             }
+//            LOG(Logger::Info,"Here3")
             if(joyStickConnected)
             {
                 if(!wheelChairCommander)
@@ -972,6 +1018,7 @@ void PlayerInterface::run ()
 //                printf("\nDirection=%d Global Dir=%d",dir,globalDir);
 //                cout<<"\n Current Joystick X:"<<joyAxes.x()<<" Y:"<<joyAxes.y();
             }
+//            LOG(Logger::Info,"Here4")
             if(ctrlConnected && drive)
             {
                 if (!stopped)
@@ -1011,6 +1058,7 @@ void PlayerInterface::run ()
                 odomLocation.p.setY(drive->GetYPos());
                 odomLocation.phi =  drive->GetYaw();
             }
+//            LOG(Logger::Info,"Here5")
             if(ptzConnected)
             {
                 ptz->SetCam(pan,tilt, 1);
@@ -1033,6 +1081,7 @@ void PlayerInterface::run ()
                         localized = false;
                 }
             }
+//            LOG(Logger::Info,"Here6")
             if(speechConnected && speechP)
             {
                 if(speechP && !voiceMessage.isEmpty())
@@ -1042,15 +1091,16 @@ void PlayerInterface::run ()
                     voiceMessage.clear();
                 }
             }
+//            LOG(Logger::Info,"Here7")
             Q_EMIT newData();
         }
     }
     catch (PlayerCc::PlayerError e)
     {
-    	std::cerr << e << std::endl;
-    	clearResources();
-    	this->quit();
-    	return;
+        LOG(Logger::Critical,"\n" << e)
     }
+//    LOG(Logger::Info,"Here8")
+    clearResources();
+    Q_EMIT robotConnected(false);
     this->connected = false;
 }

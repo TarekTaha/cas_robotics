@@ -488,6 +488,27 @@ bool Navigator::inLaserSpace(LaserScan laserScan,Pose robotLocation,QPointF wayP
     return true;
 }
 
+Pose Navigator::getDestination(Node* completePath)
+{
+    Pose p;
+    Node *temp,*lastNode=NULL;
+    temp = completePath;
+    while(temp)
+    {
+        lastNode = temp;
+        temp = temp->next;
+    }
+    if(lastNode!=NULL)
+    {
+        p = lastNode->pose;
+    }
+    else
+    {
+        p = Pose(-1,-1,-1);
+    }
+    return p;
+}
+
 bool Navigator::getGoal(LaserScan laserScan, Pose &goal)
 {
     Node *temp;
@@ -596,6 +617,7 @@ void Navigator::run()
     double speed,turnRate,y1,s1;
     LaserScan laserScan;
     trail.clear();
+    Pose finalPose = getDestination(global_path);
     while(!end_reached && !stop_navigating)
     {
         delta_t = delta_timer.secElapsed();
@@ -609,9 +631,9 @@ void Navigator::run()
 
         // Updating the current Robot Info
         dataLock.lockForWrite();
-        robotManager->robot->setPose(currentPose);
-        robotManager->robot->setSpeed(speed);
-        robotManager->robot->setTurnRate(turnRate);
+            robotManager->robot->setPose(currentPose);
+            robotManager->robot->setSpeed(speed);
+            robotManager->robot->setTurnRate(turnRate);
         dataLock.unlock();
 
         trail.push_back(currentPose.p);
@@ -679,10 +701,11 @@ void Navigator::run()
             break;
         }
         // Is it the last Segment ?
-        if (first->next)
-            if (!first->next->next)
-            {
-            if(Dist(first->next->pose.p,EstimatedPos.p)<=0.4)
+//        if (first->next)
+//            if (!first->next->next)
+//            {
+//            if(Dist(first->next->pose.p,EstimatedPos.p)<=0.5)
+            if(Dist(finalPose.p,EstimatedPos.p)<=0.4 && finalPose.p.x()!=-1 && finalPose.p.y()!=-1)
             {
 //                if (local_planner->pathPlanner->path)
 //                {
@@ -695,13 +718,12 @@ void Navigator::run()
 //                else
                 {
                     LOG(Logger::Info,"--->>> Destination Reached !!!")
-                    Q_EMIT addMsg(0,INFO,QString("--->>> Destination Reached !!!"));
                     Q_EMIT pathTraversed();
                     end_reached = true;
                     break;
                 }
             }
-        }
+//        }
         last  = first->next;
         ni = first->pose.p;
         SegmentStart.setX(ni.x());	SegmentStart.setY(ni.y());
@@ -958,7 +980,6 @@ void Navigator::run()
     robotManager->commManager->setTurnRate(0);
     //local_planner->pathPlanner->freeResources();
     LOG(Logger::Info,"Navigator: Thread Loop Terminated Normally !!!")
-    this->quit();
     return;
 }
 

@@ -44,13 +44,14 @@ MissionControlTab::MissionControlTab(QWidget *parent,PlayGround *playGround_in) 
         {
             temp = playGround->robotPlatforms[i];
             rob = new QRadioButton(QString("Robot: ").append(temp->robot->robotName));
-            connect( playGround->robotPlatforms[i]->planningManager,SIGNAL(pathFound(Node*)),this,SLOT(pathFound(Node*)));
+            connect(playGround->robotPlatforms[i]->planningManager,SIGNAL(pathFound(Node*)),this,SLOT(pathFound(Node*)));
+            connect(playGround->robotPlatforms[i]->commManager,SIGNAL(robotConnected(bool)),this,SLOT(robotConnected(bool)));
+            connect(playGround->robotPlatforms[i]->navigator,SIGNAL(pathTraversed()),this,SLOT(pathTraversed()));
             availableRobots.push_back(rob);
         }
         if(playGround->robotPlatforms.size()>0)
             playGround->activeRobot = playGround->robotPlatforms[0];
     }
-
     for(int i=0;i<availableRobots.size();i++)
     {
         ui->robotsL->addWidget(availableRobots[i]);
@@ -136,7 +137,6 @@ void MissionControlTab::pathTraversed()
     {
         playGround->activeRobot->navigator->StopNavigating();
         playGround->activeRobot->navigator->quit();
-        qDebug()<<"Quitting Thread";
     }
     ui->pathFollowBtn->setText("Path Follow");
     ui->pauseBtn->setText("Pause");
@@ -204,6 +204,23 @@ void MissionControlTab::updateSelectedRobot(bool)
         if(availableRobots[i]->isChecked())
         {
             playGround->activeRobot = playGround->robotPlatforms[i];
+            if(playGround->activeRobot)
+            {
+                if(playGround->activeRobot->commManager->isRunning())
+                {
+                    QPalette palette = ui->connect2Robot->palette();
+                    palette.setColor(QPalette::Button, Qt::red);
+                    ui->connect2Robot->setPalette(palette);
+                    ui->connect2Robot->setText("Disconnect Robot");
+                }
+                else
+                {
+                    QPalette palette = ui->connect2Robot->palette();
+                    palette.setColor(QPalette::Button, Qt::green);
+                    ui->connect2Robot->setPalette(palette);
+                    ui->connect2Robot->setText("Connect Robot");
+                }
+            }
             break;
         }
     }
@@ -240,6 +257,27 @@ void MissionControlTab::pathPlan()
 void MissionControlTab::loadMap()
 {
 
+}
+
+void MissionControlTab::robotConnected(bool)
+{
+    if(this->playGround->activeRobot)
+    {
+        if(playGround->activeRobot->commManager->isConnected())
+        {
+            QPalette palette = ui->connect2Robot->palette();
+            palette.setColor(QPalette::Button, Qt::red);
+            ui->connect2Robot->setPalette(palette);
+            ui->connect2Robot->setText("Disconnect Robot");
+        }
+        else
+        {
+            QPalette palette = ui->connect2Robot->palette();
+            palette.setColor(QPalette::Button, Qt::green);
+            ui->connect2Robot->setPalette(palette);
+            ui->connect2Robot->setText("Connect Robot");
+        }
+    }
 }
 
 void MissionControlTab::save()
@@ -286,4 +324,37 @@ void MissionControlTab::setMap(Map * map)
 void MissionControlTab::on_generateSearchSpace_released()
 {
     playGround->activeRobot->planningManager->generateSearchSpace(false,true);
+}
+
+void MissionControlTab::on_connect2Robot_released()
+{
+    if(ui->connect2Robot->text()==QString("Connect Robot"))
+    {
+        if(this->playGround->activeRobot)
+        {
+            if(!playGround->activeRobot->commManager->isRunning())
+            {
+                playGround->activeRobot->commManager->start();
+            }
+            QPalette palette = ui->connect2Robot->palette();
+            palette.setColor(QPalette::Button, Qt::red);
+            ui->connect2Robot->setPalette(palette);
+            ui->connect2Robot->setText("Disconnect Robot");
+        }
+    }
+    else
+    {
+        if(this->playGround->activeRobot)
+        {
+            while(playGround->activeRobot->commManager->isRunning())
+            {
+                playGround->activeRobot->commManager->disconnect();
+                sleep(0.1);
+            }
+            QPalette palette = ui->connect2Robot->palette();
+            palette.setColor(QPalette::Button, Qt::green);
+            ui->connect2Robot->setPalette(palette);
+            ui->connect2Robot->setText("Connect Robot");
+        }
+    }
 }
