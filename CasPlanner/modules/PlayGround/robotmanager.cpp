@@ -34,9 +34,7 @@ RobotManager::RobotManager():
         planningManager(NULL),
         navigator(NULL),
         intentionRecognizer(NULL),
-        robot(NULL),
-        notPaused(true),
-        notFollowing(true)
+        robot(NULL)
 {
         // Empty Constructor
 }
@@ -67,9 +65,7 @@ RobotManager::RobotManager(PlayGround *playG,ConfigFile *cf,int secId):
     navigator(NULL),
     intentionRecognizer(NULL),
     robot(NULL),
-    socialPlanner(NULL),
-    notPaused(true),
-    notFollowing(true)
+    socialPlanner(NULL)
 {
     connect(playGround,SIGNAL(mapUpdated(Map *)),this,SLOT(updateMap(Map *)));
     connect(this,SIGNAL(addMsg(int,int,QString)),playGround,SLOT(addMsg(int,int,QString)));
@@ -92,6 +88,32 @@ RobotManager::RobotManager(PlayGround *playG,ConfigFile *cf,int secId):
             readPlannerConfigs(cf);
         }
     }
+}
+
+bool RobotManager::hasPath()
+{
+    if(planningManager->pathPlanner->path)
+        return true;
+    else
+        return false;
+}
+
+bool RobotManager::isConnected()
+{
+    return commManager->isConnected();
+}
+
+bool RobotManager::isNavigating()
+{
+    return navigator->isRunning();
+}
+
+bool  RobotManager::isNavigationPaused()
+{
+    if(navigator)
+        return navigator->isPaused();
+    else
+        return false;
 }
 
 void RobotManager::updateMap(Map * mapData)
@@ -140,6 +162,12 @@ void RobotManager::readPlannerConfigs(ConfigFile *cf)
     planningManager->readConfigs(cf);
 }
 
+void RobotManager::setPauseNavigation(bool pause)
+{
+    if(navigator)
+        navigator->setPause(pause);
+}
+
 void RobotManager::start()
 {
     startComms();
@@ -150,9 +178,23 @@ void RobotManager::start()
 void RobotManager::stop()
 {
     if(navigator)
+    while(navigator->isRunning())
+    {
         navigator->StopNavigating();
+        sleep(0.1);
+    }
     if(commManager)
         commManager->stop();
+}
+
+void RobotManager::stopNavigating()
+{
+    if(navigator)
+    while(navigator->isRunning())
+    {
+        navigator->StopNavigating();
+        sleep(0.1);
+    }
 }
 
 void RobotManager::startComms()
@@ -169,6 +211,11 @@ void RobotManager::startPlanner()
 }
 
 void RobotManager::startNavigator()
+{
+    navigator->start();
+}
+
+void RobotManager::startNavigating()
 {
     navigator->start();
 }

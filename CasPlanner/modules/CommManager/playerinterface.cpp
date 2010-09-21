@@ -703,6 +703,7 @@ void PlayerInterface::clearResources()
     if(localizer)
     {
         delete localizer;
+        localizer = 0;
     }
     if(speechP)
     {

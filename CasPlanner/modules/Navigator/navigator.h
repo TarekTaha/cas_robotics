@@ -58,7 +58,8 @@ public:
     int  getObstAvoidAlgo();
     double nearestObstacle(LaserScan laser_scan);
     bool inLaserSpace(LaserScan laserScan,Pose robotLocation,QPointF waypoint);
-    void  setPause(bool pause);
+    void setPause(bool pause);
+    bool isPaused();
     Node * closestPathSeg(QPointF location,Node * all_path);
     Node * closestPathNode(QPointF location,Node * all_path);
     void generateLocalMap(LaserScan laserScan, Pose rob_location);
@@ -96,7 +97,7 @@ protected:
     QPointF rotation_center;
     ForceField *FF;
     QPointF	begin,tracking_point,ni,SegmentStart,SegmentEnd;
-    bool	log,position_found,end_reached,segment_navigated,stop_navigating,pause;
+    bool	log,position_found,end_reached,segment_navigated,stop_navigating,paused;
     int		platform,direction,path2Draw,obstAvoidAlgo;
     Node * local_path,* global_path,*last,*first,*path2Follow;
     PlanningManager *local_planner,*global_planner;
