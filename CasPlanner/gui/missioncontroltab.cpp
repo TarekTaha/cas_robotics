@@ -65,6 +65,8 @@ MissionControlTab::MissionControlTab(QWidget *parent,PlayGround *playGround_in) 
     connect(ui->resetBeliefBtn, 	SIGNAL(pressed()),this, SLOT(resetDestinationBelief()));
     if(availableRobots.size()>0)
         availableRobots[0]->setChecked(true);
+    ui->pathFollowBtn->setEnabled(false);
+    ui->pauseBtn->setEnabled(false);
 }
 
 MissionControlTab::~MissionControlTab()
@@ -106,7 +108,7 @@ void MissionControlTab::startIntentionRecognition()
 {
     if(this->playGround->activeRobot)
     {
-        if(!playGround->activeRobot->commManager->isConnected())
+        if(!playGround->activeRobot->isConnected())
         {
             QMessageBox msgBox(QMessageBox::Warning,QString("Warning"),QString("Your not Connected to the Robot, do you want me to connect?"),QMessageBox::Ok|QMessageBox::Cancel,this,Qt::Dialog);
             msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -133,25 +135,23 @@ void MissionControlTab::startIntentionRecognition()
 
 void MissionControlTab::pathTraversed()
 {
-    if(playGround->activeRobot->navigator->isRunning())
+    if(playGround->activeRobot->isNavigating())
     {
-        playGround->activeRobot->navigator->StopNavigating();
-        playGround->activeRobot->navigator->quit();
+        playGround->activeRobot->stopNavigating();
     }
     ui->pathFollowBtn->setText("Path Follow");
     ui->pauseBtn->setText("Pause");
-    playGround->activeRobot->notFollowing = true;
+    ui->pauseBtn->setEnabled(false);
 }
 
 void MissionControlTab::pathFollow()
 {
-    LOG(Logger::Info,"Trying to Initiate path following")
     if(!playGround->activeRobot->commManager)
     {
         LOG(Logger::Warning,"\t NavTab: Communication Manager Not Initialized")
         return;
     }
-    if(!playGround->activeRobot->commManager->isConnected())
+    if(!playGround->activeRobot->isConnected())
     {
         QMessageBox msgBox(QMessageBox::Warning,QString("Warning"),QString("Your not Connected to the Robot, do you want me to connect?"),QMessageBox::Ok|QMessageBox::Cancel,this,Qt::Dialog);
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -168,32 +168,30 @@ void MissionControlTab::pathFollow()
             break;
         }
     }
-    if(playGround->activeRobot->notFollowing)
+    if(ui->pathFollowBtn->text() == QString("Path Follow"))
     {
-        if(playGround->activeRobot->navigator->isRunning())
+        if(playGround->activeRobot->isNavigating())
         {
-            playGround->activeRobot->navigator->quit();
+            playGround->activeRobot->stopNavigating();
         }
-        if(playGround->activeRobot->planningManager->pathPlanner->path)
+        if(playGround->activeRobot->hasPath())
         {
             playGround->activeRobot->navigator->setPath(playGround->activeRobot->planningManager->pathPlanner->path);
-            playGround->activeRobot->navigator->start();
+            playGround->activeRobot->startNavigating();
             ui->pathFollowBtn->setText("Stop");
-            playGround->activeRobot->notFollowing = false;
+            ui->pauseBtn->setEnabled(true);
         }
         else
-            LOG(Logger::Warning,"No Path Found")
+            LOG(Logger::Warning,"No Path Found to follow")
     }
     else
     {
-        if(playGround->activeRobot->navigator->isRunning())
+        if(playGround->activeRobot->isNavigating())
         {
-            playGround->activeRobot->navigator->StopNavigating();
-            playGround->activeRobot->navigator->quit();
-            LOG(Logger::Warning,"Quitting Thread")
+            playGround->activeRobot->stopNavigating();
         }
         ui->pathFollowBtn->setText("Path Follow");
-        playGround->activeRobot->notFollowing = true;
+        ui->pauseBtn->setEnabled(false);
     }
 }
 
@@ -228,16 +226,14 @@ void MissionControlTab::updateSelectedRobot(bool)
 
 void MissionControlTab::setNavigation()
 {
-    if(playGround->activeRobot->notPaused)
+    if(!playGround->activeRobot->isNavigationPaused())
     {
-        playGround->activeRobot->navigator->setPause(true);
-        playGround->activeRobot->notPaused = false;
+        playGround->activeRobot->setPauseNavigation(true);
         ui->pauseBtn->setText("Continue");
     }
     else
     {
-        playGround->activeRobot->navigator->setPause(false);
-        playGround->activeRobot->notPaused = true;
+        playGround->activeRobot->setPauseNavigation(false);
         ui->pauseBtn->setText("Pause");
     }
 }
@@ -245,6 +241,9 @@ void MissionControlTab::setNavigation()
 void MissionControlTab::pathFound(Node*)
 {
     ui->pathPlanBtn->setEnabled(true);
+    ui->generateSearchSpace->setEnabled(true);
+    if(playGround->activeRobot->hasPath() && playGround->activeRobot->isConnected())
+        ui->pathFollowBtn->setEnabled(true);
 }
 
 void MissionControlTab::pathPlan()
@@ -252,6 +251,8 @@ void MissionControlTab::pathPlan()
     playGround->activeRobot->planningManager->setMap(playGround->mapManager->globalMap);
     playGround->activeRobot->planningManager->findPath(METRIC);
     ui->pathPlanBtn->setEnabled(false);
+    ui->generateSearchSpace->setEnabled(false);
+    ui->pathFollowBtn->setEnabled(false);
 }
 
 void MissionControlTab::loadMap()
@@ -269,6 +270,8 @@ void MissionControlTab::robotConnected(bool)
             palette.setColor(QPalette::Button, Qt::red);
             ui->connect2Robot->setPalette(palette);
             ui->connect2Robot->setText("Disconnect Robot");
+            if(playGround->activeRobot->hasPath())
+                ui->pathFollowBtn->setEnabled(true);
         }
         else
         {
@@ -276,6 +279,7 @@ void MissionControlTab::robotConnected(bool)
             palette.setColor(QPalette::Button, Qt::green);
             ui->connect2Robot->setPalette(palette);
             ui->connect2Robot->setText("Connect Robot");
+            ui->pathFollowBtn->setEnabled(false);
         }
     }
 }

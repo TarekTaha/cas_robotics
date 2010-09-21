@@ -178,7 +178,7 @@ globalPath(NULL),
 localPath(NULL),
 playGround(playG),
 robotManager(r),
-pause(false),
+paused(false),
 local_planner(NULL),
 global_planner(r->planningManager)
 {
@@ -347,12 +347,17 @@ void Navigator::generateLocalMap(LaserScan laserScan, Pose rob_location)
         }
     }
     return;
-};
+}
+
+bool Navigator::isPaused()
+{
+    return paused;
+}
 
 void Navigator::setPause(bool pause)
 {
     dataLock.lockForWrite();	
-	this->pause = pause;
+        this->paused = pause;
     dataLock.unlock();	
 }
 
@@ -905,7 +910,7 @@ void Navigator::run()
         }
         Q_EMIT setWayPoint(&goal);
         QTime ff_time;
-        if(!pause)
+        if(!paused)
         {
             switch(obstAvoidAlgo)
             {

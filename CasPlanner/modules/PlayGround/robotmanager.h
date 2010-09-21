@@ -43,15 +43,22 @@ class RobotManager : public QObject
         RobotManager();
         RobotManager(PlayGround *playG,ConfigFile *cf,int secId);
         ~RobotManager();
+        bool hasPath();
+        bool isConnected();
+        bool isNavigating();
+        bool isNavigationPaused();
         void readRobotConfigs(ConfigFile *cf,int secId);
         void readCommManagerConfigs(ConfigFile *cf,int secId);
         void readPlannerConfigs(ConfigFile *cf);
         void readNavigatorConfigs(ConfigFile *cf);
         void setupSocialPlanner();
+        void setPauseNavigation(bool);
         void start();
         void stop();
+        void stopNavigating();
         void startPlanner();
         void startNavigator();
+        void startNavigating();
         void startComms();
         void startIntentionRecognizer();
         PlayGround 	*playGround;
@@ -61,7 +68,6 @@ class RobotManager : public QObject
         IntentionRecognizer *intentionRecognizer;
         Robot           *robot;
         SocialPlanner   *socialPlanner;
-        bool notPaused,notFollowing;
         public
     Q_SLOTS:
                 void updateMap(Map * mapData);
