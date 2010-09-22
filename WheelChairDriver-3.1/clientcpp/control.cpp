@@ -37,7 +37,7 @@ int main()
   	printf("\033[2J");
   	printf("\033[;H");  fflush(stdout);
   	
-  	PlayerClient    robot("192.168.0.101",6665);
+  	PlayerClient    robot("127.0.0.1",6665);
 	Position2dProxy pp(&robot,0);
 	WheelChairProxy WCp(&robot,0);
   	printf("\n Turning ON WheelChair"); fflush(stdout);
