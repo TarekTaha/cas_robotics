@@ -20,8 +20,9 @@ class WheelChairProxy : public ClientProxy
     // libplayerc data structure
     playerc_opaque_t *mDevice;
     player_opaque_data_t mData;
-        player_wheelchair_config_t * config;
-        uint size;
+    player_wheelchair_config_t * config;
+    player_wheelchair_config_t confSource;
+    uint size;
   public:
     WheelChairProxy(PlayerClient *aPc, uint aIndex=0);
     ~WheelChairProxy();
