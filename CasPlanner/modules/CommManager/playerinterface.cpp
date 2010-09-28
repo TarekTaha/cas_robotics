@@ -248,9 +248,13 @@ void PlayerInterface::checkForWheelChair()
                 LOG(Logger::Info,"WheelChair is on")
                 LOG(Logger::Info,QString("\t\t - Wheelchair Driver Engaged"))
             }
+            catch(PlayerError &e) // catch error by reference for safe handeling !
+            {
+                LOG(Logger::Info,QString("\t\t - Error while trying to connect to driver:%1").arg(e.GetErrorStr().c_str()))
+            }
             catch(...)
             {
-                LOG(Logger::Info,QString("\t\t - Wheelchair Driver Engaged"))
+                LOG(Logger::Info,QString("\t\t - Error connecting to wheelchair Driver"))
             }
         }
     }
