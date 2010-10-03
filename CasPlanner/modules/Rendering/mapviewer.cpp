@@ -1022,6 +1022,31 @@ void MapViewer::showIndicators()
             glPopMatrix();
         }
     }
+    if(step == 5)
+    {
+        double phi = atan2((mousePos.y()-newLocation.p.y()),(mousePos.x()-newLocation.p.x()));
+        // Rotation Line
+        glPushMatrix();
+        glBegin(GL_LINE_LOOP);
+        COLOR_GREEN_A(1)
+        glVertex3f(newLocation.p.x(),newLocation.p.y(),0);
+        glVertex3f(mousePos.x(),mousePos.y(),0);
+        glEnd();
+        glPopMatrix();
+        // Rotate the triangle based on the arrow
+        glPushMatrix();
+        glTranslatef(newLocation.p.x(),newLocation.p.y(),0);
+        glRotated(RTOD(phi),0,0,1);
+        glShadeModel(GL_FLAT);
+        // Localization Arrow
+        glBegin(GL_TRIANGLE_FAN);
+        COLOR_BLUE_A(0.8)
+        glVertex3f(-0.2,0.15,0);
+        glVertex3f(0.3,0,0);
+        glVertex3f(-0.2,-0.15,0);
+        glEnd();
+        glPopMatrix();
+    }
 }
 
 void MapViewer::paintGL()
@@ -1092,8 +1117,8 @@ void MapViewer::paintGL()
         renderSpatialStates();
         if(!searchSpaceListCreated)
             renderSearchSpace();
-        renderPaths();
         renderLaser();
+        renderPaths();
         renderRobot();
         showIndicators();
         //glEnable(GL_DEPTH_TEST);
@@ -1236,6 +1261,8 @@ void MapViewer::mouseDoubleClickEvent(QMouseEvent *me)
     if(me->buttons()==Qt::RightButton)
     {
         newLocation.p = p;
+        step = 5;
+        setMouseTracking(true);
     }
     else if(step == 1)
     {
@@ -1262,6 +1289,8 @@ void MapViewer::mousePressEvent(QMouseEvent *me)
     {
         newLocation.phi = atan2(p.y() - newLocation.p.y(),p.x() - newLocation.p.x());
         playGround->activeRobot->commManager->setLocation(newLocation);
+        step = 1;
+        setMouseTracking(false);
     }
     else if(step ==2)
     {

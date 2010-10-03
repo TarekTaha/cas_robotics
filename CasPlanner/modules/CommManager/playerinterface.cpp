@@ -230,6 +230,8 @@ int PlayerInterface::getJoyStickDir()
 
 void PlayerInterface::checkForWheelChair()
 {
+    if(!pc)
+        return;
     QVector<DeviceType> * dev = devices;
     for(int i=0;i< dev->size(); i++)
     {
@@ -481,10 +483,11 @@ void PlayerInterface::vfhGoto(Pose goal)
 
 void PlayerInterface::setLocation(Pose loc)
 {
+//    QMutexLocker locker(&mutex);
     pose[0]= loc.p.x();
     pose[1]= loc.p.y();
     pose[2]= loc.phi;
-    LOG(Logger::Info,"Default Pose given to the Localizer X="<<loc.p.x()<<" Y="<<loc.p.y()<<" Theta="<<RTOD(loc.phi))
+    LOG(Logger::Info,"Default Pose given to the Localizer X="<<pose[0]<<" Y="<<pose[1]<<" Theta="<<RTOD(pose[2]))
     //Set Covariance Matrix
     pose_covar[0]=0.5*0.5;
     pose_covar[1]=0.5*0.5;
@@ -557,7 +560,6 @@ double PlayerInterface::getSpeed()
     dataLock.unlock(); 
     return retval; 
 }
-
 bool PlayerInterface::getSpeechNotificaionStatus()
 {
     dataLock.lockForRead();
@@ -771,6 +773,7 @@ void PlayerInterface::connectDevices()
             }
             catch(...)
             {
+                drive = NULL;
                 LOG(Logger::Critical,"\t\t - Error Connecting to position2d proxy with index:"<<positionId)
             }
         }
@@ -798,6 +801,7 @@ void PlayerInterface::connectDevices()
             }
             catch(...)
             {
+                lasers[i].lp = NULL;
                 LOG(Logger::Critical,"\t\t - Error Connecting to Laser proxy with index:"<<i)
             }
         }
@@ -817,6 +821,7 @@ void PlayerInterface::connectDevices()
             }
             catch(...)
             {
+                map = NULL;
                 LOG(Logger::Critical,"\t\t - Error Connecting map proxy with index:"<<mapId)
             }
         }
@@ -836,6 +841,7 @@ void PlayerInterface::connectDevices()
             }
             catch(...)
             {
+                ptz = NULL;
                 LOG(Logger::Critical,"\t\t - Error Connecting ptz proxy with index:"<<ptzId)
             }
         }
@@ -856,6 +862,7 @@ void PlayerInterface::connectDevices()
             }
             catch(...)
             {
+                localizer = NULL;
                 LOG(Logger::Critical,"\t\t - Error Connecting localize proxy with index:"<<0)
             }
         }
@@ -882,6 +889,7 @@ void PlayerInterface::connectDevices()
             }
             catch(...)
             {
+                vfh = NULL;
                 LOG(Logger::Critical,"\t\t - Error Connecting VFH position2d proxy with index:"<<vfhId)
             }
         }
@@ -904,6 +912,7 @@ void PlayerInterface::connectDevices()
                 }
                 catch(...)
                 {
+                    joyStick = NULL;
                     LOG(Logger::Critical,"\t\t - Error Connecting JoyStick on position2d proxy with index:"<<joyStickId)
                 }
             }
@@ -925,6 +934,7 @@ void PlayerInterface::connectDevices()
             }
             catch(...)
             {
+                speechP = NULL;
                 LOG(Logger::Critical,"\t\t - Error Connecting speech proxy with index:"<<speechId)
             }
         }
